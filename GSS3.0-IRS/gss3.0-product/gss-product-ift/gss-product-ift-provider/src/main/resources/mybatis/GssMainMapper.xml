@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.ift.dao.GssMainDao">
+
+    <!-- 通用查询结果列-->
+    <sql id="Base_Column_List">
+		ID, OWNER, SALE_COM AS saleCom, ACC_COM AS accCom, LINE, SALE_DEPT AS saleDept, CUS_TYPE AS cusType, CUS_NAME AS cusName, CUS_CODE AS cusCode, PRO_TYPE AS proType, SALE_ORD_NUM AS saleOrdNum, BILL_NUM AS billNum, PEO_NUM AS peoNum, ISSUE_DATE AS issueDate, RECE_AMOUNT AS receAmount, ACT_AMOUNT AS actAmount, SETTL_METHOD AS settlMethod, PAID_METHOD AS paidMethod, ACCOUNTS, RECE_NUM AS receNum, SUPPLIER_NAME AS supplierName, PAID_AMOUNT AS paidAmount, PAID_STATUS AS paidStatus, ORDER_STATUS AS orderStatus, REMARKS, CREATE_TIME AS createTime, MODIFY_TIME AS modifyTime, MODIFIER, UPLOAD_STATUS AS uploadStatus, ERROR_CAUSE AS errorCause, UPLOAD_TIME AS uploadTime, VALID, EXTEND1, EXTEND2, EXTEND3, EXTEND4, EXTEND5, EXTEND6, EXTEND7, EXTEND8, EXTEND9, EXTEND10, EXTEND11, EXTEND12, EXTEND13, EXTEND14, EXTEND15
+	</sql>
+
+    <!-- 根据订单号查询 -->
+    <select id="selectByOrderNo" resultType="com.tempus.gss.product.ift.api.entity.GssMain">
+		SELECT
+				S.OWNER,	S.saleCom,	S.accCom,	S.line,	S.saleDept,	S.cusType,	S.cusName,	S.cusCode,	S.proType,
+				S.saleOrdNum,	S.billNum,	S.peoNum,	S.issueDate,	S.receAmount,	S.actAmount,	S.settlMethod,
+				S.paidMethod,	S.accounts,	S.receNum,	S.supplierName,	S.paidAmount,	S.paidStatus,	S.orderStatus,
+				NULL,	now(),	NULL,	NULL,	'1',	NULL,	NULL,
+				1,		NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	NULL,
+				NULL,	NULL,	NULL,	NULL,	NULL,	NULL,	NULL
+		FROM
+			(
+				SELECT
+					os. OWNER AS OWNER,
+					CSC. NAME AS saleCom,
+					so. NAME AS accCom,
+					CC.BUSINESS_LINE AS LINE,
+					SD.NAME AS saleDept,
+					ose.CUSTOMER_TYPE_NAME AS cusType,
+					ose.CUSTOMER_NO_NAME AS cusName,
+					os.CUSTOMER_NO AS cusCode,
+					os.GOODS_TYPE AS proType,
+					os.SALE_ORDER_NO AS saleOrdNum,
+					group_concat(
+						VBSN.SETTLEMENT_NO SEPARATOR ','
+					) AS billNum,
+					os.PCOUNT AS peoNum,
+					os.ORDERING_TIME AS issueDate,
+					os.RECEIVABLE AS receAmount,
+					os.RECEIVED AS actAmount,
+					(
+						CASE LEFT (
+							cast(
+								papi.PAY_CATEGORY_CODE AS CHAR charset utf8mb4
+							),
+							1
+						)
+						WHEN 2 THEN
+							1
+						ELSE
+							0
+						END
+					) AS settlMethod,
+					ppw. NAME AS paidMethod,
+					papi.RECEIVABLE_ACCOUNT AS accounts,
+					papi.THREE_TRADE_NO AS receNum,
+					group_concat(
+						obe.SUPPLIER_NO_NAME SEPARATOR ','
+					) AS supplierName,
+					sum(ob.PAYMENT) AS paidAmount,
+					(
+						CASE
+						WHEN (os.PAY_STATUS = 1) THEN
+							'待支付'
+						WHEN (os.PAY_STATUS = 2) THEN
+							'支付中'
+						WHEN (os.PAY_STATUS = 3) THEN
+							'为已支付'
+						WHEN (os.PAY_STATUS = 4) THEN
+							'挂账支付'
+						END
+					) AS paidStatus,
+					(
+						CASE
+						WHEN (os.ORDER_STATUS = 1) THEN
+							'待确认'
+						WHEN (os.ORDER_STATUS = 2) THEN
+							'已拒单'
+						WHEN (os.ORDER_STATUS = 3) THEN
+							'已确认'
+						WHEN (os.ORDER_STATUS = 4) THEN
+							'处理中'
+						WHEN (os.ORDER_STATUS = 5) THEN
+							'已处理'
+						END
+					) AS orderStatus
+				FROM
+					(
+						(
+							(
+								(
+									(
+										(
+											(
+												(
+													OS_SALEORDER os
+													LEFT JOIN OS_SALEORDER_EXTEND ose ON (
+														(
+															ose.SALE_ORDER_NO = os.SALE_ORDER_NO
+														)
+													)
+												)
+												LEFT JOIN OS_ACTUALAMOUNTRECORD oa ON (
+													(
+														oa.RECORD_NO = os.SALE_ORDER_NO
+													)
+												)
+											)
+											LEFT JOIN PS_ALL_PAY_INFO papi ON (
+												(
+													papi.ALL_PAY_INFO_NO = oa.PAY_NO
+												)
+											)
+										)
+										LEFT JOIN OS_BUYORDER ob ON (
+											(
+												os.SALE_ORDER_NO = ob.SALE_ORDER_NO
+											)
+										)
+									)
+									LEFT JOIN OS_BUYORDER_EXTEND obe ON (
+										(
+											obe.BUY_ORDER_NO = ob.BUY_ORDER_NO
+										)
+									)
+								)
+								LEFT JOIN PS_PAY_WAY ppw ON (
+									(ppw. CODE = papi.PAY_WAY_CODE)
+								)
+							)
+							LEFT JOIN SM_OWNER_INFO so ON ((so. OWNER = os. OWNER))
+						)
+						LEFT JOIN V_BUSINESS_SETTLEMENT_NO VBSN ON (
+							(
+								(
+									VBSN.RECORD_NO = os.SALE_ORDER_NO
+								)
+								AND (VBSN.BUSINESS_TYPE = 2)
+							)
+						)
+LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO=os.CUSTOMER_NO
+LEFT JOIN GBC_DEOTCTYPE GD ON GD.CTYPE_NO=CC.GROUP_NO
+		LEFT JOIN SM_DEPT SD ON SD.ID=GD.DEPT_ID
+	LEFT JOIN CPS_SIGN_COMPANY CSC ON CSC.`CODE`=CC.SIGN_CORPORATION
+					)
+				WHERE
+					((oa.BUSINESS_TYPE = 2))
+				GROUP BY
+					os.SALE_ORDER_NO,
+					VBSN.RECORD_NO,
+					VBSN.BUSINESS_TYPE
+			   ) S
+		WHERE
+			S.saleOrdNum = #{orderNo}
+	</select>
+
+</mapper>

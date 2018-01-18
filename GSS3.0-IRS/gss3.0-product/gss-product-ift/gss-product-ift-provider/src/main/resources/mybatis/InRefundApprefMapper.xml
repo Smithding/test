@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ift.dao.InRefundApprefDao">
+
+    <!-- 使用resultMap映射实体类和字段之间的一一对应关系 -->
+     <resultMap type="com.tempus.gss.product.ift.api.entity.vo.InRefundApprefRequest" id="applyMap">
+         <id property="id" column="ID"/>
+         <result property="orderid" column="ORDERID"/>
+         <result property="ticketno" column="TICKETNO"/>
+         <result property="bankname" column="BANKNAME"/>
+         <result property="beneficiarysname" column="BENEFICIARYSNAME"/>
+         <result property="accountnumber" column="ACCOUNTNUMBER"/>
+         <result property="status" column="STATUS"/>
+         <result property="remark" column="REMARK"/>
+         <result property="applyuser" column="APPLYUSER"/>
+         <result property="customername" column="CUSTOMERNAME"/>
+         <result property="operator" column="OPERATOR"/>
+         <result property="operatetime" column="OPERATETIME"/>
+         <result property="applytime" column="APPLYTIME"/>
+         <result property="refundaccount" column="REFUNDACCOUNT"/>
+         <result property="platformOrderid" column="PLATFORMORDERID"/>
+         <result property="businessline" column="BUSINESSLINE"/>
+         <result property="tanagementarea" column="TANAGEMENTAREA"/>
+         <result property="saledep" column="SALEDEP"/>
+         <result property="oldorderid" column="OLDORDERID"/>
+     </resultMap>
+    
+    <sql id="Base_Column_List">
+            ID,
+		    ORDERID,
+			TICKETNO,
+			BANKNAME,
+			BENEFICIARYSNAME,
+			ACCOUNTNUMBER,
+			STATUS,
+			REMARK,
+			APPLYUSER,
+			CUSTOMERNAME,
+			OPERATETIME,
+			OPERATOR,
+			APPLYTIME,
+			REFUNDACCOUNT,
+			PLATFORMORDERID,
+			BUSINESSLINE,
+			TANAGEMENTAREA,
+			SALEDEP,
+			OLDORDERID
+	</sql>
+	
+	<select id="selectInRefundApprefVo" resultMap="applyMap">
+        select <include refid="Base_Column_List"/> from IFT_INREFUND_APPREF a
+		 WHERE a.ORDERID = #{orderid} ORDER BY a.APPLYTIME DESC
+    </select>
+	
+    <insert id="insertAndGetId" parameterType="com.tempus.gss.product.ift.api.entity.vo.InRefundApprefRequest" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO IFT_INREFUND_APPREF(
+			ORDERID,
+			TICKETNO,
+			BANKNAME,
+			BENEFICIARYSNAME,
+			ACCOUNTNUMBER,
+			STATUS,
+			REMARK,
+			APPLYUSER,
+			CUSTOMERNAME,
+			OPERATETIME,
+			OPERATOR,
+			APPLYTIME,
+			REFUNDACCOUNT,
+			PLATFORMORDERID,
+			BUSINESSLINE,
+			TANAGEMENTAREA,
+			SALEDEP,
+			OLDORDERID
+		)
+		VALUES(
+			#{orderid,jdbcType=VARCHAR},
+			#{ticketno,jdbcType=VARCHAR},
+			#{bankname,jdbcType=VARCHAR},
+			#{beneficiarysname,jdbcType=VARCHAR},
+			#{accountnumber,jdbcType=CHAR},
+		    #{status,jdbcType=VARCHAR},
+		    #{remark,jdbcType=VARCHAR},
+			#{applyuser,jdbcType=VARCHAR},
+			#{customername,jdbcType=VARCHAR},
+			NOW(),
+			#{operator,jdbcType=VARCHAR},
+			NOW(),
+			#{refundaccount,jdbcType=VARCHAR},
+			#{platformOrderid,jdbcType=VARCHAR},
+			#{businessline,jdbcType=VARCHAR},
+			#{tanagementarea,jdbcType=VARCHAR},
+			#{saledep,jdbcType=VARCHAR},
+			#{oldorderid,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+    <update id="updateStatus" parameterType="java.util.Map">
+		UPDATE IFT_INREFUND_APPREF SET BANKNAME = #{bankname, jdbcType=VARCHAR},BENEFICIARYSNAME = #{beneficiarysname,jdbcType=VARCHAR},REFUNDACCOUNT = #{refundaccount,jdbcType=VARCHAR},ACCOUNTNUMBER = #{accountnumber,jdbcType=VARCHAR},STATUS = #{status,jdbcType=VARCHAR},REMARK = #{remark,jdbcType=VARCHAR} WHERE ORDERID = #{orderid, jdbcType=VARCHAR}
+	</update>
+	
+	<update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.vo.InRefundApprefRequest">
+        update IFT_INREFUND_APPREF
+        <set>
+            <if test="bankname != null">
+                BANKNAME = #{bankname,jdbcType=VARCHAR},
+            </if>
+            <if test="beneficiarysname != null">
+                BENEFICIARYSNAME = #{beneficiarysname,jdbcType=VARCHAR},
+            </if>
+            <if test="refundaccount != null">
+                REFUNDACCOUNT = #{refundaccount,jdbcType=VARCHAR},
+            </if>
+            <if test="accountnumber != null">
+                ACCOUNTNUMBER = #{accountnumber,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null">
+                REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                STATUS = #{status,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where ORDERID = #{orderid,jdbcType=VARCHAR}
+    </update>
+    
+    <select id="queryObjByKey" resultMap="applyMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.InRefundApprefRequest">
+        select DISTINCT
+         <include refid="Base_Column_List" />  
+        FROM  IFT_INREFUND_APPREF o
+        WHERE 1 = 1
+        <trim suffixOverrides="AND">
+            <if test="bankname != null and saleChangeNo !=''">
+               AND o.BANKNAME = #{bankname,jdbcType=VARCHAR} 
+            </if>
+            <if test="beneficiarysname != null and beneficiarysname !=''">
+               AND o.BENEFICIARYSNAME = #{beneficiarysname,jdbcType=VARCHAR} 
+            </if>
+            <if test="refundaccount != null and refundaccount !=''">
+               AND o.REFUNDACCOUNT = #{refundaccount,jdbcType=VARCHAR} 
+            </if>
+            <if test="accountnumber != null and accountnumber !=''">
+               AND o.ACCOUNTNUMBER = #{accountnumber,jdbcType=VARCHAR} 
+            </if>
+            <if test="remark != null and remark !=''">
+               AND o.REMARK = #{remark,jdbcType=VARCHAR} 
+            </if>
+            <if test="orderid != null and orderid !=''">
+               AND o.ORDERID = #{orderid,jdbcType=VARCHAR} 
+            </if>
+            <if test="oldorderid != null and oldorderid !=''">
+               AND o.OLDORDERID = #{oldorderid,jdbcType=VARCHAR} 
+            </if>
+            <if test="beforeDate!=null and beforeDate !='' ">
+                <![CDATA[
+                    AND    DATE_FORMAT(o.APPLYTIME, '%Y-%m-%d') >= DATE_FORMAT(#{beforeDate,jdbcType=TIMESTAMP},'%Y-%m-%d') 
+	            ]]>
+            </if>
+            <if test="endDate!=null and endDate !=''">
+                <![CDATA[
+	            	AND DATE_FORMAT(o.APPLYTIME, '%Y-%m-%d') <= DATE_FORMAT(#{endDate,jdbcType=TIMESTAMP},'%Y-%m-%d') 
+	             ]]>
+            </if>
+            <if test="refundStatus!=null">
+                AND o.STATUS in 
+                <foreach collection="refundStatus" item="refundStatus"
+                         index="index" open="(" close=")" separator=",">
+                    #{refundStatus[${index}]}
+                </foreach>
+            </if>
+            order by o.APPLYTIME DESC
+        </trim>
+    </select>
+</mapper>

@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ift.dao.ProfitControlDao">
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.ift.api.entity.ProfitControl">
+        <!--控润规则编号-->
+        <id column="PROFIT_CONTROL_NO" property="profitControlNo" jdbcType="BIGINT"/>
+        <!--编号-->
+        <result column="ID" property="id" jdbcType="BIGINT"/>
+        <!--政策舱位编号-->
+        <result column="POLICY_CABIN_NO" property="policyCabinNo" jdbcType="BIGINT"/>
+        <!--渠道编号-->
+        <result column="CUSTOMER_TYPE_NO" property="customerTypeNo" jdbcType="BIGINT"/>
+        <!--销售返点-->
+        <result column="SALE_REBATE" property="saleRebate" jdbcType="DECIMAL"/>
+        <!--销售单程手续费-->
+        <result column="SALE_OW_BROKERAGE" property="saleOwBrokerage" jdbcType="DECIMAL"/>
+        <!--销售往返手续费-->
+        <result column="SALE_RT_BROKERAGE" property="saleRtBrokerage" jdbcType="DECIMAL"/>
+        <!--采购返点-->
+        <result column="BUY_REBATE" property="buyRebate" jdbcType="DECIMAL"/>
+        <!--采购单程手续费-->
+        <result column="BUY_OW_BROKERAGE" property="buyOwBrokerage" jdbcType="DECIMAL"/>
+        <!--采购往返手续费-->
+        <result column="BUY_RT_BROKERAGE" property="buyRtBrokerage" jdbcType="DECIMAL"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        PROFIT_CONTROL_NO, ID, POLICY_CABIN_NO, CUSTOMER_TYPE_NO, SALE_REBATE, SALE_OW_BROKERAGE,
+        SALE_RT_BROKERAGE, BUY_REBATE, BUY_OW_BROKERAGE, BUY_RT_BROKERAGE
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_PROFIT_CONTROL
+        where PROFIT_CONTROL_NO = #{profitControlNo,jdbcType=BIGINT}
+    </select>
+    <select id="selectByPolicyCabinNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_PROFIT_CONTROL
+        where POLICY_CABIN_NO = #{policyCabinNo,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from IFT_PROFIT_CONTROL
+        where PROFIT_CONTROL_NO = #{profitControlNo,jdbcType=BIGINT}
+    </delete>
+    <delete id="deleteByPolicyCabinNo" parameterType="java.lang.Long">
+        delete from IFT_PROFIT_CONTROL
+        where POLICY_CABIN_NO = #{policyCabinNo,jdbcType=BIGINT}
+    </delete>
+    <delete id="deleteByPolicyNo" parameterType="java.lang.Long">
+        delete from IFT_PROFIT_CONTROL
+        where POLICY_CABIN_NO IN (select POLICY_CABIN_NO from IFT_CABIN WHERE  POLICY_NO = #{policyNo,jdbcType=BIGINT})
+    </delete>
+    <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.ProfitControl">
+        insert into IFT_PROFIT_CONTROL (PROFIT_CONTROL_NO, ID, POLICY_CABIN_NO,
+        CUSTOMER_TYPE_NO, SALE_REBATE, SALE_OW_BROKERAGE,
+        SALE_RT_BROKERAGE, BUY_REBATE, BUY_OW_BROKERAGE,
+        BUY_RT_BROKERAGE)
+        values (#{profitControlNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{policyCabinNo,jdbcType=BIGINT},
+        #{customerTypeNo,jdbcType=BIGINT}, #{saleRebate,jdbcType=DECIMAL}, #{saleOwBrokerage,jdbcType=DECIMAL},
+        #{saleRtBrokerage,jdbcType=DECIMAL}, #{buyRebate,jdbcType=DECIMAL}, #{buyOwBrokerage,jdbcType=DECIMAL},
+        #{buyRtBrokerage,jdbcType=DECIMAL})
+    </insert>
+    <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.ProfitControl">
+        insert into IFT_PROFIT_CONTROL
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="profitControlNo != null">
+                PROFIT_CONTROL_NO,
+            </if>
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="policyCabinNo != null">
+                POLICY_CABIN_NO,
+            </if>
+            <if test="customerTypeNo != null">
+                CUSTOMER_TYPE_NO,
+            </if>
+            <if test="saleRebate != null">
+                SALE_REBATE,
+            </if>
+            <if test="saleOwBrokerage != null">
+                SALE_OW_BROKERAGE,
+            </if>
+            <if test="saleRtBrokerage != null">
+                SALE_RT_BROKERAGE,
+            </if>
+            <if test="buyRebate != null">
+                BUY_REBATE,
+            </if>
+            <if test="buyOwBrokerage != null">
+                BUY_OW_BROKERAGE,
+            </if>
+            <if test="buyRtBrokerage != null">
+                BUY_RT_BROKERAGE,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="profitControlNo != null">
+                #{profitControlNo,jdbcType=BIGINT},
+            </if>
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="policyCabinNo != null">
+                #{policyCabinNo,jdbcType=BIGINT},
+            </if>
+            <if test="customerTypeNo != null">
+                #{customerTypeNo,jdbcType=BIGINT},
+            </if>
+            <if test="saleRebate != null">
+                #{saleRebate,jdbcType=DECIMAL},
+            </if>
+            <if test="saleOwBrokerage != null">
+                #{saleOwBrokerage,jdbcType=DECIMAL},
+            </if>
+            <if test="saleRtBrokerage != null">
+                #{saleRtBrokerage,jdbcType=DECIMAL},
+            </if>
+            <if test="buyRebate != null">
+                #{buyRebate,jdbcType=DECIMAL},
+            </if>
+            <if test="buyOwBrokerage != null">
+                #{buyOwBrokerage,jdbcType=DECIMAL},
+            </if>
+            <if test="buyRtBrokerage != null">
+                #{buyRtBrokerage,jdbcType=DECIMAL},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.ProfitControl">
+        update IFT_PROFIT_CONTROL
+        <set>
+            <if test="id != null">
+                ID = #{id,jdbcType=BIGINT},
+            </if>
+            <if test="policyCabinNo != null">
+                POLICY_CABIN_NO = #{policyCabinNo,jdbcType=BIGINT},
+            </if>
+            <if test="customerTypeNo != null">
+                CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT},
+            </if>
+            <if test="saleRebate != null">
+                SALE_REBATE = #{saleRebate,jdbcType=DECIMAL},
+            </if>
+            <if test="saleOwBrokerage != null">
+                SALE_OW_BROKERAGE = #{saleOwBrokerage,jdbcType=DECIMAL},
+            </if>
+            <if test="saleRtBrokerage != null">
+                SALE_RT_BROKERAGE = #{saleRtBrokerage,jdbcType=DECIMAL},
+            </if>
+            <if test="buyRebate != null">
+                BUY_REBATE = #{buyRebate,jdbcType=DECIMAL},
+            </if>
+            <if test="buyOwBrokerage != null">
+                BUY_OW_BROKERAGE = #{buyOwBrokerage,jdbcType=DECIMAL},
+            </if>
+            <if test="buyRtBrokerage != null">
+                BUY_RT_BROKERAGE = #{buyRtBrokerage,jdbcType=DECIMAL},
+            </if>
+        </set>
+        where PROFIT_CONTROL_NO = #{profitControlNo,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.ift.api.entity.ProfitControl">
+        update IFT_PROFIT_CONTROL
+        set ID = #{id,jdbcType=BIGINT},
+        POLICY_CABIN_NO = #{policyCabinNo,jdbcType=BIGINT},
+        CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT},
+        SALE_REBATE = #{saleRebate,jdbcType=DECIMAL},
+        SALE_OW_BROKERAGE = #{saleOwBrokerage,jdbcType=DECIMAL},
+        SALE_RT_BROKERAGE = #{saleRtBrokerage,jdbcType=DECIMAL},
+        BUY_REBATE = #{buyRebate,jdbcType=DECIMAL},
+        BUY_OW_BROKERAGE = #{buyOwBrokerage,jdbcType=DECIMAL},
+        BUY_RT_BROKERAGE = #{buyRtBrokerage,jdbcType=DECIMAL}
+        where PROFIT_CONTROL_NO = #{profitControlNo,jdbcType=BIGINT}
+    </update>
+</mapper>

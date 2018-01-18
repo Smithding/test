@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.ift.dao.TicketSenderDao">
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.ift.api.entity.TicketSender">
+        <id column="ID" property="id" jdbcType="BIGINT"/>
+        <result column="USERID" property="userid" jdbcType="VARCHAR"/>
+        <result column="NAME" property="name" jdbcType="VARCHAR"/>
+        <result column="STATUS" property="status" jdbcType="BIGINT"/>
+        <result column="NO" property="no" jdbcType="BIGINT"/>
+        <result column="CREATOR" property="creator" jdbcType="VARCHAR"/>
+        <result column="MODIFIER" property="modifier" jdbcType="VARCHAR"/>
+        <result column="CREATEDATETIME" property="createtime" jdbcType="TIMESTAMP"/>
+        <result column="UPDATETIME" property="updatetime" jdbcType="TIMESTAMP"/>
+        <result column="ORDERCOUNT" property="ordercount" jdbcType="BIGINT"/>
+        <result column="POINT" property="point" jdbcType="BIGINT"/>
+        <result column="SEQUENCENO" property="sequenceNo" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="sqlwhere">
+        <where>
+            <if test="userId!=null and userId!=''">and USERID=#{userId}</if>
+            <if test="status!=null"> and status = #{status}</if>
+            <if test="name!=null and name!=''"> and name like #{name}</if>
+            <if test="modifier!=null and modifier!=''"> and modifier like #{modifier}</if>
+            <if test="startTime !=null and startTime!=''"> and updatetime &gt;= str_to_date(#{startTime},'%Y/%m/%d %H:%i:%s') </if>
+            <if test="endTime !=null and endTime!=''"> and updatetime &lt;= str_to_date(#{endTime},'%Y/%m/%d %H:%i:%s') </if>
+        </where>
+    </sql>
+
+    <sql id="base_column">
+        `ID`,`USERID`,`NAME`,`STATUS`,`NO`,`CREATOR`,`MODIFIER`,
+        `CREATEDATETIME`,`UPDATETIME`,`ORDERCOUNT`,`POINT`,`SEQUENCENO`
+    </sql>
+
+    <select id="queryObjByKey" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.TicketSenderVo">
+      SELECT <include refid="base_column"/> FROM IFT_TICKETSENDER
+      <include refid="sqlwhere"/>
+      order by SEQUENCENO,ORDERCOUNT ASC
+    </select>
+
+    <select id="queryById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+      SELECT <include refid="base_column"/>  FROM IFT_TICKETSENDER WHERE ID = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="queryByLoginId" resultMap="BaseResultMap" parameterType="java.lang.String">
+        SELECT <include refid="base_column"/> FROM IFT_TICKETSENDER WHERE USERID=#{loginId}
+    </select>
+
+    <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.TicketSender">
+      INSERT INTO IFT_TICKETSENDER (id,userid,
+      name,status,no,creator,modifier,createdatetime,
+      updatetime,ordercount,point,sequenceno) VALUES(
+      #{id,jdbcType=BIGINT},#{userid,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},
+      #{status,jdbcType=BIGINT},#{no,jdbcType=BIGINT},#{creator,jdbcType=VARCHAR},
+      #{modifier,jdbcType=VARCHAR},#{createtime,jdbcType=TIMESTAMP},
+      #{updatetime,jdbcType=TIMESTAMP},#{ordercount,jdbcType=BIGINT},#{point,jdbcType=BIGINT},#{sequenceNo,jdbcType=BIGINT})
+    </insert>
+    
+    <update id="updateByIds" parameterType="com.tempus.gss.product.ift.api.entity.TicketSender">
+      UPDATE IFT_TICKETSENDER
+      <set>
+          <if test="name!=null and name !=''">name = #{name},</if>
+          <if test="status!=null">status = #{status},</if>
+          <if test="no!=null">no = #{no},</if>
+          <if test="modifier!=null and modifier !=''">modifier = #{modifier},</if>
+          <if test="updatetime!=null">updatetime = #{updatetime},</if>
+          <if test="ordercount!=null">ordercount = #{ordercount},</if>
+          <if test="point!=null">point = #{point},</if>
+          <if test="sequenceNo!=null">sequenceno = #{sequenceNo},</if>
+          <if test="userid!=null and userid!=''">userid = #{userid},</if>
+      </set>
+        where id in (${ids})
+    </update>
+
+
+    <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.ift.api.entity.TicketSender">
+        UPDATE IFT_TICKETSENDER
+        <set>
+            <if test="name!=null and name !=''">name = #{name},</if>
+            <if test="status!=null">status = #{status},</if>
+            <if test="no!=null">no = #{no},</if>
+            <if test="modifier!=null and modifier !=''">modifier = #{modifier},</if>
+            <if test="updatetime!=null">updatetime = #{updatetime},</if>
+            <if test="ordercount!=null">ordercount = #{ordercount},</if>
+            <if test="point!=null">point = #{point},</if>
+            <if test="sequenceNo!=null">sequenceno = #{sequenceNo},</if>
+            <if test="userid!=null and userid!=''">userid = #{userid}</if>
+        </set>
+        where id =#{id}
+    </update>
+</mapper>

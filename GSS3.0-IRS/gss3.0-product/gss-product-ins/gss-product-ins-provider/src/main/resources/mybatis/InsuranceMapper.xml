@@ -1,0 +1,572 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ins.dao.InsuranceDao" >
+  <resultMap id="BaseResultMap" type="com.tempus.gss.product.ins.api.entity.Insurance" >
+    <!--产品编号-->
+    <id column="INSURANCE_NO" property="insuranceNo" jdbcType="BIGINT" />
+    <!--编号-->
+    <result column="ID" property="id" jdbcType="BIGINT" />
+    <!--数据归属单位-->
+    <result column="OWNER" property="owner" jdbcType="INTEGER" />
+    <!--产品code-->
+    <result column="PRODUCT_KEY" property="productKey" jdbcType="VARCHAR" />
+    <!--保险名称-->
+    <result column="NAME" property="name" jdbcType="VARCHAR" />
+    <!--保险编码-->
+    <result column="CODE" property="code" jdbcType="VARCHAR" />
+    <!--结算方式-->
+    <result column="PAY_MODEL" property="payModel" jdbcType="INTEGER" />
+    <!--保险类型-->
+    <result column="INSURE_TYPE" property="insureType" jdbcType="VARCHAR" />
+    <!--保险公司名称-->
+    <result column="COMPANY_NAME" property="companyName" jdbcType="VARCHAR" />
+    <!--是否限制人数-->
+    <result column="IS_CHECK_NUM" property="isCheckNum" jdbcType="INTEGER" />
+    <!--是否限制年龄-->
+    <result column="IS_CHECK_AGE" property="isCheckAge" jdbcType="INTEGER" />
+    <!--是否限制份数-->
+    <result column="IS_CHECK_COUNT" property="isCheckCount" jdbcType="INTEGER" />
+    <!--上限人数-->
+    <result column="TOP_NUM" property="topNum" jdbcType="BIGINT" />
+    <!--下限人数-->
+    <result column="BOTTOM_NUM" property="bottomNum" jdbcType="BIGINT" />
+    <!--上限份数-->
+    <result column="TOP_COUNT" property="topCount" jdbcType="BIGINT" />
+    <!--下限份数-->
+    <result column="BOTTOM_COUNT" property="bottomCount" jdbcType="BIGINT" />
+    <!--上限年龄-->
+    <result column="TOP_AGE" property="topAge" jdbcType="INTEGER" />
+    <!--下限年龄-->
+    <result column="BOTTOM_AGE" property="bottomAge" jdbcType="INTEGER" />
+    <!--开始天数-->
+    <result column="BEGIN_DAYS" property="beginDays" jdbcType="INTEGER" />
+    <!--结束天数-->
+    <result column="END_DAYS" property="endDays" jdbcType="INTEGER" />
+    <!--采购价-->
+    <result column="BUY_PRICE" property="buyPrice" jdbcType="DECIMAL" />
+    <!--简介-->
+    <result column="BRIEF" property="brief" jdbcType="VARCHAR" />
+    <!--购买方式 1=线上 2=线下-->
+    <result column="BUY_WAY" property="buyWay" jdbcType="INTEGER" />
+    <!--保险类别 1为国内 2为国际 3为国内国际-->
+     <result column="INTERNAT_ORCIVIL" property="internatOrcivil" jdbcType="INTEGER" />  
+    <!--是否默认.0 否 1 是-->
+    <result column="IS_DEFAULT" property="isDefault" jdbcType="BIT" />
+    <!--供应商编号-->
+    <result column="SUPPLIER_NO" property="supplierNo" jdbcType="INTEGER" />
+        <!--供应商编号-->
+    <result column="FACE_PRICE" property="facePrice" jdbcType="DECIMAL" />
+    <!--创建时间-->
+    <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP" />
+    <!--修改时间-->
+    <result column="MODIFY_TIME" property="modifyTime" jdbcType="TIMESTAMP" />
+    <!--创建者-->
+    <result column="CREATOR" property="creator" jdbcType="VARCHAR" />
+    <!--操作人 默认为：sys-->
+    <result column="MODIFIER" property="modifier" jdbcType="VARCHAR" />
+    <!--删除标志 0 无效 已删除 1 有效-->
+    <result column="VALID" property="valid" jdbcType="BIT" />
+       <!--删除标志 0 无效 已删除 1 有效-->
+    <result column="AMOUNT" property="amount" jdbcType="BIGINT" />
+    <!--一对多关联控润列表-->
+    <collection property="profitControlList" ofType="com.tempus.gss.product.ins.api.entity.ProfitControl"
+                column="INSURANCE_NO"
+                select="com.tempus.gss.product.ins.dao.ProfitControlDao.selectByInsuranceNo"/>
+
+  </resultMap>
+  <sql id="Base_Column_List" >
+    INSURANCE_NO, ID, OWNER, PRODUCT_KEY, NAME, CODE, PAY_MODEL, INSURE_TYPE, COMPANY_NAME,
+    IS_CHECK_NUM, IS_CHECK_AGE, IS_CHECK_COUNT, TOP_NUM, BOTTOM_NUM, TOP_COUNT, BOTTOM_COUNT,
+    TOP_AGE, BOTTOM_AGE, BEGIN_DAYS, END_DAYS, BUY_PRICE, BRIEF, BUY_WAY, IS_DEFAULT, SUPPLIER_NO, CREATE_TIME, MODIFY_TIME,
+    CREATOR, MODIFIER,INTERNAT_ORCIVIL,FACE_PRICE,VALID,AMOUNT
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Base_Column_List" />
+    from INS_INSURANCE
+    where INSURANCE_NO = #{insuranceNo,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from INS_INSURANCE
+    where INSURANCE_NO = #{insuranceNo,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.tempus.gss.product.ins.api.entity.Insurance" >
+    insert into INS_INSURANCE (INSURANCE_NO, ID, OWNER,
+    PRODUCT_KEY, NAME, CODE,
+    PAY_MODEL, INSURE_TYPE, COMPANY_NAME,
+    IS_CHECK_NUM, IS_CHECK_AGE, IS_CHECK_COUNT,
+    TOP_NUM, BOTTOM_NUM, TOP_COUNT,
+    BOTTOM_COUNT, TOP_AGE, BOTTOM_AGE,
+    BEGIN_DAYS, END_DAYS, BUY_PRICE,
+    BRIEF, BUY_WAY, IS_DEFAULT, SUPPLIER_NO, CREATE_TIME, MODIFY_TIME,
+    CREATOR, MODIFIER,INTERNAT_ORCIVIL,FACE_PRICE,VALID,AMOUNT
+    )
+    values (#{insuranceNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
+    #{productKey,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{code,jdbcType=VARCHAR},
+    #{payModel,jdbcType=INTEGER}, #{insureType,jdbcType=VARCHAR}, #{companyName,jdbcType=VARCHAR},
+    #{isCheckNum,jdbcType=INTEGER}, #{isCheckAge,jdbcType=INTEGER}, #{isCheckCount,jdbcType=INTEGER},
+    #{topNum,jdbcType=BIGINT}, #{bottomNum,jdbcType=BIGINT}, #{topCount,jdbcType=BIGINT},
+    #{bottomCount,jdbcType=BIGINT}, #{topAge,jdbcType=INTEGER}, #{bottomAge,jdbcType=INTEGER},
+    #{beginDays,jdbcType=INTEGER}, #{endDays,jdbcType=INTEGER}, #{buyPrice,jdbcType=DECIMAL},
+    #{brief,jdbcType=VARCHAR},  #{buyWay,jdbcType=INTEGER}, #{isDefault,jdbcType=VARCHAR}, 
+    #{supplierNo,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP},
+    #{creator,jdbcType=VARCHAR}, #{modifier,jdbcType=VARCHAR},#{internatOrcivil,jdbcType=INTEGER}, #{facePrice,jdbcType=DECIMAL}, #{valid,jdbcType=BIT}, #{amount,jdbcType=BIGINT}
+    )
+  </insert>
+  <insert id="insertSelective" parameterType="com.tempus.gss.product.ins.api.entity.Insurance" >
+    insert into INS_INSURANCE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="insuranceNo != null" >
+        INSURANCE_NO,
+      </if>
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="owner != null" >
+        OWNER,
+      </if>
+       <if test="internatOrcivil != null" >
+        INTERNAT_ORCIVIL,
+      </if>
+      <if test="productKey != null" >
+        PRODUCT_KEY,
+      </if>
+      <if test="name != null" >
+        NAME,
+      </if>
+      <if test="code != null" >
+        CODE,
+      </if>
+      <if test="payModel != null" >
+        PAY_MODEL,
+      </if>
+      <if test="insureType != null" >
+        INSURE_TYPE,
+      </if>
+      <if test="companyName != null" >
+        COMPANY_NAME,
+      </if>
+      <if test="isCheckNum != null" >
+        IS_CHECK_NUM,
+      </if>
+      <if test="isCheckAge != null" >
+        IS_CHECK_AGE,
+      </if>
+      <if test="isCheckCount != null" >
+        IS_CHECK_COUNT,
+      </if>
+      <if test="topNum != null" >
+        TOP_NUM,
+      </if>
+      <if test="bottomNum != null" >
+        BOTTOM_NUM,
+      </if>
+      <if test="topCount != null" >
+        TOP_COUNT,
+      </if>
+      <if test="bottomCount != null" >
+        BOTTOM_COUNT,
+      </if>
+      <if test="topAge != null" >
+        TOP_AGE,
+      </if>
+      <if test="bottomAge != null" >
+        BOTTOM_AGE,
+      </if>
+      <if test="beginDays != null" >
+        BEGIN_DAYS,
+      </if>
+      <if test="endDays != null" >
+        END_DAYS,
+      </if>
+      <if test="buyPrice != null" >
+        BUY_PRICE,
+      </if>
+      <if test="brief != null" >
+        BRIEF,
+      </if>
+      <if test="buyWay != null" >
+        BUY_WAY,
+      </if>
+      <if test="isDefault != null" >
+        IS_DEFAULT,
+      </if>
+      <if test="supplierNo != null" >
+        SUPPLIER_NO,
+      </if>
+      <if test="createTime != null" >
+        CREATE_TIME,
+      </if>
+      <if test="modifyTime != null" >
+        MODIFY_TIME,
+      </if>
+      <if test="creator != null" >
+        CREATOR,
+      </if>
+      <if test="modifier != null" >
+        MODIFIER,
+      </if>
+      <if test="facePrice != null" >
+        FACE_PRICE,
+      </if>
+      <if test="valid != null" >
+        VALID,
+      </if>
+        <if test="amount != null" >
+        AMOUNT,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="insuranceNo != null" >
+        #{insuranceNo,jdbcType=BIGINT},
+      </if>
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="owner != null" >
+        #{owner,jdbcType=INTEGER},
+      </if>
+        <if test="internatOrcivil != null" >
+        #{internatOrcivil,jdbcType=INTEGER},
+      </if>
+      <if test="productKey != null" >
+        #{productKey,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="payModel != null" >
+        #{payModel,jdbcType=INTEGER},
+      </if>
+      
+      <if test="insureType != null" >
+        #{insureType,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null" >
+        #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="isCheckNum != null" >
+        #{isCheckNum,jdbcType=INTEGER},
+      </if>
+      <if test="isCheckAge != null" >
+        #{isCheckAge,jdbcType=INTEGER},
+      </if>
+      <if test="isCheckCount != null" >
+        #{isCheckCount,jdbcType=INTEGER},
+      </if>
+      <if test="topNum != null" >
+        #{topNum,jdbcType=BIGINT},
+      </if>
+      <if test="bottomNum != null" >
+        #{bottomNum,jdbcType=BIGINT},
+      </if>
+      <if test="topCount != null" >
+        #{topCount,jdbcType=BIGINT},
+      </if>
+      <if test="bottomCount != null" >
+        #{bottomCount,jdbcType=BIGINT},
+      </if>
+      <if test="topAge != null" >
+        #{topAge,jdbcType=INTEGER},
+      </if>
+      <if test="bottomAge != null" >
+        #{bottomAge,jdbcType=INTEGER},
+      </if>
+      <if test="beginDays != null" >
+        #{beginDays,jdbcType=INTEGER},
+      </if>
+      <if test="endDays != null" >
+        #{endDays,jdbcType=INTEGER},
+      </if>
+      <if test="buyPrice != null" >
+        #{buyPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="brief != null" >
+        #{brief,jdbcType=VARCHAR},
+      </if>
+      <if test="buyWay != null" >
+        #{buyWay,jdbcType=INTEGER},
+      </if>
+      <if test="isDefault != null" >
+        #{isDefault,jdbcType=VARCHAR},
+      </if>
+      <if test="supplierNo != null" >
+      	#{supplierNo,jdbcType=INTEGER},
+      </if>      
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator != null" >
+        #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="modifier != null" >
+        #{modifier,jdbcType=VARCHAR},
+      </if>
+        <if test="facePrice != null" >
+        #{facePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="valid != null" >
+        #{valid,jdbcType=BIT},
+      </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ins.api.entity.Insurance" >
+    update INS_INSURANCE
+    <set >
+      <if test="id != null" >
+        ID = #{id,jdbcType=BIGINT},
+      </if>
+      <if test="owner != null" >
+        OWNER = #{owner,jdbcType=INTEGER},
+      </if>
+      <if test="productKey != null" >
+        PRODUCT_KEY = #{productKey,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null" >
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="code != null" >
+        CODE = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="payModel != null" >
+        PAY_MODEL = #{payModel,jdbcType=INTEGER},
+      </if>
+      <if test="insureType != null" >
+        INSURE_TYPE = #{insureType,jdbcType=VARCHAR},
+      </if>
+      <if test="companyName != null" >
+        COMPANY_NAME = #{companyName,jdbcType=VARCHAR},
+      </if>
+      <if test="facePrice != null and facePrice !=0" >
+        FACE_PRICE = #{facePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="isCheckNum != null" >
+        IS_CHECK_NUM = #{isCheckNum,jdbcType=INTEGER},
+      </if>
+      <if test="isCheckAge != null" >
+        IS_CHECK_AGE = #{isCheckAge,jdbcType=INTEGER},
+      </if>
+      <if test="isCheckCount != null" >
+        IS_CHECK_COUNT = #{isCheckCount,jdbcType=INTEGER},
+      </if>
+      <if test="topNum != null" >
+        TOP_NUM = #{topNum,jdbcType=BIGINT},
+      </if>
+      <if test="bottomNum != null" >
+        BOTTOM_NUM = #{bottomNum,jdbcType=BIGINT},
+      </if>
+      <if test="topCount != null" >
+        TOP_COUNT = #{topCount,jdbcType=BIGINT},
+      </if>
+      <if test="bottomCount != null" >
+        BOTTOM_COUNT = #{bottomCount,jdbcType=BIGINT},
+      </if>
+      <if test="topAge != null" >
+        TOP_AGE = #{topAge,jdbcType=INTEGER},
+      </if>
+      <if test="bottomAge != null" >
+        BOTTOM_AGE = #{bottomAge,jdbcType=INTEGER},
+      </if>
+      <if test="beginDays != null" >
+        BEGIN_DAYS = #{beginDays,jdbcType=INTEGER},
+      </if>
+      <if test="endDays != null" >
+        END_DAYS = #{endDays,jdbcType=INTEGER},
+      </if>
+      <if test="buyPrice != null" >
+        BUY_PRICE = #{buyPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="brief != null" >
+        BRIEF = #{brief,jdbcType=VARCHAR},
+      </if>
+      <if test="buyWay != null" >
+        BUY_WAY = #{buyWay,jdbcType=INTEGER},
+      </if>
+      <if test="isDefault != null" >
+        IS_DEFAULT = #{isDefault,jdbcType=VARCHAR},
+      </if>
+      <if test="supplierNo != null" >
+      	SUPPLIER_NO = #{supplierNo,jdbcType=INTEGER},
+      </if>     
+      <if test="createTime != null" >
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null" >
+        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator != null" >
+        CREATOR = #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="modifier != null" >
+        MODIFIER = #{modifier,jdbcType=VARCHAR},
+      </if>
+      <if test="valid != null" >
+        VALID = #{valid,jdbcType=BIT},
+      </if>
+       <if test="amount != null" >
+        AMOUNT = #{amount,jdbcType=BIGINT},
+      </if>
+      <if test="del != null" >
+        DEL = #{del,jdbcType=INTEGER},
+      </if>
+    </set>
+    where INSURANCE_NO = #{insuranceNo,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.ins.api.entity.Insurance" >
+    update INS_INSURANCE
+    set ID = #{id,jdbcType=BIGINT},
+      OWNER = #{owner,jdbcType=INTEGER},
+      PRODUCT_KEY = #{productKey,jdbcType=VARCHAR},
+      NAME = #{name,jdbcType=VARCHAR},
+      CODE = #{code,jdbcType=VARCHAR},
+      PAY_MODEL = #{payModel,jdbcType=INTEGER},
+      INSURE_TYPE = #{insureType,jdbcType=VARCHAR},
+      COMPANY_NAME = #{companyName,jdbcType=VARCHAR},
+      IS_CHECK_NUM = #{isCheckNum,jdbcType=INTEGER},
+      IS_CHECK_AGE = #{isCheckAge,jdbcType=INTEGER},
+      IS_CHECK_COUNT = #{isCheckCount,jdbcType=INTEGER},
+      TOP_NUM = #{topNum,jdbcType=BIGINT},
+      BOTTOM_NUM = #{bottomNum,jdbcType=BIGINT},
+      TOP_COUNT = #{topCount,jdbcType=BIGINT},
+      BOTTOM_COUNT = #{bottomCount,jdbcType=BIGINT},
+      TOP_AGE = #{topAge,jdbcType=INTEGER},
+      BOTTOM_AGE = #{bottomAge,jdbcType=INTEGER},
+      BEGIN_DAYS = #{beginDays,jdbcType=INTEGER},
+      END_DAYS = #{endDays,jdbcType=INTEGER},
+      BUY_PRICE = #{buyPrice,jdbcType=DECIMAL},
+      BRIEF = #{brief,jdbcType=VARCHAR},
+      BUY_WAY = #{buyWay,jdbcType=INTEGER},
+      IS_DEFAULT = #{isDefault,jdbcType=VARCHAR},
+      SUPPLIER_NO = #{supplierNo,jdbcType=INTEGER},
+      CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+      CREATOR = #{creator,jdbcType=VARCHAR},
+      MODIFIER = #{modifier,jdbcType=VARCHAR},
+       FACE_PRICE = #{facePrice,jdbcType=DECIMAL},
+      VALID = #{valid,jdbcType=BIT}
+      AMOUNT = #{amount,jdbcType=BIGINT}
+    where INSURANCE_NO = #{insuranceNo,jdbcType=BIGINT}
+  </update>
+  
+  <select id="queryObjByKey" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ins.api.entity.Insurance" >
+  	 select 
+  	 <include refid="Base_Column_List" />
+     FROM INS_INSURANCE 
+     where  VALID=1 AND DEL = 0
+ 	 <trim suffixOverrides="AND" >
+		<if test="insuranceNo != null and insuranceNo != ''">
+			AND INSURANCE_NO = #{insuranceNo,jdbcType=INTEGER} 
+		</if>
+		<if test="productKey != null and productKey != ''" >
+			AND PRODUCT_KEY = #{productKey,jdbcType=VARCHAR}
+		</if>
+		<if test="name != null and name != ''" >
+			AND NAME LIKE CONCAT(CONCAT('%', #{name}),'%')
+		</if>
+		<if test="companyName != null and companyName != ''" >
+			AND COMPANY_NAME LIKE CONCAT(CONCAT('%', #{companyName}),'%')
+		</if>
+		<if test="insureType != null and insureType != ''" >
+			AND INSURE_TYPE = #{insureType,jdbcType=VARCHAR}
+		</if>
+		<if test="internatOrcivil != null and internatOrcivil != ''" >
+			AND INTERNAT_ORCIVIL = #{internatOrcivil,jdbcType=VARCHAR}
+		</if>
+  	 </trim>
+  </select>
+ <select id="queryAllObjByKey" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ins.api.entity.Insurance" >
+  	 select 
+  	 <include refid="Base_Column_List" />
+     FROM INS_INSURANCE 
+     where  INS_INSURANCE.VALID=INS_INSURANCE.VALID AND DEL = 0
+ 	 <trim suffixOverrides="AND" >
+		<if test="insuranceNo != null and insuranceNo != ''">
+			AND INSURANCE_NO = #{insuranceNo,jdbcType=INTEGER} 
+		</if>
+		<if test="productKey != null and productKey != ''" >
+			AND PRODUCT_KEY = #{productKey,jdbcType=VARCHAR}
+		</if>
+		<if test="name != null and name != ''" >
+			AND NAME LIKE CONCAT(CONCAT('%', #{name}),'%')
+		</if>
+		<if test="companyName != null and companyName != ''" >
+			AND COMPANY_NAME LIKE CONCAT(CONCAT('%', #{companyName}),'%')
+		</if>
+		<if test="insureType != null and insureType != ''" >
+			AND INSURE_TYPE = #{insureType,jdbcType=VARCHAR}
+		</if>
+		<if test="internatOrcivil != null and internatOrcivil != ''" >
+			AND INTERNAT_ORCIVIL = #{internatOrcivil,jdbcType=INTEGER}
+		</if>
+		<if test="buyWay != null and buyWay != ''" >
+			AND BUY_WAY = #{buyWay,jdbcType=INTEGER}
+		</if>
+  	 </trim>
+  </select>
+
+<select id="selectInsuranceByNo" resultMap="BaseResultMap" >
+  	 select 
+  	 <include refid="Base_Column_List" />
+     FROM INS_INSURANCE 
+     where  VALID=1 AND DEL = 0
+ 	 <trim suffixOverrides="AND" >
+		<if test="insuranceNo != null and insuranceNo != ''">
+			AND INSURANCE_NO = #{insuranceNo} 
+		</if>
+  	 </trim>
+  </select>
+  <select id="selectDefaultInsurance" resultMap="BaseResultMap">
+  	 select 
+  	 <include refid="Base_Column_List" />
+     FROM 	INS_INSURANCE 
+     where  VALID=1
+	 AND 	IS_DEFAULT = 1 AND DEL = 0
+ 	 <trim suffixOverrides="AND" >
+		<if test="insureType != null and insureType != ''" >
+			AND INSURE_TYPE = #{insureType}
+		</if>
+		<if test="insuranceKindType != null" >
+			AND INTERNAT_ORCIVIL = #{insuranceKindType}
+		</if>
+  	 </trim>
+  </select>
+    <select id="chooseDefaultInsurance" resultMap="BaseResultMap">
+  	 select 
+  	 <include refid="Base_Column_List" />
+     FROM 	INS_INSURANCE 
+     where  VALID=1
+	 AND 	IS_DEFAULT = 1 AND DEL = 0
+ 	 <trim suffixOverrides="AND" >
+		<if test="insureType != null and insureType != ''" >
+			AND INSURE_TYPE = #{insureType}
+		</if>
+		<if test="insuranceKindType != null" >
+			AND  INTERNAT_ORCIVIL=3
+		</if>
+  	 </trim>
+  </select>
+    <select id="selectInsurance" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ins.api.entity.Insurance" >
+  	 select 
+  	 <include refid="Base_Column_List" />
+     FROM INS_INSURANCE
+     where  VALID=1 AND DEL = 0
+  </select>
+   <select id="selectInsuranceCode" resultMap="BaseResultMap" >
+  	 select 
+  	 <include refid="Base_Column_List" />
+     FROM INS_INSURANCE
+     where  VALID=1 AND DEL = 0
+    	<if test="productKey != null and productKey != ''" >
+			AND PRODUCT_KEY = #{productKey}
+		</if>
+  </select>
+</mapper>

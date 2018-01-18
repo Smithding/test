@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.unp.dao.OrderChangeDao" >
+	<!-- 通用查询结果列-->
+	<sql id="Base_Column_List">
+		ID, OWNER,CHANGE_ORDER_NO AS changeOrderNo, ORDER_NO AS orderNo, SALE_REFUND_PRICE as saleRefundPrice,
+		BUY_CHANGE_NO AS buyChangeNo, status, CREATOR, CREATE_TIME AS createTime, MODIFIER, MODIFY_TIME AS modifyTime, VALID
+	</sql>
+  
+  <select id="getOrderChangeByNo" resultType="com.tempus.gss.product.unp.api.entity.UnpOrderChange" parameterType="java.lang.Long">
+    select 
+    <include refid="Base_Column_List" />
+    from UNP_ORDER_CHANGE where CHANGE_ORDER_NO = #{changeOrderNo}
+  </select>
+  
+  <select id="queryBuyChangeByNo" resultType="com.tempus.gss.product.unp.api.entity.UnpOrderChange" parameterType="java.lang.Long">
+    select 
+    <include refid="Base_Column_List" />
+    from UNP_ORDER_CHANGE where BUY_CHANGE_NO = #{buyChangeNo}
+  </select>
+  
+  <select id="queryOrderChangeList" resultType="com.tempus.gss.product.unp.api.entity.UnpOrderChange" parameterType="com.tempus.gss.product.unp.api.entity.UnpOrderChange">
+    select DISTINCT
+    <include refid="Base_Column_List" />
+    from UNP_ORDER_CHANGE 
+    <where>
+        <trim suffixOverrides="AND">
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER} AND
+            </if>
+            <if test="changeOrderNo != null">
+                CHANGE_ORDER_NO = #{changeOrderNo,jdbcType=BIGINT} AND
+            </if>
+            <if test="orderNo != null and orderNo!='' ">
+                ORDER_NO = #{orderNo,jdbcType=BIGINT} AND
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP} AND
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP} AND
+            </if>
+            <if test="creator != null">
+                CREATOR = #{creator,jdbcType=VARCHAR} AND
+            </if>
+            <if test="modifier != null">
+                MODIFIER = #{modifier,jdbcType=VARCHAR} AND
+            </if>
+            <if test="status != null and status!=''">
+                STATUS = #{status,jdbcType=VARCHAR} AND
+            </if>
+            <if test="saleRefundPrice != null">
+                SALE_REFUND_PRICE = #{saleRefundPrice,jdbcType=DECIMAL} AND
+            </if>
+            
+            <if test="createStartTime != null">
+		 		date(CREATE_TIME) &gt;= date(#{createStartTime,jdbcType=DATE}) AND
+			 </if>
+			 <if test="createEndTime != null">
+				 date(CREATE_TIME) &lt;= date(#{createEndTime,jdbcType=DATE}) AND
+			 </if> 
+            VALID =1 ORDER BY CREATE_TIME DESC
+        </trim>
+     </where>   
+  </select>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpOrderChange">
+        update UNP_ORDER_CHANGE
+        <set>
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="changeOrderNo != null">
+                CHANGE_ORDER_NO = #{changeOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="orderNo != null">
+                ORDER_NO = #{orderNo,jdbcType=BIGINT},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="modifier != null">
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                STATUS = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="saleRefundPrice != null">
+                SALE_REFUND_PRICE = #{saleRefundPrice,jdbcType=DECIMAL},
+            </if>
+        </set>
+        where CHANGE_ORDER_NO = #{changeOrderNo,jdbcType=BIGINT}
+    </update>
+</mapper>

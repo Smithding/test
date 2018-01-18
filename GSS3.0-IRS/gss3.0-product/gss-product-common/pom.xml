@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>gss-product</artifactId>
+        <groupId>com.tempus.gss</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>gss-product-common</artifactId>
+    <packaging>jar</packaging> 
+    <name>gss-product-common</name>
+    <description>暴露的服务接口，生产者与消费者要依赖于该模块</description>
+    <properties>
+        <skip_maven_deploy>false</skip_maven_deploy>
+    </properties>
+
+    <dependencies>
+        <!--mybatis分页插件 -->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper</artifactId>            
+        </dependency>
+        <dependency>
+            <groupId>com.tempus.gss</groupId>
+            <artifactId>gss-core-framework</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+			<groupId>com.tempus.gss</groupId>
+			<artifactId>gss-core-file</artifactId>
+			<version>${project.version}</version>
+	   </dependency>
+    </dependencies>
+
+</project>

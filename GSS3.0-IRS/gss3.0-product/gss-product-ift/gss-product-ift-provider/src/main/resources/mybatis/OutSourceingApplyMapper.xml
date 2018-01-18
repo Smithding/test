@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.ift.dao.OutSourceingApplyDao">
+
+     <!-- 使用resultMap映射实体类和字段之间的一一对应关系 -->
+     <resultMap type="com.tempus.gss.product.ift.api.entity.OutSourceingApply" id="resultMap">
+         <id property="id" column="ID"/>
+         <result property="applyDate" column="APPLY_DATE"/>
+         <result property="applyUser" column="APPLY_USER"/>
+         <result property="passengerName" column="PASSENGER_NAME"/>
+         <result property="orderid" column="ORDERID"/>
+         <result property="routing" column="ROUTING"/>
+         <result property="flightNo" column="FLIGHT_NO"/>
+         <result property="departureDate" column="DEPARTURE_DATE"/>
+         <result property="pnr" column="PNR"/>
+         <result property="salePrice" column="SALE_PRICE"/>
+         <result property="purchasePrice" column="PURCHASE_PRICE"/>
+         <result property="profit" column="PROFIT"/>
+         <result property="accountName" column="ACCOUNT_NAME"/>
+         <result property="accountNo" column="ACCOUNT_NO"/>
+         <result property="openBank" column="OPEN_BANK"/>
+         <result property="remarke" column="REMARKE"/>
+         <result property="status" column="STATUS"/>
+         <result property="customername" column="CUSTOMERNAME"/>
+         <result property="saledep" column="SALEDEP"/>
+         <result property="businessline" column="BUSINESSLINE"/>
+         <result property="tanagementarea" column="TANAGEMENTAREA"/>
+         <result property="ticketno" column="TICKETNO"/>
+         <result property="platformOrderid" column="PLATFORM_ORDERID"/>
+         <result property="deptApproval" column="DEPT_APPROVAL"/>
+         <result property="filepath" column="FILEPATH"/>
+         <result property="outSourceId" column="OUT_SOURCE_ID"/>
+         <result property="backInfo" column="BACK_INFO"/>
+         <result property="supplierNo" column="SUPPLIER_NO"/>
+     </resultMap>
+
+	<!-- 通用查询结果列-->
+	<sql id="Base_Column_List">
+		ID, APPLY_DATE AS applyDate, APPLY_USER AS applyUser, PASSENGER_NAME AS passengerName, ORDERID, ROUTING, FLIGHT_NO AS flightNo, DEPARTURE_DATE AS departureDate, PNR, SALE_PRICE AS salePrice, PURCHASE_PRICE AS purchasePrice, PROFIT, ACCOUNT_NAME AS accountName, ACCOUNT_NO AS accountNo, OPEN_BANK AS openBank, REMARKE, STATUS, CUSTOMERNAME, SALEDEP, BUSINESSLINE, TANAGEMENTAREA, TICKETNO, PLATFORM_ORDERID AS platformOrderid, DEPT_APPROVAL AS deptApproval, FILEPATH, OUT_SOURCE_ID AS outSourceId, BACK_INFO AS backInfo
+	</sql>
+	
+	<insert id="insertAndGetId" parameterType="com.tempus.gss.product.ift.api.entity.vo.OutSourceingApplyVo" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO IFT_OUT_SOURCEING_APPLY(
+		    APPLY_DATE, 
+		    APPLY_USER, 
+		    PASSENGER_NAME, 
+		    ORDERID, 
+		    ROUTING, 
+		    FLIGHT_NO, 
+		    DEPARTURE_DATE, 
+		    PNR, 
+		    SALE_PRICE, 
+		    PURCHASE_PRICE, 
+		    PROFIT, 
+		    ACCOUNT_NAME, 
+		    ACCOUNT_NO, 
+		    OPEN_BANK, 
+		    REMARKE, 
+		    STATUS, 
+		    CUSTOMERNAME,
+		    SUPPLIER_NO,
+		    SALEDEP, 
+		    BUSINESSLINE, 
+		    TANAGEMENTAREA, 
+		    TICKETNO, 
+		    PLATFORM_ORDERID, 
+		    DEPT_APPROVAL, 
+		    FILEPATH, 
+		    OUT_SOURCE_ID, 
+		    BACK_INFO
+		)
+		VALUES(
+			NOW(),
+			#{applyUser,jdbcType=VARCHAR},
+			#{passengerName,jdbcType=VARCHAR},
+			#{orderId,jdbcType=VARCHAR},
+		    #{routing,jdbcType=VARCHAR},
+		    #{flightNo,jdbcType=VARCHAR},
+			#{departureDate,jdbcType=TIMESTAMP},
+			#{pnr,jdbcType=VARCHAR},
+			#{salePrice,jdbcType=VARCHAR},
+			#{purchasePrice,jdbcType=VARCHAR},
+			#{profit,jdbcType=VARCHAR},
+			#{accountName,jdbcType=VARCHAR},
+			#{accountNo,jdbcType=VARCHAR},
+			#{openBank,jdbcType=VARCHAR},
+			#{remarke,jdbcType=VARCHAR},
+			#{status,jdbcType=VARCHAR},
+			#{customername,jdbcType=VARCHAR},
+			#{supplierNo,jdbcType=VARCHAR},
+			#{saledep,jdbcType=VARCHAR},
+			#{businessline,jdbcType=VARCHAR},
+			#{tanagementarea,jdbcType=VARCHAR},
+			#{ticketno,jdbcType=VARCHAR},
+			#{platformOrderid,jdbcType=VARCHAR},
+			#{deptApproval,jdbcType=VARCHAR},
+			#{filepath,jdbcType=VARCHAR},
+			#{outSourceId,jdbcType=VARCHAR},
+			#{backInfo,jdbcType=VARCHAR} 
+		)
+	</insert>
+	
+	
+	<select id="selectInRefundApprefVo" resultMap="resultMap">
+        select * from IFT_OUT_SOURCEING_APPLY a
+		 WHERE a.ORDERID = #{orderid} ORDER BY a.APPLY_DATE DESC
+    </select>
+	
+	
+	<select id="queryObjByKey" resultMap="resultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.OutSourceingApplyVo">
+        select DISTINCT
+         <include refid="Base_Column_List" />  
+        FROM  IFT_OUT_SOURCEING_APPLY o
+        WHERE 1 = 1
+        <trim suffixOverrides="AND">
+            <if test="orderId != null and orderId !=''">
+               AND o.ORDERID = #{orderId,jdbcType=VARCHAR} 
+            </if>
+           <if test="beforeDate!=null and beforeDate !='' ">
+                <![CDATA[
+                    AND    DATE_FORMAT(o.APPLY_DATE, '%Y-%m-%d') >= DATE_FORMAT(#{beforeDate,jdbcType=TIMESTAMP},'%Y-%m-%d') 
+	            ]]>
+            </if>
+            <if test="endDate!=null and endDate !=''">
+                <![CDATA[
+	            	AND DATE_FORMAT(o.APPLY_DATE, '%Y-%m-%d') <= DATE_FORMAT(#{endDate,jdbcType=TIMESTAMP},'%Y-%m-%d') 
+	             ]]>
+            </if>
+            <if test="refundStatus!=null">
+                AND o.STATUS in 
+                <foreach collection="refundStatus" item="refundStatus"
+                         index="index" open="(" close=")" separator=",">
+                    #{refundStatus[${index}]}
+                </foreach>
+            </if>
+            order by o.APPLY_DATE DESC
+        </trim>
+    </select>
+    
+     <update id="updateStatus" parameterType="java.util.Map">
+		UPDATE IFT_OUT_SOURCEING_APPLY SET OPEN_BANK = #{openBank, jdbcType=VARCHAR},ACCOUNT_NO = #{accountNo,jdbcType=VARCHAR},ACCOUNT_NAME = #{accountName,jdbcType=VARCHAR},STATUS = #{status,jdbcType=VARCHAR},REMARKE = #{remarke,jdbcType=VARCHAR},FILEPATH = #{fileUrl,jdbcType=VARCHAR},PLATFORM_ORDERID = #{platformOrderid,jdbcType=VARCHAR},SALE_PRICE = #{salePrice,jdbcType=DECIMAL},PURCHASE_PRICE = #{purchasePrice,jdbcType=DECIMAL},PROFIT = #{profit,jdbcType=DECIMAL},TICKETNO = #{ticketno,jdbcType=VARCHAR},BUSINESSLINE = #{businessline,jdbcType=VARCHAR},CUSTOMERNAME = #{customername,jdbcType=VARCHAR} WHERE ORDERID = #{orderId, jdbcType=VARCHAR}
+	</update>
+	
+	<update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.OutSourceingApply">
+        update IFT_OUT_SOURCEING_APPLY
+        <set>
+            <if test="outSourceId != null">
+                OUT_SOURCE_ID = #{outSourceId,jdbcType=BIGINT},
+            </if>
+            <if test="backInfo != null">
+                BACK_INFO = #{backInfo,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                STATUS = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="backInfo != null">
+                BACK_INFO = #{backInfo,jdbcType=VARCHAR},
+            </if>
+             <if test="filepath != null">
+                FILEPATH = #{filepath,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where ORDERID = #{orderid,jdbcType=VARCHAR}
+    </update>
+
+    <select id="selectValueById" resultMap="resultMap">
+SELECT CONCAT(IP.SURNAME,'/',IP.NAME) AS PASSENGER_NAME,IR.PNR AS PNR,CONCAT(IL.DEP_AIRPORT,'-',IL.ARR_AIRPORT) AS ROUTING,
+IL.FLIGHT_NO AS FLIGHT_NO,IL.DEP_TIME AS DEPARTURE_DATE,IP.SALE_PRICE AS SALE_PRICE,IP.BUY_PRICE+IP.BUY_AGENCY_FEE AS PURCHASE_PRICE,
+IP.SALE_PRICE-IP.BUY_PRICE-IP.BUY_AGENCY_FEE AS PROFIT,IBOE.SUPPLIER_NO AS SUPPLIER_NO,CC.NAME AS CUSTOMERNAME,SD.NAME AS SALEDEP,
+SMD.NAME AS TANAGEMENTAREA,ISOD.TICKET_NO AS TICKETNO,CC.BUSINESS_LINE AS BUSINESSLINE
+FROM IFT_SALE_ORDER_EXT ISOE
+LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO=ISOE.SALE_ORDER_NO
+LEFT JOIN IFT_PASSENGER IP ON IP.PASSENGER_NO=ISOD.PASSENGER_NO
+LEFT JOIN IFT_LEG IL ON IL.LEG_NO=ISOD.LEG_NO
+LEFT JOIN IFT_BUY_ORDER_DETAIL IBOD ON IBOD.SALE_ORDER_DETAIL_NO=ISOD.SALE_ORDER_DETAIL_NO
+LEFT JOIN IFT_BUY_ORDER_EXT IBOE ON IBOE.BUY_ORDER_NO=IBOD.BUY_ORDER_NO
+LEFT JOIN OS_SALEORDER OS ON OS.SALE_ORDER_NO=ISOE.SALE_ORDER_NO
+LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO=OS.CUSTOMER_NO
+LEFT JOIN GBC_DEOTCTYPE GD ON GD.CTYPE_NO=CC.GROUP_NO
+LEFT JOIN SM_DEPT SD ON SD.ID=GD.DEPT_ID
+LEFT JOIN SM_DICT SMD ON SMD.CODE=CC.OWNER_AREA
+LEFT JOIN IFT_PNR IR ON ISOE.PNR_NO=IR.PNR_NO
+where GD.PTYPE=2 AND ISOE.SALE_ORDER_NO= #{orderId}  AND ISOD.STATUS=4;
+    </select>
+
+    <select id="selectBankNameById" resultType="string">
+        SELECT NAME FROM SM_DICT WHERE CODE=#{bankId}
+    </select>
+</mapper>

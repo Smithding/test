@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.ins.dao.InsProfitDao">
+	<resultMap id="BaseResultMap" type="com.tempus.gss.product.ins.api.entity.InsProfit">
+        <id column="ID" property="id" jdbcType="BIGINT"/>
+        <result column="PROFIT_NO" property="profitNo" jdbcType="BIGINT"/>
+        <result column="OWNER" property="owner" jdbcType="INTEGER"/>
+        <result column="CUSTOMER_TYPE_NO" property="customerTypeNo" jdbcType="BIGINT"/>
+        <result column="CUSTOMER_TYPE_NAME" property="customerTypeName" jdbcType="VARCHAR"/>
+        <result column="PRICE_TYPE" property="priceType" jdbcType="INTEGER"/>
+<!--         <result column="PAY_TYPE" property="payType" jdbcType="INTEGER"/> -->
+        <result column="PROFIT_MODE" property="profitMode" jdbcType="INTEGER"/>
+        <result column="PARENT_ID" property="parentId" jdbcType="BIGINT"/>
+        <result column="REMARK" property="remark" jdbcType="VARCHAR"/>
+        <result column="STATUS" property="status" jdbcType="VARCHAR"/>
+        <result column="CREATOR" property="creator" jdbcType="VARCHAR"/>
+        <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="MODIFIER" property="modifier" jdbcType="VARCHAR"/>
+        <result column="MODIFIER_TIME" property="modifierTime" jdbcType="TIMESTAMP"/>
+    	<result column="VALID" property="valid" jdbcType="INTEGER"/>
+    	 <result column="INSURANCE_NO" property="insuranceNo" jdbcType="BIGINT"/>
+    	 <result column="INSURANCE_NAME" property="insuranceName" jdbcType="VARCHAR"/>
+    	 <result column="PROFIT_COUNT" property="profitCount" jdbcType="DECIMAL"/>
+    	 <result column="PROFIT_MONEY" property="profitMoney" jdbcType="DECIMAL"/>
+    	<!--一对多关联乘客-->
+       <!-- <collection property="profitPriceList" ofType="com.tempus.gss.product.INS.api.entity.ProfitPrice"
+                    column="PROFIT_NO"
+                    select="com.tempus.gss.product.INS.dao.ProfitPriceMapper.selectByProfitNo"/> -->
+    </resultMap>
+	<!-- 通用查询结果列-->
+	<sql id="Base_Column_List">
+		 ID,PROFIT_NO AS profitNo, OWNER, CUSTOMER_TYPE_NO AS customerTypeNo, CUSTOMER_TYPE_NAME AS customerTypeName, PRICE_TYPE AS priceType, PROFIT_MODE AS profitMode, PARENT_ID AS parentId, STATUS, REMARK, VALID, CREATOR, CREATE_TIME AS createTime, MODIFIER, MODIFIER_TIME AS modifierTime, INSURANCE_NO AS insuranceNo,INSURANCE_NAME AS insuranceName, PROFIT_COUNT AS profitCount, PROFIT_MONEY AS profitMoney
+	</sql>
+	
+	<select id="selectProfitList" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ins.api.entity.vo.InsProfitVo">
+    	select DISTINCT
+        <include refid="Base_Column_List"/>
+        from INS_PROFIT  WHERE VALID = 1
+        <trim suffixOverrides="AND">
+            <if test="profitNo != null and profitNo != ''">
+               AND PROFIT_NO = #{profitNo,jdbcType=BIGINT} 
+            </if>
+            <if test="insuranceNo != null and insuranceNo != ''">
+               AND INSURANCE_NO = #{insuranceNo,jdbcType=BIGINT} 
+            </if>
+            <if test="customerTypeNo != null and customerTypeNo != ''">
+               AND CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT} 
+            </if>
+            <if test="customerTypeName != null and customerTypeName != ''">
+               AND CUSTOMER_TYPE_NAME = #{customerTypeName,jdbcType=VARCHAR} 
+            </if>
+            <if test="priceType != null and priceType != ''">
+               AND PRICE_TYPE = #{priceType,jdbcType=INTEGER} 
+            </if>
+            <if test="profitMode != null and profitMode != ''">
+               AND PROFIT_MODE = #{profitMode,jdbcType=INTEGER} 
+            </if>
+            <if test="parentId != null and parentId  != ''">
+               AND PARENT_ID = #{parentId ,jdbcType=BIGINT} 
+            </if>
+            <if test="status != null and status != ''">
+               AND STATUS = #{status,jdbcType=VARCHAR} 
+            </if>
+            <if test="creator != null and creator != ''" >
+       			AND CREATOR = #{creator,jdbcType=VARCHAR}
+	      	</if>
+	     	<if test="createTime != null and createTime != ''" >
+	       		AND CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
+	     	</if>
+	     	<if test="modifier !=null and modifier !=''">
+                AND MODIFIER = #{modifier,jdbcType=VARCHAR} 
+            </if>
+            <if test="modifierTime !=null and modifierTime !=''">
+                AND MODIFIER_TIME = #{modifierTime,jdbcType=TIMESTAMP} 
+            </if>
+        </trim>
+        order by CREATE_TIME desc
+    </select>
+    <select id="selectByProfitNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    	select DISTINCT
+        <include refid="Base_Column_List"/>
+        from INS_PROFIT  WHERE PROFIT_NO = #{profitNo,jdbcType=BIGINT} <!--  VALID = 1 AND -->
+    </select>
+        <select id="queryProfitByParentNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    	select DISTINCT
+        <include refid="Base_Column_List"/>
+        from INS_PROFIT  WHERE VALID = 1 AND CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT} <!--  VALID = 1 AND -->
+    </select>
+    <select id="selectByCustomerTypeNoList" resultMap="BaseResultMap" parameterType="java.lang.Long">
+    	select DISTINCT
+        <include refid="Base_Column_List"/>
+        from INS_PROFIT  WHERE VALID = 1 AND CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT} 
+    </select>
+
+	<select id="queryProfitList" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ins.api.entity.vo.InsProfitVo">
+        select DISTINCT
+        <include refid="Base_Column_List"/>
+        from INS_PROFIT  WHERE VALID = 1
+        <trim suffixOverrides="AND">
+            <if test="profitNo != null and profitNo != ''">
+               AND PROFIT_NO = #{profitNo,jdbcType=BIGINT} 
+            </if>
+            <if test="insuranceNo != null and insuranceNo != ''">
+               AND INSURANCE_NO = #{insuranceNo,jdbcType=BIGINT} 
+            </if>
+            <if test="insuranceName != null and insuranceName != ''">
+               AND INSURANCE_NAME = #{insuranceName,jdbcType=VARCHAR} 
+            </if>
+            <if test="customerTypeNo != null and customerTypeNo != ''">
+               AND CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT} 
+            </if>
+            <if test="customerTypeName != null and customerTypeName != ''">
+               AND CUSTOMER_TYPE_NAME = #{customerTypeName,jdbcType=VARCHAR} 
+            </if>
+            <if test="priceType != null and priceType != ''">
+               AND PRICE_TYPE = #{priceType,jdbcType=INTEGER} 
+            </if>
+            <if test="profitMode != null and profitMode != ''">
+               AND PROFIT_MODE = #{profitMode,jdbcType=INTEGER} 
+            </if>
+            <if test="parentId != null and parentId  != ''">
+               AND PARENT_ID = #{parentId ,jdbcType=BIGINT} 
+            </if>
+            <if test="status != null and status != ''">
+               AND STATUS = #{status,jdbcType=VARCHAR} 
+            </if>
+            <if test="creator != null and creator != ''" >
+       			AND CREATOR = #{creator,jdbcType=VARCHAR}
+	      	</if>
+	     	<if test="createTime != null and createTime != ''" >
+	       		AND CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
+	     	</if>
+	     	<if test="modifier !=null and modifier !=''">
+                AND MODIFIER = #{modifier,jdbcType=VARCHAR} 
+            </if>
+            <if test="modifierTime !=null and modifierTime !=''">
+                AND MODIFIER_TIME = #{modifierTime,jdbcType=TIMESTAMP} 
+            </if>
+            <if test="modifierStartDate != null and modifierStartDate != ''">
+                AND date(MODIFIER_TIME) &gt;= date(#{modifierStartDate,jdbcType=DATE})
+            </if>
+            <if test="modifierEndDate != null and modifierEndDate != ''">
+                AND date(MODIFIER_TIME) &lt;= date(#{modifierEndDate,jdbcType=DATE})
+            </if>		
+        </trim>
+        order by CREATE_TIME desc
+    </select>
+    <select id="queryProfitListAll" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ins.api.entity.vo.InsProfitVo">
+        select DISTINCT
+        <include refid="Base_Column_List"/>
+        from INS_PROFIT  WHERE VALID = 1
+        <trim suffixOverrides="AND">
+            <if test="profitNo != null and profitNo != ''">
+               AND PROFIT_NO = #{profitNo,jdbcType=BIGINT} 
+            </if>
+            <if test="insuranceNo != null and insuranceNo != ''">
+               AND INSURANCE_NO = #{insuranceNo,jdbcType=BIGINT} 
+            </if>
+            <if test="insuranceName != null and insuranceName != ''">
+               AND INSURANCE_NAME = #{insuranceName,jdbcType=VARCHAR} 
+            </if>
+            <if test="customerTypeNo != null and customerTypeNo != ''">
+               AND CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT} 
+            </if>
+            <if test="customerTypeName != null and customerTypeName != ''">
+               AND CUSTOMER_TYPE_NAME = #{customerTypeName,jdbcType=VARCHAR} 
+            </if>
+            <if test="priceType != null and priceType != ''">
+               AND PRICE_TYPE = #{priceType,jdbcType=INTEGER} 
+            </if>
+            <if test="profitMode != null and profitMode != ''">
+               AND PROFIT_MODE = #{profitMode,jdbcType=INTEGER} 
+            </if>
+            <if test="parentId != null and parentId  != ''">
+               AND PARENT_ID = #{parentId ,jdbcType=BIGINT} 
+            </if>
+            <if test="status != null and status != ''">
+               AND STATUS = #{status,jdbcType=VARCHAR} 
+            </if>
+            <if test="creator != null and creator != ''" >
+       			AND CREATOR = #{creator,jdbcType=VARCHAR}
+	      	</if>
+	     	<if test="createTime != null and createTime != ''" >
+	       		AND CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
+	     	</if>
+	     	<if test="modifier !=null and modifier !=''">
+                AND MODIFIER = #{modifier,jdbcType=VARCHAR} 
+            </if>
+            <if test="modifierTime !=null and modifierTime !=''">
+                AND MODIFIER_TIME = #{modifierTime,jdbcType=TIMESTAMP} 
+            </if>
+            <if test="modifierStartDate != null and modifierStartDate != ''">
+                AND date(MODIFIER_TIME) &gt;= date(#{modifierStartDate,jdbcType=DATE})
+            </if>
+            <if test="modifierEndDate != null and modifierEndDate != ''">
+                AND date(MODIFIER_TIME) &lt;= date(#{modifierEndDate,jdbcType=DATE})
+            </if>		
+        </trim>
+        order by CREATE_TIME desc
+    </select>
+    <update id="updateByProfitNo" parameterType="com.tempus.gss.product.ins.api.entity.vo.InsProfitVo" >
+        update INS_PROFIT
+        <set >
+            <if test="customerTypeNo != null" >
+                CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT},
+            </if>
+            <if test="customerTypeName != null" >
+                CUSTOMER_TYPE_NAME = #{customerTypeName,jdbcType=VARCHAR},
+            </if>
+            <if test="insuranceNo != null and insuranceNo != ''">
+                INSURANCE_NO = #{insuranceNo,jdbcType=BIGINT} 
+            </if>
+            <if test="priceType != null" >
+                PRICE_TYPE = #{priceType,jdbcType=INTEGER},
+            </if>
+            <if test="profitMode != null" >
+                PROFIT_MODE = #{profitMode,jdbcType=INTEGER},
+            </if>
+            <if test="parentId != null" >
+                PARENT_ID = #{parentId,jdbcType=BIGINT},
+            </if>
+            <if test="remark != null and remark !=''" >
+                REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null and status !=''" >
+                STATUS = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null" >
+                VALID = #{valid,jdbcType=INTEGER},
+            </if>
+            <if test="modifier != null and modifier !=''" >
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifierTime != null" >
+                MODIFIER_TIME = #{modifierTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where PROFIT_NO = #{profitNo,jdbcType=BIGINT}
+    </update>
+    <select id="queryProfitResList" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ins.api.entity.vo.InsProfitVo">
+        select DISTINCT
+        <include refid="Base_Column_List"/>
+        from INS_PROFIT  WHERE VALID = 1
+        <trim suffixOverrides="AND">
+            <if test="profitNo != null and profitNo != ''">
+               AND PROFIT_NO = #{profitNo,jdbcType=BIGINT} 
+            </if>
+            <if test="insuranceNo != null and insuranceNo != ''">
+               AND INSURANCE_NO = #{insuranceNo,jdbcType=BIGINT} 
+            </if>
+            <if test="customerTypeNo != null and customerTypeNo != ''">
+               AND CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT} 
+            </if>
+            <if test="customerTypeName != null and customerTypeName != ''">
+               AND CUSTOMER_TYPE_NAME = #{customerTypeName,jdbcType=VARCHAR} 
+            </if>
+            <if test="priceType != null and priceType != ''">
+               AND PRICE_TYPE = #{priceType,jdbcType=INTEGER} 
+            </if>
+            <if test="profitMode != null and profitMode != ''">
+               AND PROFIT_MODE = #{profitMode,jdbcType=INTEGER} 
+            </if>
+            <if test="parentId != null and parentId  != ''">
+               AND PARENT_ID = #{parentId ,jdbcType=BIGINT} 
+            </if>
+            <if test="status != null and status != ''">
+               AND STATUS = #{status,jdbcType=VARCHAR} 
+            </if>
+            <if test="creator != null and creator != ''" >
+       			AND CREATOR = #{creator,jdbcType=VARCHAR}
+	      	</if>
+	     	<if test="createTime != null and createTime != ''" >
+	       		AND CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
+	     	</if>
+	     	<if test="modifier !=null and modifier !=''">
+                AND MODIFIER = #{modifier,jdbcType=VARCHAR} 
+            </if>
+            <if test="modifierTime !=null and modifierTime !=''">
+                AND MODIFIER_TIME = #{modifierTime,jdbcType=TIMESTAMP} 
+            </if>
+        </trim>
+        order by CREATE_TIME desc
+    </select>
+    
+</mapper>

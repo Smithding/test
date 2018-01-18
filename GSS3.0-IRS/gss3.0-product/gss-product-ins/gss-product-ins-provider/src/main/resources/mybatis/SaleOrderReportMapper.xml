@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ins.dao.OrderServiceReportDao" >
+  <resultMap id="BaseResultMap" type="com.tempus.gss.product.ins.api.entity.SaleOrderExt" >
+    <!--订单编号-->
+    <id column="SALE_ORDER_NO" property="saleOrderNo" jdbcType="BIGINT" />
+    <!--编号-->
+    <result column="ID" property="id" jdbcType="BIGINT" />
+    <!--数据归属单位-->
+    <result column="OWNER" property="owner" jdbcType="INTEGER" />
+    <!--采购单编号-->
+    <result column="BUY_ORDER_NO" property="buyOrderNo" jdbcType="BIGINT" />
+    <!--保险产品编号,关联保险产品表-->
+    <result column="INSURANCE_NO" property="insuranceNo" jdbcType="BIGINT" />
+    <!--投保单号-->
+    <result column="PROPOSAL_NO" property="proposalNo" jdbcType="VARCHAR" />
+    <!--订单号-->
+    <result column="ORDER_NO" property="orderNo" jdbcType="VARCHAR" />
+    <!--订单类型 1：线上 2：线下-->
+    <result column="ORDER_TYPE" property="orderType" jdbcType="INTEGER" />
+    <!--保单下载地址-->
+    <result column="POLICY_URL" property="policyUrl" jdbcType="VARCHAR" />
+    <!--保单号-->
+    <result column="POLICY_NO" property="policyNo" jdbcType="VARCHAR" />
+    <!--交易流水号-->
+    <result column="TRANSACTION_ID" property="transactionId" jdbcType="VARCHAR" />
+    <!--产品code-->
+    <result column="PRODUCT_KEY" property="productKey" jdbcType="VARCHAR" />
+    <!--目的地-->
+    <result column="DESTINATION" property="destination" jdbcType="VARCHAR" />
+    <!--保单生效日期 yyyy-MM-dd HH:mm:ss-->
+    <result column="EFFECT_DATE" property="effectDate" jdbcType="TIMESTAMP" />
+    <!--保单失效日期 yyyy-MM-dd HH:mm:ss-->
+    <result column="EXPIRE_DATE" property="expireDate" jdbcType="TIMESTAMP" />
+    <!--投保日期 yyyy-MM-dd HH:mm:ss-->
+    <result column="ISSUE_DATE" property="issueDate" jdbcType="TIMESTAMP" />
+    <!--投保人类型 1-个人 2-企业-->
+    <result column="HOLDER_TYPE" property="holderType" jdbcType="INTEGER" />
+    <!--投保人姓名-->
+    <result column="HOLDER_NAME" property="holderName" jdbcType="VARCHAR" />
+    <!--投保人证件类型-->
+    <result column="HOLDER_CERTI_TYPE" property="holderCertiType" jdbcType="INTEGER" />
+    <!--投保人证件号码-->
+    <result column="HOLDER_CERTI_NO" property="holderCertiNo" jdbcType="VARCHAR" />
+    <!--投保人性别 1-男 2-女-->
+    <result column="HOLDER_SEX" property="holderSex" jdbcType="INTEGER" />
+    <!--yyyy-MM-dd 投保人出生日-->
+    <result column="HOLDER_BIRTHDAY" property="holderBirthday" jdbcType="DATE" />
+    <!--投保人电子邮箱地址-->
+    <result column="HOLDER_EMAIL" property="holderEmail" jdbcType="VARCHAR" />
+    <!--投保人手机号码-->
+    <result column="HOLDER_PHONE" property="holderPhone" jdbcType="VARCHAR" />
+    <!-- 控润渠道类型，目前可用范围：301（分销商），302（集团客户）,303（散客会员）,306（体内销售） -->
+    <result column="CUSTOMER_TYPE_NO" property="customerTypeNo" jdbcType="BIGINT" />
+    <!--销售价-->
+    <result column="SALE_PRICE" property="salePrice" jdbcType="DECIMAL" />
+    <!--采购价-->
+    <result column="BUY_PRICE" property="buyPrice" jdbcType="DECIMAL" />
+    <!--总保费-->
+    <result column="TOTAL_PREMIUM" property="totalPremium" jdbcType="DECIMAL" />
+    <!--旅行天数-->
+    <result column="TRAVEL_DAY" property="travelDay" jdbcType="INTEGER" />
+    <!--被保险人个数-->
+    <result column="INSURED_COUNT" property="insuredCount" jdbcType="INTEGER" />
+    <!--备注-->
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+    <!--是否团单 1-是 2-否-->
+    <result column="IS_TEAM" property="isTeam" jdbcType="BIT" />
+    <!--渠道名称-->
+    <result column="SOURCE_NAME" property="sourceName" jdbcType="VARCHAR" />
+    <!--拓展字段json串-->
+    <result column="EXTENDED_FIELDS_JSON" property="extendedFieldsJson" jdbcType="VARCHAR" />
+    <!--PNR,关联机票信息-->
+    <result column="PNR" property="pnr" jdbcType="VARCHAR" />
+    <!--创建时间-->
+    <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP" />
+    <!--修改时间-->
+    <result column="MODIFY_TIME" property="modifyTime" jdbcType="TIMESTAMP" />
+    <!--创建者-->
+    <result column="CREATOR" property="creator" jdbcType="VARCHAR" />
+    <!--操作人 默认为：sys-->
+    <result column="MODIFIER" property="modifier" jdbcType="VARCHAR" />
+        <!--结算公司-->
+    <result column="NAME" property="ownerName" jdbcType="VARCHAR" />
+    <!--删除标志 0 无效 已删除 1 有效-->
+    <result column="VALID" property="valid" jdbcType="BIT" />
+     <!--客户名称-->
+    <result column="CUSTOMER_NAME" property="customerName" jdbcType="VARCHAR" />
+     <!--客户类型-->
+    <result column="CUSTOMER_TYPE_NAME" property="customerType" jdbcType="VARCHAR" />
+    <!-- 一对一 保险产品-->
+    <association property="insurance" column="INSURANCE_NO" 
+                     select="com.tempus.gss.product.ins.dao.InsuranceDao.selectByPrimaryKey"/>
+    <!-- 一对多关联子订单 -->
+	<collection property="saleOrderDetailList" ofType="com.tempus.gss.product.ins.api.entity.SaleOrderDetail"
+                    column="SALE_ORDER_NO"
+                    select="com.tempus.gss.product.ins.dao.SaleOrderDetailDao.selectReportBySaleOrderNo"/>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    SALE_ORDER_NO, ID, OWNER, BUY_ORDER_NO, INSURANCE_NO, PROPOSAL_NO, ORDER_NO, ORDER_TYPE,
+    POLICY_URL, POLICY_NO, TRANSACTION_ID, PRODUCT_KEY, DESTINATION, EFFECT_DATE, EXPIRE_DATE,
+    ISSUE_DATE, HOLDER_TYPE, HOLDER_NAME, HOLDER_CERTI_TYPE, HOLDER_CERTI_NO, HOLDER_SEX,
+    HOLDER_BIRTHDAY, HOLDER_EMAIL, HOLDER_PHONE, CUSTOMER_TYPE_NO, SALE_PRICE, BUY_PRICE, TOTAL_PREMIUM,
+    TRAVEL_DAY, INSURED_COUNT, REMARK, IS_TEAM, SOURCE_NAME, EXTENDED_FIELDS_JSON, PNR, CREATE_TIME,
+    MODIFY_TIME, CREATOR, MODIFIER, VALID,INTERNAT_ORCIVIL,SUM_COPIES
+  </sql>
+  <select id="queryObjByKey" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ins.api.entity.vo.SaleOrderExtVo" >
+  	 select DISTINCT
+	    isoe.SALE_ORDER_NO,
+	    isoe.ID,
+	    isoe.OWNER,
+	    isoe.BUY_ORDER_NO,
+	    isoe.INSURANCE_NO,
+	    isoe.PROPOSAL_NO,
+	    isoe.ORDER_NO,
+	    isoe.ORDER_TYPE,
+	    isoe.POLICY_URL,
+	    isoe.POLICY_NO,
+	    isoe.TRANSACTION_ID,
+	    isoe.PRODUCT_KEY,
+	    isoe.DESTINATION,
+	    isoe.EFFECT_DATE,
+	    isoe.EXPIRE_DATE,
+	    isoe.ISSUE_DATE,
+	    isoe.HOLDER_TYPE,
+	    isoe.HOLDER_NAME,
+	    isoe.HOLDER_CERTI_TYPE,
+	    isoe.HOLDER_CERTI_NO,
+	    isoe.HOLDER_SEX,
+	    isoe.HOLDER_BIRTHDAY,
+	    isoe.HOLDER_EMAIL,
+	    isoe.HOLDER_PHONE,
+	    isoe.CUSTOMER_TYPE_NO,
+	    isoe.SALE_PRICE,
+	    isoe.BUY_PRICE,
+	    isoe.TOTAL_PREMIUM,
+	    isoe.TRAVEL_DAY,
+	    isoe.INSURED_COUNT,
+	    isoe.REMARK,
+	    isoe.IS_TEAM,
+	    isoe.SOURCE_NAME,
+	    isoe.EXTENDED_FIELDS_JSON,
+	    isoe.PNR,
+	    isoe.CREATE_TIME,
+	    isoe.MODIFY_TIME,
+	    isoe.CREATOR,
+	    isoe.MODIFIER,
+	    isoe.VALID,
+	    si.NAME,
+	    cc.NAME AS CUSTOMER_NAME,
+	    cct.NAME AS CUSTOMER_TYPE_NAME
+     FROM  INS_SALE_ORDER_EXT isoe,
+     	   INS_INSURANCE ii,
+     	   INS_SALE_ORDER_DETAIL isod,
+     	   OS_SALEORDER os,
+     	   SM_OWNER_INFO si,
+     	   CPS_CUSTOMER_TYPE cct,
+     	   CPS_CUSTOMER cc
+     where 	isoe.VALID = 1
+     and	isoe.SALE_ORDER_NO = os.SALE_ORDER_NO
+     and	isoe.INSURANCE_NO = ii.INSURANCE_NO
+     and 	isoe.SALE_ORDER_NO = isod.SALE_ORDER_NO
+     and    isoe.OWNER = si.OWNER
+     and    cct.CUSTOMER_TYPE_NO = os.CUSTOMER_TYPE_NO
+     and    cc.CUSTOMER_NO = os.CUSTOMER_NO
+     <trim suffixOverrides="AND" >
+     
+     	<if test="owner != null">
+             AND isoe.OWNER = #{owner,jdbcType=INTEGER}
+        </if>
+        
+        <if test="isLowerLevel != false">
+           AND  os.CUSTOMER_NO in
+           <foreach collection="lowerCustomers" item="lowerCustomers" index="index" open="(" close=")" separator=",">
+             ${lowerCustomers.customerNo}
+           </foreach>
+        </if>
+     	<if test="creator != null and creator != '' and isLowerLevel != true">
+             AND isoe.CREATOR = #{creator,jdbcType=VARCHAR}
+        </if>        
+        <if test="holderName != null and holderName != ''">
+             AND isoe.HOLDER_NAME LIKE CONCAT(CONCAT('%', #{holderName}), '%')
+        </if>
+		<if test="proposalNo != null and proposalNo != ''">
+			AND isoe.PROPOSAL_NO = #{proposalNo,jdbcType=INTEGER}  
+		</if>
+		<if test="saleOrderNo != null and saleOrderNo != ''" >
+			AND isoe.SALE_ORDER_NO = #{saleOrderNo,jdbcType=VARCHAR} 
+		</if>
+		<if test="holderPhone != null and holderPhone!= ''" >
+			AND isoe.HOLDER_PHONE LIKE CONCAT(CONCAT('%', #{holderPhone}), '%')
+		</if>
+		<if test="orderNo != null and orderNo != ''" >
+			AND isoe.ORDER_NO = #{orderNo,jdbcType=VARCHAR} 
+		</if>
+		<if test="policyNo != null and policyNo != ''" >
+			AND isod.POLICY_NO = #{policyNo,jdbcType=VARCHAR}
+		</if>
+		<if test="pnr != null and pnr != ''" >
+			AND isoe.PNR = #{pnr,jdbcType=VARCHAR} 
+		</if>
+		<if test="issueDate != null and issueDate != ''" >
+			AND date(isoe.ISSUE_DATE) = date(#{issueDate,jdbcType=TIMESTAMP})
+		</if>
+		<if test="effectDate != null and effectDate != ''" >
+			AND date(isoe.EFFECT_DATE) = date(#{effectDate,jdbcType=TIMESTAMP})
+		</if>
+		<if test="insureType != null and insureType != ''" >
+			AND ii.INSURE_TYPE = #{insureType,jdbcType=VARCHAR} 
+		</if>
+
+       <if test="insuranceName != null and insuranceName != ''" >
+         AND ii.NAME LIKE CONCAT(CONCAT('%', #{insuranceName}), '%')
+       </if>
+
+		<if test="insuredName != null and insuredName != ''" >
+			AND isod.INSURED_NAME LIKE CONCAT(CONCAT('%', #{insuredName}), '%')
+		</if>
+		<if test="payStatus != null and payStatus != ''" >
+			AND os.PAY_STATUS = #{payStatus,jdbcType=VARCHAR} 
+		</if>
+		<if test="transactionOrderNo != null and transactionOrderNo != ''" >
+			AND os.TRANSATION_ORDER_NO = #{transactionOrderNo,jdbcType=VARCHAR} 
+		</if>
+		<if test="orderChildStatus != null and orderChildStatus != ''" >
+			AND os.ORDER_CHILD_STATUS = #{orderChildStatus,jdbcType=TINYINT} 
+		</if>
+		<if test="issueStartDate != null and issueStartDate != ''" >
+			AND date(isoe.ISSUE_DATE) &gt;= date(#{issueStartDate,jdbcType=DATE})
+		</if>
+		<if test="issueEndDate != null and issueEndDate != ''" >
+			AND date(isoe.ISSUE_DATE) &lt;= date(#{issueEndDate,jdbcType=DATE}) 
+		</if>
+		<if test="customerTypeNo != null and customerTypeNo != ''">
+			AND os.CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=INTEGER}  
+		</if>
+		<if test="customerNo != null and customerNo != ''">
+			AND os.CUSTOMER_NO = #{customerNo,jdbcType=INTEGER}  
+		</if>
+		 <if test="startEffectTime != null and startEffectTime != ''">
+            AND date(isoe.EFFECT_DATE) &gt;= date(#{startEffectTime,jdbcType=DATE})
+         </if>
+         <if test="endEffectTime != null and endEffectTime != ''">
+            AND date(isoe.EFFECT_DATE) &lt;= date(#{endEffectTime,jdbcType=DATE})
+         </if>	
+         <if test="startInsureTime != null and startInsureTime != ''">
+            AND date(isoe.ISSUE_DATE) &gt;= date(#{startInsureTime,jdbcType=DATE})
+         </if>
+         <if test="endInsureTime != null and endInsureTime != ''">
+            AND date(isoe.ISSUE_DATE) &lt;= date(#{endInsureTime,jdbcType=DATE})
+         </if>		
+         <if test="transactionId != null and transactionId != ''">
+          		AND isoe.TRANSACTION_ID = #{transactionId,jdbcType=VARCHAR} 
+         </if>	
+  	 </trim>
+  	 ORDER BY CREATE_TIME DESC
+  </select>
+  <!-- 根据保单号查询订单 -->
+  <select id="selectByTransaction" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ins.api.entity.SaleOrderExt" >
+  	 select 
+		  oe.SALE_ORDER_NO,
+		  oe.ID,
+		  oe.OWNER,
+		  oe.BUY_ORDER_NO,
+		  oe.INSURANCE_NO,
+		  oe.PROPOSAL_NO,
+		  oe.ORDER_NO,
+		  oe.ORDER_TYPE,
+		  oe.POLICY_URL,
+		  oe.POLICY_NO,
+		  oe.TRANSACTION_ID,
+		  oe.PRODUCT_KEY,
+		  oe.DESTINATION,
+		  oe.EFFECT_DATE,
+		  oe.EXPIRE_DATE,
+		  oe.ISSUE_DATE,
+		  oe.HOLDER_TYPE,
+		  oe.HOLDER_NAME,
+		  oe.HOLDER_CERTI_TYPE,
+		  oe.HOLDER_CERTI_NO,
+		  oe.HOLDER_SEX,
+		  oe.HOLDER_BIRTHDAY,
+		  oe.HOLDER_EMAIL,
+		  oe.HOLDER_PHONE,
+		  oe.CUSTOMER_TYPE_NO,
+		  oe.SALE_PRICE,
+		  oe.BUY_PRICE,
+		  oe.TOTAL_PREMIUM,
+		  oe.TRAVEL_DAY,
+		  oe.INSURED_COUNT,
+		  oe.REMARK,
+		  oe.IS_TEAM,
+		  SOURCE_NAME,
+		  oe.EXTENDED_FIELDS_JSON,
+		  oe.PNR,
+		  oe.CREATE_TIME,
+		  oe.MODIFY_TIME,
+		  oe.CREATOR,
+		  oe.MODIFIER,
+		  oe.VALID
+     FROM  INS_SALE_ORDER_EXT oe,
+     	   INS_SALE_ORDER_DETAIL od
+     where  oe.SALE_ORDER_NO = od.SALE_ORDER_NO
+ 	 <trim suffixOverrides="AND" >
+		<if test="_parameter != null and _parameter != ''" >
+			AND oe.TRANSACTION_ID = #{transactionNo,jdbcType=VARCHAR}
+		</if>
+  	 </trim>    
+  </select>  
+</mapper>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ift.dao.Ift_cabinDao">
+    <sql id="Base_Column_List">
+        ID,POLICY_NO AS policyNo,POLICY_CABIN_NO AS policyCabinNo,CABIN AS cabin,SALE_REBATE AS saleRebate,SALE_OW_BROKERAGE AS saleOwBrokerage,SALE_RT_BROKERAGE AS saleRtBrokerage,
+        BUY_REBATE AS buyRebate,BUY_OW_BROKERAGE AS buyOwBrokerage,BUY_RT_BROKERAGE AS buyRtBrokerage,CABIN_GRADE AS cabinGrade,PRICE AS price
+    </sql>
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.ift.api.entity.Ift_cabin">
+        <id column="POLICY_CABIN_NO" property="policyCabinNo" jdbcType="BIGINT"/>
+        <result column="ID" property="id" jdbcType="BIGINT"/>
+        <result column="POLICY_NO" property="policyNo" jdbcType="BIGINT"/>
+        <result column="CABIN" property="cabin" jdbcType="VARCHAR"/>
+        <result column="SALE_REBATE" property="saleRebate" jdbcType="DECIMAL"/>
+        <result column="SALE_OW_BROKERAGE" property="saleOwBrokerage" jdbcType="DECIMAL"/>
+        <result column="SALE_RT_BROKERAGE" property="saleRtBrokerage" jdbcType="DECIMAL"/>
+        <result column="BUY_REBATE" property="buyRebate" jdbcType="DECIMAL"/>
+        <result column="BUY_OW_BROKERAGE" property="buyOwBrokerage" jdbcType="DECIMAL"/>
+        <result column="BUY_RT_BROKERAGE" property="buyRtBrokerage" jdbcType="DECIMAL"/>
+        <result column="CABIN_GRADE" property="cabinGrade" jdbcType="VARCHAR"/>
+        <result column="PRICE" property="price" jdbcType="DECIMAL"/>
+    </resultMap>
+
+    <select id="selectCabinByPolicyNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
+      SELECT <include  refid="Base_Column_List"/> from IFT_CABIN WHERE POLICY_NO = #{policyNo,jdbcType=BIGINT}
+    </select>
+
+    <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.Ift_cabin">
+      INSERT INTO IFT_CABIN (POLICY_CABIN_NO,
+      ID,POLICY_NO,CABIN,SALE_REBATE,SALE_OW_BROKERAGE,
+      SALE_RT_BROKERAGE,BUY_REBATE,BUY_OW_BROKERAGE,
+      BUY_RT_BROKERAGE,CABIN_GRADE,PRICE)
+      VALUES (#{policyCabinNo,jdbcType=BIGINT},#{id,jdbcType=BIGINT},
+      #{policyNo,jdbcType=BIGINT},#{cabin,jdbcType=VARCHAR},
+      #{saleRebate,jdbcType=DECIMAL},#{saleOwBrokerage,jdbcType=DECIMAL},
+      #{saleRtBrokerage,jdbcType=DECIMAL},
+      #{buyRebate,jdbcType=DECIMAL},
+      #{buyOwBrokerage,jdbcType=DECIMAL},
+      #{buyRtBrokerage,jdbcType=BIGINT},
+      #{cabinGrade,jdbcType=VARCHAR},#{price,jdbcType=DECIMAL}
+      );
+    </insert>
+
+    <update id="updateById" parameterType="com.tempus.gss.product.ift.api.entity.Ift_cabin">
+      UPDATE IFT_CABIN
+      <set>
+          <if test="cabin!=null and cabin!=''">cabin = #{cabin},</if>
+          <if test="saleRebate!=null and saleRebate!=''">sale_rebate = #{saleRebate},</if>
+          <if test="saleOwBrokerage!=null and saleOwBrokerage!=''">sale_ow_brokerage = #{saleOwBrokerage},</if>
+          <if test="saleRtBrokerage!=null and saleRtBrokerage!=''">sale_rt_brokerage = #{saleRtBrokerage},</if>
+          <if test="buyRebate!=null and buyRebate!=''">buy_rebate = #{buyRebate},</if>
+          <if test="buyOwBrokerage!=null and buyOwBrokerage!=''">buy_ow_brokerage = #{buyOwBrokerage},</if>
+          <if test="buyRtBrokerage!=null and buyRtBrokerage!=''">buy_rt_brokerage = #{buyRtBrokerage},</if>
+          <if test="cabinGrade!=null and cabinGrade!=''">cabin_grade = #{cabinGrade},</if>
+          <if test="price!=null and price!=''">price = #{price},</if>
+      </set>
+        where id = #{id}
+    </update>
+
+    <delete id="delByPolicyNo" parameterType="java.lang.Long">
+        DELETE FROM IFT_CABIN WHERE POLICY_NO = #{policyNo,jdbcType=BIGINT}
+    </delete>
+</mapper>

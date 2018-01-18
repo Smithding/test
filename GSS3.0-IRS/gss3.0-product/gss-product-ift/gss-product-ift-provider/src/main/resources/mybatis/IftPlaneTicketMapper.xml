@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.ift.dao.IftPlaneTicketDao">
+
+
+	<resultMap id="QueryResult" type="com.tempus.gss.product.ift.api.entity.IftPlaneTicket">
+		<result column="SALE_COM" property="saleCom"/>
+		<result column="ACC_COM" property="accCom"/>
+		<result column="PRO_TYPE" property="proType"/>
+		<result column="LINE" property="line"/>
+		<result column="SALE_DEPT" property="saleDept"/>
+		<result column="CUS_TYPE" property="cusType"/>
+		<result column="CUS_NAME" property="cusName"/>
+		<result column="CUS_CODE" property="cusCode"/>
+		<result column="SALE_ORD_NUM" property="saleOrdNum"/>
+		<result column="PRO_ORD_NUM" property="proOrdNum"/>
+		<result column="BILL_NUM" property="billNum"/>
+		<result column="SALE_SOURCE" property="saleSource"/>
+		<result column="ISSUE_DATE" property="issueDate"/>
+		<result column="FLIGHT_DATE" property="flightDate"/>
+
+		<result column="REFUND_DATE" property="refundDate"/>
+		<result column="AIR_COM" property="airCom"/>
+		<result column="AIR_CODE" property="airCode"/>
+		<result column="TICKET_NO" property="ticketNo"/>
+		<result column="ROUTING" property="routing"/>
+
+		<result column="FLIGHT" property="flight"/>
+		<result column="CABIN" property="cabin"/>
+		<result column="PASS_NAME" property="passName"/>
+		<result column="PNR" property="pnr"/>
+		<result column="TIC_PRICE" property="ticPrice"/>
+		<result column="TAX" property="tax"/>
+
+		<result column="COMISSION" property="commission"/>
+		<result column="SERCHARGE" property="serCharge"/>
+		<result column="REFUND_FEE" property="refundFee"/>
+		<result column="RECE_AMOUNT" property="receAmount"/>
+		<result column="REFUND_AMOUNT" property="refundAmount"/>
+		<result column="PAY_SUPP_FEE" property="paySuppFee"/>
+
+		<result column="PAY_AMOUNT" property="payAmount"/>
+		<result column="REAL_AMOUNT" property="realAmount"/>
+		<result column="PAID_AMOUNT" property="paidAmount"/>
+		<result column="SUPP_PAY_MODE" property="suppPayMode"/>
+		<result column="SUPP_PAY_NUM" property="suppPayNum"/>
+		<result column="OFFICE" property="office"/>
+
+		<result column="SUPPLIER_NAME" property="supplierName"/>
+		<result column="TRIP_NUM" property="tripNum"/>
+		<result column="CUS_PEO" property="cusPeo"/>
+		<result column="TIC_PEO" property="ticPeo"/>
+		<result column="TIC_STATUS" property="ticStatus"/>
+		<result column="PROFIT" property="profit"/>
+
+		<result column="RATE" property="rate"/>
+		<result column="REMARKS" property="remarks"/>
+		<result column="EXTEND1" property="extend1"/>
+		<result column="EXTEND2" property="extend2"/>
+		<result column="EXTEND3" property="extend3"/>
+		<result column="EXTEND4" property="extend4"/>
+		<result column="EXTEND5" property="extend5"/>
+		<result column="EXTEND6" property="extend6"/>
+		<result column="EXTEND7" property="extend7"/>
+		<result column="EXTEND8" property="extend8"/>
+		<result column="EXTEND9" property="extend9"/>
+		<result column="EXTEND10" property="extend10"/>
+		<result column="EXTEND11" property="extend11"/>
+		<result column="EXTEND12" property="extend12"/>
+		<result column="EXTEND13" property="extend13"/>
+		<result column="EXTEND14" property="extend14"/>
+		<result column="EXTEND15" property="extend15"/>
+
+	</resultMap>
+
+
+	<!-- 通用查询结果列-->
+	<sql id="Base_Column_List">
+		OWNER, SALE_COM AS saleCom, ACC_COM AS accCom, PRO_TYPE AS proType, LINE, SALE_DEPT AS saleDept, CUS_TYPE AS cusType, CUS_NAME AS cusName, CUS_CODE AS cusCode, SALE_ORD_NUM AS saleOrdNum, PRO_ORD_NUM AS proOrdNum, BILL_NUM AS billNum, SALE_SOURCE AS saleSource, ISSUE_DATE AS issueDate, FLIGHT_DATE AS flightDate, REFUND_DATE AS refundDate, AIR_COM AS airCom, AIR_CODE AS airCode, TICKET_NO AS ticketNo, ROUTING, FLIGHT, CABIN, PASS_NAME AS passName, PNR, TIC_PRICE AS ticPrice, TAX, COMMISSION, SER_CHARGE AS serCharge, REFUND_FEE AS refundFee, RECE_AMOUNT AS receAmount, REFUND_AMOUNT AS refundAmount, PAY_SUPP_FEE AS paySuppFee, PAY_AMOUNT AS payAmount, REAL_AMOUNT AS realAmount, PAID_AMOUNT AS paidAmount, SUPP_PAY_MODE AS suppPayMode, SUPP_PAY_NUM AS suppPayNum, OFFICE, SUPPLIER_NAME AS supplierName, TRIP_NUM AS tripNum, CUS_PEO AS cusPeo, TIC_PEO AS ticPeo, TIC_STATUS AS ticStatus, PROFIT,TICKETDEP AS ticketDep
+	</sql>
+
+	<sql id="Base_Column_List1">
+		OWNER, saleCom, accCom, line, saleDept, cusType,cusName, cusCode, proType, saleOrdNum,billNum, peoNum, issueDate,receAmount,actAmount,settlMethod,paidMethod,accounts,receNum,supplierName,paidAmount,paidStatus,orderStatus
+	</sql>
+
+
+
+
+
+	<!-- 解挂专用 -->
+	<select id="selectIftByMap" parameterType="map" resultType="com.tempus.gss.product.ift.api.entity.IftPlaneTicket">
+		select
+		<include refid="Base_Column_List" />
+		from (
+			SELECT
+				OS. OWNER AS OWNER,
+				so. NAME AS SALE_COM,
+				so. NAME AS ACC_COM,
+				2 AS PRO_TYPE,
+				OS.SOURCE_CHANNEL_NO AS LINE,
+				SMT.NAME AS SALE_DEPT,
+				OS.CUSTOMER_NO AS CUS_CODE,
+				OSE.CUSTOMER_TYPE_NAME AS CUS_TYPE,
+				OSE.CUSTOMER_NO_NAME AS CUS_NAME,
+				OS.SALE_ORDER_NO AS SALE_ORD_NUM,
+				'' AS PRO_ORD_NUM,
+				group_concat(
+					VBSN.SETTLEMENT_NO SEPARATOR ','
+				) AS BILL_NUM,
+				OS.SOURCE_CHANNEL_NO AS SALE_SOURCE,
+				OS.ORDERING_TIME AS ISSUE_DATE,
+				VISB.DEP_TIME AS FLIGHT_DATE,
+				VISB.AIRLINE AS AIR_COM,
+				LEFT (VISB.TICKET_NO, 3) AS AIR_CODE,
+				RIGHT (VISB.TICKET_NO, 10) AS TICKET_NO,
+				VISB.ROUTING AS ROUTING,
+				VISB.FLIGHT_NO AS FLIGHT,
+				VISB.CABIN AS CABIN,
+				VISB.PASS_NAME AS PASS_NAME,
+				VISB.PNR AS PNR,
+				'' AS RATE,
+				VISB.SALE_FARE AS TIC_PRICE,
+				VISB.SALE_TAX AS TAX,
+				VISB.SALE_AWARD_PRICE AS COMMISSION,
+				VISB.SALE_AGENCY_FEE AS SER_CHARGE,
+				VISB.SALE_PRICE AS RECE_AMOUNT,
+				VISB.BUY_PRICE AS PAY_AMOUNT,
+				VISB.BUY_PRICE AS PAID_AMOUNT,
+				PPW. NAME AS SUPP_PAY_MODE,
+				PAPI.THREE_TRADE_NO AS SUPP_PAY_NUM,
+				CS.OFFICE_NO AS OFFICE,
+				CS. NAME AS SUPPLIER_NAME,
+				(
+					VISB.SALE_PRICE - VISB.BUY_PRICE
+				) AS PROFIT,
+				VISBR.CREATE_TIME AS REFUND_DATE,
+				VISBR.SALE_BROKERAGE AS REFUND_FEE,
+				VISBR.SALE_REFUND_PRICE AS REFUND_AMOUNT,
+				VISBR.BUY_BROKERAGE AS PAY_SUPP_FEE,
+				VISBR.SALE_REFUND_PRICE AS REAL_AMOUNT,
+				'' AS TRIP_NUM,
+				VISB.CUS_PEO AS CUS_PEO,
+				VISB.TIC_PEO AS TIC_PEO,
+				SMD.NAME AS TICKETDEP,
+
+
+			IF (
+				VISBR.TRANSATION_ORDER_NO,
+				'退票',
+
+			IF (
+				VISBC.TRANSATION_ORDER_NO,
+				'改期',
+				'出票'
+			)
+			) AS TIC_STATUS
+			FROM
+				(
+					(
+						(
+							(
+								(
+									(
+										(
+											(
+												(
+													(
+														V_IFT_SALE_BUY VISB
+														LEFT JOIN OS_SALEORDER OS ON (
+															(
+																VISB.SALE_ORDER_NO = OS.SALE_ORDER_NO
+															)
+														)
+													)
+													LEFT JOIN OS_SALEORDER_EXTEND OSE ON (
+														(
+															OSE.SALE_ORDER_NO = OS.SALE_ORDER_NO
+														)
+													)
+												)
+												LEFT JOIN OS_ACTUALAMOUNTRECORD OA ON (
+													(
+														(
+															OA.RECORD_NO = VISB.BUY_ORDER_NO
+														)
+														AND (OA.BUSINESS_TYPE = 3)
+													)
+												)
+											)
+											LEFT JOIN PS_ALL_PAY_INFO PAPI ON (
+												(
+													PAPI.ALL_PAY_INFO_NO = OA.PAY_NO
+												)
+											)
+										)
+										LEFT JOIN PS_PAY_WAY PPW ON (
+											(PPW. CODE = PAPI.PAY_WAY_CODE)
+										)
+									)
+									LEFT JOIN CPS_SUPPLIER CS ON (
+										(
+											CS.SUPPLIER_NO = VISB.SUPPLIER_NO
+										)
+									)
+								)
+								LEFT JOIN V_IFT_SALE_BUY_REFUND VISBR ON (
+									(
+										(
+											VISBR.TRANSATION_ORDER_NO = VISB.TRANSATION_ORDER_NO
+										)
+										AND (
+											VISBR.TICKET_NO = VISB.TICKET_NO
+										)
+									)
+								)
+							)
+							LEFT JOIN V_IFT_SALE_BUY_CHANGE VISBC ON (
+								(
+									(
+										VISBC.TRANSATION_ORDER_NO = VISB.TRANSATION_ORDER_NO
+									)
+									AND (
+										VISBC.TICKET_NO = VISB.TICKET_NO
+									)
+								)
+							)
+						)
+						LEFT JOIN SM_OWNER_INFO so ON ((so. OWNER = OS. OWNER))
+						LEFT JOIN SM_USER SU ON ((SU.LOGIN_NAME=VISB.TIC_PEO))
+						LEFT JOIN SM_USER SUR ON ((SUR.LOGIN_NAME=VISB.CUS_PEO))
+						LEFT JOIN SM_DEPT SMD ON SMD.ID=SU.DEPT_ID
+						LEFT JOIN SM_DEPT SMT ON SMT.ID=SUR.DEPT_ID
+					)
+					LEFT JOIN V_BUSINESS_SETTLEMENT_NO VBSN ON (
+						(
+							(
+								VBSN.RECORD_NO = OS.SALE_ORDER_NO
+							)
+							AND (VBSN.BUSINESS_TYPE = 2)
+						)
+					)
+				)
+			GROUP BY
+				OS.SALE_ORDER_NO,
+				VBSN.RECORD_NO,
+				VBSN.BUSINESS_TYPE
+		 )
+		 ifr
+		where 1=1
+		<if test="OWNER != null and OWNER !=''">
+			AND ifr.OWNER = #{OWNER}
+		</if>
+		<if test="proType != null and proType != ''" >
+			AND ifr.PRO_TYPE = #{proType}
+		</if>
+		<if test="cusName != null and cusName != ''" >
+			AND ifr.CUS_NAME = #{cusName}
+		</if>
+		<if test="cusCode != null and cusCode != ''" >
+			AND ifr.CUS_CODE = #{cusCode}
+		</if>
+		<if test="saleOrdNum != null and saleOrdNum != ''" >
+			AND ifr.SALE_ORD_NUM = #{saleOrdNum}
+		</if>
+		<if test="issueStartDate != null and issueStartDate != ''" >
+	        AND ifr.ISSUE_DATE >= str_to_date(concat(#{issueStartDate}," 00:00:00"), "%Y-%m-%d %T")
+	    </if>
+	    <if test="issueEndDate != null and issueEndDate != ''" >
+	    	AND ifr.ISSUE_DATE <![CDATA[<=]]> str_to_date(concat(#{issueEndDate}," 23:59:59"), "%Y-%m-%d %T")
+	    </if>
+	    <if test="pnr != null and pnr != ''" >
+	    	AND ifr.PNR = #{pnr}
+	    </if>
+		<if test="billNum != null and billNum != ''" >
+	    	AND ifr.BILL_NUM = #{billNum}
+	    </if>
+	</select>
+
+</mapper>

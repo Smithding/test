@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.hol.dao.HotelFinancialReportMapper">
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.hol.api.entity.HotelFinancialReport">
+        <result column="SALE_ORDER_NO" property="saleOrderNo"/>
+        <result column="ORDER_STATUS" property="orderStatus"/>
+        <result column="HOTEL_ORDER_NO" property="supplierOrderNo"/>
+        <result column="PAYMENT_SIGN" property="payWay"/>
+        <result column="CONTACT_NAME" property="reservcePerson"/>
+        <result column="GUEST_NAME" property="checkinPerson"/>
+        <result column="SUPPLIERCODE" property="supplierName"/>
+        <result column="HOTEL_ADDRESS" property="city"/>
+        <result column="HOTEL_NAME" property="hotelName"/>
+        <result column="PRO_NAME" property="roomType"/>
+        <result column="PRO_ID" property="roomNo"/>
+
+
+        <result column="CREATE_ORDER_TIME" property="reserveDate"/>
+        <result column="ARRIVAL_DATE" property="checkinDate"/>
+        <result column="DEPARTURE_DATE" property="checkoutDate"/>
+        <result column="BOOK_COUNT" property="roomNum"/>
+        <result column="NIGHT_COUNT" property="nightNum"/>
+        <result column="ROOM_NIGHT_COUNT" property="roomNightNum"/>
+        <result column="EACH_NIGHT_PRICE" property="salePrices"/>
+        <result column="TOTAL_PRICE" property="saleTotalPrice"/>
+        <result column="SETTLE_TOTAL_PRICE" property="settleTotalPrice"/>
+        <result column="UP_COMMISSION" property="upCommission"/>
+        <result column="TOTAL_REFUND" property="rebatePrice"/>
+        <result column="CREATOR" property="creator"/>
+
+        <result column="BANK_NAME" property="bankName"/>
+        <result column="CARD_NUMBER" property="bankCardNo"/>
+        <result column="PROVINCE" property="openAccountProvince"/>
+        <result column="OPEN_CITY" property="openAccountCity"/>
+        <result column="OPEN_ADDRESS" property="openAccountAddress"/>
+        <result column="RATE" property="downCommission"/>
+        <result column="ORDER_SOURCE" property="orderSource"/>
+
+    </resultMap>
+    <!-- 通用查询结果列-->
+
+    
+    <select id="queryHotelFinancialReport" resultMap="BaseResultMap" >
+        SELECT DISTINCT
+        HHO.SALE_ORDER_NO,HHO.TC_ORDER_STATUS AS ORDER_STATUS,HHO.HOTEL_ORDER_NO,HHO.DB_ORDER_TYPE AS  PAYMENT_SIGN,HHO.CONTACT_NAME,HHO.GUEST_NAME,HS.SUPPLIERCODE,HHO.HOTEL_ADDRESS,HHO.HOTEL_NAME,
+        HHO.PRO_NAME,HHO.PRO_ID,HHO.CREATE_ORDER_TIME,HHO.ARRIVAL_DATE,HHO.DEPARTURE_DATE,
+        CASE WHEN HHO.FACT_PRO_COUNT IS NULL THEN HHO.BOOK_COUNT ELSE HHO.FACT_PRO_COUNT END AS BOOK_COUNT,
+        CASE WHEN HHO.FACT_NIGHT_COUNT IS NULL THEN HHO.NIGHT_COUNT ELSE HHO.FACT_NIGHT_COUNT END  AS NIGHT_COUNT,
+        CASE WHEN HHO.FACT_PRO_COUNT IS NULL OR HHO.FACT_NIGHT_COUNT IS NULL THEN  HHO.BOOK_COUNT*HHO.NIGHT_COUNT ELSE (HHO.FACT_PRO_COUNT*HHO.FACT_NIGHT_COUNT) END AS
+        ROOM_NIGHT_COUNT,
+        CASE WHEN HHO.FACT_PRO_COUNT IS NULL OR HHO.FACT_NIGHT_COUNT IS NULL OR HHO.FACT_TOTAL_PRICE IS NULL THEN ROUND(HHO.TOTAL_PRICE/HHO.NIGHT_COUNT/HHO.BOOK_COUNT,2) ELSE  ROUND(HHO.FACT_TOTAL_PRICE/(HHO.FACT_PRO_COUNT*HHO.FACT_NIGHT_COUNT),2) END AS EACH_NIGHT_PRICE,
+        CASE WHEN HHO.FACT_TOTAL_PRICE IS NULL THEN HHO.TOTAL_PRICE ELSE HHO.FACT_TOTAL_PRICE END AS TOTAL_PRICE,HS.RATE/100 AS
+        UP_COMMISSION,HHO.TOTAL_REFUND,HHO.CREATOR AS ORDER_SOURCE,HHP.RATE,HHO.CONTACT_NAME AS CREATOR
+        FROM HOL_HOTEL_ORDER AS HHO
+        LEFT JOIN HOL_SUPPLIER AS HS ON HHO.SUPPLIER_NO=HS.SUPPLIERNO
+        LEFT JOIN CPS_CUSTOMER AS CC ON CC.CUSTOMER_NO=HHO.CUSTOMER_NO
+        LEFT JOIN HOL_PROFIT  AS HP ON HP.CUSTOMER_TYPE_NO=CC.CUSTOMER_TYPE_NO
+        LEFT JOIN HOL_PROFIT_PRICE AS HHP ON HHP.PROFIT_NO=HP.PROFIT_NO
+        WHERE HS.VALID=1 AND HP.VALID=1  AND HHO.TOTAL_PRICE<![CDATA[>=]]>HHP.PRICE_FROM AND HHO.TOTAL_PRICE<![CDATA[<=]]>HHP.PRICE_TO
+        <include refid="selectByCondition"/>
+    </select>
+
+    <sql id="selectByCondition">
+        <if test="minReserveDate !=null and minReserveDate !=''">
+            AND HHO.CREATE_ORDER_TIME<![CDATA[>=]]>STR_TO_DATE(CONCAT(#{minReserveDate},'00:00:00'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="maxReserveDate !=null and maxReserveDate !=''">
+            AND HHO.CREATE_ORDER_TIME<![CDATA[<=]]>STR_TO_DATE(CONCAT(#{maxReserveDate},'23:59:59'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="checkinDate !=null and checkinDate !=''">
+            AND HHO.ARRIVAL_DATE<![CDATA[>=]]>STR_TO_DATE(CONCAT(#{checkinDate},'00:00:00'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="checkoutDate !=null and checkoutDate !=''">
+            AND HHO.ARRIVAL_DATE<![CDATA[<=]]>STR_TO_DATE(CONCAT(#{checkoutDate},'23:59:59'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="depDateBegin !=null and depDateBegin !=''">
+            AND HHO.FACT_LEAVE_TIME<![CDATA[>=]]>STR_TO_DATE(CONCAT(#{depDateBegin},'00:00:00'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="depDateOver !=null and depDateOver !=''">
+            AND HHO.FACT_LEAVE_TIME<![CDATA[<=]]>STR_TO_DATE(CONCAT(#{depDateOver},'23:59:59'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="null!=saleOrderNo  and ''!=saleOrderNo">
+            AND HHO.SALE_ORDER_NO="${saleOrderNo}"
+        </if>
+        <if test="null!=orderStatus and ''!=orderStatus">
+            AND HHO.TC_ORDER_STATUS="${orderStatus}"
+        </if>
+        <if test="null!=supplierOrderNo and ''!=supplierOrderNo">
+            AND HHO.HOTEL_ORDER_NO = "${supplierOrderNo}"
+        </if>
+        <if test="null!=payWay  and 2==payWay">
+            AND HHO.DB_ORDER_TYPE IN ('1','2','3','4')
+        </if>
+        <if test="null==payWay or payWay==1">
+            AND HHO.DB_ORDER_TYPE NOT IN ('1','2','3','4')
+        </if>
+        <if test="null!=reservePerson  and ''!=reservePerson">
+            AND HHO.CONTACT_NAME= "${reservePerson}"
+        </if>
+        <if test="null!=checkinPerson  and ''!=checkinPerson">
+            AND HHO.GUEST_NAME= "${checkinPerson}"
+        </if>
+        <if test="null!=checkinCity  and ''!=checkinCity">
+           AND HHO.HOTEL_ADDRESS LIKE "${checkinCity}%"
+        </if>
+        <if test="null!=hotelName  and ''!=hotelName">
+            AND HHO.HOTEL_NAME LIKE "%${hotelName}%"
+        </if>
+
+
+    </sql>
+
+
+</mapper>

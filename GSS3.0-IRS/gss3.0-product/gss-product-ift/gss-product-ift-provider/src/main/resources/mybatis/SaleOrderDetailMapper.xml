@@ -1,0 +1,552 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ift.dao.SaleOrderDetailDao">
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.ift.api.entity.SaleOrderDetail">
+        <!--销售明细编号 销售明细编号-->
+        <id column="SALE_ORDER_DETAIL_NO" property="saleOrderDetailNo" jdbcType="BIGINT"/>
+        <!--ID-->
+        <result column="ID" property="id" jdbcType="BIGINT"/>
+        <!--数据归属单位-->
+        <result column="OWNER" property="owner" jdbcType="INTEGER"/>
+        <!--销售订单编号 订单编号-->
+        <result column="SALE_ORDER_NO" property="saleOrderNo" jdbcType="BIGINT"/>
+        <!--乘客编号 乘客编号-->
+        <result column="PASSENGER_NO" property="passengerNo" jdbcType="BIGINT"/>
+        <!--航程编号 航程编号-->
+        <result column="LEG_NO" property="legNo" jdbcType="BIGINT"/>
+        <!--票价-->
+        <result column="FARE" property="fare" jdbcType="DECIMAL"/>
+        <!--票号-->
+        <result column="TICKET_NO" property="ticketNo" jdbcType="VARCHAR"/>
+        <!--舱位-->
+        <result column="CABIN" property="cabin" jdbcType="VARCHAR"/>
+        <!--税费-->
+        <result column="TAX" property="tax" jdbcType="DECIMAL"/>
+        <!--手续费-->
+        <result column="BROKERAGE" property="brokerage" jdbcType="DECIMAL"/>
+        <!--代理费-->
+        <result column="AGENCY_FEE" property="agencyFee" jdbcType="DECIMAL"/>
+        <!--后返-->
+        <result column="REBATE" property="rebate" jdbcType="DECIMAL"/>
+        <!--计奖价-->
+        <result column="AWARD_PRICE" property="awardPrice" jdbcType="DECIMAL"/>
+        <!--父航段序号 从01开始-->
+        <result column="PARENT_SECTION" property="parentSection" jdbcType="VARCHAR"/>
+        <!--子航段序号 从01开始 保存格式为 复航段序号+子航段序号，即：0101.-->
+        <result column="CHILD_SECTION" property="childSection" jdbcType="VARCHAR"/>
+        <!--是否退改签-->
+        <result column="IS_CHANGE" property="isChange" jdbcType="BIT"/>
+        <!--操作人 默认为：sys-->
+        <result column="MODIFIER" property="modifier" jdbcType="VARCHAR"/>
+        <!--修改时间-->
+        <result column="MODIFY_TIME" property="modifyTime" jdbcType="TIMESTAMP"/>
+        <!--创建人-->
+        <result column="CREATOR" property="creator" jdbcType="VARCHAR"/>
+        <!--创建时间-->
+        <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP"/>
+        <!--销售明细状态 1（待核价），2（已核价），3（出票中），4（已出票）5（退票中），6（废票中），7（改签中） 8（已退），9（已废），10（已改签）.-->
+        <result column="STATUS" property="status" jdbcType="VARCHAR"/>
+        <!--删除标志 0 无效 已删除 1 有效-->
+        <result column="VALID" property="valid" jdbcType="TINYINT"/>
+        <!--拒单原因-->
+        <result column="REFUSE_REASON" property="refuseReason" jdbcType="VARCHAR"/>
+
+        <result column="DEPT_PROFIT" property="deptProfit" jdbcType="DECIMAL"/>
+
+        <result column="PROFIT" property="profit" jdbcType="DECIMAL"/>
+        <!--一对一关联乘客-->
+        <association property="passenger" column="PASSENGER_NO" 
+                     select="com.tempus.gss.product.ift.dao.PassengerDao.selectByPrimaryKey"/>
+        <!--一对一关联航程-->
+        <association property="leg" column="LEG_NO"
+                     select="com.tempus.gss.product.ift.dao.LegDao.selectByPrimaryKey"/>
+
+        <!--一对一关联航程-->
+        <association property="saleOrderExt" column="SALE_ORDER_NO"
+                     select="com.tempus.gss.product.ift.dao.SaleOrderExtDao.selectByPrimaryKey"/>
+        <!--一对一关联最后销售单
+        <association property="buyOrderDetail" column="SALE_ORDER_DETAIL_NO"
+                     select="com.tempus.gss.product.ift.dao.BuyOrderDetailDao.selectBySaleNoDesc"/>-->
+        <!--一对多关联销售单列表信息
+        <collection property="buyOrderDetailList" ofType="com.tempus.gss.product.ift.api.entity.BuyOrderDetail"
+                    column="SALE_ORDER_DETAIL_NO"
+                    select="com.tempus.gss.product.ift.dao.BuyOrderDetailDao.selectBySaleNo"/>-->
+    </resultMap>
+    <sql id="Base_Column_List">
+        SALE_ORDER_DETAIL_NO, ID,CABIN, OWNER,TICKET_NO, SALE_ORDER_NO, PASSENGER_NO, LEG_NO,
+        FARE, TAX, BROKERAGE, AGENCY_FEE, REBATE, AWARD_PRICE, PARENT_SECTION, CHILD_SECTION,
+        IS_CHANGE, MODIFIER, MODIFY_TIME, CREATOR, CREATE_TIME, STATUS, VALID, REFUSE_REASON
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_SALE_ORDER_DETAIL
+        where SALE_ORDER_DETAIL_NO = #{saleOrderDetailNo,jdbcType=BIGINT} and VALID=1
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from IFT_SALE_ORDER_DETAIL
+        where SALE_ORDER_DETAIL_NO = #{saleOrderDetailNo,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderDetail">
+        insert into IFT_SALE_ORDER_DETAIL (SALE_ORDER_DETAIL_NO, ID, OWNER,
+        SALE_ORDER_NO, PASSENGER_NO,TICKET_NO,
+        LEG_NO, FARE, TAX, BROKERAGE,
+        AGENCY_FEE, REBATE, AWARD_PRICE,
+        PARENT_SECTION, CHILD_SECTION, IS_CHANGE,
+        MODIFIER, MODIFY_TIME, CREATOR,
+        CREATE_TIME, STATUS, VALID,CABIN,REFUSE_REASON
+        )
+        values (#{saleOrderDetailNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
+        #{saleOrderNo,jdbcType=BIGINT}, #{passengerNo,jdbcType=BIGINT},#{ticketNo,jdbcType=VARCHAR},
+        #{legNo,jdbcType=BIGINT}, #{fare,jdbcType=DECIMAL}, #{tax,jdbcType=DECIMAL}, #{brokerage,jdbcType=DECIMAL},
+        #{agencyFee,jdbcType=DECIMAL}, #{rebate,jdbcType=DECIMAL}, #{awardPrice,jdbcType=DECIMAL},
+        #{parentSection,jdbcType=VARCHAR}, #{childSection,jdbcType=VARCHAR}, #{isChange,jdbcType=BIT},
+        #{modifier,jdbcType=VARCHAR}, #{modifyTime,jdbcType=TIMESTAMP}, #{creator,jdbcType=VARCHAR},
+        #{createTime,jdbcType=TIMESTAMP}, #{status,jdbcType=VARCHAR}, #{valid,jdbcType=TINYINT},#{cabin,jdbcType=VARCHAR},
+        #{refuseReason,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderDetail">
+        insert into IFT_SALE_ORDER_DETAIL
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="saleOrderDetailNo != null">
+                SALE_ORDER_DETAIL_NO,
+            </if>
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="owner != null">
+                OWNER,
+            </if>
+            <if test="saleOrderNo != null">
+                SALE_ORDER_NO,
+            </if>
+            <if test="passengerNo != null">
+                PASSENGER_NO,
+            </if>
+            <if test="legNo != null">
+                LEG_NO,
+            </if>
+			<if test="cabin != null">
+                CABIN,
+            </if>
+            <if test="ticketNo != null">
+                TICKET_NO,
+            </if>
+            <if test="fare != null">
+                FARE,
+            </if>
+            <if test="tax != null">
+                TAX,
+            </if>
+            <if test="brokerage != null">
+                BROKERAGE,
+            </if>
+            <if test="agencyFee != null">
+                AGENCY_FEE,
+            </if>
+            <if test="rebate != null">
+                REBATE,
+            </if>
+            <if test="awardPrice != null">
+                AWARD_PRICE,
+            </if>
+            <if test="parentSection != null">
+                PARENT_SECTION,
+            </if>
+            <if test="childSection != null">
+                CHILD_SECTION,
+            </if>
+            <if test="isChange != null">
+                IS_CHANGE,
+            </if>
+            <if test="modifier != null">
+                MODIFIER,
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME,
+            </if>
+            <if test="creator != null">
+                CREATOR,
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME,
+            </if>
+            <if test="status != null">
+                STATUS,
+            </if>
+            <if test="valid != null">
+                VALID,
+            </if>
+            <if test="refuseReason != null">
+                REFUSE_REASON,
+            </if>
+            <if test="deptProfit !=null">
+                DEPT_PROFIT,
+            </if>
+            <if test="profit !=null">
+                PROFIT,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="saleOrderDetailNo != null">
+                #{saleOrderDetailNo,jdbcType=BIGINT},
+            </if>
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null">
+                #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="saleOrderNo != null">
+                #{saleOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="passengerNo != null">
+                #{passengerNo,jdbcType=BIGINT},
+            </if>
+            <if test="legNo != null">
+                #{legNo,jdbcType=BIGINT},
+            </if>
+            <if test="cabin != null">
+                 #{cabin,jdbcType=VARCHAR},
+            </if>
+            <if test="ticketNo != null">
+                 #{ticketNo,jdbcType=DECIMAL},
+            </if>
+            <if test="fare != null">
+                #{fare,jdbcType=DECIMAL},
+            </if>
+            <if test="tax != null">
+                #{tax,jdbcType=DECIMAL},
+            </if>
+            <if test="brokerage != null">
+                #{brokerage,jdbcType=DECIMAL},
+            </if>
+            <if test="agencyFee != null">
+                #{agencyFee,jdbcType=DECIMAL},
+            </if>
+            <if test="rebate != null">
+                #{rebate,jdbcType=DECIMAL},
+            </if>
+            <if test="awardPrice != null">
+                #{awardPrice,jdbcType=DECIMAL},
+            </if>
+            <if test="parentSection != null">
+                #{parentSection,jdbcType=VARCHAR},
+            </if>
+            <if test="childSection != null">
+                #{childSection,jdbcType=VARCHAR},
+            </if>
+            <if test="isChange != null">
+                #{isChange,jdbcType=BIT},
+            </if>
+            <if test="modifier != null">
+                #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="refuseReason != null">
+                #{refuseReason,jdbcType=VARCHAR},
+            </if>
+            <if test="deptProfit !=null">
+                #{deptProfit,jdbcType=DECIMAL},
+            </if>
+            <if test="profit !=null">
+                #{profit,jdbcType=DECIMAL},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderDetail">
+        update IFT_SALE_ORDER_DETAIL
+        <set>
+            <if test="id != null">
+                ID = #{id,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="saleOrderNo != null">
+                SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="passengerNo != null">
+                PASSENGER_NO = #{passengerNo,jdbcType=BIGINT},
+            </if>
+			<if test="cabin != null">
+                CABIN = #{cabin,jdbcType=VARCHAR},
+            </if>
+            <if test="legNo != null">
+                LEG_NO = #{legNo,jdbcType=BIGINT},
+            </if>
+            <if test="fare != null">
+                FARE = #{fare,jdbcType=DECIMAL},
+            </if>
+            <if test="tax != null">
+                TAX = #{tax,jdbcType=DECIMAL},
+            </if>
+            <if test="brokerage != null">
+                BROKERAGE = #{brokerage,jdbcType=DECIMAL},
+            </if>
+            <if test="agencyFee != null">
+                AGENCY_FEE = #{agencyFee,jdbcType=DECIMAL},
+            </if>
+            <if test="rebate != null">
+                REBATE = #{rebate,jdbcType=DECIMAL},
+            </if>
+            <if test="awardPrice != null">
+                AWARD_PRICE = #{awardPrice,jdbcType=DECIMAL},
+            </if>
+            <if test="ticketNo != null">
+                TICKET_NO = #{ticketNo,jdbcType=VARCHAR},
+            </if>
+            <if test="parentSection != null">
+                PARENT_SECTION = #{parentSection,jdbcType=VARCHAR},
+            </if>
+            <if test="childSection != null">
+                CHILD_SECTION = #{childSection,jdbcType=VARCHAR},
+            </if>
+            <if test="isChange != null">
+                IS_CHANGE = #{isChange,jdbcType=BIT},
+            </if>
+            <if test="modifier != null">
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                STATUS = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="refuseReason != null">
+                REFUSE_REASON = #{refuseReason,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where SALE_ORDER_DETAIL_NO = #{saleOrderDetailNo,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderDetail">
+        update IFT_SALE_ORDER_DETAIL
+        set ID = #{id,jdbcType=BIGINT},
+        OWNER = #{owner,jdbcType=INTEGER},
+        SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT},
+        PASSENGER_NO = #{passengerNo,jdbcType=BIGINT},
+        LEG_NO = #{legNo,jdbcType=BIGINT},
+        CABIN = #{cabin,jdbcType=VARCHAR},
+        FARE = #{fare,jdbcType=DECIMAL},
+        TAX = #{tax,jdbcType=DECIMAL},
+        BROKERAGE = #{brokerage,jdbcType=DECIMAL},
+        AGENCY_FEE = #{agencyFee,jdbcType=DECIMAL},
+        REBATE = #{rebate,jdbcType=DECIMAL},
+        AWARD_PRICE = #{awardPrice,jdbcType=DECIMAL},
+        PARENT_SECTION = #{parentSection,jdbcType=VARCHAR},
+        CHILD_SECTION = #{childSection,jdbcType=VARCHAR},
+        TICKET_NO = #{ticketNo,jdbcType=VARCHAR},
+        IS_CHANGE = #{isChange,jdbcType=BIT},
+        MODIFIER = #{modifier,jdbcType=VARCHAR},
+        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+        CREATOR = #{creator,jdbcType=VARCHAR},
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+        STATUS = #{status,jdbcType=VARCHAR},
+        VALID = #{valid,jdbcType=TINYINT}
+        where SALE_ORDER_DETAIL_NO = #{saleOrderDetailNo,jdbcType=BIGINT}
+    </update>
+    <select id="selectBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_SALE_ORDER_DETAIL 
+        where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+    </select>
+
+    <select id="selectByPassengerAndLeg" resultMap="BaseResultMap" >
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_SALE_ORDER_DETAIL
+        where PASSENGER_NO = #{param1} and LEG_NO = #{param2}
+    </select>
+
+    <select id="selectByTicketNo" resultMap="BaseResultMap"  parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_SALE_ORDER_DETAIL
+        where TICKET_NO = #{param1}
+    </select>
+    <select id="selectByChangeNo"  resultMap="BaseResultMap"  parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_SALE_ORDER_DETAIL
+        where SALE_ORDER_DETAIL_NO IN (
+        SELECT cd.SALE_ORDER_DETAIL_NO FROM IFT_SALE_CHANGE_DETAIL cd
+        WHERE cd.SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT} )
+    </select>
+    <update id="batchUpdate" parameterType="java.util.List">  
+        <foreach close="" collection="list" index="index" item="item" open="" separator=";">  
+            update IFT_SALE_ORDER_DETAIL set STATUS=#{item.status,jdbcType=VARCHAR},REJECT_REASON = #{item.rejectreason,jdbcType=VARCHAR} 
+            where SALE_ORDER_DETAIL_NO=#{item.saleOrderDetailNo,jdbcType=BIGINT}  
+        </foreach>  
+    </update>  
+    
+    <update id="updateByOrderNo" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderDetail">
+        update IFT_SALE_ORDER_DETAIL
+        <set>
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="cabin != null">
+                CABIN = #{cabin,jdbcType=VARCHAR},
+            </if>
+            <if test="legNo != null">
+                LEG_NO = #{legNo,jdbcType=BIGINT},
+            </if>
+            <if test="fare != null">
+                FARE = #{fare,jdbcType=DECIMAL},
+            </if>
+            <if test="tax != null">
+                TAX = #{tax,jdbcType=DECIMAL},
+            </if>
+            <if test="brokerage != null">
+                BROKERAGE = #{brokerage,jdbcType=DECIMAL},
+            </if>
+            <if test="agencyFee != null">
+                AGENCY_FEE = #{agencyFee,jdbcType=DECIMAL},
+            </if>
+            <if test="rebate != null">
+                REBATE = #{rebate,jdbcType=DECIMAL},
+            </if>
+            <if test="awardPrice != null">
+                AWARD_PRICE = #{awardPrice,jdbcType=DECIMAL},
+            </if>
+            <if test="ticketNo != null">
+                TICKET_NO = #{ticketNo,jdbcType=VARCHAR},
+            </if>
+            <if test="parentSection != null">
+                PARENT_SECTION = #{parentSection,jdbcType=VARCHAR},
+            </if>
+            <if test="childSection != null">
+                CHILD_SECTION = #{childSection,jdbcType=VARCHAR},
+            </if>
+            <if test="isChange != null">
+                IS_CHANGE = #{isChange,jdbcType=BIT},
+            </if>
+            <if test="modifier != null">
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                STATUS = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="refuseReason != null">
+                REFUSE_REASON = #{refuseReason,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+    </update>
+    
+    <update id="updateByChangeOrderNo" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderDetail">
+        update IFT_SALE_ORDER_DETAIL
+        <set>
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="cabin != null">
+                CABIN = #{cabin,jdbcType=VARCHAR},
+            </if>
+            <if test="legNo != null">
+                LEG_NO = #{legNo,jdbcType=BIGINT},
+            </if>
+            <if test="fare != null">
+                FARE = #{fare,jdbcType=DECIMAL},
+            </if>
+            <if test="tax != null">
+                TAX = #{tax,jdbcType=DECIMAL},
+            </if>
+            <if test="brokerage != null">
+                BROKERAGE = #{brokerage,jdbcType=DECIMAL},
+            </if>
+            <if test="agencyFee != null">
+                AGENCY_FEE = #{agencyFee,jdbcType=DECIMAL},
+            </if>
+            <if test="rebate != null">
+                REBATE = #{rebate,jdbcType=DECIMAL},
+            </if>
+            <if test="awardPrice != null">
+                AWARD_PRICE = #{awardPrice,jdbcType=DECIMAL},
+            </if>
+            <if test="ticketNo != null">
+                TICKET_NO = #{ticketNo,jdbcType=VARCHAR},
+            </if>
+            <if test="parentSection != null">
+                PARENT_SECTION = #{parentSection,jdbcType=VARCHAR},
+            </if>
+            <if test="childSection != null">
+                CHILD_SECTION = #{childSection,jdbcType=VARCHAR},
+            </if>
+            <if test="isChange != null">
+                IS_CHANGE = #{isChange,jdbcType=BIT},
+            </if>
+            <if test="modifier != null">
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                STATUS = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="refuseReason != null">
+                REFUSE_REASON = #{refuseReason,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where SALE_ORDER_NO in (SELECT d.SALE_ORDER_DETAIL_NO FROM IFT_SALE_CHANGE_DETAIL d WHERE d.SALE_CHANGE_NO = #{changeOrderNo,jdbcType=INTEGER})
+    </update>
+
+    <update id="updateSaleOrderDetailStatus" >
+UPDATE IFT_SALE_ORDER_DETAIL ISOE LEFT JOIN OS_SALEORDER OS ON OS.SALE_ORDER_NO=ISOE.SALE_ORDER_NO
+SET ISOE.STATUS=1  WHERE ISOE.STATUS=2 AND OS.PAY_STATUS=1
+    </update>
+    <update id="updateSaleOrderDetailStatusByNo" >
+        UPDATE IFT_SALE_ORDER_DETAIL ISOE
+        SET ISOE.STATUS=1   WHERE ISOE.SALE_ORDER_NO=#{saleOrderNo};
+         UPDATE  OS_SALEORDER OS
+        SET   OS.ORDER_CHILD_STATUS=1  WHERE OS.SALE_ORDER_NO=#{saleOrderNo}
+    </update>
+
+</mapper>

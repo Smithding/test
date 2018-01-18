@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ins.dao.InsuranceProfitDao" >
+  <resultMap id="BaseResultMap" type="com.tempus.gss.product.ins.api.entity.InsuranceProfit" >
+    <!--编号-->
+    <result column="PROFIT_NO" property="profitNo" jdbcType="BIGINT" />
+    <!--数据归属单位-->
+    <result column="OWNER" property="owner" jdbcType="INTEGER" />
+    <!-- 控润渠道类型-->
+    <result column="CUSTOMER_TYPE_NO" property="customerTypeNo" jdbcType="BIGINT" />
+    <!--控润渠道名称-->
+    <result column="CUSTOMER_TYPE_NAME" property="customerTypeName" jdbcType="VARCHAR" />
+    <!--供应UBP编号-->
+    <result column="SUPPLIER_SOURCE" property="supplierSource" jdbcType="VARCHAR" />
+    <!--价格方式  1 不控 2 固定 3 区间控-->
+    <result column="PRICE_TYPE" property="priceType" jdbcType="INTEGER" />
+    <!--控润模式 1.控点 2.控现-->
+    <result column="PROFIT_MODE" property="profitMode" jdbcType="INTEGER" />
+    <!--上级编号-->
+    <result column="PARENT_ID" property="parentId" jdbcType="BIGINT" />
+    <!--备注-->
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+    <!--启用状态 0 禁用 1 启用-->
+    <result column="STATUS" property="status" jdbcType="VARCHAR" />
+    <!--创建者-->
+    <result column="CREATOR" property="creator" jdbcType="VARCHAR" />
+    <!--创建时间-->
+    <result column="CREATE_TIME" property="createTime" jdbcType="VARCHAR" />
+    <!--修改人-->
+    <result column="MODIFIER" property="Modifier" jdbcType="VARCHAR" />
+    <!--修改时间-->
+    <result column="MODIFIER_TIME" property="ModifierTime" jdbcType="VARCHAR" />
+    <!--是否可售 1 可售 0 不可售-->
+    <result column="VALID" property="value" jdbcType="INTEGER" />
+    <!--产品编号-->
+    <result column="INSURANCE_NO" property="insuranceNo" jdbcType="BIGINT" />
+    <!--控润点数-->
+    <result column="PROFIT_COUNT" property="profitCount" jdbcType="DECIMAL" />
+    <!--控润价格-->
+    <result column="PROFIT_MONEY" property="profitMoney" jdbcType="DECIMAL" />
+  </resultMap>
+
+  <select id="queryInsuranceProfitByNo" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select * from INS_PROFIT
+    where INSURANCE_NO = #{insuranceNo} AND VALID=1
+  </select>
+  
+</mapper>

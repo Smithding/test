@@ -1,0 +1,901 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ift.dao.SaleOrderExtDao">
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.ift.api.entity.SaleOrderExt">
+        <!--订单编号 订单编号-->
+        <id column="SALE_ORDER_NO" property="saleOrderNo" jdbcType="BIGINT"/>
+        <result column="ID" property="id" jdbcType="BIGINT"/>
+        <!--数据归属 数据归属-->
+        <result column="OWNER" property="owner" jdbcType="INTEGER"/>
+        <!--需求单编号-->
+        <result column="DEMAND_NO" property="demandNo" jdbcType="BIGINT"/>
+        <!--PNR编号-->
+        <result column="PNR_NO" property="pnrNo" jdbcType="BIGINT"/>
+        <!--航程类型  航程类型：1:单程; 2:往返.-->
+        <result column="LEG_TYPE" property="legType" jdbcType="INTEGER"/>
+        <!--联系人名称-->
+        <result column="CONTACT_NAME" property="contactName" jdbcType="VARCHAR"/>
+        <!--联系人电话-->
+        <result column="CONTACT_PHONE" property="contactPhone" jdbcType="VARCHAR"/>
+        <!--联系人手机号-->
+        <result column="CONTACT_MOBILE" property="contactMobile" jdbcType="VARCHAR"/>
+        <!--联系人邮箱-->
+        <result column="CONTACT_MAIL" property="contactMail" jdbcType="VARCHAR"/>
+        <!--币种-->
+        <result column="CURRENCY" property="currency" jdbcType="VARCHAR"/>
+        <!--销售备注-->
+        <result column="SALE_REMARK" property="saleRemark" jdbcType="VARCHAR"/>
+        <!--删除标记-->
+        <result column="VALID" property="valid" jdbcType="TINYINT"/>
+        <!--版本号 每次更新时还需判断同意版本号，再+1.-->
+        <result column="VERSION" property="version" jdbcType="DECIMAL"/>
+        <!--将销售单锁定的用户的Id 有大于0的值，表示已被用户锁定，是该用户的Id.-->
+        <result column="LOCKER" property="locker" jdbcType="BIGINT"/>
+        <!--锁定时间.-->
+        <result column="LOCK_TIME" property="lockTime" jdbcType="TIMESTAMP"/>
+        <!--订单创建类型. 1：PNR,2：白屏，3：手工补单.-->
+        <result column="CREATE_TYPE" property="createType" jdbcType="DECIMAL"/>
+        <!--创建日期-->
+        <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP"/>
+        <!-- 出票时间 -->
+        <result column="ISSUE_TIME" property="issueTime" jdbcType="TIMESTAMP"/>
+        <!--修改日期-->
+        <result column="MODIFY_TIME" property="modifyTime" jdbcType="TIMESTAMP"/>
+        <!--创建人-->
+        <result column="CREATOR" property="creator" jdbcType="VARCHAR"/>
+        <!--修改人-->
+        <result column="MODIFIER" property="modifier" jdbcType="VARCHAR"/>
+        <!--主订单状态-->
+        <result column="STATUS" property="status" jdbcType="VARCHAR"/>
+        <!--关联类型-->
+        <result column="LINKTYPE" property="linkType" jdbcType="VARCHAR"/>
+        <!--原订单编号-->
+        <result column="ORIGINAL_ORDER_NO" property="originalOrderNo" jdbcType="BIGINT"/>
+        <result column="LINKNO" property="linkNo" jdbcType="VARCHAR"/>
+        <result column="CURRENCY" property="currency" jdbcType="VARCHAR"/>
+        <result column="SALE_CURRENCY" property="saleCurrency" jdbcType="VARCHAR"/>
+        <result column="EXCHANGE_RATE" property="exchangeRate" javaType="DECIMAL"/>
+        <!-- 一对一 PNR-->
+        <association property="importPnr" column="SALE_ORDER_NO"
+                     select="com.tempus.gss.product.ift.dao.PnrDao.selectByOrderNo"/>
+        <!-- 一对一 demand-->
+        <association property="demand" column="DEMAND_NO"
+                     select="com.tempus.gss.product.ift.dao.DemandDao.selectByPrimaryKey"/>
+        <!--一对一关联销售单明细  子订单-->
+        <collection property="saleOrderDetailList" ofType="com.tempus.gss.product.ift.api.entity.SaleOrderDetail"
+                    column="SALE_ORDER_NO"
+                    select="com.tempus.gss.product.ift.dao.SaleOrderDetailDao.selectBySaleOrderNo"/>
+        <!--一对多航程集合-->
+        <collection property="legList" ofType="com.tempus.gss.product.ift.api.entity.Leg" column="SALE_ORDER_NO"
+                    select="com.tempus.gss.product.ift.dao.LegDao.selectLegBySaleOrderNo"/>
+        <!--一对多乘客集合-->
+        <collection property="passengerList" ofType="com.tempus.gss.product.ift.api.entity.Passenger" column="SALE_ORDER_NO"
+                    select="com.tempus.gss.product.ift.dao.PassengerDao.selectPassengerBySaleOrderNo"/>
+    </resultMap>
+
+    <resultMap id="TicketNoResultMap" type="com.tempus.gss.product.ift.api.entity.vo.ReportVo">
+        <!--票号-->
+        <result column="TICKET_NO" property="ticketNo" jdbcType="VARCHAR"/>
+        <!--航司-->
+        <result column="AIRLINE" property="airLine" jdbcType="VARCHAR"/>
+        <!--票面价-->
+        <result column="SALE_FARE" property="saleFare" jdbcType="DECIMAL"/>
+        <!--税费-->
+        <result column="SALE_TAX" property="saleTax" jdbcType="DECIMAL"/>
+        <!--代理费-->
+        <result column="SALE_AGENCY_FEE" property="saleAgencyFee" jdbcType="DECIMAL"/>
+        <!-- 航线 -->
+        <result column="AIRROUTE" property="airRoute" jdbcType="VARCHAR"/>
+        <!--航程-->
+        <result column="FLIGHT_NO" property="flightNo" jdbcType="VARCHAR"/>
+        <!--舱位-->
+        <result column="CABIN" property="cabin" jdbcType="VARCHAR"/>
+        <!--乘机日期-->
+        <result column="DEP_TIME" property="depTime" jdbcType="VARCHAR"/>
+        <!--PNR-->
+        <result column="PNR" property="pnr" jdbcType="VARCHAR"/>
+        <!--联系人-->
+        <result column="CONTACT_NAME" property="contactName" jdbcType="VARCHAR"/>
+        <!--乘客-->
+        <result column="NAME" property="passengerName" jdbcType="VARCHAR"/>
+        <!--供应商-->
+        <result column="NAME" property="supplierName" jdbcType="VARCHAR"/>
+        <!-- 出票日期 -->
+        <result column="ISSUE_TIME" property="issueTime" jdbcType="VARCHAR"/>
+
+    </resultMap>
+    <sql id="Base_Column_List">
+        SALE_ORDER_NO, ID, OWNER, DEMAND_NO, LEG_TYPE, CONTACT_NAME, CONTACT_PHONE, CONTACT_MOBILE,
+        CONTACT_MAIL, SALE_REMARK, VALID, VERSION, LOCKER, LOCK_TIME, CREATE_TYPE, CREATE_TIME,
+        MODIFY_TIME, CREATOR, MODIFIER, ISSUE_TIME, ORIGINAL_ORDER_NO, LINKNO, LINKTYPE, CURRENCY,
+        SALE_CURRENCY,EXCHANGE_RATE
+
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_SALE_ORDER_EXT
+        where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} AND VALID=1
+    </select>
+    <select id="queryByPnrNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_SALE_ORDER_EXT
+        where PNR_NO = #{pnrNo,jdbcType=BIGINT} AND VALID=1
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        DELETE FROM IFT_SALE_ORDER_EXT
+        WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderExt">
+        INSERT INTO IFT_SALE_ORDER_EXT (SALE_ORDER_NO, ID, OWNER,
+                                        DEMAND_NO, LEG_TYPE, CONTACT_NAME,
+                                        CONTACT_PHONE, CONTACT_MOBILE, CONTACT_MAIL,
+                                        SALE_REMARK, VALID, VERSION,
+                                        LOCKER, LOCK_TIME, CREATE_TYPE,
+                                        CREATE_TIME, MODIFY_TIME, CREATOR, ISSUE_TIME
+                                        MODIFIER)
+        VALUES (#{saleOrderNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
+                                                #{demandNo,jdbcType=BIGINT}, #{legType,jdbcType=INTEGER}, #{contactName,jdbcType=VARCHAR},
+                                                #{contactPhone,jdbcType=VARCHAR}, #{contactMobile,jdbcType=VARCHAR}, #{contactMail,jdbcType=VARCHAR},
+                                                #{saleRemark,jdbcType=VARCHAR}, #{valid,jdbcType=TINYINT}, #{version,jdbcType=DECIMAL},
+                #{locker,jdbcType=BIGINT}, #{lockTime,jdbcType=TIMESTAMP}, #{createType,jdbcType=DECIMAL},
+                #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP}, #{creator,jdbcType=VARCHAR},
+                #{issueTime,jdbcType=TIMESTAMP}, #{modifier,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderExt">
+        insert into IFT_SALE_ORDER_EXT
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="saleOrderNo != null">
+                SALE_ORDER_NO,
+            </if>
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="owner != null">
+                OWNER,
+            </if>
+            <if test="demandNo != null">
+                DEMAND_NO,
+            </if>
+            <if test="teamNo != null">
+                TEAM_NO,
+            </if>
+            <if test="pnrNo != null">
+                PNR_NO,
+            </if>
+            <if test="legType != null">
+                LEG_TYPE,
+            </if>
+            <if test="contactName != null">
+                CONTACT_NAME,
+            </if>
+            <if test="contactPhone != null">
+                CONTACT_PHONE,
+            </if>
+            <if test="contactMobile != null">
+                CONTACT_MOBILE,
+            </if>
+            <if test="contactMail != null">
+                CONTACT_MAIL,
+            </if>
+            <if test="saleRemark != null">
+                SALE_REMARK,
+            </if>
+            <if test="valid != null">
+                VALID,
+            </if>
+            <if test="version != null">
+                VERSION,
+            </if>
+            <if test="locker != null">
+                LOCKER,
+            </if>
+            <if test="lockTime != null">
+                LOCK_TIME,
+            </if>
+            <if test="createType != null">
+                CREATE_TYPE,
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME,
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME,
+            </if>
+            <if test="creator != null">
+                CREATOR,
+            </if>
+            <if test="modifier != null">
+                MODIFIER,
+            </if>
+            <if test="issueTime != null">
+                ISSUE_TIME,
+            </if>
+            <if test="linkType != null">
+                LINKTYPE,
+            </if>
+            <if test="linkNo != null">
+                LINKNO,
+            </if>
+            <if test="currency!=null">
+                CURRENCY,
+            </if>
+            <if test="saleCurrency !=null and saleCurrency!=''">
+                SALE_CURRENCY,
+            </if>
+            <if test="exchangeRate!=null">
+                EXCHANGE_RATE,
+            </if>
+            <if test="originalOrderNo != null">
+                ORIGINAL_ORDER_NO,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="saleOrderNo != null">
+                #{saleOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null">
+                #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="demandNo != null">
+                #{demandNo,jdbcType=BIGINT},
+            </if>
+            <if test="teamNo != null">
+                #{teamNo,jdbcType=BIGINT},
+            </if>
+            <if test="pnrNo != null">
+                #{pnrNo,jdbcType=BIGINT},
+            </if>
+            <if test="legType != null">
+                #{legType,jdbcType=INTEGER},
+            </if>
+            <if test="contactName != null">
+                #{contactName,jdbcType=VARCHAR},
+            </if>
+            <if test="contactPhone != null">
+                #{contactPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="contactMobile != null">
+                #{contactMobile,jdbcType=VARCHAR},
+            </if>
+            <if test="contactMail != null">
+                #{contactMail,jdbcType=VARCHAR},
+            </if>
+            <if test="saleRemark != null">
+                #{saleRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="version != null">
+                #{version,jdbcType=DECIMAL},
+            </if>
+            <if test="locker != null">
+                #{locker,jdbcType=BIGINT},
+            </if>
+            <if test="lockTime != null">
+                #{lockTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createType != null">
+                #{createType,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifyTime != null">
+                #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="modifier != null">
+                #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="issueTime != null">
+                #{issueTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="linkType != null">
+                #{linkType,jdbcType=VARCHAR},
+            </if>
+            <if test="linkNo != null">
+                #{linkNo,jdbcType=VARCHAR},
+            </if>
+            <if test="currency != null">
+                #{currency,jdbcType=VARCHAR},
+            </if>
+            <if test="saleCurrency!=null and saleCurrency !=''">
+                #{saleCurrency,jdbcType=VARCHAR},
+            </if>
+            <if test="exchangeRate != null">
+                #{exchangeRate,jdbcType=DECIMAL},
+            </if>
+            <if test="originalOrderNo != null">
+                #{originalOrderNo,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderExt">
+        update IFT_SALE_ORDER_EXT
+        <set>
+            <if test="id != null">
+                ID = #{id,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="demandNo != null">
+                DEMAND_NO = #{demandNo,jdbcType=BIGINT},
+            </if>
+            <if test="pnrNo != null">
+                PNR_NO = #{pnrNo,jdbcType=BIGINT},
+            </if>
+            <if test="legType != null">
+                LEG_TYPE = #{legType,jdbcType=INTEGER},
+            </if>
+            <if test="contactName != null">
+                CONTACT_NAME = #{contactName,jdbcType=VARCHAR},
+            </if>
+            <if test="contactPhone != null">
+                CONTACT_PHONE = #{contactPhone,jdbcType=VARCHAR},
+            </if>
+            <if test="contactMobile != null">
+                CONTACT_MOBILE = #{contactMobile,jdbcType=VARCHAR},
+            </if>
+            <if test="contactMail != null">
+                CONTACT_MAIL = #{contactMail,jdbcType=VARCHAR},
+            </if>
+            <if test="saleRemark != null">
+                SALE_REMARK = #{saleRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="version != null">
+                VERSION = #{version,jdbcType=DECIMAL},
+            </if>
+            <if test="locker != null">
+                LOCKER = #{locker,jdbcType=BIGINT},
+            </if>
+            <if test="lockTime != null">
+                LOCK_TIME = #{lockTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createType != null">
+                CREATE_TYPE = #{createType,jdbcType=DECIMAL},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="modifier != null">
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="issueTime != null">
+                ISSUE_TIME=#{issueTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="linkNo != null">
+                LINKNO=#{linkNo,jdbcType=VARCHAR},
+            </if>
+            <if test="linkType != null">
+                LINKTYPE=#{linkType,jdbcType=VARCHAR},
+            </if>
+            <if test="currency!=null and currency!=''">
+                CURRENCY = #{currency,jdbcType=VARCHAR},
+            </if>
+            <if test="saleCurrency !=null and saleCurrency!=''">
+                SALE_CURRENCY=#{saleCurrency,jdbcType=VARCHAR},
+            </if>
+            <if test="exchangeRate!=null">
+                EXCHANGE_RATE = #{exchangeRate}
+            </if>
+        </set>
+        where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderExt">
+        UPDATE IFT_SALE_ORDER_EXT
+        SET ID             = #{id,jdbcType=BIGINT},
+            OWNER          = #{owner,jdbcType=INTEGER},
+            DEMAND_NO      = #{demandNo,jdbcType=BIGINT},
+            PNR_NO         = #{pnrNo,jdbcType=BIGINT},
+            LEG_TYPE       = #{legType,jdbcType=INTEGER},
+            CONTACT_NAME   = #{contactName,jdbcType=VARCHAR},
+            CONTACT_PHONE  = #{contactPhone,jdbcType=VARCHAR},
+            CONTACT_MOBILE = #{contactMobile,jdbcType=VARCHAR},
+            CONTACT_MAIL   = #{contactMail,jdbcType=VARCHAR},
+            SALE_REMARK    = #{saleRemark,jdbcType=VARCHAR},
+            VALID          = #{valid,jdbcType=TINYINT},
+            VERSION        = #{version,jdbcType=DECIMAL},
+            LOCKER         = #{locker,jdbcType=BIGINT},
+            LOCK_TIME      = #{lockTime,jdbcType=TIMESTAMP},
+            CREATE_TYPE    = #{createType,jdbcType=DECIMAL},
+            CREATE_TIME    = #{createTime,jdbcType=TIMESTAMP},
+            MODIFY_TIME    = #{modifyTime,jdbcType=TIMESTAMP},
+            CREATOR        = #{creator,jdbcType=VARCHAR},
+            ISSUE_TIME     = #{issueTime,jdbcType=TIMESTAMP},
+            MODIFIER       = #{modifier,jdbcType=VARCHAR}
+        WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+    </update>
+    <select id="queryByPnrNoAndTime" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.QueryPnrAndTimeVo">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_SALE_ORDER_EXT
+        where
+        <if test="pnrNo != null">
+            PNR_NO = #{pnrNo,jdbcType=BIGINT}
+        </if>
+        <if test="start != null">
+            AND date(CREATE_TIME) &gt;= date(#{start,jdbcType=TIMESTAMP})
+        </if>
+        <if test="end != null">
+            AND date(CREATE_TIME) &lt;= date(#{end,jdbcType=TIMESTAMP})
+        </if>
+        AND VALID=1
+    </select>
+    <select id="queryObjByKey" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SaleOrderExtVo">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_SALE_ORDER_EXT
+        where
+        <trim suffixOverrides="AND">
+            <if test="id != null">
+                ID = #{id,jdbcType=BIGINT} AND
+            </if>
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER} AND
+            </if>
+            <if test="demandNo != null">
+                DEMAND_NO = #{demandNo,jdbcType=BIGINT} AND
+            </if>
+            <if test="legType != null">
+                LEG_TYPE = #{legType,jdbcType=INTEGER} AND
+            </if>
+            <if test="contactName != null">
+                CONTACT_NAME = #{contactName,jdbcType=VARCHAR} AND
+            </if>
+            <if test="contactPhone != null">
+                CONTACT_PHONE = #{contactPhone,jdbcType=VARCHAR} AND
+            </if>
+            <if test="contactMobile != null">
+                CONTACT_MOBILE = #{contactMobile,jdbcType=VARCHAR} AND
+            </if>
+            <if test="contactMail != null">
+                CONTACT_MAIL = #{contactMail,jdbcType=VARCHAR} AND
+            </if>
+            <if test="saleRemark != null">
+                SALE_REMARK = #{saleRemark,jdbcType=VARCHAR} AND
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=TINYINT} AND
+            </if>
+            <if test="version != null">
+                VERSION = #{version,jdbcType=DECIMAL} AND
+            </if>
+            <if test="locker != null">
+                LOCKER = #{locker,jdbcType=BIGINT} AND
+            </if>
+            <if test="lockTime != null">
+                LOCK_TIME = #{lockTime,jdbcType=TIMESTAMP} AND
+            </if>
+            <if test="createType != null">
+                CREATE_TYPE = #{createType,jdbcType=DECIMAL} AND
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP} AND
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP} AND
+            </if>
+            <if test="creator != null">
+                CREATOR = #{creator,jdbcType=VARCHAR} AND
+            </if>
+            <if test="modifier != null">
+                MODIFIER = #{modifier,jdbcType=VARCHAR} AND
+            </if>
+            <if test="issueTime != null">
+                ISSUE_TIME=#{issueTime,jdbcType=TIMESTAMP} AND
+            </if>
+        </trim>
+    </select>
+    <select id="queryFromSaleQueryOrderVo" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SaleQueryOrderVo">
+        select DISTINCT
+        f.SALE_ORDER_NO, f.ID, f.OWNER, f.DEMAND_NO, f.LEG_TYPE, f.CONTACT_NAME, f.CONTACT_PHONE, f.CONTACT_MOBILE,
+        f.CONTACT_MAIL, f.SALE_REMARK, f.VALID, f.VERSION, f.LOCKER, f.LOCK_TIME, f.CREATE_TYPE, f.CREATE_TIME,
+        f.MODIFY_TIME,  (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,(select NAME from SM_USER where LOGIN_NAME =aa.MODIFIER) as MODIFIER,o.ORDER_CHILD_STATUS,f.LINKTYPE
+        FROM
+        IFT_SALE_ORDER_EXT f
+        left join OS_SALEORDER o on f.SALE_ORDER_NO = o.SALE_ORDER_NO
+        left join IFT_LEG l on l.SALE_ORDER_NO = f.SALE_ORDER_NO
+        left join IFT_PNR p on p.SOURCE_NO = f.SALE_ORDER_NO
+        left join IFT_SALE_ORDER_DETAIL d on d.SALE_ORDER_NO = f.SALE_ORDER_NO
+        left join IFT_PASSENGER a on a.SALE_ORDER_NO = f.SALE_ORDER_NO
+        left join OS_BUYORDER aa ON f.SALE_ORDER_NO=aa.SALE_ORDER_NO
+        left join IFT_BUY_ORDER_EXT ab ON aa.BUY_ORDER_NO=ab.BUY_ORDER_NO
+        left join CPS_CUSTOMER CC ON CC.CUSTOMER_NO=o.CUSTOMER_NO
+        left join  IFT_BUY_ORDER_DETAIL IBOD ON IBOD.BUY_ORDER_NO=aa.BUY_ORDER_NO
+        where
+        <trim suffixOverrides="AND">
+            f.VALID = 1 and
+            <if test="bookStartDate != null and bookStartDate !=''">
+                <![CDATA[
+                  DATE_FORMAT(o.ORDERING_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{bookStartDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
+                ]]>
+            </if>
+            <if test="bookEndDate !=null and bookEndDate !=''">
+                <![CDATA[
+                  DATE_FORMAT(o.ORDERING_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{bookEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
+                ]]>
+            </if>
+            <if test="flyStartDate != null and flyStartDate !=''">
+                <![CDATA[
+                  DATE_FORMAT(l.DEP_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{flyStartDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
+                ]]>
+            </if>
+            <if test="flyStartEndDate !=null and flyStartEndDate !=''">
+                <![CDATA[
+                  DATE_FORMAT(l.DEP_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{flyStartEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
+                ]]>
+            </if>
+            <if test="flyEndDate != null and flyEndDate !=''">
+                <![CDATA[
+                  DATE_FORMAT(l.ARR_TIME , '%Y-%m-%d') >= DATE_FORMAT(#{flyEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
+                ]]>
+            </if>
+            <if test=" flyEndArrDate !=null and flyEndArrDate !='' ">
+                <![CDATA[
+                  DATE_FORMAT(l.ARR_TIME , '%Y-%m-%d')<= DATE_FORMAT(#{flyEndArrDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
+                ]]>
+            </if>
+            <if test="customerType != null and customerType !='' ">
+                o.CUSTOMER_TYPE_NO = #{customerType,jdbcType = VARCHAR} AND
+            </if>
+            <if test="customerCount==false and customerNo != null and customerNo !='' ">
+                o.CUSTOMER_NO = #{customerNo,jdbcType = VARCHAR} AND
+            </if>
+            <if test="pnr != null and pnr !='' ">
+                p.PNR = #{pnr,jdbcType = VARCHAR} AND
+            </if>
+            <if test="orderStatusArray!=null and orderStatusArray!='' ">
+                <if test="queryType != null and queryType ==1 ">
+                    o.ORDER_CHILD_STATUS in
+                </if>
+                <if test="queryType != null and queryType ==2 ">
+                    aa.BUY_CHILD_STATUS in
+                </if>
+                <foreach collection="orderStatusArray" item="orderStatusArray"
+                         index="index" open="(" close=")" separator=",">
+                    #{orderStatusArray[${index}]}
+                </foreach>
+                AND
+            </if>
+            <if test="orderSource != null and orderSource !='' ">
+                o.SOURCE_CHANNEL_NO = #{orderSource,jdbcType = VARCHAR} AND
+            </if>
+            <if test="transationOrderNo != null and transationOrderNo !='' ">
+                o.TRANSATION_ORDER_NO = #{transationOrderNo,jdbcType = VARCHAR} AND
+            </if>
+            <if test="ticketNo != null and ticketNo !='' ">
+                d.TICKET_NO = #{ticketNo,jdbcType = VARCHAR} AND
+            </if>
+            <if test="passenger != null and passenger !='' ">
+                CONCAT_WS('',a.SURNAME,a.`NAME`) like CONCAT('%',#{passenger,jdbcType=VARCHAR},'%' ) AND
+            </if>
+            <if test="airline != null and airline !='' ">
+                l.AIRLINE = #{airline,jdbcType = VARCHAR} AND
+            </if>
+            <if test="ticketAirline != null and ticketAirline !='' ">
+                ab.AIRLINE = #{ticketAirline,jdbcType = VARCHAR} AND
+            </if>
+            <if test="departureCity != null and departureCity !='' ">
+                l.DEP_AIRPORT = #{departureCity,jdbcType = VARCHAR} AND
+            </if>
+            <if test="arrivalCity != null and arrivalCity !='' ">
+                l.ARR_AIRPORT = #{arrivalCity,jdbcType = VARCHAR} AND
+            </if>
+            <if test="contacts!=null and contacts!=''">
+                f.CONTACT_NAME like CONCAT('%',#{contacts,jdbcType=VARCHAR},'%' ) AND
+            </if>
+            <if test="phone!=null and phone !=''">
+                f.CONTACT_PHONE like CONCAT('%',#{phone,jdbcType=VARCHAR},'%' ) AND
+            </if>
+
+            <if test="saleOrderNo!=null">
+                f.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} AND
+            </if>
+            <if test="payStatus!=null">
+                o.PAY_STATUS = #{payStatus,jdbcType=BIGINT} AND
+            </if>
+            <if test="supplierNo!=null">
+                aa.SUPPLIER_NO = #{supplierNo,jdbcType=BIGINT} AND
+            </if>
+            <if test="cabin!=null and cabin !=''">
+                d.CABIN = #{cabin,jdbcType=VARCHAR} AND
+            </if>
+            <if test="issueTime != null">
+                ISSUE_TIME=#{issueTime,jdbcType=TIMESTAMP} AND
+            </if>
+            <if test="locker!=null">
+                <choose>
+                    <when test="locker == 0">f.LOCKER=0 AND</when>
+                    <when test="locker == 1">f.LOCKER!=0 AND</when>
+                    <otherwise>f.LOCKER = #{locker,jdbcType=BIGINT} AND</otherwise>
+                </choose>
+            </if>
+            <if test="cardNo!=null and cardNo !=''">
+                a.CERT_NO like CONCAT('%',#{cardNo,jdbcType=VARCHAR},'%' ) AND
+            </if>
+            <if test="createTypeStatusArray!=null and createTypeStatusArray!='' ">
+                CREATE_TYPE in
+                <foreach collection="createTypeStatusArray" item="createTypeStatusArray"
+                         index="index" open="(" close=")" separator=",">
+                    #{createTypeStatusArray[${index}]}
+                </foreach>
+                AND
+            </if>
+            <if test="orderStatus!=null">
+                d.STATUS = #{orderStatus,jdbcType=BIGINT} AND
+            </if>
+            <if test="payStatuss!=null and payStatuss!='' ">
+                o.PAY_STATUS in (${payStatuss}) AND
+            </if>
+            <if test="longList!=null and longList.size>0">
+                CC.CUSTOMER_NO IN
+                <foreach item="longList" index="index" collection="longList" open="(" separator="," close=")">
+                    ${longList}
+                </foreach>
+                AND
+            </if>
+            <if test="modifier!=null and modifier!=''">
+              o.MODIFIER = #{modifier,jdbcType=VARCHAR}AND
+            </if>
+            <if test="orderChildStatus!=null">
+                o.ORDER_CHILD_STATUS = #{orderChildStatus,jdbcType=BIGINT}AND
+            </if>
+            <if test="orderChildStatus!=null">
+                o.ORDER_CHILD_STATUS = #{orderChildStatus,jdbcType=BIGINT} AND
+            </if>
+            <if test="issuemodifier!=null and issuemodifier!=''">
+                IBOD.CREATOR= #{issuemodifier,jdbcType=VARCHAR} AND
+            </if>
+            <if test="operator!=null and operator!=''">
+                d.CREATOR= #{operator,jdbcType=VARCHAR} AND
+            </if>
+            <!--  <if test="linkType!=null and linkType !=''">
+                 f.LINKTYPE = #{linkType,jdbcType=VARCHAR} AND
+             </if> -->
+        </trim>
+        order by f.CREATE_TIME desc
+    </select>
+
+    <update id="updateLocker" parameterType="com.tempus.gss.product.ift.api.entity.SaleChangeExt">
+        UPDATE IFT_SALE_ORDER_EXT
+        SET LOCKER      = #{locker,jdbcType=BIGINT},
+            LOCK_TIME   = #{lockTime,jdbcType=TIMESTAMP},
+            MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            MODIFIER    = #{modifier,jdbcType=VARCHAR}
+        WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+    </update>
+
+    <select id="selectDemandOrder" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_SALE_ORDER_EXT
+        where DEMAND_NO = #{demandNo,jdbcType=BIGINT} AND VALID=1 AND CREATE_TYPE=4
+    </select>
+    <select id="selectDemandTeamOrder" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.DemandTeamVo">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_SALE_ORDER_EXT
+        where DEMAND_NO = #{demandNo,jdbcType=BIGINT} AND VALID=1 AND CREATE_TYPE = #{createType,jdbcType=VARCHAR}
+    </select>
+    <!-- 根据票号查询信息 -->
+    <select id="selectByTicketNo" resultMap="TicketNoResultMap" parameterType="java.lang.String">
+        SELECT DISTINCT
+            d.TICKET_NO,
+            e.AIRLINE,
+            p.SALE_FARE,
+            p.SALE_TAX,
+            p.SALE_AGENCY_FEE,
+            concat(l.DEP_AIRPORT, '-', l.ARR_AIRPORT) AS AIRROUTE,
+            l.FLIGHT_NO,
+            d.CABIN,
+            l.DEP_TIME,
+            r.PNR,
+            x.CONTACT_NAME,
+            p.`NAME`,
+            s.`NAME`,
+            x.ISSUE_TIME
+        FROM
+            OS_SALEORDER o, IFT_SALE_ORDER_DETAIL d, IFT_BUY_ORDER_EXT e, IFT_SALE_ORDER_EXT x, OS_BUYORDER b, IFT_PASSENGER p, IFT_LEG l,
+            IFT_PNR r, CPS_SUPPLIER s
+        WHERE 1 = 1
+              AND x.VALID = 1
+              AND o.SALE_ORDER_NO = d.SALE_ORDER_NO
+              AND b.BUSINESS_SIGN_NO = o.BUSINESS_SIGN_NO
+              AND b.BUY_ORDER_NO = e.BUY_ORDER_NO
+              AND p.PASSENGER_NO = d.PASSENGER_NO
+              AND l.SALE_ORDER_NO = o.SALE_ORDER_NO
+              AND x.SALE_ORDER_NO = o.SALE_ORDER_NO
+              AND r.PNR_NO = x.PNR_NO
+              AND s.SUPPLIER_NO = b.SUPPLIER_NO
+              AND d.TICKET_NO = #{ticketNo,jdbcType = VARCHAR}
+    </select>
+
+    <select id="selectOutTicketOrder" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SaleQueryOrderVo">
+        select DISTINCT
+        f.SALE_ORDER_NO, f.ID, f.OWNER, f.DEMAND_NO, f.LEG_TYPE, f.CONTACT_NAME, f.CONTACT_PHONE, f.CONTACT_MOBILE,
+        f.CONTACT_MAIL, f.SALE_REMARK, f.VALID, f.VERSION, f.LOCKER, f.LOCK_TIME, f.CREATE_TYPE, f.CREATE_TIME,
+        f.MODIFY_TIME,  (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,(select NAME from SM_USER where LOGIN_NAME =aa.MODIFIER) as MODIFIER,o.ORDER_CHILD_STATUS,f.LINKTYPE
+        FROM
+        IFT_SALE_ORDER_EXT f
+        left join OS_SALEORDER o on f.SALE_ORDER_NO = o.SALE_ORDER_NO
+        left join IFT_LEG l on l.SALE_ORDER_NO = f.SALE_ORDER_NO
+        left join IFT_PNR p on p.SOURCE_NO = f.SALE_ORDER_NO
+        left join IFT_SALE_ORDER_DETAIL d on d.SALE_ORDER_NO = f.SALE_ORDER_NO
+        left join IFT_PASSENGER a on a.SALE_ORDER_NO = f.SALE_ORDER_NO
+        left join OS_BUYORDER aa ON f.SALE_ORDER_NO=aa.SALE_ORDER_NO
+        left join IFT_BUY_ORDER_EXT ab ON aa.BUY_ORDER_NO=ab.BUY_ORDER_NO
+        left join CPS_CUSTOMER CC ON CC.CUSTOMER_NO=o.CUSTOMER_NO
+        left join  IFT_BUY_ORDER_DETAIL IBOD ON IBOD.BUY_ORDER_NO=aa.BUY_ORDER_NO
+        where
+        <trim suffixOverrides="AND">
+            o.ORDER_CHILD_STATUS = 4 AND o.GOODS_TYPE != 6 AND o.TRANSATION_ORDER_NO NOT IN
+            (SELECT ls.ORDER_NO FROM LS_DELIVERY_BATCH_OS ls) AND f.VALID = 1 AND
+            <if test="bookStartDate != null and bookStartDate !=''">
+                <![CDATA[
+                  DATE_FORMAT(o.ORDERING_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{bookStartDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
+                ]]>
+            </if>
+            <if test="bookEndDate !=null and bookEndDate !=''">
+                <![CDATA[
+                  DATE_FORMAT(o.ORDERING_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{bookEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
+                ]]>
+            </if>
+            <if test="flyStartDate != null and flyStartDate !=''">
+                <![CDATA[
+                  DATE_FORMAT(l.DEP_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{flyStartDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
+                ]]>
+            </if>
+            <if test="flyStartEndDate !=null and flyStartEndDate !=''">
+                <![CDATA[
+                  DATE_FORMAT(l.DEP_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{flyStartEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
+                ]]>
+            </if>
+            <if test="flyEndDate != null and flyEndDate !=''">
+                <![CDATA[
+                  DATE_FORMAT(l.ARR_TIME , '%Y-%m-%d') >= DATE_FORMAT(#{flyEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
+                ]]>
+            </if>
+            <if test=" flyEndArrDate !=null and flyEndArrDate !='' ">
+                <![CDATA[
+                  DATE_FORMAT(l.ARR_TIME , '%Y-%m-%d')<= DATE_FORMAT(#{flyEndArrDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
+                ]]>
+            </if>
+            <if test="customerType != null and customerType !='' ">
+                o.CUSTOMER_TYPE_NO = #{customerType,jdbcType = VARCHAR} AND
+            </if>
+            <if test="customerCount==false and customerNo != null and customerNo !='' ">
+                o.CUSTOMER_NO = #{customerNo,jdbcType = VARCHAR} AND
+            </if>
+            <if test="pnr != null and pnr !='' ">
+                p.PNR = #{pnr,jdbcType = VARCHAR} AND
+            </if>
+            <if test="orderStatusArray!=null and orderStatusArray!='' ">
+                <if test="queryType != null and queryType ==1 ">
+                    o.ORDER_CHILD_STATUS in
+                </if>
+                <if test="queryType != null and queryType ==2 ">
+                    aa.BUY_CHILD_STATUS in
+                </if>
+                <foreach collection="orderStatusArray" item="orderStatusArray"
+                         index="index" open="(" close=")" separator=",">
+                    #{orderStatusArray[${index}]}
+                </foreach>
+                AND
+            </if>
+            <if test="orderSource != null and orderSource !='' ">
+                o.SOURCE_CHANNEL_NO = #{orderSource,jdbcType = VARCHAR} AND
+            </if>
+            <if test="transationOrderNo != null and transationOrderNo !='' ">
+                o.TRANSATION_ORDER_NO = #{transationOrderNo,jdbcType = VARCHAR} AND
+            </if>
+            <if test="ticketNo != null and ticketNo !='' ">
+                d.TICKET_NO = #{ticketNo,jdbcType = VARCHAR} AND
+            </if>
+            <if test="passenger != null and passenger !='' ">
+                CONCAT_WS('',a.SURNAME,a.`NAME`) like CONCAT('%',#{passenger,jdbcType=VARCHAR},'%' ) AND
+            </if>
+            <if test="airline != null and airline !='' ">
+                l.AIRLINE = #{airline,jdbcType = VARCHAR} AND
+            </if>
+            <if test="ticketAirline != null and ticketAirline !='' ">
+                ab.AIRLINE = #{ticketAirline,jdbcType = VARCHAR} AND
+            </if>
+            <if test="departureCity != null and departureCity !='' ">
+                l.DEP_AIRPORT = #{departureCity,jdbcType = VARCHAR} AND
+            </if>
+            <if test="arrivalCity != null and arrivalCity !='' ">
+                l.ARR_AIRPORT = #{arrivalCity,jdbcType = VARCHAR} AND
+            </if>
+            <if test="contacts!=null and contacts!=''">
+                f.CONTACT_NAME like CONCAT('%',#{contacts,jdbcType=VARCHAR},'%' ) AND
+            </if>
+            <if test="phone!=null and phone !=''">
+                f.CONTACT_PHONE like CONCAT('%',#{phone,jdbcType=VARCHAR},'%' ) AND
+            </if>
+
+            <if test="saleOrderNo!=null">
+                f.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} AND
+            </if>
+            <if test="payStatus!=null">
+                o.PAY_STATUS = #{payStatus,jdbcType=BIGINT} AND
+            </if>
+            <if test="supplierNo!=null">
+                aa.SUPPLIER_NO = #{supplierNo,jdbcType=BIGINT} AND
+            </if>
+            <if test="cabin!=null and cabin !=''">
+                d.CABIN = #{cabin,jdbcType=VARCHAR} AND
+            </if>
+            <if test="issueTime != null">
+                ISSUE_TIME=#{issueTime,jdbcType=TIMESTAMP} AND
+            </if>
+            <if test="locker!=null">
+                <choose>
+                    <when test="locker == 0">f.LOCKER=0 AND</when>
+                    <when test="locker == 1">f.LOCKER!=0 AND</when>
+                    <otherwise>f.LOCKER = #{locker,jdbcType=BIGINT} AND</otherwise>
+                </choose>
+            </if>
+            <if test="cardNo!=null and cardNo !=''">
+                a.CERT_NO like CONCAT('%',#{cardNo,jdbcType=VARCHAR},'%' ) AND
+            </if>
+            <if test="createTypeStatusArray!=null and createTypeStatusArray!='' ">
+                CREATE_TYPE in
+                <foreach collection="createTypeStatusArray" item="createTypeStatusArray"
+                         index="index" open="(" close=")" separator=",">
+                    #{createTypeStatusArray[${index}]}
+                </foreach>
+                AND
+            </if>
+            <if test="orderStatus!=null">
+                d.STATUS = #{orderStatus,jdbcType=BIGINT} AND
+            </if>
+            <if test="payStatuss!=null and payStatuss!='' ">
+                o.PAY_STATUS in (${payStatuss}) AND
+            </if>
+            <if test="longList!=null and longList.size>0">
+                CC.CUSTOMER_NO IN
+                <foreach item="longList" index="index" collection="longList" open="(" separator="," close=")">
+                    ${longList}
+                </foreach>
+                AND
+            </if>
+            <if test="modifier!=null and modifier!=''">
+                o.MODIFIER = #{modifier,jdbcType=VARCHAR}AND
+            </if>
+            <if test="orderChildStatus!=null">
+                o.ORDER_CHILD_STATUS = #{orderChildStatus,jdbcType=BIGINT}AND
+            </if>
+            <if test="orderChildStatus!=null">
+                o.ORDER_CHILD_STATUS = #{orderChildStatus,jdbcType=BIGINT} AND
+            </if>
+            <if test="issuemodifier!=null and issuemodifier!=''">
+                IBOD.CREATOR= #{issuemodifier,jdbcType=VARCHAR} AND
+            </if>
+            <if test="operator!=null and operator!=''">
+                d.CREATOR= #{operator,jdbcType=VARCHAR} AND
+            </if>
+            <!--  <if test="linkType!=null and linkType !=''">
+                 f.LINKTYPE = #{linkType,jdbcType=VARCHAR} AND
+             </if> -->
+        </trim>
+        order by f.CREATE_TIME desc
+    </select>
+</mapper>

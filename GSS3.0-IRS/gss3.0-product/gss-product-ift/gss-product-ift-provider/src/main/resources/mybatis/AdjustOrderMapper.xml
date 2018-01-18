@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ift.dao.AdjustOrderDao" >
+  
+  <resultMap id="BaseResultMap" type="com.tempus.gss.product.ift.api.entity.AdjustOrder" >
+    <id column="ID" property="id" jdbcType="DECIMAL" />
+    <result column="TICKETNO" property="ticketno" jdbcType="VARCHAR" />
+    <result column="AIRCODE" property="aircode" jdbcType="VARCHAR" />
+    <result column="ORDERID" property="orderid" jdbcType="DECIMAL" />
+    <result column="SUPPLIER" property="supplier" jdbcType="VARCHAR" />
+    <result column="ISSUEDATE" property="issuedate" jdbcType="VARCHAR" />
+    <result column="ERRORINFO" property="errorinfo" jdbcType="VARCHAR" />
+    <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+    <result column="ADJUSTFLAG" property="adjustflag" jdbcType="VARCHAR" />
+    <result column="SELECTTYPES" property="selecttypes" jdbcType="VARCHAR" />
+    <result column="USERID" property="userid" jdbcType="VARCHAR" />
+    <result column="TYPE" property="type" jdbcType="VARCHAR" />
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    ID, TICKETNO, AIRCODE, ORDERID, SUPPLIER, ISSUEDATE, ERRORINFO, REMARK, ADJUSTFLAG, 
+    SELECTTYPES, USERID, TYPE
+  </sql>
+  
+   <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.AdjustOrder" >
+    insert into IFT_ADJUSTORDER (ID, TICKETNO, AIRCODE, 
+      ORDERID, SUPPLIER, ISSUEDATE, 
+      ERRORINFO, REMARK, ADJUSTFLAG, 
+      SELECTTYPES, USERID, TYPE
+      )
+    values (#{id,jdbcType=DECIMAL}, #{ticketno,jdbcType=VARCHAR}, #{aircode,jdbcType=VARCHAR}, 
+      #{orderid,jdbcType=DECIMAL}, #{supplier,jdbcType=VARCHAR}, #{issuedate,jdbcType=VARCHAR}, 
+      #{errorinfo,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, #{adjustflag,jdbcType=VARCHAR}, 
+      #{selecttypes,jdbcType=VARCHAR}, #{userid,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR}
+      )
+  </insert>
+  <select id="getAdjustOrderByOrderId" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.AdjustOrder" >
+    select
+       distinct 
+    <include refid="Base_Column_List" />
+       from IFT_ADJUSTORDER
+    <if test="adjustflag != null">
+        	ADJUSTFLAG = #{adjustflag,jdbcType=VARCHAR} 
+    </if>
+    <if test="orderid != null">
+        	ORDERID = #{orderid,jdbcType=VARCHAR} 
+    </if>
+    order by  ISSUEDATE desc 
+  </select>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.AdjustOrder" >
+    update IFT_ADJUSTORDER
+    <set >
+      <if test="ticketno != null" >
+        TICKETNO = #{ticketno,jdbcType=VARCHAR},
+      </if>
+      <if test="aircode != null" >
+        AIRCODE = #{aircode,jdbcType=VARCHAR},
+      </if>
+      <if test="orderid != null" >
+        ORDERID = #{orderid,jdbcType=DECIMAL},
+      </if>
+      <if test="supplier != null" >
+        SUPPLIER = #{supplier,jdbcType=VARCHAR},
+      </if>
+      <if test="issuedate != null" >
+        ISSUEDATE = #{issuedate,jdbcType=VARCHAR},
+      </if>
+      <if test="errorinfo != null" >
+        ERRORINFO = #{errorinfo,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="adjustflag != null" >
+        ADJUSTFLAG = #{adjustflag,jdbcType=VARCHAR},
+      </if>
+      <if test="selecttypes != null" >
+        SELECTTYPES = #{selecttypes,jdbcType=VARCHAR},
+      </if>
+      <if test="userid != null" >
+        USERID = #{userid,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null" >
+        TYPE = #{type,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=DECIMAL}
+  </update>
+</mapper>

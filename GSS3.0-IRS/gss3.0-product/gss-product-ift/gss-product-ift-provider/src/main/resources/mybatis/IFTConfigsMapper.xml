@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ift.dao.setting.ConfigsDao">
+	
+	<select id="find" resultType="com.tempus.gss.product.ift.api.entity.setting.IFTConfigs">
+		SELECT T1.* 
+		FROM IFT_CONFIGS AS T1 
+		WHERE T1.OWNER=#{owner} AND T1.VALID=1 AND T1.CHANNEL_ID IN 		
+		<foreach collection="channelIds" item="item" open="(" close=")" separator=", ">#{item}</foreach>
+	   	ORDER BY T1.CHANNEL_TYPE ASC
+	</select>
+	
+	<select id="query" resultType="com.tempus.gss.product.ift.api.entity.setting.IFTConfigs">
+		SELECT T1.* 
+		FROM IFT_CONFIGS AS T1 
+		WHERE T1.OWNER=#{owner} AND T1.VALID=1 
+	   	<if test="null != channelId">AND T1.CHANNEL_ID=#{channelId} </if>
+	   	<if test="null != channelType">AND T1.CHANNEL_TYPE=#{channelType} </if>
+	   	<if test="null != status">AND T1.STATUS=#{status} </if>
+	   	ORDER BY T1.CHANNEL_TYPE ASC
+	</select>
+
+	<select id="exist" resultType="java.lang.Integer">
+		SELECT COUNT(1) TOTAL 
+		FROM IFT_CONFIGS T1 
+		WHERE T1.OWNER=#{owner} AND T1.VALID=1 AND T1.CHANNEL_ID=#{channelId} 
+		<if test="null != id">AND T1.ID&lt;&gt;#{id} </if>
+	</select>
+
+	<insert id="insert">
+		INSERT INTO IFT_CONFIGS( ID, OWNER, CHANNEL_ID, CHANNEL_TYPE, OFFICE, CONFIGS, 
+			REMARK, STATUS, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME, VALID ) 
+		VALUES( #{id}, #{owner}, #{channelId}, #{channelType}, #{office}, #{configs}, 
+			#{remark}, #{status}, #{creator}, #{createTime}, #{modifier}, #{modifyTime}, 1 ) 
+	</insert>
+
+	<update id="update" >
+		UPDATE IFT_CONFIGS 
+			SET 
+			<if test="null != office">OFFICE=#{office}, </if>
+			<if test="null != configs">CONFIGS=#{configs}, </if>
+			<if test="null != remark">REMARK=#{remark}, </if>
+			<if test="null != status">STATUS=#{status}, </if>
+			MODIFIER=#{modifier}, MODIFY_TIME=#{modifyTime} 
+		WHERE ID=#{id} AND OWNER=#{owner} AND VALID=1 
+	</update>
+
+	<update id="delete">
+		UPDATE IFT_CONFIGS 
+			SET VALID=0, MODIFIER=#{modifier}, MODIFY_TIME=#{modifyTime} 
+		WHERE CHANNEL_ID=#{channelId} AND OWNER=#{owner} AND VALID=1 
+	</update>
+
+</mapper>

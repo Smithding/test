@@ -1,0 +1,665 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ift.dao.SaleChangeExtDao">
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.ift.api.entity.SaleChangeExt">
+        <!--销售单废退改编号-->
+        <id column="SALE_CHANGE_NO" property="saleChangeNo" jdbcType="BIGINT"/>
+        <!--ID-->
+        <result column="ID" property="id" jdbcType="BIGINT"/>
+        <!--数据归属单位-->
+        <result column="OWNER" property="owner" jdbcType="INTEGER"/>
+        <!--废退方式：1：自愿、2：非自愿-->
+        <result column="REFUND_WAY" property="refundWay" jdbcType="INTEGER"/>
+        <!--操作人 默认为：sys-->
+        <result column="MODIFIER" property="modifier" jdbcType="VARCHAR"/>
+        <!--启用状态 1：启用， 2：停用-->
+        <result column="STATUS" property="status" jdbcType="VARCHAR"/>
+        <!--修改时间-->
+        <result column="MODIFY_TIME" property="modifyTime" jdbcType="TIMESTAMP"/>
+        <!--删除标志 0 无效 已删除 1 有效-->
+        <result column="VALID" property="valid" jdbcType="TINYINT"/>
+        <!--创建时间-->
+        <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP"/>
+        <!--创建人-->
+        <result column="CREATOR" property="creator" jdbcType="VARCHAR"/>
+        <!--将销售单锁定的用户的Id 有大于0的值，表示已被用户锁定，是该用户的Id.-->
+        <result column="LOCKER" property="locker" jdbcType="BIGINT"/>
+        <!--锁定时间-->
+        <result column="LOCK_TIME" property="lockTime" jdbcType="TIMESTAMP"/>
+        <!--业务类型 1废 2退 3改(同SaleChange的 orderChangeType 属性)-->
+        <result column="CHANGE_TYPE" property="changeType" jdbcType="INTEGER"/>
+        <!--改签类型 1升舱 2改期 3换开  -->
+        <result column="TICKET_CHANGE_TYPE" property="ticketChangeType" jdbcType="INTEGER"/>
+        <!--联系人名称-->
+        <result column="CONTACT_NAME" property="contactName" jdbcType="VARCHAR"/>
+        <!--联系人手机号-->
+        <result column="CONTACT_MOBILE" property="contactMobile" jdbcType="VARCHAR"/>
+        <!--用户备注-->
+        <result column="CUSTOMER_REMARK" property="customerRemark" jdbcType="VARCHAR"/>
+        <!--拒绝原因-->
+        <result column="REFUSE_REASON" property="refuseReason" jdbcType="VARCHAR"/>
+        <!-- 航司状态 -->
+        <result column="AIRLINE_STATUS" property="airlineStatus" jdbcType="INTEGER"/>
+        <!-- 审核人员 -->
+        <result column="AUDIT_PERSON" property="auditPerson" jdbcType="VARCHAR"/>
+        <!-- 审核时间 -->
+        <result column="AUDIT_TIME" property="auditTime" jdbcType="VARCHAR"/>
+        <!-- 退票文件上传路径 -->
+        <result column="REFUND_FILE_URL" property="refundFileUrl" jdbcType="VARCHAR"/>
+        <!--客商编号-->
+        <result column="CUSTOMER_NO" property="customerNo" jdbcType="BIGINT"/>
+        <!--客商类型编号-->
+        <result column="CUSTOMER_TYPE_NO" property="customerTypeNo" jdbcType="BIGINT"/>
+        <!--PNR编号-->
+        <result column="PNR_NO" property="pnrNo" jdbcType="BIGINT"/>
+        <!--改签备注-->
+        <result column="CHANGE_REMARK" property="changeRemark" jdbcType="VARCHAR"/>
+        <!--采购币种-->
+        <result column="CURRENCY" property="currency" jdbcType="VARCHAR"/>
+        <!--销售币种-->
+        <result column="SALE_CURRENCY" property="saleCurrency" jdbcType="VARCHAR"/>
+        <!--汇率-->
+        <result column="EXCHANGE_RATE" property="exchangeRate" jdbcType="DECIMAL"/>
+        <!--一对多关联销售单明细-->
+        <collection property="saleChangeDetailList" ofType="com.tempus.gss.product.ift.api.entity.SaleChangeDetail"
+                    column="SALE_CHANGE_NO"
+                    select="com.tempus.gss.product.ift.dao.SaleChangeDetailDao.selectBySaleChangeNo"/>
+        <!--一对多乘客集合-->
+        <collection property="passengerChangePriceList" ofType="com.tempus.gss.product.ift.api.entity.PassengerChangePrice"
+                    column="SALE_CHANGE_NO"
+                    select="com.tempus.gss.product.ift.dao.PassengerChangePriceDao.selectPricerByChangeNo"/>
+        <!--一对多乘客集合-->
+        <collection property="passengerRefundPriceList" ofType="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice"
+                    column="SALE_CHANGE_NO"
+                    select="com.tempus.gss.product.ift.dao.PassengerRefundPriceDao.selectPassengerRefundPriceBySaleOrderNo"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        SALE_CHANGE_NO, ID, OWNER, REFUND_WAY,  MODIFIER, STATUS, MODIFY_TIME,
+        VALID, CREATE_TIME, CREATOR, LOCKER, LOCK_TIME, CHANGE_TYPE, CONTACT_NAME, CONTACT_MOBILE,
+        CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL,CUSTOMER_NO, 
+    CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,CURRENCY,SALE_CURRENCY,EXCHANGE_RATE
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_SALE_CHANGE_EXT
+        where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from IFT_SALE_CHANGE_EXT
+        where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.SaleChangeExt">
+        insert into IFT_SALE_CHANGE_EXT (SALE_CHANGE_NO, ID, OWNER,
+        REFUND_WAY,  MODIFIER,
+        STATUS, MODIFY_TIME, VALID,
+        CREATE_TIME, CREATOR, LOCKER,
+        LOCK_TIME, CHANGE_TYPE, CONTACT_NAME,
+        CONTACT_MOBILE, CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL, 
+      	CUSTOMER_NO, CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK
+        )
+        values (#{saleChangeNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
+        #{refundWay,jdbcType=INTEGER},  #{modifier,jdbcType=VARCHAR},
+        #{status,jdbcType=VARCHAR}, #{modifyTime,jdbcType=TIMESTAMP}, #{valid,jdbcType=TINYINT},
+        #{createTime,jdbcType=TIMESTAMP}, #{creator,jdbcType=VARCHAR}, #{locker,jdbcType=BIGINT},
+        #{lockTime,jdbcType=TIMESTAMP}, #{changeType,jdbcType=INTEGER}, #{contactName,jdbcType=VARCHAR},
+        #{contactMobile,jdbcType=VARCHAR}, #{customerRemark,jdbcType=VARCHAR}, #{refuseReason,jdbcType=VARCHAR},
+        #{airlineStatus,jdbcType=INTEGER},#{auditPerson,jdbcType=VARCHAR},#{auditTime,jdbcType=VARCHAR},#{refundFileUrl,jdbcType=VARCHAR},
+	    #{customerNo,jdbcType=BIGINT}, #{customerTypeNo,jdbcType=BIGINT}, #{ticketChangeType,jdbcType=INTEGER}),
+	    #{pnrNo,jdbcType=BIGINT}), #{changeRemark,jdbcType=VARCHAR})
+        )
+    </insert>
+    <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.SaleChangeExt">
+        insert into IFT_SALE_CHANGE_EXT
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="saleChangeNo != null">
+                SALE_CHANGE_NO,
+            </if>
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="owner != null">
+                OWNER,
+            </if>
+            <if test="refundWay != null">
+                REFUND_WAY,
+            </if>
+
+            <if test="modifier != null">
+                MODIFIER,
+            </if>
+            <if test="status != null">
+                STATUS,
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME,
+            </if>
+            <if test="valid != null">
+                VALID,
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME,
+            </if>
+            <if test="creator != null">
+                CREATOR,
+            </if>
+            <if test="locker != null">
+                LOCKER,
+            </if>
+            <if test="lockTime != null">
+                LOCK_TIME,
+            </if>
+            <if test="changeType != null">
+                CHANGE_TYPE,
+            </if>
+            <if test="contactName != null">
+                CONTACT_NAME,
+            </if>
+            <if test="contactMobile != null">
+                CONTACT_MOBILE,
+            </if>
+            <if test="customerRemark != null">
+                CUSTOMER_REMARK,
+            </if>
+            <if test="refuseReason != null">
+                REFUSE_REASON,
+            </if>
+            <if test="airlineStatus != null">
+                AIRLINE_STATUS,
+            </if>
+            <if test="auditPerson != null">
+                AUDIT_PERSON,
+            </if>
+            <if test="auditTime != null">
+                AUDIT_TIME,
+            </if>
+            <if test="refundFileUrl !=null">
+                REFUND_FILE_URL,
+            </if>
+            <if test="customerNo != null">
+                CUSTOMER_NO,
+            </if>
+            <if test="customerTypeNo != null">
+                CUSTOMER_TYPE_NO,
+            </if>
+            <if test="ticketChangeType !=null">
+            	TICKET_CHANGE_TYPE,
+            </if>
+            <if test="pnrNo !=null">
+                PNR_NO,
+            </if>
+            <if test="changeRemark !=null">
+                CHANGE_REMARK,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="saleChangeNo != null">
+                #{saleChangeNo,jdbcType=BIGINT},
+            </if>
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null">
+                #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="refundWay != null">
+                #{refundWay,jdbcType=INTEGER},
+            </if>
+
+            <if test="modifier != null">
+                #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="valid != null">
+                #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="locker != null">
+                #{locker,jdbcType=BIGINT},
+            </if>
+            <if test="lockTime != null">
+                #{lockTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="changeType != null">
+                #{changeType,jdbcType=INTEGER},
+            </if>
+            <if test="ticketChangeType !=null">
+            	#{ticketChangeType,jdbcType=INTEGER},
+            </if>
+            <if test="contactName != null">
+                #{contactName,jdbcType=VARCHAR},
+            </if>
+            <if test="contactMobile != null">
+                #{contactMobile,jdbcType=VARCHAR},
+            </if>
+            <if test="customerRemark != null">
+                #{customerRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="refuseReason != null">
+                #{refuseReason,jdbcType=VARCHAR},
+            </if>
+            <if test="airlineStatus != null">
+                #{airlineStatus,jdbcType=INTEGER},
+            </if>
+            <if test="auditPerson != null">
+                #{auditPerson,jdbcType=VARCHAR},
+            </if>
+            <if test="auditTime != null">
+                #{auditTime,jdbcType=VARCHAR},
+            </if>
+            <if test="refundFileUrl!=null">
+                #{refundFileUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="customerNo != null">
+                #{customerNo,jdbcType=BIGINT},
+            </if>
+            <if test="customerTypeNo != null">
+                #{customerTypeNo,jdbcType=BIGINT},
+            </if>
+            <if test="pnrNo !=null">
+                #{pnrNo,jdbcType=BIGINT},
+            </if>
+            <if test="changeRemark !=null">
+                #{changeRemark,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.SaleChangeExt">
+        update IFT_SALE_CHANGE_EXT
+        <set>
+            <if test="id != null">
+                ID = #{id,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="refundWay != null">
+                REFUND_WAY = #{refundWay,jdbcType=INTEGER},
+            </if>
+
+            <if test="modifier != null">
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                STATUS = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="locker != null">
+                LOCKER = #{locker,jdbcType=BIGINT},
+            </if>
+            <if test="lockTime != null">
+                LOCK_TIME = #{lockTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="changeType != null">
+                CHANGE_TYPE = #{changeType,jdbcType=INTEGER},
+            </if>
+            <if test="contactName != null">
+                CONTACT_NAME = #{contactName,jdbcType=VARCHAR},
+            </if>
+            <if test="contactMobile != null">
+                CONTACT_MOBILE = #{contactMobile,jdbcType=VARCHAR},
+            </if>
+            <if test="customerRemark != null">
+                CUSTOMER_REMARK = #{customerRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="refuseReason != null">
+                REFUSE_REASON = #{refuseReason,jdbcType=VARCHAR},
+            </if>
+            <if test="airlineStatus != null">
+                AIRLINE_STATUS = #{airlineStatus,jdbcType=INTEGER},
+            </if>
+            <if test="auditPerson != null">
+                AUDIT_PERSON = #{auditPerson,jdbcType=VARCHAR},
+            </if>
+            <if test="auditTime != null">
+                AUDIT_TIME = #{auditTime,jdbcType=VARCHAR},
+            </if>
+            <if test="refundFileUrl!=null">
+                REFUND_FILE_URL = #{refundFileUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="customerNo != null">
+                CUSTOMER_NO = #{customerNo,jdbcType=BIGINT},
+            </if>
+            <if test="customerTypeNo != null">
+                CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT},
+            </if>
+            <if test="ticketChangeType !=null">
+            	TICKET_CHANGE_TYPE=#{ticketChangeType,jdbcType=INTEGER},
+            </if>
+            <if test="pnrNo !=null">
+                PNR_No=#{pnrNo,jdbcType=BIGINT},
+            </if>
+            <if test="changeRemark !=null">
+                CHANGE_REMARK= #{changeRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="currency!=null and currency!=''">
+                CURRENCY=#{currency,jdbcType=VARCHAR},
+            </if>
+            <if test="saleCurrency!=null and saleCurrency!=''">
+                SALE_CURRENCY=#{saleCurrency,jdbcType=VARCHAR},
+            </if>
+            <if test="exchangeRate!=null">
+                EXCHANGE_RATE =#{exchangeRate,jdbcType=DECIMAL}
+            </if>
+        </set>
+        where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.ift.api.entity.SaleChangeExt">
+        update IFT_SALE_CHANGE_EXT
+        set ID = #{id,jdbcType=BIGINT},
+        OWNER = #{owner,jdbcType=INTEGER},
+        REFUND_WAY = #{refundWay,jdbcType=INTEGER},
+     	TICKET_CHANGE_TYPE=#{ticketChangeType,jdbcType=INTEGER},
+        MODIFIER = #{modifier,jdbcType=VARCHAR},
+        STATUS = #{status,jdbcType=VARCHAR},
+        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+        VALID = #{valid,jdbcType=TINYINT},
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+        CREATOR = #{creator,jdbcType=VARCHAR},
+        LOCKER = #{locker,jdbcType=BIGINT},
+        LOCK_TIME = #{lockTime,jdbcType=TIMESTAMP},
+        CHANGE_TYPE = #{changeType,jdbcType=INTEGER},
+        CONTACT_NAME = #{contactName,jdbcType=VARCHAR},
+        CONTACT_MOBILE = #{contactMobile,jdbcType=VARCHAR},
+        CUSTOMER_REMARK = #{customerRemark,jdbcType=VARCHAR},
+        REFUSE_REASON = #{refuseReason,jdbcType=VARCHAR},
+        AIRLINE_STATUS =  #{airlineStatus,jdbcType=INTEGER},
+        AUDIT_PERSON = #{auditPerson,jdbcType=VARCHAR},
+        AUDIT_TIME =  #{auditTime,jdbcType=VARCHAR},
+         REFUND_FILE_URL = #{refundFileUrl,jdbcType=VARCHAR},
+	 CUSTOMER_NO = #{customerNo,jdbcType=BIGINT},
+      CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT}
+        where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
+    </update>
+    <select id="queryBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
+          SELECT DISTINCT i.SALE_CHANGE_NO,i.ID,i. OWNER,i.REFUND_WAY,i.MODIFIER,i. STATUS,i.MODIFY_TIME,
+          i.VALID,i.CREATE_TIME,i.CREATOR,i.LOCKER,i.LOCK_TIME,i.CHANGE_TYPE, i.CONTACT_NAME,i.CONTACT_MOBILE,
+          i.CUSTOMER_REMARK, i.REFUSE_REASON, i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.TICKET_CHANGE_TYPE
+        from IFT_SALE_CHANGE_EXT i
+        LEFT JOIN OS_SALECHANGE s on s.SALE_CHANGE_NO=  i.SALE_CHANGE_NO
+        where s.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+    </select>
+    <select id="queryObjByKey" resultMap="BaseResultMap"
+            parameterType="com.tempus.gss.product.ift.api.entity.vo.SaleChangeExtVo">
+        select DISTINCT
+        i.SALE_CHANGE_NO, i.ID, i.OWNER, i.REFUND_WAY, i.MODIFIER, i.STATUS, i.MODIFY_TIME,
+        i.VALID, i.CREATE_TIME, i.CREATOR, i.LOCKER, i.LOCK_TIME, i.CHANGE_TYPE, i.CONTACT_NAME, i.CONTACT_MOBILE,
+        i.CUSTOMER_REMARK, i.REFUSE_REASON,i.TICKET_CHANGE_TYPE
+        ,i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO
+        FROM
+        IFT_SALE_CHANGE_EXT i
+        left join OS_SALECHANGE o on o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
+        left join OS_SALEORDER w on w.SALE_ORDER_NO = o.SALE_ORDER_NO
+        left join IFT_SALE_CHANGE_DETAIL d on d.SALE_CHANGE_NO = i.SALE_CHANGE_NO
+        left join IFT_SALE_ORDER_DETAIL od on od.SALE_ORDER_DETAIL_NO=d.SALE_ORDER_DETAIL_NO
+        left join IFT_PASSENGER p on od.PASSENGER_NO=p.PASSENGER_NO
+        left join IFT_PNR n on n.SOURCE_NO = o.SALE_ORDER_NO
+        left join IFT_LEG l on l.LEG_NO = od.LEG_NO
+        left join OS_BUYORDER k on k.SALE_ORDER_NO = o.SALE_ORDER_NO
+        left join OS_BUYCHANGE m on m.BUY_ORDER_NO = k.BUY_ORDER_NO
+        left join IFT_BUY_CHANGE_EXT h on h.BUY_CHANGE_NO = m.BUY_CHANGE_NO
+        left join IFT_BUY_ORDER_EXT a on a.BUY_ORDER_NO = k.BUY_ORDER_NO
+        left join CPS_CUSTOMER CC ON CC.CUSTOMER_NO = w.CUSTOMER_NO
+        WHERE i.VALID = 1
+        <trim suffixOverrides="AND">
+            <if test="saleChangeNo != null and saleChangeNo !=''">
+                AND i.SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
+            </if>
+            <if test="saleOrderNo != null and saleOrderNo !=''">
+                AND o.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+            </if>
+            <if test="beforeDate!=null and beforeDate !='' ">
+                <![CDATA[
+                    AND    DATE_FORMAT(i.CREATE_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{beforeDate,jdbcType=TIMESTAMP},'%Y-%m-%d')
+	            ]]>
+            </if>
+            <if test="endDate!=null and endDate !=''">
+                <![CDATA[
+	            	AND DATE_FORMAT(i.CREATE_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{endDate,jdbcType=TIMESTAMP},'%Y-%m-%d')
+	             ]]>
+            </if>
+            <if test="auditStartTime!=null and auditStartTime !='' ">
+                <![CDATA[
+	                AND DATE_FORMAT(i.AUDIT_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{auditStartTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+	            ]]>
+            </if>
+            <if test="auditEndTime!=null and auditEndTime !=''">
+                <![CDATA[
+	             	AND DATE_FORMAT(i.AUDIT_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{auditEndTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+	             ]]>
+            </if>
+
+            <if test="depStartTime!=null and depStartTime !='' ">
+                <![CDATA[
+	                AND DATE_FORMAT(l.DEP_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{depStartTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+	            ]]>
+            </if>
+            <if test="depEndTime!=null and depEndTime !=''">
+                <![CDATA[
+	             	AND DATE_FORMAT(l.DEP_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{depEndTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+	             ]]>
+            </if>
+            <if test="refundWay != null">
+                <choose>
+                    <when test="refundWay ==0">
+                        AND i.REFUND_WAY BETWEEN 1 AND 2
+                    </when>
+                    <when test="refundWay ==1">
+                        AND i.REFUND_WAY = #{refundWay,jdbcType=INTEGER}
+                    </when>
+                    <when test="refundWay ==2">
+                        AND i.REFUND_WAY = #{refundWay,jdbcType=INTEGER}
+                    </when>
+                </choose>
+            </if>
+            <if test="customerRemark!=null and customerRemark!='' ">
+                AND i.CUSTOMER_REMARK=#{customerRemark,jdbcType=VARCHAR}
+            </if>
+            <if test="source!=null and source!='' ">
+                AND w.SOURCE_CHANNEL_NO=#{source,jdbcType=VARCHAR}
+            </if>
+            <if test="owner!=null and owner!=0">
+                AND i.OWNER = #{owner,jdbcType=INTEGER}
+            </if>
+            <if test="pnr!=null and pnr!=''">
+                AND n.PNR = #{pnr,jdbcType=VARCHAR}
+            </if>
+            <if test="changeType !=null and changeType!=0">
+                AND i.CHANGE_TYPE = #{changeType,jdbcType=INTEGER}
+            </if>
+            <if test="ticketChangeType !=null and ticketChangeType!=0">
+                <choose>
+                    <when test="toDoType!=null and toDoType==1">AND i.TICKET_CHANGE_TYPE != #{ticketChangeType,jdbcType=INTEGER}</when>
+                    <otherwise>AND i.TICKET_CHANGE_TYPE = #{ticketChangeType,jdbcType=INTEGER}</otherwise>
+                </choose>
+            </if>
+            <if test="airline !=null and airline!=''">
+                AND a.AIRLINE = #{airline,jdbcType=VARCHAR}
+            </if>
+            <if test="changeType==0">
+                AND (i.CHANGE_TYPE = 1 or i.CHANGE_TYPE =2)
+            </if>
+            <if test="pgerName !=null and pgerName !=''">
+                AND CONCAT_WS('',p.SURNAME,p.`NAME`) like CONCAT('%',#{pgerName,jdbcType=VARCHAR},'%' )
+            </if>
+            <if test="locker !=null">
+               <choose>
+	            	<when test="locker == 0">AND i.LOCKER = 0 </when>
+	            	<when test="locker == 1">AND i.LOCKER != 0 </when>
+	            	<otherwise>AND i.LOCKER = #{locker,jdbcType=BIGINT} </otherwise>
+            	</choose>
+            </if>
+            <if test="ticketNo !=null and ticketNo !=''">
+                AND od.TICKET_NO like CONCAT ('%', #{ticketNo,jdbcType=VARCHAR} ,'%')
+            </if>
+            <if test="ticketType !=null and ticketType !=''">
+                AND h.TICKET_TYPE = #{ticketType,jdbcType=VARCHAR}
+            </if>
+            <if test="office !=null and office !=''">
+                AND h.OFFICE = #{office,jdbcType=VARCHAR}
+            </if>
+            <if test="supplierNo !=null and supplierNo !=''">
+                AND k.SUPPLIER_NO = #{supplierNo,jdbcType=BIGINT}
+            </if>
+            <if test="depAirport !=null and depAirport !='' and (arrAirport ==null || arrAirport =='')">
+                AND l.DEP_AIRPORT = #{depAirport,jdbcType=VARCHAR}
+            </if>
+            <if test="arrAirport !=null and arrAirport !='' and (depAirport ==null || depAirport =='')">
+                AND l.ARR_AIRPORT = #{arrAirport,jdbcType=VARCHAR}
+            </if>
+            <if test="depAirport !=null and depAirport !='' and arrAirport !=null and arrAirport !=''">
+                AND (l.DEP_AIRPORT = #{depAirport,jdbcType=VARCHAR} or  l.ARR_AIRPORT = #{arrAirport,jdbcType=VARCHAR})
+            </if>
+            <if test="status == 33">
+                AND ((m.CHILD_STATUS =1 and i.LOCKER !=0 ) or (m.CHILD_STATUS=2 and i.LOCKER=0))
+            </if>
+            <if test="buyStatus!= null">
+                AND m.CHILD_STATUS =#{buyStatus,jdbcType=BIGINT}
+            </if>
+
+            <if test="customerCount==false and customerNo != null">
+                AND i.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT}
+            </if>
+            <if test="customerTypeNo != null">
+                AND i.CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT}
+            </if>
+            <if test="status == 22">
+                AND ((o.CHILD_STATUS =1 and i.LOCKER !=0 ) or (o.CHILD_STATUS=2 and i.LOCKER=0))
+            </if>
+            <if test="payStatus!=null">
+                AND o.PAY_STATUS in
+                <foreach collection="payStatus" item="payStatus"
+                         index="index" open="(" close=")" separator=",">
+                    #{payStatus[${index}]}
+                </foreach>
+            </if>
+            <if test="childStatus!=null">
+                AND o.CHILD_STATUS in
+                <foreach collection="childStatus" item="childStatus"
+                         index="index" open="(" close=")" separator=",">
+                    #{childStatus[${index}]}
+                </foreach>
+            </if>
+            <if test="longList!=null and longList.size>0">
+                AND CC.CUSTOMER_NO IN
+                <foreach item="longList" index="index"  collection="longList" open="(" separator="," close=")">
+                    ${longList}
+                </foreach>
+            </if>
+            order by i.MODIFY_TIME desc
+        </trim>
+    </select>
+    <update id="updateAirlineStatus">
+        update IFT_SALE_CHANGE_EXT
+        set 
+        AIRLINE_STATUS =  #{airlineStatus,jdbcType=INTEGER}
+        where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
+    </update>
+    <update id="updateLocker" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderExt">
+        update IFT_SALE_CHANGE_EXT
+        set LOCKER = #{locker,jdbcType=BIGINT},
+        LOCK_TIME = #{lockTime,jdbcType=TIMESTAMP},
+        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+        MODIFIER = #{modifier,jdbcType=VARCHAR}
+        where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
+    </update>
+    <update id="updateByOrderNo" parameterType="com.tempus.gss.product.ift.api.entity.SaleChangeExt">
+        UPDATE IFT_SALE_CHANGE_EXT c
+        <set>
+            <if test="owner != null">
+                c.OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="refundWay != null">
+                c.REFUND_WAY = #{refundWay,jdbcType=INTEGER},
+            </if>
+            <if test="modifier != null">
+                c.MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                c.STATUS = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                c.MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="valid != null">
+                c.VALID = #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="createTime != null">
+                c.CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                c.CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="locker != null">
+                c.LOCKER = #{locker,jdbcType=BIGINT},
+            </if>
+            <if test="lockTime != null">
+                c.LOCK_TIME = #{lockTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="changeType != null">
+                c.CHANGE_TYPE = #{changeType,jdbcType=INTEGER},
+            </if>
+            <if test="contactName != null">
+                c.CONTACT_NAME = #{contactName,jdbcType=VARCHAR},
+            </if>
+            <if test="contactMobile != null">
+                c.CONTACT_MOBILE = #{contactMobile,jdbcType=VARCHAR},
+            </if>
+            <if test="customerRemark != null">
+                c.CUSTOMER_REMARK = #{customerRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="refuseReason != null">
+                c.REFUSE_REASON = #{refuseReason,jdbcType=VARCHAR},
+            </if>
+            <if test="airlineStatus != null">
+                c.AIRLINE_STATUS = #{airlineStatus,jdbcType=INTEGER},
+            </if>
+            <if test="auditPerson != null">
+                c.AUDIT_PERSON = #{auditPerson,jdbcType=VARCHAR},
+            </if>
+            <if test="auditTime != null">
+                c.AUDIT_TIME = #{auditTime,jdbcType=VARCHAR},
+            </if>
+            <if test="refundFileUrl!=null">
+                c.REFUND_FILE_URL = #{refundFileUrl,jdbcType=VARCHAR},
+            </if>
+            <if test="customerNo != null">
+                c.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT},
+            </if>
+            <if test="customerTypeNo != null">
+                c.CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT},
+            </if>
+            <if test="ticketChangeType !=null">
+                c.TICKET_CHANGE_TYPE=#{ticketChangeType,jdbcType=INTEGER},
+            </if>
+            <if test="pnrNo !=null">
+                c.PNR_No=#{pnrNo,jdbcType=BIGINT},
+            </if>
+            <if test="changeRemark !=null">
+                c.CHANGE_REMARK= #{changeRemark,jdbcType=VARCHAR},
+            </if>
+        </set>
+        WHERE c.SALE_CHANGE_NO IN (SELECT p.SALE_CHANGE_NO FROM IFT_PASSENGER_CHANGE_PRICE p WHERE p.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT})
+    </update>
+</mapper>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <dubbo:application name="gss-op-web" owner="programmer" organization="dubbox"/>
+
+
+    <!--   <dubbo:registry address="zookeeper://${zookeeper.url}"/>-->
+    <dubbo:registry address="zookeeper://172.16.3.38:2181"/>
+    <!--<dubbo:monitor protocol="registry"/> -->
+
+    <dubbo:reference id="maxNoService" interface="com.tempus.gss.system.service.IMaxNoService"
+                     check="false" />
+
+    <dubbo:reference id="orderService" interface="com.tempus.gss.product.ins.api.service.IOrderService"
+                     check="false" version="0.0.0.4"/>
+    <dubbo:reference id="insuranceService" interface="com.tempus.gss.product.ins.api.service.IInsuranceService"
+                     check="false" version="0.0.0.4"/>                     
+                     
+
+    <!--<dubbo:reference id="printTemplateDetailService" interface="com.tempus.gss.system.service.IPrintTemplateDetailService" check="false" version="0.1"/>-->
+</beans>

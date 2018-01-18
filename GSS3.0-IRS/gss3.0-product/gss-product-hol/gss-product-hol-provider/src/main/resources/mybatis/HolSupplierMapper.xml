@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.hol.dao.HolSupplierMapper">
+	<resultMap id="BaseResultMap" type="com.tempus.gss.product.hol.api.entity.HolSupplier">
+        <id column="ID" property="id" jdbcType="BIGINT"/><!---->
+        <result column="OWNER" property="owner" jdbcType="BIGINT"/>
+         <result column="SUPPLIERNO" property="supplierNo" jdbcType="BIGINT"/>
+        <result column="GSSCODE" property="GSSCode" jdbcType="VARCHAR"/>
+        <result column="SUPPLIERCODE" property="supplierCode" jdbcType="VARCHAR"/>
+        <result column="PAYTYPE" property="payType" jdbcType="INTEGER"/>
+        <result column="RATE" property="rate" jdbcType="DECIMAL"/>
+        <result column="CONTEXT" property="context" jdbcType="VARCHAR"/>
+        <result column="REMARK" property="remark" jdbcType="VARCHAR"/>
+        <result column="STATUS" property="status" jdbcType="INTEGER"/>
+        <result column="CREATOR" property="creator" jdbcType="VARCHAR"/>
+        <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="MODIFIER" property="modifier" jdbcType="VARCHAR"/>
+        <result column="MODIFIER_TIME" property="modifierTime" jdbcType="TIMESTAMP"/>
+    	<result column="VALID" property="valid" jdbcType="TINYINT"/>
+    </resultMap>
+	<!-- 通用查询结果列-->
+	<sql id="Base_Column_List">
+		ID, OWNER,SUPPLIERNO, GSSCODE, SUPPLIERCODE,PAYTYPE, RATE, CONTEXT, REMARK, STATUS, CREATOR, CREATE_TIME AS createTime, MODIFIER, MODIFIER_TIME AS modifierTime, VALID
+	</sql>
+	<insert id="insertSupplier" parameterType="com.tempus.gss.product.hol.api.entity.HolSupplier">
+        insert into HOL_SUPPLIER
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="owner != null">
+                OWNER,
+            </if>
+            <if test="supplierCode != null">
+                SUPPLIERCODE,
+            </if>
+            <if test="supplierNo != null">
+                SUPPLIERNO,
+            </if>
+            <if test="GSSCode != null">
+                GSSCODE,
+            </if>
+            <if test="payType != null">
+                PAYTYPE,
+            </if>
+            <if test="rate != null">
+                RATE,
+            </if>
+            <if test="context != null">
+                CONTEXT,
+            </if>
+            <if test="remark != null">
+                REMARK,
+            </if>
+            <if test="status != null">
+                STATUS,
+            </if>
+            <if test="valid != null">
+                VALID,
+            </if>
+            <if test="modifier != null">
+                MODIFIER,
+            </if>
+            <if test="modifierTime != null">
+                MODIFIER_TIME,
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME,
+            </if>
+            <if test="creator != null">
+                CREATOR,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null">
+                #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="supplierCode != null and supplierCode !=''">
+                #{supplierCode,jdbcType=VARCHAR},
+            </if>
+            <if test="supplierNo != null">
+                #{supplierNo,jdbcType=BIGINT},
+            </if>
+            <if test="GSSCode != null and GSSCode !=''">
+                #{GSSCode,jdbcType=VARCHAR},
+            </if>
+            <if test="payType != null">
+                #{payType,jdbcType=INTEGER},
+            </if>
+            <if test="rate != null">
+                #{rate,jdbcType=DECIMAL},
+            </if>
+            <if test="context != null and context !=''">
+                #{context,jdbcType=VARCHAR},
+            </if>
+            <if test="remark != null and remark !=''">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null and status !=''">
+                #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="modifier != null and modifier !=''">
+                #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifierTime != null">
+                #{modifierTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null and creator !=''">
+                #{creator,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <select id="selectSupplierList" resultMap="BaseResultMap">
+    	select DISTINCT
+        <include refid="Base_Column_List"/>
+        from HOL_SUPPLIER  WHERE VALID = 1
+    </select>
+	<select id="querySupplierList" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.hol.api.entity.vo.SupplierVo">
+        select DISTINCT
+        <include refid="Base_Column_List"/>
+        from HOL_SUPPLIER  WHERE VALID = 1
+        <trim suffixOverrides="AND">
+            <if test="GSSCode != null and GSSCode != ''">
+               AND GSSCODE = #{gssCode,jdbcType=VARCHAR} 
+            </if>
+            <if test="supplierCode != null and supplierCode != ''">
+               AND SUPPLIERCODE = #{supplierCode,jdbcType=VARCHAR} 
+            </if>
+            <if test="supplierNo != null and supplierNo != ''">
+               AND SUPPLIERNO = #{supplierNo,jdbcType=VARCHAR} 
+            </if>
+            <if test="rate != null and rate != ''">
+               AND RATE = #{rate,jdbcType=DECIMAL} 
+            </if>
+            <if test="context != null and context != ''">
+               AND CONTEXT = #{context,jdbcType=VARCHAR} 
+            </if>
+            <if test="payType != null and payType != ''">
+               AND PAYTYPE = #{payType,jdbcType=INTEGER} 
+            </if>
+            <if test="status != null and status != ''">
+               AND STATUS = #{status,jdbcType=INTEGER} 
+            </if>
+            <if test="creator != null and creator != ''" >
+       			AND CREATOR = #{creator,jdbcType=VARCHAR}
+	      	</if>
+	     	<if test="createTime != null and createTime != ''" >
+	       		AND CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
+	     	</if>
+	     	<if test="modifier !=null and modifier !=''">
+               MODIFIER = #{modifier,jdbcType=VARCHAR} AND
+            </if>
+            <if test="modifierTime !=null and modifierTime !=''">
+               MODIFIER_TIME = #{modifierTime,jdbcType=TIMESTAMP} AND
+            </if>
+        </trim>
+        order by CREATE_TIME desc
+    </select>
+    <select id="queryById" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select DISTINCT
+        <include refid="Base_Column_List"/>
+        from HOL_SUPPLIER  WHERE VALID = 1 and id=#{id,jdbcType=BIGINT}
+    </select>
+    <select id="queryBySupplierCode" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select DISTINCT
+        <include refid="Base_Column_List"/>
+        from HOL_SUPPLIER  WHERE VALID = 1 and supplierCode=#{supplierCode,jdbcType=VARCHAR}
+    </select>
+    <update id="updateSupplierById" parameterType="com.tempus.gss.product.hol.api.entity.HolSupplier" >
+        update HOL_SUPPLIER
+        <set >
+            <if test="owner != null" >
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="id != null" >
+                ID = #{id,jdbcType=BIGINT},
+            </if>
+            <if test="GSSCode != null and GSSCode != ''" >
+                GSSCODE = #{GSSCode,jdbcType=VARCHAR},
+            </if>
+            <if test="supplierCode != null and supplierCode != ''" >
+                SUPPLIERCODE = #{supplierCode,jdbcType=VARCHAR},
+            </if>
+            <if test="supplierNo != null and supplierNo != ''" >
+                SUPPLIERNO = #{supplierNo,jdbcType=VARCHAR},
+            </if>
+            <if test="context != null and context != ''" >
+                CONTEXT = #{context,jdbcType=VARCHAR},
+            </if>
+            <if test="payType != null" >
+                PAYTYPE = #{payType,jdbcType=INTEGER},
+            </if>
+            
+            <if test="remark != null and remark != ''" >
+                REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="rate != null" >
+                RATE = #{rate,jdbcType=DECIMAL},
+            </if>
+            <if test="modifier != null and modifier != ''" >
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null" >
+                STATUS = #{status,jdbcType=INTEGER},
+            </if>
+            <if test="modifierTime != null" >
+                MODIFIER_TIME = #{modifierTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="valid != null" >
+                VALID = #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="createTime != null" >
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null and creator != ''" >
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where ID = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="cancelById" parameterType="com.tempus.gss.product.hol.api.entity.HolSupplier" >
+        update HOL_SUPPLIER
+        <set >
+            <if test="valid != null" >
+                VALID = #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="modifier != null" >
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifierTime != null" >
+                MODIFIER_TIME = #{modifierTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where ID = #{id,jdbcType=BIGINT}
+    </update>
+</mapper>

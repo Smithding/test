@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.hol.dao.HolCustomerBillMapper">
+    <resultMap id="ReportVOResultMap" type="com.tempus.gss.product.hol.api.entity.vo.ReportVO">
+        <result column="hotelOrderNo" property="hotelOrderNo" jdbcType="VARCHAR"/>
+        <result column="customerType" property="customerType" jdbcType="BIGINT"/>
+        <result column="customerTypeName" property="customerTypeName" jdbcType="VARCHAR"/>
+        <result column="customerNo" property="customerNo" jdbcType="BIGINT"/>
+        <result column="customerName" property="customerName" jdbcType="VARCHAR"/>
+        <result column="createTime" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="holAddr" property="holAddr" jdbcType="VARCHAR"/>
+        <result column="hotelName" property="hotelName" jdbcType="VARCHAR"/>
+        <result column="guestName" property="guestName" jdbcType="VARCHAR"/>
+        <result column="factGuestName" property="factGuestName" jdbcType="VARCHAR"/>
+        <result column="arrivalDate" property="arrivalDate" jdbcType="TIMESTAMP"/>
+        <result column="factArrivalDate" property="factArrivalDate" jdbcType="TIMESTAMP"/>
+        <result column="departureDate" property="departureDate" jdbcType="TIMESTAMP"/>
+        <result column="factDepartureDate" property="factDepartureDate" jdbcType="TIMESTAMP"/>
+        <result column="bookPro" property="bookPro" jdbcType="TINYINT"/>
+        <result column="factBookPro" property="factBookPro" jdbcType="TINYINT"/>
+        <result column="bookNight" property="bookNight" jdbcType="TINYINT"/>
+        <result column="factBookNight" property="factBookNight" jdbcType="TINYINT"/>
+        <result column="factProNight" property="factProNight" jdbcType="TINYINT"/>
+        <result column="proNight" property="proNight" jdbcType="TINYINT"/>
+        <result column="totalPrice" property="totalPrice" jdbcType="DECIMAL"/>
+        <result column="factTotalPrice" property="factTotalPrice" jdbcType="DECIMAL"/>
+        <result column="saleRefund" property="saleRefund" jdbcType="DECIMAL"/>
+        <result column="factSaleRefund" property="factSaleRefund" jdbcType="DECIMAL"/>
+        <result column="checkStatus" property="checkStatus" jdbcType="VARCHAR"/>
+        <result column="creator" property="creator" jdbcType="VARCHAR"/>
+        <result column="bankName" property="bankName" jdbcType="VARCHAR"/>
+        <result column="cardNo" property="cardNo" jdbcType="VARCHAR"/>
+        <result column="userName" property="userName" jdbcType="VARCHAR"/>
+        <result column="province" property="province" jdbcType="VARCHAR"/>
+        <result column="bankCity" property="bankCity" jdbcType="VARCHAR"/>
+        <result column="bankAddr" property="bankAddr" jdbcType="VARCHAR"/>
+        <result column="profit" property="profit" jdbcType="DECIMAL"/>
+        <result column="gProfit" property="gProfit" jdbcType="DECIMAL"/>
+        <result column="rate" property="rate" jdbcType="DECIMAL"/>
+        <result column="factRate" property="factRate" jdbcType="DECIMAL"/>
+        <result column="orderCount" property="orderCount" jdbcType="TINYINT"/>
+        <result column="queryType" property="queryType" jdbcType="TINYINT"/>
+        <result column="orderStatus" property="orderStatus" jdbcType="TINYINT"/>
+    </resultMap>
+    <select id="queryInfos" resultMap="ReportVOResultMap" parameterType="com.tempus.gss.product.hol.api.entity.vo.ReportVO">
+        SELECT
+        HO.SALE_ORDER_NO AS hotelOrderNo,
+        CC.CUSTOMER_TYPE_NO AS customerType,
+        CCT.NAME AS customerTypeName,
+        HO.CUSTOMER_NO AS customerNo,
+        CC.NAME AS customerName,
+        HO.CREATE_ORDER_TIME AS createTime,
+        HO.HOTEL_ADDRESS AS holAddr,
+        HO.HOTEL_NAME AS hotelName,
+        HO.GUEST_NAME AS guestName,
+        HO.ARRIVAL_DATE AS arrivalDate,
+        HO.DEPARTURE_DATE AS departureDate,
+        HO.FACT_GUEST_NAME AS factGuestName,
+        HO.FACT_ARRIVE_TIME AS factArrivalDate,
+        HO.FACT_LEAVE_TIME AS factDepartureDate,
+        HO.TC_ORDER_STATUS AS checkStatus,
+        HO.ORDER_STATUS AS orderStatus,
+        HO.CREATOR AS creator,
+        HO.NIGHT_COUNT AS bookPro,
+        HO.BOOK_COUNT AS bookNight,
+        (HO.BOOK_COUNT * HO.NIGHT_COUNT) AS proNight,
+        HO.TOTAL_PRICE AS totalPrice,
+        HO.TOTAL_REFUND AS saleRefund,
+        HO.TOTAL_REFUND / HO.TOTAL_PRICE AS rate,
+        HO.FACT_NIGHT_COUNT AS factBookPro,
+        HO.FACT_PRO_COUNT AS factBookNight,
+        (HO.FACT_PRO_COUNT * HO.FACT_NIGHT_COUNT) AS factProNight,
+        HO.FACT_TOTAL_PRICE AS factTotalPrice,
+        HO.FACT_TOTAL_REFUND AS factSaleRefund,
+        HO.FACT_TOTAL_REFUND / HO.FACT_TOTAL_PRICE AS factRate,
+        C.BANK_NAME AS bankName,
+        C.CARD_NO AS cardNo,
+        C.USER_NAME AS userName,
+        C.PROVINCE AS province,
+        C.CITY AS bankCity,
+        C.ADDRESS AS bankAddr
+        FROM `gss-op`.HOL_HOTEL_ORDER AS HO
+        LEFT JOIN `gss-op`.CPS_CUSTOMER AS CC ON (CC.CUSTOMER_NO = HO.CUSTOMER_NO)
+        LEFT JOIN `gss-op`.CPS_BANK_CARD AS C ON (C.CUSTOMER_NO = HO.CUSTOMER_NO)
+        LEFT JOIN `gss-op`.CPS_CUSTOMER_TYPE AS CCT ON (CCT.CUSTOMER_TYPE_NO = CC.CUSTOMER_TYPE_NO)
+        <where>
+            and 1=1
+            <if test="hotelOrderNo!=null and hotelOrderNo!=''">
+                AND HO.HOTEL_ORDER_NO=#{hotelOrderNo,jdbcType=VARCHAR}
+            </if>
+            <if test="customerType!=null and customerType!=''">
+                AND CC.CUSTOMER_TYPE_NO=#{customerType,jdbcType=BIGINT}
+            </if>
+            <if test="customerTypeName!=null and customerTypeName!=''">
+                AND CCT.NAME=#{customerTypeName,jdbcType=VARCHAR}
+            </if>
+            <if test="customerNo!=null and customerNo!=''">
+                AND HO.CUSTOMER_NO=#{customerNo,jdbcType=BIGINT}
+            </if>
+            <if test="customerName!=null and customerName!=''">
+                AND CC.NAME=#{customerName,jdbcType=VARCHAR}
+            </if>
+
+            <if test="holAddr!=null and holAddr!=''">
+                AND HO.HOTEL_ADDRESS=#{holAddr,jdbcType=VARCHAR}
+            </if>
+            <if test="hotelName!=null and hotelName!=''">
+                AND HO.HOTEL_NAME LIKE CONCAT(CONCAT('%', #{hotelName}), '%')
+            </if>
+            <if test="guestName!=null and guestName!=''">
+                AND HO.GUEST_NAME=#{guestName,jdbcType=VARCHAR}
+            </if>
+            <if test="startDate!=null and startDate!=''">
+                <if test="dateType==1 or dateType=='1'">
+                    AND HO.CREATE_ORDER_TIME &gt;=#{startDate,jdbcType=TIMESTAMP}
+                </if>
+                <if test="dateType==2 or dateType=='2'">
+                    AND HO.ARRIVAL_DATE &gt;=#{startDate,jdbcType=TIMESTAMP}
+                </if>
+                <if test="dateType==3 or dateType=='3'">
+                    AND HO.DEPARTURE_DATE &gt;=#{startDate,jdbcType=TIMESTAMP}
+                </if>
+            </if>
+            <if test="endDate!=null and endDate!=''">
+                <if test="dateType==1 or dateType=='1'">
+                    AND HO.CREATE_ORDER_TIME &lt;=#{endDate,jdbcType=TIMESTAMP}
+                </if>
+                <if test="dateType==2 or dateType=='2'">
+                    AND HO.ARRIVAL_DATE &lt;=#{endDate,jdbcType=TIMESTAMP}
+                </if>
+                <if test="dateType==3 or dateType=='3'">
+                    AND HO.DEPARTURE_DATE &lt;=#{endDate,jdbcType=TIMESTAMP}
+                </if>
+            </if>
+            <if test="bookPro!=null and bookPro!=''">
+                AND HO.BOOK_COUNT=#{bookPro,jdbcType=TINYINT}
+            </if>
+            <!--<if test="orderStatusArray!=null and orderStatusArray!=''">-->
+                <!--AND HO.ORDER_STATUS IN(701,800,801)-->
+                <!--<foreach collection="orderStatusArray" item="orderStatusArray"-->
+                <!--index="index" open="(" close=")" separator=",">-->
+                <!--#{orderStatusArray[${index}]}-->
+                <!--</foreach>-->
+            <!--</if>-->
+            <if test="bookNight!=null and bookNight!=''">
+                AND HO.NIGHT_COUNT=#{bookNight,jdbcType=TINYINT}
+            </if>
+            <if test="checkStatus!=null and checkStatus!=''">
+                AND HO.TC_ORDER_STATUS=#{checkStatus,jdbcType=VARCHAR}
+            </if>
+            <if test="creator!=null and creator!=''">
+                AND HO.CREATOR=#{creator,jdbcType=VARCHAR}
+            </if>
+            AND HO.ORDER_STATUS IN(701,800,801)
+        </where>
+        ORDER BY HO.CREATE_ORDER_TIME DESC
+    </select>
+    <select id="queryByHolName" resultMap="ReportVOResultMap" parameterType="com.tempus.gss.product.hol.api.entity.vo.ReportVO">
+        SELECT
+        HO.HOTEL_NAME AS hotelName,
+        count(HO.HOTEL_ORDER_NO) AS orderCount,
+        HO.HOTEL_ADDRESS AS holAddr,
+        sum(HO.FACT_PRO_COUNT) AS bookPro,
+        sum(HO.FACT_NIGHT_COUNT * HO.NIGHT_COUNT) AS proNight,
+        sum(HO.FACT_TOTAL_PRICE) AS totalPrice,
+        sum(HO.FACT_TOTAL_REFUND) AS saleRefund,
+        sum((HS.RATE / 100) * HO.TOTAL_PRICE) AS gProfit,
+        sum(((HS.RATE / 100 * HO.TOTAL_PRICE) - HO.FACT_TOTAL_REFUND)) AS profit
+        FROM `gss-op`.HOL_HOTEL_ORDER AS HO
+        LEFT JOIN `gss-op`.CPS_CUSTOMER AS CC ON(CC.CUSTOMER_NO=HO.CUSTOMER_NO)
+        LEFT JOIN `gss-op`.CPS_CUSTOMER_TYPE AS CCT ON(CCT.CUSTOMER_TYPE_NO=CC.CUSTOMER_TYPE_NO)
+        LEFT JOIN `gss-op`.HOL_SUPPLIER AS HS ON (HS.SUPPLIERNO = HO.SUPPLIER_NO)
+        <where>
+            and 1=1
+            <if test="hotelOrderNo!=null and hotelOrderNo!=''">
+                AND HO.HOTEL_ORDER_NO=#{hotelOrderNo,jdbcType=VARCHAR}
+            </if>
+            <if test="customerType!=null and customerType!=''">
+                AND CC.CUSTOMER_TYPE_NO=#{customerType,jdbcType=BIGINT}
+            </if>
+            <if test="customerTypeName!=null and customerTypeName!=''">
+                AND CCT.NAME=#{customerTypeName,jdbcType=VARCHAR}
+            </if>
+            <if test="customerNo!=null and customerNo!=''">
+                AND HO.CUSTOMER_NO=#{customerNo,jdbcType=BIGINT}
+            </if>
+            <if test="customerName!=null and customerName!=''">
+                AND CC.NAME=#{customerName,jdbcType=VARCHAR}
+            </if>
+
+            <if test="holAddr!=null and holAddr!=''">
+                AND HO.HOTEL_ADDRESS=#{holAddr,jdbcType=VARCHAR}
+            </if>
+            <if test="hotelName!=null and hotelName!=''">
+                AND HO.HOTEL_NAME LIKE CONCAT(CONCAT('%', #{hotelName}), '%')
+            </if>
+            <if test="guestName!=null and guestName!=''">
+                AND HO.GUEST_NAME=#{guestName,jdbcType=VARCHAR}
+            </if>
+            <if test="startDate!=null and startDate!=''">
+                <if test="dateType==1 or dateType=='1'">
+                    AND HO.CREATE_ORDER_TIME &gt;=#{startDate,jdbcType=TIMESTAMP}
+                </if>
+                <if test="dateType==2 or dateType=='2'">
+                    AND HO.ARRIVAL_DATE &gt;=#{startDate,jdbcType=TIMESTAMP}
+                </if>
+                <if test="dateType==3 or dateType=='3'">
+                    AND HO.DEPARTURE_DATE &gt;=#{startDate,jdbcType=TIMESTAMP}
+                </if>
+            </if>
+            <if test="endDate!=null and endDate!=''">
+                <if test="dateType==1 or dateType=='1'">
+                    AND HO.CREATE_ORDER_TIME &lt;=#{endDate,jdbcType=TIMESTAMP}
+                </if>
+                <if test="dateType==2 or dateType=='2'">
+                    AND HO.ARRIVAL_DATE &lt;=#{endDate,jdbcType=TIMESTAMP}
+                </if>
+                <if test="dateType==3 or dateType=='3'">
+                    AND HO.DEPARTURE_DATE &lt;=#{endDate,jdbcType=TIMESTAMP}
+                </if>
+            </if>
+            <if test="bookPro!=null and bookPro!=''">
+                AND HO.BOOK_COUNT=#{bookPro,jdbcType=TINYINT}
+            </if>
+            <if test="bookNight!=null and bookNight!=''">
+                AND HO.NIGHT_COUNT=#{bookNight,jdbcType=TINYINT}
+            </if>
+            <if test="checkStatus!=null and checkStatus!=''">
+                AND HO.TC_ORDER_STATUS=#{checkStatus,jdbcType=VARCHAR}
+            </if>
+            <if test="creator!=null and creator!=''">
+                AND HO.CREATOR=#{creator,jdbcType=VARCHAR}
+            </if>
+        </where>
+        GROUP BY HO.HOTEL_CODE
+        ORDER BY totalPrice DESC
+    </select>
+    <select id="queryByCus" resultMap="ReportVOResultMap" parameterType="com.tempus.gss.product.hol.api.entity.vo.ReportVO">
+        SELECT
+        CC.NAME AS customerName,
+        CCT.NAME AS customerTypeName,
+        COUNT(HO.HOTEL_ORDER_NO) AS orderCount,
+        sum(HO.FACT_PRO_COUNT) AS bookPro,
+        sum(HO.FACT_NIGHT_COUNT * HO.NIGHT_COUNT) AS proNight,
+        sum(HO.FACT_TOTAL_PRICE) AS totalPrice,
+        sum(HO.FACT_TOTAL_REFUND) AS saleRefund,
+        sum((HS.RATE / 100) * HO.TOTAL_PRICE) AS gProfit,
+        CC.CUSTOMER_TYPE_NO AS customerType,
+        sum(((HS.RATE / 100 * HO.TOTAL_PRICE) - HO.FACT_TOTAL_REFUND)) AS profit
+        FROM `gss-op`.HOL_HOTEL_ORDER AS HO
+        LEFT JOIN `gss-op`.CPS_CUSTOMER AS CC ON (CC.CUSTOMER_NO = HO.CUSTOMER_NO)
+        LEFT JOIN `gss-op`.CPS_CUSTOMER_TYPE AS CCT ON (CCT.CUSTOMER_TYPE_NO = CC.CUSTOMER_TYPE_NO)
+        LEFT JOIN `gss-op`.HOL_SUPPLIER AS HS ON (HS.SUPPLIERNO = HO.SUPPLIER_NO)
+        <where>
+            and 1=1
+            <if test="hotelOrderNo!=null and hotelOrderNo!=''">
+                AND HO.HOTEL_ORDER_NO=#{hotelOrderNo,jdbcType=VARCHAR}
+            </if>
+            <if test="customerType!=null and customerType!=''">
+                AND CC.CUSTOMER_TYPE_NO=#{customerType,jdbcType=BIGINT}
+            </if>
+            <if test="customerTypeName!=null and customerTypeName!=''">
+                AND CCT.NAME=#{customerTypeName,jdbcType=VARCHAR}
+            </if>
+            <if test="customerNo!=null and customerNo!=''">
+                AND HO.CUSTOMER_NO=#{customerNo,jdbcType=BIGINT}
+            </if>
+            <if test="customerName!=null and customerName!=''">
+                AND CC.NAME=#{customerName,jdbcType=VARCHAR}
+            </if>
+
+            <if test="holAddr!=null and holAddr!=''">
+                AND HO.HOTEL_ADDRESS=#{holAddr,jdbcType=VARCHAR}
+            </if>
+            <if test="hotelName!=null and hotelName!=''">
+                AND HO.HOTEL_NAME LIKE CONCAT(CONCAT('%', #{hotelName}), '%')
+            </if>
+            <if test="guestName!=null and guestName!=''">
+                AND HO.GUEST_NAME=#{guestName,jdbcType=VARCHAR}
+            </if>
+            <if test="startDate!=null and startDate!=''">
+                <if test="dateType==1 or dateType=='1'">
+                    AND HO.CREATE_ORDER_TIME &gt;=#{startDate,jdbcType=TIMESTAMP}
+                </if>
+                <if test="dateType==2 or dateType=='2'">
+                    AND HO.ARRIVAL_DATE &gt;=#{startDate,jdbcType=TIMESTAMP}
+                </if>
+                <if test="dateType==3 or dateType=='3'">
+                    AND HO.DEPARTURE_DATE &gt;=#{startDate,jdbcType=TIMESTAMP}
+                </if>
+            </if>
+            <if test="endDate!=null and endDate!=''">
+                <if test="dateType==1 or dateType=='1'">
+                    AND HO.CREATE_ORDER_TIME &lt;=#{endDate,jdbcType=TIMESTAMP}
+                </if>
+                <if test="dateType==2 or dateType=='2'">
+                    AND HO.ARRIVAL_DATE &lt;=#{endDate,jdbcType=TIMESTAMP}
+                </if>
+                <if test="dateType==3 or dateType=='3'">
+                    AND HO.DEPARTURE_DATE &lt;=#{endDate,jdbcType=TIMESTAMP}
+                </if>
+            </if>
+            <if test="bookPro!=null and bookPro!=''">
+                AND HO.BOOK_COUNT=#{bookPro,jdbcType=TINYINT}
+            </if>
+            <if test="bookNight!=null and bookNight!=''">
+                AND HO.NIGHT_COUNT=#{bookNight,jdbcType=TINYINT}
+            </if>
+            <if test="checkStatus!=null and checkStatus!=''">
+                AND HO.TC_ORDER_STATUS=#{checkStatus,jdbcType=VARCHAR}
+            </if>
+            <if test="creator!=null and creator!=''">
+                AND HO.CREATOR=#{creator,jdbcType=VARCHAR}
+            </if>
+        </where>
+        <if test="queryType != 4">
+            GROUP BY HO.CUSTOMER_NO
+        </if>
+        <if test="queryType == 4">
+            GROUP BY CC.CUSTOMER_TYPE_NO,HO.CUSTOMER_NO
+        </if>
+        ORDER BY totalPrice DESC
+    </select>
+
+</mapper>

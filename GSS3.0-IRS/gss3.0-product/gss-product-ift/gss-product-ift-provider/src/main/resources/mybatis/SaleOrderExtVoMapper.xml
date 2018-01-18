@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ift.dao.SaleOrderExtVoDao">
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.ift.api.entity.vo.SaleOrderExtVo">
+        <!--订单编号 订单编号-->
+        <result property="saleOrderNo" column="saleOrderNo" jdbcType="BIGINT"/>
+        <result property="supplierNo" column="supplierNo" jdbcType="BIGINT"/>
+        <result property="transationOrderNo" column="transationOrderNo" jdbcType="BIGINT"/>
+        <result property="businessSignNo" column="businessSignNo" jdbcType="BIGINT"/>
+        <result property="deptCode" column="deptCode" jdbcType="VARCHAR"/>
+        <result property="orderType" column="orderType" jdbcType="INTEGER"/>
+        <result property="sourceChannelNo" column="sourceChannelNo" jdbcType="VARCHAR"/>
+        <result property="customerTypeNo" column="customerTypeNo" jdbcType="BIGINT"/>
+        <result property="customerNo" column="customerNo" jdbcType="BIGINT"/>
+        <result property="orderingLoginName" column="orderingLoginName" jdbcType="VARCHAR"/>
+        <result property="mainOrderNo" column="mainOrderNo" jdbcType="BIGINT"/>
+        <result property="attachedType" column="attachedType" jdbcType="VARCHAR"/>
+        <result property="orderChangeType" column="orderChangeType" jdbcType="VARCHAR"/>
+        <result property="goodsType" column="goodsType" jdbcType="INTEGER"/>
+        <result property="goodsSubType" column="goodsSubType" jdbcType="INTEGER"/>
+        <result property="goodsName" column="goodsName" jdbcType="VARCHAR"/>
+        <result property="amount" column="amount" jdbcType="DECIMAL"/>
+        <result property="discountAmount" column="discountAmount" jdbcType="DECIMAL"/>
+        <result property="receivable" column="receivable" jdbcType="DECIMAL"/>
+        <result property="received" column="received" jdbcType="DECIMAL"/>
+        <result property="buyorderPrice" column="buyorderPrice" jdbcType="DECIMAL"/>
+        <result property="pcount" column="pcount" jdbcType="INTEGER"/>
+        <result property="orderingTime" column="orderingTime" jdbcType="TIMESTAMP"/>
+        <result property="payStatus" column="payStatus" jdbcType="INTEGER"/>
+        <result property="orderStatus" column="orderStatus" jdbcType="INTEGER"/>
+        <result property="sourceNo" column="sourceNo" jdbcType="BIGINT"/>
+        <result property="pnr" column="pnr" jdbcType="VARCHAR"/>
+        <result property="pnrType" column="pnrType" jdbcType="INTEGER"/>
+        <result property="pnrContent" column="pnrContent" jdbcType="VARCHAR"/>
+        <result property="ticketNo" column="ticketNo" jdbcType="VARCHAR"/>
+        <result property="bigPnr" column="bigPnr" jdbcType="VARCHAR"/>
+        <result property="rtTime" column="rtTime" jdbcType="TIMESTAMP"/>
+        <result property="pnrSource" column="pnrSource" jdbcType="INTEGER"/>
+        <result property="owner" column="owner" jdbcType="INTEGER"/>
+        <result property="demandNo" column="demandNo" jdbcType="BIGINT"/>
+        <result property="legType" column="legType" jdbcType="INTEGER"/>
+        <result property="contactName" column="contactName" jdbcType="VARCHAR"/>
+        <result property="contactPhone" column="contactPhone" jdbcType="VARCHAR"/>
+        <result property="contactMobile" column="contactMobile" jdbcType="VARCHAR"/>
+        <result property="contactMail" column="contactMail" jdbcType="VARCHAR"/>
+        <result property="saleRemark" column="saleRemark" jdbcType="VARCHAR"/>
+        <result property="valid" column="valid" jdbcType="TINYINT"/>
+        <result property="version" column="version" jdbcType="BIGINT"/>
+        <result property="locker" column="locker" jdbcType="BIGINT"/>
+        <result property="lockTime" column="lockTime" jdbcType="TIMESTAMP"/>
+        <result property="createType" column="createType" jdbcType="BIGINT"/>
+        <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+        <result property="modifyTime" column="modifyTime" jdbcType="TIMESTAMP"/>
+        <result property="creator" column="creator" jdbcType="VARCHAR"/>
+        <result property="modifier" column="modifier" jdbcType="VARCHAR"/>
+        <result property="ticketConfig" column="ticketConfig" jdbcType="VARCHAR"/>
+        <result property="ticketAirline" column="ticketAirline" jdbcType="VARCHAR"/>
+        <result property="ticketType" column="ticketType" jdbcType="VARCHAR"/>
+        <result property="buyStatus" column="buyStatus" jdbcType="INTEGER"/>
+        <result property="saleStatus" column="saleStatus" jdbcType="INTEGER"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="leg" column="leg" jdbcType="VARCHAR"/>
+        <result property="flightNo" column="flightNo" jdbcType="VARCHAR"/>
+        <result property="startTime" column="startTime" jdbcType="VARCHAR"/>
+        <result property="serviceClass" column="serviceClass" jdbcType="VARCHAR"/>
+        <result property="salePrice" column="salePrice" jdbcType="VARCHAR"/>
+        <result property="buyPrice" column="buyPrice" jdbcType="VARCHAR"/>
+        <result property="saleFare" column="saleFare" jdbcType="VARCHAR"/>
+        <result property="saleTax" column="saleTax" jdbcType="VARCHAR"/>
+        <result property="policyType" column="policyType" jdbcType="VARCHAR"/>
+        <result property="agentId" column="agentId" jdbcType="BIGINT"/>
+        <result property="issueTime" column="issueTime" jdbcType="TIMESTAMP"/>
+        <result property="status" column="status" jdbcType="VARCHAR"/>
+
+    </resultMap>
+    <select id="selectByTraNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+            OS.SALE_ORDER_NO       AS saleOrderNo,
+#             OS.VALID               AS valid,
+            OB.SUPPLIER_NO        AS supplierNo
+#             OS.TRANSATION_ORDER_NO AS transationOrderNo,
+#             OS.BUSINESS_SIGN_NO    AS businessSignNo,
+#             OS.DEPT_CODE           AS deptCode,
+#             OS.ORDER_TYPE          AS orderType,
+#             OS.SOURCE_CHANNEL_NO   AS sourceChannelNo,
+#             OS.CUSTOMER_TYPE_NO    AS customerTypeNo,
+#             OS.CUSTOMER_NO         AS customerNo,
+#             OS.ORDERING_LOGIN_NAME AS orderingLoginName,
+#             OS.MAIN_ORDER_NO       AS mainOrderNo,
+#             OS.ATTACHED_TYPE       AS attachedType,
+#             OS.ORDER_CHANGE_TYPE   AS orderChangeType,
+#             OS.GOODS_TYPE          AS goodsType,
+#             OS.GOODS_SUB_TYPE      AS goodsSubType,
+#             OS.GOODS_NAME          AS goodsName,
+#             OS.AMOUNT              AS amount,
+#             OS.DISCOUNT_AMOUNT     AS discountAmount,
+#             OS.RECEIVABLE          AS receivable,
+#             OS.RECEIVED            AS received,
+#             OS.BUYORDER_PRICE      AS buyorderPrice,
+#             OS.PCOUNT              AS pcount,
+#             OS.ORDERING_TIME       AS orderingTime,
+#             OS.PAY_STATUS          AS payStatus,
+#             OS.ORDER_STATUS        AS orderStatus,
+#             OS.OWNER               AS OWNER,
+#             ISOE.DEMAND_NO         AS demandNo,
+#             ISOE.LEG_TYPE          AS legType,
+#             ISOE.CONTACT_NAME      AS contactName,
+#             ISOE.CONTACT_PHONE     AS contactPhone,
+#             ISOE.CONTACT_MOBILE    AS contactMobile,
+#             ISOE.CONTACT_MAIL      AS contactMail,
+#             ISOE.SALE_REMARK       AS saleRemark,
+#             ISOE.VERSION           AS version,
+#             ISOE.LOCKER            AS locker,
+#             ISOE.LOCK_TIME         AS lockTime,
+#             ISOE.CREATE_TIME       AS createTime,
+#             ISOE.CREATE_TYPE       AS createType,
+#             ISOE.MODIFY_TIME       AS modifyTime,
+#             ISOE.CREATOR           AS creator,
+#             ISOE.MODIFIER          AS modifier,
+#             ISOE.ISSUE_TIME        AS issueTime
+        FROM `gss-op`.OS_SALEORDER AS OS
+            LEFT JOIN `gss-op`.OS_BUYORDER AS OB ON (OS.SALE_ORDER_NO = OB.SALE_ORDER_NO)
+#             LEFT JOIN `gss-op`.OS_SALEORDER_EXTEND AS OSE ON (OSE.SALE_ORDER_NO = OS.SALE_ORDER_NO)
+#             LEFT JOIN `gss-op`.OS_BUYORDER AS OB ON (OB.SALE_ORDER_NO = OS.SALE_ORDER_NO)
+#             LEFT JOIN `gss-op`.IFT_SALE_ORDER_EXT AS ISOE ON (ISOE.SALE_ORDER_NO = OS.SALE_ORDER_NO)
+            LEFT JOIN `gss-op`.IFT_BUY_ORDER_EXT AS IBE ON (IBE.BUY_ORDER_NO = OB.BUY_ORDER_NO)
+#             LEFT JOIN `gss-op`.IFT_PNR AS P ON (P.PNR_NO = ISOE.PNR_NO)
+        WHERE OS.TRANSATION_ORDER_NO = #{transationOrderNo,jdbcType= BIGINT} AND OS.GOODS_TYPE = 2
+    </select>
+
+    <select id="selectBySaleNo" resultType="com.tempus.gss.product.ift.api.entity.vo.SaleOrderExtVo">
+          SELECT
+            OS.SALE_ORDER_NO       AS saleOrderNo,
+            OS.TRANSATION_ORDER_NO AS transationOrderNo,
+               OB.SUPPLIER_NO        AS supplierNo
+                 FROM `gss-op`.OS_SALEORDER AS OS
+                   LEFT JOIN `gss-op`.OS_BUYORDER AS OB ON (OS.SALE_ORDER_NO = OB.SALE_ORDER_NO)
+                       LEFT JOIN `gss-op`.IFT_BUY_ORDER_EXT AS IBE ON (IBE.BUY_ORDER_NO = OB.BUY_ORDER_NO)
+                          WHERE OS.SALE_ORDER_NO = #{saleOrderNo,jdbcType= BIGINT} AND OS.GOODS_TYPE = 2
+    </select>
+
+</mapper>

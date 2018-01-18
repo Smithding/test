@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ift.dao.LegDao" >
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.ift.api.entity.Leg" >
+        <!--航程编号 航程编号-->
+        <id column="LEG_NO" property="legNo" jdbcType="BIGINT" />
+        <!--Id-->
+        <result column="ID" property="id" jdbcType="BIGINT" />
+        <!--数据归属单位-->
+        <result column="OWNER" property="owner" jdbcType="INTEGER" />
+        <!--销售单编号-->
+        <result column="SALE_ORDER_NO" property="saleOrderNo" jdbcType="BIGINT" />
+        <!--航司-->
+        <result column="AIRLINE" property="airline" jdbcType="VARCHAR" />
+        <!--航班号-->
+        <result column="FLIGHT_NO" property="flightNo" jdbcType="VARCHAR" />
+        <!--起点机场-->
+        <result column="DEP_AIRPORT" property="depAirport" jdbcType="VARCHAR" />
+        <!--经停机场-->
+        <result column="STOP_AIRPORT" property="stopAirport" jdbcType="VARCHAR" />
+        <!--停留时间 48:30,表示停留48小时30分钟.-->
+        <result column="STOP_TIME" property="stopTime" jdbcType="VARCHAR" />
+        <!--终点机场-->
+        <result column="ARR_AIRPORT" property="arrAirport" jdbcType="VARCHAR" />
+        <!--起飞时间-->
+        <result column="DEP_TIME" property="depTime" jdbcType="TIMESTAMP" />
+        <!--到达时间-->
+        <result column="ARR_TIME" property="arrTime" jdbcType="TIMESTAMP" />
+        <!--父航段序号. 表示该航程属于第几个航段，便于还原用户选择的多段。
+    一个航段包含多个航程时，
+
+    比如用户的总航程是SZX-SIN。
+    选择的航线是：SZX-KUL-SIN。
+    那么这里就是两条记录，section都为1，SZX-KUL的section是1，KUL-SIN的section是2.-->
+        <result column="PARENT_SECTION" property="parentSection" jdbcType="INTEGER" />
+        <!--子航段序号 从01开始.保存格式为 复航段序号+子航段序号，即：0101.-->
+        <result column="CHILD_SECTION" property="childSection" jdbcType="INTEGER" />
+        <!--航站楼-->
+        <result column="TERMINAL" property="terminal" jdbcType="VARCHAR" />
+        <!--机型-->
+        <result column="AIRPORT_MODEL" property="airportModel" jdbcType="VARCHAR" />
+        <!--行程类型 1.去程  2.返程-->
+        <result column="GO_BACK" property="goBack" jdbcType="INTEGER" />
+        <!--删除标志 0 无效 已删除 1 有效-->
+        <result column="VALID" property="valid" jdbcType="TINYINT" />
+        <!--启用状态 1：启用，
+    2：停用-->
+        <result column="STATUS" property="status" jdbcType="VARCHAR" />
+        <!--操作人 默认为：sys-->
+        <result column="MODIFIER" property="modifier" jdbcType="VARCHAR" />
+        <!--创建人-->
+        <result column="CREATOR" property="creator" jdbcType="VARCHAR" />
+        <!--创建时间-->
+        <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP" />
+        <!--修改时间-->
+        <result column="MODIFY_TIME" property="modifyTime" jdbcType="TIMESTAMP" />
+        <result column="CABIN" property="cabin" jdbcType="VARCHAR" />
+        <result column="FSI" property="fsi" jdbcType="VARCHAR" />
+    </resultMap>
+    <sql id="Base_Column_List" >
+        LEG_NO, ID, OWNER, SALE_ORDER_NO, AIRLINE, FLIGHT_NO, DEP_AIRPORT, STOP_AIRPORT,
+        STOP_TIME, ARR_AIRPORT, DEP_TIME, ARR_TIME, PARENT_SECTION, CHILD_SECTION, TERMINAL,
+        AIRPORT_MODEL, GO_BACK, VALID, STATUS, MODIFIER, CREATOR, CREATE_TIME, MODIFY_TIME, CABIN,FSI
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        select
+        <include refid="Base_Column_List" />
+        from IFT_LEG
+        where LEG_NO = #{legNo,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+        delete from IFT_LEG
+        where LEG_NO = #{legNo,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.Leg" >
+        insert into IFT_LEG (LEG_NO, ID, OWNER,
+        SALE_ORDER_NO, AIRLINE, FLIGHT_NO,
+        DEP_AIRPORT, STOP_AIRPORT, STOP_TIME,
+        ARR_AIRPORT, DEP_TIME, ARR_TIME,
+        PARENT_SECTION, CHILD_SECTION, TERMINAL,
+        AIRPORT_MODEL, GO_BACK, VALID,
+        STATUS, MODIFIER, CREATOR,
+        CREATE_TIME, MODIFY_TIME, CABIN,FSI)
+        values (#{legNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
+        #{saleOrderNo,jdbcType=BIGINT}, #{airline,jdbcType=VARCHAR}, #{flightNo,jdbcType=VARCHAR},
+        #{depAirport,jdbcType=VARCHAR}, #{stopAirport,jdbcType=VARCHAR}, #{stopTime,jdbcType=VARCHAR},
+        #{arrAirport,jdbcType=VARCHAR}, #{depTime,jdbcType=TIMESTAMP}, #{arrTime,jdbcType=TIMESTAMP},
+        #{parentSection,jdbcType=INTEGER}, #{childSection,jdbcType=INTEGER}, #{terminal,jdbcType=VARCHAR},
+        #{airportModel,jdbcType=VARCHAR}, #{goBack,jdbcType=INTEGER}, #{valid,jdbcType=TINYINT},
+        #{status,jdbcType=VARCHAR}, #{modifier,jdbcType=VARCHAR}, #{creator,jdbcType=VARCHAR},
+        #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP}, #{cabin,jdbcType=VARCHAR}, #{fsi,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.Leg" >
+        insert into IFT_LEG
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="legNo != null" >
+                LEG_NO,
+            </if>
+            <if test="id != null" >
+                ID,
+            </if>
+            <if test="owner != null" >
+                OWNER,
+            </if>
+            <if test="saleOrderNo != null" >
+                SALE_ORDER_NO,
+            </if>
+            <if test="airline != null" >
+                AIRLINE,
+            </if>
+            <if test="flightNo != null" >
+                FLIGHT_NO,
+            </if>
+            <if test="depAirport != null" >
+                DEP_AIRPORT,
+            </if>
+            <if test="stopAirport != null" >
+                STOP_AIRPORT,
+            </if>
+            <if test="stopTime != null" >
+                STOP_TIME,
+            </if>
+            <if test="arrAirport != null" >
+                ARR_AIRPORT,
+            </if>
+            <if test="depTime != null" >
+                DEP_TIME,
+            </if>
+            <if test="arrTime != null" >
+                ARR_TIME,
+            </if>
+            <if test="parentSection != null" >
+                PARENT_SECTION,
+            </if>
+            <if test="childSection != null" >
+                CHILD_SECTION,
+            </if>
+            <if test="terminal != null" >
+                TERMINAL,
+            </if>
+            <if test="airportModel != null" >
+                AIRPORT_MODEL,
+            </if>
+            <if test="goBack != null" >
+                GO_BACK,
+            </if>
+            <if test="valid != null" >
+                VALID,
+            </if>
+            <if test="status != null" >
+                STATUS,
+            </if>
+            <if test="modifier != null" >
+                MODIFIER,
+            </if>
+            <if test="creator != null" >
+                CREATOR,
+            </if>
+            <if test="createTime != null" >
+                CREATE_TIME,
+            </if>
+            <if test="modifyTime != null" >
+                MODIFY_TIME,
+            </if>
+            <if test="cabin != null and cabin !=''" >
+                CABIN,
+            </if>
+            <if test="fsi != null and fsi !=''" >
+                FSI,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="legNo != null" >
+                #{legNo,jdbcType=BIGINT},
+            </if>
+            <if test="id != null" >
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null" >
+                #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="saleOrderNo != null" >
+                #{saleOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="airline != null" >
+                #{airline,jdbcType=VARCHAR},
+            </if>
+            <if test="flightNo != null" >
+                #{flightNo,jdbcType=VARCHAR},
+            </if>
+            <if test="depAirport != null" >
+                #{depAirport,jdbcType=VARCHAR},
+            </if>
+            <if test="stopAirport != null" >
+                #{stopAirport,jdbcType=VARCHAR},
+            </if>
+            <if test="stopTime != null" >
+                #{stopTime,jdbcType=VARCHAR},
+            </if>
+            <if test="arrAirport != null" >
+                #{arrAirport,jdbcType=VARCHAR},
+            </if>
+            <if test="depTime != null" >
+                #{depTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="arrTime != null" >
+                #{arrTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="parentSection != null" >
+                #{parentSection,jdbcType=INTEGER},
+            </if>
+            <if test="childSection != null" >
+                #{childSection,jdbcType=INTEGER},
+            </if>
+            <if test="terminal != null" >
+                #{terminal,jdbcType=VARCHAR},
+            </if>
+            <if test="airportModel != null" >
+                #{airportModel,jdbcType=VARCHAR},
+            </if>
+            <if test="goBack != null" >
+                #{goBack,jdbcType=INTEGER},
+            </if>
+            <if test="valid != null" >
+                #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="status != null" >
+                #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="modifier != null" >
+                #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="creator != null" >
+                #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifyTime != null" >
+                #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="cabin != null and cabin != ''" >
+                #{cabin,jdbcType=VARCHAR},
+            </if>
+            <if test="fsi != null and fsi !=''" >
+                #{fsi,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.Leg" >
+        update IFT_LEG
+        <set >
+            <if test="id != null" >
+                ID = #{id,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null" >
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="saleOrderNo != null" >
+                SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="airline != null" >
+                AIRLINE = #{airline,jdbcType=VARCHAR},
+            </if>
+            <if test="flightNo != null" >
+                FLIGHT_NO = #{flightNo,jdbcType=VARCHAR},
+            </if>
+            <if test="depAirport != null" >
+                DEP_AIRPORT = #{depAirport,jdbcType=VARCHAR},
+            </if>
+            <if test="stopAirport != null" >
+                STOP_AIRPORT = #{stopAirport,jdbcType=VARCHAR},
+            </if>
+            <if test="stopTime != null" >
+                STOP_TIME = #{stopTime,jdbcType=VARCHAR},
+            </if>
+            <if test="arrAirport != null" >
+                ARR_AIRPORT = #{arrAirport,jdbcType=VARCHAR},
+            </if>
+            <if test="depTime != null" >
+                DEP_TIME = #{depTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="arrTime != null" >
+                ARR_TIME = #{arrTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="parentSection != null" >
+                PARENT_SECTION = #{parentSection,jdbcType=INTEGER},
+            </if>
+            <if test="childSection != null" >
+                CHILD_SECTION = #{childSection,jdbcType=INTEGER},
+            </if>
+            <if test="terminal != null" >
+                TERMINAL = #{terminal,jdbcType=VARCHAR},
+            </if>
+            <if test="airportModel != null" >
+                AIRPORT_MODEL = #{airportModel,jdbcType=VARCHAR},
+            </if>
+            <if test="goBack != null" >
+                GO_BACK = #{goBack,jdbcType=INTEGER},
+            </if>
+            <if test="valid != null" >
+                VALID = #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="status != null" >
+                STATUS = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="modifier != null" >
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="creator != null" >
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifyTime != null" >
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="cabin != null and cabin != ''" >
+                CABIN = #{cabin,jdbcType=VARCHAR},
+            </if>
+            <if test="fsi != null and fsi != ''" >
+                FSI = #{fsi,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where LEG_NO = #{legNo,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.ift.api.entity.Leg" >
+        update IFT_LEG
+        set ID = #{id,jdbcType=BIGINT},
+        OWNER = #{owner,jdbcType=INTEGER},
+        SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT},
+        AIRLINE = #{airline,jdbcType=VARCHAR},
+        FLIGHT_NO = #{flightNo,jdbcType=VARCHAR},
+        DEP_AIRPORT = #{depAirport,jdbcType=VARCHAR},
+        STOP_AIRPORT = #{stopAirport,jdbcType=VARCHAR},
+        STOP_TIME = #{stopTime,jdbcType=VARCHAR},
+        ARR_AIRPORT = #{arrAirport,jdbcType=VARCHAR},
+        DEP_TIME = #{depTime,jdbcType=TIMESTAMP},
+        ARR_TIME = #{arrTime,jdbcType=TIMESTAMP},
+        PARENT_SECTION = #{parentSection,jdbcType=INTEGER},
+        CHILD_SECTION = #{childSection,jdbcType=INTEGER},
+        TERMINAL = #{terminal,jdbcType=VARCHAR},
+        AIRPORT_MODEL = #{airportModel,jdbcType=VARCHAR},
+        GO_BACK = #{goBack,jdbcType=INTEGER},
+        VALID = #{valid,jdbcType=TINYINT},
+        STATUS = #{status,jdbcType=VARCHAR},
+        MODIFIER = #{modifier,jdbcType=VARCHAR},
+        CREATOR = #{creator,jdbcType=VARCHAR},
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+        CABIN = #{cabin,jdbcType=VARCHAR},
+        FSI = #{fsi,jdbcType=VARCHAR}
+        where LEG_NO = #{legNo,jdbcType=BIGINT}
+    </update>
+
+    <select id="selectLegBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_LEG
+        where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+    </select>
+</mapper>

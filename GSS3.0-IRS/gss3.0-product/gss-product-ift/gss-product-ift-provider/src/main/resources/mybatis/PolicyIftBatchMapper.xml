@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.ift.dao.PolicyIftBatchDao">
+	
+	
+   <select id="find" resultType="com.tempus.gss.product.ift.api.entity.PolicyIftBatch">
+		SELECT T1.*
+		FROM IFT_POLICY_BATCH T1
+		WHERE T1.VALID=1  AND T1.ID = #{id} AND T1.OWNER = #{owner}
+	</select>
+	
+	<insert id="add">
+		INSERT INTO IFT_POLICY_BATCH
+		(ID,OWNER,NUM,NAME,POLICY_TYPE,SOTRE_PATH,REMARK,STATUS,CREATOR,CREATE_TIME,MODIFIER,MODIFY_TIME,VALID)
+		VALUES
+		(#{id},#{owner},#{num},#{name},#{policyType},#{sotrePath},#{remark},#{status},#{creator},#{createTime},#{modifier},
+		#{modifyTime},1)
+	</insert>
+     
+     
+     <select id="query" resultType="com.tempus.gss.product.ift.api.entity.PolicyIftBatch">
+		SELECT T1.*
+		FROM IFT_POLICY_BATCH T1
+		WHERE T1.OWNER=${owner}  AND  T1.VALID=1
+		<if test="policyType !=null &amp;&amp; policyType !='' ">
+		   AND T1.POLICY_TYPE=#{policyType}
+		</if>
+		<if test="searchId !=null &amp;&amp; searchId !=''">
+		   AND T1.NUM=#{searchId}
+		</if>
+		<if test="searchName !=null &amp;&amp; searchName !='' ">
+		   AND T1.NAME  like '%${searchName}%'
+		</if>
+		<if test="searchCreateTimeStart !=null">
+		 AND T1.CREATE_TIME &gt;= #{searchCreateTimeStart}
+		</if>
+		
+		<if test="searchCreateTimeEnd !=null">
+		 AND T1.CREATE_TIME &lt;= #{searchCreateTimeEnd}
+		</if>
+		
+		<if test="status !=null &amp;&amp; status !=''">
+		   AND T1.STATUS=#{status}
+		</if>
+		<if test="creator !=null &amp;&amp; creator !=''">
+			AND T1.CREATOR like '%${creator}%'
+		</if>
+		<if test="modifier !=null &amp;&amp; modifier !=''">
+			AND T1.MODIFIER like '%${modifier}%'
+		</if>
+		ORDER BY T1.CREATE_TIME DESC
+	</select>
+
+	<update id="update">
+		UPDATE IFT_POLICY_BATCH
+		SET NUM=#{num},NAME=#{name},
+		POLICY_TYPE=#{policyType},
+		SOTRE_PATH=#{sotrePath},REMARK=#{remark},STATUS=#{status},
+		MODIFIER=#{modifier},MODIFY_TIME=#{modifyTime},VALID=1
+		WHERE ID=#{id} AND VALID=1
+	</update>	
+	
+
+	<update id="del">
+		UPDATE IFT_POLICY_BATCH
+		SET VALID=0, MODIFIER=#{modifier}, MODIFY_TIME=#{modifyTime}
+		WHERE OWNER = #{owner} AND VALID=1 
+			AND ID IN
+		<foreach collection="ids" item="id" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</update>
+	
+	<update id="updateStatus">
+		UPDATE IFT_POLICY_BATCH
+		SET STATUS=#{status},MODIFIER=#{modifier},MODIFY_TIME=#{modifyTime}
+		WHERE OWNER=#{owner} AND VALID=1 
+			AND ID IN
+		<foreach collection="ids" item="id" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</update>
+	
+	
+	<!--  查找指定产品id并且状态不为指定值的产品列表 --> 
+   <select id="queryNotStatusByIDs" resultType="com.tempus.gss.product.ift.api.entity.PolicyIftBatch">
+		SELECT T1.*
+		FROM IFT_POLICY_BATCH T1
+		WHERE OWNER = #{owner} AND T1.VALID=1  
+		 AND T1.STATUS &lt;&gt; #{status} AND ID  IN
+		<foreach collection="ids" item="id" open="(" close=")" separator=", ">#{id}</foreach> 
+		ORDER BY T1.CREATE_TIME DESC
+	</select>
+	
+	 <!--  查找指定产品id并且状态的产品列表 --> 
+   <select id="queryBatchByIDs" resultType="com.tempus.gss.product.ift.api.entity.PolicyIftBatch">
+		SELECT T1.*
+		FROM IFT_POLICY_BATCH T1
+		WHERE T1.OWNER = #{owner} AND T1.VALID=1 	
+		AND T1.STATUS=#{status} AND ID  IN
+		<foreach collection="ids" item="id" open="(" close=")" separator=", ">#{id}</foreach> 
+		ORDER BY T1.CREATE_TIME DESC
+	</select>
+	
+</mapper>

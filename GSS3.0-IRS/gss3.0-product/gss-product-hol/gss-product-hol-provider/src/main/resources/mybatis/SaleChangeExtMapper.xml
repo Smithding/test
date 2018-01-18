@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.hol.dao.SaleChangeExtMapper">
+
+	<resultMap id="BaseResultMap" type="com.tempus.gss.product.hol.api.entity.SaleChangeExt">
+		<id column="ID" property="id" jdbcType="BIGINT"/>
+		<result column="OWNER" property="owner" jdbcType="BIGINT"/>
+		<result column="SALE_CHANGE_NO" property="saleChangeNo" jdbcType="BIGINT"/>
+		<result column="BUY_CHANGE_NO" property="buyChangeNo" jdbcType="BIGINT"/>
+		<result column="SALE_ORDER_NO" property="saleOrderNo" jdbcType="BIGINT"/>
+		<result column="MODIFIER" property="modifier" jdbcType="VARCHAR"/>
+		<result column="STATUS" property="status" jdbcType="VARCHAR"/>
+		<result column="MODIFY_TIME" property="modifyTime" jdbcType="TIMESTAMP"/>
+		<result column="VALID" property="valid" jdbcType="TINYINT"/>
+		<result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP"/>
+		<result column="CREATOR" property="creator" jdbcType="VARCHAR"/>
+		<result column="LOCK_TIME" property="lockTime" jdbcType="TIMESTAMP"/>
+		<result column="CHANGE_TYPE" property="changeType" jdbcType="INTEGER"/>
+		<result column="REMARK" property="remark" jdbcType="VARCHAR"/>
+		<result column="AUDIT_PERSON" property="auditPerson" jdbcType="TIMESTAMP"/>
+		<result column="AUDIT_TIME" property="auditTime" jdbcType="DECIMAL"/>
+		<result column="CUSTOMER_NO" property="customerNo" jdbcType="BIGINT"/>
+		<result column="CUSTOMER_TYPE_NO" property="customerTypeNo" jdbcType="BIGINT"/>
+	</resultMap>
+
+	<!-- 通用查询结果列-->
+	<sql id="Base_Column_List">
+		 ID AS id, OWNER is owner,SALE_CHANGE_NO AS saleChangeNo,BUY_CHANGE_NO AS buyChangeNo,SALE_ORDER_NO AS saleOrderNo,MODIFIER, STATUS, MODIFY_TIME AS modifyTime, VALID, CREATE_TIME AS createTime, CREATOR, LOCK_TIME AS lockTime, CHANGE_TYPE AS changeType, REMARK, AUDIT_PERSON AS auditPerson, AUDIT_TIME AS auditTime, CUSTOMER_NO AS customerNo, CUSTOMER_TYPE_NO AS customerTypeNo
+	</sql>
+
+	<select id="querySaleChangeExtList" resultMap="BaseResultMap"
+			parameterType="com.tempus.gss.product.hol.api.entity.vo.SaleChangeExtVo">
+		select DISTINCT
+		hsce.ID,
+		hsce.OWNER,
+		hsce.SALE_CHANGE_NO,
+		hsce.BUY_CHANGE_NO,
+		hsce.SALE_ORDER_NO,
+		hsce.MODIFIER,
+		hsce.STATUS,
+		hsce.MODIFY_TIME,
+		hsce.VALID,
+		hsce.CREATE_TIME,
+		hsce.CREATOR,
+		hsce.LOCK_TIME,
+		hsce.CHANGE_TYPE,
+		hsce.REMARK,
+		hsce.AUDIT_PERSON,
+		hsce.AUDIT_TIME,
+		hsce.CUSTOMER_NO,
+		hsce.CUSTOMER_TYPE_NO
+		FROM
+		HOL_SALE_CHANGE_EXT hsce,
+		OS_SALECHANGE osc
+		where hsce.SALE_ORDER_NO = osc.SALE_ORDER_NO
+		<trim suffixOverrides="AND">
+			<if test="owner != null">
+				AND hsce.OWNER = #{owner,jdbcType=INTEGER}
+			</if>
+			<if test="creator != null">
+				AND hsce.CREATOR = #{creator,jdbcType=VARCHAR}
+			</if>
+			<if test="saleOrderNo != null">
+				AND hsce.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+			</if>
+			<if test="createStartTime != null">
+				AND date(hsce.CREATE_TIME) &gt;= date(#{createStartTime,jdbcType=DATE})
+			</if>
+			<if test="createEndTime != null">
+				AND date(hsce.CREATE_TIME) &lt;= date(#{createEndTime,jdbcType=DATE})
+			</if>
+
+			<if test="customerNo != null">
+				AND hsce.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT}
+			</if>
+			<if test="saleChangeChildStatus != null and saleChangeChildStatus != ''">
+				AND osc.CHILD_STATUS = #{saleChangeChildStatus,jdbcType=TINYINT}
+			</if>
+		</trim>
+		ORDER BY CREATE_TIME DESC
+	</select>
+</mapper>

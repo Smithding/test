@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.ift.dao.ProfitDao">
+  <resultMap id="BaseResultMap" type="com.tempus.gss.product.ift.api.entity.Profit">
+    <id column="PROFIT_NO" jdbcType="BIGINT" property="profitNo" />
+    <result column="CUSTOMER_NO" jdbcType="BIGINT" property="customerNo" />
+    <result column="REBATE" jdbcType="DECIMAL" property="rebate" />
+    <result column="RAISE_PRICE" jdbcType="DECIMAL" property="raisePrice" />
+    <result column="CUSTOMER_TYPE_NO" jdbcType="BIGINT" property="customerTypeNo" />
+    <result column="CUSTOMER_TYPE_NAME" jdbcType="VARCHAR" property="customerTypeName" />
+    <result column="CREATOR" jdbcType="VARCHAR" property="creator" />
+    <result column="CREATE_TIME" jdbcType="DATE" property="createTime" />
+    <result column="ACCOUNT" jdbcType="VARCHAR" property="account" />
+    <result column="MODIFIER" jdbcType="VARCHAR" property="modifier" />
+    <result column="MODIFY_TIME" jdbcType="DATE" property="modifyTime" />
+    <result column="VALID" jdbcType="BIT" property="valid" />
+    <result column="OWNER" jdbcType="INTEGER" property="owner" />
+    <result column="CUSTOMER_NAME" jdbcType="VARCHAR" property="customerName" />
+    <result column="PRICE_TYPE" jdbcType="INTEGER" property="priceType" />
+    <result column="STATUS" jdbcType="VARCHAR" property="status" />
+    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+
+  </resultMap>
+  <sql id="Base_Column_List">
+      PROFIT_NO,CUSTOMER_NO,CUSTOMER_NAME,REBATE, RAISE_PRICE, CUSTOMER_TYPE_NO,ACCOUNT, CUSTOMER_TYPE_NAME,MODIFIER,MODIFY_TIME,PRICE_TYPE,STATUS,REMARK
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from IFT_PROFIT
+    where PROFIT_NO = #{profitNo,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from IFT_PROFIT
+    where PROFIT_NO = #{profitNo,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.Profit">
+    insert into IFT_PROFIT (PROFIT_NO, ID, CUSTOMER_NO, 
+      REBATE, RAISE_PRICE, ACCOUNT
+      )
+    values (#{profitNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{customerNo,jdbcType=BIGINT}, 
+      #{rebate,jdbcType=DECIMAL}, #{raisePrice,jdbcType=DECIMAL}, #{account,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="iftProfit">
+    insert into IFT_PROFIT (PROFIT_NO, CUSTOMER_NO,
+      REBATE, RAISE_PRICE,CUSTOMER_TYPE_NO,CUSTOMER_TYPE_NAME,CREATOR,CREATE_TIME,OWNER,CUSTOMER_NAME,MODIFY_TIME,PRICE_TYPE,STATUS,REMARK
+      )
+    values (#{profitNo,jdbcType=BIGINT},  #{customerNo,jdbcType=BIGINT},
+      #{rebate,jdbcType=DECIMAL}, #{raisePrice,jdbcType=DECIMAL},#{customerTypeNo,jdbcType=BIGINT},#{customerTypeName,jdbcType=VARCHAR},#{creator,jdbcType=VARCHAR}, #{createTime,jdbcType=DATE}
+      ,#{owner,jdbcType=INTEGER},#{customerName,jdbcType=VARCHAR},#{modifyTime,jdbcType=DATE},#{priceType,jdbcType=INTEGER},#{status,jdbcType=VARCHAR},#{remark,jdbcType=VARCHAR}
+      )
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.Profit">
+    update IFT_PROFIT
+    <set>
+      <if test="customerTypeNo != null">
+        CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT},
+      </if>
+      <if test="customerTypeName != null">
+        CUSTOMER_TYPE_NAME = #{customerTypeName,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null">
+        MODIFY_TIME = #{modifyTime,jdbcType=DATE},
+      </if>
+        CUSTOMER_NAME = #{customerName,jdbcType=DATE},
+        CUSTOMER_NO = #{customerNo,jdbcType=BIGINT},
+        REBATE = #{rebate,jdbcType=DECIMAL},
+        RAISE_PRICE = #{raisePrice,jdbcType=DECIMAL},
+      <if test="account != null">
+        ACCOUNT = #{account,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="status != null">
+        STATUS = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="priceType != null">
+        PRICE_TYPE = #{priceType,jdbcType=INTEGER}
+      </if>
+    </set>
+    where PROFIT_NO = #{profitNo,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.ift.api.entity.Profit">
+    update IFT_PROFIT
+    set ID = #{id,jdbcType=BIGINT},
+      CUSTOMER_NO = #{customerNo,jdbcType=BIGINT},
+      REBATE = #{rebate,jdbcType=DECIMAL},
+      RAISE_PRICE = #{raisePrice,jdbcType=DECIMAL},
+      ACCOUNT = #{account,jdbcType=VARCHAR}
+    where PROFIT_NO = #{profitNo,jdbcType=BIGINT}
+  </update>
+  
+	<select id="queryProfitList" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.ProfitVO">
+        select DISTINCT
+          *
+        from IFT_PROFIT  WHERE 1 = 1
+	      <if test="profitNo != null">
+	        AND PROFIT_NO = #{profitNo,jdbcType=BIGINT}
+	      </if>
+    </select>
+
+  <select id="queryProfit" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.ProfitVO">
+    select DISTINCT *
+    from IFT_PROFIT  WHERE 1 = 1
+    <if test="profitNo != null">
+      AND CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT}
+    </if>
+  </select>
+
+  <delete id="deleteByPrimaryKeySelective" >
+DELETE FROM IFT_PROFIT WHERE PROFIT_NO=#{profitNo,jdbcType=BIGINT}
+  </delete>
+</mapper>

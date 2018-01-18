@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ins.dao.SaleOrderDetailDao" >
+  <resultMap id="BaseResultMap" type="com.tempus.gss.product.ins.api.entity.SaleOrderDetail" >
+    <!--被保人编号-->
+    <id column="INSURED_NO" property="insuredNo" jdbcType="BIGINT" />
+    <!--编号-->
+    <result column="ID" property="id" jdbcType="BIGINT" />
+    <!--数据归属单位-->
+    <result column="OWNER" property="owner" jdbcType="INTEGER" />
+    <!--订单编号-->
+    <result column="SALE_ORDER_NO" property="saleOrderNo" jdbcType="BIGINT" />
+    <!--被保险人姓名-->
+    <result column="INSURED_NAME" property="insuredName" jdbcType="VARCHAR" />
+    <!--被保人证件类型-->
+    <result column="INSURED_CERTI_TYPE" property="insuredCertiType" jdbcType="VARCHAR" />
+    <!--被保人证件号码-->
+    <result column="INSURED_CERTI_NO" property="insuredCertiNo" jdbcType="VARCHAR" />
+    <!--保单号-->
+    <result column="POLICY_NO" property="policyNo" jdbcType="VARCHAR" />
+    <!--子保单下载地址-->
+    <result column="ELE_URL" property="eleUrl" jdbcType="VARCHAR" />
+    <!--被保人出生日期(yyyy-MM-dd)-->
+    <result column="INSURED_BIRTHDAY" property="insuredBirthday" jdbcType="VARCHAR" />
+    <!--被保人性别-->
+    <result column="INSURED_SEX" property="insuredSex" jdbcType="INTEGER" />
+    <!--被保人手机号码-->
+    <result column="INSURED_PHONE" property="insuredPhone" jdbcType="VARCHAR" />
+    <!--被保人邮箱-->
+    <result column="INSURED_EMAIL" property="insuredEmail" jdbcType="VARCHAR" />
+    <!--保费-->
+    <result column="PREMIUM" property="premium" jdbcType="DECIMAL" />
+    <!--受益人类型-->
+    <result column="BENEFICIARY_TYPE" property="beneficiaryType" jdbcType="INTEGER" />
+    <!--与投保人关系(投保人不用填)-->
+    <result column="CUSTOMER_RELATIONS" property="customerRelations" jdbcType="VARCHAR" />
+    <!--购买份数-->
+    <result column="INSURANCE_NUM" property="insuranceNum" jdbcType="INTEGER" />
+	<!--子订单状态 1.未投保 2.已投保 3.已退保-->
+    <result column="STATUS" property="status" jdbcType="INTEGER" />    
+    <!--创建时间-->
+    <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP" />
+    <!--修改时间-->
+    <result column="MODIFY_TIME" property="modifyTime" jdbcType="TIMESTAMP" />
+    <!--创建者-->
+    <result column="CREATOR" property="creator" jdbcType="VARCHAR" />
+    <!--操作人 默认为：sys-->
+    <result column="MODIFIER" property="modifier" jdbcType="VARCHAR" />
+    <!--删除标志 0 无效 已删除 1 有效-->
+    <result column="VALID" property="valid" jdbcType="BIT" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    INSURED_NO, ID, OWNER, SALE_ORDER_NO, INSURED_NAME, INSURED_CERTI_TYPE, INSURED_CERTI_NO, 
+    POLICY_NO, ELE_URL, INSURED_BIRTHDAY, INSURED_SEX, INSURED_PHONE, INSURED_EMAIL, PREMIUM, 
+    BENEFICIARY_TYPE, CUSTOMER_RELATIONS, INSURANCE_NUM, STATUS, CREATE_TIME, MODIFY_TIME, CREATOR, 
+    MODIFIER, VALID
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from INS_SALE_ORDER_DETAIL
+    where INSURED_NO = #{insuredNo,jdbcType=BIGINT} AND ISREPORT='0'
+  </select>
+  <select id="selectBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select 
+        <include refid="Base_Column_List"/> 
+        from INS_SALE_ORDER_DETAIL 
+        where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} AND ISREPORT='0'
+  </select>
+    <select id="selectReportBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select 
+        <include refid="Base_Column_List"/> 
+        from INS_SALE_ORDER_DETAIL 
+        where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from INS_SALE_ORDER_DETAIL
+    where INSURED_NO = #{insuredNo,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.tempus.gss.product.ins.api.entity.SaleOrderDetail" >
+    insert into INS_SALE_ORDER_DETAIL (INSURED_NO, ID, OWNER, 
+      SALE_ORDER_NO, INSURED_NAME, INSURED_CERTI_TYPE, 
+      INSURED_CERTI_NO, POLICY_NO, ELE_URL, INSURED_BIRTHDAY, 
+      INSURED_SEX, INSURED_PHONE, INSURED_EMAIL, 
+      PREMIUM, BENEFICIARY_TYPE, CUSTOMER_RELATIONS, 
+      INSURANCE_NUM, STATUS, CREATE_TIME, MODIFY_TIME, 
+      CREATOR, MODIFIER, VALID,ISREPORT
+      )
+    values (#{insuredNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER}, 
+      #{saleOrderNo,jdbcType=BIGINT}, #{insuredName,jdbcType=VARCHAR}, #{insuredCertiType,jdbcType=VARCHAR}, 
+      #{insuredCertiNo,jdbcType=VARCHAR}, #{policyNo,jdbcType=VARCHAR}, #{eleUrl,jdbcType=VARCHAR}, #{insuredBirthday,jdbcType=VARCHAR}, 
+      #{insuredSex,jdbcType=INTEGER}, #{insuredPhone,jdbcType=VARCHAR}, #{insuredEmail,jdbcType=VARCHAR}, 
+      #{premium,jdbcType=DECIMAL}, #{beneficiaryType,jdbcType=INTEGER}, #{customerRelations,jdbcType=VARCHAR}, 
+      #{insuranceNum,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP}, 
+      #{creator,jdbcType=VARCHAR}, #{modifier,jdbcType=VARCHAR}, #{valid,jdbcType=BIT},#{isReport,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.tempus.gss.product.ins.api.entity.SaleOrderDetail" >
+    insert into INS_SALE_ORDER_DETAIL
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="insuredNo != null" >
+        INSURED_NO,
+      </if>
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="owner != null" >
+        OWNER,
+      </if>
+      <if test="saleOrderNo != null" >
+        SALE_ORDER_NO,
+      </if>
+      <if test="insuredName != null" >
+        INSURED_NAME,
+      </if>
+      <if test="insuredCertiType != null" >
+        INSURED_CERTI_TYPE,
+      </if>
+      <if test="insuredCertiNo != null" >
+        INSURED_CERTI_NO,
+      </if>
+      <if test="policyNo != null" >
+        POLICY_NO,
+      </if>      
+      <if test="eleUrl != null" >
+        ELE_URL,
+      </if>
+      <if test="insuredBirthday != null" >
+        INSURED_BIRTHDAY,
+      </if>
+      <if test="insuredSex != null" >
+        INSURED_SEX,
+      </if>
+      <if test="insuredPhone != null" >
+        INSURED_PHONE,
+      </if>
+      <if test="insuredEmail != null" >
+        INSURED_EMAIL,
+      </if>
+      <if test="premium != null" >
+        PREMIUM,
+      </if>
+      <if test="beneficiaryType != null" >
+        BENEFICIARY_TYPE,
+      </if>
+      <if test="customerRelations != null" >
+        CUSTOMER_RELATIONS,
+      </if>
+      <if test="insuranceNum != null" >
+        INSURANCE_NUM,
+      </if>
+      <if test="status != null" >
+        STATUS,
+      </if>
+      <if test="createTime != null" >
+        CREATE_TIME,
+      </if>
+      <if test="modifyTime != null" >
+        MODIFY_TIME,
+      </if>
+      <if test="creator != null" >
+        CREATOR,
+      </if>
+      <if test="modifier != null" >
+        MODIFIER,
+      </if>
+      <if test="valid != null" >
+        VALID,
+      </if>
+      <if test="isReport != null" >
+        ISREPORT,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="insuredNo != null" >
+        #{insuredNo,jdbcType=BIGINT},
+      </if>
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="owner != null" >
+        #{owner,jdbcType=INTEGER},
+      </if>
+      <if test="saleOrderNo != null" >
+        #{saleOrderNo,jdbcType=BIGINT},
+      </if>
+      <if test="insuredName != null" >
+        #{insuredName,jdbcType=VARCHAR},
+      </if>
+      <if test="insuredCertiType != null" >
+        #{insuredCertiType,jdbcType=VARCHAR},
+      </if>
+      <if test="insuredCertiNo != null" >
+        #{insuredCertiNo,jdbcType=VARCHAR},
+      </if>
+      <if test="policyNo != null" >
+        #{policyNo,jdbcType=VARCHAR},
+      </if>      
+      <if test="eleUrl != null" >
+        #{eleUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="insuredBirthday != null" >
+        #{insuredBirthday,jdbcType=VARCHAR},
+      </if>
+      <if test="insuredSex != null" >
+        #{insuredSex,jdbcType=INTEGER},
+      </if>
+      <if test="insuredPhone != null" >
+        #{insuredPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="insuredEmail != null" >
+        #{insuredEmail,jdbcType=VARCHAR},
+      </if>
+      <if test="premium != null" >
+        #{premium,jdbcType=DECIMAL},
+      </if>
+      <if test="beneficiaryType != null" >
+        #{beneficiaryType,jdbcType=INTEGER},
+      </if>
+      <if test="customerRelations != null" >
+        #{customerRelations,jdbcType=VARCHAR},
+      </if>
+      <if test="insuranceNum != null" >
+        #{insuranceNum,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator != null" >
+        #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="modifier != null" >
+        #{modifier,jdbcType=VARCHAR},
+      </if>
+      <if test="valid != null" >
+        #{valid,jdbcType=BIT},
+      </if>
+      <if test="isReport != null" >
+        #{isReport,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ins.api.entity.SaleOrderDetail" >
+    update INS_SALE_ORDER_DETAIL
+    <set >
+      <if test="id != null" >
+        ID = #{id,jdbcType=BIGINT},
+      </if>
+      <if test="owner != null" >
+        OWNER = #{owner,jdbcType=INTEGER},
+      </if>
+      <if test="saleOrderNo != null" >
+        SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT},
+      </if>
+      <if test="insuredName != null" >
+        INSURED_NAME = #{insuredName,jdbcType=VARCHAR},
+      </if>
+      <if test="insuredCertiType != null" >
+        INSURED_CERTI_TYPE = #{insuredCertiType,jdbcType=VARCHAR},
+      </if>
+      <if test="insuredCertiNo != null" >
+        INSURED_CERTI_NO = #{insuredCertiNo,jdbcType=VARCHAR},
+      </if>
+      <if test="policyNo != null" >
+        POLICY_NO = #{policyNo,jdbcType=VARCHAR},
+      </if>      
+      <if test="eleUrl != null" >
+        ELE_URL = #{eleUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="insuredBirthday != null" >
+        INSURED_BIRTHDAY = #{insuredBirthday,jdbcType=VARCHAR},
+      </if>
+      <if test="insuredSex != null" >
+        INSURED_SEX = #{insuredSex,jdbcType=INTEGER},
+      </if>
+      <if test="insuredPhone != null" >
+        INSURED_PHONE = #{insuredPhone,jdbcType=VARCHAR},
+      </if>
+      <if test="insuredEmail != null" >
+        INSURED_EMAIL = #{insuredEmail,jdbcType=VARCHAR},
+      </if>
+      <if test="premium != null" >
+        PREMIUM = #{premium,jdbcType=DECIMAL},
+      </if>
+      <if test="beneficiaryType != null" >
+        BENEFICIARY_TYPE = #{beneficiaryType,jdbcType=INTEGER},
+      </if>
+      <if test="customerRelations != null" >
+        CUSTOMER_RELATIONS = #{customerRelations,jdbcType=VARCHAR},
+      </if>
+      <if test="insuranceNum != null" >
+        INSURANCE_NUM = #{insuranceNum,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        STATUS = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="createTime != null" >
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null" >
+        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator != null" >
+        CREATOR = #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="modifier != null" >
+        MODIFIER = #{modifier,jdbcType=VARCHAR},
+      </if>
+      <if test="valid != null" >
+        VALID = #{valid,jdbcType=BIT},
+      </if>
+    </set>
+    where INSURED_NO = #{insuredNo,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.ins.api.entity.SaleOrderDetail" >
+    update INS_SALE_ORDER_DETAIL
+    set ID = #{id,jdbcType=BIGINT},
+      OWNER = #{owner,jdbcType=INTEGER},
+      SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT},
+      INSURED_NAME = #{insuredName,jdbcType=VARCHAR},
+      INSURED_CERTI_TYPE = #{insuredCertiType,jdbcType=VARCHAR},
+      INSURED_CERTI_NO = #{insuredCertiNo,jdbcType=VARCHAR},
+      POLICY_NO = #{policyNo,jdbcType=VARCHAR},
+      ELE_URL = #{eleUrl,jdbcType=VARCHAR},
+      INSURED_BIRTHDAY = #{insuredBirthday,jdbcType=VARCHAR},
+      INSURED_SEX = #{insuredSex,jdbcType=INTEGER},
+      INSURED_PHONE = #{insuredPhone,jdbcType=VARCHAR},
+      INSURED_EMAIL = #{insuredEmail,jdbcType=VARCHAR},
+      PREMIUM = #{premium,jdbcType=DECIMAL},
+      BENEFICIARY_TYPE = #{beneficiaryType,jdbcType=INTEGER},
+      CUSTOMER_RELATIONS = #{customerRelations,jdbcType=VARCHAR},
+      INSURANCE_NUM = #{insuranceNum,jdbcType=INTEGER},
+      STATUS = #{status,jdbcType=INTEGER},
+      CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+      CREATOR = #{creator,jdbcType=VARCHAR},
+      MODIFIER = #{modifier,jdbcType=VARCHAR},
+      VALID = #{valid,jdbcType=BIT}
+    where INSURED_NO = #{insuredNo,jdbcType=BIGINT}
+  </update>
+  
+  <select id="selectDetailByPolicyNo" resultMap="BaseResultMap">
+    select 
+    	<include refid="Base_Column_List" />
+    from INS_SALE_ORDER_DETAIL
+    WHERE 1=1 AND ISREPORT='0'
+ 	 <trim suffixOverrides="AND" >
+		<if test="_parameter != null and _parameter != ''" >
+			AND POLICY_NO = #{policyNo,jdbcType=VARCHAR}
+		</if>
+  	 </trim>    
+  </select>
+  
+</mapper>

@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ift.dao.PriceSpecDao">
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.ift.api.entity.PriceSpec">
+        <!--算价总则号-->
+        <id column="PRICE_SPEC_NO" property="priceSpecNo" jdbcType="INTEGER"/>
+        <!--编号-->
+        <result column="ID" property="id" jdbcType="BIGINT"/>
+        <!--归属单位-->
+        <result column="OWNER" property="owner" jdbcType="INTEGER"/>
+        <!--出票航司-->
+        <result column="AIRLINE" property="airline" jdbcType="VARCHAR"/>
+        <!--旅客类型无奖励-->
+        <result column="NO_AWARD_TYPE" property="noAwardType" jdbcType="VARCHAR"/>
+        <!--SOTO票无奖励-->
+        <result column="NO_AWARD_SOTO" property="noAwardSoto" jdbcType="BIT"/>
+        <!--IT票无奖励-->
+        <result column="NO_AWARD_IT" property="noAwardIt" jdbcType="BIT"/>
+        <!--OPEN票无奖励-->
+        <result column="NO_AWARD_OPEN" property="noAwardOpen" jdbcType="BIT"/>
+        <!--包含无奖励的舱位-->
+        <result column="NO_AWARD_CABIN" property="noAwardCabin" jdbcType="VARCHAR"/>
+        <!--包含无奖励的票价基础-->
+        <result column="NO_AWARD_FARE_BASE" property="noAwardFareBase" jdbcType="VARCHAR"/>
+        <!--包含无奖励的TourCode-->
+        <result column="NO_AWARD_TOUR_CODE" property="noAwardTourCode" jdbcType="VARCHAR"/>
+        <!--包含无奖励的航班号-->
+        <result column="NO_AWARD_FLIGHT_NO" property="noAwardFlightNo" jdbcType="VARCHAR"/>
+        <!--票价第于设定值无奖励-->
+        <result column="NO_AWARD_BELOW_FARE" property="noAwardBelowFare" jdbcType="DECIMAL"/>
+        <!--去程起点类型-->
+        <result column="GO_DEP" property="goDep" jdbcType="INTEGER"/>
+        <!--去程终点/回程起点类型-->
+        <result column="MIDDLE" property="middle" jdbcType="INTEGER"/>
+        <!--回程终点-->
+        <result column="BACK_ARR" property="backArr" jdbcType="INTEGER"/>
+        <!--价格选取方式-->
+        <result column="PRIORITY_PRICE" property="priorityPrice" jdbcType="INTEGER"/>
+        <!--价格公式计算的参数-->
+        <result column="FORMULA_DATA" property="formulaData" jdbcType="VARCHAR"/>
+        <!--删除标记-->
+        <result column="VALID" property="valid" jdbcType="BIT"/>
+        <!--创建时间-->
+        <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP"/>
+        <!--修改时间-->
+        <result column="MODIFY_TIME" property="modifyTime" jdbcType="TIMESTAMP"/>
+        <!--创建者-->
+        <result column="CREATOR" property="creator" jdbcType="VARCHAR"/>
+        <!--修改者-->
+        <result column="MODIFIER" property="modifier" jdbcType="VARCHAR"/>
+        <!--操作日志-->
+        <result column="LOG" property="log" jdbcType="VARCHAR"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        PRICE_SPEC_NO, ID, OWNER, AIRLINE, NO_AWARD_TYPE, NO_AWARD_SOTO, NO_AWARD_IT, NO_AWARD_OPEN,
+        NO_AWARD_CABIN, NO_AWARD_FARE_BASE, NO_AWARD_TOUR_CODE, NO_AWARD_FLIGHT_NO, NO_AWARD_BELOW_FARE,
+        GO_DEP, MIDDLE, BACK_ARR, PRIORITY_PRICE, FORMULA_DATA, VALID, CREATE_TIME, MODIFY_TIME,
+        CREATOR, MODIFIER, LOG
+    </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_PRICE_SPEC
+        where PRICE_SPEC_NO = #{priceSpecNo,jdbcType=INTEGER}
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+        DELETE FROM IFT_PRICE_SPEC
+        WHERE PRICE_SPEC_NO = #{priceSpecNo,jdbcType=INTEGER}
+    </delete>
+
+    <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.PriceSpec">
+        INSERT INTO IFT_PRICE_SPEC (PRICE_SPEC_NO, ID, OWNER,
+                                    AIRLINE, NO_AWARD_TYPE, NO_AWARD_SOTO,
+                                    NO_AWARD_IT, NO_AWARD_OPEN, NO_AWARD_CABIN,
+                                    NO_AWARD_FARE_BASE, NO_AWARD_TOUR_CODE, NO_AWARD_FLIGHT_NO,
+                                    NO_AWARD_BELOW_FARE, GO_DEP, MIDDLE,
+                                    BACK_ARR, PRIORITY_PRICE, FORMULA_DATA,
+                                    VALID, CREATE_TIME, MODIFY_TIME,
+                                    CREATOR, MODIFIER)
+        VALUES (#{priceSpecNo,jdbcType=INTEGER}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
+                                                 #{airline,jdbcType=VARCHAR}, #{noAwardType,jdbcType=VARCHAR}, #{noAwardSoto,jdbcType=BIT},
+                                                 #{noAwardIt,jdbcType=BIT}, #{noAwardOpen,jdbcType=BIT}, #{noAwardCabin,jdbcType=VARCHAR},
+                                                 #{noAwardFareBase,jdbcType=VARCHAR}, #{noAwardTourCode,jdbcType=VARCHAR},
+            #{noAwardFlightNo,jdbcType=VARCHAR},
+            #{noAwardBelowFare,jdbcType=DECIMAL}, #{goDep,jdbcType=INTEGER}, #{middle,jdbcType=INTEGER},
+            #{backArr,jdbcType=INTEGER}, #{priorityPrice,jdbcType=INTEGER}, #{formulaData,jdbcType=VARCHAR},
+            #{valid,jdbcType=BIT}, #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP},
+                #{creator,jdbcType=VARCHAR}, #{modifier,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.PriceSpec">
+        insert into IFT_PRICE_SPEC
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="priceSpecNo != null">
+                PRICE_SPEC_NO,
+            </if>
+            <if test="id != null">
+                ID,
+            </if>
+            <if test="owner != null">
+                OWNER,
+            </if>
+            <if test="airline != null">
+                AIRLINE,
+            </if>
+            <if test="noAwardType != null">
+                NO_AWARD_TYPE,
+            </if>
+            <if test="noAwardSoto != null">
+                NO_AWARD_SOTO,
+            </if>
+            <if test="noAwardIt != null">
+                NO_AWARD_IT,
+            </if>
+            <if test="noAwardOpen != null">
+                NO_AWARD_OPEN,
+            </if>
+            <if test="noAwardCabin != null">
+                NO_AWARD_CABIN,
+            </if>
+            <if test="noAwardFareBase != null">
+                NO_AWARD_FARE_BASE,
+            </if>
+            <if test="noAwardTourCode != null">
+                NO_AWARD_TOUR_CODE,
+            </if>
+            <if test="noAwardFlightNo != null">
+                NO_AWARD_FLIGHT_NO,
+            </if>
+            <if test="noAwardBelowFare != null">
+                NO_AWARD_BELOW_FARE,
+            </if>
+            <if test="GO_DEP != null">
+                GO_DEP,
+            </if>
+            <if test="middle != null">
+                MIDDLE,
+            </if>
+            <if test="backArr != null">
+                BACK_ARR,
+            </if>
+            <if test="priorityPrice != null">
+                PRIORITY_PRICE,
+            </if>
+            <if test="formulaData != null">
+                FORMULA_DATA,
+            </if>
+            <if test="valid != null">
+                VALID,
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME,
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME,
+            </if>
+            <if test="creator != null">
+                CREATOR,
+            </if>
+            <if test="modifier != null">
+                MODIFIER,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="priceSpecNo != null">
+                #{priceSpecNo,jdbcType=INTEGER},
+            </if>
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null">
+                #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="airline != null">
+                #{airline,jdbcType=VARCHAR},
+            </if>
+            <if test="noAwardType != null">
+                #{noAwardType,jdbcType=VARCHAR},
+            </if>
+            <if test="noAwardSoto != null">
+                #{noAwardSoto,jdbcType=BIT},
+            </if>
+            <if test="noAwardIt != null">
+                #{noAwardIt,jdbcType=BIT},
+            </if>
+            <if test="noAwardOpen != null">
+                #{noAwardOpen,jdbcType=BIT},
+            </if>
+            <if test="noAwardCabin != null">
+                #{noAwardCabin,jdbcType=VARCHAR},
+            </if>
+            <if test="noAwardFareBase != null">
+                #{noAwardFareBase,jdbcType=VARCHAR},
+            </if>
+            <if test="noAwardTourCode != null">
+                #{noAwardTourCode,jdbcType=VARCHAR},
+            </if>
+            <if test="noAwardFlightNo != null">
+                #{noAwardFlightNo,jdbcType=VARCHAR},
+            </if>
+            <if test="noAwardBelowFare != null">
+                #{noAwardBelowFare,jdbcType=DECIMAL},
+            </if>
+            <if test="GO_DEP != null">
+                #{goDep,jdbcType=INTEGER},
+            </if>
+            <if test="middle != null">
+                #{middle,jdbcType=INTEGER},
+            </if>
+            <if test="backArr != null">
+                #{backArr,jdbcType=INTEGER},
+            </if>
+            <if test="priorityPrice != null">
+                #{priorityPrice,jdbcType=INTEGER},
+            </if>
+            <if test="formulaData != null">
+                #{formulaData,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                #{valid,jdbcType=BIT},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifyTime != null">
+                #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="modifier != null">
+                #{modifier,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.PriceSpec">
+        update IFT_PRICE_SPEC
+        <set>
+            <if test="id != null">
+                ID = #{id,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="airline != null">
+                AIRLINE = #{airline,jdbcType=VARCHAR},
+            </if>
+            <if test="noAwardType != null">
+                NO_AWARD_TYPE = #{noAwardType,jdbcType=VARCHAR},
+            </if>
+            <if test="noAwardSoto != null">
+                NO_AWARD_SOTO = #{noAwardSoto,jdbcType=BIT},
+            </if>
+            <if test="noAwardIt != null">
+                NO_AWARD_IT = #{noAwardIt,jdbcType=BIT},
+            </if>
+            <if test="noAwardOpen != null">
+                NO_AWARD_OPEN = #{noAwardOpen,jdbcType=BIT},
+            </if>
+            <if test="noAwardCabin != null">
+                NO_AWARD_CABIN = #{noAwardCabin,jdbcType=VARCHAR},
+            </if>
+            <if test="noAwardFareBase != null">
+                NO_AWARD_FARE_BASE = #{noAwardFareBase,jdbcType=VARCHAR},
+            </if>
+            <if test="noAwardTourCode != null">
+                NO_AWARD_TOUR_CODE = #{noAwardTourCode,jdbcType=VARCHAR},
+            </if>
+            <if test="noAwardFlightNo != null">
+                NO_AWARD_FLIGHT_NO = #{noAwardFlightNo,jdbcType=VARCHAR},
+            </if>
+            <if test="noAwardBelowFare != null">
+                NO_AWARD_BELOW_FARE = #{noAwardBelowFare,jdbcType=DECIMAL},
+            </if>
+            <if test="goDep != null">
+                GO_DEP = #{goDep,jdbcType=INTEGER},
+            </if>
+            <if test="middle != null">
+                MIDDLE = #{middle,jdbcType=INTEGER},
+            </if>
+            <if test="backArr != null">
+                BACK_ARR = #{backArr,jdbcType=INTEGER},
+            </if>
+            <if test="priorityPrice != null">
+                PRIORITY_PRICE = #{priorityPrice,jdbcType=INTEGER},
+            </if>
+            <if test="formulaData != null">
+                FORMULA_DATA = #{formulaData,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=BIT},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="modifier != null">
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where PRICE_SPEC_NO = #{priceSpecNo,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.ift.api.entity.PriceSpec">
+        UPDATE IFT_PRICE_SPEC
+        SET ID                  = #{id,jdbcType=BIGINT},
+            OWNER               = #{owner,jdbcType=INTEGER},
+            AIRLINE             = #{airline,jdbcType=VARCHAR},
+            NO_AWARD_TYPE       = #{noAwardType,jdbcType=VARCHAR},
+            NO_AWARD_SOTO       = #{noAwardSoto,jdbcType=BIT},
+            NO_AWARD_IT         = #{noAwardIt,jdbcType=BIT},
+            NO_AWARD_OPEN       = #{noAwardOpen,jdbcType=BIT},
+            NO_AWARD_CABIN      = #{noAwardCabin,jdbcType=VARCHAR},
+            NO_AWARD_FARE_BASE  = #{noAwardFareBase,jdbcType=VARCHAR},
+            NO_AWARD_TOUR_CODE  = #{noAwardTourCode,jdbcType=VARCHAR},
+            NO_AWARD_FLIGHT_NO  = #{noAwardFlightNo,jdbcType=VARCHAR},
+            NO_AWARD_BELOW_FARE = #{noAwardBelowFare,jdbcType=DECIMAL},
+            GO_DEP              = #{goDep,jdbcType=INTEGER},
+            MIDDLE              = #{middle,jdbcType=INTEGER},
+            BACK_ARR            = #{backArr,jdbcType=INTEGER},
+            PRIORITY_PRICE      = #{priorityPrice,jdbcType=INTEGER},
+            FORMULA_DATA        = #{formulaData,jdbcType=VARCHAR},
+            VALID               = #{valid,jdbcType=BIT},
+            CREATE_TIME         = #{createTime,jdbcType=TIMESTAMP},
+            MODIFY_TIME         = #{modifyTime,jdbcType=TIMESTAMP},
+            CREATOR             = #{creator,jdbcType=VARCHAR},
+            MODIFIER            = #{modifier,jdbcType=VARCHAR}
+        WHERE PRICE_SPEC_NO = #{priceSpecNo,jdbcType=INTEGER}
+    </update>
+
+    <select id="queryObjByKey" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.PriceSpec">
+        select
+        <include refid="Base_Column_List"/>
+        FROM IFT_PRICE_SPEC where 1=1
+        <trim suffixOverrides="AND">
+            <if test="airline != null and airline !=''">
+                AND AIRLINE = #{airline,jdbcType=VARCHAR}
+            </if>
+            <if test="owner != null">
+                AND OWNER = #{owner,jdbcType=INTEGER}
+            </if>
+        </trim>
+
+    </select>
+
+    <select id="selectAirLine" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List"/>
+        FROM IFT_PRICE_SPEC where AIRLINE = #{airline,jdbcType=VARCHAR} AND VALID=1
+    </select>
+
+    <update id="deleteByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.PriceSpec">
+        update IFT_PRICE_SPEC
+        <set>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=BIT},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifier != null and modifier != '' ">
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where PRICE_SPEC_NO = #{priceSpecNo,jdbcType=INTEGER}
+    </update>
+    <update id="validate" parameterType="com.tempus.gss.product.ift.api.entity.PriceSpec">
+        UPDATE IFT_PRICE_SPEC
+        SET
+        <if test="log!=null and log!=''">
+            LOG=#{log,jdbcType=VARCHAR},
+        </if>
+        <if test="log!=null and log!=''">
+            VALID = #{valid,jdbcType=BIT}
+        </if>
+        WHERE PRICE_SPEC_NO = #{priceSpecNo,jdbcType=INTEGER}
+    </update>
+</mapper>

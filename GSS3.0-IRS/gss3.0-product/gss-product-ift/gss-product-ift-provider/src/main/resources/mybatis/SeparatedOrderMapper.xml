@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.ift.dao.SeparatedOrderDao">
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.ift.api.entity.SeparatedOrder">
+        <id column="ID" property="id" jdbcType="BIGINT"/>
+        <result column="SALE_ORDER_NO" property="saleOrderNo" jdbcType="BIGINT"/>
+        <result column="PNR" property="pnr" jdbcType="BIGINT"/>
+        <result column="DEPNAME" property="depName" jdbcType="VARCHAR"/>
+        <result column="MODIFIERNAME" property="modifierName" jdbcType="VARCHAR"/>
+        <result column="COMPNAME" property="compName" jdbcType="VARCHAR"/>
+        <result column="CUSTOMERNAME" property="customerName" jdbcType="VARCHAR"/>
+        <result column="LOCKER" property="locker" jdbcType="BIGINT"/>
+    </resultMap>
+
+    <sql id="sqlwhere">
+        <where>
+            ift.CREATE_TYPE in(1,2,3,4,6) AND  o.ORDER_CHILD_STATUS  in (2,3) and ift.LOCKER!=0
+            <if test="saleOrderNO!=null"> and ift.SALE_ORDER_NO = #{saleOrderNO}</if>
+            <if test="pnr!=null"> and ift.PNR_NO = #{pnr}</if>
+        </where>
+    </sql>
+
+    <select id="queryObjByKey" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SeparatedOrderVo">
+        SELECT ift.ID,ift.SALE_ORDER_NO,ift.PNR_NO AS PNR,de.NAME AS DEPNAME,sm.NAME AS MODIFIERNAME,cps.NAME AS COMPNAME,
+        (SELECT NAME FROM SM_USER s WHERE s.LOGIN_NAME = ift.CREATOR) AS CUSTOMERNAME,ift.LOCKER  FROM IFT_SALE_ORDER_EXT ift
+        LEFT JOIN SM_USER sm ON sm.LOGIN_NAME = ift.MODIFIER
+        LEFT JOIN SM_DEPT de ON de.ID = sm.DEPT_ID
+        LEFT JOIN CPS_CUSTOMER cps ON cps.CUSTOMER_NO = de.CUSTOMER_ID
+        LEFT JOIN OS_SALEORDER o ON ift.SALE_ORDER_NO = o.SALE_ORDER_NO
+        <include refid="sqlwhere"/>
+        ORDER BY ${sort}
+    </select>
+</mapper>

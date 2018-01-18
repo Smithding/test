@@ -1,0 +1,624 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ift.dao.PassengerRefundPriceDao" >
+  <resultMap id="BaseResultMap" type="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice" >
+    <!--退票编号-->
+    <id column="PASSENGER_REFUND_PRICE_NO" property="passengerRefundPriceNo" jdbcType="BIGINT"/>
+    <!--编号-->
+    <result column="ID" property="id" jdbcType="BIGINT" />
+    <!--数据归属单位-->
+    <result column="OWNER" property="owner" jdbcType="INTEGER" />
+  
+    <!--销售单编号-->
+    <result column="SALE_ORDER_NO" property="saleOrderNo" jdbcType="BIGINT" />
+    <!--  -->
+        <result column="SALE_CHANGE_NO" property="saleChangeNo" jdbcType="BIGINT"/>
+    <!--乘客编号-->
+    <result column="PASSENGER_NO" property="passengerNo" jdbcType="BIGINT" />
+    <!--销售票面价.-->
+    <result column="SALE_PRICE" property="salePrice" jdbcType="DECIMAL" />
+     <!--  -->
+        <result column="SALE_BROKERAGE" property="saleBrokerage" jdbcType="DECIMAL"/>
+        <!--  -->
+        <result column="BUY_BROKERAGE" property="buyBrokerage" jdbcType="DECIMAL"/>
+    <!--销售税费-->
+    <result column="SALE_TAX" property="saleTax" jdbcType="DECIMAL" />
+    <!--退票费-->
+    <result column="SALE_REFUND_PRICE" property="saleRefundPrice" jdbcType="DECIMAL" />
+    <!--销售机票结算价-->
+    <result column="SALE_TICKET_ACCOUNT" property="saleTicketAccount" jdbcType="DECIMAL" />
+    <!--销售回收奖励-->
+    <result column="SALE_RECOVERY_AWARD" property="saleRecoveryAward" jdbcType="DECIMAL" />
+    <!--销售退票结算价-->
+    <result column="SALE_REFUND_ACCOUNT" property="saleRefundAccount" jdbcType="DECIMAL" />
+    <!--采购机票结算价-->
+    <result column="BUY_TICKET_ACCOUNT" property="buyTicketAccount" jdbcType="DECIMAL" />
+    <!--采购回收奖励-->
+    <result column="BUY_RECOVERY_AWARD" property="buyRecoveryAward" jdbcType="DECIMAL" />
+    <!--采购退票结算价-->
+    <result column="BUY_FEFUND_ACCOUNT" property="buyFefundAccount" jdbcType="DECIMAL" />
+    <!--采购票面价-->
+    <result column="BUY_PRICE" property="buyPrice" jdbcType="DECIMAL" />
+    <!--采购税费-->
+    <result column="BUY_TAX" property="buyTax" jdbcType="DECIMAL" />
+    <!--采购退票费-->
+    <result column="BUY_REFUND_PRICE" property="buyRefundPrice" jdbcType="DECIMAL" />
+    <!--1:成人 2：儿童 3：婴儿-->
+    <result column="PASSENGER_TYPE" property="passengerType" jdbcType="VARCHAR" />
+    <!--1:销售 2：采购-->
+    <result column="ORDER_TYPE" property="orderType" jdbcType="VARCHAR" />
+    <!--删除标志 0 无效 已删除 1 有效-->
+    <result column="VALID" property="valid" jdbcType="TINYINT" />
+    <!--启用状态 1：启用，2：停用-->
+    <result column="STATUS" property="status" jdbcType="VARCHAR" />
+    <!--操作人-->
+    <result column="CREATOR" property="creator" jdbcType="VARCHAR" />
+    <!--创建时间-->
+    <result column="CREATE_TIME" property="createTime" jdbcType="TIMESTAMP" />
+    <!--操作人-->
+    <result column="MODIFIER" property="modifier" jdbcType="VARCHAR" />
+    <!--操作时间-->
+    <result column="MODIFY_TIME" property="modifyTime" jdbcType="TIMESTAMP" />
+    <!-- 销售总价 -->
+    <result column="SALE_COUNT" property="saleCount" jdbcType="DECIMAL" />
+    <!-- 采购总价 -->
+    <result column="BUY_COUNT" property="buyCount" jdbcType="DECIMAL" />
+    <!--采购币种-->
+    <result column="SALE_CURRENCY" property="saleCurrency" jdbcType="VARCHAR"/>
+    <!--销售币种-->
+    <result column="CURRENCY" property="currency" jdbcType="VARCHAR"/>
+    <!--汇率-->
+    <result column="EXCHANGE_RATE " property="exchangeRate" jdbcType="DECIMAL"/>
+    <result column="CHARGE_PROFIT" property="chargeProfit" jdbcType="DECIMAL" />
+    <!--一对一关联乘客-->
+    <association property="passenger" column="PASSENGER_NO"
+                 select="com.tempus.gss.product.ift.dao.PassengerDao.selectByPrimaryKey"/>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    PASSENGER_REFUND_PRICE_NO, ID, OWNER, SALE_ORDER_NO,SALE_CHANGE_NO , PASSENGER_NO, 
+    SALE_PRICE,SALE_BROKERAGE,BUY_BROKERAGE, SALE_TAX, SALE_REFUND_PRICE, SALE_TICKET_ACCOUNT, SALE_RECOVERY_AWARD, SALE_REFUND_ACCOUNT, 
+    BUY_TICKET_ACCOUNT, BUY_RECOVERY_AWARD, BUY_FEFUND_ACCOUNT, BUY_PRICE, BUY_TAX, BUY_REFUND_PRICE, 
+    PASSENGER_TYPE, ORDER_TYPE, VALID, STATUS, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME,SALE_COUNT,BUY_COUNT,CHARGE_PROFIT,
+    CURRENCY,SALE_CURRENCY,EXCHANGE_RATE
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from IFT_PASSENGER_REFUND_PRICE
+    where PASSENGER_REFUND_PRICE_NO = #{passengerRefundPriceNo,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from IFT_PASSENGER_REFUND_PRICE
+    where PASSENGER_REFUND_PRICE_NO = #{passengerRefundPriceNo,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice" >
+    insert into IFT_PASSENGER_REFUND_PRICE (PASSENGER_REFUND_PRICE_NO, ID, OWNER, 
+      SALE_ORDER_NO,SALE_CHANGE_NO, PASSENGER_NO, 
+      SALE_PRICE,SALE_BROKERAGE,BUY_BROKERAGE, SALE_TAX, SALE_REFUND_PRICE, 
+      SALE_TICKET_ACCOUNT, SALE_RECOVERY_AWARD, SALE_REFUND_ACCOUNT, 
+      BUY_TICKET_ACCOUNT, BUY_RECOVERY_AWARD, BUY_FEFUND_ACCOUNT, 
+      BUY_PRICE, BUY_TAX, BUY_REFUND_PRICE, 
+      PASSENGER_TYPE, ORDER_TYPE, VALID, 
+      STATUS, CREATOR, CREATE_TIME, 
+      MODIFIER, MODIFY_TIME,SALE_COUNT,BUY_COUNT,CHARGE_PROFIT)
+    values (#{passengerRefundPriceNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER}, 
+    	#{saleOrderNo,jdbcType=BIGINT},#{saleChangeNo,jdbcType=BIGINT}, #{passengerNo,jdbcType=BIGINT}, 
+      #{salePrice,jdbcType=DECIMAL}, #{saleTax,jdbcType=DECIMAL}, #{saleRefundPrice,jdbcType=DECIMAL}, 
+      #{saleBrokerage,jdbcType=DECIMAL},#{buyBrokerage,jdbcType=DECIMAL},
+      #{saleTicketAccount,jdbcType=DECIMAL}, #{saleRecoveryAward,jdbcType=DECIMAL}, #{saleRefundAccount,jdbcType=DECIMAL}, 
+      #{buyTicketAccount,jdbcType=DECIMAL}, #{buyRecoveryAward,jdbcType=DECIMAL}, #{buyFefundAccount,jdbcType=DECIMAL}, 
+      #{buyPrice,jdbcType=DECIMAL}, #{buyTax,jdbcType=DECIMAL}, #{buyRefundPrice,jdbcType=DECIMAL}, 
+      #{passengerType,jdbcType=VARCHAR}, #{orderType,jdbcType=VARCHAR}, #{valid,jdbcType=TINYINT}, 
+      #{status,jdbcType=VARCHAR}, #{creator,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{modifier,jdbcType=VARCHAR}, #{modifyTime,jdbcType=TIMESTAMP},#{saleCount,jdbcType=DECIMAL},#{buyCount,jdbcType=DECIMAL},#{chargeProfit,jdbcType=DECIMAL})
+  </insert>
+  <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice" >
+    insert into IFT_PASSENGER_REFUND_PRICE
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="passengerRefundPriceNo != null" >
+        PASSENGER_REFUND_PRICE_NO,
+      </if>
+      <if test="id != null" >
+        ID,
+      </if>
+      <if test="owner != null" >
+        OWNER,
+      </if>
+
+      <if test="saleOrderNo != null" >
+        SALE_ORDER_NO,
+      </if>
+      <if test="saleChangeNo != null">
+                SALE_CHANGE_NO,
+            </if>
+      <if test="passengerNo != null" >
+        PASSENGER_NO,
+      </if>
+      <if test="salePrice != null" >
+        SALE_PRICE,
+      </if>
+      <if test="saleBrokerage != null">
+      	SALE_BROKERAGE,
+      </if>
+      <if test="buyBrokerage != null">
+      	BUY_BROKERAGE,
+      </if>
+      <if test="saleTax != null" >
+        SALE_TAX,
+      </if>
+      <if test="saleRefundPrice != null" >
+        SALE_REFUND_PRICE,
+      </if>
+      <if test="saleTicketAccount != null" >
+        SALE_TICKET_ACCOUNT,
+      </if>
+      <if test="saleRecoveryAward != null" >
+        SALE_RECOVERY_AWARD,
+      </if>
+      <if test="saleRefundAccount != null" >
+        SALE_REFUND_ACCOUNT,
+      </if>
+      <if test="buyTicketAccount != null" >
+        BUY_TICKET_ACCOUNT,
+      </if>
+      <if test="buyRecoveryAward != null" >
+        BUY_RECOVERY_AWARD,
+      </if>
+      <if test="buyFefundAccount != null" >
+        BUY_FEFUND_ACCOUNT,
+      </if>
+      <if test="buyPrice != null" >
+        BUY_PRICE,
+      </if>
+      <if test="buyTax != null" >
+        BUY_TAX,
+      </if>
+      <if test="buyRefundPrice != null" >
+        BUY_REFUND_PRICE,
+      </if>
+      <if test="passengerType != null" >
+        PASSENGER_TYPE,
+      </if>
+      <if test="orderType != null" >
+        ORDER_TYPE,
+      </if>
+      <if test="valid != null" >
+        VALID,
+      </if>
+      <if test="status != null" >
+        STATUS,
+      </if>
+      <if test="creator != null" >
+        CREATOR,
+      </if>
+      <if test="createTime != null" >
+        CREATE_TIME,
+      </if>
+      <if test="modifier != null" >
+        MODIFIER,
+      </if>
+      <if test="modifyTime != null" >
+        MODIFY_TIME,
+      </if>
+      <if test="saleCount != null" >
+        SALE_COUNT,
+      </if>
+      <if test="buyCount != null" >
+        BUY_COUNT,
+      </if>
+      <if test="chargeProfit != null" >
+        CHARGE_PROFIT,
+      </if>
+      <if test="currency != null and currency!=''" >
+        CURRENCY,
+      </if>
+      <if test="saleCurrency != null and saleCurrency!=''" >
+        SALE_CURRENCY,
+      </if>
+      <if test="exchangeRate != null" >
+        EXCHANGE_RATE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="passengerRefundPriceNo != null" >
+        #{passengerRefundPriceNo,jdbcType=BIGINT},
+      </if>
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="owner != null" >
+        #{owner,jdbcType=INTEGER},
+      </if>
+
+      <if test="saleOrderNo != null" >
+        #{saleOrderNo,jdbcType=BIGINT},
+      </if>
+      <if test="saleChangeNo != null">
+      	#{saleChangeNo,jdbcType=BIGINT},
+      </if>
+      <if test="passengerNo != null" >
+        #{passengerNo,jdbcType=BIGINT},
+      </if>
+      <if test="salePrice != null" >
+        #{salePrice,jdbcType=DECIMAL},
+      </if>
+	 <if test="saleBrokerage != null">
+                #{saleBrokerage,jdbcType=DECIMAL},
+            </if>
+            <if test="buyBrokerage != null">
+                #{buyBrokerage,jdbcType=DECIMAL},
+            </if>
+      <if test="saleTax != null" >
+        #{saleTax,jdbcType=DECIMAL},
+      </if>
+      <if test="saleRefundPrice != null" >
+        #{saleRefundPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="saleTicketAccount != null" >
+        #{saleTicketAccount,jdbcType=DECIMAL},
+      </if>
+      <if test="saleRecoveryAward != null" >
+        #{saleRecoveryAward,jdbcType=DECIMAL},
+      </if>
+      <if test="saleRefundAccount != null" >
+        #{saleRefundAccount,jdbcType=DECIMAL},
+      </if>
+      <if test="buyTicketAccount != null" >
+        #{buyTicketAccount,jdbcType=DECIMAL},
+      </if>
+      <if test="buyRecoveryAward != null" >
+        #{buyRecoveryAward,jdbcType=DECIMAL},
+      </if>
+      <if test="buyFefundAccount != null" >
+        #{buyFefundAccount,jdbcType=DECIMAL},
+      </if>
+      <if test="buyPrice != null" >
+        #{buyPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="buyTax != null" >
+        #{buyTax,jdbcType=DECIMAL},
+      </if>
+      <if test="buyRefundPrice != null" >
+        #{buyRefundPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="passengerType != null" >
+        #{passengerType,jdbcType=VARCHAR},
+      </if>
+      <if test="orderType != null" >
+        #{orderType,jdbcType=VARCHAR},
+      </if>
+      <if test="valid != null" >
+        #{valid,jdbcType=TINYINT},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="creator != null" >
+        #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifier != null" >
+        #{modifier,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="saleCount != null" >
+        #{saleCount,jdbcType=DECIMAL},
+      </if>
+      <if test="buyCount != null" >
+        #{buyCount,jdbcType=DECIMAL},
+      </if>
+      <if test="chargeProfit != null" >
+        #{chargeProfit,jdbcType=DECIMAL},
+      </if>
+      <if test="currency!=null and currency !=''">
+        #{currency,jdbcType=VARCHAR},
+      </if>
+      <if test="saleCurrency!=null and saleCurrency !=''">
+        #{saleCurrency,jdbcType=VARCHAR},
+      </if>
+      <if test="exchangeRate!=null and exchangeRate !=''">
+        #{exchangeRate,jdbcType=DECIMAL},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice" >
+    update IFT_PASSENGER_REFUND_PRICE
+    <set >
+      <if test="id != null" >
+        ID = #{id,jdbcType=BIGINT},
+      </if>
+      <if test="owner != null" >
+        OWNER = #{owner,jdbcType=INTEGER},
+      </if>
+      <if test="saleOrderNo != null" >
+        SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT},
+      </if>
+	  <if test="saleChangeNo != null">
+         SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT},
+      </if>
+      <if test="passengerNo != null" >
+        PASSENGER_NO = #{passengerNo,jdbcType=BIGINT},
+      </if>
+      <if test="salePrice != null" >
+        SALE_PRICE = #{salePrice,jdbcType=DECIMAL},
+      </if>
+	  <if test="saleBrokerage != null">
+         SALE_BROKERAGE = #{saleBrokerage,jdbcType=DECIMAL},
+      </if>
+      <if test="buyBrokerage != null">
+        	BUY_BROKERAGE = #{buyBrokerage,jdbcType=DECIMAL},
+      </if>
+      <if test="saleTax != null" >
+        SALE_TAX = #{saleTax,jdbcType=DECIMAL},
+      </if>
+      <if test="saleRefundPrice != null" >
+        SALE_REFUND_PRICE = #{saleRefundPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="saleTicketAccount != null" >
+        SALE_TICKET_ACCOUNT = #{saleTicketAccount,jdbcType=DECIMAL},
+      </if>
+      <if test="saleRecoveryAward != null" >
+        SALE_RECOVERY_AWARD = #{saleRecoveryAward,jdbcType=DECIMAL},
+      </if>
+      <if test="saleRefundAccount != null" >
+        SALE_REFUND_ACCOUNT = #{saleRefundAccount,jdbcType=DECIMAL},
+      </if>
+      <if test="buyTicketAccount != null" >
+        BUY_TICKET_ACCOUNT = #{buyTicketAccount,jdbcType=DECIMAL},
+      </if>
+      <if test="buyRecoveryAward != null" >
+        BUY_RECOVERY_AWARD = #{buyRecoveryAward,jdbcType=DECIMAL},
+      </if>
+      <if test="buyFefundAccount != null" >
+        BUY_FEFUND_ACCOUNT = #{buyFefundAccount,jdbcType=DECIMAL},
+      </if>
+      <if test="buyPrice != null" >
+        BUY_PRICE = #{buyPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="buyTax != null" >
+        BUY_TAX = #{buyTax,jdbcType=DECIMAL},
+      </if>
+      <if test="buyRefundPrice != null" >
+        BUY_REFUND_PRICE = #{buyRefundPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="passengerType != null" >
+        PASSENGER_TYPE = #{passengerType,jdbcType=VARCHAR},
+      </if>
+      <if test="orderType != null" >
+        ORDER_TYPE = #{orderType,jdbcType=VARCHAR},
+      </if>
+      <if test="valid != null" >
+        VALID = #{valid,jdbcType=TINYINT},
+      </if>
+      <if test="status != null" >
+        STATUS = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="creator != null" >
+        CREATOR = #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifier != null" >
+        MODIFIER = #{modifier,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="saleCount != null" >
+        SALE_COUNT = #{saleCount,jdbcType=DECIMAL},
+      </if>
+      <if test="buyCount != null" >
+        BUY_COUNT = #{buyCount ,jdbcType=DECIMAL},
+      </if>
+      <if test="chargeProfit != null" >
+        CHARGE_PROFIT = #{chargeProfit ,jdbcType=DECIMAL},
+      </if>
+      <if test="currency!=null and currency!=''">
+        CURRENCY =#{currency,jdbcType=VARCHAR},
+      </if>
+      <if test="saleCurrency!=null and saleCurrency!=''">
+        SALE_CURRENCY =#{saleCurrency,jdbcType=VARCHAR},
+      </if>
+      <if test="exchangeRate!=null">
+        EXCHANGE_RATE =#{exchangeRate,jdbcType=DECIMAL},
+      </if>
+    </set>
+    where PASSENGER_REFUND_PRICE_NO = #{passengerRefundPriceNo,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice" >
+    update IFT_PASSENGER_REFUND_PRICE
+    set ID = #{id,jdbcType=BIGINT},
+        OWNER = #{owner,jdbcType=INTEGER},
+        SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT},
+		SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT},
+        PASSENGER_NO = #{passengerNo,jdbcType=BIGINT},
+        SALE_PRICE = #{salePrice,jdbcType=DECIMAL},
+		SALE_BROKERAGE = #{saleBrokerage,jdbcType=DECIMAL},
+        BUY_BROKERAGE = #{buyBrokerage,jdbcType=DECIMAL},
+        SALE_TAX = #{saleTax,jdbcType=DECIMAL},
+        SALE_REFUND_PRICE = #{saleRefundPrice,jdbcType=DECIMAL},
+        SALE_TICKET_ACCOUNT = #{saleTicketAccount,jdbcType=DECIMAL},
+        SALE_RECOVERY_AWARD = #{saleRecoveryAward,jdbcType=DECIMAL},
+        SALE_REFUND_ACCOUNT = #{saleRefundAccount,jdbcType=DECIMAL},
+        BUY_TICKET_ACCOUNT = #{buyTicketAccount,jdbcType=DECIMAL},
+        BUY_RECOVERY_AWARD = #{buyRecoveryAward,jdbcType=DECIMAL},
+        BUY_FEFUND_ACCOUNT = #{buyFefundAccount,jdbcType=DECIMAL},
+        BUY_PRICE = #{buyPrice,jdbcType=DECIMAL},
+        BUY_TAX = #{buyTax,jdbcType=DECIMAL},
+        BUY_REFUND_PRICE = #{buyRefundPrice,jdbcType=DECIMAL},
+        PASSENGER_TYPE = #{passengerType,jdbcType=VARCHAR},
+        ORDER_TYPE = #{orderType,jdbcType=VARCHAR},
+        VALID = #{valid,jdbcType=TINYINT},
+        STATUS = #{status,jdbcType=VARCHAR},
+        CREATOR = #{creator,jdbcType=VARCHAR},
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+        MODIFIER = #{modifier,jdbcType=VARCHAR},
+        SALE_COUNT = #{saleCount,jdbcType=DECIMAL},
+        BUY_COUNT = #{buyCount,jdbcType=DECIMAL},
+        CHARGE_PROFIT = #{chargeProfit ,jdbcType=DECIMAL},
+    where PASSENGER_REFUND_PRICE_NO = #{passengerRefundPriceNo,jdbcType=BIGINT}
+  </update>
+  <select id="getPassengerRefundPrice" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_PASSENGER_REFUND_PRICE
+        where 
+        	<trim suffixOverrides="AND">
+        	1=1 AND
+          <if test="id != null and id !=''" >
+        	ID = #{id,jdbcType=BIGINT} AND
+      	  </if>
+      	  <if test="owner != null and owner !=''" >
+       		 OWNER = #{owner,jdbcType=INTEGER} AND
+	      </if>
+	      <if test="saleOrderNo != null and saleOrderNo !=''" >
+	        SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} AND
+	      </if>
+		  <if test="saleChangeNo != null and saleChangeNo!=''">
+	         SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT} AND
+	      </if>
+	      <if test="passengerNo != null and passengerNo!=''" >
+	        PASSENGER_NO = #{passengerNo,jdbcType=BIGINT} AND
+	      </if>	      
+	      <if test="passengerType != null and passengerType!=''" >
+	        PASSENGER_TYPE = #{passengerType,jdbcType=VARCHAR} AND
+	      </if>
+	      <if test="orderType != null and orderType!=''" >
+	        ORDER_TYPE = #{orderType,jdbcType=VARCHAR} AND
+	      </if>
+	      <if test="valid != null and valid!=''" >
+	        VALID = #{valid,jdbcType=TINYINT} AND
+	      </if>
+	      <if test="status != null and status !=''" >
+	        STATUS = #{status,jdbcType=VARCHAR} AND
+	      </if>
+	      <if test="creator != null and creator!=''" >
+	        CREATOR = #{creator,jdbcType=VARCHAR} AND
+	      </if>
+	      <if test="createTime != null and createTime!=''" >
+	        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP} AND
+	      </if>
+	      <if test="modifier != null and modifier!=''" >
+	        MODIFIER = #{modifier,jdbcType=VARCHAR} AND
+	      </if>
+	      <if test="modifyTime != null and modifyTime!=''" >
+	        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP} AND
+	      </if>
+	      </trim>
+    </select>
+  <select id="selectPassengerRefundPriceBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
+  	select 
+    <include refid="Base_Column_List" />
+    from IFT_PASSENGER_REFUND_PRICE
+    where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT} 
+  </select>
+  <select id="queryObjByKeyList" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.PassengerRefundPriceVo">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_PASSENGER_REFUND_PRICE
+        WHERE
+        <trim suffixOverrides="AND">
+        	<if test="saleChangeNo != null and saleChangeNo!=''">
+	        	SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT} AND
+	      	</if>
+            <if test="valid != null and valid != ''">
+                VALID = #{valid,jdbcType=VARCHAR} AND
+            </if>
+            <if test="owner != null and owner != ''">
+                OWNER = #{owner,jdbcType=INTEGER} AND
+            </if>
+        </trim>
+    </select>
+  <update id="updateByChangeOrderNo" parameterType="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice">
+    update IFT_PASSENGER_REFUND_PRICE
+    <set>
+      <if test="owner != null" >
+        OWNER = #{owner,jdbcType=INTEGER},
+      </if>
+      <if test="passengerNo != null" >
+        PASSENGER_NO = #{passengerNo,jdbcType=BIGINT},
+      </if>
+      <if test="salePrice != null" >
+        SALE_PRICE = #{salePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="saleBrokerage != null">
+        SALE_BROKERAGE = #{saleBrokerage,jdbcType=DECIMAL},
+      </if>
+      <if test="buyBrokerage != null">
+        BUY_BROKERAGE = #{buyBrokerage,jdbcType=DECIMAL},
+      </if>
+      <if test="saleTax != null" >
+        SALE_TAX = #{saleTax,jdbcType=DECIMAL},
+      </if>
+      <if test="saleRefundPrice != null" >
+        SALE_REFUND_PRICE = #{saleRefundPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="saleTicketAccount != null" >
+        SALE_TICKET_ACCOUNT = #{saleTicketAccount,jdbcType=DECIMAL},
+      </if>
+      <if test="saleRecoveryAward != null" >
+        SALE_RECOVERY_AWARD = #{saleRecoveryAward,jdbcType=DECIMAL},
+      </if>
+      <if test="saleRefundAccount != null" >
+        SALE_REFUND_ACCOUNT = #{saleRefundAccount,jdbcType=DECIMAL},
+      </if>
+      <if test="buyTicketAccount != null" >
+        BUY_TICKET_ACCOUNT = #{buyTicketAccount,jdbcType=DECIMAL},
+      </if>
+      <if test="buyRecoveryAward != null" >
+        BUY_RECOVERY_AWARD = #{buyRecoveryAward,jdbcType=DECIMAL},
+      </if>
+      <if test="buyFefundAccount != null" >
+        BUY_FEFUND_ACCOUNT = #{buyFefundAccount,jdbcType=DECIMAL},
+      </if>
+      <if test="buyPrice != null" >
+        BUY_PRICE = #{buyPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="buyTax != null" >
+        BUY_TAX = #{buyTax,jdbcType=DECIMAL},
+      </if>
+      <if test="buyRefundPrice != null" >
+        BUY_REFUND_PRICE = #{buyRefundPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="passengerType != null" >
+        PASSENGER_TYPE = #{passengerType,jdbcType=VARCHAR},
+      </if>
+      <if test="orderType != null" >
+        ORDER_TYPE = #{orderType,jdbcType=VARCHAR},
+      </if>
+      <if test="valid != null" >
+        VALID = #{valid,jdbcType=TINYINT},
+      </if>
+      <if test="status != null" >
+        STATUS = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="creator != null" >
+        CREATOR = #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifier != null" >
+        MODIFIER = #{modifier,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="saleCount != null" >
+        SALE_COUNT = #{saleCount,jdbcType=DECIMAL},
+      </if>
+      <if test="buyCount != null" >
+        BUY_COUNT = #{"buyCount != null",jdbcType=DECIMAL},
+      </if>
+      <if test="chargeProfit != null" >
+      CHARGE_PROFIT = #{chargeProfit ,jdbcType=DECIMAL},
+      </if>
+    </set>
+    WHERE SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
+  </update>
+</mapper>

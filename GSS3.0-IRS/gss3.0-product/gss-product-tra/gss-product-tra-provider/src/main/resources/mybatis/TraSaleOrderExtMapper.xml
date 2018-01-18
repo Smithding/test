@@ -1,0 +1,765 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.tra.dao.TraSaleOrderExtDao">
+  <resultMap id="BaseResultMap" type="com.tempus.gss.product.tra.api.entity.TraSaleOrderExt">
+    <id column="SALE_ORDER_NO" jdbcType="BIGINT" property="saleOrderNo" />
+    <result column="ID" jdbcType="BIGINT" property="id" />
+    <result column="OWNER" jdbcType="INTEGER" property="owner" />
+    <result column="BUY_ORDER_NO" jdbcType="BIGINT" property="buyOrderNo" />
+    <result column="ORDER_NO" jdbcType="BIGINT" property="orderNo" />
+    <result column="ORDER_TYPE" jdbcType="INTEGER" property="orderType" />
+    <result column="person" jdbcType="VARCHAR" property="person" />
+    <result column="cellphone" jdbcType="VARCHAR" property="cellphone" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="train_name" jdbcType="VARCHAR" property="trainName" />
+    <result column="SALE_PRICE" jdbcType="DECIMAL" property="salePrice" />
+    <result column="BUY_PRICE" jdbcType="DECIMAL" property="buyPrice" />
+    <result column="PREMIUM" jdbcType="DECIMAL" property="premium" />
+    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    <result column="IS_TEAM" jdbcType="TINYINT" property="isTeam" />
+    <result column="SOURCE_NAME" jdbcType="VARCHAR" property="sourceName" />
+    <result column="EXTENDED_FIELDS_JSON" jdbcType="VARCHAR" property="extendedFieldsJson" />
+    <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="CREATOR" jdbcType="VARCHAR" property="creator" />
+    <result column="MODIFIER" jdbcType="VARCHAR" property="modifier" />
+    <result column="VALID" jdbcType="BIT" property="valid" />
+    <result column="ISSUE_DATE" jdbcType="TIMESTAMP" property="issueDate" />
+    <result column="OUTORDERNO" jdbcType="VARCHAR" property="outOrderNo" />
+    <collection property="saleOrderDetailList" ofType="com.tempus.gss.product.tra.api.entity.TraSaleOrderDetail" column="SALE_ORDER_NO"
+                select="com.tempus.gss.product.tra.dao.TraSaleOrderDetailDao.selectBySaleOrderNo"/>
+  </resultMap>
+  
+  <resultMap id="QueryResultMap" type="com.tempus.gss.product.tra.api.entity.TraSaleOrderExt">
+    <id column="SALE_ORDER_NO" jdbcType="BIGINT" property="saleOrderNo" />
+    <result column="ID" jdbcType="BIGINT" property="id" />
+    <result column="OWNER" jdbcType="INTEGER" property="owner" />
+    <result column="BUY_ORDER_NO" jdbcType="BIGINT" property="buyOrderNo" />
+    <result column="ORDER_NO" jdbcType="BIGINT" property="orderNo" />
+    <result column="ORDER_TYPE" jdbcType="INTEGER" property="orderType" />
+    <result column="person" jdbcType="VARCHAR" property="person" />
+    <result column="cellphone" jdbcType="VARCHAR" property="cellphone" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="train_name" jdbcType="VARCHAR" property="trainName" />
+    <result column="SALE_PRICE" jdbcType="DECIMAL" property="salePrice" />
+    <result column="BUY_PRICE" jdbcType="DECIMAL" property="buyPrice" />
+    <result column="PREMIUM" jdbcType="DECIMAL" property="premium" />
+    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    <result column="IS_TEAM" jdbcType="TINYINT" property="isTeam" />
+    <result column="SOURCE_NAME" jdbcType="VARCHAR" property="sourceName" />
+    <result column="EXTENDED_FIELDS_JSON" jdbcType="VARCHAR" property="extendedFieldsJson" />
+    <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="CREATOR" jdbcType="VARCHAR" property="creator" />
+    <result column="MODIFIER" jdbcType="VARCHAR" property="modifier" />
+    <result column="VALID" jdbcType="BIT" property="valid" />
+    <result column="ISSUE_DATE" jdbcType="TIMESTAMP" property="issueDate" />
+    <result column="STATUS" jdbcType="INTEGER" property="status" />
+    <result column="SURNAME" jdbcType="VARCHAR" property="surname" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="trainNo" jdbcType="VARCHAR" property="trainNo" />
+    <result column="departureTime" jdbcType="TIMESTAMP" property="departureTime" />
+    <result column="CUSTOMER_NO" jdbcType="BIGINT" property="customerNo" />
+    <result column="CUSTOMER_TYPE_NO" jdbcType="INTEGER" property="customerTypeNo" />
+    <collection property="saleOrderDetailList" ofType="com.tempus.gss.product.tra.api.entity.TraSaleOrderDetail" column="SALE_ORDER_NO"
+                select="com.tempus.gss.product.tra.dao.TraSaleOrderDetailDao.selectBySaleOrderNo"/>
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Sat Feb 25 17:24:56 CST 2017.
+    -->
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Sat Feb 25 17:24:56 CST 2017.
+    -->
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Sat Feb 25 17:24:56 CST 2017.
+    -->
+    SALE_ORDER_NO, ID, OWNER, BUY_ORDER_NO, ORDER_NO, ORDER_TYPE, person, cellphone, 
+    email, train_name, SALE_PRICE, BUY_PRICE, PREMIUM, REMARK, IS_TEAM, SOURCE_NAME, 
+    EXTENDED_FIELDS_JSON, CREATE_TIME, MODIFY_TIME, CREATOR, MODIFIER, VALID, ISSUE_DATE,OUTORDERNO
+  </sql>
+  <select id="selectByExample" parameterType="com.tempus.gss.product.tra.api.entity.TraSaleOrderExtExample" resultMap="BaseResultMap">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Sat Feb 25 17:24:56 CST 2017.
+    -->
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from TRA_SALE_ORDER_EXT
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Sat Feb 25 17:24:56 CST 2017.
+    -->
+    select 
+    <include refid="Base_Column_List" />
+    from TRA_SALE_ORDER_EXT
+    where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Sat Feb 25 17:24:56 CST 2017.
+    -->
+    delete from TRA_SALE_ORDER_EXT
+    where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.tempus.gss.product.tra.api.entity.TraSaleOrderExtExample">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Sat Feb 25 17:24:56 CST 2017.
+    -->
+    delete from TRA_SALE_ORDER_EXT
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.tempus.gss.product.tra.api.entity.TraSaleOrderExt">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Sat Feb 25 17:24:56 CST 2017.
+    -->
+    insert into TRA_SALE_ORDER_EXT (SALE_ORDER_NO, ID, OWNER, 
+      BUY_ORDER_NO, ORDER_NO, ORDER_TYPE, 
+      person, cellphone, email, 
+      train_name, SALE_PRICE, BUY_PRICE, 
+      PREMIUM, REMARK, IS_TEAM, 
+      SOURCE_NAME, EXTENDED_FIELDS_JSON, CREATE_TIME, 
+      MODIFY_TIME, CREATOR, MODIFIER, 
+      VALID, ISSUE_DATE,OUTORDERNO)
+    values (#{saleOrderNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER}, 
+      #{buyOrderNo,jdbcType=BIGINT}, #{orderNo,jdbcType=BIGINT}, #{orderType,jdbcType=INTEGER}, 
+      #{person,jdbcType=VARCHAR}, #{cellphone,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, 
+      #{trainName,jdbcType=VARCHAR}, #{salePrice,jdbcType=DECIMAL}, #{buyPrice,jdbcType=DECIMAL}, 
+      #{premium,jdbcType=DECIMAL}, #{remark,jdbcType=VARCHAR}, #{isTeam,jdbcType=TINYINT}, 
+      #{sourceName,jdbcType=VARCHAR}, #{extendedFieldsJson,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{modifyTime,jdbcType=TIMESTAMP}, #{creator,jdbcType=VARCHAR}, #{modifier,jdbcType=VARCHAR}, 
+      #{valid,jdbcType=BIT}, #{issueDate,jdbcType=TIMESTAMP},  #{outOrderNo,jdbcType=VARCHAR}), #{departureTime,jdbcType=TIMESTAMP}
+  </insert>
+  <insert id="insertSelective" parameterType="com.tempus.gss.product.tra.api.entity.TraSaleOrderExt">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Sat Feb 25 17:24:56 CST 2017.
+    -->
+    insert into TRA_SALE_ORDER_EXT
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="saleOrderNo != null">
+        SALE_ORDER_NO,
+      </if>
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="owner != null">
+        OWNER,
+      </if>
+      <if test="buyOrderNo != null">
+        BUY_ORDER_NO,
+      </if>
+      <if test="orderNo != null">
+        ORDER_NO,
+      </if>
+      <if test="orderType != null">
+        ORDER_TYPE,
+      </if>
+      <if test="person != null">
+        person,
+      </if>
+      <if test="cellphone != null">
+        cellphone,
+      </if>
+      <if test="email != null">
+        email,
+      </if>
+      <if test="trainName != null">
+        train_name,
+      </if>
+      <if test="salePrice != null">
+        SALE_PRICE,
+      </if>
+      <if test="buyPrice != null">
+        BUY_PRICE,
+      </if>
+      <if test="premium != null">
+        PREMIUM,
+      </if>
+      <if test="remark != null">
+        REMARK,
+      </if>
+      <if test="isTeam != null">
+        IS_TEAM,
+      </if>
+      <if test="sourceName != null">
+        SOURCE_NAME,
+      </if>
+      <if test="extendedFieldsJson != null">
+        EXTENDED_FIELDS_JSON,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="modifyTime != null">
+        MODIFY_TIME,
+      </if>
+      <if test="creator != null">
+        CREATOR,
+      </if>
+      <if test="modifier != null">
+        MODIFIER,
+      </if>
+      <if test="valid != null">
+        VALID,
+      </if>
+      <if test="issueDate != null">
+        ISSUE_DATE,
+      </if>
+      <if test="outOrderNo != null">
+        OUTORDERNO,
+      </if>
+      <if test="departureTime != null">
+        departureTime,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="saleOrderNo != null">
+        #{saleOrderNo,jdbcType=BIGINT},
+      </if>
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="owner != null">
+        #{owner,jdbcType=INTEGER},
+      </if>
+      <if test="buyOrderNo != null">
+        #{buyOrderNo,jdbcType=BIGINT},
+      </if>
+      <if test="orderNo != null">
+        #{orderNo,jdbcType=BIGINT},
+      </if>
+      <if test="orderType != null">
+        #{orderType,jdbcType=INTEGER},
+      </if>
+      <if test="person != null">
+        #{person,jdbcType=VARCHAR},
+      </if>
+      <if test="cellphone != null">
+        #{cellphone,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null">
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="trainName != null">
+        #{trainName,jdbcType=VARCHAR},
+      </if>
+      <if test="salePrice != null">
+        #{salePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="buyPrice != null">
+        #{buyPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="premium != null">
+        #{premium,jdbcType=DECIMAL},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="isTeam != null">
+        #{isTeam,jdbcType=TINYINT},
+      </if>
+      <if test="sourceName != null">
+        #{sourceName,jdbcType=VARCHAR},
+      </if>
+      <if test="extendedFieldsJson != null">
+        #{extendedFieldsJson,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null">
+        #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator != null">
+        #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="modifier != null">
+        #{modifier,jdbcType=VARCHAR},
+      </if>
+      <if test="valid != null">
+        #{valid,jdbcType=BIT},
+      </if>
+      <if test="issueDate != null">
+        #{issueDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="outOrderNo != null">
+        #{outOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="departureTime != null">
+        #{departureTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.tempus.gss.product.tra.api.entity.TraSaleOrderExtExample" resultType="java.lang.Integer">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Sat Feb 25 17:24:56 CST 2017.
+    -->
+    select count(*) from TRA_SALE_ORDER_EXT
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Sat Feb 25 17:24:56 CST 2017.
+    -->
+    update TRA_SALE_ORDER_EXT
+    <set>
+      <if test="record.saleOrderNo != null">
+        SALE_ORDER_NO = #{record.saleOrderNo,jdbcType=BIGINT},
+      </if>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.owner != null">
+        OWNER = #{record.owner,jdbcType=INTEGER},
+      </if>
+      <if test="record.buyOrderNo != null">
+        BUY_ORDER_NO = #{record.buyOrderNo,jdbcType=BIGINT},
+      </if>
+      <if test="record.orderNo != null">
+        ORDER_NO = #{record.orderNo,jdbcType=BIGINT},
+      </if>
+      <if test="record.orderType != null">
+        ORDER_TYPE = #{record.orderType,jdbcType=INTEGER},
+      </if>
+      <if test="record.person != null">
+        person = #{record.person,jdbcType=VARCHAR},
+      </if>
+      <if test="record.cellphone != null">
+        cellphone = #{record.cellphone,jdbcType=VARCHAR},
+      </if>
+      <if test="record.email != null">
+        email = #{record.email,jdbcType=VARCHAR},
+      </if>
+      <if test="record.trainName != null">
+        train_name = #{record.trainName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.salePrice != null">
+        SALE_PRICE = #{record.salePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="record.buyPrice != null">
+        BUY_PRICE = #{record.buyPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="record.premium != null">
+        PREMIUM = #{record.premium,jdbcType=DECIMAL},
+      </if>
+      <if test="record.remark != null">
+        REMARK = #{record.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.isTeam != null">
+        IS_TEAM = #{record.isTeam,jdbcType=TINYINT},
+      </if>
+      <if test="record.sourceName != null">
+        SOURCE_NAME = #{record.sourceName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.extendedFieldsJson != null">
+        EXTENDED_FIELDS_JSON = #{record.extendedFieldsJson,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.modifyTime != null">
+        MODIFY_TIME = #{record.modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.creator != null">
+        CREATOR = #{record.creator,jdbcType=VARCHAR},
+      </if>
+      <if test="record.modifier != null">
+        MODIFIER = #{record.modifier,jdbcType=VARCHAR},
+      </if>
+      <if test="record.valid != null">
+        VALID = #{record.valid,jdbcType=BIT},
+      </if>
+      <if test="record.issueDate != null">
+        ISSUE_DATE = #{record.issueDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.outOrderNo != null">
+        OUTORDERNO =#{outOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="record.departureTime != null">
+        departureTime =#{departureTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Sat Feb 25 17:24:56 CST 2017.
+    -->
+    update TRA_SALE_ORDER_EXT
+    set SALE_ORDER_NO = #{record.saleOrderNo,jdbcType=BIGINT},
+      ID = #{record.id,jdbcType=BIGINT},
+      OWNER = #{record.owner,jdbcType=INTEGER},
+      BUY_ORDER_NO = #{record.buyOrderNo,jdbcType=BIGINT},
+      ORDER_NO = #{record.orderNo,jdbcType=BIGINT},
+      ORDER_TYPE = #{record.orderType,jdbcType=INTEGER},
+      person = #{record.person,jdbcType=VARCHAR},
+      cellphone = #{record.cellphone,jdbcType=VARCHAR},
+      email = #{record.email,jdbcType=VARCHAR},
+      train_name = #{record.trainName,jdbcType=VARCHAR},
+      SALE_PRICE = #{record.salePrice,jdbcType=DECIMAL},
+      BUY_PRICE = #{record.buyPrice,jdbcType=DECIMAL},
+      PREMIUM = #{record.premium,jdbcType=DECIMAL},
+      REMARK = #{record.remark,jdbcType=VARCHAR},
+      IS_TEAM = #{record.isTeam,jdbcType=TINYINT},
+      SOURCE_NAME = #{record.sourceName,jdbcType=VARCHAR},
+      EXTENDED_FIELDS_JSON = #{record.extendedFieldsJson,jdbcType=VARCHAR},
+      CREATE_TIME = #{record.createTime,jdbcType=TIMESTAMP},
+      MODIFY_TIME = #{record.modifyTime,jdbcType=TIMESTAMP},
+      CREATOR = #{record.creator,jdbcType=VARCHAR},
+      MODIFIER = #{record.modifier,jdbcType=VARCHAR},
+      VALID = #{record.valid,jdbcType=BIT},
+      ISSUE_DATE = #{record.issueDate,jdbcType=TIMESTAMP},
+     OUTORDERNO =#{outOrderNo,jdbcType=VARCHAR},
+    departureTime =#{departureTime,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.tra.api.entity.TraSaleOrderExt">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Sat Feb 25 17:24:56 CST 2017.
+    -->
+    update TRA_SALE_ORDER_EXT
+    <set>
+      <if test="id != null">
+        ID = #{id,jdbcType=BIGINT},
+      </if>
+      <if test="owner != null">
+        OWNER = #{owner,jdbcType=INTEGER},
+      </if>
+      <if test="buyOrderNo != null">
+        BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT},
+      </if>
+      <if test="orderNo != null">
+        ORDER_NO = #{orderNo,jdbcType=BIGINT},
+      </if>
+      <if test="orderType != null">
+        ORDER_TYPE = #{orderType,jdbcType=INTEGER},
+      </if>
+      <if test="person != null">
+        person = #{person,jdbcType=VARCHAR},
+      </if>
+      <if test="cellphone != null">
+        cellphone = #{cellphone,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null">
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="trainName != null">
+        train_name = #{trainName,jdbcType=VARCHAR},
+      </if>
+      <if test="salePrice != null">
+        SALE_PRICE = #{salePrice,jdbcType=DECIMAL},
+      </if>
+      <if test="buyPrice != null">
+        BUY_PRICE = #{buyPrice,jdbcType=DECIMAL},
+      </if>
+      <if test="premium != null">
+        PREMIUM = #{premium,jdbcType=DECIMAL},
+      </if>
+      <if test="remark != null">
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="isTeam != null">
+        IS_TEAM = #{isTeam,jdbcType=TINYINT},
+      </if>
+      <if test="sourceName != null">
+        SOURCE_NAME = #{sourceName,jdbcType=VARCHAR},
+      </if>
+      <if test="extendedFieldsJson != null">
+        EXTENDED_FIELDS_JSON = #{extendedFieldsJson,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifyTime != null">
+        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="creator != null">
+        CREATOR = #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="modifier != null">
+        MODIFIER = #{modifier,jdbcType=VARCHAR},
+      </if>
+      <if test="valid != null">
+        VALID = #{valid,jdbcType=BIT},
+      </if>
+      <if test="issueDate != null">
+        ISSUE_DATE = #{issueDate,jdbcType=TIMESTAMP},
+      </if>
+      <if test="outOrderNo != null">
+        OUTORDERNO = #{outOrderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="departureTime != null">
+        departureTime = #{departureTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.tra.api.entity.TraSaleOrderExt">
+    <!--
+      WARNING - @mbggenerated
+      This element is automatically generated by MyBatis Generator, do not modify.
+      This element was generated on Sat Feb 25 17:24:56 CST 2017.
+    -->
+    update TRA_SALE_ORDER_EXT
+    set ID = #{id,jdbcType=BIGINT},
+      OWNER = #{owner,jdbcType=INTEGER},
+      BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT},
+      ORDER_NO = #{orderNo,jdbcType=BIGINT},
+      ORDER_TYPE = #{orderType,jdbcType=INTEGER},
+      person = #{person,jdbcType=VARCHAR},
+      cellphone = #{cellphone,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      train_name = #{trainName,jdbcType=VARCHAR},
+      SALE_PRICE = #{salePrice,jdbcType=DECIMAL},
+      BUY_PRICE = #{buyPrice,jdbcType=DECIMAL},
+      PREMIUM = #{premium,jdbcType=DECIMAL},
+      REMARK = #{remark,jdbcType=VARCHAR},
+      IS_TEAM = #{isTeam,jdbcType=TINYINT},
+      SOURCE_NAME = #{sourceName,jdbcType=VARCHAR},
+      EXTENDED_FIELDS_JSON = #{extendedFieldsJson,jdbcType=VARCHAR},
+      CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+      CREATOR = #{creator,jdbcType=VARCHAR},
+      MODIFIER = #{modifier,jdbcType=VARCHAR},
+      VALID = #{valid,jdbcType=BIT},
+      ISSUE_DATE = #{issueDate,jdbcType=TIMESTAMP},
+     OUTORDERNO = #{outOrderNo,jdbcType=VARCHAR},
+    departureTime = #{departureTime,jdbcType=TIMESTAMP}
+    where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+  </update>
+  <select id="queryObjByKey" resultMap="QueryResultMap" parameterType="com.tempus.gss.product.tra.api.entity.vo.TraSaleOrderExtVo" >
+    select DISTINCT t.SALE_ORDER_NO, t.ID, t.OWNER, t.BUY_ORDER_NO, t.ORDER_NO, t.ORDER_TYPE, t.person, 
+	t.cellphone, t.email, t.train_name, t.SALE_PRICE, t.BUY_PRICE, t.PREMIUM, t.REMARK, t.IS_TEAM, t.SOURCE_NAME,
+	t.EXTENDED_FIELDS_JSON, t.CREATE_TIME, t.MODIFY_TIME, t.CREATOR, t.MODIFIER, t.VALID, t.ISSUE_DATE,t.departureTime
+	<!--,d.`STATUS`,d.trainNo,p.SURNAME,p.NAME,s.TRANSATION_ORDER_NO,s.CUSTOMER_NO,s.CUSTOMER_TYPE_NO-->
+FROM TRA_SALE_ORDER_EXT t 
+	left join TRA_SALE_ORDER_DETAIL d on t.SALE_ORDER_NO=d.SALE_ORDER_NO 
+	left join TRA_PASSENGER p on d.passenger_no=p.PASSENGER_NO 
+	left join OS_SALEORDER s on s.SALE_ORDER_NO=t.SALE_ORDER_NO  
+WHERE t.VALID=1
+    <trim suffixOverrides="AND" >
+      
+      <if test="owner != null">
+        AND t.OWNER = #{owner,jdbcType=INTEGER}
+      </if>
+       <if test="isLowerLevel == true">
+           AND  s.CUSTOMER_NO in
+           <foreach collection="lowerCustomers" item="lowerCustomers" index="index" open="(" close=")" separator=",">
+             ${lowerCustomers.customerNo}
+           </foreach>
+        </if>
+      <if test="saleOrderNo != null and saleOrderNo != ''" >
+        AND  t.SALE_ORDER_NO= #{saleOrderNo,jdbcType=BIGINT}
+      </if>
+      <if test="transationOrderNo != null and transationOrderNo != ''" >
+        AND  s.TRANSATION_ORDER_NO= #{transationOrderNo,jdbcType=BIGINT}
+      </if>
+      <if test="buyOrderNo != null and buyOrderNo != ''" >
+        AND t.BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
+      </if>
+      <if test="orderNo != null and orderNo != ''" >
+        AND t.ORDER_NO = #{orderNo,jdbcType=BIGINT}
+      </if>
+      <if test="orderType != null" >
+        AND t.ORDER_TYPE = #{orderType,jdbcType=INTEGER}
+      </if>
+      <if test="person != null and person != ''" >
+        AND t.person = #{person,jdbcType=VARCHAR}
+      </if>
+      <if test="cellphone != null and cellphone != ''" >
+       AND t.cellphone = #{cellphone,jdbcType=VARCHAR}
+      </if>
+      <if test="email != null and email != ''" >
+        AND t.email = #{email,jdbcType=VARCHAR}
+      </if>
+      <if test="trainName != null and trainName != ''" >
+        AND t.train_name like CONCAT(CONCAT('%', #{trainName,jdbcType=VARCHAR}),'%')
+      </if>
+      <if test="salePrice != null and salePrice != ''" >
+        AND t.SALE_PRICE = #{salePrice,jdbcType=DECIMAL}
+      </if>
+      <if test="buyPrice != null and buyPrice != ''" >
+        AND t.BUY_PRICE = #{buyPrice,jdbcType=DECIMAL}
+      </if>
+      <if test="premium != null and premium != ''" >
+        AND t.PREMIUM = #{premium,jdbcType=DECIMAL}
+      </if>
+      <if test="isTeam != null and isTeam != ''" >
+        AND t.IS_TEAM = #{isTeam,jdbcType=TINYINT}
+      </if>
+      <if test="sourceName != null and sourceName != ''" >
+        AND t.SOURCE_NAME = #{sourceName,jdbcType=VARCHAR}
+      </if>
+      <if test="createTime != null and createTime != ''" >
+        AND t.CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="creator != null and creator != '' and isLowerLevel == false">
+        AND t.CREATOR = #{creator,jdbcType=VARCHAR}
+      </if>
+      <if test="modifier != null and modifier != ''">
+        AND t.MODIFIER = #{modifier,jdbcType=VARCHAR}
+      </if>
+      <if test="modifyTime != null and modifyTime != ''">
+        AND t.MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP}
+      </if>
+      <if test="valid != null and valid != ''">
+        AND t.VALID = #{valid,jdbcType=BIT}
+      </if>
+      <if test="issueDate != null and issueDate != ''">
+        AND t.ISSUE_DATE = #{issueDate,jdbcType=TIMESTAMP}
+      </if>
+      <if test="outOrderNo != null and outOrderNo != ''">
+        AND t.OUTORDERNO = #{outOrderNo,jdbcType=TIMESTAMP}
+      </if>
+      <if test="createStartTime != null">
+        <![CDATA[
+            AND   DATE_FORMAT(t.ISSUE_DATE, '%Y-%m-%d') >= DATE_FORMAT(#{createStartTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+         ]]>
+	 </if>
+	 <if test="createEndTime != null">
+       <![CDATA[
+            AND   DATE_FORMAT(t.ISSUE_DATE, '%Y-%m-%d') <= DATE_FORMAT(#{createEndTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+         ]]>
+	 </if>
+
+      <if test="departureStartTime != null">
+        <![CDATA[
+            AND   DATE_FORMAT(t.departureTime, '%Y-%m-%d') >= DATE_FORMAT(#{departureStartTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+         ]]>
+      </if>
+      <if test="departureEndTime != null">
+        <![CDATA[
+            AND   DATE_FORMAT(t.departureTime, '%Y-%m-%d') <= DATE_FORMAT(#{departureEndTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
+         ]]>
+      </if>
+
+      <if test="surname != null and surname!=''">
+		AND p.SURNAME= #{surname!=,jdbcType=VARCHAR}
+	 </if>
+	 <if test="name != null and name!=''">
+		AND p.NAME = #{name,jdbcType=VARCHAR}
+	 </if>
+	 <if test="status != null and status">
+		AND d.STATUS = #{status,jdbcType=INTEGER}
+	 </if>
+	 <if test="trainNo != null">
+		AND d.trainNo = #{trainNo,jdbcType=VARCHAR}
+	 </if>
+	 <if test="customerNo != null and isLowerLevel == false">
+		AND s.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT}
+	 </if>
+	 <if test="customerTypeNo != null and isLowerLevel == true">
+		AND s.CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=INTEGER}
+	 </if>
+    </trim>
+    ORDER BY CREATE_TIME DESC
+  </select>
+  
+  <select id="queryByBuyOrderNo" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from TRA_SALE_ORDER_EXT
+    where BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT} AND VALID=1
+  </select>
+</mapper>

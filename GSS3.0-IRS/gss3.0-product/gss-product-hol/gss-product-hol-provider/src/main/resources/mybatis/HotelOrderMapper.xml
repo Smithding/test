@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.hol.dao.HotelOrderMapper">
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.hol.api.entity.response.HotelOrder">
+        <id column="ID" property="id" jdbcType="BIGINT"/>
+        <result column="HOTEL_ORDER_NO" property="hotelOrderNo" jdbcType="VARCHAR"/>
+        <result column="SALE_ORDER_NO" property="saleOrderNo" jdbcType="BIGINT"/>
+        <result column="BUY_ORDER_NO" property="buyOrderNo" jdbcType="BIGINT"/>
+        <result column="HOTEL_CODE" property="hotelCode" jdbcType="VARCHAR"/>
+        <result column="HOTEL_NAME" property="hotelName" jdbcType="VARCHAR"/>
+        <result column="ORDER_TYPE" property="orderType" jdbcType="INTEGER"/>
+        <result column="CONTACT_NAME" property="contactName" jdbcType="VARCHAR"/>
+        <result column="CONTACT_NUMBER" property="contactNumber" jdbcType="VARCHAR"/>
+        <result column="CANCEL_TIME" property="cancelTime" jdbcType="TIMESTAMP"/>
+        <result column="ARRIVAL_DATE" property="arrivalDate" jdbcType="TIMESTAMP"/>
+        <result column="DEPARTURE_DATE" property="departureDate" jdbcType="TIMESTAMP"/>
+        <result column="TOTAL_PRICE" property="totalPrice" jdbcType="DECIMAL"/>
+        <result column="TOTAL_REFUND" property="totalRefund" jdbcType="DECIMAL"/>
+        <result column="GUEST_NAME" property="guestName" jdbcType="VARCHAR"/>
+        <result column="REMARK" property="remark" jdbcType="VARCHAR"/>
+        <result column="LOCKER" property="locker" jdbcType="BIGINT"/>
+        <result column="LOCK_TIME" property="lockTime" jdbcType="TIMESTAMP"/>
+        <result column="CREATOR" property="creator" jdbcType="VARCHAR"/>
+        <result column="CREATE_ORDER_TIME" property="createOrderTime" jdbcType="TIMESTAMP"/>
+        <result column="MODIFIER" property="modifier" jdbcType="VARCHAR"/>
+        <result column="MODIFY_TIME" property="modifyTime" jdbcType="TIMESTAMP"/>
+        <result column="PRODUCT_UNIQUE_ID" property="productUniqueId" jdbcType="BIGINT"/>
+        <result column="BOOK_COUNT" property="bookCount" jdbcType="TINYINT"/>
+        <result column="PAYMENT_SIGN" property="paymentSign" jdbcType="TINYINT"/>
+        <result column="BANK_ID" property="bankId" jdbcType="BIGINT"/>
+        <result column="BANK_NAME" property="bankName" jdbcType="VARCHAR"/>
+        <result column="CARD_NUMBER" property="cardNumber" jdbcType="VARCHAR"/>
+        <result column="CARD_USER_NAME" property="cardUserName" jdbcType="VARCHAR"/>
+        <result column="CARD_VALUE_DATE" property="cardValueDate" jdbcType="VARCHAR"/>
+        <result column="CREDENTIAL_NAME" property="credentialName" jdbcType="VARCHAR"/>
+        <result column="CREDENTIAL_NUMBER" property="credentialNumber" jdbcType="VARCHAR"/>
+        <result column="CARD_MOBILE" property="cardMobile" jdbcType="VARCHAR"/>
+        <result column="ORDER_STATUS" property="orderStatus" jdbcType="VARCHAR"/>
+        <result column="MSG" property="msg" jdbcType="VARCHAR"/>
+<!--         <result column="ORDER_MONEY" property="orderMoney" jdbcType="DECIMAL"/> -->
+        <result column="IS_AFFIRM" property="isAffirm" jdbcType="TINYINT"/>
+        <result column="RESULT_CODE" property="resultCode" jdbcType="VARCHAR"/>
+        <result column="NIGHT_COUNT" property="nightCount" jdbcType="INTEGER"/>
+        <result column="OWNER" property="owner" jdbcType="INTEGER"/>
+        <result column="PRO_ID" property="proId" jdbcType="VARCHAR"/>
+        <result column="HOTEL_ADDRESS" property="hotelAddress" jdbcType="VARCHAR"/>
+        <result column="HOTEL_PHONE" property="hotelPhone" jdbcType="VARCHAR"/>
+        <result column="PRO_NAME" property="proName" jdbcType="VARCHAR"/>
+        <result column="TC_ORDER_STATUS" property="tcOrderStatus" jdbcType="VARCHAR"/>
+        <result column="TRANSATION_ORDER_NO" property="transationOrderNo" jdbcType="BIGINT"/>
+        <result column="GUEST_MOBILE" property="guestMobile" jdbcType="VARCHAR"/>
+        <result column="DB_ORDER_TYPE" property="dbOrderType" jdbcType="VARCHAR"/>
+        <result column="DB_ORDER_MONEY" property="dbOrderMoney" jdbcType="DECIMAL"/>
+        <result column="DB_CANCEL_RULE" property="dbCancelRule" jdbcType="VARCHAR"/>
+        <result column="CANCEL_PENALTY" property="cancelPenalty" jdbcType="TIMESTAMP"/>
+        <result column="EARLY_ARRIVE_TIME" property="earlyArriveTime" jdbcType="TIMESTAMP"/>
+        <result column="LATEST_ARRIVE_TIME" property="latestArriveTime" jdbcType="TIMESTAMP"/>
+        <result column="CUSTOMER_NO" property="customerNo" jdbcType="BIGINT"/>
+        <result column="SUPPLIER_NO" property="supplierNo" jdbcType="BIGINT"/>
+        <result column="CARD_VALUE_CODE" property="cardValueCode" jdbcType="VARCHAR"/>
+        <result column="ARRIVE_HOTEL_TIME" property="arriveHotelTime" jdbcType="VARCHAR"/>
+        <result column="REQUEST_CODE" property="requestCode" jdbcType="VARCHAR"/>
+        <result column="REQUEST_TEXT" property="requestText" jdbcType="VARCHAR"/>
+        <result column="REQUEST_NAME" property="requestName" jdbcType="VARCHAR"/>
+        <result column="FACT_ARRIVE_TIME" property="factArriveTime" jdbcType="TIMESTAMP"/>
+        <result column="FACT_LEAVE_TIME" property="factLeaveTime" jdbcType="TIMESTAMP"/>
+        <result column="FACT_GUEST_NAME" property="factGuestName" jdbcType="VARCHAR"/>
+        <result column="FACT_NIGHT_COUNT" property="factNightCount" jdbcType="TINYINT"/>
+        <result column="FACT_PRO_COUNT" property="factProCount" jdbcType="TINYINT"/>
+        <result column="EACH_NIGHT_PRICE" property="eachNightPrice" jdbcType="VARCHAR"/>
+        <result column="FACT_TOTAL_PRICE" property="factTotalPrice" jdbcType="DECIMAL"/>
+        <result column="BREAKFAST_COUNT" property="breakfastCount" jdbcType="VARCHAR"/>
+        <result column="SUPPLIER_NUMBER" property="supplierNumber" jdbcType="VARCHAR"/>
+        <result column="SUP_PRICE_NAME" property="supPriceName" jdbcType="VARCHAR"/>
+        <result column="BED_TYPE_NAME" property="bedTypeName" jdbcType="VARCHAR"/>
+        <result column="FACT_TOTAL_REFUND" property="factTotalRefund" jdbcType="DECIMAL"/>
+        <result column="RELATE_ORDER_NO" property="relateOrderNo" jdbcType="VARCHAR"/>
+    </resultMap>
+    <!-- 通用查询结果列-->
+    <sql id="Base_Column_List">
+		ID,OWNER, HOTEL_ORDER_NO AS hotelOrderNo, SALE_ORDER_NO AS saleOrderNo, BUY_ORDER_NO AS buyOrderNo, HOTEL_CODE AS hotelCode,HOTEL_NAME AS hotelName, ORDER_TYPE AS orderType, CONTACT_NAME AS contactName, CONTACT_NUMBER AS contactNumber, CANCEL_TIME AS cancelTime, ARRIVAL_DATE AS arrivalDate,
+		DEPARTURE_DATE AS departureDate, TOTAL_PRICE AS totalPrice, TOTAL_REFUND AS totalRefund, GUEST_NAME AS guestName, REMARK, LOCKER, LOCK_TIME AS lockTime, CREATOR, CREATE_ORDER_TIME AS createOrderTime, MODIFIER, MODIFY_TIME AS modifyTime, PRODUCT_UNIQUE_ID AS productUniqueId, BOOK_COUNT AS bookCount,
+		PAYMENT_SIGN AS paymentSign, BANK_ID AS bankId, BANK_NAME AS bankName, CARD_NUMBER AS cardNumber, CARD_USER_NAME AS cardUserName, CARD_VALUE_DATE AS cardValueDate, CREDENTIAL_NAME AS credentialName, CREDENTIAL_NUMBER AS credentialNumber, CARD_MOBILE AS cardMobile, ORDER_STATUS AS orderStatus, MSG,
+		IS_AFFIRM AS isAffirm, RESULT_CODE AS resultCode, NIGHT_COUNT AS nightCount, PRO_ID AS proId, HOTEL_ADDRESS AS hotelAddress, HOTEL_PHONE AS hotelPhone, PRO_NAME AS proName, TC_ORDER_STATUS AS tcOrderStatus, TRANSATION_ORDER_NO AS transationOrderNo, GUEST_MOBILE AS guestMobile, DB_ORDER_TYPE AS dbOrderType,
+		DB_ORDER_MONEY AS dbOrderMoney, DB_CANCEL_RULE AS dbCancelRule, CANCEL_PENALTY AS cancelPenalty, EARLY_ARRIVE_TIME AS earlyArriveTime, LATEST_ARRIVE_TIME AS latestArriveTime, CUSTOMER_NO AS customerNo, SUPPLIER_NO AS supplierNo, CARD_VALUE_CODE AS cardValueCode, ARRIVE_HOTEL_TIME AS arriveHotelTime,
+		REQUEST_CODE AS requestCode, REQUEST_TEXT AS requestText, REQUEST_NAME AS requestName, FACT_ARRIVE_TIME AS factArriveTime, FACT_LEAVE_TIME AS factLeaveTime, FACT_GUEST_NAME AS factGuestName, FACT_NIGHT_COUNT AS factNightCount, FACT_PRO_COUNT AS factProCount, EACH_NIGHT_PRICE AS eachNightPrice,
+		FACT_TOTAL_PRICE AS factTotalPrice, BREAKFAST_COUNT AS breakfastCount, SUPPLIER_NUMBER AS supplierNumber, SUP_PRICE_NAME AS supPriceName, BED_TYPE_NAME AS bedTypeName, FACT_TOTAL_REFUND AS factTotalRefund, RELATE_ORDER_NO AS relateOrderNo
+	</sql>
+    <update id="updateStatus" parameterType="com.tempus.gss.product.hol.api.entity.response.HotelOrder">
+        update HOL_HOTEL_ORDER
+        set ORDER_STATUS = #{orderStatus,jdbcType=VARCHAR},
+        MODIFIER = #{modifier,jdbcType=VARCHAR},
+        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP}
+        where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+    </update>
+    
+    <select id="queryOrderByOrderResultCode" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List"/>
+        from HOL_HOTEL_ORDER
+        where
+        RESULT_CODE = #{resultCode,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getOrderByNo" resultMap="BaseResultMap" parameterType="java.lang.String">
+        select
+        <include refid="Base_Column_List"/>
+        from HOL_HOTEL_ORDER
+        where HOTEL_ORDER_NO = #{hotelOrderNo,jdbcType=VARCHAR}
+    </select>
+
+    <select id="queryOrderList" resultMap="BaseResultMap"
+            parameterType="com.tempus.gss.product.hol.api.entity.vo.HotelOrderVo">
+        select DISTINCT
+        hho.ID,
+        hho.HOTEL_ORDER_NO,
+        hho.SALE_ORDER_NO,
+        hho.BUY_ORDER_NO,
+        hho.HOTEL_CODE,
+        hho.HOTEL_NAME,
+        hho.ORDER_TYPE,
+        hho.CONTACT_NAME,
+        hho.CONTACT_NUMBER,
+        hho.CANCEL_TIME,
+        hho.ARRIVAL_DATE,
+        hho.DEPARTURE_DATE,
+        hho.TOTAL_PRICE,
+        hho.TOTAL_REFUND,
+        hho.GUEST_NAME,
+        hho.REMARK,
+        hho.LOCKER,
+        hho.LOCK_TIME,
+        hho.CREATOR,
+        hho.CREATE_ORDER_TIME,
+        hho.MODIFIER,
+        hho.MODIFY_TIME,
+        hho.PRODUCT_UNIQUE_ID,
+        hho.BOOK_COUNT,
+        hho.PAYMENT_SIGN,
+        hho.BANK_ID,
+        hho.BANK_NAME,
+        hho.CARD_NUMBER,
+        hho.CARD_USER_NAME,
+        hho.CARD_VALUE_DATE,
+        hho.CREDENTIAL_NAME,
+        hho.CREDENTIAL_NUMBER,
+        hho.CARD_MOBILE,
+        hho.ORDER_STATUS,
+        hho.MSG,
+        hho.IS_AFFIRM,
+        hho.RESULT_CODE,
+        hho.NIGHT_COUNT,
+        hho.OWNER,
+        hho.PRO_ID,
+        hho.HOTEL_ADDRESS,
+        hho.HOTEL_PHONE,
+        hho.PRO_NAME,
+        hho.TC_ORDER_STATUS,
+        hho.TRANSATION_ORDER_NO,
+        hho.GUEST_MOBILE,
+        hho.DB_ORDER_TYPE,
+        hho.DB_ORDER_MONEY,
+        hho.DB_CANCEL_RULE,
+        hho.CANCEL_PENALTY,
+        hho.EARLY_ARRIVE_TIME,
+        hho.LATEST_ARRIVE_TIME,
+        hho.CUSTOMER_NO,
+        hho.SUPPLIER_NO,
+        hho.CARD_VALUE_CODE,
+        hho.ARRIVE_HOTEL_TIME,
+        hho.REQUEST_CODE,
+        hho.REQUEST_TEXT,
+        hho.REQUEST_NAME,
+        hho.FACT_ARRIVE_TIME,
+        hho.FACT_LEAVE_TIME,
+        hho.FACT_GUEST_NAME,
+        hho.FACT_PRO_COUNT,
+        hho.FACT_NIGHT_COUNT,
+        hho.EACH_NIGHT_PRICE,
+        hho.FACT_TOTAL_PRICE,
+        hho.BREAKFAST_COUNT,
+        hho.SUPPLIER_NUMBER
+        FROM
+        HOL_HOTEL_ORDER hho,
+        OS_SALEORDER os
+        where hho.SALE_ORDER_NO = os.SALE_ORDER_NO
+        <trim suffixOverrides="AND">
+        	<if test="owner != null">
+                AND hho.OWNER = #{owner,jdbcType=INTEGER}
+            </if>
+            <if test="creator != null and creator !=''">
+                AND hho.CREATOR = #{creator,jdbcType=VARCHAR}
+            </if>
+            <if test="saleOrderNo != null">
+                AND hho.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+            </if>
+            <if test="transactionNo != null">
+                AND os.TRANSATION_ORDER_NO = #{transactionNo,jdbcType=BIGINT}
+            </if>
+            <if test="locker != null">
+                AND hho.LOCKER = #{locker,jdbcType=BIGINT}
+            </if>
+            <if test="createStartTime != null">
+                AND date(hho.CREATE_ORDER_TIME) &gt;= date(#{createStartTime,jdbcType=DATE})
+            </if>
+            <if test="createEndTime != null">
+                AND date(hho.CREATE_ORDER_TIME) &lt;= date(#{createEndTime,jdbcType=DATE})
+            </if>
+            <if test="arrivalStartDate != null">
+                AND date(hho.ARRIVAL_DATE) &gt;= date(#{arrivalStartDate,jdbcType=DATE})
+            </if>
+            <if test="arrivalEndDate != null">
+                AND date(hho.ARRIVAL_DATE) &lt;= date(#{arrivalEndDate,jdbcType=DATE})
+            </if>
+            <if test="departureStartDate != null">
+                AND date(hho.DEPARTURE_DATE) &gt;= date(#{departureStartDate,jdbcType=DATE})
+            </if>
+            <if test="departureEndDate != null">
+                AND date(hho.DEPARTURE_DATE) &lt;= date(#{departureEndDate,jdbcType=DATE})
+            </if>
+            <if test="hotelName != null and hotelName !=''">
+                AND hho.HOTEL_NAME LIKE CONCAT(CONCAT('%', #{hotelName}), '%')
+            </if>
+            <if test="guestName != null and guestName != ''">
+                AND hho.GUEST_NAME LIKE CONCAT(CONCAT('%', #{guestName}), '%')
+            </if>
+            <if test="customerNo != null">
+                AND os.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT}
+            </if>
+            <if test="orderStatus != null and orderStatus != ''">
+                AND hho.ORDER_STATUS = #{orderStatus,jdbcType=VARCHAR}
+            </if>
+            <if test="hotelOrderNo != null and hotelOrderNo != ''">
+                AND hho.HOTEL_ORDER_NO = #{hotelOrderNo,jdbcType=VARCHAR}
+            </if>
+            <if test="resultCode != null and resultCode != ''">
+                AND hho.RESULT_CODE = #{resultCode,jdbcType=VARCHAR}
+            </if>
+             <if test="contactName != null and contactName != ''">
+                AND hho.CONTACT_NAME = #{contactName,jdbcType=VARCHAR}
+            </if>
+             <if test="supplierNumber != null and supplierNumber != ''">
+                AND hho.SUPPLIER_NUMBER = #{supplierNumber,jdbcType=VARCHAR}
+            </if>
+            <if test="supplierOrderStatus != null and supplierOrderStatus != ''">
+                AND hho.TC_ORDER_STATUS = #{supplierOrderStatus,jdbcType=VARCHAR}
+            </if>
+             <if test="cityName != null and cityName != ''">
+                AND hho.HOTEL_ADDRESS LIKE CONCAT(CONCAT('%', #{cityName}), '%')
+            </if>
+        </trim>
+        ORDER BY CREATE_ORDER_TIME DESC
+    </select>
+    
+    
+    <select id="queryCustomerOrderList" resultMap="BaseResultMap"
+            parameterType="java.util.Map">
+        select DISTINCT
+        hho.ID,
+        hho.HOTEL_ORDER_NO,
+        hho.SALE_ORDER_NO,
+        hho.BUY_ORDER_NO,
+        hho.HOTEL_CODE,
+        hho.HOTEL_NAME,
+        hho.ORDER_TYPE,
+        hho.CONTACT_NAME,
+        hho.CONTACT_NUMBER,
+        hho.CANCEL_TIME,
+        hho.ARRIVAL_DATE,
+        hho.DEPARTURE_DATE,
+        hho.TOTAL_PRICE,
+        hho.TOTAL_REFUND,
+        hho.GUEST_NAME,
+        hho.REMARK,
+        hho.LOCKER,
+        hho.LOCK_TIME,
+        hho.CREATOR,
+        hho.CREATE_ORDER_TIME,
+        hho.MODIFIER,
+        hho.MODIFY_TIME,
+        hho.PRODUCT_UNIQUE_ID,
+        hho.BOOK_COUNT,
+        hho.PAYMENT_SIGN,
+        hho.BANK_ID,
+        hho.BANK_NAME,
+        hho.CARD_NUMBER,
+        hho.CARD_USER_NAME,
+        hho.CARD_VALUE_DATE,
+        hho.CREDENTIAL_NAME,
+        hho.CREDENTIAL_NUMBER,
+        hho.CARD_MOBILE,
+        hho.ORDER_STATUS,
+        hho.MSG,
+        hho.IS_AFFIRM,
+        hho.RESULT_CODE,
+        hho.NIGHT_COUNT,
+        hho.OWNER,
+        hho.PRO_ID,
+        hho.HOTEL_ADDRESS,
+        hho.HOTEL_PHONE,
+        hho.PRO_NAME,
+        hho.TC_ORDER_STATUS,
+        hho.TRANSATION_ORDER_NO,
+        hho.GUEST_MOBILE,
+        hho.DB_ORDER_TYPE,
+        hho.DB_ORDER_MONEY,
+        hho.DB_CANCEL_RULE,
+        hho.CANCEL_PENALTY,
+        hho.EARLY_ARRIVE_TIME,
+        hho.LATEST_ARRIVE_TIME,
+        hho.CUSTOMER_NO,
+        hho.SUPPLIER_NO,
+        hho.CARD_VALUE_CODE,
+        hho.ARRIVE_HOTEL_TIME,
+        hho.REQUEST_CODE,
+        hho.REQUEST_TEXT,
+        hho.REQUEST_NAME,
+        hho.FACT_ARRIVE_TIME,
+        hho.FACT_LEAVE_TIME,
+        hho.FACT_GUEST_NAME,
+        hho.FACT_PRO_COUNT,
+        hho.FACT_NIGHT_COUNT,
+        hho.EACH_NIGHT_PRICE,
+        hho.FACT_TOTAL_PRICE,
+        hho.BREAKFAST_COUNT,
+        hho.SUPPLIER_NUMBER
+        FROM
+        HOL_HOTEL_ORDER hho,
+        OS_SALEORDER os
+        where hho.SALE_ORDER_NO = os.SALE_ORDER_NO
+        <trim suffixOverrides="AND">
+        	<if test="owner != null">
+                AND hho.OWNER = #{owner,jdbcType=INTEGER}
+            </if>
+            <if test="creator != null and creator !=''">
+                AND hho.CREATOR = #{creator,jdbcType=VARCHAR}
+            </if>
+            <if test="saleOrderNo != null">
+                AND hho.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+            </if>
+            <if test="transactionNo != null">
+                AND os.TRANSATION_ORDER_NO = #{transactionNo,jdbcType=BIGINT}
+            </if>
+            <if test="createStartTime != null">
+                AND date(hho.CREATE_ORDER_TIME) &gt;= date(#{createStartTime,jdbcType=DATE})
+            </if>
+            <if test="createEndTime != null">
+                AND date(hho.CREATE_ORDER_TIME) &lt;= date(#{createEndTime,jdbcType=DATE})
+            </if>
+            <if test="arrivalStartDate != null">
+                AND date(hho.ARRIVAL_DATE) &gt;= date(#{arrivalStartDate,jdbcType=DATE})
+            </if>
+            <if test="arrivalEndDate != null">
+                AND date(hho.ARRIVAL_DATE) &lt;= date(#{arrivalEndDate,jdbcType=DATE})
+            </if>
+            <if test="departureStartDate != null">
+                AND date(hho.DEPARTURE_DATE) &gt;= date(#{departureStartDate,jdbcType=DATE})
+            </if>
+            <if test="departureEndDate != null">
+                AND date(hho.DEPARTURE_DATE) &lt;= date(#{departureEndDate,jdbcType=DATE})
+            </if>
+            <if test="hotelName != null and hotelName !=''">
+                AND hho.HOTEL_NAME LIKE CONCAT(CONCAT('%', #{hotelName}), '%')
+            </if>
+            <if test="guestName != null and guestName != ''">
+                AND hho.GUEST_NAME LIKE CONCAT(CONCAT('%', #{guestName}), '%')
+            </if>
+            <if test="customerNo != null">
+                AND hho.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT}
+            </if>
+            <if test="list != null">
+                AND hho.CUSTOMER_NO IN
+                <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+	                #{item}
+                </foreach>
+            </if>
+            <if test="orderStatus != null and orderStatus != ''">
+                AND hho.ORDER_STATUS = #{orderStatus,jdbcType=VARCHAR}
+            </if>
+            <if test="hotelOrderNo != null and hotelOrderNo != ''">
+                AND hho.HOTEL_ORDER_NO = #{hotelOrderNo,jdbcType=VARCHAR}
+            </if>
+            <if test="resultCode != null and resultCode != ''">
+                AND hho.RESULT_CODE = #{resultCode,jdbcType=VARCHAR}
+            </if>
+             <if test="contactName != null and contactName != ''">
+                AND hho.CONTACT_NAME = #{contactName,jdbcType=VARCHAR}
+            </if>
+        </trim>
+        ORDER BY CREATE_ORDER_TIME DESC
+    </select>
+    
+</mapper>

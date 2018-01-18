@@ -1,0 +1,125 @@
+package com.tempus.gss.product.ift.api.service;
+
+import java.util.List;
+
+import com.baomidou.mybatisplus.plugins.Page;
+import com.tempus.gss.product.common.entity.RequestWithActor;
+import com.tempus.gss.product.ift.api.entity.PassengerChangePrice;
+import com.tempus.gss.product.ift.api.entity.SaleChangeExt;
+import com.tempus.gss.product.ift.api.entity.vo.*;
+
+/**
+ * 国际机票改签服务接口.
+ */
+public interface IChangeService {
+
+	/**
+	 * 创建改签单.
+	 *
+	 * @param requestWithActor
+	 * @return
+	 */
+	boolean createChange(RequestWithActor<ChangeCreateVo> requestWithActor);
+	
+	/**
+	 * 创建改签单.
+	 *
+	 * @param requestWithActor
+	 * @return
+	 */
+	SaleChangeExt apiCreateChange(RequestWithActor<ChangeCreateVo> requestWithActor);
+
+	/**
+	 * 改签单创建应收应付.
+	 *
+	 * @param passengerChangeList
+	 * @return
+	 */
+	boolean verify(RequestWithActor<List<PassengerChangePrice>> passengerChangeList);
+	/**
+	 * 审核改签单.
+	 * @param requestWithActor
+	 * @return
+	 */
+	boolean changeAudit(RequestWithActor<ChangePriceRequest> requestWithActor);
+	/**
+	 * 改签处理.
+	 *
+	 * @param changeTicketRequest
+	 * @return
+	 */
+	boolean changeHandle(RequestWithActor<ChangeTicketRequest> changeTicketRequest);
+
+	/**
+	 * 更新采购变更单状态
+	 * @param buyChangeNo
+	 * @return
+	 */
+	boolean updateBuyChangeStatus(RequestWithActor<Long> buyChangeNo);
+	/**
+	 * 改签出单确认.
+	 *
+	 * @param 
+	 * @return
+	 */
+	boolean changeConfirm(RequestWithActor<ChangePriceRequest> requestWithActor);
+
+	/**
+	 * 取消改签.
+	 *
+	 * @param saleChangeNo
+	 * @return
+	 */
+	boolean cancel(RequestWithActor<Long> saleChangeNo);
+
+	/**
+	 * 改签拒单.
+	 *
+	 * @param saleChangeNo
+	 * @return
+	 */
+	boolean refuse(RequestWithActor<Long> saleChangeNo,String reason);
+
+	/**
+	 * 改签单查询.
+	 *
+	 * @param saleChangeQueryRequest
+	 * @return
+	 */
+	Page<SaleChangeExt> querySaleChange(Page<SaleChangeExt> page,RequestWithActor<SaleChangeExtVo> saleChangeQueryRequest);
+	/**
+	 * 根据改签单编号查询详情.
+	 *
+	 * @param saleChangeNo
+	 * @return
+	 */
+	SaleChangeExt getSaleChange(RequestWithActor<Long> saleChangeNo);
+
+	/*
+    * 通过销售单编号获取改签变更单 saleOrderNO
+    * */
+	List<SaleChangeExt> getSaleChangeExt(RequestWithActor<Long> saleOrderNo);
+	
+	
+	/**
+	 * 锁住订单
+	 * @param saleChange
+	 * @return
+	 */
+	boolean locker(RequestWithActor<SaleChangeExtVo> saleChange);
+	
+	/**
+	 * 当客商编号不一致的时候创建采购单
+	 *
+	 * @param requestWithActor
+	 * @return
+	 */
+	boolean createBuyOrder(RequestWithActor<ChangeCreateVo> requestWithActor);
+
+	/**
+	 * 订单改签通知
+	 * @param orderInformVo
+	 * @return
+	 */
+	int orderChangeInform(OrderInformVo orderInformVo);
+}
