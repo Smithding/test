@@ -271,14 +271,36 @@ public class Policy implements Serializable {
 
 	/**
 	 * 是否需要审核
-	 * 0:需要 1:你需要
+	 * 0:需要 1:不需要
 	 */
 	private Boolean isReview;
+	
+	/**
+	 * 销售配置对应的供应商编号
+	 *
+	 */
+	private String saleConfigWithNo;
 
 	/**多个编号组成的字符串*/
 	@Transient
 	private String ids;
-
+	
+	public String getSaleConfigWithNo() {
+		return saleConfigWithNo;
+	}
+	
+	public void setSaleConfigWithNo(String saleConfigWithNo) {
+		this.saleConfigWithNo = saleConfigWithNo;
+	}
+	
+	public Boolean getReview() {
+		return isReview;
+	}
+	
+	public void setReview(Boolean review) {
+		isReview = review;
+	}
+	
 	public String getBatchNum() {
 		return batchNum;
 	}

@@ -17,6 +17,8 @@ import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
 import com.tempus.gss.product.ift.api.service.*;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.*;
+import com.tempus.gss.system.entity.User;
+import com.tempus.gss.system.service.IUserService;
 import com.tempus.gss.websocket.SocketDO;
 import com.tempus.tbd.entity.Airport;
 import com.tempus.tbd.service.IAirportService;
@@ -190,6 +192,8 @@ public class OrderServiceImpl implements IOrderService {
     MqSender mqSender;
     @Reference
     IConfigsService configsService;
+    @Reference
+    IUserService userService;
     
     /**
      * 创建订单. 通过白屏查询、Pnr、需求单、手工方式创建订单.
@@ -1342,12 +1346,12 @@ public class OrderServiceImpl implements IOrderService {
                     saleOrderExt.setLocker(saleOrderNo.getAgent().getId() == null ? 1 : saleOrderNo.getAgent().getId());
                     //saleOrderExt.setModifier(saleOrderNo.getAgent().getAccount());
                     saleOrderExt.setLockTime(new Date());
-                    saleOrderExt.setModifyTime(new Date());
+                    //saleOrderExt.setModifyTime(new Date());
                 } else {
                     saleOrderExt.setLocker(0L);
                     //saleOrderExt.setModifier(saleOrderNo.getAgent().getAccount());
                     saleOrderExt.setLockTime(new Date());
-                    saleOrderExt.setModifyTime(new Date());
+                    //saleOrderExt.setModifyTime(new Date());
                 }
                 int updateLocker = saleOrderExtDao.updateLocker(saleOrderExt);
                 TicketSender ticketSender = iTicketSenderService.getTicketSenderByLoginId(saleOrderNo.getAgent().getAccount());
@@ -1508,7 +1512,8 @@ public class OrderServiceImpl implements IOrderService {
         List<Pnr> pnrList = pnrDao.queryByPnr(pnr);
         for (Pnr pnrS : pnrList) {
             QueryByPnr query = new QueryByPnr();
-            SaleOrderExt ext = saleOrderExtDao.queryByPnrNo(pnrS.getPnrNo());
+            SaleOrderExt ext = saleOrderExtDao.selectByPrimaryKey(pnrS.getSourceNo());
+            if(ext==null) ext = saleOrderExtDao.queryByPnrNo(pnrS.getPnrNo());
             if (ext != null) {
                 SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, ext.getSaleOrderNo());
                 ext.setSaleOrder(saleOrder);
@@ -1715,13 +1720,11 @@ public class OrderServiceImpl implements IOrderService {
     public void assign() {
         /**获取没被禁用的出票人信息集合，并按照优先级进行排序*/
         TicketSenderVo ticketSenderVo = new TicketSenderVo();
-        //ticketSenderVo.setSort(" SEQUENCENO,NO ASC");
         ticketSenderVo.setStatus(3);//只给在线用户分单
+        ticketSenderVo.setTypes("both,ticketSender");//只给出票员分单
         List<TicketSender> ticketSenderList = iTicketSenderService.queryByBean(ticketSenderVo);
-        //long ticketSize = ticketSenderList.size();
         
         /**获取已经支付了并只核价了的订单集合*/
-        //Page<SaleOrderExt> page = new Page<>();
         SaleQueryOrderVo saleQueryOrderVo = new SaleQueryOrderVo();
         saleQueryOrderVo.setPayStatuss("3,4");
         saleQueryOrderVo.setValid((byte) 1);
@@ -1753,7 +1756,8 @@ public class OrderServiceImpl implements IOrderService {
                         saleOrderDetailDao.updateByOrderNo(saleOrderDetail);
                         
                         /**锁单*/
-                        order.setLocker(1L);
+                        User user = userService.findUserByLoginName(agent,peopleInfo.getUserid());
+                        order.setLocker(user.getId());
                         order.setModifier(peopleInfo.getUserid() + "");
                         order.setLockTime(date);
                         order.setModifyTime(date);
@@ -1762,7 +1766,7 @@ public class OrderServiceImpl implements IOrderService {
                         SocketDO sdo = new SocketDO();
                         sdo.setType(2);
                         sdo.setLoginName(peopleInfo.getUserid());
-                        sdo.setRemark("您已被分配订单，订单号：" + order.getSaleOrderNo() + "请及时处理");
+                        sdo.setSaleOrder(String.valueOf(order.getSaleOrderNo()));
                         mqSender.send("gss-websocket-exchange", "notice", sdo);
                         break;
                     }
@@ -2628,5 +2632,27 @@ public class OrderServiceImpl implements IOrderService {
             throw new GSSException("查询订单模块（为运营平台订单管理提供服务）", "0403", "查询订单异常");
         }
         return page;
+    }
+
+    @Override
+    public void sendWebSocketInfoByMq(String msg) {
+        SocketDO sd = JsonUtil.toBean(msg, SocketDO.class);
+        mqSender.send("gss-websocket-exchange", "notice", sd);
+        log.info("发送websocket消息到mq:"+msg);
+        try {
+            Long saleOrderNum = Long.parseLong(sd.getSaleOrder());
+            SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(saleOrderNum);
+            if(saleOrderExt!=null){
+                Agent agent = new Agent(8755);
+                User user = userService.findUserByLoginName(agent, sd.getLoginName());
+                saleOrderExt.setLocker(user.getId());
+                Date date = new Date();
+                saleOrderExt.setLockTime(date);
+                saleOrderExt.setModifyTime(date);
+                saleOrderExtDao.updateByPrimaryKey(saleOrderExt);
+            }
+        }catch(Exception e){
+            log.error("sendWebSocketInfoByMq 更新时异常",e);
+        }
     }
 }

@@ -864,6 +864,43 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
         
         return page;
 	}
+	
+	@Override
+	public Page<HotelOrder> queryErrorOrderListWithPage(Page<HotelOrder> page, RequestWithActor<HotelOrderVo> pageRequest) throws GSSException{
+		logger.info("根据条件查询酒店报错订单列表开始,入参:" + JSONObject.toJSONString(pageRequest));
+		try {
+			Agent agent = pageRequest.getAgent();
+	        if (StringUtil.isNullOrEmpty(agent)) {
+	            logger.error("当前操作用户不能为空");
+	            throw new GSSException("查询酒店订单列表", "1010", "当前操作用户不能为空");
+	        }
+	        //如果是运营平台账号，可查看全部订单，否则只能查看当前账号自己创建的订单
+	        if (StringUtil.isNotNullOrEmpty(agent.getType()) && agent.getType() != 0L) { //不是运营平台账号
+	            if (StringUtil.isNullOrEmpty(pageRequest.getEntity())) {
+	                HotelOrderVo hotelOrderVo = new HotelOrderVo();
+	                hotelOrderVo.setOwner(pageRequest.getAgent().getOwner());
+	                pageRequest.setEntity(hotelOrderVo);
+	            } else {
+	                pageRequest.getEntity().setOwner(pageRequest.getAgent().getOwner());
+	            }
+	        }
+	        List<HotelOrder> hotelOrderList = hotelOrderMapper.queryOrderList(page, pageRequest.getEntity());
+	        /**
+	         * 根据saleOrderNo通过API接口去其他子系统去获取数据
+	         * 需要根据list的长度去执行获取数据的次数,此操作可能会存在性能问题
+	         */
+	        /*for (HotelOrder hotelOrder : hotelOrderList) {
+	            SaleOrder saleOrder = saleOrderService.getSOrderByNo(pageRequest.getAgent(), hotelOrder.getSaleOrderNo());
+	            hotelOrder.setSaleOrder(saleOrder);
+	        }*/
+	        page.setRecords(hotelOrderList);
+		}catch(Exception ex)
+		{
+			logger.error("查询订单列表异常：", ex);
+		}
+        
+        return page;
+	}
 
 	@Override
 	public HotelOrder getHotelOrderDetail(Agent agent, Long saleOrderNo) throws GSSException{

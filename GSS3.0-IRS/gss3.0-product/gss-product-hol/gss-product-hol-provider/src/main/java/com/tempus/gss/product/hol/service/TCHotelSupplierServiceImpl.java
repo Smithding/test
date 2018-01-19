@@ -18,6 +18,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.assertj.core.util.Lists;
@@ -291,7 +292,15 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
  					criatira.and("saleStatus").is(hotelSearchReq.getSaleStatus());
  				}
  				if(StringUtils.isNotEmpty(hotelSearchReq.getKeyword())){
- 					criatira.and("resName").regex(".*?\\" +hotelSearchReq.getKeyword().trim()+ ".*");
+ 					String keyword = hotelSearchReq.getKeyword().trim();
+ 					String escapeHtml = StringEscapeUtils.unescapeHtml(keyword);
+ 					String[] fbsArr = { "(", ")" };  //  "\\", "$", "(", ")", "*", "+", ".", "[", "]", "?", "^", "{", "}", "|" 
+ 			        	 for (String key : fbsArr) { 
+ 			        		 if(escapeHtml.contains(key)){
+ 			        			escapeHtml = escapeHtml.replace(key, "\\" + key);
+ 			        		 }
+ 			        	 }
+ 					criatira.and("resName").regex("^.*"+escapeHtml+".*$");//"^.*"+hotelName+".*$"
  				}
  				if(StringUtils.isNotEmpty(hotelSearchReq.getSectionName())){
  					criatira.and("sectionName").is(hotelSearchReq.getSectionName());
@@ -871,7 +880,15 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     				criatira.and("cityName").is(hotelSearchReq.getCityCode());
     			}
     		if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getKeyword())){
-    			criatira.and("resName").regex(".*?\\" +hotelSearchReq.getKeyword().trim()+ ".*");
+    			String keyword = hotelSearchReq.getKeyword().trim();
+					String escapeHtml = StringEscapeUtils.unescapeHtml(keyword);
+					String[] fbsArr = { "(", ")" };  // "\\", "$", "(", ")", "*", "+", ".", "[", "]", "?", "^", "{", "}", "|" 
+			        	 for (String key : fbsArr) { 
+			        		 if(escapeHtml.contains(key)){
+			        			escapeHtml = escapeHtml.replace(key, "\\" + key);
+			        		 }
+			        	 }
+					criatira.and("resName").regex("^.*"+escapeHtml+".*$");//"^.*"+hotelName+".*$"
     		}
     		if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getResId())){
     			criatira.and("_id").is(Long.valueOf(hotelSearchReq.getResId()));
@@ -908,7 +925,15 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     	
     	 Pattern pattern;//用在模糊查询得时候，对字段进行匹配  
          if(StringUtils.isNotBlank(keyword)){//模糊查询  
-             pattern = Pattern.compile("^.*"+keyword+".*$", Pattern.CASE_INSENSITIVE);  
+        	 keyword = keyword.trim();
+				String escapeHtml = StringEscapeUtils.unescapeHtml(keyword);
+				String[] fbsArr = { "(", ")"};  // "\\", "$", "(", ")", "*", "+", ".", "[", "]", "?", "^", "{", "}", "|" 
+		        	 for (String key : fbsArr) { 
+		        		 if(escapeHtml.contains(key)){
+		        			escapeHtml = escapeHtml.replace(key, "\\" + key);
+		        		 }
+		        	 }
+             pattern = Pattern.compile("^.*"+escapeHtml+".*$", Pattern.CASE_INSENSITIVE);  
              dbObject.put("name",pattern);   
          }
          dbObject.put("city",city);
@@ -986,10 +1011,12 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		log.info("关键字模糊查询酒店名称列表开始，入参: "+hotelName);
 
     	DBObject dbObject = new BasicDBObject(); 
-    	 String[] fbsArr = { "\\", "$", "(", ")", "*", "+", ".", "[", "]", "?", "^", "{", "}", "|" };  
+    	 String[] fbsArr = { "(", ")"};  //  "\\", "$", "(", ")", "*", "+", ".", "[", "]", "?", "^", "{", "}", "|" 
     	 Pattern pattern;//用在模糊查询得时候，对字段进行匹配  
          if(StringUtils.isNotBlank(hotelName)){//模糊查询  
-        	 for (String key : fbsArr) { 
+        	 hotelName = hotelName.trim();
+        	 hotelName = StringEscapeUtils.unescapeHtml(hotelName);
+        	 for (String key : fbsArr) {
         		 if(hotelName.contains(key)){
         			 hotelName = hotelName.replace(key, "\\" + key);
         		 }

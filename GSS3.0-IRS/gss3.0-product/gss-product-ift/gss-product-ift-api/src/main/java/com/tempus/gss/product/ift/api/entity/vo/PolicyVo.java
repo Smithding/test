@@ -235,7 +235,12 @@ public class PolicyVo implements Serializable {
 	 * 版本号
 	 */
 	private Integer version;
-
+	/**
+	 * 是否需要审核
+	 * 0:需要 1:不需要
+	 */
+	private Boolean isReview;
+	
 	/*
 	* 舱位集合
 	* */
@@ -254,7 +259,23 @@ public class PolicyVo implements Serializable {
 
 		this.policyNo = policyNo;
 	}
-
+	
+	public Boolean getIsReview() {
+		return isReview;
+	}
+	
+	public Boolean getReview() {
+		return isReview;
+	}
+	
+	public void setReview(Boolean review) {
+		isReview = review;
+	}
+	
+	public void setIsReview(Boolean review) {
+		isReview = review;
+	}
+	
 	public Long getId() {
 
 		return id;

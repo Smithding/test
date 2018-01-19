@@ -74,6 +74,13 @@ public interface ITCHotelOrderService {
 	 */
 	public Page<HotelOrder> queryOrderListWithPage(Page<HotelOrder> page, RequestWithActor<HotelOrderVo> pageRequest) throws GSSException;
 	
+	/**
+	 * 根据条件查询酒店报错订单列表
+	 * @param page
+	 * @param pageRequest
+	 * @return
+	 */
+	public Page<HotelOrder> queryErrorOrderListWithPage(Page<HotelOrder> page, RequestWithActor<HotelOrderVo> pageRequest) throws GSSException;
 	
 	/**
 	 * 根据条件查询分销商订单列表

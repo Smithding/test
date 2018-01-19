@@ -289,4 +289,6 @@ public interface IOrderService {
 	 * @return 结果返回到销售平台，销售平台需要二次处理.
 	 */
 	Page<SaleOrderExt> selectOutTicketOrder(Page<SaleOrderExt> page,RequestWithActor<SaleQueryOrderVo> saleOrderQueryRequest);
+
+	void sendWebSocketInfoByMq(String msg);
 }

@@ -54,6 +54,7 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
 
     @Override
     public int update(TicketSender ticketSender) {
+        log.info("updateByPrimaryKey更新国际机票业务员信息:"+ticketSenderDao.toString());
         return ticketSenderDao.updateByIds(ticketSender);
     }
 
@@ -78,6 +79,7 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
 
     @Override
     public int updateByPrimaryKey(TicketSender ticketSender) {
+        log.info("updateByPrimaryKey更新国际机票业务员信息:"+ticketSenderDao.toString());
         return ticketSenderDao.updateByPrimaryKey(ticketSender);
     }
 

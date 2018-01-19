@@ -125,7 +125,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
             /***
              * 验证pnr是否已经使用
              */
-            if("0".equals(code)&&pnr!=null&&!getOrderbyPnr(agent, pnr.getPnrNo())){
+            if("0".equals(code)&&pnr!=null&&!getOrderByPnr(agent, pnr.getPnrNo())){
                 code = "3";
             }
         } catch (Exception e) {
@@ -497,23 +497,29 @@ public class PNRMappingServiceImpl implements PNRMappingService {
      * @param pnrCode
      * @return
      */
-    private Boolean getOrderbyPnr(Agent agent, String pnrCode) {
-        Boolean bool = true;
-        String staus = "8,9,11,14";
+    private Boolean getOrderByPnr(Agent agent, String pnrCode) {
         List<QueryByPnr> queryByPnrList = orderService.queryByPnr(agent, pnrCode);
         if (queryByPnrList != null && queryByPnrList.size() > 0) {
             for (QueryByPnr queryByPnr : queryByPnrList) {
                 if (queryByPnr != null && queryByPnr.getSaleOrderExt() != null && queryByPnr.getSaleOrderExt().getSaleOrder() != null) {
                     SaleOrder saleOrder = queryByPnr.getSaleOrderExt().getSaleOrder();
                     /**只要有一条数据不存在这几个状态中的一个，pnr就不可使用*/
-                    if (staus.indexOf(saleOrder.getOrderChildStatus().toString()) == -1) {
-                        bool = false;
-                        break;
+                    switch (saleOrder.getOrderChildStatus()){
+                        case 8:
+                            break;
+                        case 9:
+                            break;
+                        case 11:
+                            break;
+                        case 14:
+                            break;
+                        default:
+                            return false;
                     }
                 }
             }
         }
-        return bool;
+        return true;
     }
 
     /**

@@ -103,6 +103,8 @@ public class PriceSpecServiceImpl implements IPriceSpecService {
             throw new GSSException("算价总则更新模块", "00201", "此编号不存在或为空-------");
 
         }
+        String json = JsonUtil.toJson(priceSpec.getEntity().getFormula());
+        priceSpec.getEntity().setFormulaData(json);
         priceSpecDao.updateByPrimaryKeySelective(priceSpec.getEntity());
         log.info("更新结束");
         return priceSpec.getEntity();
