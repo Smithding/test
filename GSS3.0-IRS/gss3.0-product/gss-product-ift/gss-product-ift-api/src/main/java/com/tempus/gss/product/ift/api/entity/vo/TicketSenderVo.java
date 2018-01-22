@@ -21,6 +21,8 @@ public class TicketSenderVo implements Serializable {
     private String endTime;
     /**排序字段*/
     private String sort;
+    //类型
+    private String types;
 
     @Override
     public String toString() {
@@ -33,6 +35,7 @@ public class TicketSenderVo implements Serializable {
                 ", startTime='" + startTime + '\'' +
                 ", endTime='" + endTime + '\'' +
                 ", sort='" + sort + '\'' +
+                ", types='" + types + '\'' +
                 '}';
     }
 
@@ -98,5 +101,13 @@ public class TicketSenderVo implements Serializable {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public String getTypes() {
+        return types;
+    }
+
+    public void setTypes(String types) {
+        this.types = types;
     }
 }
