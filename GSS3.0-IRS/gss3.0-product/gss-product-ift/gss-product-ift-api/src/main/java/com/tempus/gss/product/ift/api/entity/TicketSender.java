@@ -13,33 +13,51 @@ import java.util.Date;
 public class TicketSender implements Serializable {
 
     private Long id;
-    /**用户id*/
+    /**
+     * 用户id
+     */
     private String userid;
-    /**姓名*/
+    /**
+     * 姓名
+     */
     private String name;
     /***状态*/
     private Integer status;
     /***优先级*/
     private Integer no;
-    /**创建人*/
+    /**
+     * 创建人
+     */
     private String creator;
     /***操作人*/
     private String modifier;
-    /**创建时间*/
+    /**
+     * 创建时间
+     */
     private Date createtime;
     /***修改时间*/
     private Date updatetime;
-    /**订单数*/
+    /**
+     * 订单数
+     */
     private Long ordercount;
     /***标记*/
     private Integer point;
-    /**顺序号*/
+    /**
+     * 顺序号
+     */
     private Long sequenceNo;
+    //操作员类型 销售员-salesMan 出票员-ticketSender
+    private String type;
+    //待处理销售订单数量
+    private Integer saleOrderNum;
     /***多个ID组成的字符串*/
     @Transient
     private String ids;
 
-    /**修改信息*/
+    /**
+     * 修改信息
+     */
     @Transient
     private String updateInfo;
 
@@ -58,6 +76,8 @@ public class TicketSender implements Serializable {
                 ", ordercount=" + ordercount +
                 ", point=" + point +
                 ", sequenceNo=" + sequenceNo +
+                ", type='" + type + '\'' +
+                ", saleOrderNum=" + saleOrderNum +
                 ", ids='" + ids + '\'' +
                 ", updateInfo='" + updateInfo + '\'' +
                 '}';
@@ -167,10 +187,26 @@ public class TicketSender implements Serializable {
         this.ids = ids;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public Integer getSaleOrderNum() {
+        return saleOrderNum;
+    }
+
+    public void setSaleOrderNum(Integer saleOrderNum) {
+        this.saleOrderNum = saleOrderNum;
+    }
+
     public String getUpdateInfo() {
         String info = "";
-        if(this.updatetime!=null&& StringUtils.isNotBlank(this.modifier)){
-            info = this.modifier+"<br/>"+DateUtil.dateToDateString(this.updatetime,"YYYYMMdd HH:mm:ss");
+        if (this.updatetime != null && StringUtils.isNotBlank(this.modifier)) {
+            info = this.modifier + "<br/>" + DateUtil.dateToDateString(this.updatetime, "YYYY-MM-dd HH:mm:ss");
         }
         return info;
     }
