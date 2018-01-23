@@ -1356,6 +1356,7 @@ public class OrderServiceImpl implements IOrderService {
                 int updateLocker = saleOrderExtDao.updateLocker(saleOrderExt);
                 TicketSender ticketSender = iTicketSenderService.getTicketSenderByLoginId(saleOrderNo.getAgent().getAccount());
                 ticketSender.setOrdercount(ticketSender.getOrdercount() + 1);
+                ticketSender.setSaleOrderNum(ticketSender.getSaleOrderNum()-1);
                 iTicketSenderService.updateByPrimaryKey(ticketSender);
                 if (updateLocker == 1) {
                     flag = true;
@@ -1721,7 +1722,7 @@ public class OrderServiceImpl implements IOrderService {
         /**获取没被禁用的出票人信息集合，并按照优先级进行排序*/
         TicketSenderVo ticketSenderVo = new TicketSenderVo();
         ticketSenderVo.setStatus(3);//只给在线用户分单
-        ticketSenderVo.setTypes("both,ticketSender");//只给出票员分单
+        ticketSenderVo.setTypes("'both','ticketSender'");//只给出票员分单
         List<TicketSender> ticketSenderList = iTicketSenderService.queryByBean(ticketSenderVo);
         
         /**获取已经支付了并只核价了的订单集合*/
