@@ -1452,6 +1452,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								priceFraction = resourceModel.getPriceFraction();
 								String newRemark = resourceModel.getRemark();
 								newHotelOrder.setRemark(newRemark);
+								long productUniqueId = resourceModel.getProductUniqueId().longValue();
+								newHotelOrder.setProductUniqueId(Long.valueOf(productUniqueId));
 								if(StringUtils.isNotEmpty(resourceModel.getSupplierConfirmNumber())){
 									newSupplierNo = resourceModel.getSupplierConfirmNumber();
 									newHotelOrder.setSupplierNumber(newSupplierNo);
@@ -1940,6 +1942,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							Integer priceFraction = 0;
 							if(StringUtil.isNotNullOrEmpty(orderInfoModel.getResources())){
 								priceFraction = orderInfoModel.getResources().get(0).getPriceFraction();
+								long longValue = orderInfoModel.getResources().get(0).getProductUniqueId().longValue();
+								hotelOrder.setProductUniqueId(Long.valueOf(longValue));
 								for(ResourceModel resource : orderInfoModel.getResources()){
 									if(StringUtils.isNotEmpty(resource.getSupplierConfirmNumber())){
 										hotelOrder.setSupplierNumber(resource.getSupplierConfirmNumber());

@@ -2,7 +2,6 @@ package com.tempus.gss.product.hol.service;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.tempus.gss.dps.report.exception.Errors;
 import com.tempus.gss.product.hol.api.entity.HotelFinancialReport;
 import com.tempus.gss.product.hol.api.entity.vo.QueryFinancialReportVo;
 import com.tempus.gss.product.hol.api.service.IHotelFinancialReportService;
