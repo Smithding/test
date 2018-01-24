@@ -1,0 +1,8 @@
+pom.xml
+.idea/
+*.iml
+Docs/
+.settings/
+.project
+target/
+*.classpath
