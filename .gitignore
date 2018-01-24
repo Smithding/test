@@ -1,8 +1,11 @@
 pom.xml
-.idea/
+.idea
 *.iml
 Docs/
-.settings/
+.settings
 .project
-target/
+target
 *.classpath
+*.class
+Docs
+HTML
