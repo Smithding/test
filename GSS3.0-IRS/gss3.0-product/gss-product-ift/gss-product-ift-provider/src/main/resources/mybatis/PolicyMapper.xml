@@ -97,6 +97,9 @@
         <result column="BATCH_NUM" property="batchNum" jdbcType="VARCHAR"/>
         <result column="IS_REVIEW" property="isReview" jdbcType="BIT"/>
         <result column="SALE_CONFIG_WITH_NO" property="saleConfigWithNo" jdbcType="VARCHAR"/>
+        <result column="Q_REBATE" property="qRebate" jdbcType="BIT"/>
+        <result column="S_REBATE" property="sRebate" jdbcType="BIT"/>
+        <result column="YQ_YR_REBATE" property="yryqRebate" jdbcType="BIT"/>
         <!--一对多关联控润信息-->
         <collection property="cabinList" ofType="com.tempus.gss.product.ift.api.entity.Cabin" column="POLICY_NO"
                     select="com.tempus.gss.product.ift.dao.CabinDao.selectByPolicyNo"/>
