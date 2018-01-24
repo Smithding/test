@@ -840,6 +840,44 @@ public class OrderServiceImpl implements IOrderService {
 			}
 			
 			insureRequestVo.setExpireDate(saleOrderExt.getExpireDate());
+		/*String policyHolderType = paramService.getValueByKey("ins_holder_type");
+		if (StringUtils.isNoneBlank(policyHolderType)) {
+			insureRequestVo.setPolicyHolderType(Integer.valueOf(policyHolderType));
+		}
+		String policyHolderSex = paramService.getValueByKey("ins_holder_sex");
+		if (insurance.getCompanyName().contains(COMPANY_NAME_HEZONG)&&StringUtils.isNoneBlank(policyHolderSex)) {
+			insureRequestVo.setPolicyHolderSex(Integer.valueOf(policyHolderSex));
+		}
+		String policyHolderCertiType = paramService.getValueByKey("ins_holder_certi_type");
+		if (StringUtils.isNotBlank(policyHolderCertiType)) {
+			insureRequestVo.setPolicyHolderCertiType(Integer.valueOf(policyHolderCertiType));
+		}
+		String policyHolderCertiNo = paramService.getValueByKey("ins_holder_certi_no");
+		if (StringUtils.isNotBlank(policyHolderCertiNo)) {
+			insureRequestVo.setPolicyHolderCertiNo(policyHolderCertiNo);
+		}
+		String policyHolderName = paramService.getValueByKey("ins_holder_name");
+		if (StringUtils.isNotBlank(policyHolderName)) {
+			insureRequestVo.setPolicyHolderName(policyHolderName);
+		}
+		String policyHolderPhone = paramService.getValueByKey("ins_holder_phone");
+		if (StringUtils.isNotBlank(policyHolderPhone)) {
+			insureRequestVo.setPolicyHolderPhone(policyHolderPhone);
+		}
+		String policyHolderEmail = paramService.getValueByKey("ins_holder_email");
+		if (StringUtils.isNotBlank(policyHolderEmail)) {
+			insureRequestVo.setPolicyHolderEmail(policyHolderEmail);
+		}
+		String policyHolderBirthday = paramService.getValueByKey("ins_holder_birthday");
+		if (StringUtils.isNotBlank(policyHolderBirthday)) {
+			Date parse = null;
+			try {
+				parse = simple.parse(policyHolderBirthday);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+			insureRequestVo.setPolicyHolderBirthday(parse);
+		}*/
 		}
 		Date issueDate = null;
 		String issueDateStr = "";
