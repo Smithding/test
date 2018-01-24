@@ -19,6 +19,11 @@
             <artifactId>gss-core-websocket-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.tempus.gss</groupId>
+            <artifactId>gss-product-ift-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <properties>
         <skip_maven_deploy>true</skip_maven_deploy>
