@@ -75,7 +75,21 @@ public class PolicyVo implements Serializable {
 	 * 行程类型 1：单程，2：往返
 	 */
 	private Integer tripType;
-
+	/**
+	 * Q值返佣
+	 */
+	private Boolean qRebate;
+	
+	/**
+	 * S值返佣
+	 */
+	private Boolean sRebate;
+	
+	/**
+	 * YR YQ返佣
+	 */
+	private Boolean yryqRebate;
+	
 	/**
 	 * 去程起点
 	 */
@@ -249,7 +263,11 @@ public class PolicyVo implements Serializable {
 	private String batchNum;
 
 	private static final long serialVersionUID = 1L;
-
+	/**
+	 * 销售配置对应的供应商编号
+	 */
+	private String saleConfigWithNo;
+	
 	public Long getPolicyNo() {
 
 		return policyNo;
@@ -262,6 +280,38 @@ public class PolicyVo implements Serializable {
 	
 	public Boolean getIsReview() {
 		return isReview;
+	}
+	
+	public Boolean getqRebate() {
+		return qRebate;
+	}
+	
+	public void setqRebate(Boolean qRebate) {
+		this.qRebate = qRebate;
+	}
+	
+	public Boolean getsRebate() {
+		return sRebate;
+	}
+	
+	public void setsRebate(Boolean sRebate) {
+		this.sRebate = sRebate;
+	}
+	
+	public Boolean getYryqRebate() {
+		return yryqRebate;
+	}
+	
+	public void setYryqRebate(Boolean yryqRebate) {
+		this.yryqRebate = yryqRebate;
+	}
+	
+	public String getSaleConfigWithNo() {
+		return saleConfigWithNo;
+	}
+	
+	public void setSaleConfigWithNo(String saleConfigWithNo) {
+		this.saleConfigWithNo = saleConfigWithNo;
 	}
 	
 	public Boolean getReview() {

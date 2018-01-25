@@ -20,7 +20,7 @@ public interface ISeparatedOrderService {
 
     /**
      * 修改出票人
-     * @param saleOrderExt
+     * @param saleOrderNo
      */
-    int updateSeparatedOrder(SaleOrderExt saleOrderExt,String userid,String currentUserId);
+    int updateSeparatedOrder(Long saleOrderNo,String loginName,String currentUserId);
 }

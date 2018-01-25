@@ -563,7 +563,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     		mongoTemplate.save(HotelName, "hotelName");
 		}
         try {
-        	 if(StringUtil.isNotNullOrEmpty(resDetail) && StringUtil.isNotNullOrEmpty(resDetail.getProDetails()) && StringUtil.isNotNullOrEmpty(resDetail.getImgInfoList())){
+        	 if(StringUtil.isNotNullOrEmpty(resDetail) && StringUtil.isNotNullOrEmpty(resDetail.getProDetails())){
              	List<String> strs  = Tool.intToTwoPower(resDetail.getCreditCards().intValue());
              	resDetail.setCreditCardsTarget(strs);
              	//Map<String, List<ResProBaseInfo>> proMap= resDetail.getProMap();
@@ -712,22 +712,24 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			Date newDate=new Date();
 			//List<LastestResRecord> lastestResRecordList= new ArrayList<LastestResRecord>();
 			if(StringUtil.isNotNullOrEmpty(resDetail)){
-				List<ImgInfo> img = resDetail.getImgInfoList();
-				if(StringUtil.isNotNullOrEmpty(img)){
-		    		for(ImgInfo mm : img){
-		    			if(mm.getIsResDefault().equals(1)){
-		    				lastestResRecord.setImageUrl(mm.getImageUrl());
-		    				break;
-		    			}
-		    		}
-		    		lastestResRecord.setUserId(userId);
-		    		lastestResRecord.setResId(resDetail.getResId());
-		        	lastestResRecord.setResName(resDetail.getResName());
-		        	lastestResRecord.setResGrade(resDetail.getResGrade());
-		        	lastestResRecord.setMinPrice(resDetail.getMinPrice());
-		        	lastestResRecord.setRecordDate(newDate);
-		        	mongoTemplate.insert(lastestResRecord, "lastestResRecord");
-		        	//lastestResRecordList.add(lastestResRecord);
+				if(StringUtil.isNotNullOrEmpty(resDetail.getImgInfoList())){
+					List<ImgInfo> img = resDetail.getImgInfoList();
+					if(StringUtil.isNotNullOrEmpty(img)){
+			    		for(ImgInfo mm : img){
+			    			if(mm.getIsResDefault().equals(1)){
+			    				lastestResRecord.setImageUrl(mm.getImageUrl());
+			    				break;
+			    			}
+			    		}
+				}
+	    		lastestResRecord.setUserId(userId);
+	    		lastestResRecord.setResId(resDetail.getResId());
+	        	lastestResRecord.setResName(resDetail.getResName());
+	        	lastestResRecord.setResGrade(resDetail.getResGrade());
+	        	lastestResRecord.setMinPrice(resDetail.getMinPrice());
+	        	lastestResRecord.setRecordDate(newDate);
+	        	mongoTemplate.insert(lastestResRecord, "lastestResRecord");
+	        	//lastestResRecordList.add(lastestResRecord);
 				}
 			}
 		} catch (Exception e) {
@@ -1080,12 +1082,11 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 				    			singleHotelDetailReqImg.setRequestContent("rimg");
 				    			TCHotelDetailResult hotelDetailImg=hotel.queryTCHotelDetail(singleHotelDetailReqImg);
 				    			
-				    			if(null != hotelDetail && null!=hotelDetailImg){ 
+				    			if(null != hotelDetail){ 
 				    				List<ResBaseInfo> resBaseInfoList =hotelDetail.getResBaseInfos();
 				    				List<ResProBaseInfo> resProBaseInfoList= hotelDetail.getResProBaseInfos();
-				    				List<ImgInfo> imgInfoList= hotelDetailImg.getResImages();
 				    				
-				    				if(resBaseInfoList.size() > 0 && resProBaseInfoList.size() > 0 && imgInfoList.size() > 0){
+				    				if(resBaseInfoList.size() > 0 && resProBaseInfoList.size() > 0){
 				    					resBaseInfoList.get(0).setId(resId);
 				    					resBaseInfoList.get(0).setSupplierNo("411709261204150108");
 				    					if(resBaseInfoList.get(0).getResGrade() != null){
@@ -1188,9 +1189,12 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 				    								}
 				    								resBaseInfoList.get(0).setProDetails(ProInfoDetaisList);
 				    							}
-				    							List<ImgInfo> list2=new ArrayList<ImgInfo>();
-				    							list2.addAll(imgInfoList);
-				    							resBaseInfoList.get(0).setImgInfoList(list2);
+				    							if(StringUtil.isNotNullOrEmpty(hotelDetailImg)){
+				    								List<ImgInfo> imgInfoList= hotelDetailImg.getResImages();
+				    								List<ImgInfo> list2=new ArrayList<ImgInfo>();
+				    								list2.addAll(imgInfoList);
+				    								resBaseInfoList.get(0).setImgInfoList(list2);
+				    							}
 				    							Integer saleStatus = 1;
 				    							resBaseInfoList.get(0).setSaleStatus(saleStatus);
 					    						resBaseInfoList.get(0).setLatestUpdateTime(sdfupdate.format(new Date()));

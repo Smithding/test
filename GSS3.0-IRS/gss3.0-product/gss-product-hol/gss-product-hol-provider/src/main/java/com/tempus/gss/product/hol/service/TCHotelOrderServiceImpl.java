@@ -1281,6 +1281,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							throw new GSSException("更新状态信息异常", "0110", "获取订单详情列表为空");
 						}
 						OrderInfoModel orderInfoModel = orderInfomationDetail.getOrderInfos().get(0);
+						Date stringToSimpleDate = DateUtil.stringToSimpleDate(orderInfoModel.getLasestCancelTime());
+						hotelOrder.setCancelPenalty(stringToSimpleDate);
 						if(StringUtil.isNotNullOrEmpty(orderInfoModel.getResources())){
 							for(ResourceModel resource : orderInfoModel.getResources()){
 								if(StringUtils.isNotEmpty(resource.getSupplierConfirmNumber())){
@@ -1452,6 +1454,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								priceFraction = resourceModel.getPriceFraction();
 								String newRemark = resourceModel.getRemark();
 								newHotelOrder.setRemark(newRemark);
+								long productUniqueId = resourceModel.getProductUniqueId().longValue();
+								newHotelOrder.setProductUniqueId(Long.valueOf(productUniqueId));
 								if(StringUtils.isNotEmpty(resourceModel.getSupplierConfirmNumber())){
 									newSupplierNo = resourceModel.getSupplierConfirmNumber();
 									newHotelOrder.setSupplierNumber(newSupplierNo);
@@ -1940,6 +1944,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							Integer priceFraction = 0;
 							if(StringUtil.isNotNullOrEmpty(orderInfoModel.getResources())){
 								priceFraction = orderInfoModel.getResources().get(0).getPriceFraction();
+								long longValue = orderInfoModel.getResources().get(0).getProductUniqueId().longValue();
+								hotelOrder.setProductUniqueId(Long.valueOf(longValue));
 								for(ResourceModel resource : orderInfoModel.getResources()){
 									if(StringUtils.isNotEmpty(resource.getSupplierConfirmNumber())){
 										hotelOrder.setSupplierNumber(resource.getSupplierConfirmNumber());

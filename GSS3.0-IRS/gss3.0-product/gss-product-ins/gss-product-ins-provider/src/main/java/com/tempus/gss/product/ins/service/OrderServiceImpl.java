@@ -130,7 +130,8 @@ public class OrderServiceImpl implements IOrderService {
 
 	private static final String COMPANY_NAME_JUNLONG = "君龙";
 	private static final String RESPONSE_SUCCESS = "0000";
-
+	//设置投保人为个人   1：个人  2：企业
+	private static final int holderType = 1;
 	protected final transient Logger log = LoggerFactory.getLogger(getClass());
 
 	// 应收应付
@@ -267,7 +268,6 @@ public class OrderServiceImpl implements IOrderService {
 			}
 			insureExtVo = saleOrderExt.getInsureExtVo();
 		}
-
 		if (insurance.getBuyWay() == null) {
 			log.info("产品购买方式buyWay为空");
 			throw new GSSException("产品购买方式buyWay为空", "0", "创建保险订单失败");
@@ -730,7 +730,7 @@ public class OrderServiceImpl implements IOrderService {
 	InsureRequestVo toInsureRequestVoForWeb(SaleOrderExt saleOrderExt) {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		Insurance insurance = saleOrderExt.getInsurance();
 		List<SaleOrderDetail> saleOrderDetailList = saleOrderExt.getSaleOrderDetailList();
 
@@ -778,8 +778,69 @@ public class OrderServiceImpl implements IOrderService {
 				}
 			}
 		}else{
+			try{
+				if(saleOrderDetailList.get(0)!=null){
+					insureRequestVo.setPolicyHolderType(holderType);
+					insureRequestVo.setPolicyHolderCertiType(Integer.parseInt(saleOrderDetailList.get(0).getInsuredCertiType()));
+					insureRequestVo.setPolicyHolderCertiNo(StringUtils.defaultString(saleOrderDetailList.get(0).getInsuredCertiNo()));
+					insureRequestVo.setPolicyHolderName(StringUtils.defaultString(saleOrderDetailList.get(0).getInsuredName()));
+					insureRequestVo.setPolicyHolderBirthday(dateFormat.parse(saleOrderDetailList.get(0).getInsuredBirthday()));
+					insureRequestVo.setPolicyHolderPhone(StringUtils.defaultString(saleOrderDetailList.get(0).getInsuredPhone()));
+					if(saleOrderExt.getHolderEmail()==null||saleOrderExt.getHolderEmail()==""){
+						String policyHolderEmail = paramService.getValueByKey("ins_holder_email");
+						insureRequestVo.setPolicyHolderEmail(policyHolderEmail);
+					}else{
+						insureRequestVo.setPolicyHolderEmail(StringUtils.defaultString(saleOrderExt.getHolderEmail()));
+					}
+					if (insurance.getCompanyName().contains(COMPANY_NAME_HEZONG)&&saleOrderDetailList.get(0).getInsuredSex()!=null) {
+						insureRequestVo.setPolicyHolderSex(Integer.valueOf(saleOrderDetailList.get(0).getInsuredSex()));
+					}
+				}else{
+					String policyHolderType = paramService.getValueByKey("ins_holder_type");
+					if (StringUtils.isNoneBlank(policyHolderType)) {
+						insureRequestVo.setPolicyHolderType(Integer.valueOf(policyHolderType));
+					}
+					String policyHolderSex = paramService.getValueByKey("ins_holder_sex");
+					if (insurance.getCompanyName().contains(COMPANY_NAME_HEZONG)&&StringUtils.isNoneBlank(policyHolderSex)) {
+						insureRequestVo.setPolicyHolderSex(Integer.valueOf(policyHolderSex));
+					}
+					String policyHolderCertiType = paramService.getValueByKey("ins_holder_certi_type");
+					if (StringUtils.isNotBlank(policyHolderCertiType)) {
+						insureRequestVo.setPolicyHolderCertiType(Integer.valueOf(policyHolderCertiType));
+					}
+					String policyHolderCertiNo = paramService.getValueByKey("ins_holder_certi_no");
+					if (StringUtils.isNotBlank(policyHolderCertiNo)) {
+						insureRequestVo.setPolicyHolderCertiNo(policyHolderCertiNo);
+					}
+					String policyHolderName = paramService.getValueByKey("ins_holder_name");
+					if (StringUtils.isNotBlank(policyHolderName)) {
+						insureRequestVo.setPolicyHolderName(policyHolderName);
+					}
+					String policyHolderPhone = paramService.getValueByKey("ins_holder_phone");
+					if (StringUtils.isNotBlank(policyHolderPhone)) {
+						insureRequestVo.setPolicyHolderPhone(policyHolderPhone);
+					}
+					String policyHolderEmail = paramService.getValueByKey("ins_holder_email");
+					if (StringUtils.isNotBlank(policyHolderEmail)) {
+						insureRequestVo.setPolicyHolderEmail(policyHolderEmail);
+					}
+					String policyHolderBirthday = paramService.getValueByKey("ins_holder_birthday");
+					if (StringUtils.isNotBlank(policyHolderBirthday)) {
+						Date parse = null;
+						try {
+							parse = simple.parse(policyHolderBirthday);
+						} catch (ParseException e) {
+							e.printStackTrace();
+						}
+						insureRequestVo.setPolicyHolderBirthday(parse);
+					}
+				}
+			}catch(Exception e){
+				throw new GSSException("时间格式转换异常!", "1010", "投保失败");
+			}
+			
 			insureRequestVo.setExpireDate(saleOrderExt.getExpireDate());
-		String policyHolderType = paramService.getValueByKey("ins_holder_type");
+		/*String policyHolderType = paramService.getValueByKey("ins_holder_type");
 		if (StringUtils.isNoneBlank(policyHolderType)) {
 			insureRequestVo.setPolicyHolderType(Integer.valueOf(policyHolderType));
 		}
@@ -816,7 +877,7 @@ public class OrderServiceImpl implements IOrderService {
 				e.printStackTrace();
 			}
 			insureRequestVo.setPolicyHolderBirthday(parse);
-		}
+		}*/
 		}
 		Date issueDate = null;
 		String issueDateStr = "";
@@ -834,27 +895,30 @@ public class OrderServiceImpl implements IOrderService {
 		}
 
 		insureRequestVo.setSourceName(sourceName);
+		String extendedFieldsJson = null;
+		InsureExtVo InsureExtVo=null;
+		ObjectMapper mapper = new ObjectMapper();
 		try{
 			//太平的扩展字段进行特殊处理   （详细请看文档）
 			if(insurance.getCompanyName().contains(COMPANY_NAME_TAIPING)||insurance.getCompanyName().contains(COMPANY_NAME_JUNLONG)){
-				InsureExtVo InsureExtVo=null;
-				ObjectMapper mapper = new ObjectMapper();
+
 				if(saleOrderExt.getExtendedFieldsJson()!=null){
 					 InsureExtVo=mapper.readValue(saleOrderExt.getExtendedFieldsJson(), InsureExtVo.class);
 					 InsureExtVo.getFlightInfoVo().setQuantity(saleOrderExt.getSaleOrderDetailList().get(0).getInsuranceNum());
+					    extendedFieldsJson = mapper.writeValueAsString(InsureExtVo.getFlightInfoVo());
 				}
-				String extendedFieldsJson = mapper.writeValueAsString(InsureExtVo.getFlightInfoVo());
-				saleOrderExt.setExtendedFieldsJson(extendedFieldsJson);
-				insureRequestVo.setPolicyHolderName(saleOrderDetailList.get(0).getInsuredName());
-				insureRequestVo.setPolicyHolderPhone(saleOrderDetailList.get(0).getInsuredPhone());
+		
 /*				insureRequestVo.setPolicyHolderCertiNo(saleOrderDetailList.get(0).getInsuredCertiNo());
 				insureRequestVo.setPolicyHolderCertiType(Integer.parseInt(saleOrderDetailList.get(0).getInsuredCertiType()));
 				insureRequestVo.setPolicyHolderBirthday(saleOrderDetailList.get(0).getInsuredBirthday());*/
+			}else{
+				 extendedFieldsJson = saleOrderExt.getExtendedFieldsJson();
 			}
+		    extendedFieldsJson = mapper.writeValueAsString(InsureExtVo.getFlightInfoVo());
 		}catch(Exception e){
 			log.error("json转对象，对象转json异常"+e,1);
 		}
-		insureRequestVo.setExtendedFieldSJson(saleOrderExt.getExtendedFieldsJson());
+		insureRequestVo.setExtendedFieldSJson(extendedFieldsJson);
 		insureRequestVo.setSaleOrderDetailList(null);
 		insureRequestVo.setInsuredList(saleOrderDetailList);
 		return insureRequestVo;
@@ -1263,17 +1327,27 @@ public class OrderServiceImpl implements IOrderService {
 			insureRequestVo.setTotalPremium(insurance.getFacePrice().multiply(new BigDecimal(sum)));
 		try {
 			insureRequestVo.setIssueDate(sdf.parse(sdf.format(new Date())));
+			if(saleOrderDetailList.get(0)!=null){
+				insureRequestVo.setPolicyHolderType(holderType);
+				insureRequestVo.setPolicyHolderCertiType(Integer.parseInt(saleOrderDetailList.get(0).getInsuredCertiType()));
+				insureRequestVo.setPolicyHolderCertiNo(StringUtils.defaultString(saleOrderDetailList.get(0).getInsuredCertiNo()));
+				insureRequestVo.setPolicyHolderName(StringUtils.defaultString(saleOrderDetailList.get(0).getInsuredName()));
+				insureRequestVo.setPolicyHolderBirthday(sdf.parse(saleOrderDetailList.get(0).getInsuredBirthday()));
+				insureRequestVo.setPolicyHolderPhone(StringUtils.defaultString(saleOrderDetailList.get(0).getInsuredPhone()));
+				insureRequestVo.setPolicyHolderEmail(StringUtils.defaultString(saleOrderExt.getHolderEmail()));
+			}else{
+				insureRequestVo.setPolicyHolderType(saleOrderExt.getHolderType());
+				insureRequestVo.setPolicyHolderCertiType(saleOrderExt.getHolderCertiType());
+				insureRequestVo.setPolicyHolderCertiNo(StringUtils.defaultString(saleOrderExt.getHolderCertiNo()));
+				insureRequestVo.setPolicyHolderName(StringUtils.defaultString(saleOrderExt.getHolderName()));
+				insureRequestVo.setPolicyHolderBirthday(saleOrderExt.getHolderBirthday());
+				insureRequestVo.setPolicyHolderPhone(StringUtils.defaultString(saleOrderExt.getHolderPhone()));
+				insureRequestVo.setPolicyHolderEmail(StringUtils.defaultString(saleOrderExt.getHolderEmail()));
+			}
 		} catch (ParseException e) {
-			log.error("转换issueDate异常");
+			log.error("转换Date异常");
 			e.printStackTrace();
 		}
-		insureRequestVo.setPolicyHolderType(saleOrderExt.getHolderType());
-		insureRequestVo.setPolicyHolderCertiType(saleOrderExt.getHolderCertiType());
-		insureRequestVo.setPolicyHolderCertiNo(StringUtils.defaultString(saleOrderExt.getHolderCertiNo()));
-		insureRequestVo.setPolicyHolderName(StringUtils.defaultString(saleOrderExt.getHolderName()));
-		insureRequestVo.setPolicyHolderBirthday(saleOrderExt.getHolderBirthday());
-		insureRequestVo.setPolicyHolderPhone(StringUtils.defaultString(saleOrderExt.getHolderPhone()));
-		insureRequestVo.setPolicyHolderEmail(StringUtils.defaultString(saleOrderExt.getHolderEmail()));
 		Date issueDate = null;
 		String issueDateStr = "";
 		if (null != insureRequestVo.getIssueDate() && !"".equals(insureRequestVo.getIssueDate())) {
