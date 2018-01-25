@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.ift.dao.GZOutReportDao">
+    <resultMap id="IftReportResultMap" type="com.tempus.gss.product.ift.api.entity.GZOutTicket">
+        <result column="SUPPLIER" property="supplier" />
+        <result column="TICKET_DATE" property="ticketDate" />
+        <result column="TICKET_NO" property="ticketNo" />
+        <result column="PNR" property="pnr" />
+        <result column="ROUTING" property="routing" />
+        <result column="FLIGHT_NO" property="flightNo" />
+        <result column="CABIN" property="cabin" />
+        <result column="DEPART_DATE" property="departDate" />
+        <result column="PASSENGER_NAME" property="passengerName" />
+        <result column="PASSENGER_TYPE" property="passengerType" />
+        <result column="SETTLE_PRICE" property="settlePrice" />
+        <result column="TAX" property="tax" />
+        <result column="QVALUE" property="qValue" />
+        <result column="TICKET_TYPE" property="ticketType" />
+        <result column="TICKET_NUM" property="ticketNum" />
+        <result column="END_POINT" property="endPoint" />
+        <result column="LAST_REBATE_POINT" property="lastRebatePoint"/>
+        <result column="ADD_PRICE" property="addPrice" />
+        <result column="BUSINESS_GROSS" property="businessGross" />
+        <result column="GROSS" property="gross" />
+        <result column="CUSTOMER" property="customer" />
+        <result column="CUS_PERSON" property="cusPerson" />
+        <result column="CUS_DEPT" property="cusDept" />
+        <result column="TICKET_PERSON" property="ticketPerson" />
+        <result column="TICKET_DEPT" property="ticketDept"/>
+        <result column="END_PRICE" property="endPrice"/>
+        <result column="AGENCY_FEE" property="agencyFee"/>
+    </resultMap>
+    <select id="queryGZOutReport" resultMap="IftReportResultMap">
+        SELECT CS.NAME AS SUPPLIER,ISOE.ISSUE_TIME AS TICKET_DATE,ISOD.TICKET_NO AS TICKET_NO,IPR.PNR AS PNR,CONCAT(IL.DEP_AIRPORT,'-',IL.ARR_AIRPORT) AS
+        ROUTING,IL.FLIGHT_NO AS FLIGHT_NO,ISOD.CABIN AS CABIN,IL.DEP_TIME AS DEPART_DATE,CONCAT
+        (IP.SURNAME,'/',IP.NAME) AS  PASSENGER_NAME,IP.PASSENGER_TYPE AS PASSENGER_TYPE,IP.SALE_PRICE-IP.BUY_TAX AS SETTLE_PRICE,IP.BUY_TAX AS TAX,IP.BUY_FARE-
+        IP.BUY_AWARD_PRICE AS QVALUE,ISOE.CREATE_TYPE AS TICKET_TYPE,1 AS TICKET_NUM,IP.BUY_REBATE AS END_POINT,IP.SALE_REBATE AS LAST_REBATE_POINT,
+        IP.SALE_BROKERAGE AS ADD_PRICE,CC.NAME AS CUSTOMER,SU.NAME AS CUS_PERSON,SD.NAME AS CUS_DEPT,SMU.NAME AS TICKET_PERSON,SMD.NAME AS TICKET_DEPT,IP.BUY_AGENCY_FEE AS AGENCY_FEE,IP.BUY_FARE AS END_PRICE
+        FROM IFT_SALE_ORDER_EXT ISOE
+        LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO=ISOE.SALE_ORDER_NO
+        LEFT JOIN IFT_LEG IL ON IL.LEG_NO=ISOD.LEG_NO
+        LEFT JOIN IFT_PNR IPR ON IPR.PNR_NO=ISOE.PNR_NO
+        LEFT JOIN IFT_PASSENGER IP ON IP.PASSENGER_NO=ISOD.PASSENGER_NO
+        LEFT JOIN OS_SALEORDER OS ON OS.SALE_ORDER_NO=ISOE.SALE_ORDER_NO
+        LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO=OS.CUSTOMER_NO
+        LEFT JOIN IFT_BUY_ORDER_DETAIL IBOD ON IBOD.SALE_ORDER_DETAIL_NO=ISOD.SALE_ORDER_DETAIL_NO
+        LEFT JOIN OS_BUYORDER OB ON OB.BUY_ORDER_NO=IBOD.BUY_ORDER_NO
+        LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO=OB.SUPPLIER_NO
+        LEFT JOIN SM_USER SU ON SU.LOGIN_NAME=OB.MODIFIER
+        LEFT JOIN SM_DEPT SD ON SD.ID=SU.DEPT_ID
+        LEFT JOIN SM_USER SMU ON SMU.LOGIN_NAME=ISOE.MODIFIER
+        LEFT JOIN SM_DEPT SMD ON SMD.ID=SMU.DEPT_ID
+        WHERE 1=1
+        <include refid="selectSumByDateAndDept"/>
+
+
+
+
+
+
+    </select>
+
+
+
+    <sql id="selectSumByDateAndDept">
+        <if test="air !=null and air!=''">
+            AND IL.AIRLINE ="${air}"
+        </if>
+        <if test="ticketNo !=null and ticketNo!=''">
+            AND ISOD.TICKET_NO LIKE CONCAT('%',#{ticketNo})
+        </if>
+        <if test="pnr !=null and pnr!=''">
+            AND IPR.PNR ="${pnr}"
+        </if>
+        <if test="cabin !=null and cabin!=''">
+            AND ISOD.CABIN ="${cabin}"
+        </if>
+        <if test="beginTicketDate !=null and beginTicketDate != '' ">
+            AND ISOE.ISSUE_TIME<![CDATA[>=]]>STR_TO_DATE(CONCAT(#{beginTicketDate},'00:00:00'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="overTicketDate !=null  and overTicketDate != ''">
+            AND ISOE.ISSUE_TIME<![CDATA[<=]]>STR_TO_DATE(CONCAT(#{overTicketDate},'23:59:59'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="beginFlyDate !=null and beginFlyDate != '' ">
+            AND IL.DEP_TIME<![CDATA[>=]]>STR_TO_DATE(CONCAT(#{beginFlyDate},'00:00:00'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="overFlyDate !=null  and overFlyDate != ''">
+            AND IL.DEP_TIME<![CDATA[<=]]>STR_TO_DATE(CONCAT(#{overFlyDate},'23:59:59'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="depPlace !=null and depPlace!=''">
+            AND IL.DEP_AIRPORT="${depPlace}"
+        </if>
+        <if test="arrPlace !=null and arrPlace!=''">
+            AND IL.ARR_AIRPORT="${arrPlace}"
+        </if>
+        <if test="supplier !=null and supplier!=''">
+            AND CS.NAME ="${supplier}"
+        </if>
+        <if test="customer !=null and customer!=''">
+            AND CC.NAME ="${customer}"
+        </if>
+    </sql>
+
+
+</mapper>
