@@ -58,7 +58,7 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
 
     @Override
     @Transactional
-    public int updateSeparatedOrder(Long saleOrderNo,String userId,String currentUserId) {
+    public int updateSeparatedOrder(Long saleOrderNo,String loginName,String currentUserId) {
         //查询订单，根据订单状态判定是那种情形下的重新分单
         String status = "1";//待核价
         SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(saleOrderNo);
@@ -69,15 +69,19 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
             }
         }
         //更新将被分单人员
-        updateTicketSenderInfo(userId,status,currentUserId,"add");
+        updateTicketSenderInfo(loginName,status,currentUserId,"add");
         Long lockerId = saleOrderExt.getLocker();
         //更新原被分配人员
         User user = userService.selectById(lockerId);
         if(user!=null) {
             updateTicketSenderInfo(user.getLoginName(), status, currentUserId,"sub");
         }
-        //分给制定出票员后，订单被此人ID锁定
-        saleOrderExt.setLocker(Long.valueOf(userId));
+        //分给指定出票员后，订单被此人ID锁定
+        Agent agent = new Agent(8755);
+        User tempUser = userService.findUserByLoginName(agent,loginName);
+        if(tempUser!=null) {
+            saleOrderExt.setLocker(tempUser.getId());
+        }
         return saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
     }
 

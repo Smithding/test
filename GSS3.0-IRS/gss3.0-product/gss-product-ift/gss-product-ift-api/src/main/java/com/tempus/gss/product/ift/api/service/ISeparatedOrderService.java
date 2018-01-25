@@ -22,5 +22,5 @@ public interface ISeparatedOrderService {
      * 修改出票人
      * @param saleOrderNo
      */
-    int updateSeparatedOrder(Long saleOrderNo,String userId,String currentUserId);
+    int updateSeparatedOrder(Long saleOrderNo,String loginName,String currentUserId);
 }
