@@ -1,0 +1,14 @@
+.idea/
+*.iml/
+Docs/
+.settings
+.project
+target
+*.classpath
+*.class
+Docs
+HTML
+GSS3.0-CORE/gss3.0-core/gss-provider-parent/gss-provider-boot/pom.xml
+*.project
+*.keystore
+*.iml
