@@ -376,24 +376,24 @@ public class ExportReportUtil {
                     break;
                     //实际佣金率
                     case 22: {
-                        if (null != obj.getFactSaleRefund()) {
-                            cell.setCellValue(obj.getFactSaleRefund().doubleValue());
+                        if (null != obj.getFactRate()) {
+                            cell.setCellValue(obj.getFactRate().doubleValue());
                         } else {
                             cell.setCellValue(0);
-                            log.info("报表导出模块,0907,第" + (i + 1) + "行的实际佣金率为空");
-                            
+                            log.info("报表导出模块,0907,第" + (i + 1) + "行的实际佣金为空");
+        
                         }
                         cell.setCellType(CellType.NUMERIC);
                     }
                     break;
                     //实际佣金
                     case 23: {
-                        if (null != obj.getFactRate()) {
-                            cell.setCellValue(obj.getFactRate().doubleValue());
+                        if (null != obj.getFactSaleRefund()) {
+                            cell.setCellValue(obj.getFactSaleRefund().doubleValue());
                         } else {
                             cell.setCellValue(0);
-                            log.info("报表导出模块,0907,第" + (i + 1) + "行的实际佣金为空");
-                            
+                            log.info("报表导出模块,0907,第" + (i + 1) + "行的实际佣金率为空");
+        
                         }
                         cell.setCellType(CellType.NUMERIC);
                     }

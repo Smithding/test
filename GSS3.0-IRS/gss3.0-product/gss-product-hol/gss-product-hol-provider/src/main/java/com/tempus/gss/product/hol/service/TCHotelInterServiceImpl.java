@@ -299,12 +299,11 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			singleHotelDetailReqImg.setRequestContent("rimg");
 			TCHotelDetailResult hotelDetailImg=queryTCHotelDetail(singleHotelDetailReqImg);
 			
-			if(StringUtil.isNotNullOrEmpty(hotelDetail) && StringUtil.isNotNullOrEmpty(hotelDetailImg)){
+			if(StringUtil.isNotNullOrEmpty(hotelDetail)){
 				List<ResBaseInfo> resBaseInfoList =hotelDetail.getResBaseInfos();
 				List<ResProBaseInfo> resProBaseInfoList= hotelDetail.getResProBaseInfos();
-				List<ImgInfo> imgInfoList= hotelDetailImg.getResImages();
 				
-				if(resBaseInfoList.size() > 0 && resProBaseInfoList.size() > 0 && imgInfoList.size() > 0){
+				if(resBaseInfoList.size() > 0 && resProBaseInfoList.size() > 0){
 					resBaseInfoList.get(0).setSupplierNo("411709261204150108");
 					if(StringUtil.isNotNullOrEmpty(resBaseInfoList.get(0).getResGrade())){
 						if(resBaseInfoList.get(0).getResGrade().equals("豪华型")){
@@ -398,16 +397,19 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 								}
 								resBaseInfoList.get(0).setProDetails(ProInfoDetaisList);
 							}
-							List<ImgInfo> list2=new ArrayList<ImgInfo>();
-							list2.addAll(imgInfoList);
-							resBaseInfoList.get(0).setImgInfoList(list2);
+							if(StringUtil.isNotNullOrEmpty(hotelDetailImg)){
+								List<ImgInfo> imgInfoList= hotelDetailImg.getResImages();
+								List<ImgInfo> list2=new ArrayList<ImgInfo>();
+								list2.addAll(imgInfoList);
+								resBaseInfoList.get(0).setImgInfoList(list2);
+							}
 							resBaseInfoList.get(0).setId(resId);
 							Integer saleStatus = 1;
 							resBaseInfoList.get(0).setSaleStatus(saleStatus);
 							resBaseInfoList.get(0).setLatestUpdateTime(sdfupdate.format(new Date()));
 							mongoTemplate.save(resBaseInfoList.get(0),"resBaseInfo");
 						//log.info("插入酒店详细信息到mongodb成功!");
-						System.out.println("插入酒店详细信息到mongodb成功!");
+							log.info("插入酒店详细信息到mongodb成功!");
 				}
 			}
 		} catch (Exception e) {
@@ -437,12 +439,11 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 		singleHotelDetailReqImg.setRequestContent("rimg");
 		TCHotelDetailResult hotelDetailImg=queryTCHotelDetail(singleHotelDetailReqImg);
 		
-		if(StringUtil.isNotNullOrEmpty(hotelDetail)  && StringUtil.isNotNullOrEmpty(hotelDetailImg)){
+		if(StringUtil.isNotNullOrEmpty(hotelDetail)){
 			List<ResBaseInfo> resBaseInfoList =hotelDetail.getResBaseInfos();
 			List<ResProBaseInfo> resProBaseInfoList= hotelDetail.getResProBaseInfos();
-			List<ImgInfo> imgInfoList= hotelDetailImg.getResImages();
 			
-			if(resBaseInfoList.size() > 0 && resProBaseInfoList.size() > 0 && imgInfoList.size() > 0){
+			if(resBaseInfoList.size() > 0 && resProBaseInfoList.size() > 0){
 				Map<String, List<ResProBaseInfo>> proMap=new HashMap<String, List<ResProBaseInfo>>();
 				String key="";
 					for(ResProBaseInfo proList: resProBaseInfoList){
@@ -471,9 +472,12 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 							}
 							resBaseInfoList.get(0).setProDetails(ProInfoDetaisList);
 						}
-						List<ImgInfo> list2=new ArrayList<ImgInfo>();
-						list2.addAll(imgInfoList);
-						resBaseInfoList.get(0).setImgInfoList(list2);
+						if(StringUtil.isNotNullOrEmpty(hotelDetailImg)){
+							List<ImgInfo> imgInfoList= hotelDetailImg.getResImages();
+							List<ImgInfo> list2=new ArrayList<ImgInfo>();
+							list2.addAll(imgInfoList);
+							resBaseInfoList.get(0).setImgInfoList(list2);
+						}
 						resBaseInfoList.get(0).setId(Long.valueOf(resId));
 						List<String> strs  = Tool.intToTwoPower(resBaseInfoList.get(0).getCreditCards().intValue());
 						resBaseInfoList.get(0).setCreditCardsTarget(strs);
@@ -576,7 +580,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 							pro.setUpdateInvenTime(sdfupdate.format(new Date()));
 							mongoTemplate.save(pro, "proInfoDetail");
 						}
-						System.out.println("库存插入成功");
+						log.info("库存插入成功");
 					}
 			}
 		} catch (Exception e) {

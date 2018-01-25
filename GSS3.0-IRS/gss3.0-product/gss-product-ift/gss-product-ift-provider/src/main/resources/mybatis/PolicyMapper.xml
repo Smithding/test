@@ -97,6 +97,9 @@
         <result column="BATCH_NUM" property="batchNum" jdbcType="VARCHAR"/>
         <result column="IS_REVIEW" property="isReview" jdbcType="BIT"/>
         <result column="SALE_CONFIG_WITH_NO" property="saleConfigWithNo" jdbcType="VARCHAR"/>
+        <result column="Q_REBATE" property="qRebate" jdbcType="BIT"/>
+        <result column="S_REBATE" property="sRebate" jdbcType="BIT"/>
+        <result column="YQ_YR_REBATE" property="yryqRebate" jdbcType="BIT"/>
         <!--一对多关联控润信息-->
         <collection property="cabinList" ofType="com.tempus.gss.product.ift.api.entity.Cabin" column="POLICY_NO"
                     select="com.tempus.gss.product.ift.dao.CabinDao.selectByPolicyNo"/>
@@ -108,7 +111,7 @@
     TICKET_DATE, IS_SAME_CARRIER, IS_CODE_SHARE, SHARE_AIRLINE, ONLY_DIRECT_FLIGHT, GO_NOT_FLIGHT,
     GO_MUST_FLIGHT, BACK_NOT_FLIGHT, BACK_MUST_FLIGHT, GO_FLIGHT_NO, BACK_FLIGHT_NO,
     EXCEPT_FLIGHT_NO, AGENCY_FEE, POLICY_EFFECT_START, POLICY_EFFECT_END, REMARK, STATUS,
-    CREATE_TIME, MODIFY_TIME, CREATOR, MODIFIER, VALID, VERSION,ADV_PNR,IS_DEFAULT,BATCH_NUM,IS_REVIEW,SALE_CONFIG_WITH_NO
+    CREATE_TIME, MODIFY_TIME, CREATOR, MODIFIER, VALID, VERSION,ADV_PNR,IS_DEFAULT,BATCH_NUM,IS_REVIEW,SALE_CONFIG_WITH_NO,Q_REBATE,S_REBATE,YQ_YR_REBATE
   </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -122,27 +125,15 @@
         from IFT_POLICY
         where POLICY_TYPE = 5 AND POLICY_NO = #{policyNo,jdbcType=BIGINT} AND VALID=1
     </select>
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-    delete from IFT_POLICY
-    where POLICY_TYPE = 5 AND POLICY_NO = #{policyNo,jdbcType=BIGINT} AND
-  </delete>
     <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.Policy">
-    insert into IFT_POLICY (POLICY_NO, ID, OWNER,
-    AIRLINE, DISTRIBUTOR, PRODUCTOR,
-    SALE_CONFIG,TICKET_WAY, PRODUCT_NO, TRAVELLER_TYPE,
-    TRAVELLER_LIMIT, TEAM_TICKET_TYPE, TRIP_TYPE,
-    GO_START, EXCEPT_GO_START, GO_END,
-    EXCEPT_GO_END, BACK_END, EXCEPT_BACK_END,
-    ALLOW_CROSS_LINE_MATCH, TRAVEL_DATE, BACK_DATE,
-    TICKET_DATE, IS_SAME_CARRIER, IS_CODE_SHARE,
-    SHARE_AIRLINE, ONLY_DIRECT_FLIGHT, GO_NOT_FLIGHT,
-    GO_MUST_FLIGHT, BACK_NOT_FLIGHT, BACK_MUST_FLIGHT,
-    GO_FLIGHT_NO, BACK_FLIGHT_NO, EXCEPT_FLIGHT_NO,
-    AGENCY_FEE, POLICY_EFFECT_START, POLICY_EFFECT_END,
-    REMARK, STATUS, CREATE_TIME,
-    MODIFY_TIME, CREATOR, MODIFIER,
-    VALID, VERSION,ADV_PNR,IS_REVIEW,SALE_CONFIG_WITH_NO)
-    values (#{policyNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
+    INSERT INTO IFT_POLICY (POLICY_NO, ID, OWNER,AIRLINE, DISTRIBUTOR, PRODUCTOR,
+    SALE_CONFIG,TICKET_WAY, PRODUCT_NO, TRAVELLER_TYPE,TRAVELLER_LIMIT, TEAM_TICKET_TYPE, TRIP_TYPE,
+    GO_START, EXCEPT_GO_START, GO_END,EXCEPT_GO_END, BACK_END, EXCEPT_BACK_END,
+    ALLOW_CROSS_LINE_MATCH, TRAVEL_DATE, BACK_DATE,TICKET_DATE, IS_SAME_CARRIER, IS_CODE_SHARE,
+    SHARE_AIRLINE, ONLY_DIRECT_FLIGHT, GO_NOT_FLIGHT,GO_MUST_FLIGHT, BACK_NOT_FLIGHT, BACK_MUST_FLIGHT,
+    GO_FLIGHT_NO, BACK_FLIGHT_NO, EXCEPT_FLIGHT_NO,AGENCY_FEE, POLICY_EFFECT_START, POLICY_EFFECT_END,
+    REMARK, STATUS, CREATE_TIME,MODIFY_TIME, CREATOR, MODIFIER,VALID, VERSION,ADV_PNR,IS_REVIEW,SALE_CONFIG_WITH_NO,Q_REBATE,S_REBATE,YQ_YR_REBATE)
+    VALUES (#{policyNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
     #{airline,jdbcType=VARCHAR}, #{distributor,jdbcType=VARCHAR}, #{productor,jdbcType=VARCHAR},
     #{saleConfig,jdbcType=VARCHAR},#{ticketWay,jdbcType=VARCHAR}, #{productNo,jdbcType=VARCHAR}, #{travellerType,jdbcType=VARCHAR},
     #{travellerLimit,jdbcType=INTEGER}, #{teamTicketType,jdbcType=INTEGER}, #{tripType,jdbcType=INTEGER},
@@ -156,152 +147,162 @@
     #{agencyFee,jdbcType=DECIMAL}, #{policyEffectStart,jdbcType=VARCHAR}, #{policyEffectEnd,jdbcType=VARCHAR},
     #{remark,jdbcType=VARCHAR}, #{status,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP},
     #{modifyTime,jdbcType=TIMESTAMP}, #{creator,jdbcType=VARCHAR}, #{modifier,jdbcType=VARCHAR},
-    #{valid,jdbcType=BIT}, #{version,jdbcType=INTEGER},#{advPnr,jdbcType=BIT},#{isReview,jdbcType=BIT},#{saleConfigWithNo,jdbcType=VARCHAR})
+    #{valid,jdbcType=BIT}, #{version,jdbcType=INTEGER},#{advPnr,jdbcType=BIT},#{isReview,jdbcType=BIT},#{saleConfigWithNo,jdbcType=VARCHAR},#{qRebate,jdbcType=BIT},#{sRebate,jdbcType=BIT},#{yryqRebate,jdbcType=BIT})
   </insert>
+
     <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.Policy">
-        insert into IFT_POLICY
+        INSERT INTO IFT_POLICY
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="policyNo != null">
-        POLICY_NO,
-      </if>
+              POLICY_NO,
+            </if>
             <if test="id != null">
-        ID,
-      </if>
+                  ID,
+                </if>
             <if test="owner != null">
-        OWNER,
-      </if>
+                  OWNER,
+                </if>
             <if test="airline != null">
-        AIRLINE,
-      </if>
+                  AIRLINE,
+                </if>
             <if test="distributor != null">
-        DISTRIBUTOR,
-      </if>
+                  DISTRIBUTOR,
+                </if>
             <if test="productor != null">
-        PRODUCTOR,
-      </if>
+                  PRODUCTOR,
+                </if>
             <if test="saleConfig != null">
-        SALE_CONFIG,
-      </if>
+                  SALE_CONFIG,
+                </if>
             <if test="ticketWay != null">
-      	TICKET_WAY,
-      </if>
+                	TICKET_WAY,
+                </if>
             <if test="productNo != null">
-        PRODUCT_NO,
-      </if>
+                  PRODUCT_NO,
+                </if>
             <if test="travellerType != null">
-        TRAVELLER_TYPE,
-      </if>
+                  TRAVELLER_TYPE,
+                </if>
             <if test="travellerLimit != null">
-        TRAVELLER_LIMIT,
-      </if>
+                  TRAVELLER_LIMIT,
+                </if>
             <if test="teamTicketType != null">
-        TEAM_TICKET_TYPE,
-      </if>
+                  TEAM_TICKET_TYPE,
+                </if>
             <if test="tripType != null">
-        TRIP_TYPE,
-      </if>
+                  TRIP_TYPE,
+                </if>
             <if test="goStart != null">
-        GO_START,
-      </if>
+                  GO_START,
+                </if>
             <if test="exceptGoStart != null">
-        EXCEPT_GO_START,
-      </if>
+                  EXCEPT_GO_START,
+                </if>
             <if test="goEnd != null">
-        GO_END,
-      </if>
+                  GO_END,
+                </if>
             <if test="exceptGoEnd != null">
-        EXCEPT_GO_END,
-      </if>
+                  EXCEPT_GO_END,
+                </if>
             <if test="backEnd != null">
-        BACK_END,
-      </if>
+                  BACK_END,
+                </if>
             <if test="exceptBackEnd != null">
-        EXCEPT_BACK_END,
-      </if>
+                  EXCEPT_BACK_END,
+                </if>
             <if test="allowCrossLineMatch != null">
-        ALLOW_CROSS_LINE_MATCH,
-      </if>
+                  ALLOW_CROSS_LINE_MATCH,
+                </if>
             <if test="travelDate != null">
-        TRAVEL_DATE,
-      </if>
+                  TRAVEL_DATE,
+                </if>
             <if test="backDate != null">
-        BACK_DATE,
-      </if>
+                  BACK_DATE,
+                </if>
             <if test="ticketDate != null">
-        TICKET_DATE,
-      </if>
+                  TICKET_DATE,
+                </if>
             <if test="isSameCarrier != null">
-        IS_SAME_CARRIER,
-      </if>
+                  IS_SAME_CARRIER,
+                </if>
             <if test="isCodeShare != null">
-        IS_CODE_SHARE,
-      </if>
+                  IS_CODE_SHARE,
+                </if>
             <if test="shareAirline != null">
-        SHARE_AIRLINE,
-      </if>
+                  SHARE_AIRLINE,
+                </if>
             <if test="onlyDirectFlight != null">
-        ONLY_DIRECT_FLIGHT,
-      </if>
+                  ONLY_DIRECT_FLIGHT,
+                </if>
             <if test="goNotFlight != null">
-        GO_NOT_FLIGHT,
-      </if>
+                  GO_NOT_FLIGHT,
+                </if>
             <if test="goMustFlight != null">
-        GO_MUST_FLIGHT,
-      </if>
+                  GO_MUST_FLIGHT,
+                </if>
             <if test="backNotFlight != null">
-        BACK_NOT_FLIGHT,
-      </if>
+                  BACK_NOT_FLIGHT,
+                </if>
             <if test="backMustFlight != null">
-        BACK_MUST_FLIGHT,
-      </if>
+                  BACK_MUST_FLIGHT,
+                </if>
             <if test="goFlightNo != null">
-        GO_FLIGHT_NO,
-      </if>
+                  GO_FLIGHT_NO,
+                </if>
             <if test="backFlightNo != null">
-        BACK_FLIGHT_NO,
-      </if>
+                  BACK_FLIGHT_NO,
+                </if>
             <if test="exceptFlightNo != null">
-        EXCEPT_FLIGHT_NO,
-      </if>
+                  EXCEPT_FLIGHT_NO,
+                </if>
             <if test="agencyFee != null">
-        AGENCY_FEE,
-      </if>
+                  AGENCY_FEE,
+                </if>
             <if test="policyEffectStart != null">
-        POLICY_EFFECT_START,
-      </if>
+                  POLICY_EFFECT_START,
+                </if>
             <if test="policyEffectEnd != null">
-        POLICY_EFFECT_END,
-      </if>
+                  POLICY_EFFECT_END,
+                </if>
             <if test="remark != null">
-        REMARK,
-      </if>
+                  REMARK,
+                </if>
             <if test="status != null">
-        STATUS,
-      </if>
+                  STATUS,
+                </if>
             <if test="createTime != null">
-        CREATE_TIME,
-      </if>
+                  CREATE_TIME,
+                </if>
             <if test="modifyTime != null">
-        MODIFY_TIME,
-      </if>
+                  MODIFY_TIME,
+                </if>
             <if test="creator != null">
-        CREATOR,
-      </if>
+                  CREATOR,
+                </if>
             <if test="modifier != null">
-        MODIFIER,
-      </if>
+                  MODIFIER,
+                </if>
             <if test="valid != null">
-        VALID,
-      </if>
+                  VALID,
+                </if>
             <if test="version != null">
-        VERSION,
-      </if>
+                  VERSION,
+                </if>
             <if test="isReview != null">
-        IS_REVIEW,
-      </if>
+                  IS_REVIEW,
+                </if>
             <if test="saleConfigWithNo != null">
-        SALE_CONFIG_WITH_NO,
-      </if>
+                  SALE_CONFIG_WITH_NO,
+                </if>
+            <if test="sRebate != null">
+                      S_REBATE,
+            </if>
+            <if test="qRebate != null">
+               Q_REBATE,
+            </if>
+            <if test="yryqRebate != null">
+                 YQ_YR_REBATE,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="policyNo != null">
@@ -445,6 +446,15 @@
             <if test="saleConfigWithNo != null">
         #{saleConfigWithNo,jdbcType=VARCHAR},
       </if>
+            <if test="sRebate != null">
+          #{sRebate,jdbcType=BIT},
+        </if>
+            <if test="qRebate != null">
+         #{qRebate,jdbcType=BIT},
+        </if>
+            <if test="yryqRebate != null">
+           #{yryqRebate,jdbcType=BIT},
+        </if>
         </trim>
     </insert>
     <insert id="insertByList" useGeneratedKeys="true" parameterType="java.util.List">
@@ -463,11 +473,10 @@
         AGENCY_FEE, POLICY_EFFECT_START, POLICY_EFFECT_END,
         REMARK, STATUS, CREATE_TIME,
         MODIFY_TIME, CREATOR, MODIFIER,
-        VALID, VERSION,ADV_PNR,BATCH_NUM,IS_REVIEW,SALE_CONFIG_WITH_NO)
+        VALID, VERSION,ADV_PNR,BATCH_NUM,IS_REVIEW,SALE_CONFIG_WITH_NO,Q_REBATE,S_REBATE,YQ_YR_REBATE)
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
-            (
-            #{item.policyNo},#{item.owner},
+            (#{item.policyNo},#{item.owner},
             #{item.airline}, #{item.distributor}, #{item.productor},
             #{item.saleConfig},#{item.ticketWay}, #{item.productNo}, #{item.travellerType},
             #{item.travellerLimit}, #{item.teamTicketType}, #{item.tripType},
@@ -481,7 +490,9 @@
             #{item.agencyFee}, #{item.policyEffectStart}, #{item.policyEffectEnd},
             #{item.remark}, #{item.status}, #{item.createTime},
             #{item.modifyTime}, #{item.creator}, #{item.modifier},
-            #{item.valid}, #{item.version},#{item.advPnr},#{item.batchNum},#{item.isReview},#{item.saleConfigWithNo}
+            #{item.valid},#{item.version},#{item.advPnr},
+            #{item.batchNum},#{item.isReview},#{item.saleConfigWithNo},
+            #{item.qRebate},#{item.sRebate},#{item.yryqRebate}
             )
         </foreach>
     </insert>
@@ -626,6 +637,15 @@
             <if test="saleConfigWithNo != null">
         SALE_CONFIG_WITH_NO = #{saleConfigWithNo,jdbcType=VARCHAR},
       </if>
+            <if test="sRebate != null">
+        S_REBATE = #{sRebate,jdbcType=BIT},
+        </if>
+            <if test="qRebate != null">
+        Q_REBATE = #{qRebate,jdbcType=BIT},
+        </if>
+            <if test="yryqRebate != null">
+        YQ_YR_REBATE = #{yryqRebate,jdbcType=BIT},
+        </if>
         </set>
         where ID = #{id,jdbcType=BIGINT}
     </update>
@@ -676,7 +696,10 @@
             VALID                  = #{valid,jdbcType=BIT},
             VERSION                = #{version,jdbcType=INTEGER},
             IS_REVIEW              = #{isReview,jdbcType=BIT},
-            SALE_CONFIG_WITH_NO    = #{saleConfigWithNo,jdbcType=VARCHAR}
+            SALE_CONFIG_WITH_NO    = #{saleConfigWithNo,jdbcType=VARCHAR},
+            S_REBATE               = #{sRebate,jdbcType=BIT},
+            Q_REBATE               = #{qRebate,jdbcType=BIT},
+            YQ_YR_REBATE           = #{yryqRebate,jdbcType=BIT}
         WHERE POLICY_NO = #{policyNo,jdbcType=BIGINT}
     </update>
     <select id="queryObjByOD" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.Policy">
@@ -864,6 +887,15 @@
       </if>
             <if test="isReview != null and isReview != ''">
         IS_REVIEW = #{isReview,jdbcType=BIT} AND
+      </if>
+            <if test="sRebate != null and sRebate != ''">
+        S_REBATE = #{sRebate,jdbcType=BIT} AND
+      </if>
+            <if test="qRebate != null and qRebate != ''">
+        Q_REBATE = #{qRebate,jdbcType=BIT} AND
+      </if>
+            <if test="yryqRebate != null and yryqRebate != ''">
+        YQ_YR_REBATE = #{yryqRebate,jdbcType=BIT}
       </if>
         </trim>
         ORDER BY MODIFY_TIME DESC

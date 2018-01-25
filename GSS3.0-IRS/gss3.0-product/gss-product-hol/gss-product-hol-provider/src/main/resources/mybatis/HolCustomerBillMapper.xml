@@ -78,7 +78,7 @@
         C.USER_NAME AS userName,
         C.PROVINCE AS province,
         C.CITY AS bankCity,
-        C.ADDRESS AS bankAddr
+        C.OPEN_BANK AS bankAddr
         FROM `gss-op`.HOL_HOTEL_ORDER AS HO
         LEFT JOIN `gss-op`.CPS_CUSTOMER AS CC ON (CC.CUSTOMER_NO = HO.CUSTOMER_NO)
         LEFT JOIN `gss-op`.CPS_BANK_CARD AS C ON (C.CUSTOMER_NO = HO.CUSTOMER_NO)

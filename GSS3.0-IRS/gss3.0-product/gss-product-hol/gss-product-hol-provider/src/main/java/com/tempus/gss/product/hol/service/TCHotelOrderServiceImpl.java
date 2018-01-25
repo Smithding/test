@@ -1281,6 +1281,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							throw new GSSException("更新状态信息异常", "0110", "获取订单详情列表为空");
 						}
 						OrderInfoModel orderInfoModel = orderInfomationDetail.getOrderInfos().get(0);
+						Date stringToSimpleDate = DateUtil.stringToSimpleDate(orderInfoModel.getLasestCancelTime());
+						hotelOrder.setCancelPenalty(stringToSimpleDate);
 						if(StringUtil.isNotNullOrEmpty(orderInfoModel.getResources())){
 							for(ResourceModel resource : orderInfoModel.getResources()){
 								if(StringUtils.isNotEmpty(resource.getSupplierConfirmNumber())){
