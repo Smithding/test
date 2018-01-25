@@ -7,7 +7,6 @@
 *.iml
 out
 pom.xml
-.gitignore
 gss-product.iml
 gss-product-ais
 gss-product-flp
