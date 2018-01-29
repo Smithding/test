@@ -271,10 +271,10 @@ public class HttpClientUtil {
 			    httpPost.setHeader(security,stringPwd);
 			    
 	            res = client.execute(httpPost);// 发送请求
-	           if(res!=null)
+	           /*if(res!=null)
 	           {
 	        	   log.debug("请求同程酒店接口请求返回结果:"+res.getEntity());
-	           }
+	           }*/
 	            
 	            
 	            if (res.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
