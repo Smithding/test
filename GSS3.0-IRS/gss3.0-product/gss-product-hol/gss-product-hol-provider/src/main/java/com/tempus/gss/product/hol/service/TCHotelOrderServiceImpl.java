@@ -1424,8 +1424,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			                } catch (Exception e) {
 			                    logger.error("对象属性复制错误");
 			                }
-							hotelOrder.setRelateOrderNo(tcPushOrderInfo.getNewOrderId());
-							hotelOrderMapper.updateById(hotelOrder);
 							
 							newHotelOrder.setRelateOrderNo(tcPushOrderInfo.getOrderId());
 							des = "补单信息, 老订单号: "+tcPushOrderInfo.getOrderId()+", 新订单号: "+tcPushOrderInfo.getNewOrderId();
@@ -1709,6 +1707,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								buyOrderService.create(agent, buyOrder);
 								hotelOrderMapper.insertSelective(newHotelOrder);
 							}
+							hotelOrder.setRelateOrderNo(tcPushOrderInfo.getNewOrderId());
+							hotelOrderMapper.updateById(hotelOrder);
 							oldLogRecord.setCreateTime(new Date());
 							oldLogRecord.setDesc(des);
 							oldLogRecord.setOptName("供应商");
