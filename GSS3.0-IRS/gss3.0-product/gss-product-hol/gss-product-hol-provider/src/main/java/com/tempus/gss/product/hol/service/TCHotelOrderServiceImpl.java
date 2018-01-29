@@ -547,17 +547,11 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								hotelOrder.setTcOrderStatus(TcOrderStatus.WAIT_TC_CONFIRM.getKey());
 								hotelOrderMapper.updateById(hotelOrder);
 							}else{
-								hotelOrder.setOrderStatus(OwnerOrderStatus.BOOK_FAIL.getKey());
-								hotelOrder.setMsg(orderCreateBase.getErr_msg().trim());
-								hotelOrder.setResultCode("0");
-								hotelOrderMapper.updateById(hotelOrder);
+								throw new GSSException("创建酒店失败", "0133", "创建酒店请求失败:" + orderCreateBase.getErr_msg());
 							}
 						}else{
 							logger.error("酒店数据解析失败");
 	                        throw new GSSException("实体类酒店失败", "0134", "实体类酒店失败");
-						}
-						if(!orderCreateBase.getRet_code().equals("200")){
-							throw new GSSException("创建酒店失败", "0133", "创建酒店请求失败:" + orderCreateBase.getErr_msg());
 						}
 					}else{
 						logger.error("创建酒店请求返回空值");
@@ -571,6 +565,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		}
     	catch(Exception e){
     		logger.error("创建酒店订单请求出错",e);
+    		hotelOrder.setOrderStatus(OwnerOrderStatus.BOOK_FAIL.getKey());
+    		hotelOrder.setMsg(e.getMessage());
+			hotelOrder.setResultCode("0");
+			hotelOrderMapper.insertSelective(hotelOrder);
             throw new GSSException("创建酒店订单失败", "0137", e.getMessage());
     	}
     	logger.info("创建酒店订单结束=====");
