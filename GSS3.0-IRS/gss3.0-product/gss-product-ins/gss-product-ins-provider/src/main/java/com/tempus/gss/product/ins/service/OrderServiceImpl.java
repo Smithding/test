@@ -183,7 +183,7 @@ public class OrderServiceImpl implements IOrderService {
 	@Reference
 	IParamService paramService;
 
-	@Reference(version="LL")
+	@Reference
 	ICertificateService certificateService;
 
 	@Reference
@@ -1771,10 +1771,11 @@ public class OrderServiceImpl implements IOrderService {
 			throw new GSSException("当前操作用户不能为空", "1010", "当前操作用户不能为空");
 		}
 		//如果是运营平台账号，可查看全部订单，否则只能查看当前账号自己创建的订单
-		if(agent.getType() != null && agent.getType() != 0L){ //不是运营平台账号
-			
+		if(agent.getType() != null && agent.getType() != 0L){ //不是运营平台账号			
 				if(pageRequest.getEntity().isLowerLevel()==true){
+					Date start1 = new Date();
 					lowerCustomers = customerService.getSubCustomerByCno(agent, agent.getNum());
+					log.info("保险订单查询定位getSubCustomerByCno该方法执行的时间为:"+(new Date().getTime()-start1.getTime()));
 					pageRequest.getEntity().setLowerCustomers(lowerCustomers);
 				}
 				pageRequest.getEntity().setOwner(pageRequest.getAgent().getOwner());
@@ -1783,8 +1784,11 @@ public class OrderServiceImpl implements IOrderService {
 		}
 		/* 分页列表 */
 		try{
+			Date start2 = new Date();
 			List<SaleOrderExt> tempList = orderServiceDao.queryObjByKey(page, pageRequest.getEntity());
+			log.info("保险订单查询定位queryObjByKey该方法执行的时间为:"+(new Date().getTime()-start2.getTime()));
 			List<SaleOrderExt> saleOrderExtList = new ArrayList<SaleOrderExt>();
+			Date start3 = new Date();
 			for(SaleOrderExt order: tempList) {
 				BigDecimal prise = new BigDecimal(order.getSaleOrderDetailList().size());
 				SaleOrder saleOrder = saleOrderService.getSOrderByNo(pageRequest.getAgent(), order.getSaleOrderNo());
@@ -1796,7 +1800,7 @@ public class OrderServiceImpl implements IOrderService {
 				order.setLowerCustomers(lowerCustomers);
 				saleOrderExtList.add(order);
 			}
-	
+			log.info("保险订单查询定位getSOrderByNo该方法执行的时间为:"+(new Date().getTime()-start3.getTime()));
 			page.setRecords(saleOrderExtList);
 			log.info("根据条件查询保单结束==============");
 		}catch(Exception e){
