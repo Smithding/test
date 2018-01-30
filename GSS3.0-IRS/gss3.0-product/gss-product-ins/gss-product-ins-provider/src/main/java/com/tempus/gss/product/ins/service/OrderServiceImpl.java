@@ -183,7 +183,7 @@ public class OrderServiceImpl implements IOrderService {
 	@Reference
 	IParamService paramService;
 
-	@Reference
+	@Reference(version="LL")
 	ICertificateService certificateService;
 
 	@Reference
