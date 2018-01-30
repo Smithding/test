@@ -32,20 +32,22 @@ public class PolicyIndexService implements IPolicyIndexService {
         if(2==policy.getTripType()){
              flyTypeDid =1;
         }
-        String airline  =policy.getAirline();
+        List<String> keyList=null;
+        Long policyId=policy.getPolicyNo();
         Integer getOwner =policy.getOwner();
         String fromCityDcd = policy.getGoStart();
         String toCityDcd = policy.getGoEnd();
-        Long policyId=policy.getPolicyNo();
-        // 生产索引表的key值
-        List<String> keyList = getPolicyTempKeyList(flyTypeDid, fromCityDcd,
-                toCityDcd,airline,getOwner);
-        if(2==policy.getTripType()){
-            flyTypeDid =2;
-             fromCityDcd = policy.getGoEnd();
-             toCityDcd = policy.getBackEnd();
-            keyList.addAll(getPolicyTempKeyList(flyTypeDid, fromCityDcd,
-                    toCityDcd,airline,getOwner));
+        for(String airline :policy.getAirline().split("/")){
+            // 生产索引表的key值
+            keyList = getPolicyTempKeyList(flyTypeDid, fromCityDcd,
+                    toCityDcd,airline,getOwner);
+            if(2==policy.getTripType()){
+                flyTypeDid =2;
+                fromCityDcd = policy.getGoEnd();
+                toCityDcd = policy.getBackEnd();
+                keyList.addAll(getPolicyTempKeyList(flyTypeDid, fromCityDcd,
+                        toCityDcd,airline,getOwner));
+            }
         }
         for (String key : keyList) {
             String  policyIndexs = policyRedisUtils.getStr(key);
