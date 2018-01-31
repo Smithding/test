@@ -15,4 +15,6 @@ public interface IPnrManageService {
     String cancelPnr(RequestWithActor<Long> actor) throws Exception;
     
     List<Pnr> selectByOrderNo(RequestWithActor<Long> actor) throws Exception;
+    
+    Pnr selectByPnrNo(RequestWithActor<Long> actor) throws Exception;
 }
