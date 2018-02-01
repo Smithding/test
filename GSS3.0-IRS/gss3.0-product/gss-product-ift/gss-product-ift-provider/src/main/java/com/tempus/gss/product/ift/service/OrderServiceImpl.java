@@ -92,7 +92,7 @@ import com.tempus.tbe.entity.PnrOutPut;
 @EnableAutoConfiguration
 public class OrderServiceImpl implements IOrderService {
 
-    
+
     protected final transient Logger log = LoggerFactory.getLogger(getClass());
     @Autowired
     SaleOrderExtDao saleOrderExtDao;
@@ -207,17 +207,17 @@ public class OrderServiceImpl implements IOrderService {
     public SaleOrderExt createOrder(RequestWithActor<OrderCreateVo> requestWithActor) throws Exception {
 
         //log.info("创建订单开始========"+JsonUtil.toJson(requestWithActor));
-        
+
         /* 校验登录用户 */
         if (requestWithActor.getAgent() == null) {
             throw new GSSException("登录用户为空", "0101", "创建订单失败");
         }
-        
+
         /* 校验条件 */
         if (requestWithActor.getEntity() == null) {
             throw new GSSException("销售单为空", "0101", "创建订单失败");
         }
-        
+
         /* 校验销售单条件 */
         SaleOrderExt saleOrderExt = requestWithActor.getEntity().getSaleOrderExt();
         //System.out.println(JsonUtil.toJson(saleOrderExt));
@@ -293,7 +293,7 @@ public class OrderServiceImpl implements IOrderService {
                 passenger.setValid((byte) 1);
                 passengerDao.insertSelective(passenger);
             }
-            
+
             /* 创建采购单 */
             Long buyOrderNo = maxNoService.generateBizNo("IFT_BUY_ORDER_NO", 24);
             BuyOrderExt buyOrderExt = requestWithActor.getEntity().getBuyOrderExt();
@@ -328,7 +328,7 @@ public class OrderServiceImpl implements IOrderService {
             buyOrderExt.getBuyOrder().setBusinessSignNo(businessSignNo);// 业务批次号
             buyOrderExt.getBuyOrder().setBsignType(1);// 1销采 2换票 3废和退 4改签
             buyOrderExt.getBuyOrder().setBuyChildStatus(1);// 未审核
-            
+
             /* 创建采购单的pnr信息 */
             Pnr pnr = saleOrderExt.getImportPnr();
             if (pnr != null) {
@@ -348,7 +348,7 @@ public class OrderServiceImpl implements IOrderService {
                 pnr.setValid((byte) 1);
                 pnrDao.insertSelective(pnr);
             }
-            
+
             /* 创建主订单 */
             SaleOrder saleOrder = saleOrderExt.getSaleOrder();
             if (saleOrder == null) {
@@ -377,7 +377,7 @@ public class OrderServiceImpl implements IOrderService {
             saleOrderService.create(requestWithActor.getAgent(), saleOrder);
 
             buyOrderService.create(requestWithActor.getAgent(), buyOrderExt.getBuyOrder());
-            
+
             /* 封装人+航段对象 */
             List<SaleOrderDetail> saleOrderDetailList = new ArrayList<>();
             for (Leg leg : saleOrderExt.getLegList()) {
@@ -403,7 +403,7 @@ public class OrderServiceImpl implements IOrderService {
                     saleOrderDetailList.add(saleOrderDetail);
                 }
             }
-            
+
             /* 采购单明细 */
             for (SaleOrderDetail saleOrderDetail : saleOrderDetailList) {
                 BuyOrderDetail buyOrderDetail = new BuyOrderDetail();
@@ -416,7 +416,7 @@ public class OrderServiceImpl implements IOrderService {
                 buyOrderDetail.setValid((byte) 1);
                 buyOrderDetailDao.insertSelective(buyOrderDetail);
             }
-            
+
             /* 创建销售拓展单 */
             saleOrderExt.setSaleOrderNo(saleOrderNo);
             if (pnr != null && pnr.getPnrNo() != null) {
@@ -428,7 +428,7 @@ public class OrderServiceImpl implements IOrderService {
             saleOrderExt.setValid((byte) 1);
             saleOrderExt.setLocker(0L);// 解锁状态
             saleOrderExtDao.insertSelective(saleOrderExt);
-            
+
             /* 创建采购单 */
             buyOrderExt.setBuyOrderNo(buyOrderNo);
             buyOrderExt.setOwner(agent.getOwner());
@@ -438,7 +438,7 @@ public class OrderServiceImpl implements IOrderService {
             buyOrderExtDao.insertSelective(buyOrderExt);
             log.info("创建国际订单成功=====saleOrderNo=" + saleOrderNo);
             String logstr = "<p>" + String.format("创建国际订单成功=====", new Date()) + ":saleOrderNo=" + JsonUtil.toJson(saleOrderNo);
-            
+
             /* 创建操作日志 */
             try {
                 LogRecord logRecord = new LogRecord();
@@ -799,7 +799,7 @@ public class OrderServiceImpl implements IOrderService {
                 throw new GSSException("saleOrderNo入参为空==", "1001", "取消订单失败");
             }
             saleOrderService.updateStatus(agent, requestWithActor.getEntity(), 5);// 改为已取消状态
-            
+
             /* 创建操作日志 */
             try {
                 LogRecord logRecord = new LogRecord();
@@ -895,7 +895,7 @@ public class OrderServiceImpl implements IOrderService {
      * @param requestWithActor
      * @return
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional
     public boolean issuing(RequestWithActor<PassengerListVo> requestWithActor) {
 
         Agent agent = requestWithActor.getAgent();
@@ -969,22 +969,15 @@ public class OrderServiceImpl implements IOrderService {
             // 更改主订单状态
             saleOrderService.updateStatus(agent, saleOrderNo, 4);// 将状态改为已出票
             saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
-            String logstr = "";
-            try {
-                Agent newAgent = new Agent(agent.getOwner(), saleOrderExt.getSaleOrder().getCustomerTypeNo(), saleOrderExt.getSaleOrder().getCustomerNo(), agent.getId(), agent.getAccount(), agent.getToken(), agent.getIp(), agent.getDevice(), null);
-                mssReserveService.drawTicketOta(newAgent, saleOrderNo, "2");
-                logstr += "<p>" + String.format("出单操作成功:%1$tF %1$tT", new Date()) + ":" + JsonUtil.toJson(saleOrderNo);
-            } catch (Exception e) {
-                log.error("国际订单出票回调失败=============e" + e);
-                throw new GSSException("国际订单出票回调失败","","国际订单出票回调失败"+e);
-            }
-
-            // 配送管理出票队列
-            SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleOrderNo);
+            String logstr="";
+            SaleOrder saleOrder =  saleOrderExt.getSaleOrder();
             Long transationOrderNo = null;
             if (null != saleOrder) {
                 transationOrderNo = saleOrder.getTransationOrderNo();
+                //
+                ApiCallBack(saleOrder,agent,logstr,date);
             }
+            // 配送管理出票队列
             sendTicketInfoByMq(agent,transationOrderNo);
             /* 创建操作日志 */
             saveLog(agent,saleOrderNo,logstr,transationOrderNo);
@@ -993,7 +986,7 @@ public class OrderServiceImpl implements IOrderService {
             subSaleOrderNum(agent);
         } catch (Exception e) {
             log.error("国际机票出票异常",e);
-            throw new GSSException("必要参数为空", "0102", "出单操作失败!" + e);
+            throw new GSSException("国际机票出票异常", "0102", "出单操作失败!" + e);
         }
         log.info("出单结束");
         return true;
@@ -2658,7 +2651,7 @@ public class OrderServiceImpl implements IOrderService {
         }
     }
 
-    private void sendTicketInfoByMq(Agent agent,Long transationOrderNo){
+    private void sendTicketInfoByMq(Agent agent,Long transationOrderNo) throws RuntimeException{
         /*SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleOrderNo);
         Long transationOrderNo = null;
         if (null != saleOrder) {
@@ -2671,7 +2664,7 @@ public class OrderServiceImpl implements IOrderService {
         iftTicketMqSender.send(IftTicketMqSender.TICKETED_KEY, iftTicketMessage);
     }
 
-    private void updateBuyOrder(Agent agent,Long saleOrderNo,BigDecimal payable,PassengerListVo listVo,String tickets){
+    private void updateBuyOrder(Agent agent,Long saleOrderNo,BigDecimal payable,PassengerListVo listVo,String tickets) throws RuntimeException{
         Supplier supplier = supplierService.getSupplierByNo(agent, listVo.getSupplierNo());
         List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(agent, saleOrderNo);
         if (buyOrderList != null && buyOrderList.size() != 0) {
@@ -2701,7 +2694,7 @@ public class OrderServiceImpl implements IOrderService {
         }
     }
 
-    private Long savePnr(Long pnrNo,PassengerListVo listVo,Long saleOrderNo,Agent agent,Date date){
+    private Long savePnr(Long pnrNo,PassengerListVo listVo,Long saleOrderNo,Agent agent,Date date) throws RuntimeException{
         Pnr insetPnr = new Pnr();
         pnrNo = maxNoService.generateBizNo("IFT_PNR_NO", 32);
         insetPnr.setPnr(listVo.getPnr());
@@ -2714,5 +2707,18 @@ public class OrderServiceImpl implements IOrderService {
         insetPnr.setValid((byte) 1);
         pnrDao.insertSelective(insetPnr);
         return pnrNo;
+    }
+
+    private void ApiCallBack(SaleOrder saleOrder,Agent agent,String logstr,Date date){
+        if ("API".equals(saleOrder.getSourceChannelNo())) {//外部订单
+            try {
+                Agent newAgent = new Agent(agent.getOwner(), saleOrder.getCustomerTypeNo(), saleOrder.getCustomerNo(), agent.getId(), agent.getAccount(), agent.getToken(), agent.getIp(), agent.getDevice(), null);
+                mssReserveService.drawTicketOta(newAgent, saleOrder.getSaleOrderNo(), "2");
+                logstr += "<p>" + String.format("出单操作成功:%1$tF %1$tT", date) + ":" + JsonUtil.toJson(saleOrder.getSaleOrderNo());
+            } catch (Exception e) {
+                log.error("国际订单出票回调失败=============e" + e);
+                // throw new GSSException("国际订单出票回调失败","","国际订单出票回调失败"+e);
+            }
+        }
     }
 }

@@ -55,6 +55,8 @@
         <result column="CURRENCY" property="currency" jdbcType="VARCHAR"/>
         <result column="SALE_CURRENCY" property="saleCurrency" jdbcType="VARCHAR"/>
         <result column="EXCHANGE_RATE" property="exchangeRate" javaType="DECIMAL"/>
+        <association property="saleOrder" column="SALE_ORDER_NO"
+                     select="com.tempus.gss.order.dao.SaleOrderMapper.selectByRecordNo"/>
         <!-- 一对一 PNR-->
         <association property="importPnr" column="SALE_ORDER_NO"
                      select="com.tempus.gss.product.ift.dao.PnrDao.selectByOrderNo"/>
@@ -653,7 +655,7 @@
                 AND
             </if>
             <if test="modifier!=null and modifier!=''">
-              o.MODIFIER = #{modifier,jdbcType=VARCHAR}AND
+                o.MODIFIER = #{modifier,jdbcType=VARCHAR}AND
             </if>
             <if test="orderChildStatus!=null">
                 o.ORDER_CHILD_STATUS = #{orderChildStatus,jdbcType=BIGINT}AND

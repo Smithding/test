@@ -84,9 +84,26 @@ public class PnrManageServiceimpl implements IPnrManageService {
     public List<Pnr> selectByOrderNo(RequestWithActor<Long> actor) throws Exception {
         try {
             if (null == actor.getEntity()) {
-                throw new IFTException("pnr查询", "不存在对应的记录", "cancelPnr方法的参数为空", "0099");
+                throw new IFTException("pnr查询", "不存在对应的记录", "selectByOrderNo方法的参数为空", "0099");
             }
             return pnrDao.selectByOrderNo(actor.getEntity());
+        } catch (Exception e) {
+            log.error("cancelPnrServiceimpl ，出错！");
+            log.error(e.getMessage());
+            return null;
+        }
+        
+    }
+    /**
+     * @return
+     */
+    @Override
+    public Pnr selectByPnrNo(RequestWithActor<Long> actor) throws Exception {
+        try {
+            if (null == actor.getEntity()) {
+                throw new IFTException("pnr查询", "不存在对应的记录", "selectByPnrNo方法的参数为空", "0009");
+            }
+            return pnrDao.selectByPrimaryKey(actor.getEntity());
         } catch (Exception e) {
             log.error("cancelPnrServiceimpl ，出错！");
             log.error(e.getMessage());
