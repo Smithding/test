@@ -527,6 +527,15 @@ public class OrderServiceImpl implements IOrderService {
 				if (saleOrderExt.getSaleOrderNo() == null) {
 					throw new GSSException("主订单号为空,子订单无法插入", "1010", "订单创建失败");
 				}
+				//验证性别是否正确，如果不正确 进行修改
+				if("1".equals(saleOrderDetail.getInsuredCertiType())){
+					String sex = saleOrderDetail.getInsuredCertiNo().substring(16, 17);
+					if(Integer.parseInt(sex)%2==0){
+						saleOrderDetail.setInsuredSex(2);
+					}else{
+						saleOrderDetail.setInsuredSex(1);
+					}
+				}
 				saleOrderDetail.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
 				saleOrderDetail.setOwner(agent.getOwner());
 				saleOrderDetail.setCreateTime(new Date());
