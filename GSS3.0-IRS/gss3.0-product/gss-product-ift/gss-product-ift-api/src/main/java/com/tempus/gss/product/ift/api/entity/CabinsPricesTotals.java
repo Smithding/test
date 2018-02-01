@@ -61,6 +61,9 @@ public class CabinsPricesTotals implements Serializable {
 	/**各个乘客类型的税费统计**/
 	private Map<String,Double> passengerTypeTax;
 
+	/**各个乘客类型的价格统计**/
+	private Map<String,Double> passengerTypeSalePrice;
+
 	public String getCabins() {
 
 		return cabins;
@@ -225,5 +228,24 @@ public class CabinsPricesTotals implements Serializable {
 
 	public void setPassengerTypeTax(Map<String, Double> passengerTypeTax) {
 		this.passengerTypeTax = passengerTypeTax;
+	}
+
+	public Map<String, Double> getPassengerTypeSalePrice() {
+		Map<String, Double> passengerTypeMap = new HashMap<>();
+		if(this.passengerTypePricesTotals!=null){
+			for(PassengerTypePricesTotal passengerType:this.passengerTypePricesTotals){
+				if(passengerType.getSalePrice()==null){
+					Double price = (passengerType.getTax()==null?0d:passengerType.getTax().doubleValue())+(passengerType.getFare()==null?0d:passengerType.getFare().doubleValue());
+					passengerTypeMap.put(passengerType.getPassengerType(),price);
+				}else{
+					passengerTypeMap.put(passengerType.getPassengerType(),passengerType.getSalePrice().doubleValue());
+				}
+			}
+		}
+		return passengerTypeMap;
+	}
+
+	public void setPassengerTypeSalePrice(Map<String, Double> passengerTypeSalePrice) {
+		this.passengerTypeSalePrice = passengerTypeSalePrice;
 	}
 }
