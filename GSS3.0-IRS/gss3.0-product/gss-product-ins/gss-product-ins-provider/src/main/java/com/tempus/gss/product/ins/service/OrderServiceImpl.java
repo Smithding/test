@@ -84,6 +84,8 @@ import com.tempus.gss.security.AgentUtil;
 import com.tempus.gss.system.service.IMaxNoService;
 import com.tempus.gss.system.service.IParamService;
 import com.tempus.gss.vo.Agent;
+import com.tempus.tbd.entity.Airport;
+import com.tempus.tbd.service.IAirportService;
 
 @Service(retries = 0, timeout = 60000)
 @org.springframework.stereotype.Service
@@ -194,7 +196,10 @@ public class OrderServiceImpl implements IOrderService {
 
 	@Reference
 	ISupplierService supplierService;
-
+	
+    @Reference
+    IAirportService airportService;
+	
 	@Reference
 	IMssReserveService mssReserveService;
 	@Reference
@@ -347,11 +352,21 @@ public class OrderServiceImpl implements IOrderService {
 		saleOrderExt.setInsuranceNo(insuranceNo);
 		saleOrderExt.setIssueDate(new Date());
 		saleOrderExt.setOrderType(insurance.getBuyWay());
-		if (saleOrderExt.getEffectDate() != null) {
-			saleOrderExt.setEffectDate(saleOrderExt.getEffectDate());
-		}
-		if (saleOrderExt.getExpireDate() != null) {
-			saleOrderExt.setExpireDate(saleOrderExt.getExpireDate());
+		if(insurance.getName().contains("单次")){
+			Date flightTime = requestWithActor.getEntity().getSaleOrderExt().getInsureExtVo().getFlightInfoVo().getFlightDate();
+			long time;
+			if(flightTime!=null){
+				saleOrderExt.setEffectDate(flightTime);
+				time = insurance.getEndDays()*24*60*60*1000l;
+				saleOrderExt.setExpireDate(new Date(flightTime.getTime()+time));
+			}
+		}else{
+			if (saleOrderExt.getEffectDate() != null) {
+				saleOrderExt.setEffectDate(saleOrderExt.getEffectDate());
+			}
+			if (saleOrderExt.getExpireDate() != null) {
+				saleOrderExt.setExpireDate(saleOrderExt.getExpireDate());
+			}
 		}
 		if (saleOrderExt.getHolderType() != null
 				&& "".equals(saleOrderExt.getHolderType())) {
@@ -492,6 +507,14 @@ public class OrderServiceImpl implements IOrderService {
 	
 		//根据保险险种来存储扩展信息
 		if (saleOrderExt.getInsureExtVo() != null && (saleOrderExt.getInsureExtVo().getFlightNo() != null || saleOrderExt.getInsureExtVo().getFlightInfoVo() != null)) {
+			if(saleOrderExt.getInsureExtVo().getFlightInfoVo().getDestinationCity()==null&&saleOrderExt.getInsureExtVo().getFlightInfoVo().getDestinationCode()!=null){
+				List<Airport> airports = airportService.queryAirportByParm(saleOrderExt.getInsureExtVo().getFlightInfoVo().getDestinationCode(), "D");
+				saleOrderExt.getInsureExtVo().getFlightInfoVo().setDestinationCity(airports.get(0).getCityCName());
+			}
+			if(saleOrderExt.getInsureExtVo().getFlightInfoVo().getOriginCity()==null&&saleOrderExt.getInsureExtVo().getFlightInfoVo().getOriginCode()!=null){
+				List<Airport> airports = airportService.queryAirportByParm(saleOrderExt.getInsureExtVo().getFlightInfoVo().getOriginCode(), "D");
+				saleOrderExt.getInsureExtVo().getFlightInfoVo().setOriginCity(airports.get(0).getCityCName());
+			}
 			if(!insurance.getCompanyName().contains(COMPANY_NAME_ZHONGAN)){
 				saleOrderExt.getInsureExtVo().getFlightInfoVo().setDestinationCode(null);
 				saleOrderExt.getInsureExtVo().getFlightInfoVo().setOriginCode(null);
@@ -847,7 +870,6 @@ public class OrderServiceImpl implements IOrderService {
 			}catch(Exception e){
 				throw new GSSException("时间格式转换异常!", "1010", "投保失败");
 			}
-			
 			insureRequestVo.setExpireDate(saleOrderExt.getExpireDate());
 		/*String policyHolderType = paramService.getValueByKey("ins_holder_type");
 		if (StringUtils.isNoneBlank(policyHolderType)) {
@@ -927,6 +949,7 @@ public class OrderServiceImpl implements IOrderService {
 		}catch(Exception e){
 			log.error("json转对象，对象转json异常"+e,1);
 		}
+		
 		insureRequestVo.setExtendedFieldSJson(extendedFieldsJson);
 		insureRequestVo.setSaleOrderDetailList(null);
 		insureRequestVo.setInsuredList(saleOrderDetailList);
