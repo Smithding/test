@@ -1,5 +1,6 @@
 package com.tempus.gss.product.hol.api.syn;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.tempus.gss.exception.GSSException;
@@ -154,4 +155,24 @@ public interface ITCHotelSupplierService {
 	 * @return
 	 */
 	public Boolean insertNewRes(Agent agent, Long resId);
+	/**
+	 * 添加索引
+	 * @param list
+	 * @return
+	 * @throws IOException
+	 */
+	public Boolean updateLuceneDate(Agent agent,List<HotelName> list) throws IOException;
+	/**
+	 * 查询索引
+	 * @param agent
+	 * @param name
+	 * @return
+	 */
+	public List<HotelName> queryHotelNamesByLucene(Agent agent,String name);
+	/**
+	 * 修改更新索引
+	 * @param resId
+	 * @return
+	 */
+	public Boolean changeLuceneData(HotelName hotelName);
 }

@@ -1,6 +1,9 @@
 package com.tempus.gss.product.hol.service;
 
+import java.io.IOException;
+import java.io.StringReader;
 import java.math.BigDecimal;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,6 +24,34 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.IntPoint;
+import org.apache.lucene.document.LongPoint;
+import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.StringField;
+import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexReader;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.SortField;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.WildcardQuery;
+import org.apache.lucene.search.highlight.Highlighter;
+import org.apache.lucene.search.highlight.QueryScorer;
+import org.apache.lucene.search.highlight.SimpleHTMLFormatter;
+import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.Version;
 import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -33,6 +64,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.wltea.analyzer.lucene.IKAnalyzer;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
@@ -546,6 +578,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
        
         ResBaseInfo resDetail =mongoTemplate.findOne(new Query(Criteria.where("_id").is(resId)),ResBaseInfo.class);
         Long checkTimes = 1L;
+        Integer saleStatus = 1;
 		Query query = Query.query(Criteria.where("_id").is(resId));
 		HotelName findOne = mongoTemplate.findOne(query, HotelName.class);
 		if(StringUtil.isNotNullOrEmpty(findOne)){
@@ -553,6 +586,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 				checkTimes = findOne.getCheckTimes() + checkTimes;
 			}
 			findOne.setCheckTimes(checkTimes);
+			findOne.setSaleStatus(saleStatus);
 			mongoTemplate.save(findOne, "hotelName");
 		}else{
 			HotelName HotelName=new HotelName();
@@ -560,7 +594,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     		HotelName.setName(resDetail.getResName());
     		HotelName.setCity(resDetail.getCityName());
     		HotelName.setCheckTimes(checkTimes);
+    		HotelName.setSaleStatus(saleStatus);
     		mongoTemplate.save(HotelName, "hotelName");
+    		
 		}
         try {
         	 if(StringUtil.isNotNullOrEmpty(resDetail) && StringUtil.isNotNullOrEmpty(resDetail.getProDetails())){
@@ -1221,6 +1257,157 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 					//logger.error("同步酒店详情失败, 酒店ID为: "+resId+", "+e.getMessage());
 				}
 		return flag;
+	}
+
+	@Override
+	public Boolean updateLuceneDate(Agent agent,List<HotelName> list) throws IOException {
+		//List<HotelName> list = mongoTemplate.find(new Query(Criteria.where("_id").ne("").ne(null)), HotelName.class);
+		//try {
+			Directory directory = FSDirectory.open(Paths.get("./index"));
+	    	//Version version = Version.LUCENE_7_1_0;
+	    	
+	    		Analyzer analyzer = new IKAnalyzer();
+		    	//创建索引写入配置
+		    	IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);
+		    	  
+		    	//创建索引写入对象
+		    	IndexWriter indexWriter = new IndexWriter(directory, indexWriterConfig);
+			//System.out.println(i);
+			/*Query query = Query.query(Criteria.where("_id").ne("").ne(null));
+			query.skip(i);
+			query.limit(100);
+			List<HotelName> list = mongoTemplate.find(query,HotelName.class);*/
+			if(StringUtil.isNotNullOrEmpty(list)) {
+				System.out.println(list.size());
+				for (int j = 0; j < list.size(); j++) {
+					Document doc = new Document();
+			    	doc.add(new LongPoint("id", list.get(j).getId()));
+			    	doc.add(new StoredField("id", list.get(j).getId()));
+			    	doc.add(new TextField("name", list.get(j).getName(), Field.Store.YES));
+			    	doc.add(new StringField("city", list.get(j).getCity(), Field.Store.YES));
+					//doc.add(new IntPoint("saleStatus", list.get(j).getSaleStatus()));
+					//doc.add(new StoredField("saleStatus", list.get(j).getSaleStatus()));
+					doc.add(new LongPoint("checkTimes", list.get(j).getCheckTimes()));
+			    	doc.add(new StoredField("checkTimes", list.get(j).getCheckTimes()));
+					indexWriter.addDocument(doc);
+				}     
+				indexWriter.commit();
+				indexWriter.close();
+			}
+	    	directory.close();
+	    	log.info("添加全文检索结束");
+	    	
+		/*} catch (Exception e) {
+			log.error("添加全文检索失败");
+			throw new GSSException("添加全文检索", "0218", "添加全文检索失败"+e.getMessage());
+		}*/
+		return true;
+	}
+
+	@Override
+	public List<HotelName> queryHotelNamesByLucene(Agent agent,String name) {
+		//System.out.println("name: "+name);
+		List<HotelName> hns = new ArrayList<HotelName>();
+		try {
+			Analyzer analyzer = new IKAnalyzer();
+	    	Directory directory = FSDirectory.open(Paths.get("./index"));
+	    	IndexReader indexReader = DirectoryReader.open(directory);
+	    	IndexSearcher indexSearcher = new IndexSearcher(indexReader);
+	    	
+	    	String searchField = "name";
+	    	//String checkTimes = "checkTimes";
+	    	//String[] filedStr = new String[]{searchField, checkTimes};
+	    	//QueryParser parser = new MultiFieldQueryParser(filedStr, analyzer);
+	    	QueryParser parser = new QueryParser(searchField, analyzer);
+	    	org.apache.lucene.search.Query query = parser.parse(name);
+	    	//org.apache.lucene.search.Query query = new MultiFieldQueryParser(filedStr, analyzer).parse(name);
+	    	/*Term term = new Term(searchField, "上海");
+	    	query = new PrefixQuery(term);*/
+	    	/*TokenStream tokenStream = analyzer.tokenStream("name", new StringReader(name));
+	        CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
+	        tokenStream.reset();
+	        while (tokenStream.incrementToken()) {
+	            System.out.println("分词后: "+charTermAttribute.toString());
+	        }
+	        tokenStream.end();*/
+	    	//org.apache.lucene.search.Sort sort = new org.apache.lucene.search.Sort(new SortField[]{new SortField(checkTimes, SortField.Type.LONG,true),SortField.FIELD_SCORE});
+	    	/*Term term = new Term(searchField, name);
+	    	query = new WildcardQuery(term);*/
+	        //SortField sortField = new SortField("checkTimes", SortField.Type.STRING,true);
+	       // org.apache.lucene.search.Sort sort = new org.apache.lucene.search.Sort(sortField);
+	    	//TopDocs topDocs = indexSearcher.search(query, 20, sort);
+	    	TopDocs topDocs = indexSearcher.search(query, 20);
+	    	SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<span style='color:red'>", "</span>");
+	    	Highlighter highlighter = new Highlighter(simpleHTMLFormatter, new QueryScorer(query));
+	    	
+	    	//System.out.println("命中：" + topDocs.totalHits);
+	    	for(ScoreDoc scoreDoc : topDocs.scoreDocs){
+	    		//System.out.println("得分: "+scoreDoc.score);
+	    		Document document = indexSearcher.doc(scoreDoc.doc);
+	    		String resId = document.get("id");
+	    		String beResName = document.get("name");
+	    		//String checkTimess = document.get("checkTimes");
+	    		String noResName = document.get("name");
+	    		String city = document.get("city");
+	    		// 内容增加高亮显示
+	    		TokenStream tokenStream1 = analyzer.tokenStream("name", new StringReader(beResName));
+	    	    String resName = highlighter.getBestFragment(tokenStream1, beResName);
+	    	    HotelName hn = new HotelName();
+	    		/*System.out.println("resId: "+resId);
+	    		System.out.println("resName: "+resName);
+	    		System.out.println("checkTimes: "+checkTimess);
+	    		System.out.println("noResName: "+noResName);*/
+	    	    hn.setId(Long.valueOf(resId));
+	    	    hn.setCity(city);
+	    	    hn.setLabel(resName);
+	    	    hn.setName(noResName);
+	    	    hns.add(hn);
+	    	}
+	    	indexReader.close();
+	    	directory.close();
+	    	//tokenStream.close();
+	        analyzer.close();
+	    	
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+			return hns;
+	}
+
+	@Override
+	public Boolean changeLuceneData(HotelName hotelName) {
+		try {
+			Directory directory = FSDirectory.open(Paths.get("./index"));
+			Analyzer analyzer = new IKAnalyzer();//中文分词
+			
+	        //创建索引写入配置
+	        IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);
+	        //创建索引写入对象
+	        IndexWriter indexWriter = new IndexWriter(directory, indexWriterConfig);
+
+	        Document doc = new Document();
+	        
+	        doc.add(new LongPoint("id", hotelName.getId()));
+	    	doc.add(new StoredField("id", hotelName.getId()));
+	    	doc.add(new TextField("name", hotelName.getName(), Field.Store.YES));
+	    	doc.add(new StringField("city",hotelName.getCity(), Field.Store.YES));
+			//doc.add(new IntPoint("saleStatus", list.get(j).getSaleStatus()));
+			//doc.add(new StoredField("saleStatus", list.get(j).getSaleStatus()));
+			doc.add(new LongPoint("checkTimes", hotelName.getCheckTimes()));
+	    	doc.add(new StoredField("checkTimes", hotelName.getCheckTimes()));
+	    	
+	    	indexWriter.updateDocument(new Term("id",hotelName.getId().toString()), doc);
+	    	 indexWriter.commit();
+	    	indexWriter.close();
+	    	directory.close();
+	    	
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		
+		
+		return null;
 	}
  
 
