@@ -8,6 +8,12 @@ public class HotelName implements Serializable{
 	private String name;
 	private String city;
 	private Long checkTimes;
+	/**
+	 * 酒店是否可售状态，默认为1可售， 0位不可售，此状态与同程无关
+	 */
+	private Integer saleStatus;
+	private String label;
+	
 	public Long getId() {
 		return id;
 	}
@@ -38,6 +44,22 @@ public class HotelName implements Serializable{
 
 	public void setCheckTimes(Long checkTimes) {
 		this.checkTimes = checkTimes;
+	}
+
+	public Integer getSaleStatus() {
+		return saleStatus;
+	}
+
+	public void setSaleStatus(Integer saleStatus) {
+		this.saleStatus = saleStatus;
+	}
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
 	}
 	
 }
