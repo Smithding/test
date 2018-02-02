@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.XmlType;
 public class AddInsaleInerrormentResponse {
 
     @XmlElement(name = "return")
-    protected ReturnInfo _return;
+    protected ReturnInfo1 _return;
 
     /**
      * ��ȡreturn���Ե�ֵ��
@@ -43,7 +43,7 @@ public class AddInsaleInerrormentResponse {
      *     {@link ReturnInfo }
      *     
      */
-    public ReturnInfo getReturn() {
+    public ReturnInfo1 getReturn() {
         return _return;
     }
 
@@ -55,7 +55,7 @@ public class AddInsaleInerrormentResponse {
      *     {@link ReturnInfo }
      *     
      */
-    public void setReturn(ReturnInfo value) {
+    public void setReturn(ReturnInfo1 value) {
         this._return = value;
     }
 
