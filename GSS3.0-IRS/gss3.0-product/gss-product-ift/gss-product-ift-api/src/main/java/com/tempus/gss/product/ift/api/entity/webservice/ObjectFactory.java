@@ -90,8 +90,8 @@ public class ObjectFactory {
      * Create an instance of {@link ReturnInfo }
      * 
      */
-    public ReturnInfo createReturnInfo() {
-        return new ReturnInfo();
+    public ReturnInfo1 createReturnInfo() {
+        return new ReturnInfo1();
     }
 
     /**
