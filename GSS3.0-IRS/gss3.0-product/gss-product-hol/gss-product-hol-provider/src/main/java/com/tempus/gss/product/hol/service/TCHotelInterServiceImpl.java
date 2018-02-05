@@ -532,14 +532,22 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 							 	if(proSaleInfoDetails != null && proSaleInfoDetails.size() >0){
 							 		for (Map.Entry<String, ProSaleInfoDetail> entry : proSaleInfoDetails.entrySet()) {
 								 		if(fd.getDay().compareTo(DateUtil.stringToSimpleString(entry.getKey())) == 0){
-								 			fd.setPrice(entry.getValue().getDistributionSalePrice());
+								 			if(entry.getValue().getInventoryStats().equals(4) || (entry.getValue().getOpeningSale().equals(false) && entry.getValue().getInventoryRemainder().equals(0))) {
+								 				fd.setPrice(0);
+								 			}else {
+								 				fd.setPrice(entry.getValue().getDistributionSalePrice());
+								 			}
 								 		}
 								 	}
 							 	}
 							 	if(proinfomap != null){
 							 		for(Map.Entry<String, ProSaleInfoDetail> entry : proinfomap.entrySet()) {
 								 		if(fd.getDay().compareTo(DateUtil.stringToSimpleString(entry.getKey())) == 0){
-								 			fd.setPrice2(entry.getValue().getDistributionSalePrice());
+								 			if(entry.getValue().getInventoryStats().equals(4) || (entry.getValue().getOpeningSale().equals(false) && entry.getValue().getInventoryRemainder().equals(0))) {
+								 				fd.setPrice2(0);
+								 			}else {
+								 				fd.setPrice2(entry.getValue().getDistributionSalePrice());
+								 			}
 								 		}
 								 	}
 							 	}
