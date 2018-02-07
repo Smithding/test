@@ -19,6 +19,10 @@ public class SeparatedOrderVo implements Serializable {
      */
     private String sort;
 
+    private String type;
+
+    private String status;
+
     public Long getSaleOrderNO() {
         return saleOrderNO;
     }
@@ -41,5 +45,21 @@ public class SeparatedOrderVo implements Serializable {
 
     public void setSort(String sort) {
         this.sort = sort;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
