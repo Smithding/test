@@ -802,12 +802,7 @@ public class OrderServiceImpl implements IOrderService {
 				if (StringUtils.isNotBlank(policyHolderEmail)) {
 					insureRequestVo.setPolicyHolderEmail(policyHolderEmail);
 				}
-				  try {
-					insureRequestVo.setPolicyHolderBirthday(simple.parse(saleOrderExt.getSaleOrderDetailList().get(0).getInsuredBirthday()));
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				  insureRequestVo.setPolicyHolderBirthday(simple.format(saleOrderExt.getSaleOrderDetailList().get(0).getInsuredBirthday()));
 			}
 		}else{
 			try{
@@ -816,7 +811,7 @@ public class OrderServiceImpl implements IOrderService {
 					insureRequestVo.setPolicyHolderCertiType(Integer.parseInt(saleOrderDetailList.get(0).getInsuredCertiType()));
 					insureRequestVo.setPolicyHolderCertiNo(StringUtils.defaultString(saleOrderDetailList.get(0).getInsuredCertiNo()));
 					insureRequestVo.setPolicyHolderName(StringUtils.defaultString(saleOrderDetailList.get(0).getInsuredName()));
-					insureRequestVo.setPolicyHolderBirthday(dateFormat.parse(saleOrderDetailList.get(0).getInsuredBirthday()));
+					insureRequestVo.setPolicyHolderBirthday(saleOrderDetailList.get(0).getInsuredBirthday());
 					insureRequestVo.setPolicyHolderPhone(StringUtils.defaultString(saleOrderDetailList.get(0).getInsuredPhone()));
 					if(saleOrderExt.getHolderEmail()==null||saleOrderExt.getHolderEmail()==""){
 						String policyHolderEmail = paramService.getValueByKey("ins_holder_email");
@@ -859,12 +854,12 @@ public class OrderServiceImpl implements IOrderService {
 					String policyHolderBirthday = paramService.getValueByKey("ins_holder_birthday");
 					if (StringUtils.isNotBlank(policyHolderBirthday)) {
 						Date parse = null;
-						try {
-							parse = simple.parse(policyHolderBirthday);
+						/*try {
+							parse = spolicyHolderBirthday;
 						} catch (ParseException e) {
 							e.printStackTrace();
-						}
-						insureRequestVo.setPolicyHolderBirthday(parse);
+						}*/
+						insureRequestVo.setPolicyHolderBirthday(policyHolderBirthday);
 					}
 				}
 			}catch(Exception e){
@@ -1177,7 +1172,6 @@ public class OrderServiceImpl implements IOrderService {
 				InsureRequestVo insureRequestVoForWeb = toInsureRequestVoForWeb(saleOrderExt);
 				String json = mapper.writeValueAsString(insureRequestVoForWeb);
 				log.info("投保请求报文=======> " + json);
-
 				@SuppressWarnings("unchecked")
 				Response<SaleOrderExtVo> response = (Response<SaleOrderExtVo>) HttpClientUtil.doJsonPost(insurePath,
 						json,
@@ -1364,7 +1358,7 @@ public class OrderServiceImpl implements IOrderService {
 				insureRequestVo.setPolicyHolderCertiType(Integer.parseInt(saleOrderDetailList.get(0).getInsuredCertiType()));
 				insureRequestVo.setPolicyHolderCertiNo(StringUtils.defaultString(saleOrderDetailList.get(0).getInsuredCertiNo()));
 				insureRequestVo.setPolicyHolderName(StringUtils.defaultString(saleOrderDetailList.get(0).getInsuredName()));
-				insureRequestVo.setPolicyHolderBirthday(sdf.parse(saleOrderDetailList.get(0).getInsuredBirthday()));
+				insureRequestVo.setPolicyHolderBirthday(saleOrderDetailList.get(0).getInsuredBirthday());
 				insureRequestVo.setPolicyHolderPhone(StringUtils.defaultString(saleOrderDetailList.get(0).getInsuredPhone()));
 				insureRequestVo.setPolicyHolderEmail(StringUtils.defaultString(saleOrderExt.getHolderEmail()));
 			}else{
@@ -1372,7 +1366,7 @@ public class OrderServiceImpl implements IOrderService {
 				insureRequestVo.setPolicyHolderCertiType(saleOrderExt.getHolderCertiType());
 				insureRequestVo.setPolicyHolderCertiNo(StringUtils.defaultString(saleOrderExt.getHolderCertiNo()));
 				insureRequestVo.setPolicyHolderName(StringUtils.defaultString(saleOrderExt.getHolderName()));
-				insureRequestVo.setPolicyHolderBirthday(saleOrderExt.getHolderBirthday());
+				insureRequestVo.setPolicyHolderBirthday(DateUtil.getYYYYMMDDDate(saleOrderExt.getHolderBirthday()));
 				insureRequestVo.setPolicyHolderPhone(StringUtils.defaultString(saleOrderExt.getHolderPhone()));
 				insureRequestVo.setPolicyHolderEmail(StringUtils.defaultString(saleOrderExt.getHolderEmail()));
 			}

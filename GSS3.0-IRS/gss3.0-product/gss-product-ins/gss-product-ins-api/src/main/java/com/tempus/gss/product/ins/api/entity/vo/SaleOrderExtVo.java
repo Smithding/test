@@ -137,7 +137,14 @@ public class SaleOrderExtVo implements Serializable {
 	 * 投保开始日期 yyyy-MM-dd
 	 */
 	private Date issueStartDate;
-
+	/**
+	 * 退款开始日期 yyyy-MM-dd
+	 */
+	private String refundStartDate;
+	/**
+	 * 退款结束日期 yyyy-MM-dd
+	 */
+	private String refundEndDate;
 	/**
 	 * 投保结束日期 yyyy-MM-dd
 	 */
@@ -436,6 +443,22 @@ public class SaleOrderExtVo implements Serializable {
 	public void setCustomerNo(Long customerNo) {
 
 		this.customerNo = customerNo;
+	}
+	
+	public String getRefundStartDate() {
+		return refundStartDate;
+	}
+
+	public void setRefundStartDate(String refundStartDate) {
+		this.refundStartDate = refundStartDate;
+	}
+
+	public String getRefundEndDate() {
+		return refundEndDate;
+	}
+
+	public void setRefundEndDate(String refundEndDate) {
+		this.refundEndDate = refundEndDate;
 	}
 
 	public String getPnr() {
