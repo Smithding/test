@@ -14,7 +14,7 @@
 
     <sql id="sqlwhere">
         <where>
-            ift.CREATE_TYPE in(1,2,3,4,6) AND  o.ORDER_CHILD_STATUS  in (1,2,3) and ift.LOCKER!=0
+            ift.CREATE_TYPE in(1,2,3,4,6) AND  o.ORDER_CHILD_STATUS  in (${status}) and ift.LOCKER!=0
             <if test="saleOrderNO!=null"> and ift.SALE_ORDER_NO = #{saleOrderNO}</if>
             <if test="pnr!=null"> and ift.PNR_NO = #{pnr}</if>
         </where>
@@ -30,4 +30,3 @@
         <include refid="sqlwhere"/>
         ORDER BY ${sort}
     </select>
-</mapper>
