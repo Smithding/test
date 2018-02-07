@@ -14,7 +14,7 @@
     <modules>
         <module>gss-product-common</module>
         <module>gss-product-ift</module>
-        <module>gss-product-hol</module>
+        <!--<module>gss-product-hol</module>-->
         <module>gss-product-ins</module>
         <module>gss-product-tra</module>
         <module>gss-product-unp</module>
