@@ -248,6 +248,12 @@
          <if test="endEffectTime != null and endEffectTime != ''">
             AND date(isoe.EFFECT_DATE) &lt;= date(#{endEffectTime,jdbcType=DATE})
          </if>	
+         <if test="refundStartDate != null and refundStartDate != ''" >
+			AND date(isoe.MODIFY_TIME) &gt;= date(#{refundStartDate,jdbcType=DATE})
+		</if>
+		<if test="refundEndDate != null and refundEndDate != ''" >
+			AND date(isoe.MODIFY_TIME) &lt;= date(#{refundEndDate,jdbcType=DATE}) 
+		</if>
          <if test="startInsureTime != null and startInsureTime != ''">
             AND date(isoe.ISSUE_DATE) &gt;= date(#{startInsureTime,jdbcType=DATE})
          </if>
