@@ -63,6 +63,7 @@ import com.tempus.gss.product.ins.api.entity.SaleChangeDetail;
 import com.tempus.gss.product.ins.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ins.api.entity.SaleOrderDetail;
 import com.tempus.gss.product.ins.api.entity.SaleOrderExt;
+import com.tempus.gss.product.ins.api.entity.vo.FlightInfoVo;
 import com.tempus.gss.product.ins.api.entity.vo.InsureExtVo;
 import com.tempus.gss.product.ins.api.entity.vo.InsureRequestVo;
 import com.tempus.gss.product.ins.api.entity.vo.OrderCancelVo;
@@ -131,6 +132,7 @@ public class OrderServiceImpl implements IOrderService {
 	private static final String COMPANY_NAME_HUAXIA = "华夏";
 
 	private static final String COMPANY_NAME_JUNLONG = "君龙";
+	private static final String COMPANY_NAME_QIANHAICAI = "前海财";
 	private static final String RESPONSE_SUCCESS = "0000";
 	//设置投保人为个人   1：个人  2：企业
 	private static final int holderType = 1;
@@ -831,6 +833,9 @@ public class OrderServiceImpl implements IOrderService {
 					if (insurance.getCompanyName().contains(COMPANY_NAME_HEZONG)&&StringUtils.isNoneBlank(policyHolderSex)) {
 						insureRequestVo.setPolicyHolderSex(Integer.valueOf(policyHolderSex));
 					}
+					if(insurance.getCompanyName().contains(COMPANY_NAME_QIANHAICAI)){
+						insureRequestVo.setIsTeam((short) 2);
+					}
 					String policyHolderCertiType = paramService.getValueByKey("ins_holder_certi_type");
 					if (StringUtils.isNotBlank(policyHolderCertiType)) {
 						insureRequestVo.setPolicyHolderCertiType(Integer.valueOf(policyHolderCertiType));
@@ -919,7 +924,6 @@ public class OrderServiceImpl implements IOrderService {
 			log.error("当前保险产品key为空,请在参数管理处配置!");
 			throw new GSSException("当前保险产品key为空,请在参数管理处配置!", "1010", "投保失败");
 		}
-
 		insureRequestVo.setSourceName(sourceName);
 		String extendedFieldsJson = null;
 		InsureExtVo InsureExtVo=null;
@@ -940,7 +944,24 @@ public class OrderServiceImpl implements IOrderService {
 			}else{
 				 extendedFieldsJson = saleOrderExt.getExtendedFieldsJson();
 			}
-		    extendedFieldsJson = mapper.writeValueAsString(InsureExtVo.getFlightInfoVo());
+			if(insurance.getCompanyName().contains(COMPANY_NAME_QIANHAICAI)){
+				if(saleOrderExt.getExtendedFieldsJson()!=null){
+					 InsureExtVo=mapper.readValue(saleOrderExt.getExtendedFieldsJson(), InsureExtVo.class);
+				}
+				FlightInfoVo flightInfoVo = new FlightInfoVo();
+				if(InsureExtVo.getFlightNo()!=null){
+					flightInfoVo.setFlightNo(InsureExtVo.getFlightNo());
+				}else{
+					flightInfoVo.setFlightNo(InsureExtVo.getFlightInfoVo().getFlightNo());
+				}
+				int day = daysBetween(saleOrderExt.getEffectDate(),saleOrderExt.getExpireDate());
+				insureRequestVo.setTravelDay(day);
+				insureRequestVo.setDestination(InsureExtVo.getFlightInfoVo().getDestinationCity());
+				extendedFieldsJson = mapper.writeValueAsString(flightInfoVo);
+			}else{
+				  extendedFieldsJson = mapper.writeValueAsString(InsureExtVo.getFlightInfoVo());
+			}
+		  
 		}catch(Exception e){
 			log.error("json转对象，对象转json异常"+e,1);
 		}
@@ -950,6 +971,21 @@ public class OrderServiceImpl implements IOrderService {
 		insureRequestVo.setInsuredList(saleOrderDetailList);
 		return insureRequestVo;
 	}
+	 //计算两个日期差值
+    public static int daysBetween(Date smdate,Date bdate) throws ParseException    
+    {    
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");  
+        smdate=sdf.parse(sdf.format(smdate));  
+        bdate=sdf.parse(sdf.format(bdate));  
+        Calendar cal = Calendar.getInstance();    
+        cal.setTime(smdate);    
+        long time1 = cal.getTimeInMillis();                 
+        cal.setTime(bdate);    
+        long time2 = cal.getTimeInMillis();         
+        long between_days=(time2-time1)/(1000*3600*24);  
+            
+       return Integer.parseInt(String.valueOf(between_days));           
+    } 
 	@Override
 	public ResultInsure buyInsureForPerson(RequestWithActor<Long> requestWithActor, Long insuredNo) throws Exception {
 		log.info("进入投保接口==============");
@@ -1013,7 +1049,7 @@ public class OrderServiceImpl implements IOrderService {
 						detail.setInsuredBirthday(saleOrderDetail.getInsuredBirthday()); // yyyyMMdd
 						detail.setInsuredSex(saleOrderDetail.getInsuredSex());
 						detail.setInsuranceNum(saleOrderDetail.getInsuranceNum());
-						if(insurance.getCompanyName().contains(COMPANY_NAME_JUNLONG)){
+						if(insurance.getCompanyName().contains(COMPANY_NAME_JUNLONG)||	insurance.getCompanyName().contains(COMPANY_NAME_QIANHAICAI)){
 							detail.setPremium(insurance.getFacePrice().multiply( new BigDecimal(saleOrderDetail.getInsuranceNum())));
 						}
 						//如果是华夏和太平险 则需要添加保险分数
@@ -3546,9 +3582,7 @@ public class OrderServiceImpl implements IOrderService {
 
 				if (RESPONSE_SUCCESS.equals(response.getCode())||"该保单已退保，请不要重复操作".equals(response.getMsg())) {
 					// 设置子订单状态为3(已退保)
-				
 					if(isRefund==1){
-						
 						saleOrderDetail.setStatus(12);//退款中
 						int s = saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 			         	   SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 12);//退款中

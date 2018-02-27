@@ -139,7 +139,6 @@ public class InsureRequestVo implements Serializable {
 	* 拓展字段json串
 	* */
 	private String extendedFieldSJson;
-
 	public List<SaleOrderDetail> getSaleOrderDetailList() {
 		return SaleOrderDetailList;
 	}
