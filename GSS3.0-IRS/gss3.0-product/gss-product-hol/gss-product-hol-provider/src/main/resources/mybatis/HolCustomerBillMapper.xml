@@ -136,11 +136,11 @@
                 AND HO.BOOK_COUNT=#{bookPro,jdbcType=TINYINT}
             </if>
             <!--<if test="orderStatusArray!=null and orderStatusArray!=''">-->
-                <!--AND HO.ORDER_STATUS IN(701,800,801)-->
-                <!--<foreach collection="orderStatusArray" item="orderStatusArray"-->
-                <!--index="index" open="(" close=")" separator=",">-->
-                <!--#{orderStatusArray[${index}]}-->
-                <!--</foreach>-->
+            <!--AND HO.ORDER_STATUS IN(701,800,801)-->
+            <!--<foreach collection="orderStatusArray" item="orderStatusArray"-->
+            <!--index="index" open="(" close=")" separator=",">-->
+            <!--#{orderStatusArray[${index}]}-->
+            <!--</foreach>-->
             <!--</if>-->
             <if test="bookNight!=null and bookNight!=''">
                 AND HO.NIGHT_COUNT=#{bookNight,jdbcType=TINYINT}
@@ -280,24 +280,24 @@
             </if>
             <if test="startDate!=null and startDate!=''">
                 <if test="dateType==1 or dateType=='1'">
-                    AND HO.CREATE_ORDER_TIME &gt;=#{startDate,jdbcType=TIMESTAMP}
+                    AND HO.CREATE_ORDER_TIME &gt;=CONCAT(#{startDate},' 00:00:00')
                 </if>
                 <if test="dateType==2 or dateType=='2'">
-                    AND HO.ARRIVAL_DATE &gt;=#{startDate,jdbcType=TIMESTAMP}
+                    AND HO.ARRIVAL_DATE &gt;=CONCAT(#{startDate},' 00:00:00')
                 </if>
                 <if test="dateType==3 or dateType=='3'">
-                    AND HO.DEPARTURE_DATE &gt;=#{startDate,jdbcType=TIMESTAMP}
+                    AND HO.DEPARTURE_DATE &gt;=CONCAT(#{startDate},' 00:00:00')
                 </if>
             </if>
             <if test="endDate!=null and endDate!=''">
                 <if test="dateType==1 or dateType=='1'">
-                    AND HO.CREATE_ORDER_TIME &lt;=#{endDate,jdbcType=TIMESTAMP}
+                    AND HO.CREATE_ORDER_TIME &lt;=CONCAT(#{endDate},' 23:59:59')
                 </if>
                 <if test="dateType==2 or dateType=='2'">
-                    AND HO.ARRIVAL_DATE &lt;=#{endDate,jdbcType=TIMESTAMP}
+                    AND HO.ARRIVAL_DATE &lt;=CONCAT(#{endDate},' 23:59:59')
                 </if>
                 <if test="dateType==3 or dateType=='3'">
-                    AND HO.DEPARTURE_DATE &lt;=#{endDate,jdbcType=TIMESTAMP}
+                    AND HO.DEPARTURE_DATE &lt;=CONCAT(#{endDate},' 23:59:59')
                 </if>
             </if>
             <if test="bookPro!=null and bookPro!=''">
