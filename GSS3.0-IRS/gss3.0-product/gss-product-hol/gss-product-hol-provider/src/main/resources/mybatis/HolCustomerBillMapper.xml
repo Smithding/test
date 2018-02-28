@@ -164,8 +164,8 @@
         sum(HO.FACT_NIGHT_COUNT * HO.NIGHT_COUNT) AS proNight,
         sum(HO.FACT_TOTAL_PRICE) AS totalPrice,
         sum(HO.FACT_TOTAL_REFUND) AS saleRefund,
-        sum((HS.RATE / 100) * HO.TOTAL_PRICE) AS gProfit,
-        sum(((HS.RATE / 100 * HO.TOTAL_PRICE) - HO.FACT_TOTAL_REFUND)) AS profit
+        sum((HS.RATE / 100) * HO.FACT_TOTAL_PRICE) AS gProfit,
+        sum(((HS.RATE / 100 * HO.FACT_TOTAL_PRICE) - HO.FACT_TOTAL_REFUND)) AS profit
         FROM `gss-op`.HOL_HOTEL_ORDER AS HO
         LEFT JOIN `gss-op`.CPS_CUSTOMER AS CC ON(CC.CUSTOMER_NO=HO.CUSTOMER_NO)
         LEFT JOIN `gss-op`.CPS_CUSTOMER_TYPE AS CCT ON(CCT.CUSTOMER_TYPE_NO=CC.CUSTOMER_TYPE_NO)
@@ -244,9 +244,9 @@
         sum(HO.FACT_NIGHT_COUNT * HO.NIGHT_COUNT) AS proNight,
         sum(HO.FACT_TOTAL_PRICE) AS totalPrice,
         sum(HO.FACT_TOTAL_REFUND) AS saleRefund,
-        sum((HS.RATE / 100) * HO.TOTAL_PRICE) AS gProfit,
+        sum((HS.RATE / 100) * HO.FACT_TOTAL_PRICE) AS gProfit,
         CC.CUSTOMER_TYPE_NO AS customerType,
-        sum(((HS.RATE / 100 * HO.TOTAL_PRICE) - HO.FACT_TOTAL_REFUND)) AS profit
+        sum(((HS.RATE / 100 * HO.FACT_TOTAL_PRICE) - HO.FACT_TOTAL_REFUND)) AS profit
         FROM `gss-op`.HOL_HOTEL_ORDER AS HO
         LEFT JOIN `gss-op`.CPS_CUSTOMER AS CC ON (CC.CUSTOMER_NO = HO.CUSTOMER_NO)
         LEFT JOIN `gss-op`.CPS_CUSTOMER_TYPE AS CCT ON (CCT.CUSTOMER_TYPE_NO = CC.CUSTOMER_TYPE_NO)
