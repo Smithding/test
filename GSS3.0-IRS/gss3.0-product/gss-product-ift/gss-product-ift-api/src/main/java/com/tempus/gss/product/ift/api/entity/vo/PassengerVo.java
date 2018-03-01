@@ -242,6 +242,7 @@ public class PassengerVo implements Serializable {
 	private BigDecimal saleRebate;
 	private String exchangeRate;
 	private String currency;
+	private String profit;
 
 	@Override
 	public String toString() {
@@ -850,5 +851,13 @@ public class PassengerVo implements Serializable {
 
 	public void setCurrency(String currency) {
 		this.currency = currency;
+	}
+
+	public String getProfit() {
+		return profit;
+	}
+
+	public void setProfit(String profit) {
+		this.profit = profit;
 	}
 }
