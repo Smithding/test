@@ -240,13 +240,24 @@
         CC.NAME AS customerName,
         CCT.NAME AS customerTypeName,
         COUNT(HO.HOTEL_ORDER_NO) AS orderCount,
+        <if test="dateType==1 or dateType=='1'">
+        sum(HO.BOOK_COUNT) AS bookPro,
+        sum(HO.BOOK_COUNT * HO.NIGHT_COUNT) AS proNight,
+        sum(HO.TOTAL_PRICE) AS totalPrice,
+        sum(HO.TOTAL_REFUND) AS saleRefund,
+        sum((HS.RATE / 100) * HO.TOTAL_PRICE) AS gProfit,
+        CC.CUSTOMER_TYPE_NO AS customerType,
+        sum(((HS.RATE / 100 * HO.TOTAL_PRICE) - HO.TOTAL_REFUND)) AS profit,
+        </if>
+        <if test="dateType!=1 and dateType!='1'">
         sum(HO.FACT_PRO_COUNT) AS bookPro,
-        sum(HO.FACT_NIGHT_COUNT * HO.NIGHT_COUNT) AS proNight,
+        sum(HO.FACT_PRO_COUNT * HO.FACT_NIGHT_COUNT) AS proNight,
         sum(HO.FACT_TOTAL_PRICE) AS totalPrice,
         sum(HO.FACT_TOTAL_REFUND) AS saleRefund,
         sum((HS.RATE / 100) * HO.FACT_TOTAL_PRICE) AS gProfit,
         CC.CUSTOMER_TYPE_NO AS customerType,
         sum(((HS.RATE / 100 * HO.FACT_TOTAL_PRICE) - HO.FACT_TOTAL_REFUND)) AS profit
+        </if>
         FROM `gss-op`.HOL_HOTEL_ORDER AS HO
         LEFT JOIN `gss-op`.CPS_CUSTOMER AS CC ON (CC.CUSTOMER_NO = HO.CUSTOMER_NO)
         LEFT JOIN `gss-op`.CPS_CUSTOMER_TYPE AS CCT ON (CCT.CUSTOMER_TYPE_NO = CC.CUSTOMER_TYPE_NO)
