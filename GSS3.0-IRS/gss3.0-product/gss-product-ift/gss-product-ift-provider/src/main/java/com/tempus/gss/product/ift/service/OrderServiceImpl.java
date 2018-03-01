@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -195,6 +196,8 @@ public class OrderServiceImpl implements IOrderService {
     IConfigsService configsService;
     @Reference
     IUserService userService;
+    @Value("${dpsconfig.job.owner}")
+    protected String owner;
 
     /**
      * 创建订单. 通过白屏查询、Pnr、需求单、手工方式创建订单.
@@ -1656,7 +1659,7 @@ public class OrderServiceImpl implements IOrderService {
         List<TicketSender> senders = getOnlineTicketSender();
         log.info("是否有在线出票员:"+(senders!=null));
         if (senders != null && senders.size() > 0) {
-            Agent agent = new Agent(8755);
+            Agent agent = new Agent(Integer.valueOf(owner));
             IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
             Map config = configs.getConfig();
             String str_maxOrderNum = (String) config.get("maxOrderNum");
