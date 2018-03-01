@@ -14,6 +14,57 @@ private String insuranceName;
 private String effectDate;
 /*保单失效日期*/
 private String expireDate;
+
+/*保单状态*/
+private String status;
+/*支付时间*/
+private String payTime;
+/*支付状态*/
+private String payStatus;
+/*支付方式*/
+private String payWay;
+/*结算类型*/
+private String Type;
+/*公司名称*/
+private String companyName;
+/*订票员*/
+private String Ticker;
+/*被保人*/
+private String Insure;
+/*证件类型*/
+private String cardType;
+/*证件号码*/
+private String cardNo;
+/*保险份数*/
+private String insuranceCount;
+/*采购价*/
+private BigDecimal buyPrice;
+/*保费*/
+private BigDecimal facePrice;
+/*实收*/
+private BigDecimal realPrice;
+/*创建时间*/
+private String issueDate;
+/*投保时间*/
+private String fundDate;
+/*利润*/
+private BigDecimal Profit;
+/*航班号*/
+private String flightNo;
+/*起飞时间*/
+private String flightTime;
+
+public String getPolicyNo() {
+	return policyNo;
+}
+/*客户类型*/
+private String customerType;
+/*客户名称*/
+private String customerName;
+/*国内还是国际*/
+private String internatOrcivil;
+/*保单号*/
+private String policyNo;
 public String getPnr() {
 	return pnr;
 }
@@ -183,57 +234,7 @@ public String getInternatOrcivil() {
 public void setInternatOrcivil(String internatOrcivil) {
 	this.internatOrcivil = internatOrcivil;
 }
-/*保单状态*/
-private String status;
-/*支付时间*/
-private String payTime;
-/*支付状态*/
-private String payStatus;
-/*支付方式*/
-private String payWay;
-/*结算类型*/
-private String Type;
-/*公司名称*/
-private String companyName;
-/*订票员*/
-private String Ticker;
-/*被保人*/
-private String Insure;
-/*证件类型*/
-private String cardType;
-/*证件号码*/
-private String cardNo;
-/*保险份数*/
-private String insuranceCount;
-/*采购价*/
-private BigDecimal buyPrice;
-/*保费*/
-private BigDecimal facePrice;
-/*实收*/
-private BigDecimal realPrice;
-/*创建时间*/
-private String issueDate;
-/*投保时间*/
-private String fundDate;
-/*利润*/
-private BigDecimal Profit;
-/*航班号*/
-private String flightNo;
-/*起飞时间*/
-private String flightTime;
-
-public String getPolicyNo() {
-	return policyNo;
-}
 public void setPolicyNo(String policyNo) {
 	this.policyNo = policyNo;
 }
-/*客户类型*/
-private String customerType;
-/*客户名称*/
-private String customerName;
-/*国内还是国际*/
-private String internatOrcivil;
-/*保单号*/
-private String policyNo;
 }

@@ -76,8 +76,8 @@ public class InsureRequestVo implements Serializable {
 	/*
 	* yyyy-MM-dd 投保人出生日
 	* */
-	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-	private Date policyHolderBirthday;
+/*	@JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")*/
+	private String policyHolderBirthday;
 	/*
 	* 投保人电子邮箱地址
 	* */
@@ -139,7 +139,6 @@ public class InsureRequestVo implements Serializable {
 	* 拓展字段json串
 	* */
 	private String extendedFieldSJson;
-
 	public List<SaleOrderDetail> getSaleOrderDetailList() {
 		return SaleOrderDetailList;
 	}
@@ -253,17 +252,17 @@ public class InsureRequestVo implements Serializable {
 
 		return policyHolderCertiNo;
 	}
-	public Date getPolicyHolderBirthday() {
-		return policyHolderBirthday;
-	}
-
-	public void setPolicyHolderBirthday(Date policyHolderBirthday) {
-		this.policyHolderBirthday = policyHolderBirthday;
-	}
-
 	public void setPolicyHolderCertiNo(String policyHolderCertiNo) {
 
 		this.policyHolderCertiNo = policyHolderCertiNo;
+	}
+
+	public String getPolicyHolderBirthday() {
+		return policyHolderBirthday;
+	}
+
+	public void setPolicyHolderBirthday(String policyHolderBirthday) {
+		this.policyHolderBirthday = policyHolderBirthday;
 	}
 
 	public Integer getPolicyHolderCertiType() {

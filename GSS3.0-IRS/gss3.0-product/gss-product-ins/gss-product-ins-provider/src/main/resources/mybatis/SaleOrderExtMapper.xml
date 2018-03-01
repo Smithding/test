@@ -719,6 +719,12 @@
 		<if test="issueEndDate != null and issueEndDate != ''" >
 			AND date(isoe.ISSUE_DATE) &lt;= date(#{issueEndDate,jdbcType=DATE}) 
 		</if>
+		<if test="refundStartDate != null and refundStartDate != ''" >
+			AND date(isoe.MODIFY_TIME) &gt;= date(#{refundStartDate,jdbcType=DATE})
+		</if>
+		<if test="refundEndDate != null and refundEndDate != ''" >
+			AND date(isoe.MODIFY_TIME) &lt;= date(#{refundEndDate,jdbcType=DATE}) 
+		</if>
 		<if test="customerTypeNo != null and customerTypeNo != ''">
 			AND os.CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=INTEGER}  
 		</if>

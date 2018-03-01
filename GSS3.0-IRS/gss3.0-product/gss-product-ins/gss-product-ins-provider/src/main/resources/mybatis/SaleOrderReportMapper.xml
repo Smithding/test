@@ -156,7 +156,7 @@
      	   SM_OWNER_INFO si,
      	   CPS_CUSTOMER_TYPE cct,
      	   CPS_CUSTOMER cc
-     where 	isoe.VALID = 1
+     where 	isoe.VALID = 1 and os.PAY_STATUS != 1 and isod.STATUS != 1 and isod.STATUS != 3
      and	isoe.SALE_ORDER_NO = os.SALE_ORDER_NO
      and	isoe.INSURANCE_NO = ii.INSURANCE_NO
      and 	isoe.SALE_ORDER_NO = isod.SALE_ORDER_NO
@@ -208,7 +208,12 @@
 		<if test="insureType != null and insureType != ''" >
 			AND ii.INSURE_TYPE = #{insureType,jdbcType=VARCHAR} 
 		</if>
-
+        	<if test="refundStartDate != null and refundStartDate != ''" >
+			AND date(isoe.MODIFY_TIME) &gt;= date(#{refundStartDate,jdbcType=DATE})
+		</if>
+		<if test="refundEndDate != null and refundEndDate != ''" >
+			AND date(isoe.MODIFY_TIME) &lt;= date(#{refundEndDate,jdbcType=DATE}) 
+		</if>
        <if test="insuranceName != null and insuranceName != ''" >
          AND ii.NAME LIKE CONCAT(CONCAT('%', #{insuranceName}), '%')
        </if>
@@ -243,6 +248,12 @@
          <if test="endEffectTime != null and endEffectTime != ''">
             AND date(isoe.EFFECT_DATE) &lt;= date(#{endEffectTime,jdbcType=DATE})
          </if>	
+         <if test="refundStartDate != null and refundStartDate != ''" >
+			AND date(isoe.MODIFY_TIME) &gt;= date(#{refundStartDate,jdbcType=DATE})
+		</if>
+		<if test="refundEndDate != null and refundEndDate != ''" >
+			AND date(isoe.MODIFY_TIME) &lt;= date(#{refundEndDate,jdbcType=DATE}) 
+		</if>
          <if test="startInsureTime != null and startInsureTime != ''">
             AND date(isoe.ISSUE_DATE) &gt;= date(#{startInsureTime,jdbcType=DATE})
          </if>

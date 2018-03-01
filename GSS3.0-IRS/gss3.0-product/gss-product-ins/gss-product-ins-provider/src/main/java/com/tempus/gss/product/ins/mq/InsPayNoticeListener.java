@@ -31,6 +31,7 @@ import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.order.entity.PayNoticeVO;
+import com.tempus.gss.order.entity.SaleOrder;
 import com.tempus.gss.order.service.ISaleOrderService;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ins.api.entity.Insurance;
@@ -38,6 +39,7 @@ import com.tempus.gss.product.ins.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ins.api.entity.SaleOrderDetail;
 import com.tempus.gss.product.ins.api.entity.SaleOrderExt;
 import com.tempus.gss.product.ins.api.service.IOrderService;
+import com.tempus.gss.product.ins.dao.OrderServiceDao;
 import com.tempus.gss.product.ins.dao.SaleChangeExtDao;
 import com.tempus.gss.product.ins.dao.SaleOrderDetailDao;
 import com.tempus.gss.vo.Agent;
@@ -68,6 +70,8 @@ public class InsPayNoticeListener {
 	SaleOrderDetailDao saleOrderDetailDao;
 	@Autowired
 	SaleChangeExtDao saleChangeExtDao;
+	@Autowired
+	OrderServiceDao orderServiceDao;
 	@RabbitHandler
 	public void onMessage(PayNoticeVO payNoticeVO) {
 		Integer owner = payNoticeVO.getOwner();
@@ -115,8 +119,6 @@ public class InsPayNoticeListener {
 							boolean flag = orderService.buyInsure(requestWithActor);
 							logger.info("投保是否成功,销售单号:" + payNoticeVO.getBusinessNo() + "->" + flag);
 						}
-					
-				
 				}
 					//退款状态处理
 					if (2 == businessType && 2 == incomeExpenseType) { // 2.销售单退款
@@ -163,10 +165,16 @@ public class InsPayNoticeListener {
 							}
 							if(isCancel==true&&isCancel2==true){
 								saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 9);//部分退款
+								
 				         	}
 				         	if(isCancel==true&&isCancel2==false){
 				         		saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 10);//子订单更改为10 已经退款
 				         	}
+							//存储退款时间
+				         	SaleOrderExt saleOrderExtForTime = new SaleOrderExt();
+				         	saleOrderExtForTime.setModifyTime(new Date());
+				         	saleOrderExtForTime.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
+				         	orderServiceDao.updateByPrimaryKeySelective(saleOrderExtForTime);
 				         	logger.info("退款成功------>");
 						}
 						if(payStatus==2){
