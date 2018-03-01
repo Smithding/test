@@ -1654,11 +1654,13 @@ public class OrderServiceImpl implements IOrderService {
         }
         log.info("第二步：查询在线出票员...");
         List<TicketSender> senders = getOnlineTicketSender();
+        log.info("是否有在线出票员:"+(senders!=null));
         if (senders != null && senders.size() > 0) {
             Agent agent = new Agent(8755);
             IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
             Map config = configs.getConfig();
             String str_maxOrderNum = (String) config.get("maxOrderNum");
+            log.info("有在线出票员人数:" + (senders.size())+"获得配置最大分单数："+str_maxOrderNum);
             Long maxOrderNum = Long.valueOf(str_maxOrderNum);
             Date updateTime = new Date();
             log.info("第三步：判断出票员手头出票订单数量...");
