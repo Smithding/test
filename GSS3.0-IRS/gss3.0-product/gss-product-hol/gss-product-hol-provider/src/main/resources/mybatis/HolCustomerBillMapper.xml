@@ -151,7 +151,7 @@
             <if test="creator!=null and creator!=''">
                 AND HO.CREATOR=#{creator,jdbcType=VARCHAR}
             </if>
-            AND HO.ORDER_STATUS IN(701,800,801)
+            <!--AND HO.ORDER_STATUS IN(701,800,801)-->
         </where>
         ORDER BY HO.CREATE_ORDER_TIME DESC
     </select>
