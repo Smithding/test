@@ -136,11 +136,11 @@
                 AND HO.BOOK_COUNT=#{bookPro,jdbcType=TINYINT}
             </if>
             <!--<if test="orderStatusArray!=null and orderStatusArray!=''">-->
-                <!--AND HO.ORDER_STATUS IN(701,800,801)-->
-                <!--<foreach collection="orderStatusArray" item="orderStatusArray"-->
-                <!--index="index" open="(" close=")" separator=",">-->
-                <!--#{orderStatusArray[${index}]}-->
-                <!--</foreach>-->
+            <!--AND HO.ORDER_STATUS IN(701,800,801)-->
+            <!--<foreach collection="orderStatusArray" item="orderStatusArray"-->
+            <!--index="index" open="(" close=")" separator=",">-->
+            <!--#{orderStatusArray[${index}]}-->
+            <!--</foreach>-->
             <!--</if>-->
             <if test="bookNight!=null and bookNight!=''">
                 AND HO.NIGHT_COUNT=#{bookNight,jdbcType=TINYINT}
@@ -151,7 +151,7 @@
             <if test="creator!=null and creator!=''">
                 AND HO.CREATOR=#{creator,jdbcType=VARCHAR}
             </if>
-            AND HO.ORDER_STATUS IN(701,800,801)
+            <!--AND HO.ORDER_STATUS IN(701,800,801)-->
         </where>
         ORDER BY HO.CREATE_ORDER_TIME DESC
     </select>
@@ -160,12 +160,22 @@
         HO.HOTEL_NAME AS hotelName,
         count(HO.HOTEL_ORDER_NO) AS orderCount,
         HO.HOTEL_ADDRESS AS holAddr,
+        <if test="dateType!=1 and dateType!='1'">
         sum(HO.FACT_PRO_COUNT) AS bookPro,
-        sum(HO.FACT_NIGHT_COUNT * HO.NIGHT_COUNT) AS proNight,
+        sum(HO.FACT_NIGHT_COUNT * HO.FACT_PRO_COUNT) AS proNight,
         sum(HO.FACT_TOTAL_PRICE) AS totalPrice,
         sum(HO.FACT_TOTAL_REFUND) AS saleRefund,
+        sum((HS.RATE / 100) * HO.FACT_TOTAL_PRICE) AS gProfit,
+        sum(((HS.RATE / 100 * HO.FACT_TOTAL_PRICE) - HO.FACT_TOTAL_REFUND)) AS profit
+        </if>
+        <if test="dateType==1 or dateType=='1'">
+        sum(HO.BOOK_COUNT) AS bookPro,
+        sum(HO.BOOK_COUNT * HO.NIGHT_COUNT) AS proNight,
+        sum(HO.TOTAL_PRICE) AS totalPrice,
+        sum(HO.TOTAL_REFUND) AS saleRefund,
         sum((HS.RATE / 100) * HO.TOTAL_PRICE) AS gProfit,
-        sum(((HS.RATE / 100 * HO.TOTAL_PRICE) - HO.FACT_TOTAL_REFUND)) AS profit
+        sum(((HS.RATE / 100 * HO.TOTAL_PRICE) - HO.TOTAL_REFUND)) AS profit
+        </if>
         FROM `gss-op`.HOL_HOTEL_ORDER AS HO
         LEFT JOIN `gss-op`.CPS_CUSTOMER AS CC ON(CC.CUSTOMER_NO=HO.CUSTOMER_NO)
         LEFT JOIN `gss-op`.CPS_CUSTOMER_TYPE AS CCT ON(CCT.CUSTOMER_TYPE_NO=CC.CUSTOMER_TYPE_NO)
@@ -240,13 +250,23 @@
         CC.NAME AS customerName,
         CCT.NAME AS customerTypeName,
         COUNT(HO.HOTEL_ORDER_NO) AS orderCount,
-        sum(HO.FACT_PRO_COUNT) AS bookPro,
-        sum(HO.FACT_NIGHT_COUNT * HO.NIGHT_COUNT) AS proNight,
-        sum(HO.FACT_TOTAL_PRICE) AS totalPrice,
-        sum(HO.FACT_TOTAL_REFUND) AS saleRefund,
-        sum((HS.RATE / 100) * HO.TOTAL_PRICE) AS gProfit,
-        CC.CUSTOMER_TYPE_NO AS customerType,
-        sum(((HS.RATE / 100 * HO.TOTAL_PRICE) - HO.FACT_TOTAL_REFUND)) AS profit
+        <if test="dateType==1 or dateType=='1'">
+            sum(HO.BOOK_COUNT) AS bookPro,
+            sum(HO.BOOK_COUNT * HO.NIGHT_COUNT) AS proNight,
+            sum(HO.TOTAL_PRICE) AS totalPrice,
+            sum(HO.TOTAL_REFUND) AS saleRefund,
+            sum((HS.RATE / 100) * HO.TOTAL_PRICE) AS gProfit,
+            sum(((HS.RATE / 100 * HO.TOTAL_PRICE) - HO.TOTAL_REFUND)) AS profit,
+        </if>
+        <if test="dateType!=1 and dateType!='1'">
+            sum(HO.FACT_PRO_COUNT) AS bookPro,
+            sum(HO.FACT_PRO_COUNT * HO.FACT_NIGHT_COUNT) AS proNight,
+            sum(HO.FACT_TOTAL_PRICE) AS totalPrice,
+            sum(HO.FACT_TOTAL_REFUND) AS saleRefund,
+            sum((HS.RATE / 100) * HO.FACT_TOTAL_PRICE) AS gProfit,
+            sum(((HS.RATE / 100 * HO.FACT_TOTAL_PRICE) - HO.FACT_TOTAL_REFUND)) AS profit,
+        </if>
+        CC.CUSTOMER_TYPE_NO AS customerType
         FROM `gss-op`.HOL_HOTEL_ORDER AS HO
         LEFT JOIN `gss-op`.CPS_CUSTOMER AS CC ON (CC.CUSTOMER_NO = HO.CUSTOMER_NO)
         LEFT JOIN `gss-op`.CPS_CUSTOMER_TYPE AS CCT ON (CCT.CUSTOMER_TYPE_NO = CC.CUSTOMER_TYPE_NO)
@@ -280,24 +300,24 @@
             </if>
             <if test="startDate!=null and startDate!=''">
                 <if test="dateType==1 or dateType=='1'">
-                    AND HO.CREATE_ORDER_TIME &gt;=#{startDate,jdbcType=TIMESTAMP}
+                    AND HO.CREATE_ORDER_TIME &gt;=CONCAT(#{startDate},' 00:00:00')
                 </if>
                 <if test="dateType==2 or dateType=='2'">
-                    AND HO.ARRIVAL_DATE &gt;=#{startDate,jdbcType=TIMESTAMP}
+                    AND HO.ARRIVAL_DATE &gt;=CONCAT(#{startDate},' 00:00:00')
                 </if>
                 <if test="dateType==3 or dateType=='3'">
-                    AND HO.DEPARTURE_DATE &gt;=#{startDate,jdbcType=TIMESTAMP}
+                    AND HO.DEPARTURE_DATE &gt;=CONCAT(#{startDate},' 00:00:00')
                 </if>
             </if>
             <if test="endDate!=null and endDate!=''">
                 <if test="dateType==1 or dateType=='1'">
-                    AND HO.CREATE_ORDER_TIME &lt;=#{endDate,jdbcType=TIMESTAMP}
+                    AND HO.CREATE_ORDER_TIME &lt;=CONCAT(#{endDate},' 23:59:59')
                 </if>
                 <if test="dateType==2 or dateType=='2'">
-                    AND HO.ARRIVAL_DATE &lt;=#{endDate,jdbcType=TIMESTAMP}
+                    AND HO.ARRIVAL_DATE &lt;=CONCAT(#{endDate},' 23:59:59')
                 </if>
                 <if test="dateType==3 or dateType=='3'">
-                    AND HO.DEPARTURE_DATE &lt;=#{endDate,jdbcType=TIMESTAMP}
+                    AND HO.DEPARTURE_DATE &lt;=CONCAT(#{endDate},' 23:59:59')
                 </if>
             </if>
             <if test="bookPro!=null and bookPro!=''">
