@@ -135,13 +135,9 @@
             <if test="bookPro!=null and bookPro!=''">
                 AND HO.BOOK_COUNT=#{bookPro,jdbcType=TINYINT}
             </if>
-            <!--<if test="orderStatusArray!=null and orderStatusArray!=''">-->
-            <!--AND HO.ORDER_STATUS IN(701,800,801)-->
-            <!--<foreach collection="orderStatusArray" item="orderStatusArray"-->
-            <!--index="index" open="(" close=")" separator=",">-->
-            <!--#{orderStatusArray[${index}]}-->
-            <!--</foreach>-->
-            <!--</if>-->
+            <if test="orderStatus!=null and orderStatus!=''">
+            AND HO.ORDER_STATUS =#{orderStatus,jdbcType=VARCHAR}
+            </if>
             <if test="bookNight!=null and bookNight!=''">
                 AND HO.NIGHT_COUNT=#{bookNight,jdbcType=TINYINT}
             </if>
