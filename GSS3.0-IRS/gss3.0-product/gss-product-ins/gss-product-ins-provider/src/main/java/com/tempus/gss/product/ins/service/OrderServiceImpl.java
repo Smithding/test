@@ -204,8 +204,10 @@ public class OrderServiceImpl implements IOrderService {
 	
 	@Reference
 	IMssReserveService mssReserveService;
+	
 	@Reference
 	ICustomerService customerService;
+	
     @Reference
     public IInsuranceProfitService insuranceProfitService;
 	SimpleDateFormat simple = new SimpleDateFormat("yyyy-MM-dd");
