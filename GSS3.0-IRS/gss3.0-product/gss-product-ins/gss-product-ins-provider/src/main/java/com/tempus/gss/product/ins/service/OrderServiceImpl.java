@@ -204,8 +204,10 @@ public class OrderServiceImpl implements IOrderService {
 	
 	@Reference
 	IMssReserveService mssReserveService;
+	
 	@Reference
 	ICustomerService customerService;
+	
     @Reference
     public IInsuranceProfitService insuranceProfitService;
 	SimpleDateFormat simple = new SimpleDateFormat("yyyy-MM-dd");
@@ -736,7 +738,7 @@ public class OrderServiceImpl implements IOrderService {
 				if (companyName.contains(COMPANY_NAME_YATAI)) {
 					if (response.getMsg() != null) {
 						saleOrderDetail.setPolicyNo(response.getMsg());
-						saleOrderDetail.setModifyTime(new Date());
+/*						saleOrderDetail.setModifyTime(new Date());*/
 						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					}
 				}
@@ -744,7 +746,7 @@ public class OrderServiceImpl implements IOrderService {
 				if (companyName.contains(COMPANY_NAME_ZHONGAN)) {
 					if (StringUtils.isNotBlank(saleOrderExtVo.getPolicyNo())) {
 						saleOrderDetail.setPolicyNo(saleOrderExtVo.getPolicyNo());
-						saleOrderDetail.setModifyTime(new Date());
+/*						saleOrderDetail.setModifyTime(new Date());*/
 						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					}
 				}
@@ -1105,7 +1107,7 @@ public class OrderServiceImpl implements IOrderService {
 					if (StringUtils.isNotBlank(saleOrderExtVo.getPolicyNo())) {
 						saleOrderDetail.setPolicyNo(saleOrderExtVo.getPolicyNo());
 						//投保时间
-						saleOrderDetail.setModifyTime(new Date());
+/*						saleOrderDetail.setModifyTime(new Date());*/
 						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					}
 					if (StringUtils.isNotBlank(saleOrderExtVo.getPolicyNo())) {
@@ -1234,7 +1236,7 @@ public class OrderServiceImpl implements IOrderService {
 						log.error("获取保险保单成功--------》"+saleOrderExtVo.getPolicyNo());
 						saleOrderDetail.setPolicyNo(saleOrderExtVo.getPolicyNo());
 						//投保时间
-						saleOrderDetail.setModifyTime(new Date());
+/*						saleOrderDetail.setModifyTime(new Date());*/
 						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					}
 					saleOrderService.updateStatus(agent, saleOrderNo, 2);
@@ -1715,7 +1717,7 @@ public class OrderServiceImpl implements IOrderService {
 			         	   SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 5);
 			         	}
 						saleOrderDetail.setStatus(5);
-						saleOrderDetail.setModifyTime(new Date());
+/*						saleOrderDetail.setModifyTime(new Date());*/
 						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					}
 
@@ -3606,7 +3608,7 @@ public class OrderServiceImpl implements IOrderService {
 			         	   SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 5);
 			         	}
 						saleOrderDetail.setStatus(5);
-						saleOrderDetail.setModifyTime(new Date());
+/*						saleOrderDetail.setModifyTime(new Date());*/
 						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					}
 
