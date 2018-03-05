@@ -258,7 +258,7 @@ public class InsuranceServiceImpl  implements IInsuranceService {
 					   List<InsuranceProfit> insuranceProfitList = insuranceProfitService.queryInsuranceProfitByNo(pageRequest.getAgent(), ins.getInsuranceNo());
 					   for(InsuranceProfit insuranceProfit:insuranceProfitList){
 						   if(insuranceProfit.getProfitCount()!=null||insuranceProfit.getProfitMoney()!=null){
-				              	  //判断是控点还是固定控  1为控点    2为固定控          
+				              	  //判断是控点还是固定控  1为控点   2为固定控          
 				                  if(insuranceProfit.getProfitMode()==1){
 				                  	/* if(insuranceProfit.getProfitCount()!=null){
 				                  		 //二级控点暂时停用

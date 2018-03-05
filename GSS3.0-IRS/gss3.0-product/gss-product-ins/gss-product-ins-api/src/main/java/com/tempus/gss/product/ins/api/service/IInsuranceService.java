@@ -97,6 +97,7 @@ public interface IInsuranceService {
 	 */
 	boolean  selectInsuranceCode(String code);
 	/**
+	 * 获取所有控润后的保险信息(国内)
 	 */
 	List<Insurance> getAllInsurance(RequestWithActor<InsuranceVo> requestWithActor);
 }
