@@ -447,7 +447,7 @@ public class ReportVO implements Serializable {
     }
     
     public void setOrderStatusName(String orderStatus) {
-        if (null != orderStatus) {
+        if (null != orderStatus&&!"".equals(orderStatus)) {
             this.orderStatusName = OwnerOrderStatus.keyOf(orderStatus).getValue();
         } else {
             this.orderStatusName = "";
