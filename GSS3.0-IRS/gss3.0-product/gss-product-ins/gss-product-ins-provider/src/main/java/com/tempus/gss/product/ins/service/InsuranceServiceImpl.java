@@ -496,6 +496,10 @@ public class InsuranceServiceImpl  implements IInsuranceService {
 	        Long customerTypeNo = Long.parseLong((agent.getType()+"").substring(0, 3));
 	        //一级控润
 	        for(Insurance ins : tempInsuranceList) {
+	        	//国际保险跳过
+	        	if(ins.getInternatOrcivil()==2){
+	        		continue;
+	        	}
 	        	 List<ProfitControl> profitList = orderService.selectByInsuranceNo(ins.getInsuranceNo());
 	        	 for(ProfitControl pf : profitList) {
 	        		 if(pf.getCustomerTypeNo() !=null ) {	
