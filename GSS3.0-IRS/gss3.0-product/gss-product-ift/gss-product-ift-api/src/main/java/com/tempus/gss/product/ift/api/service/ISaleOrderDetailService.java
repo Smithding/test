@@ -37,4 +37,10 @@ public interface ISaleOrderDetailService {
 	* */
 	int updateSaleOrderDetailStatusByNo(Long saleOrderNo);
 
+	/**
+	 * 通过销售订单号修改订单详情数据
+	 * @param saleOrderDetail
+	 * @return
+	 */
+	public int updateBySaleOrderNo(RequestWithActor<SaleOrderDetail> saleOrderDetail);
 }
