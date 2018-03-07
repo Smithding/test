@@ -136,6 +136,7 @@ public class OrderServiceImpl implements IOrderService {
 	private static final String RESPONSE_SUCCESS = "0000";
 	//设置投保人为个人   1：个人  2：企业
 	private static final int holderType = 1;
+	
 	protected final transient Logger log = LoggerFactory.getLogger(getClass());
 
 	// 应收应付
