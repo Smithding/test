@@ -711,7 +711,7 @@ public class OrderServiceImpl implements IOrderService {
 				insureRequestVo = toInsureRequestVo4Back(saleOrderExt);
 
 				String json = mapper.writeValueAsString(insureRequestVo);
-				log.info("投保请求json报文------->" + json);
+				log.info("投保请求报文=======>" + json);
 
 				@SuppressWarnings("unchecked")
 				Response<SaleOrderExtVo> response = (Response<SaleOrderExtVo>) HttpClientUtil.doJsonPost(insurePath,
@@ -1195,7 +1195,7 @@ public class OrderServiceImpl implements IOrderService {
 					detail.setInsuredBirthday(saleOrderDetail.getInsuredBirthday()); // yyyyMMdd
 					detail.setInsuredSex(saleOrderDetail.getInsuredSex());
 					detail.setInsuranceNum(saleOrderDetail.getInsuranceNum());
-					if(insurance.getCompanyName().contains(COMPANY_NAME_JUNLONG)){
+					if(insurance.getCompanyName().contains(COMPANY_NAME_JUNLONG)||	insurance.getCompanyName().contains(COMPANY_NAME_QIANHAICAI)){
 						detail.setPremium(insurance.getFacePrice().multiply( new BigDecimal(saleOrderDetail.getInsuranceNum())));
 					}
 					//如果是华夏和太平险 则需要添加保险分数
