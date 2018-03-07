@@ -93,7 +93,7 @@
         MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP}
         where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
     </update>
-    
+
     <select id="queryOrderByOrderResultCode" resultMap="BaseResultMap" parameterType="java.lang.String">
         select
         <include refid="Base_Column_List"/>
@@ -188,9 +188,12 @@
         	<if test="owner != null">
                 AND hho.OWNER = #{owner,jdbcType=INTEGER}
             </if>
-            <if test="creator != null and creator !=''">
-                AND hho.CREATOR = #{creator,jdbcType=VARCHAR}
+            <if test="customerNo != null and customerNo !=''">
+                AND os.CUSTOMER_NO = #{customerNo,jdbcType=INTEGER}
             </if>
+<!--             <if test="creator != null and creator !=''">
+                AND hho.CREATOR = #{creator,jdbcType=VARCHAR}
+            </if> -->
             <if test="saleOrderNo != null">
                 AND hho.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
             </if>
@@ -251,8 +254,8 @@
         </trim>
         ORDER BY CREATE_ORDER_TIME DESC
     </select>
-    
-    
+
+
     <select id="queryCustomerOrderList" resultMap="BaseResultMap"
             parameterType="java.util.Map">
         select DISTINCT
@@ -389,5 +392,5 @@
         </trim>
         ORDER BY CREATE_ORDER_TIME DESC
     </select>
-    
+
 </mapper>
