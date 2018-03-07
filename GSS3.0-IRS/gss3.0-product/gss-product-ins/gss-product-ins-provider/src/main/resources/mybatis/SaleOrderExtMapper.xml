@@ -663,9 +663,12 @@
 		<if test="customerType != null and customerType != ''" >
 			AND cct.NAME = #{customerType,jdbcType=VARCHAR} 
 		</if>
-     	<if test="creator != null and creator != '' and isLowerLevel != true">
+		<if test="customerNo != null and customerNo != '' and isLowerLevel != true">
+             AND os.CUSTOMER_NO = #{customerNo,jdbcType=INTEGER}
+        </if>
+<!--      	<if test="creator != null and creator != '' and isLowerLevel != true">
              AND isoe.CREATOR = #{creator,jdbcType=VARCHAR}
-        </if>        
+        </if>  -->       
         <if test="holderName != null and holderName != ''">
              AND isoe.HOLDER_NAME LIKE CONCAT(CONCAT('%', #{holderName}), '%')
         </if>
