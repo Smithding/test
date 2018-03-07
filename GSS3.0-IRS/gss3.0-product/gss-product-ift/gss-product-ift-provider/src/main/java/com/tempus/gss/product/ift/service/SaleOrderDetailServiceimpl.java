@@ -86,4 +86,25 @@ public class SaleOrderDetailServiceimpl implements ISaleOrderDetailService{
 		return detailDao.updateSaleOrderDetailStatusByNo(saleOrderNo);
 	}
 
+	public int updateBySaleOrderNo(RequestWithActor<SaleOrderDetail> saleOrderDetail){
+		int flag = detailDao.updateByOrderNo(saleOrderDetail.getEntity());
+		if (flag == 0) {
+			throw new GSSException("修改订单明细模块", "0301", "修改订单明细失败");
+		}
+		/* 创建操作日志 */
+		try {
+			LogRecord logRecord = new LogRecord();
+			logRecord.setAppCode("UBP");
+			logRecord.setCreateTime(new Date());
+			logRecord.setTitle("修改国际销售单");
+			logRecord.setDesc(JSON.toJSONString(saleOrderDetail));
+			logRecord.setOptLoginName(saleOrderDetail.getAgent().getAccount());
+			logRecord.setRequestIp(saleOrderDetail.getAgent().getIp());
+			logRecord.setBizCode("IFT-OrderServiceImpl-updateSaleOrderExt");
+			logRecord.setBizNo(String.valueOf(saleOrderDetail.getEntity().getSaleOrderNo()));
+		} catch (Exception e) {
+			log.error("添加操作日志异常===" + e);
+		}
+		return flag;
+	}
 }
