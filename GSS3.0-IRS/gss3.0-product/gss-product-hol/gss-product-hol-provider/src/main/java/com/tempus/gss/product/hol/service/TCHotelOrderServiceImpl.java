@@ -843,6 +843,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            } else {
 	                pageRequest.getEntity().setOwner(pageRequest.getAgent().getOwner());
 	                pageRequest.getEntity().setCreator(pageRequest.getAgent().getAccount());
+	                pageRequest.getEntity().setCustomerNo(pageRequest.getAgent().getNum());
 	            }
 	        }
 	        List<HotelOrder> hotelOrderList = hotelOrderMapper.queryOrderList(page, pageRequest.getEntity());

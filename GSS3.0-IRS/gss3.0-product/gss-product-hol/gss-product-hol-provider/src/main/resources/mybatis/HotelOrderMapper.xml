@@ -189,8 +189,11 @@
                 AND hho.OWNER = #{owner,jdbcType=INTEGER}
             </if>
             <if test="creator != null and creator !=''">
-                AND hho.CREATOR = #{creator,jdbcType=VARCHAR}
+                AND os.CUSTOMER_NO = #{customerNo,jdbcType=INTEGER}
             </if>
+<!--             <if test="creator != null and creator !=''">
+                AND hho.CREATOR = #{creator,jdbcType=VARCHAR}
+            </if> -->
             <if test="saleOrderNo != null">
                 AND hho.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
             </if>
