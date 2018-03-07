@@ -116,4 +116,9 @@ public class BuyOrderExtServiceImpl implements IBuyOrderExtService {
 		log.info("获取采购单拓展结束==");
 		return buyOrderExtList;
 	}
+
+	@Override
+	public int update(Agent agent, BuyOrderExt buyOrderExt) {
+		return buyOrderExtDao.updateByPrimaryKeySelective(buyOrderExt);
+	}
 }

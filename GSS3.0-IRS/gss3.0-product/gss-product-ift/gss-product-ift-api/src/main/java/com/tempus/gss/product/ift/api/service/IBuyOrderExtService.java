@@ -27,6 +27,7 @@ public interface IBuyOrderExtService {
 
 
 	List<BuyOrderExt> selectListBySaleOrderNo(Agent agent, Long saleOrderNo)throws Exception;
-	
+
+	int update(Agent agent,BuyOrderExt buyOrderExt);
 
 }
