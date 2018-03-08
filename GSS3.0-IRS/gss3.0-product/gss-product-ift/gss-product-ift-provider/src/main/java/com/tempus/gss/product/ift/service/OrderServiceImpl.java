@@ -31,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -196,8 +195,6 @@ public class OrderServiceImpl implements IOrderService {
     IConfigsService configsService;
     @Reference
     IUserService userService;
-    @Value("${dpsconfig.job.owner}")
-    protected String owner;
 
     /**
      * 创建订单. 通过白屏查询、Pnr、需求单、手工方式创建订单.
@@ -1657,13 +1654,11 @@ public class OrderServiceImpl implements IOrderService {
         }
         log.info("第二步：查询在线出票员...");
         List<TicketSender> senders = getOnlineTicketSender();
-        log.info("是否有在线出票员:"+(senders!=null));
         if (senders != null && senders.size() > 0) {
-            Agent agent = new Agent(Integer.valueOf(owner));
+            Agent agent = new Agent(8755);
             IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
             Map config = configs.getConfig();
             String str_maxOrderNum = (String) config.get("maxOrderNum");
-            log.info("有在线出票员人数:" + (senders.size())+"获得配置最大分单数："+str_maxOrderNum);
             Long maxOrderNum = Long.valueOf(str_maxOrderNum);
             Date updateTime = new Date();
             log.info("第三步：判断出票员手头出票订单数量...");
@@ -2587,7 +2582,6 @@ public class OrderServiceImpl implements IOrderService {
     private void assingLockOrder(SaleOrderExt order,TicketSender sender,Date date,Agent agent){
         User user = userService.findUserByLoginName(agent,sender.getUserid());
         order.setLocker(user.getId());
-        order.setModifier(sender.getUserid() + "");
         order.setLockTime(date);
         order.setModifyTime(date);
         saleOrderExtDao.updateLocker(order);

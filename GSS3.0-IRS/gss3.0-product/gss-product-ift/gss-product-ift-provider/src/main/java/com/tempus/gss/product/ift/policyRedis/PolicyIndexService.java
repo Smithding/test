@@ -7,6 +7,7 @@ import com.tempus.gss.product.ift.api.service.IPolicyIndexService;
 import com.tempus.gss.product.ift.api.service.IPolicyRedisUtils;
 import com.tempus.gss.util.JsonUtil;
 import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,7 @@ import java.util.*;
  */
 @Service
 public class PolicyIndexService implements IPolicyIndexService {
+    private static Logger logger = Logger.getLogger(IPolicyIndexService.class);
     @Autowired
     IPolicyRedisUtils policyRedisUtils;
     /**
@@ -29,7 +31,7 @@ public class PolicyIndexService implements IPolicyIndexService {
         if (policy == null)
             return;
         Integer flyTypeDid = policy.getTripType();
-        if(2==policy.getTripType()){
+        if(2==policy.getTripType()||3==policy.getTripType()){
              flyTypeDid =1;
         }
         List<String> keyList=null;
@@ -40,8 +42,8 @@ public class PolicyIndexService implements IPolicyIndexService {
         for(String airline :policy.getAirline().split("/")){
             // 生产索引表的key值
             keyList = getPolicyTempKeyList(flyTypeDid, fromCityDcd,
-                    toCityDcd,airline,getOwner);
-            if(2==policy.getTripType()){
+                    toCityDcd,airline.trim(),getOwner);
+            if(2==policy.getTripType()||3==policy.getTripType()){
                 flyTypeDid =2;
                 fromCityDcd = policy.getGoEnd();
                 toCityDcd = policy.getBackEnd();
@@ -85,13 +87,13 @@ public class PolicyIndexService implements IPolicyIndexService {
                 String[] arrayFromCitys = fromCityDcdo.split("/");
                 for (String fromCity : arrayFromCitys) {
                     keySb = new StringBuffer();
-                    keySb.append(fromCity).append("-");
+                    keySb.append(fromCity.trim()).append("-");
                     // 拆分ToCity
                     sliptToCityAppendKey(keySb, toCityDcd, flyTypeDid, airline, getOwner,keyList);
                 }
             } else {
                 keySb = new StringBuffer();
-                keySb.append(fromCityDcdo).append("-");
+                keySb.append(fromCityDcdo.trim()).append("-");
                 sliptToCityAppendKey(keySb, toCityDcd, flyTypeDid, airline, getOwner,keyList);
             }
         }
@@ -113,14 +115,14 @@ public class PolicyIndexService implements IPolicyIndexService {
                 String[] arrayToCitys = toCityDid.split("/");
                 for (String toCity : arrayToCitys) {
                     StringBuffer keyBuffer = new StringBuffer(fromCityKey);
-                    keyBuffer.append(toCity);
+                    keyBuffer.append(toCity.trim());
                     keyBuffer.append("-").append(flyTypeDid).append("-").append(airline).append("-").append(getOwner);
                     String key = keyBuffer.toString();
                     keyList.add(key);
                 }
             } else {
                 StringBuffer keyBuffer = new StringBuffer(fromCityKey);
-                keyBuffer.append(toCityDid);
+                keyBuffer.append(toCityDid.trim());
                 keyBuffer.append("-").append(flyTypeDid).append("-").append(airline).append("-").append(getOwner);
                 String key = keyBuffer.toString();
                 keyList.add(key);

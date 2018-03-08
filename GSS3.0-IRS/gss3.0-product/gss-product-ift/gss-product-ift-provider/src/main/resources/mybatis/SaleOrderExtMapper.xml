@@ -680,8 +680,7 @@
         UPDATE IFT_SALE_ORDER_EXT
         SET LOCKER      = #{locker,jdbcType=BIGINT},
             LOCK_TIME   = #{lockTime,jdbcType=TIMESTAMP},
-            MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
-            MODIFIER    = #{modifier,jdbcType=VARCHAR}
+            MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP}
         WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
     </update>
 

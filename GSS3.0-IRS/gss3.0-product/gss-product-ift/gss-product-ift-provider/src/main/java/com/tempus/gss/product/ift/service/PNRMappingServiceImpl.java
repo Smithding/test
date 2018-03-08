@@ -70,6 +70,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
         } catch (Exception e) {
             e.printStackTrace();
             log.info("pnr匹配出错", e);
+            return queryIBEDetail;
         }
         return queryIBEDetail;
     }
@@ -204,7 +205,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
                 List<FlightCabinPriceVo> flightCabinPriceVos = new ArrayList<FlightCabinPriceVo>();
                 Flight flight = new Flight();
                 flight.setTicketType(pnrSeg.getTicket());
-                //   flight.setTpm(Integer.parseInt(shoppingFlight.getTPM()));//里程
+                flight.setTpm(0);//里程
                 flight.setDepAirport(pnrSeg.getDepartureAirport());
                 flight.setArrAirport(pnrSeg.getArrivalAirport());
                 flight.setDepTerminal(pnrSeg.getDepartureTerminal());
@@ -353,6 +354,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
                         }
                     }
                     passengerTypePricesTotal.setFareLinear(qteResult.getNuc());
+                    passengerTypePricesTotal.setFareBasis(qteResult.getFareBasis());
                 }
             }
         }
@@ -360,19 +362,58 @@ public class PNRMappingServiceImpl implements PNRMappingService {
 
     public void getDirection(QueryIBEDetail queryIBEDetail) {
         List<Flight> flights = queryIBEDetail.getFlights();
+        if(null==queryIBEDetail.getLegType()||"".equals(queryIBEDetail.getLegType())){
+            if(flights.size()>1){
+                String depAirport=flights.get(0).getDepAirport();
+                String arrAirport=flights.get(flights.size()-1).getArrAirport();
+                if(depAirport.equals(arrAirport)){
+                    queryIBEDetail.setLegType(2);
+                }else{
+                    Airport depAir = airportService.queryAirportByCode(depAirport, "I");
+                    if (null == depAirport) {
+                        depAir = airportService.queryAirportByCode(depAirport, "D");
+                    }
+                    Airport arrAir = airportService.queryAirportByCode(arrAirport, "I");
+                    if (null == arrAir) {
+                        arrAir = airportService.queryAirportByCode(arrAirport, "D");
+                    }
+                    String depCity = depAir.getCityCode();
+                    String arrCity = arrAir.getCityCode();
+                    if(depCity.equals(arrCity)){
+                        queryIBEDetail.setLegType(1);
+                    }else{
+                        boolean isMultipass = false;
+                        for (int i = 0; i <= flights.size() - 2; i++) {
+                            Flight flight0 = flights.get(i);
+                            Flight flight1 = flights.get(i + 1);
+                            long temptime = flight1.getDepTime().getTime()-flight0.getArrTime().getTime() ;
+                            if(temptime > 24 * 3600 * 1000){
+                                isMultipass=true;
+                            }
+                        }
+                        if(isMultipass){
+                            queryIBEDetail.setLegType(3);
+                        }else{
+                            queryIBEDetail.setLegType(1);
+                        }
+                    }
+                }
+            }else{
+                queryIBEDetail.setLegType(1);
+            }
+        }
         if (1 == queryIBEDetail.getLegType()) {
             for (Flight flight : flights) {
                 flight.setDirection("go");
             }
-        }
-        if (2 == queryIBEDetail.getLegType()) {
+        } if (2 == queryIBEDetail.getLegType()) {
             long temptime = 0;
             long temp = 0;
             String airport = "";
-            for (int i = 0; i < flights.size() - 2; i++) {
+            for (int i = 0; i <=flights.size() - 2; i++) {
                 Flight flight0 = flights.get(i);
                 Flight flight1 = flights.get(i + 1);
-                temp = flight0.getArrTime().getTime() - flight1.getDepTime().getTime();
+                temp =flight1.getDepTime().getTime()- flight0.getArrTime().getTime();
                 if (temp > temptime) {
                     temptime = temp;
                     airport = flight0.getArrAirport();
@@ -389,8 +430,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
                     flight.setDirection("back");
                 }
             }
-        }
-        if (3 == queryIBEDetail.getLegType()) {
+        } if (3 == queryIBEDetail.getLegType()) {
             long temptime = 0;
             long temp = 0;
             String airport = "";
@@ -684,7 +724,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
     }
 
     public String getmonthStrEnglish(Date date) {
-        java.util.Calendar cal = java.util.Calendar.getInstance();
+        Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         int m = cal.get(Calendar.MONTH);
         String monthStr = null;

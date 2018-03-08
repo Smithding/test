@@ -65,7 +65,7 @@ public class QueryServiceImpl implements IQueryService {
     
     @Reference
     ISubControlRuleService subControlRuleService;
-    
+
     /*多程单独计算*/
     @Autowired
     IMultipassMappingService multipassMappingService;
@@ -76,9 +76,9 @@ public class QueryServiceImpl implements IQueryService {
     @Autowired
     FliePriceMappingService fliePriceMappingService;
     @Reference
-    ILogService logService;
+    ILogService logService ;
     @Autowired
-    IPolicyRService policyRService;
+    IPolicyRService  policyRService;
     
     @Value("${ift.iataNo}")
     private String iataNo;
@@ -94,11 +94,11 @@ public class QueryServiceImpl implements IQueryService {
     @Override
     public Page<QueryIBEDetail> query(Page<QueryIBEDetail> page, RequestWithActor<FlightQueryRequest> flightQueryRequest) {
         FlightQueryRequest flightQuery = flightQueryRequest.getEntity();
-        if (3 == flightQuery.getLegType()) {
-            return multipassMappingService.query(page, flightQueryRequest);
+        if(3==flightQuery.getLegType()){
+            return  multipassMappingService.query(page, flightQueryRequest);
         }
         Page<QueryIBEDetail> pages = new Page<QueryIBEDetail>();
-        
+
         log.info("查询参数：" + JsonUtil.toJson(flightQuery));
         Agent agent = flightQueryRequest.getAgent();
         if (null == agent) {
@@ -158,7 +158,7 @@ public class QueryServiceImpl implements IQueryService {
         log.info("开始调用shopping接口");
         log.info(JsonUtil.toJson(shoppingInput));
         ShoppingOutPut shoppingOutPut = shoppingService.shoppingI(shoppingInput);
-        log.info("完成调用shopping接口" + shoppingOutPut.getShortText());
+        log.info("完成调用shopping接口"+shoppingOutPut.getShortText());
         List<AvailableJourney> availableJourneys = shoppingOutPut.getAvailableJourneys();
         if (null == availableJourneys || availableJourneys.size() < 1) {
             return null;
@@ -194,7 +194,7 @@ public class QueryServiceImpl implements IQueryService {
             log.info(e.getLocalizedMessage());
         }
         log.info("开始组装数据");
-        queryIBEDetailList = combineQueryIBEDetails(queryIBEDetailList, flightQueryRequest.getAgent().getDevice(), agent);
+        queryIBEDetailList = combineQueryIBEDetails(queryIBEDetailList, flightQueryRequest.getAgent().getDevice(),agent);
         log.info("完成组装数据");
         log.info(JsonUtil.toJson(queryIBEDetailList));
         pages.setRecords(queryIBEDetailList);
@@ -212,18 +212,18 @@ public class QueryServiceImpl implements IQueryService {
         RequestWithActor<String> stringRequestWithActor = new RequestWithActor<String>();
         stringRequestWithActor.setEntity(queryIBEDetail.getTicketAirline());
         stringRequestWithActor.setAgent(agent);
-        if (null == queryIBEDetail.getTicketAirline()) {
-            return;
+        if(null==queryIBEDetail.getTicketAirline()){
+           return;
         }
         PriceSpec priceSpec = priceSpecService.getPriceSpec(stringRequestWithActor);
-        if (null == priceSpec) {
+        if(null==priceSpec){
             stringRequestWithActor.setEntity("*");
             priceSpec = priceSpecService.getPriceSpec(stringRequestWithActor);
         }
         Formula formula = JsonUtil.toBean(priceSpec.getFormulaData(), Formula.class);
         priceSpec.setFormula(formula);
         queryIBEDetail.setPriceSpecNo(priceSpec.getPriceSpecNo());
-        
+
         Map<String, String> passengerTypeMap = new HashMap<String, String>();
         for (Flight flight : queryIBEDetail.getFlights()) {//判断航段有没有奖励
             for (FlightCabinPriceVo flightCabinPriceVo : flight.getFlightCabinPriceVos()) {
@@ -267,7 +267,7 @@ public class QueryServiceImpl implements IQueryService {
                 } else {
                     passengerTypePricesTotal.setAward(true);
                 }
-                if (priceSpec.isNoAwardIt() && null != passengerTypePricesTotal.getFareBasis() && passengerTypePricesTotal.getFareBasis().contains("/it")) {
+                 if (priceSpec.isNoAwardIt() && null!=passengerTypePricesTotal.getFareBasis()&&passengerTypePricesTotal.getFareBasis().contains("/it")) {
                     passengerTypePricesTotal.setAward(false);
                 } else {
                     passengerTypePricesTotal.setAward(true);
@@ -427,9 +427,9 @@ public class QueryServiceImpl implements IQueryService {
         queryIBEDetail.setGoArrOD(goArr);
         queryIBEDetail.setBackDepOD(goArr);
         queryIBEDetail.setBackArrOD(backArr);
-        fliePriceMappingService.exchangeFilePrice(queryIBEDetail, agent);
+        fliePriceMappingService.exchangeFilePrice( queryIBEDetail,  agent);
         for (PassengerTypePricesTotal passengerTypePricesTotal : queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals()) {
-            if (null == passengerTypePricesTotal.getFare()) {
+            if(null==passengerTypePricesTotal.getFare()) {
                 return;
             }
             String passengerType = passengerTypePricesTotal.getPassengerType();
@@ -480,35 +480,35 @@ public class QueryServiceImpl implements IQueryService {
                         break;
                 }
             } else {//计算单程价格
-                BigDecimal salePrice = null;
-                BigDecimal awardPrice = passengerTypePricesTotal.getFare();
-                if (null != policyMap) {
+                BigDecimal salePrice=null;
+                BigDecimal awardPrice=passengerTypePricesTotal.getFare();
+                if(null!=policyMap){
                     Policy policy = (Policy) policyMap.get("policy");
-                    if (null == policy.getqRebate() || !policy.getqRebate()) {
+                    if(null==policy.getqRebate()||!policy.getqRebate()){
                         BigDecimal Qvalue = new BigDecimal(0);
                         if (null != uncMap && null != uncMap.get("Q")) {
                             Qvalue = new BigDecimal((String) uncMap.get("Q")).multiply(new BigDecimal((String) uncMap.get("roe")));
                         }
-                        awardPrice = awardPrice.subtract(Qvalue);
+                        awardPrice= awardPrice.subtract(Qvalue);
                     }
-                    if (null == policy.getsRebate() || !policy.getsRebate()) {
+                    if(null==policy.getsRebate()||!policy.getsRebate()){
                         BigDecimal Svalue = new BigDecimal(0);
                         if (null != uncMap && null != uncMap.get("S")) {
                             Svalue = new BigDecimal((String) uncMap.get("S")).multiply(new BigDecimal((String) uncMap.get("roe")));
                         }
-                        awardPrice = awardPrice.subtract(Svalue);
+                        awardPrice=awardPrice.subtract(Svalue);
                     }
-                    if (null != policy.getYryqRebate() && policy.getYryqRebate()) {
+                    if(null!=policy.getYryqRebate()&&policy.getYryqRebate()){
                         BigDecimal YQvalue = new BigDecimal(0);
                         BigDecimal YRvalue = new BigDecimal(0);
-                        HashMap<String, BigDecimal> map = passengerTypePricesTotal.getTaxs();
+                        HashMap<String, BigDecimal> map= passengerTypePricesTotal.getTaxs();
                         if (null != uncMap && null != map.get("YQ")) {
                             YQvalue = new BigDecimal((String) uncMap.get("YQ"));
                         }
                         if (null != uncMap && null != map.get("YR")) {
                             YRvalue = new BigDecimal((String) uncMap.get("YR"));
                         }
-                        awardPrice = awardPrice.add(YRvalue).add(YQvalue);
+                        awardPrice=awardPrice.add(YRvalue).add(YQvalue);
                         passengerTypePricesTotal.setFare(passengerTypePricesTotal.getFare().add(YRvalue).add(YQvalue));
                         passengerTypePricesTotal.setTax(passengerTypePricesTotal.getTax().subtract(YRvalue).subtract(YQvalue));
                     }
@@ -517,18 +517,18 @@ public class QueryServiceImpl implements IQueryService {
                 passengerTypePricesTotal.setSalePrice(salePrice.setScale(0, BigDecimal.ROUND_UP));
             }
             if (null != policyMap) {//有政策获取政策中的代理费率，返点，手续费
-                if (null != policyMap.get("saleRebate")) {
+                if(null!=policyMap.get("saleRebate")){
                     passengerTypePricesTotal.setSaleRebate((BigDecimal) policyMap.get("saleRebate"));
                     passengerTypePricesTotal.setBrokerage((BigDecimal) policyMap.get("saleOwBrokerage"));
-                } else {
+                }else{
                     passengerTypePricesTotal.setSaleRebate((BigDecimal) policyMap.get("backSaleRebate"));
                     passengerTypePricesTotal.setBrokerage((BigDecimal) policyMap.get("backSaleOwBrokerage"));
                 }
-                BigDecimal awardPrice = (BigDecimal) policyMap.get("awardPrice");
-                if (null == policyMap.get("awardPrice")) {
+                BigDecimal awardPrice=(BigDecimal)policyMap.get("awardPrice");
+                if(null==policyMap.get("awardPrice")){
                     passengerTypePricesTotal.setAwardPrice((BigDecimal) policyMap.get("backAwardPrice"));
-                } else {
-                    if (null != policyMap.get("backAwardPrice")) {
+                }else {
+                    if(null!= policyMap.get("backAwardPrice")){
                         passengerTypePricesTotal.setAwardPrice(awardPrice.add((BigDecimal) policyMap.get("backAwardPrice")));
                     }
                     passengerTypePricesTotal.setAwardPrice(awardPrice);
@@ -550,22 +550,21 @@ public class QueryServiceImpl implements IQueryService {
     /**
      * 获取往返城最佳返点
      *
-     * @param goDep,
-     *         goArr, backArr, airline, passengerTypeMap ,goFlights, backFlights, customerTypeNo
+     * @param goDep, goArr, backArr, airline, passengerTypeMap ,goFlights, backFlights, customerTypeNo
      * @return Map
      */
     private Map mappingPolicy(String goDep, String goArr, String backArr, String airline, String passengerType, List<Flight> goFlights, List<Flight> backFlights, String customerTypeNo, Agent agent) {
         List<Policy> goPolicyList = new ArrayList<Policy>();
         Policy policyVo = new Policy();
-        policyVo.setGoStart(goDep);
-        policyVo.setGoEnd(goArr);
+        policyVo.setGoStart( goDep );
+        policyVo.setGoEnd( goArr );
         policyVo.setAirline(airline);
-        policyVo.setTravellerType(passengerType);
+        policyVo.setTravellerType(passengerType );
         policyVo.setTravellerLimit(1);
         policyVo.setOwner(agent.getOwner());
         policyVo.setTripType(1);
-        goPolicyList = policyRService.queryObjByODs(policyVo);
-        log.info("查询查询政策goPolicyList：" + (goPolicyList == null ? 0 : goPolicyList.size()));
+        goPolicyList=policyRService.queryObjByODs(policyVo);
+        log.info("查询查询政策goPolicyList：" +(goPolicyList==null?0:goPolicyList.size()) );
         Flight goflight = getMainFlight(goFlights);
         for (int i = goPolicyList.size() - 1; i >= 0; i--) {//
             Policy policy = goPolicyList.get(i);
@@ -577,14 +576,14 @@ public class QueryServiceImpl implements IQueryService {
         if (null != backArr && !"".equals(backArr)) {//取返程政策
             List<Policy> backPolicyList = new ArrayList<Policy>();
             policyVo = new Policy();
-            policyVo.setGoStart(goArr);
-            policyVo.setGoEnd(backArr);
+            policyVo.setGoStart(goArr );
+            policyVo.setGoEnd( backArr );
             policyVo.setAirline(airline);
-            policyVo.setTravellerType(passengerType);
+            policyVo.setTravellerType( passengerType );
             policyVo.setTravellerLimit(1);
             policyVo.setOwner(agent.getOwner());
             policyVo.setTripType(2);
-            backPolicyList = policyRService.queryObjByODs(policyVo);
+            backPolicyList=policyRService.queryObjByODs(policyVo);
             Flight backFlight = getMainFlight(backFlights);
             for (int i = backPolicyList.size() - 1; i >= 0; i--) {//根据限制条件去除政策
                 Policy policy = backPolicyList.get(i);
@@ -669,8 +668,7 @@ public class QueryServiceImpl implements IQueryService {
     /**
      * 检验政策日期
      *
-     * @param policy
-     *         goflight isback
+     * @param policy goflight isback
      * @return boolean
      */
     private boolean checkPolicyDate(Policy policy, Flight goflight, boolean isback) {
@@ -713,8 +711,7 @@ public class QueryServiceImpl implements IQueryService {
     /**
      * 检验政策航段
      *
-     * @param policy
-     *         goflight isback
+     * @param policy goflight isback
      * @return boolean
      */
     private boolean checkPolicyFlight(Policy policy, Flight goflight, boolean isback) {
@@ -761,8 +758,7 @@ public class QueryServiceImpl implements IQueryService {
     /**
      * 检验政策其它设置
      *
-     * @param policy
-     *         flights
+     * @param policy flights
      * @return boolean
      */
     private boolean checkPolicyOther(Policy policy, List<Flight> flights) {
@@ -806,8 +802,7 @@ public class QueryServiceImpl implements IQueryService {
     /**
      * 检验政策仓位
      *
-     * @param policys
-     *         goflight customerTypeNo
+     * @param policys goflight customerTypeNo
      * @return List<Map>
      */
     private List<Map> mappingCabins(List<Policy> policys, Flight goflight, String customerTypeNo) {
@@ -816,7 +811,7 @@ public class QueryServiceImpl implements IQueryService {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("policy", policy);
             for (Cabin cabin : policy.getCabinList()) {
-                if ((cabin.getCabin().contains(goflight.getFlightCabinPriceVos().get(0).getCabin()) || ("*".equals(cabin.getCabin()) && (null == cabin.getExclusiveCabin() || !cabin.getExclusiveCabin().contains(goflight.getFlightCabinPriceVos().get(0).getCabin())))) && false != goflight.getFlightCabinPriceVos().get(0).isAward()) {
+                if ((cabin.getCabin().contains(goflight.getFlightCabinPriceVos().get(0).getCabin())|| ("*".equals(cabin.getCabin())&&(null==cabin.getExclusiveCabin()||!cabin.getExclusiveCabin().contains(goflight.getFlightCabinPriceVos().get(0).getCabin()))))&& false != goflight.getFlightCabinPriceVos().get(0).isAward()) {
                     for (ProfitControl profitControl : cabin.getProfitControlList()) {//判断渠道
                         if (customerTypeNo.equals("" + profitControl.getCustomerTypeNo())) {
                             if (null != profitControl.getSaleRebate() && profitControl.getSaleRebate().compareTo(new BigDecimal(0)) == 1) {
@@ -886,14 +881,14 @@ public class QueryServiceImpl implements IQueryService {
                 BigDecimal taxs = new BigDecimal(0);
                 BigDecimal taxxt = new BigDecimal(0);
                 if (null != psgerFare.getTaxs()) {
-                    HashMap<String, BigDecimal> maptaxs = new HashMap<String, BigDecimal>();
+                    HashMap<String,BigDecimal> maptaxs=new HashMap<String,BigDecimal>();
                     for (Tax tax : psgerFare.getTaxs()) {
                         if ("XT".equals(tax.getTaxCode())) {
                             taxxt = taxxt.add(tax.getAmount());
                         } else {
                             taxs = taxs.add(tax.getAmount());
                         }
-                        maptaxs.put(tax.getTaxCode(), tax.getAmount());
+                        maptaxs.put(tax.getTaxCode(),tax.getAmount());
                     }
                 } else {
                     double baseFare = 0;
@@ -950,7 +945,7 @@ public class QueryServiceImpl implements IQueryService {
                     flight.setDepTerminal(shoppingFlight.getDepterm());
                     flight.setArrTerminal(shoppingFlight.getArrterm());
                     flight.setAirline(shoppingFlight.getMarketingAirline());
-                    flight.setCodeshare(shoppingFlight.getOpCode() + shoppingFlight.getOpFltNo());
+                    flight.setCodeshare(shoppingFlight.getOpCode()+shoppingFlight.getOpFltNo());
                     flight.setFlightNum(shoppingFlight.getRph());
                     flight.setEquipment(shoppingFlight.getEquipment());
                     flight.setFlightNo(shoppingFlight.getFlightNumber());
@@ -1007,8 +1002,7 @@ public class QueryServiceImpl implements IQueryService {
     /**
      * 得到国内附加段
      *
-     * @param flights
-     *         goDep goArr backArr
+     * @param flights goDep goArr backArr
      * @return List<Flight>
      */
     private List<Flight> getAddonFlight(List<Flight> flights) {
@@ -1028,8 +1022,7 @@ public class QueryServiceImpl implements IQueryService {
     /**
      * 得到国外延伸段
      *
-     * @param flights
-     *         goDep goArr backArr
+     * @param flights goDep goArr backArr
      * @return List<Flight>
      */
     private List<Flight> getSPAFlight(List<Flight> flights) {
@@ -1050,23 +1043,22 @@ public class QueryServiceImpl implements IQueryService {
     /**
      * 解析运价横式
      *
-     * @param fareLinear
-     *         goDep goArr
+     * @param fareLinear goDep goArr
      * @return List<Flight>
      */
     private Map<String, String> getNucByFareLinear(String fareLinear, String arr, String arrCity, String dep, String depCity, String fareBasis, Integer legType) {
         Map<String, String> map = new HashMap<String, String>();
-        LogRecord log = new LogRecord();
+        LogRecord log =new LogRecord();
         log.setCreateTime(new Date());
         log.setAppCode("B2B");
         log.setBizCode("POLICY");
-        log.setDesc("fareLinear:" + fareLinear + "--" + "arr:" + arr + "--arrCity:" + arrCity + "--dep:" + dep + "--depCity:" + depCity + "--fareBasis:" + fareBasis + "--legType:" + legType);
+        log.setDesc( "fareLinear:"+fareLinear+"--"+"arr:"+ arr + "--arrCity:"+ arrCity+ "--dep:" +dep + "--depCity:" +depCity +"--fareBasis:" + fareBasis+"--legType:" + legType);
         log.setBizNo("fareLinear12345678968574512");
         logService.insert(log);
-        if (null == fareLinear) {
-            fareLinear = "";
+        if(null==fareLinear){
+            fareLinear="";
         }
-        fareLinear = fareLinear.toLowerCase();
+        fareLinear=fareLinear.toLowerCase();
         if (fareBasis.contains("+")) {
             for (String fareBasi : fareBasis.split("/+")) {
                 fareLinear = fareLinear.replace(fareBasi.toLowerCase(), "");
@@ -1086,8 +1078,8 @@ public class QueryServiceImpl implements IQueryService {
                 map.put("totalNuc", "2");
                 map.put("roe", "1");
             }
-        } else if (fareLinear.contains("/it")) {
-            fareLinear = fareLinear.replaceAll("/it", "");
+        } else if(fareLinear.contains("/it")) {
+            fareLinear=fareLinear.replaceAll("/it","");
             String[] fc = fareLinear.split(" ");
             for (String a : fc) {
                 Pattern pattern = Pattern.compile("^q.*");
@@ -1099,7 +1091,7 @@ public class QueryServiceImpl implements IQueryService {
                         map.put("Q", nuc);
                     }
                 }
-                if (a.contains("s")) {
+                if ( a.contains("s")) {
                     nuc = a.replaceAll(arr, "").replaceAll("[a-z]", "").trim();
                     if (!"".equals(nuc)) {
                         map.put("S", nuc);
@@ -1112,13 +1104,13 @@ public class QueryServiceImpl implements IQueryService {
                         map.put("roe", nuc);
                     }
                 }
-                if (null != map.get("roe") && !"".equals(map.get("roe"))) {
-                    if (null != map.get("Q") && !"".equals(map.get("Q"))) {
-                        BigDecimal Qvalue = new BigDecimal(map.get("roe")).multiply(new BigDecimal(map.get("Q")));
-                        map.put("Qvalue", Qvalue.toString());
+                if(null!=map.get("roe")&&!"".equals(map.get("roe"))){
+                    if(null!=map.get("Q")&&!"".equals(map.get("Q"))){
+                        BigDecimal  Qvalue=new BigDecimal(map.get("roe")).multiply(new BigDecimal(map.get("Q")));
+                        map.put("Qvalue",Qvalue.toString() );
                     }
-                    if (null != map.get("S") && !"".equals(map.get("S"))) {
-                        BigDecimal Svalue = new BigDecimal(map.get("roe")).multiply(new BigDecimal(map.get("S")));
+                    if(null!=map.get("S")&&!"".equals(map.get("S"))){
+                        BigDecimal  Svalue=new BigDecimal(map.get("roe")).multiply(new BigDecimal(map.get("S")));
                         map.put("Svalue", Svalue.toString());
                     }
                 }
@@ -1139,7 +1131,7 @@ public class QueryServiceImpl implements IQueryService {
                         map.put("Q", nuc);
                     }
                 }
-                if (a.contains("S") || a.contains("s")) {
+                if (a.contains("S")||a.contains("s") ) {
                     nuc = a.replaceAll(arr, "").replaceAll("[a-z]", "").trim();
                     if (!"".equals(nuc)) {
                         map.put("S", nuc);
@@ -1222,8 +1214,7 @@ public class QueryServiceImpl implements IQueryService {
     /**
      * 计算运价
      *
-     * @param policyMap
-     *         formula
+     * @param policyMap formula
      * @return BigDecimal
      */
     private BigDecimal getfare(Map policyMap, Formula formula, QueryIBEDetail queryIBEDetail, BigDecimal fare, BigDecimal tax, BigDecimal awardPrice, List<Flight> flights, String type) {
@@ -1412,15 +1403,15 @@ public class QueryServiceImpl implements IQueryService {
                         formulaParameters.setBrokerage(new BigDecimal(0));
                         formulaParameters.setTax(new BigDecimal(0));
                         if ("back".equals(type)) {
-                            if (null != formula01Para.getForeignRebateList()) {
+                            if(null!=formula01Para.getForeignRebateList()){
                                 formulaParameters.setSaleRebate(saleRebate.subtract(formula01Para.getForeignRebateList().get(1)));
-                            } else {
+                            }else{
                                 formulaParameters.setSaleRebate(saleRebate);
                             }
                         } else {
-                            if (null != formula01Para.getForeignRebateList()) {
+                            if(null!=formula01Para.getForeignRebateList()) {
                                 formulaParameters.setSaleRebate(saleRebate.subtract(formula01Para.getForeignRebateList().get(0)));
-                            } else {
+                            }else{
                                 formulaParameters.setSaleRebate(saleRebate);
                             }
                         }
@@ -1647,7 +1638,11 @@ public class QueryServiceImpl implements IQueryService {
                 awardTmp = awardTmp + mainFlight.getTpm();
                 mainFlight.setPolicyNo(policy.getPolicyNo());
                 FormulaParameters formulaParameters = new FormulaParameters();
-                formulaParameters.setAwardPrice(awardPrice.multiply(new BigDecimal(awardTmp / tpmTotal)));
+                if(0==tpmTotal){
+                    formulaParameters.setAwardPrice(awardPrice);
+                }else{
+                    formulaParameters.setAwardPrice(awardPrice.multiply(new BigDecimal(awardTmp / tpmTotal)));
+                }
                 formulaParameters.setFare(fare);
                 formulaParameters.setAgencyFee(policy.getAgencyFee());
                 formulaParameters.setTax(tax);
@@ -1655,8 +1650,11 @@ public class QueryServiceImpl implements IQueryService {
                 formulaParameters.setBrokerage(saleBrokerage);
                 if ("back".equals(type)) {
                     policyMap.put("backAwardPrice", formulaParameters.getAwardPrice());
-                } else {
+                }else {
                     policyMap.put("awardPrice", formulaParameters.getAwardPrice());
+                }
+                if(null==formula02Para.getFormulaNo()){
+                    formula02Para.setFormulaNo(0);
                 }
                 switch (formula02Para.getFormulaNo()) {//判断计算公式编号
                     case 1:
@@ -1717,8 +1715,7 @@ public class QueryServiceImpl implements IQueryService {
     /**
      * 计算往返程
      *
-     * @param passengerTypePricesTotal
-     *         queryIBEDetail priceSpec policyMap type
+     * @param passengerTypePricesTotal queryIBEDetail priceSpec policyMap type
      * @return BigDecimal
      */
     private BigDecimal getCombinationPrice(PassengerTypePricesTotal passengerTypePricesTotal, QueryIBEDetail queryIBEDetail, PriceSpec priceSpec, Map policyMap, int type) {
@@ -1743,37 +1740,44 @@ public class QueryServiceImpl implements IQueryService {
                 if (null != uncMap.get("Q")) {//获取Q值
                     Qvalue = new BigDecimal((String) uncMap.get("Q")).multiply(new BigDecimal((String) uncMap.get("roe")));
                 }
-                BigDecimal awardGoFare = new BigDecimal((String) uncMap.get("goNuc")).multiply(new BigDecimal((String) uncMap.get("roe")));
-                BigDecimal awardBackFare = new BigDecimal((String) uncMap.get("backNuc")).multiply(new BigDecimal((String) uncMap.get("roe")));
-                if ("1".equals(uncMap.get("goNuc"))) {//获取nuc
+                BigDecimal awardGoFare = null;
+                BigDecimal awardBackFare =null;
+                if(null==uncMap.get("goNuc")){
+                    awardGoFare = passengerTypePricesTotal.getFare().divide(new BigDecimal(2)).subtract(Qvalue);
+                    awardBackFare = passengerTypePricesTotal.getFare().divide(new BigDecimal(2)).subtract(Qvalue);
+                }else{
+                    awardGoFare = new BigDecimal((String) uncMap.get("goNuc")).multiply(new BigDecimal((String) uncMap.get("roe")));
+                    awardBackFare = new BigDecimal((String) uncMap.get("backNuc")).multiply(new BigDecimal((String) uncMap.get("roe")));
+                }
+                 if ("1".equals(uncMap.get("goNuc"))) {//获取nuc
                     awardGoFare = passengerTypePricesTotal.getFare().divide(new BigDecimal(2));
                     awardBackFare = passengerTypePricesTotal.getFare().divide(new BigDecimal(2));
                 }
-                BigDecimal goFare = awardGoFare.add(Qvalue);
+                BigDecimal goFare=awardGoFare.add(Qvalue);
                 Policy policy = (Policy) policyMap.get("policy");
-                if (null != policy.getqRebate() && policy.getqRebate()) {
-                    awardGoFare = awardGoFare.add(Qvalue);
+                if(null!=policy.getqRebate()&&policy.getqRebate()){
+                    awardGoFare= awardGoFare.add(Qvalue);
                 }
                 BigDecimal Svalue = new BigDecimal(0);
                 if (null != uncMap && null != uncMap.get("S")) {
                     Svalue = new BigDecimal((String) uncMap.get("S")).multiply(new BigDecimal((String) uncMap.get("roe")));
                 }
-                if (null != policy.getsRebate() && policy.getsRebate()) {
-                    awardGoFare = awardGoFare.add(Svalue);
+                if(null!=policy.getsRebate()&&policy.getsRebate()){
+                    awardGoFare= awardGoFare.add(Svalue);
                 }
-                goFare = awardGoFare.add(Qvalue).add(Svalue);
-                if (null != policy.getYryqRebate() && policy.getYryqRebate()) {
+                goFare=awardGoFare.add(Qvalue).add(Svalue);
+                if(null!=policy.getYryqRebate()&&policy.getYryqRebate()){
                     BigDecimal YQvalue = new BigDecimal(0);
                     BigDecimal YRvalue = new BigDecimal(0);
-                    HashMap<String, BigDecimal> map = passengerTypePricesTotal.getTaxs();
+                    HashMap<String, BigDecimal> map= passengerTypePricesTotal.getTaxs();
                     if (null != uncMap && null != map.get("YQ")) {
                         YQvalue = new BigDecimal((String) uncMap.get("YQ"));
                     }
                     if (null != uncMap && null != map.get("YR")) {
                         YRvalue = new BigDecimal((String) uncMap.get("YR"));
                     }
-                    awardGoFare = awardGoFare.add(YRvalue).add(YQvalue);
-                    goFare = goFare.add(YRvalue).add(YQvalue);
+                    awardGoFare= awardGoFare.add(YRvalue).add(YQvalue);
+                    goFare=goFare.add(YRvalue).add(YQvalue);
                     passengerTypePricesTotal.setTax(passengerTypePricesTotal.getTax().subtract(YRvalue).subtract(YQvalue));
                 }
                 BigDecimal awardGoPrice = getfare(policyMap, priceSpec.getFormula(), queryIBEDetail, goFare, passengerTypePricesTotal.getTax(), awardGoFare, queryIBEDetail.getFlights(), "go");
@@ -1786,37 +1790,37 @@ public class QueryServiceImpl implements IQueryService {
                 BigDecimal awardBackFare2 = passengerTypePricesTotal.getFare().divide(new BigDecimal(2));
                 BigDecimal goFare2 = awardGoFare2;
                 BigDecimal backFare2 = awardBackFare2;
-                if (null == policy.getqRebate() || !policy.getqRebate()) {
+                if(null==policy.getqRebate()||!policy.getqRebate()){
                     BigDecimal Qvalue2 = new BigDecimal(0);
                     if (null != uncMap.get("Q")) {
                         Qvalue2 = new BigDecimal((String) uncMap.get("Q")).multiply(new BigDecimal((String) uncMap.get("roe")));
                     }
-                    awardGoFare2 = awardGoFare2.subtract(Qvalue2.divide(new BigDecimal(2)));
-                    awardBackFare2 = awardBackFare2.subtract(Qvalue2.divide(new BigDecimal(2)));
+                    awardGoFare2= awardGoFare2.subtract(Qvalue2.divide(new BigDecimal(2)));
+                    awardBackFare2= awardBackFare2.subtract(Qvalue2.divide(new BigDecimal(2)));
                 }
-                if (null == policy.getsRebate() || !policy.getsRebate()) {
+                if(null==policy.getsRebate()||!policy.getsRebate()){
                     BigDecimal Svalue = new BigDecimal(0);
                     if (null != uncMap && null != uncMap.get("S")) {
                         Svalue = new BigDecimal((String) uncMap.get("S")).multiply(new BigDecimal((String) uncMap.get("roe")));
                     }
-                    awardGoFare2 = awardGoFare2.subtract(Svalue.divide(new BigDecimal(2)));
-                    awardBackFare2 = awardBackFare2.subtract(Svalue.divide(new BigDecimal(2)));
+                    awardGoFare2= awardGoFare2.subtract(Svalue.divide(new BigDecimal(2)));
+                    awardBackFare2= awardBackFare2.subtract(Svalue.divide(new BigDecimal(2)));
                 }
-                if (null != policy.getYryqRebate() && policy.getYryqRebate()) {
+                if(null!=policy.getYryqRebate()&&policy.getYryqRebate()){
                     BigDecimal YQvalue = new BigDecimal(0);
                     BigDecimal YRvalue = new BigDecimal(0);
-                    HashMap<String, BigDecimal> map = passengerTypePricesTotal.getTaxs();
+                    HashMap<String, BigDecimal> map= passengerTypePricesTotal.getTaxs();
                     if (null != uncMap && null != map.get("YQ")) {
                         YQvalue = new BigDecimal((String) uncMap.get("YQ"));
                     }
                     if (null != uncMap && null != map.get("YR")) {
                         YRvalue = new BigDecimal((String) uncMap.get("YR"));
                     }
-                    awardGoFare2 = awardGoFare2.add(YRvalue).add(YQvalue);
-                    goFare2 = goFare2.add(YRvalue).add(YQvalue);
+                    awardGoFare2= awardGoFare2.add(YRvalue).add(YQvalue);
+                    goFare2=goFare2.add(YRvalue).add(YQvalue);
                     passengerTypePricesTotal.setTax(passengerTypePricesTotal.getTax().subtract(YRvalue).subtract(YQvalue));
                 }
-                
+
                 BigDecimal awardGoPrice2 = getfare(policyMap, priceSpec.getFormula(), queryIBEDetail, goFare2, passengerTypePricesTotal.getTax(), awardGoFare2, queryIBEDetail.getFlights(), "go");
                 BigDecimal awardBackPrice2 = getfare(policyMap, priceSpec.getFormula(), queryIBEDetail, backFare2, new BigDecimal(0), awardBackFare2, queryIBEDetail.getFlights(), "back");
                 return awardGoPrice2.add(awardBackPrice2);
@@ -1829,12 +1833,11 @@ public class QueryServiceImpl implements IQueryService {
     /**
      * 合并行程相同的数据
      *
-     * @param queryIBEDetails
-     *         List<QueryIBEDetail>
+     * @param queryIBEDetails List<QueryIBEDetail>
      */
-    private List<QueryIBEDetail> combineQueryIBEDetails(List<QueryIBEDetail> queryIBEDetails, String type, Agent agent) {
+    private List<QueryIBEDetail> combineQueryIBEDetails(List<QueryIBEDetail> queryIBEDetails, String type,Agent agent) {
         Map<String, QueryIBEDetail> queryIBEDetailMap = new HashMap<String, QueryIBEDetail>();
-        BigDecimal profit = getProfitByAgent(agent);
+        BigDecimal profit=getProfitByAgent( agent);
         QueryIBEDetail minqueryIBEDetail = null;
         for (QueryIBEDetail queryIBEDetail : queryIBEDetails) {//组装数据
             StringBuffer sb = new StringBuffer("");
@@ -1854,16 +1857,16 @@ public class QueryServiceImpl implements IQueryService {
                                     minqueryIBEDetail = queryIBEDetail;
                                 }
                             }
-                            
+
                         }
                     }
                 }
             } else {
                 minqueryIBEDetail = queryIBEDetail;
             }
-            for (CabinsPricesTotals cabinsPricesTotals : queryIBEDetail.getCabinsPricesTotalses()) {
+            for (CabinsPricesTotals cabinsPricesTotals:  queryIBEDetail.getCabinsPricesTotalses()) {
                 for (PassengerTypePricesTotal passengerTypePricesTotal : cabinsPricesTotals.getPassengerTypePricesTotals()) {
-                    if (null != passengerTypePricesTotal.getSalePrice()) {
+                    if(null!=passengerTypePricesTotal.getSalePrice()){
                         passengerTypePricesTotal.setSalePrice(passengerTypePricesTotal.getSalePrice().add(profit));
                         passengerTypePricesTotal.setAddPrice(profit);
                     }
@@ -2117,7 +2120,7 @@ public class QueryServiceImpl implements IQueryService {
         List<SubControlRule> subControlRuleList = subControlRuleService.selectSubControlRuleByMap(subControlRule);
         if (subControlRuleList != null && subControlRuleList.size() > 0) {
             for (SubControlRule bean : subControlRuleList) {
-                //按区间控
+               //按区间控
                 if (bean.getType() == 1) {
                     if (passengerTypePricesTotal.getSalePrice().floatValue() >= bean.getStart() && passengerTypePricesTotal.getSalePrice().floatValue() <= bean.getEnd()) {
                         passengerTypePricesTotal.setSalePrice(passengerTypePricesTotal.getSalePrice().add(new BigDecimal(bean.getPoint())));
@@ -2132,32 +2135,33 @@ public class QueryServiceImpl implements IQueryService {
             }
         }
     }
-    
+
     /**
      * 国际机票二次控润
+     *
      *
      * @param agent
      */
     public BigDecimal getProfitByAgent(Agent agent) {
         ProfitVO profitVO = new ProfitVO();
         Customer customer = customerService.getCustomerByNo(agent, agent.getNum());
-        if (null == customer) {
+        if(null==customer){
             return new BigDecimal(0);
         }
         profitVO.setOwner(agent.getOwner());
         profitVO.setCustomerTypeNo(customer.getCustomerTypeNo());
-        List<Profit> profits = profitDao.queryProfit(profitVO);
+        List<Profit>  profits= profitDao.queryProfit(profitVO);
         if (profits != null && profits.size() > 0) {
             for (Profit bean : profits) {
-                if (null != bean.getCustomerNo() && bean.getCustomerNo().equals(agent.getNum())) {
-                    if (null != bean.getRaisePrice()) {
-                        return bean.getRaisePrice();
+                if(null!=bean.getCustomerNo()&&bean.getCustomerNo().equals(agent.getNum())){
+                    if(null!=bean.getRaisePrice()){
+                        return  bean.getRaisePrice();
                     }
-                } else if (bean.getCustomerNo() == null) {
-                    if (null != bean.getRaisePrice()) {
-                        return bean.getRaisePrice();
+                }else if(bean.getCustomerNo()==null){
+                    if(null!=bean.getRaisePrice()){
+                        return  bean.getRaisePrice();
                     }
-                } else {
+                }else{
                     return new BigDecimal(0);
                 }
             }
