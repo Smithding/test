@@ -1658,7 +1658,7 @@ public class OrderServiceImpl implements IOrderService {
 						Response.class);
 				if(response!=null){
 					error = response.getMsg();
-					resultInsure.setCode(response.getCode());
+					resultInsure.setCode(response.getCode()); 
 					resultInsure.setMessage(response.getMsg());
 				}
 				log.info("保险经纪接口响应:"+JSONObject.toJSONString(response));
