@@ -660,9 +660,6 @@
             <if test="orderChildStatus!=null">
                 o.ORDER_CHILD_STATUS = #{orderChildStatus,jdbcType=BIGINT}AND
             </if>
-            <if test="orderChildStatus!=null">
-                o.ORDER_CHILD_STATUS = #{orderChildStatus,jdbcType=BIGINT} AND
-            </if>
             <if test="issuemodifier!=null and issuemodifier!=''">
                 IBOD.CREATOR= #{issuemodifier,jdbcType=VARCHAR} AND
             </if>
@@ -680,7 +677,8 @@
         UPDATE IFT_SALE_ORDER_EXT
         SET LOCKER      = #{locker,jdbcType=BIGINT},
             LOCK_TIME   = #{lockTime,jdbcType=TIMESTAMP},
-            MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP}
+            MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            MODIFIER    = #{modifier,jdbcType=VARCHAR}
         WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
     </update>
 

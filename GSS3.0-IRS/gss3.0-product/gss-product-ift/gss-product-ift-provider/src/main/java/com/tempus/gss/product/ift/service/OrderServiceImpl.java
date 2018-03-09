@@ -898,7 +898,7 @@ public class OrderServiceImpl implements IOrderService {
      * @param requestWithActor
      * @return
      */
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean issuing(RequestWithActor<PassengerListVo> requestWithActor) {
 
         Agent agent = requestWithActor.getAgent();
@@ -2587,6 +2587,7 @@ public class OrderServiceImpl implements IOrderService {
     private void assingLockOrder(SaleOrderExt order,TicketSender sender,Date date,Agent agent){
         User user = userService.findUserByLoginName(agent,sender.getUserid());
         order.setLocker(user.getId());
+        order.setModifier(sender.getUserid() + "");
         order.setLockTime(date);
         order.setModifyTime(date);
         saleOrderExtDao.updateLocker(order);
