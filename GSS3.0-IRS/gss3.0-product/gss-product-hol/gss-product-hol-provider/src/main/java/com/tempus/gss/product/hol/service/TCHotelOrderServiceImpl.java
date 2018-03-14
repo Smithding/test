@@ -16,6 +16,7 @@ import java.util.TreeMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -99,7 +100,9 @@ import com.tempus.gss.product.hol.api.util.DateUtil;
 import com.tempus.gss.product.hol.api.util.OrderStatusUtils;
 import com.tempus.gss.product.hol.dao.HolSupplierMapper;
 import com.tempus.gss.product.hol.dao.HotelOrderMapper;
+import com.tempus.gss.security.ShiroUser;
 import com.tempus.gss.sms.SMSUtil;
+import com.tempus.gss.system.entity.SmsTemplateDetail;
 import com.tempus.gss.system.service.IMaxNoService;
 import com.tempus.gss.system.service.ISmsTemplateDetailService;
 import com.tempus.gss.util.JsonUtil;
@@ -1236,8 +1239,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	}
 	
 	public String messageReplace(String message, HotelOrder hotelOrder){
-		SimpleDateFormat simpleorder = new SimpleDateFormat("yyyy年MM月dd日");
-		String replace1 = message.replace("{$OrderNo}", hotelOrder.getHotelOrderNo());
+		System.out.println("订单内容: "+JsonUtil.toJson(hotelOrder));
+		SimpleDateFormat simpleorder = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat simple = new SimpleDateFormat("yyyy/MM/dd");
+		String replace1 = message.replace("{$OrderNo}", hotelOrder.getSaleOrderNo().toString());
 		String replace2 = replace1.replace("{$CreateDate}", simpleorder.format(hotelOrder.getCreateOrderTime()));
 		String replace3 = replace2.replace("{$HotelName}", hotelOrder.getHotelName());
 		String replace4 = replace3.replace("{$Address}", hotelOrder.getHotelAddress());
@@ -1245,9 +1250,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		String replace6 = replace5.replace("{$RoomNum}", hotelOrder.getBookCount().toString());
 		String replace7 = replace6.replace("{$RoomNight}", hotelOrder.getNightCount().toString());
 		String replace8 = replace7.replace("{$RoomType}", hotelOrder.getProName());
-		//replace8.replace("{$DayInfo}", hotelOrder.);
-		String replace9 = replace8.replace("{$GuestsName}", hotelOrder.getGuestName());
-		String replace = replace9.replace("{$LateTime}", hotelOrder.getArriveHotelTime().substring(0, 13));
+		String replace9 = replace8.replace("{$DayInfo}", simple.format(hotelOrder.getArrivalDate()).substring(5, 10)+"-"+simple.format(hotelOrder.getDepartureDate()).substring(5, 10)+" 总价¥"+hotelOrder.getTotalPrice());
+		String replace10 = replace9.replace("{$GuestsName}", hotelOrder.getGuestName());
+		String replace = replace10.replace("{$LateTime}", hotelOrder.getArriveHotelTime().substring(0, 13));
 		return replace;
 	}
 
@@ -1295,15 +1300,31 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							SmsTemplateDetail smsTemplateDetail = new SmsTemplateDetail();
 					    	smsTemplateDetail.setDictCode("HOTEL_NO_GUARANTEE");
 					    	List<SmsTemplateDetail> stds = smsTemplateDetailService.query(smsTemplateDetail);
-					    	String messageReplace = messageReplace(stds.get(0).getDictCode(), hotelOrder);
-					    	smsUtil.sendMsgForUpdateBill(agent, hotelOrder.getContactNumber(), messageReplace);
-						}else{
+					    	System.out.println("短信内容: "+JsonUtil.toJson(stds));
+					    	String messageReplace = messageReplace(stds.get(0).getContent(), hotelOrder);
+					    	System.out.println("变化后的内容: "+messageReplace);
+					    	//smsUtil.sendMsgForUpdateBill(agent, hotelOrder.getContactNumber(), messageReplace);
+						}else{*/
 							SmsTemplateDetail smsTemplateDetail = new SmsTemplateDetail();
 							smsTemplateDetail.setDictCode("HOTEL_GUARANTEE");
 					    	List<SmsTemplateDetail> stds = smsTemplateDetailService.query(smsTemplateDetail);
-					    	String messageReplace = messageReplace(stds.get(0).getDictCode(), hotelOrder);
-					    	smsUtil.sendMsgForUpdateBill(agent, hotelOrder.getContactNumber(), messageReplace);
-						}*/
+					    	System.out.println("总内容: "+JsonUtil.toJson(stds));
+					    	String messageReplace = messageReplace(stds.get(0).getContent(), hotelOrder);
+					    	System.out.println("短信内容1: "+stds.get(0).getContent());
+					    	System.out.println("变化后的内容: "+messageReplace);
+					    	
+					    	LogRecord logRecord=new LogRecord();
+							logRecord.setAppCode("GSS");
+							logRecord.setBizCode("HOL-Order");
+							logRecord.setBizNo(hotelOrder.getHotelOrderNo());		
+							logRecord.setCreateTime(new java.sql.Date(System.currentTimeMillis()));
+							logRecord.setDesc(messageReplace);
+							logRecord.setCreateTime(new Date());
+							logRecord.setOptName("腾邦国际");
+							iLogService.insert(logRecord); 
+					    	
+					    	//smsUtil.sendMsgForUpdateBill(agent, hotelOrder.getContactNumber(), messageReplace);
+						//}
 					}else if(tcPushOrderInfo.getOperateType().equals(StatusType.CANCEL_ORDER_CONFIRM.getKey())){
 						des = "订单号"+orderId +",订单状态由"+OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus()).getValue()+"变成:"+ OwnerOrderStatus.CANCEL_OK.getValue();
 						//更新销售单和采购单状态

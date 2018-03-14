@@ -1306,7 +1306,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 
 	@Override
 	public List<HotelName> queryHotelNamesByLucene(Agent agent,String name) {
-		//System.out.println("name: "+name);
+		log.info("查询索引关键字入参: "+name);
 		List<HotelName> hns = new ArrayList<HotelName>();
 		try {
 			Analyzer analyzer = new IKAnalyzer();
