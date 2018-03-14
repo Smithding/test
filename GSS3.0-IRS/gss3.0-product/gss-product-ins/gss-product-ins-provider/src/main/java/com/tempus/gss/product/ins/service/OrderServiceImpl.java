@@ -216,9 +216,7 @@ public class OrderServiceImpl implements IOrderService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
 	public Long createOrder(RequestWithActor<OrderCreateVo> requestWithActor) throws Exception {
-
 		log.info("创建保险订单开始==========");
-
 		if (requestWithActor.getAgent() == null || requestWithActor.getEntity() == null) {
 			log.info("创建保险订单参数为空");
 			throw new GSSException("创建保险订单参数为空", "1010", "创建保险订单失败");
@@ -401,12 +399,10 @@ public class OrderServiceImpl implements IOrderService {
 		if (StringUtils.isNotBlank(saleOrderExt.getHolderPhone())) {
 			saleOrderExt.setHolderPhone(saleOrderExt.getHolderPhone());
 		}
-
 		String productKey = insurance.getProductKey();
 		if (StringUtils.isNotBlank(productKey)) {
 			saleOrderExt.setProductKey(productKey);
 		}
-
 		BigDecimal salePrice = null;
 		 Long customerType = Long.parseLong((customerTypeNo+"").substring(0, 3));
 		List<ProfitControl> profitControls = profitControlDao.selectByInsuranceNo(insuranceNo);
@@ -420,14 +416,12 @@ public class OrderServiceImpl implements IOrderService {
 				}
 			}
 		}
-
 		if (salePrice == null) {
 			log.info("销售价为空");
 			throw new GSSException("销售价为空", "1010", "创建保险订单失败");
 		}else{
 			saleOrderExt.setSalePrice(salePrice);
 		}
-
 		// 总投保份数
 		int totalInsuredCount = 0;
 		List<SaleOrderDetail> saleOrderDetailList = saleOrderExt.getSaleOrderDetailList();
@@ -444,7 +438,6 @@ public class OrderServiceImpl implements IOrderService {
 			log.info("总投保份数为0!");
 			throw new GSSException("总投保份数为0!", "1010", "创建保险订单失败");
 		}
-
 		// 传过来的总保费
 		BigDecimal totalPremium = saleOrderExt.getTotalPremium();
 		// 根据控润渠道销售价计算的总保费
@@ -459,23 +452,15 @@ public class OrderServiceImpl implements IOrderService {
             if(insuranceProfit.getProfitCount()!=null||insuranceProfit.getProfitMoney()!=null){
           	  //判断是控点还是固定控  1为控点    2为固定控          
               if(insuranceProfit.getProfitMode()==1){
-/*              	 if(insuranceProfit.getProfitCount()!=null){
-              		 premiums = (premiums.multiply(insuranceProfit.getProfitCount()).divide(a)).add(premiums);    
-            	   }else{
-            		   Log.error("保险控点为空");
-            	   }*/
-            
              }else if(insuranceProfit.getProfitMode()==2){
           	   if(insuranceProfit.getProfitMoney()!=null){
           		   premiums = premiums.add(insuranceProfit.getProfitMoney());
           	   }else{
           		   Log.error("保险控现为空");
-          	   }
-          		   
+          	   } 
              }
           }
         }
-   
         saleOrderExt.setSalePrice(premiums);
         //单个保险再乘以购买保险的总人数
         SaleOrderExt SaleOrderExt = requestWithActor.getEntity().getSaleOrderExt();
@@ -509,7 +494,6 @@ public class OrderServiceImpl implements IOrderService {
 		}
 		saleOrderExt.setValid(null);
 		saleOrderExt.setInsurance(insurance);
-	
 		//根据保险险种来存储扩展信息
 		if (saleOrderExt.getInsureExtVo() != null && (saleOrderExt.getInsureExtVo().getFlightNo() != null || saleOrderExt.getInsureExtVo().getFlightInfoVo() != null)) {
 			if(saleOrderExt.getInsureExtVo().getFlightInfoVo().getDestinationCity()==null&&saleOrderExt.getInsureExtVo().getFlightInfoVo().getDestinationCode()!=null){
@@ -538,18 +522,18 @@ public class OrderServiceImpl implements IOrderService {
 			saleOrderExt.setExtendedFieldsJson(extendedFieldsJson);
 		}
 		orderServiceDao.insertSelective(saleOrderExt);
-
 		/**
 		 * 为防止生成订单异常时,仍生成了销售单和采购单
 		 * 故将生成销售单和采购单放在生成订单之后
 		 */
 		saleOrderService.create(requestWithActor.getAgent(), saleOrder);
 		buyOrderService.create(requestWithActor.getAgent(), buyOrder);
-
 		/* 创建子订单 */
 		if (saleOrderExt.getSaleOrderDetailList() != null && !"".equals(saleOrderExt.getSaleOrderDetailList())) {
 			for (SaleOrderDetail saleOrderDetail : saleOrderExt.getSaleOrderDetailList()) {
 				saleOrderDetail.setInsuredNo(maxNoService.generateBizNo("INS_INSURED_NO", 46));
+				//去掉姓名中空格
+				saleOrderDetail.setInsuredName(saleOrderDetail.getInsuredName().trim());
 				// 设置子订单初始状态为1(未投保)
 				saleOrderDetail.setStatus(1);
 				if (saleOrderExt.getSaleOrderNo() == null) {
@@ -575,13 +559,11 @@ public class OrderServiceImpl implements IOrderService {
 			log.info("保险子订单为空");
 			throw new GSSException("保险子订单为空", "1010", "创建保险订单失败");
 		}
-		
 		// 创建销售应收记录
 		CreatePlanAmountVO saleOrderPlanAmountVO = new CreatePlanAmountVO();
 		if (totalPremium != null) {
 			saleOrderPlanAmountVO.setPlanAmount(totalPremium);// 销售应收金额
 		}
-
 		saleOrderPlanAmountVO.setGoodsType(saleOrderExt.getSaleOrder().getGoodsType());//商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
 		saleOrderPlanAmountVO.setRecordNo(saleOrder.getSaleOrderNo());//记录编号   自动生成
 		saleOrderPlanAmountVO.setBusinessType(2);//业务类型 2，销售单，3，采购单，4 ，变更单（可以根据变更表设计情况将废退改分开）
@@ -591,7 +573,6 @@ public class OrderServiceImpl implements IOrderService {
 													// 采购补单 13 补付 14 采购废退，15
 													// 采购改签
 		planAmountRecordService.create(requestWithActor.getAgent(), saleOrderPlanAmountVO);
-         
 		// 创建采购应付记录
 		CreatePlanAmountVO buyOrderPlanAmountVO = new CreatePlanAmountVO();
 		BigDecimal buyPrice = null;
@@ -621,17 +602,13 @@ public class OrderServiceImpl implements IOrderService {
 		log.info("创建保险订单结束==========");
 		return saleOrderExt.getSaleOrderNo();
 	}
-
-
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
 	private void buyInsureForBack(RequestWithActor<OrderCreateVo> requestWithActor) throws Exception {
-
 		RequestWithActor<Long> buyInsureRequest = new RequestWithActor<>();
 		buyInsureRequest.setAgent(requestWithActor.getAgent());
 		buyInsureRequest.setEntity(requestWithActor.getEntity().getSaleOrderExt().getSaleOrderNo());
 		this.buyInsure4Back(buyInsureRequest);
 	}
-
 	/**
 	 * 
 	 * buyInsureForWeb:前台投保
@@ -650,7 +627,6 @@ public class OrderServiceImpl implements IOrderService {
 	//		log.info("--------------------------------------调用 buyInsure-------------------------------------");
 	//		this.buyInsure(buyInsureRequest);
 	//	}
-
 	@Transactional
 	public SaleOrderExtVo buyInsure4Back(RequestWithActor<Long> requestWithActor) throws Exception {
 		log.info("投保开始==============");
@@ -662,7 +638,6 @@ public class OrderServiceImpl implements IOrderService {
 				log.info("投保参数为空");
 				throw new GSSException("投保参数为空", "1010", "投保失败");
 			}
-
 			SaleOrderExt saleOrderExt = orderServiceDao.selectByPrimaryKey(requestWithActor.getEntity());
 			if (saleOrderExt == null) {
 				log.info("根据销售单编号查询保险订单结果为空");
@@ -670,7 +645,6 @@ public class OrderServiceImpl implements IOrderService {
 			}
 			String sourceName = paramService.getValueByKey(INS_SOURCE_NAME);
 			saleOrderExt.setSourceName(sourceName);
-
 			Insurance insurance = saleOrderExt.getInsurance();
 			if (null == insurance) {
 				log.error("该订单对应的保险产品为空!");
@@ -681,13 +655,11 @@ public class OrderServiceImpl implements IOrderService {
 				log.error("保险产品的保险公司名称为空!");
 				throw new GSSException("保险产品的保险公司名称为空!", "1010", "投保失败");
 			}
-
 			String insurePath = paramService.getValueByKey(INSURE_PATH);
 			if (StringUtils.isBlank(insurePath)) {
 				log.error("当前保险产品的投保请求路径为空,请在参数管理处配置!");
 				throw new GSSException("当前保险产品的投保请求路径为空,请在参数管理处配置!", "1010", "投保失败");
 			}
-
 			List<SaleOrderDetail> saleOrderDetailList = saleOrderExt.getSaleOrderDetailList();
 			if (saleOrderDetailList == null || saleOrderDetailList.size() == 0) {
 				log.error("子订单为空!");
@@ -695,6 +667,7 @@ public class OrderServiceImpl implements IOrderService {
 			}
 			// 对被保人循环进行投保操作
 			for (SaleOrderDetail saleOrderDetail : saleOrderDetailList) {
+				//如果该被保人已经投保，则跳过
 				if(saleOrderDetail.getStatus()==2){
 					continue;
 				}
@@ -708,15 +681,12 @@ public class OrderServiceImpl implements IOrderService {
 				detail.setInsuredSex(saleOrderDetail.getInsuredSex());
 				saleOrderDetails.add(detail);
 				saleOrderExt.setSaleOrderDetailList(saleOrderDetails);
-
 				/* 调用保险经纪的接口进行投保，请求是json串 */
 				ObjectMapper mapper = new ObjectMapper();
 				InsureRequestVo insureRequestVo = null;
 				insureRequestVo = toInsureRequestVo4Back(saleOrderExt);
-
 				String json = mapper.writeValueAsString(insureRequestVo);
 				log.info("投保请求报文=======>" + json);
-
 				@SuppressWarnings("unchecked")
 				Response<SaleOrderExtVo> response = (Response<SaleOrderExtVo>) HttpClientUtil.doJsonPost(insurePath,
 						json,
@@ -742,42 +712,40 @@ public class OrderServiceImpl implements IOrderService {
 				if (companyName.contains(COMPANY_NAME_YATAI)) {
 					if (response.getMsg() != null) {
 						saleOrderDetail.setPolicyNo(response.getMsg());
-/*						saleOrderDetail.setModifyTime(new Date());*/
 						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					}
 				}
-
 				if (companyName.contains(COMPANY_NAME_ZHONGAN)) {
 					if (StringUtils.isNotBlank(saleOrderExtVo.getPolicyNo())) {
 						saleOrderDetail.setPolicyNo(saleOrderExtVo.getPolicyNo());
-/*						saleOrderDetail.setModifyTime(new Date());*/
 						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					}
 				}
-
 				orderServiceDao.updateByPrimaryKeySelective(saleOrderExt);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("调用保险经纪接口出错");
 			throw new GSSException("调用保险经纪接口出错", "1010", "投保失败");
-
 		}
 		log.info("投保结束==============");
 		return saleOrderExtVo;
 	}
-
+/**
+ * toInsureRequestVoForWeb:格式转化为投保需要的格式
+ * @param saleOrderExt
+ * @return
+ */
 	InsureRequestVo toInsureRequestVoForWeb(SaleOrderExt saleOrderExt) {
-
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		Insurance insurance = saleOrderExt.getInsurance();
 		List<SaleOrderDetail> saleOrderDetailList = saleOrderExt.getSaleOrderDetailList();
-
 		InsureRequestVo insureRequestVo = new InsureRequestVo();
 		insureRequestVo.setProductKey(StringUtils.defaultString(insurance.getProductKey()));
 		insureRequestVo.setEffectDate(saleOrderExt.getEffectDate());
 		int sum = 0;
+		//计算总价
 	    for(SaleOrderDetail saleOrderDetail:saleOrderDetailList){
 	    	sum += saleOrderDetail.getInsuranceNum();
 	    }
@@ -877,44 +845,6 @@ public class OrderServiceImpl implements IOrderService {
 				throw new GSSException("时间格式转换异常!", "1010", "投保失败");
 			}
 			insureRequestVo.setExpireDate(saleOrderExt.getExpireDate());
-		/*String policyHolderType = paramService.getValueByKey("ins_holder_type");
-		if (StringUtils.isNoneBlank(policyHolderType)) {
-			insureRequestVo.setPolicyHolderType(Integer.valueOf(policyHolderType));
-		}
-		String policyHolderSex = paramService.getValueByKey("ins_holder_sex");
-		if (insurance.getCompanyName().contains(COMPANY_NAME_HEZONG)&&StringUtils.isNoneBlank(policyHolderSex)) {
-			insureRequestVo.setPolicyHolderSex(Integer.valueOf(policyHolderSex));
-		}
-		String policyHolderCertiType = paramService.getValueByKey("ins_holder_certi_type");
-		if (StringUtils.isNotBlank(policyHolderCertiType)) {
-			insureRequestVo.setPolicyHolderCertiType(Integer.valueOf(policyHolderCertiType));
-		}
-		String policyHolderCertiNo = paramService.getValueByKey("ins_holder_certi_no");
-		if (StringUtils.isNotBlank(policyHolderCertiNo)) {
-			insureRequestVo.setPolicyHolderCertiNo(policyHolderCertiNo);
-		}
-		String policyHolderName = paramService.getValueByKey("ins_holder_name");
-		if (StringUtils.isNotBlank(policyHolderName)) {
-			insureRequestVo.setPolicyHolderName(policyHolderName);
-		}
-		String policyHolderPhone = paramService.getValueByKey("ins_holder_phone");
-		if (StringUtils.isNotBlank(policyHolderPhone)) {
-			insureRequestVo.setPolicyHolderPhone(policyHolderPhone);
-		}
-		String policyHolderEmail = paramService.getValueByKey("ins_holder_email");
-		if (StringUtils.isNotBlank(policyHolderEmail)) {
-			insureRequestVo.setPolicyHolderEmail(policyHolderEmail);
-		}
-		String policyHolderBirthday = paramService.getValueByKey("ins_holder_birthday");
-		if (StringUtils.isNotBlank(policyHolderBirthday)) {
-			Date parse = null;
-			try {
-				parse = simple.parse(policyHolderBirthday);
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-			insureRequestVo.setPolicyHolderBirthday(parse);
-		}*/
 		}
 		Date issueDate = null;
 		String issueDateStr = "";
@@ -943,10 +873,6 @@ public class OrderServiceImpl implements IOrderService {
 					 InsureExtVo.getFlightInfoVo().setQuantity(saleOrderExt.getSaleOrderDetailList().get(0).getInsuranceNum());
 					    extendedFieldsJson = mapper.writeValueAsString(InsureExtVo.getFlightInfoVo());
 				}
-		
-/*				insureRequestVo.setPolicyHolderCertiNo(saleOrderDetailList.get(0).getInsuredCertiNo());
-				insureRequestVo.setPolicyHolderCertiType(Integer.parseInt(saleOrderDetailList.get(0).getInsuredCertiType()));
-				insureRequestVo.setPolicyHolderBirthday(saleOrderDetailList.get(0).getInsuredBirthday());*/
 			}else{
 				 extendedFieldsJson = saleOrderExt.getExtendedFieldsJson();
 			}
@@ -964,14 +890,10 @@ public class OrderServiceImpl implements IOrderService {
 				insureRequestVo.setTravelDay(day);
 				insureRequestVo.setDestination(InsureExtVo.getFlightInfoVo().getDestinationCity());
 				extendedFieldsJson = mapper.writeValueAsString(flightInfoVo);
-			}else{
-				  extendedFieldsJson = mapper.writeValueAsString(InsureExtVo.getFlightInfoVo());
 			}
-		  
 		}catch(Exception e){
 			log.error("json转对象，对象转json异常"+e,1);
 		}
-		
 		insureRequestVo.setExtendedFieldSJson(extendedFieldsJson);
 		insureRequestVo.setSaleOrderDetailList(null);
 		insureRequestVo.setInsuredList(saleOrderDetailList);
@@ -992,6 +914,9 @@ public class OrderServiceImpl implements IOrderService {
             
        return Integer.parseInt(String.valueOf(between_days));           
     } 
+    /**
+     * 个人单独投保接口
+     */
 	@Override
 	public ResultInsure buyInsureForPerson(RequestWithActor<Long> requestWithActor, Long insuredNo) throws Exception {
 		log.info("进入投保接口==============");
@@ -1045,12 +970,13 @@ public class OrderServiceImpl implements IOrderService {
 			// 对被保人循环进行投保操作
 			for (SaleOrderDetail saleOrderDetail : saleOrderDetailList){
 				if(saleOrderDetail.getInsuredNo().equals(insuredNo)){
+					//如果该被保人已经投保，则越过
 					if(saleOrderDetail.getStatus()==2){
 						continue;
 					}
 						List<SaleOrderDetail> saleOrderDetails = new ArrayList<SaleOrderDetail>();
 						SaleOrderDetail detail = new SaleOrderDetail();
-						detail.setInsuredName(saleOrderDetail.getInsuredName());
+						detail.setInsuredName(saleOrderDetail.getInsuredName().trim());
 						detail.setInsuredCertiType(saleOrderDetail.getInsuredCertiType());
 						detail.setInsuredCertiNo(saleOrderDetail.getInsuredCertiNo());
 						detail.setInsuredPhone(saleOrderDetail.getInsuredPhone());
@@ -1090,7 +1016,6 @@ public class OrderServiceImpl implements IOrderService {
 				String jsonStr = JSON.toJSONString(response.getData());
 				JSON js = JSON.parseObject(jsonStr);
 				saleOrderExtVo = JSON.toJavaObject(js, SaleOrderExtVo.class);
-
 				if (RESPONSE_SUCCESS.equals(response.getCode())) {
 					log.info("投保响应成功");
 					// 设置子订单状态为2(已投保)
@@ -1100,7 +1025,6 @@ public class OrderServiceImpl implements IOrderService {
 					for(SaleOrderDetail saleOrderDetailForStatus:saleOrderDetailList){
 						if(saleOrderDetailForStatus.getStatus()==1){
 							panDuan = true;
-						
 						}
 					}
 			         if(panDuan==true){
@@ -1127,7 +1051,6 @@ public class OrderServiceImpl implements IOrderService {
 					throw new GSSException(response.getMsg(), "1010", "投保失败");
 				}
 				orderServiceDao.updateByPrimaryKeySelective(saleOrderExt);
-				
 			}
 			}
 			return result;
@@ -1138,7 +1061,6 @@ public class OrderServiceImpl implements IOrderService {
 		}finally{
 			return result;
 		}
-
 	}
 
 	@Override
@@ -1176,19 +1098,16 @@ public class OrderServiceImpl implements IOrderService {
 				log.error("保险产品的code为空!");
 				throw new GSSException("保险产品的code为空!", "1010", "投保失败");
 			}
-
 			String insurePath = paramService.getValueByKey(INSURE_PATH);
 			if (StringUtils.isBlank(insurePath)) {
 				log.error("当前保险产品的投保请求路径为空,请在参数管理处配置!");
 				throw new GSSException("当前保险产品的投保请求路径为空,请在参数管理处配置!", "1010", "投保失败");
 			}
-
 			List<SaleOrderDetail> saleOrderDetailList = saleOrderExt.getSaleOrderDetailList();
 			if (saleOrderDetailList == null || saleOrderDetailList.size() == 0) {
 				log.error("子订单为空!");
 				throw new GSSException("子订单为空!", "1010", "投保失败");
 			}
-
 			StringBuffer insureNoArray = new StringBuffer();
 			// 对被保人循环进行投保操作
 			for (SaleOrderDetail saleOrderDetail : saleOrderDetailList){
@@ -1197,7 +1116,7 @@ public class OrderServiceImpl implements IOrderService {
 				}
 					List<SaleOrderDetail> saleOrderDetails = new ArrayList<SaleOrderDetail>();
 					SaleOrderDetail detail = new SaleOrderDetail();
-					detail.setInsuredName(saleOrderDetail.getInsuredName());
+					detail.setInsuredName(saleOrderDetail.getInsuredName().trim());
 					detail.setInsuredCertiType(saleOrderDetail.getInsuredCertiType());
 					detail.setInsuredCertiNo(saleOrderDetail.getInsuredCertiNo());
 					detail.setInsuredPhone(saleOrderDetail.getInsuredPhone());
@@ -1263,92 +1182,14 @@ public class OrderServiceImpl implements IOrderService {
 					saleOrderDetail.setPolicyNo(saleOrderExtVo.getPolicyNo());
 					saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 				}
-               
-			/*	if (insureRequestVoForWeb.getPolicyHolderType() != null
-						&& "".equals(insureRequestVoForWeb.getPolicyHolderType())) {
-					saleOrderExt.setHolderType(insureRequestVoForWeb.getPolicyHolderType());
-				}
-				if (StringUtils.isNotBlank(insureRequestVoForWeb.getPolicyHolderName())) {
-					saleOrderExt.setHolderName(insureRequestVoForWeb.getPolicyHolderName());
-				}
-				if (insureRequestVoForWeb.getPolicyHolderCertiType() != null
-						&& "".equals(insureRequestVoForWeb.getPolicyHolderCertiType())) {
-					saleOrderExt.setHolderCertiType(insureRequestVoForWeb.getPolicyHolderCertiType());
-				}
-				if (StringUtils.isNotBlank(insureRequestVoForWeb.getPolicyHolderCertiNo())) {
-					saleOrderExt.setHolderCertiNo(insureRequestVoForWeb.getPolicyHolderCertiNo());
-				}
-				if (insureRequestVoForWeb.getPolicyHolderSex() != null
-						&& "".equals(insureRequestVoForWeb.getPolicyHolderSex())) {
-					saleOrderExt.setHolderSex(insureRequestVoForWeb.getPolicyHolderSex());
-				}
-				if (insureRequestVoForWeb.getPolicyHolderBirthday() != null
-						&& "".equals(insureRequestVoForWeb.getPolicyHolderBirthday())) {
-					saleOrderExt.setHolderBirthday(insureRequestVoForWeb.getPolicyHolderBirthday());
-				}
-				if (StringUtils.isNoneBlank(insureRequestVoForWeb.getPolicyHolderEmail())) {
-					saleOrderExt.setHolderEmail(insureRequestVoForWeb.getPolicyHolderEmail());
-				}
-				if (StringUtils.isNotBlank(insureRequestVoForWeb.getPolicyHolderPhone())) {
-					saleOrderExt.setHolderPhone(insureRequestVoForWeb.getPolicyHolderPhone());
-				}*/
 				// 为创建采购付款单获取保单号列
 				if (StringUtils.isNotBlank(saleOrderExtVo.getPolicyNo())) {
 					String policyNo = saleOrderExtVo.getPolicyNo();
 					log.error("获取保险保单号列--------》");
 					insureNoArray.append(policyNo).append(",");
 				}
-
 				orderServiceDao.updateByPrimaryKeySelective(saleOrderExt);
 			}
-
-			/**
-			 * 创建采购付款单 
-			 *//*
-			// 月结使用欠款账户
-			// 获取保险产品的供应商编号
-			Long supplierNo = insurance.getSupplierNo();
-			// 查询供应商
-			Supplier supplier = supplierService.getSupplierByNo(agent,supplierNo);
-			// 根据供应商编号查询保险供应商
-			InsSupplier insSupplier = supplierDao.selectByPrimaryKey(supplierNo);
-			Long buyOrderNo = saleOrderExt.getBuyOrderNo();
-			BuyOrder buyOrder = buyOrderService.getBOrderByBONo(agent, buyOrderNo);
-
-			if (insureNoArray.length() > 0) {
-				insureNoArray.deleteCharAt(insureNoArray.length() - 1);
-			}
-
-			if (insurance.getPayModel() == 1) {
-				log.info("使用月结账户支付----------");
-				Long accountNo = Long.parseLong(supplier.getAccountNo());
-				if (accountNo == null) {
-					log.error("开户账户为空!");
-					throw new GSSException("开户账户编号为空!", "1010", "投保失败");
-				}
-				Account account = accountService.getAccountByAccountNo(agent,accountNo);
-				if (account != null) {
-					this.createBuyCertificate(agent, buyOrder.getBuyOrderNo(), buyOrder.getPayable().doubleValue(),
-							account.getAccountNo(), supplier.getSupplierNo(), supplier.getCustomerTypeNo(), 2,
-							2000003,
-							"BUY", insureNoArray.toString());
-				}
-			} else {
-				// 现结使用支付账户
-				log.info("使用现结账户支付----------");
-				Long capitalAccountNo = insSupplier.getCapitalAccountNo();
-				if (capitalAccountNo == null) {
-					log.error("支付账户为空!");
-					throw new GSSException("开户账户为空!", "1010", "投保失败");
-				}
-				CapitalAccount capitalAccount = payRestService.queryCapitalAccountByNo(agent, capitalAccountNo);
-				if (capitalAccount != null) {
-					this.createBuyCertificate(agent, buyOrder.getBuyOrderNo(), buyOrder.getPayable().doubleValue(),
-							capitalAccount.getAccountNo(), supplier.getSupplierNo(), supplier.getCustomerTypeNo(),
-							1, capitalAccount.getPayWayCode(), "BUY",
-							insureNoArray.toString());
-				}
-			}*/
 			try{
 				//mss平台承保通知接口
 				MssApiInsCallbackVo vo = new MssApiInsCallbackVo();
@@ -1361,12 +1202,10 @@ public class OrderServiceImpl implements IOrderService {
 				log.info("mss平台承保通知接口出错");
 				e.printStackTrace();
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("调用保险经纪接口出错");
 			throw new GSSException("调用保险经纪接口出错", "1010", "投保失败");
-
 		}
 		log.info("退出投保接口==============");
 		return true;
@@ -1383,12 +1222,9 @@ public class OrderServiceImpl implements IOrderService {
 	 * @since  CodingExample　Ver 1.1
 	 */
 	private InsureRequestVo toInsureRequestVo4Back(SaleOrderExt saleOrderExt) {
-
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
 		Insurance insurance = saleOrderExt.getInsurance();
 		List<SaleOrderDetail> saleOrderDetailList = saleOrderExt.getSaleOrderDetailList();
-
 		InsureRequestVo insureRequestVo = new InsureRequestVo();
 		insureRequestVo.setProductKey(StringUtils.defaultString(insurance.getProductKey()));
 		insureRequestVo.setEffectDate(saleOrderExt.getEffectDate());
@@ -1441,11 +1277,18 @@ public class OrderServiceImpl implements IOrderService {
 
 		return insureRequestVo;
 	}
-
+	/**
+	 * 
+	 * cancelSaleOrder:线上产品退保开始
+	 *
+	 * @param  @param requestWithActor isRefund
+	 * @param  @return    设定文件
+	 * @return InsureRequestVo    DOM对象
+	 * @throws 
+	 * @since  CodingExample　Ver 1.1
+	 */
 	@Override
-/*	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)*/
 	public ResultInsure cancelSaleOrder(RequestWithActor<OrderCancelVo> requestWithActor,int isRefund) throws Exception {
-
 		log.info("线上产品退保开始==============");
 		ResultInsure resultInsure = new ResultInsure();
 		if (requestWithActor.getAgent() == null || requestWithActor.getEntity() == null ||
@@ -1456,7 +1299,6 @@ public class OrderServiceImpl implements IOrderService {
 		log.info("退保入参{}",JSONObject.toJSONString(requestWithActor.getEntity().getPolicyNoList()));
 		Agent agent = requestWithActor.getAgent();
 		List<String> policyNoList = requestWithActor.getEntity().getPolicyNoList();
-
 		SaleOrderExt saleOrderExt = null;
 		Long saleOrderNo = null;
 		String error = null;
@@ -1483,7 +1325,6 @@ public class OrderServiceImpl implements IOrderService {
 			try {
 				Long businessSignNo = IdWorker.getId();
 				Long saleChangeNo = maxNoService.generateBizNo("INS_SALE_CHANGE_EXT_NO", 51);
-
 				saleOrderNo = saleOrderExt.getSaleOrderNo();
 				if (saleOrderNo == null) {
 					log.error("saleOrderNo为空");
@@ -1494,7 +1335,6 @@ public class OrderServiceImpl implements IOrderService {
 					log.error("根据saleOrderNo查询saleOrder为空");
 					throw new GSSException("根据saleOrderNo查询saleOrder为空", "1010", "退保失败");
 				}
-
 				/* 创建采购变更单 */
 				BuyChange buyChange = new BuyChange();
 				buyChange.setBuyChangeNo(maxNoService.generateBizNo("INS_BUY_CHANGE_NO", 53));
@@ -1519,7 +1359,6 @@ public class OrderServiceImpl implements IOrderService {
 					log.error("创建采购变更单失败");
 					throw new GSSException("创建采购变更单失败", "1010", "退保失败");
 				}
-
 				/* 创建销售变更单 */
 				SaleChange saleChange = new SaleChange();
 				saleChange.setSaleChangeNo(saleChangeNo);
@@ -1594,17 +1433,14 @@ public class OrderServiceImpl implements IOrderService {
 					log.info("客户类型customerTypeNo为空!");
 					throw new GSSException("客户类型customerTypeNo为空!", "0", "退保失败");
 				}
-		
 				// 创建销售应付记录
 				CreatePlanAmountVO saleOrderPlanAmountVO = new CreatePlanAmountVO();
-		
 				saleOrderPlanAmountVO.setPlanAmount(salePrice);
 				saleOrderPlanAmountVO.setGoodsType(saleOrder.getGoodsType());//商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
 				saleOrderPlanAmountVO.setRecordNo(saleOrder.getSaleOrderNo());//记录编号   自动生成
 				saleOrderPlanAmountVO.setBusinessType(2);//业务类型 2，销售单，3，采购单，4 ，变更单（可以根据变更表设计情况将废退改分开）
 				saleOrderPlanAmountVO.setIncomeExpenseType(2);// 收支类型 1 收，2 为支
 				saleOrderPlanAmountVO.setRecordMovingType(1);// 记录变动类型 如 1 销售，2销售补单 3 补收，4
-				
 				// 创建采购应收记录
 				Long buyOrderNo = saleOrderExt.getBuyOrderNo();
 				if (buyOrderNo == null) {
@@ -1632,34 +1468,15 @@ public class OrderServiceImpl implements IOrderService {
 				// 采购补单 13 补付 14 采购废退，15
 				boolean isCancel = false;
 				 boolean isCancel2 = false;
-/*				if(isRefund==1){
-					// 采购改签
-					PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, saleOrderPlanAmountVO);
-					// 采购改签
-					PlanAmountRecord planAmountRecord1 = planAmountRecordService.create(agent, buyOrderPlanAmountVO);
-					// 销售废退， 5 销售改签 11 采购，12
-					// 采购补单 13 补付 14 采购废退，15
-				
-					if (planAmountRecord == null) {
-						log.info("创建销售应付记录失败");
-						throw new GSSException("创建销售应付记录失败", "1010", "退保失败");
-					}
-					if (planAmountRecord1 == null) {
-						log.info("创建采购应收记录失败");
-						throw new GSSException("创建采购应收记录失败", "1010", "退保失败");
-					}
-				}*/
-				
-			
 				ObjectMapper mapper = new ObjectMapper();
 				OrderCancelVo orderCancelVo = toOrderCancelVo(saleOrderExt, policyNo);
 				String json = mapper.writeValueAsString(orderCancelVo);
-
 				String insureCancelPath = paramService.getValueByKey(INSURE_CANCEL_PATH);
 				if (StringUtils.isBlank(insureCancelPath)) {
 					log.error("当前保险产品的退保请求路径为空,请在参数管理处配置!");
 					throw new GSSException("当前保险产品的退保请求路径为空,请在参数管理处配置!", "1010", "退保失败");
 				}
+				//进行退保操作
 				@SuppressWarnings("unchecked")
 				Response<JSONObject> response = (Response<JSONObject>) HttpClientUtil.doJsonPost(insureCancelPath,
 						json,
@@ -1673,15 +1490,11 @@ public class OrderServiceImpl implements IOrderService {
 
 				if (RESPONSE_SUCCESS.equals(response.getCode())||"该保单已退保，请不要重复操作".equals(response.getMsg())) {
 					// 设置子订单状态为3(已退保)
-				
 					if(isRefund==1){
 						// 采购改签
 						PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, saleOrderPlanAmountVO);
 						// 采购改签
 						PlanAmountRecord planAmountRecord1 = planAmountRecordService.create(agent, buyOrderPlanAmountVO);
-						// 销售废退， 5 销售改签 11 采购，12
-						// 采购补单 13 补付 14 采购废退，15
-					
 						if (planAmountRecord == null) {
 							log.info("创建销售应付记录失败");
 							throw new GSSException("创建销售应付记录失败", "1010", "退保失败");
@@ -1690,23 +1503,9 @@ public class OrderServiceImpl implements IOrderService {
 							log.info("创建采购应收记录失败");
 							throw new GSSException("创建采购应收记录失败", "1010", "退保失败");
 						}
-					/*	for(SaleOrderDetail saleOrderDetailChange:saleOrderExt.getSaleOrderDetailList()){
-							if(saleOrderDetail.getInsuredNo().equals(saleOrderDetailChange.getInsuredNo())){
-								isCancel = true;
-							}
-							if(saleOrderDetailChange.getStatus()==8){
-			         			isCancel = true;
-			         		}
-							
-						}
-						if(isCancel==false){
-							SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 9);
-			         	}else{*/
 						saleOrderDetail.setStatus(8);//退款中
 						int s = saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 			         	   SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 8);//退款中
-/*			         	}*/
-						
 						// 创建销售退款单
 						this.saleRefund(agent, saleOrderNo);
 					}else{
@@ -1718,7 +1517,6 @@ public class OrderServiceImpl implements IOrderService {
 							if(saleOrderDetail.getInsuredNo().equals(saleOrderDetailChange.getInsuredNo())){
 								isCancel = true;
 							}
-							
 						}
 						if(isCancel==false){
 							SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 6);
@@ -1726,15 +1524,10 @@ public class OrderServiceImpl implements IOrderService {
 			         	   SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 5);
 			         	}
 						saleOrderDetail.setStatus(5);
-/*						saleOrderDetail.setModifyTime(new Date());*/
 						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					}
-
-					
-	
 				} else {
 					return resultInsure;
-					
 				}
 			} catch (JsonProcessingException e) {
 				log.error("调用保险经纪退保接口出错  原因:"+resultInsure.getMessage());
@@ -1752,13 +1545,8 @@ public class OrderServiceImpl implements IOrderService {
 			}
 		}
 		if(isRefund==1){
-/*			if((count+policyNoList.size()) == saleOrderDetails.size()){*/
-			saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 8); //部分退保
+			saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 8); //退款中
 				buyOrderService.updateStatus(agent, saleOrderExt.getBuyOrderNo(), 8); //退款中
-/*			}else{
-				
-				buyOrderService.updateStatus(agent, saleOrderExt.getBuyOrderNo(), 9); //部分退保
-			}*/
 		}else{
 			if((count+policyNoList.size()) == saleOrderDetails.size()){
 				saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 5); //已退保
@@ -1831,7 +1619,9 @@ public class OrderServiceImpl implements IOrderService {
 		log.info("查询保单结束==============");
 		return saleOrderExt;
 	}
-
+   /**
+    * 根据条件查询保单
+    */
 	@Override
 	public Page<SaleOrderExt> querySaleOrderList(Page<SaleOrderExt> page, RequestWithActor<SaleOrderExtVo> pageRequest) {
 
@@ -1867,10 +1657,6 @@ public class OrderServiceImpl implements IOrderService {
 				BigDecimal prise = new BigDecimal(order.getSaleOrderDetailList().size());
 				SaleOrder saleOrder = saleOrderService.getSOrderByNo(pageRequest.getAgent(), order.getSaleOrderNo());
 				order.setSaleOrder(saleOrder);
-				/*if(prise!=null){
-					order.setTotalPremium(prise.multiply(order.getTotalPremium()));
-				}*/
-				
 				order.setLowerCustomers(lowerCustomers);
 				saleOrderExtList.add(order);
 			}
@@ -1885,13 +1671,13 @@ public class OrderServiceImpl implements IOrderService {
 		 * 根据saleorderno通过API接口去其他子系统去获取数据
 		 * 需要根据list的长度去执行获取数据的次数,此操作可能会存在性能问题
 		 */
-	
 		return page;
 	}
-	
+	/**
+	 * 保险报表查询
+	 */
 	@Override
 	public Page<SaleOrderExt> queryReportOrderList(Page<SaleOrderExt> page, RequestWithActor<SaleOrderExtVo> pageRequest) {
-
 		log.info("根据条件查询保单开始==============");
 		Agent agent = pageRequest.getAgent();
 		//获取当前客商下的子账户
@@ -1917,32 +1703,24 @@ public class OrderServiceImpl implements IOrderService {
 			for(SaleOrderExt order: tempList) {
 				BigDecimal prise = new BigDecimal(order.getSaleOrderDetailList().size());
 				SaleOrder saleOrder = saleOrderService.getSOrderByNo(pageRequest.getAgent(), order.getSaleOrderNo());
-				order.setSaleOrder(saleOrder);
-				/*if(prise!=null){
-					order.setTotalPremium(prise.multiply(order.getTotalPremium()));
-				}*/
-				
+				order.setSaleOrder(saleOrder);			
 				order.setLowerCustomers(lowerCustomers);
 				saleOrderExtList.add(order);
 			}
-	
 			page.setRecords(saleOrderExtList);
 			log.info("根据条件查询保单结束==============");
 		}catch(Exception e){
 			e.printStackTrace();
 		}
-		
 		/**
 		 * 根据saleorderno通过API接口去其他子系统去获取数据
 		 * 需要根据list的长度去执行获取数据的次数,此操作可能会存在性能问题
 		 */
-	
 		return page;
 	}
 	@Override
 	@Transactional
 	public int deleteSaleOrder(RequestWithActor<Long> saleOrderNo) throws Exception {
-
 		int flag = 0;
 		if (saleOrderNo == null) {
 			log.error("SaleOrder删除异常，请选择需要删除的记录");
@@ -1963,18 +1741,17 @@ public class OrderServiceImpl implements IOrderService {
 			}else {
 				flag = 0;
 			}
-			
 		} catch (Exception e) {
 			log.error("删除订单修改valid失败", e);
 			throw new GSSException("删除订单模块", "0403", "删除订单失败");
 		}
-
 		return flag;
 	}
-
+    /**
+     * 查询保险控润
+     */
 	@Override
 	public List<ProfitControl> selectByInsuranceNo(Long insuranceNo) {
-
 		List<ProfitControl> profitControls = profitControlDao.selectByInsuranceNo(insuranceNo);
 		return profitControls;
 		
@@ -1983,7 +1760,6 @@ public class OrderServiceImpl implements IOrderService {
 	@Override
 	public Page<SaleOrderDetail> selectDetailBySaleOrderNo(Page<SaleOrderDetail> page,
 			RequestWithActor<SaleOrderDetailVo> requestWithActor) {
-
 		Long saleOrderNo = requestWithActor.getEntity().getSaleOrderNo();
 		List<SaleOrderDetail> saleOrderDetails = saleOrderDetailDao.selectBySaleOrderNo(saleOrderNo);
 		/**
@@ -2003,6 +1779,10 @@ public class OrderServiceImpl implements IOrderService {
 	 * @return
      */
     public boolean refundForPersonDetail(SaleOrderExt saleOrderExt,SaleOrderDetail saleOrderDetail,Agent agent){
+    	//如果该订单状态为已退款(10)或者是退款中(8)，则不进行再次退款的操作
+    	if(saleOrderDetail.getStatus()==10||saleOrderDetail.getStatus()==8){
+    		return false;
+    	}
     	saleOrderDetail.setStatus(8);
 		saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 		// 创建销售应付记录
@@ -2014,45 +1794,10 @@ public class OrderServiceImpl implements IOrderService {
 					SaleOrder saleOrder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 8);//退款zhogn
 					Insurance insurance =  insuranceService.getInsurance(requestWithActorTwo);
 					salePrice = saleOrderDetail.getPremium();
-				/*	List<ProfitControl> profitControls = profitControlDao.selectByInsuranceNo(saleOrderExt.getInsuranceNo());
-					Long customerTypeNo = Long.parseLong((saleOrder.getCustomerTypeNo()+"").substring(0, 3));
-					if (!profitControls.isEmpty()) {
-						for (ProfitControl profitControl : profitControls) {
-							if (customerTypeNo.equals(profitControl.getCustomerTypeNo())) {
-								salePrice = profitControl.getSalePrice();
-							}
-						}
-					}
-					Agent newAgent = new Agent(agent.getOwner(), saleOrder.getCustomerTypeNo(),agent.getNum());
-					 //二级控润
-			        InsuranceProfit insuranceProfit = insuranceProfitService.queryInsuranceProfitByNo(newAgent, insurance.getInsuranceNo());
-			        BigDecimal a = new BigDecimal(100);
-		            if(insuranceProfit.getProfitCount()!=null||insuranceProfit.getProfitMoney()!=null){
-		            	  //判断是控点还是固定控  1为控点    2为固定控          
-		                if(insuranceProfit.getProfitMode()==1){
-		                	 if(insuranceProfit.getProfitCount()!=null){
-		                		 //暂时没做点控
-		                		 insurance.setBuyPrice((insurance.getBuyPrice().multiply(insuranceProfit.getProfitCount()).divide(a)).add(insurance.getBuyPrice()));    
-		              	   }else{
-		              		   Log.error("保险控点为空");
-		              	   }
-		              
-		               }else if(insuranceProfit.getProfitMode()==2){
-		            	   if(insuranceProfit.getProfitMoney()!=null){
-		            		   salePrice =  salePrice.add(insuranceProfit.getProfitMoney());    
-		            	   }else{
-		            		   Log.error("保险控现为空");
-		            	   }
-		            		   
-		               }
-		                
-		            }*/
 					if (salePrice == null) {
 						log.info("订单销售价salePrice为空");
 						throw new GSSException("订单销售价salePrice为空", "1010", "退保失败");
 					}
-					/*//计算一个人买的份数  总价
-				    salePrice = salePrice.multiply(new BigDecimal(saleOrderDetail.getInsuranceNum()));*/
 					saleOrderPlanAmountVO.setPlanAmount(salePrice);
 					saleOrderPlanAmountVO.setGoodsType(saleOrder.getGoodsType());//商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
 					saleOrderPlanAmountVO.setRecordNo(saleOrder.getSaleOrderNo());//记录编号   自动生成
@@ -2138,12 +1883,9 @@ public class OrderServiceImpl implements IOrderService {
 					saleOrderDetail.setStatus(3);
 				}
 				saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
-				
 				Insurance insurance = saleOrderExt.getInsurance();
-				
 				Long businessSignNo = IdWorker.getId();
 				Long saleChangeNo = maxNoService.generateBizNo("INS_SALE_CHANGE_EXT_NO", 51);
-
 				saleOrderNo = saleOrderExt.getSaleOrderNo();
 				if (saleOrderNo == null) {
 					log.error("saleOrderNo为空");
@@ -2154,7 +1896,6 @@ public class OrderServiceImpl implements IOrderService {
 					log.error("根据saleOrderNo查询saleOrder为空");
 					throw new GSSException("根据saleOrderNo查询saleOrder为空", "1010", "退保失败");
 				}
-				
 				/* 创建采购变更单 */
 				BuyChange buyChange = new BuyChange();
 				buyChange.setBuyChangeNo(maxNoService.generateBizNo("INS_BUY_CHANGE_NO", 53));
@@ -2174,12 +1915,11 @@ public class OrderServiceImpl implements IOrderService {
 					log.error("采购单编号buyOrderNo为空");
 					throw new GSSException("采购单编号buyOrderNo为空", "1010", "退保失败");
 				}
-				buyChange = buyChangeService.create(requestWithActor.getAgent(), buyChange);
+				buyChange = buyChangeService.create(agent, buyChange);
 				if (buyChange == null) {
 					log.error("创建采购变更单失败");
 					throw new GSSException("创建采购变更单失败", "1010", "退保失败");
 				}
-				
 				/* 创建销售变更单 */
 				SaleChange saleChange = new SaleChange();
 				saleChange.setSaleChangeNo(saleChangeNo);
@@ -2201,12 +1941,11 @@ public class OrderServiceImpl implements IOrderService {
 				}
 				saleChange.setTransationOrderNo(transationOrderNo);//交易号
 				saleChange.setIncomeExpenseType(2);//收支类型 1.收 2.支
-				saleChange = saleChangeService.create(requestWithActor.getAgent(), saleChange);
+				saleChange = saleChangeService.create(agent, saleChange);
 				if (saleChange == null) {
 					log.error("创建销售变更单失败");
-					throw new GSSException("创建销售变更单失败", "1010", "退保失败");
+					throw new GSSException("创建销售                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    变更单失败", "1010", "退保失败");
 				}
-				
 				// 创建销售变更明细
 				SaleChangeDetail saleChangeDetail = new SaleChangeDetail();
 				saleChangeDetail.setSaleChangeDetailNo(maxNoService.generateBizNo("INS_SALE_CHANGE_DETAIL_NO", 52));
@@ -2259,38 +1998,6 @@ public class OrderServiceImpl implements IOrderService {
 				if(isRefund==1){
 					// 创建销售应付记录
 					CreatePlanAmountVO saleOrderPlanAmountVO = new CreatePlanAmountVO();
-				/*	List<ProfitControl> profitControls = profitControlDao.selectByInsuranceNo(insuranceNo);
-					 Long customerType = Long.parseLong((customerTypeNo+"").substring(0, 3));
-					if (!profitControls.isEmpty()) {
-						for (ProfitControl profitControl : profitControls) {
-							if (customerType.toString().equals(profitControl.getCustomerTypeNo().toString())) {
-								salePrice = profitControl.getSalePrice();
-							}
-						}
-					}
-					Agent newAgent = new Agent(agent.getOwner(), saleOrder.getCustomerTypeNo(),agent.getNum());
-					 //二级控润
-			        InsuranceProfit insuranceProfit = insuranceProfitService.queryInsuranceProfitByNo(newAgent, insurance.getInsuranceNo());
-			        BigDecimal a = new BigDecimal(100);
-		            if(insuranceProfit.getProfitCount()!=null||insuranceProfit.getProfitMoney()!=null){
-		            	  //判断是控点还是固定控  1为控点    2为固定控          
-		                if(insuranceProfit.getProfitMode()==1){
-		                	 if(insuranceProfit.getProfitCount()!=null){
-		                		 //暂时没做点控
-		                		 insurance.setBuyPrice((insurance.getBuyPrice().multiply(insuranceProfit.getProfitCount()).divide(a)).add(insurance.getBuyPrice()));    
-		              	   }else{
-		              		   Log.error("保险控点为空");
-		              	   }
-		              
-		               }else if(insuranceProfit.getProfitMode()==2){
-		            	   if(insuranceProfit.getProfitMoney()!=null){
-		            		   salePrice =  salePrice.add(insuranceProfit.getProfitMoney());    
-		            	   }else{
-		            		   Log.error("保险控现为空");
-		            	   }
-		            		   
-		               }
-		            }*/
 					if (salePrice == null) {
 						log.info("订单销售价salePrice为空");
 						throw new GSSException("订单销售价salePrice为空", "1010", "退保失败");
@@ -2304,7 +2011,7 @@ public class OrderServiceImpl implements IOrderService {
 					// 销售废退， 5 销售改签 11 采购，12
 					// 采购补单 13 补付 14 采购废退，15
 					// 采购改签
-					PlanAmountRecord planAmountRecord = planAmountRecordService.create(requestWithActor.getAgent(), saleOrderPlanAmountVO);
+					PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, saleOrderPlanAmountVO);
 					if (planAmountRecord == null) {
 						log.info("创建销售应付记录失败");
 						throw new GSSException("创建销售应付记录失败", "1010", "退保失败");
@@ -2335,32 +2042,16 @@ public class OrderServiceImpl implements IOrderService {
 					// 销售废退， 5 销售改签 11 采购，12
 					// 采购补单 13 补付 14 采购废退，15
 					// 采购改签
-					PlanAmountRecord planAmountRecord1 = planAmountRecordService.create(requestWithActor.getAgent(), buyOrderPlanAmountVO);
+					PlanAmountRecord planAmountRecord1 = planAmountRecordService.create(agent, buyOrderPlanAmountVO);
 					if (planAmountRecord1 == null) {
 						log.info("创建采购应收记录失败");
 						throw new GSSException("创建采购应收记录失败", "1010", "退保失败");
 					}
-			   		saleOrderService.updateStatus(AgentUtil.getAgent(), saleOrderExt.getSaleOrderNo(), 8);//退款中
-			/*		boolean isCancel = false;
-					 boolean isCancel2 = false;
-					for(SaleOrderDetail saleOrderDetailChange:saleOrderExt.getSaleOrderDetailList()){
-						if(saleOrderDetailChange.getStatus()==8){
-		         			isCancel = true;
-		         		}else{
-		         			isCancel2 = true;
-		         		}
-						if(isCancel==true&&isCancel2==true){
-							saleOrderService.updateStatus(AgentUtil.getAgent(), saleOrderExt.getSaleOrderNo(), 9);
-			         	}
-			         	if(isCancel==true&&isCancel2==false){
-			         		saleOrderService.updateStatus(AgentUtil.getAgent(), saleOrderExt.getSaleOrderNo(), 8);
-			         	}
-					}*/
+			   		saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 8);//退款中
 					// 创建销售退款单
 					this.saleRefund(agent,saleOrderNo);
 				}
 				}
-			
 			//更新销售单和采购单状态
 			List<SaleOrderDetail> saleOrderDetails = saleOrderExt.getSaleOrderDetailList();
 			//如果全部子订单为已退保，则销售单和采购单状态为已退保状态，如果子订单有部分已退保，则销售单和采购单状态为部分退保
@@ -2383,30 +2074,24 @@ public class OrderServiceImpl implements IOrderService {
 					}
 				}
 			}
-			
-			
 		}catch (Exception e){
 			log.error("退保失败:"+e);
 			throw new GSSException("线下产品退保", "1004", "退保失败");
 		}
 		return true;
 	}
-
 	@Override
 	public void updateStatus4Offline(Agent agent, Long saleOrderNo, Integer orderChildStatus) {
-
 		log.info("更新线下保险产品订单状态开始==============");
 		if (agent == null || saleOrderNo == null) {
 			log.info("线下保险产品订单参数为空");
 			throw new GSSException("线下保险产品订单参数为空", "1010", "更新线下保险产品订单状态失败");
 		}
-
 		// 更新子状态
 		SaleOrder saleOrder = saleOrderService.updateStatus(agent, saleOrderNo, orderChildStatus);
 
 		//更新被保人状态
 		List<SaleOrderDetail> saleOrderDetails = saleOrderDetailDao.selectBySaleOrderNo(saleOrderNo);
-
 		for (SaleOrderDetail saleOrderDetail : saleOrderDetails) {
 			if (orderChildStatus == 5) {
 				saleOrderDetail.setStatus(3);
@@ -2428,61 +2113,15 @@ public class OrderServiceImpl implements IOrderService {
 			requestWithActor.setEntity(saleOrderNo);
 			SaleOrderExt saleOrderExt = querySaleOrder(requestWithActor);
 			requestWithActorTwo.setEntity(saleOrderExt.getInsuranceNo());
-			
 			Insurance insurance =  insuranceService.getInsurance(requestWithActorTwo);
-			
 			// 创建销售应付记录
 			CreatePlanAmountVO saleOrderPlanAmountVO = new CreatePlanAmountVO();
 			BigDecimal salePrice = null;
 			salePrice = saleOrderExt.getTotalPremium();
-			/*List<ProfitControl> profitControls = profitControlDao.selectByInsuranceNo(saleOrderExt.getInsuranceNo());
-			 Long customerTypeNo = Long.parseLong((saleOrder.getCustomerTypeNo()+"").substring(0, 3));
-			if (!profitControls.isEmpty()) {
-				for (ProfitControl profitControl : profitControls) {
-					if (customerTypeNo.equals(profitControl.getCustomerTypeNo())) {
-						salePrice = profitControl.getSalePrice();
-					}
-				}
-			}
-			Agent newAgent = new Agent(agent.getOwner(), saleOrder.getCustomerTypeNo(),agent.getNum());
-			 //二级控润
-	        InsuranceProfit insuranceProfit = insuranceProfitService.queryInsuranceProfitByNo(newAgent, insurance.getInsuranceNo());
-	        BigDecimal a = new BigDecimal(100);
-            if(insuranceProfit.getProfitCount()!=null||insuranceProfit.getProfitMoney()!=null){
-            	  //判断是控点还是固定控  1为控点    2为固定控          
-                if(insuranceProfit.getProfitMode()==1){
-                	 if(insuranceProfit.getProfitCount()!=null){
-                		 //暂时没做点控
-                		 insurance.setBuyPrice((insurance.getBuyPrice().multiply(insuranceProfit.getProfitCount()).divide(a)).add(insurance.getBuyPrice()));    
-              	   }else{
-              		   Log.error("保险控点为空");
-              	   }
-              
-               }else if(insuranceProfit.getProfitMode()==2){
-            	   if(insuranceProfit.getProfitMoney()!=null){
-            		   salePrice =  salePrice.add(insuranceProfit.getProfitMoney());    
-            	   }else{
-            		   Log.error("保险控现为空");
-            	   }
-            		   
-               }
-            }*/
 			if (salePrice == null) {
 				log.info("订单销售价salePrice为空");
 				throw new GSSException("订单销售价salePrice为空", "1010", "退保失败");
 			}
-		/*	//退款的单价乘以总分数
-			 int personnum = 0;
-		        for(SaleOrderDetail saleOrderDetail:saleOrderExt.getSaleOrderDetailList()){
-		        	if(saleOrderDetail.getInsuranceNum()==0){
-		        		personnum++;
-		        	}else{
-		        		personnum +=saleOrderDetail.getInsuranceNum();
-		        	}
-		        }
-		        if(personnum!=0){
-		        	salePrice = salePrice.multiply(new BigDecimal(personnum));
-		        }*/
 			saleOrderPlanAmountVO.setPlanAmount(salePrice);
 			saleOrderPlanAmountVO.setGoodsType(saleOrder.getGoodsType());//商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
 			saleOrderPlanAmountVO.setRecordNo(saleOrder.getSaleOrderNo());//记录编号   自动生成
@@ -2528,32 +2167,24 @@ public class OrderServiceImpl implements IOrderService {
 				log.info("创建采购应收记录失败");
 				throw new GSSException("创建采购应收记录失败", "1010", "退保失败");
 			}
-			
 			  this.saleRefundForUncustomed(agent, saleOrderNo);
 		}
-       
 		log.info("更新线下保险产品订单状态为" + orderChildStatus + "成功!");
 		log.info("更新线下保险产品订单状态结束==============");
 	}
 	@Override
 	public void updateStatus4OfflineForPerson(Agent agent, Long saleOrderNo, Integer orderChildStatus,Long insuredNo) {
-
 		log.info("更新线下保险产品订单状态开始==============");
 		if (agent == null || saleOrderNo == null) {
 			log.info("线下保险产品订单参数为空");
 			throw new GSSException("线下保险产品订单参数为空", "1010", "更新线下保险产品订单状态失败");
 		}
-
 		// 更新子状态
 		SaleOrder saleOrder = saleOrderService.updateStatus(agent, saleOrderNo, orderChildStatus);
-
 		//更新被保人状态
 		List<SaleOrderDetail> saleOrderDetails = saleOrderDetailDao.selectBySaleOrderNo(saleOrderNo);
-
 		for (SaleOrderDetail saleOrderDetail : saleOrderDetails) {
 			if(saleOrderDetail.getInsuranceNum().equals(insuredNo)){
-				
-			
 			if (orderChildStatus == 5) {
 				saleOrderDetail.setStatus(3);
 			} else if (orderChildStatus == 3 || orderChildStatus == 4) {
@@ -2563,26 +2194,23 @@ public class OrderServiceImpl implements IOrderService {
 			}
 			saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 		}
-
 		if (saleOrder == null) {
 			log.info("更新线下保险产品订单状态异常!");
 			throw new GSSException("更新线下保险产品订单状态异常!", "1010", "更新线下保险产品订单状态失败");
 		}
-
 		log.info("更新线下保险产品订单状态为" + orderChildStatus + "成功!");
 		log.info("更新线下保险产品订单状态结束==============");
 		}
 	}
+	
 	@Override
 	public int updateStatusDetail(RequestWithActor<SaleOrderDetail> requestWithActor) {
-
 		log.info("更新线下保险产品保单号开始==============");
 		if (requestWithActor == null) {
 			log.info("线下保险产品订单参数为空");
 			throw new GSSException("线下保险产品订单参数为空", "1010", "更新线下保险产品订单状态失败");
 		}
 		int price = saleOrderDetailDao.updateByPrimaryKeySelective(requestWithActor.getEntity());
-
 		log.info("更新线下保险产品保单号结束==============");
 		return price;
 	}
@@ -2594,7 +2222,6 @@ public class OrderServiceImpl implements IOrderService {
      */
 	@Override
 	public boolean cancelSaleOrderExt(RequestWithActor<Long> requestWithActor) {
-
 		log.info("取消订单开始==============");
 		if (requestWithActor.getAgent() == null || requestWithActor.getEntity() == null) {
 			log.info("取消订单参数为空");
@@ -2602,25 +2229,19 @@ public class OrderServiceImpl implements IOrderService {
 		}
 		Agent agent = requestWithActor.getAgent();
 		Long saleOrderNo = requestWithActor.getEntity();
-
 		// 更新销售单为取消状态
 		SaleOrder saleOrder = saleOrderService.updateStatus(agent, saleOrderNo, 3);
-
 		if (saleOrder == null) {
 			log.info("更新销售单状态异常!");
 			throw new GSSException("更新销售单状态异常!", "1010", "取消订单失败");
 		}
-
 		// 更新采购单为取消状态
 		SaleOrderExt saleOrderExt = orderServiceDao.selectByPrimaryKey(saleOrderNo);
 		BuyOrder buyOrder = buyOrderService.updateStatus(agent, saleOrderExt.getBuyOrderNo(), 3);
-
 		if (buyOrder == null) {
 			log.info("更新采购单状态异常!");
 			throw new GSSException("更新采购单状态异常!", "1010", "取消订单失败");
 		}
-
-
 		log.info("取消订单结束==============");
 		return true;
 	}
@@ -2636,7 +2257,6 @@ public class OrderServiceImpl implements IOrderService {
 		List<SaleOrderDetail> saleOrderDetails = saleOrderDetailDao.selectBySaleOrderNo(saleOrderNo);
 		log.info("根据销售单号查询被保人列表结束==============");
 		return saleOrderDetails;
-
 	}
 
 	/**
@@ -2672,7 +2292,6 @@ public class OrderServiceImpl implements IOrderService {
 	public void createBuyCertificate(Agent agent, long buyOrderNo, double payAmount, long payAccount, long customerNo,
 			long customerTypeNo,
 			int payType, int payWay, String channel, String thirdBusNo) {
-
 		CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
 		certificateCreateVO.setAccoutNo(String.valueOf(payAccount)); //支付账号
 		certificateCreateVO.setChannel(channel); //渠道 未知
@@ -2692,7 +2311,6 @@ public class OrderServiceImpl implements IOrderService {
 		businessOrderInfo.setRecordNo(buyOrderNo);
 		orderInfoList.add(businessOrderInfo);
 		certificateCreateVO.setOrderInfoList(orderInfoList);
-
 		try {
 			log.info("创建采购付款单的参数certificateCreateVO----------> " + certificateCreateVO.toString());
 			this.certificateService.createBuyCertificate(agent, certificateCreateVO);
@@ -2701,16 +2319,13 @@ public class OrderServiceImpl implements IOrderService {
 		}
 	}
 	
-
 	/**
 	 * 创建销售退款单
 	 *
 	 * @return
 	 */
 	public boolean saleRefund(Agent agent, Long saleOrderNo) throws GSSException {
-       
 		log.info("退保时创建销售退款单开始-------------");
-
 		if (agent == null) {
 			log.error("agent 为空");
 			throw new GSSException("agent 为空", "1001", "创建销售退款单失败");
@@ -2722,7 +2337,6 @@ public class OrderServiceImpl implements IOrderService {
 		SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleOrderNo);
 		//当支付状态为已支付（1）时创建销售退款单
 		if (saleOrder != null) {
-	
 			if (saleOrder.getPayStatus() == 1) {
 				try {
 					CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
@@ -2748,10 +2362,10 @@ public class OrderServiceImpl implements IOrderService {
 				}
 			}
 		}
-
 		log.info("退保时创建销售退款单结束-------------");
 		return true;
 	}
+	
 	/**未投保退款
 	 * 创建销售退款单
 	 *
@@ -2795,10 +2409,10 @@ public class OrderServiceImpl implements IOrderService {
 				}
 			}
 		}
-
 		log.info("退保时创建销售退款单结束-------------");
 		return true;
 	}
+	
 	/**未投保退款
 	 * 创建销售退款单
 	 *
@@ -2842,17 +2456,13 @@ public class OrderServiceImpl implements IOrderService {
 				}
 			}
 		}
-
 		log.info("退保时创建销售退款单结束-------------");
 		return true;
 	}
 
 	@Override
 	public Boolean cancelSaleOrder(RequestWithActor<OrderCancelVo> requestWithActor) throws Exception {
-
-
 		log.info("线上产品退保开始==============");
-
 		if (requestWithActor.getAgent() == null || requestWithActor.getEntity() == null ||
 				requestWithActor.getEntity().getPolicyNoList().isEmpty()) {
 			log.error("退保单号为空");
@@ -2883,7 +2493,6 @@ public class OrderServiceImpl implements IOrderService {
 				throw new GSSException("订单的保险产品insurance为空", "1010", "退保失败");
 			}
 			Insurance insurance = saleOrderExt.getInsurance();
-
 			try {
 				Long businessSignNo = IdWorker.getId();
 				Long saleChangeNo = maxNoService.generateBizNo("INS_SALE_CHANGE_EXT_NO", 51);
@@ -2898,7 +2507,6 @@ public class OrderServiceImpl implements IOrderService {
 					log.error("根据saleOrderNo查询saleOrder为空");
 					throw new GSSException("根据saleOrderNo查询saleOrder为空", "1010", "退保失败");
 				}
-
 				/* 创建采购变更单 */
 				BuyChange buyChange = new BuyChange();
 				buyChange.setBuyChangeNo(maxNoService.generateBizNo("INS_BUY_CHANGE_NO", 53));
@@ -2923,7 +2531,6 @@ public class OrderServiceImpl implements IOrderService {
 					log.error("创建采购变更单失败");
 					throw new GSSException("创建采购变更单失败", "1010", "退保失败");
 				}
-
 				/* 创建销售变更单 */
 				SaleChange saleChange = new SaleChange();
 				saleChange.setSaleChangeNo(saleChangeNo);
@@ -3061,7 +2668,6 @@ public class OrderServiceImpl implements IOrderService {
 				if (RESPONSE_SUCCESS.equals(response.getCode())) {
 					saleOrderDetail.setStatus(3);
 					saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
-
 					// 创建销售退款单
 					this.saleRefund(agent, saleOrderNo);
 				} else {
@@ -3113,7 +2719,6 @@ public class OrderServiceImpl implements IOrderService {
 
 	@Override
 	public Boolean cancelSaleOrderOffline(RequestWithActor<OrderCancelVo> requestWithActor) throws Exception {
-
 		log.info("线下产品退保开始==============");
 		Agent agent = requestWithActor.getAgent();
 		if(StringUtil.isNullOrEmpty(agent)){
@@ -3138,12 +2743,9 @@ public class OrderServiceImpl implements IOrderService {
 					throw new GSSException("线下产品退保!", "1003", "根据保单号查询子订单错误");
 				}
 				SaleOrderDetail saleOrderDetail = saleOrderDetails.get(0);
-
 					saleOrderDetail.setStatus(8);
 				saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
-				
 				Insurance insurance = saleOrderExt.getInsurance();
-				
 				Long businessSignNo = IdWorker.getId();
 				Long saleChangeNo = maxNoService.generateBizNo("INS_SALE_CHANGE_EXT_NO", 51);
 
@@ -3157,7 +2759,6 @@ public class OrderServiceImpl implements IOrderService {
 					log.error("根据saleOrderNo查询saleOrder为空");
 					throw new GSSException("根据saleOrderNo查询saleOrder为空", "1010", "退保失败");
 				}
-				
 				/* 创建采购变更单 */
 				BuyChange buyChange = new BuyChange();
 				buyChange.setBuyChangeNo(maxNoService.generateBizNo("INS_BUY_CHANGE_NO", 53));
@@ -3182,7 +2783,6 @@ public class OrderServiceImpl implements IOrderService {
 					log.error("创建采购变更单失败");
 					throw new GSSException("创建采购变更单失败", "1010", "退保失败");
 				}
-				
 				/* 创建销售变更单 */
 				SaleChange saleChange = new SaleChange();
 				saleChange.setSaleChangeNo(saleChangeNo);
@@ -3209,7 +2809,6 @@ public class OrderServiceImpl implements IOrderService {
 					log.error("创建销售变更单失败");
 					throw new GSSException("创建销售变更单失败", "1010", "退保失败");
 				}
-				
 				// 创建销售变更明细
 				SaleChangeDetail saleChangeDetail = new SaleChangeDetail();
 				saleChangeDetail.setSaleChangeDetailNo(maxNoService.generateBizNo("INS_SALE_CHANGE_DETAIL_NO", 52));
@@ -3307,7 +2906,6 @@ public class OrderServiceImpl implements IOrderService {
 					// 创建销售退款单
 					this.saleRefund(agent,saleOrderNo);
 				}
-			
 			//更新销售单和采购单状态
 			List<SaleOrderDetail> saleOrderDetails = saleOrderExt.getSaleOrderDetailList();
 			//如果全部子订单为已退保，则销售单和采购单状态为已退保状态，如果子订单有部分已退保，则销售单和采购单状态为部分退保
@@ -3364,7 +2962,6 @@ public class OrderServiceImpl implements IOrderService {
     	return true;
 	}
 
-
 	@Override
 	public ResultInsure cancelSaleOrderForB2b(RequestWithActor<OrderCancelVo> requestWithActor, int isRefund)
 			throws Exception {
@@ -3401,7 +2998,6 @@ public class OrderServiceImpl implements IOrderService {
 				throw new GSSException("订单的保险产品insurance为空", "1010", "退保失败");
 			}
 			Insurance insurance = saleOrderExt.getInsurance();
-        
 			try {
 				Long businessSignNo = IdWorker.getId();
 				Long saleChangeNo = maxNoService.generateBizNo("INS_SALE_CHANGE_EXT_NO", 51);
@@ -3440,7 +3036,6 @@ public class OrderServiceImpl implements IOrderService {
 					log.error("创建采购变更单失败");
 					throw new GSSException("创建采购变更单失败", "1010", "退保失败");
 				}
-
 				/* 创建销售变更单 */
 				SaleChange saleChange = new SaleChange();
 				saleChange.setSaleChangeNo(saleChangeNo);
@@ -3515,17 +3110,14 @@ public class OrderServiceImpl implements IOrderService {
 					log.info("客户类型customerTypeNo为空!");
 					throw new GSSException("客户类型customerTypeNo为空!", "0", "退保失败");
 				}
-		
 				// 创建销售应付记录
 				CreatePlanAmountVO saleOrderPlanAmountVO = new CreatePlanAmountVO();
-		
 				saleOrderPlanAmountVO.setPlanAmount(salePrice);
 				saleOrderPlanAmountVO.setGoodsType(saleOrder.getGoodsType());//商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
 				saleOrderPlanAmountVO.setRecordNo(saleOrder.getSaleOrderNo());//记录编号   自动生成
 				saleOrderPlanAmountVO.setBusinessType(2);//业务类型 2，销售单，3，采购单，4 ，变更单（可以根据变更表设计情况将废退改分开）
 				saleOrderPlanAmountVO.setIncomeExpenseType(2);// 收支类型 1 收，2 为支
 				saleOrderPlanAmountVO.setRecordMovingType(1);// 记录变动类型 如 1 销售，2销售补单 3 补收，4
-				
 				// 创建采购应收记录
 				Long buyOrderNo = saleOrderExt.getBuyOrderNo();
 				if (buyOrderNo == null) {
@@ -3553,34 +3145,15 @@ public class OrderServiceImpl implements IOrderService {
 				// 采购补单 13 补付 14 采购废退，15
 				boolean isCancel = false;
 				 boolean isCancel2 = false;
-/*				if(isRefund==1){
-					// 采购改签
-					PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, saleOrderPlanAmountVO);
-					// 采购改签
-					PlanAmountRecord planAmountRecord1 = planAmountRecordService.create(agent, buyOrderPlanAmountVO);
-					// 销售废退， 5 销售改签 11 采购，12
-					// 采购补单 13 补付 14 采购废退，15
-				
-					if (planAmountRecord == null) {
-						log.info("创建销售应付记录失败");
-						throw new GSSException("创建销售应付记录失败", "1010", "退保失败");
-					}
-					if (planAmountRecord1 == null) {
-						log.info("创建采购应收记录失败");
-						throw new GSSException("创建采购应收记录失败", "1010", "退保失败");
-					}
-				}*/
-				
-			
 				ObjectMapper mapper = new ObjectMapper();
 				OrderCancelVo orderCancelVo = toOrderCancelVo(saleOrderExt, policyNo);
 				String json = mapper.writeValueAsString(orderCancelVo);
-
 				String insureCancelPath = paramService.getValueByKey(INSURE_CANCEL_PATH);
 				if (StringUtils.isBlank(insureCancelPath)) {
 					log.error("当前保险产品的退保请求路径为空,请在参数管理处配置!");
 					throw new GSSException("当前保险产品的退保请求路径为空,请在参数管理处配置!", "1010", "退保失败");
 				}
+				//进行退保操作
 				@SuppressWarnings("unchecked")
 				Response<JSONObject> response = (Response<JSONObject>) HttpClientUtil.doJsonPost(insureCancelPath,
 						json,
@@ -3598,9 +3171,6 @@ public class OrderServiceImpl implements IOrderService {
 						saleOrderDetail.setStatus(12);//退款中
 						int s = saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 			         	   SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 12);//退款中
-/*			         	}*/
-						// 创建销售退款单
-				/*		this.saleRefund(agent, saleOrderNo);*/
 					}else{
 						isCancel = false;
 						for(SaleOrderDetail saleOrderDetailChange:saleOrderExt.getSaleOrderDetailList()){
@@ -3610,7 +3180,6 @@ public class OrderServiceImpl implements IOrderService {
 							if(saleOrderDetail.getInsuredNo().equals(saleOrderDetailChange.getInsuredNo())){
 								isCancel = true;
 							}
-							
 						}
 						if(isCancel==false){
 							SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 6);
@@ -3618,15 +3187,10 @@ public class OrderServiceImpl implements IOrderService {
 			         	   SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 5);
 			         	}
 						saleOrderDetail.setStatus(5);
-/*						saleOrderDetail.setModifyTime(new Date());*/
 						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					}
-
-					
-	
 				} else {
 					return resultInsure;
-					
 				}
 			} catch (JsonProcessingException e) {
 				log.error("调用保险经纪退保接口出错  原因:"+resultInsure.getMessage());
@@ -3644,13 +3208,8 @@ public class OrderServiceImpl implements IOrderService {
 			}
 		}
 		if(isRefund==1){
-/*			if((count+policyNoList.size()) == saleOrderDetails.size()){*/
 			saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 12); //部分退保
 				buyOrderService.updateStatus(agent, saleOrderExt.getBuyOrderNo(), 12); //退款中
-/*			}else{
-				
-				buyOrderService.updateStatus(agent, saleOrderExt.getBuyOrderNo(), 9); //部分退保
-			}*/
 		}else{
 			if((count+policyNoList.size()) == saleOrderDetails.size()){
 				saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 5); //已退保
@@ -3679,7 +3238,6 @@ public class OrderServiceImpl implements IOrderService {
 		return resultInsure;
 	}
 
-
 	@Override
 	public boolean cacelForB2BPersonDetail(SaleOrderExt saleOrderExt, SaleOrderDetail saleOrderDetail, Agent agent) {
 		//更改状态为退款审核中的状态
@@ -3697,67 +3255,6 @@ public class OrderServiceImpl implements IOrderService {
 				}else{
 					SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 6);//改为已退保
 				}
-				
 		    	return true;
 	}
 }
-/*//创建销售应付记录
-CreatePlanAmountVO saleOrderPlanAmountVO = new CreatePlanAmountVO();
-BigDecimal salePrice = null;
-List<ProfitControl> profitControls = profitControlDao.selectByInsuranceNo(insuranceNo);
-if (!profitControls.isEmpty()) {
-	for (ProfitControl profitControl : profitControls) {
-		if (customerTypeNo.toString().equals(profitControl.getCustomerTypeNo().toString())) {
-			salePrice = profitControl.getSalePrice();
-		}
-	}
-}
-if (salePrice == null) {
-	log.info("订单销售价salePrice为空");
-	throw new GSSException("订单销售价salePrice为空", "1010", "退保失败");
-}
-saleOrderPlanAmountVO.setPlanAmount(salePrice);
-saleOrderPlanAmountVO.setGoodsType(saleOrder.getGoodsType());//商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
-saleOrderPlanAmountVO.setRecordNo(saleOrder.getSaleOrderNo());//记录编号   自动生成
-saleOrderPlanAmountVO.setBusinessType(2);//业务类型 2，销售单，3，采购单，4 ，变更单（可以根据变更表设计情况将废退改分开）
-saleOrderPlanAmountVO.setIncomeExpenseType(2);// 收支类型 1 收，2 为支
-saleOrderPlanAmountVO.setRecordMovingType(1);// 记录变动类型 如 1 销售，2销售补单 3 补收，4
-// 销售废退， 5 销售改签 11 采购，12
-// 采购补单 13 补付 14 采购废退，15
-// 采购改签
-PlanAmountRecord planAmountRecord = planAmountRecordService.create(requestWithActor.getAgent(), saleOrderPlanAmountVO);
-if (planAmountRecord == null) {
-	log.info("创建销售应付记录失败");
-	throw new GSSException("创建销售应付记录失败", "1010", "退保失败");
-}
-// 创建采购应收记录
-Long buyOrderNo = saleOrderExt.getBuyOrderNo();
-if (buyOrderNo == null) {
-	log.error("buyOrderNo为空");
-	throw new GSSException("buyOrderNo为空", "1010", "退保失败");
-}
-BuyOrder buyOrder = buyOrderService.getBOrderByBONo(agent, buyOrderNo);
-if (buyOrder == null) {
-	log.error("根据buyOrderNo查询buyOrder为空");
-	throw new GSSException("根据buyOrderNo查询buyOrder为空", "1010", "退保失败");
-}
-CreatePlanAmountVO buyOrderPlanAmountVO = new CreatePlanAmountVO();
-BigDecimal buyPrice = insurance.getBuyPrice();
-if (buyPrice == null) {
-	log.info("保险产品采购价buyPrice为空");
-	throw new GSSException("保险产品采购价buyPrice为空", "1010", "退保失败");
-}
-buyOrderPlanAmountVO.setPlanAmount(buyPrice);// 采购应收金额
-buyOrderPlanAmountVO.setGoodsType(buyOrder.getGoodsType());//商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
-buyOrderPlanAmountVO.setRecordNo(buyOrder.getBuyOrderNo());//记录编号   自动生成
-buyOrderPlanAmountVO.setBusinessType(3);//业务类型 2，销售单，3，采购单，4 ，变更单（可以根据变更表设计情况将废退改分开）
-buyOrderPlanAmountVO.setIncomeExpenseType(2);// 收支类型 1 收，2 为支
-buyOrderPlanAmountVO.setRecordMovingType(11);// 记录变动类型 如 1 销售，2销售补单 3 补收，4
-// 销售废退， 5 销售改签 11 采购，12
-// 采购补单 13 补付 14 采购废退，15
-// 采购改签
-PlanAmountRecord planAmountRecord1 = planAmountRecordService.create(requestWithActor.getAgent(), buyOrderPlanAmountVO);
-if (planAmountRecord1 == null) {
-	log.info("创建采购应收记录失败");
-	throw new GSSException("创建采购应收记录失败", "1010", "退保失败");
-}*/
