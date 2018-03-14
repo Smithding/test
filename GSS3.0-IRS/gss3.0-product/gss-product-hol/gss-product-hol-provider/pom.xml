@@ -13,26 +13,31 @@
     	<dependency>
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-core</artifactId>
+			<version>7.1.0</version>
 		</dependency>
 		
 		<dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-analyzers-common</artifactId>
+            <version>7.1.0</version>
         </dependency>
         
         <dependency>
             <groupId>org.apache.lucene</groupId>
             <artifactId>lucene-queryparser</artifactId>
+            <version>7.1.0</version>
         </dependency>
         
         <dependency>
 		  <groupId>org.apache.lucene</groupId>
 		  <artifactId>lucene-highlighter</artifactId>
+		  <version>7.1.0</version>
 		</dependency>
 		
 		<dependency>
 				<groupId>com.tempus.ik</groupId>
-				<artifactId>analyzer</artifactId>		
+				<artifactId>analyzer</artifactId>	
+				<version>6.5.0</version>	
 		</dependency>
     	
     	<dependency>
