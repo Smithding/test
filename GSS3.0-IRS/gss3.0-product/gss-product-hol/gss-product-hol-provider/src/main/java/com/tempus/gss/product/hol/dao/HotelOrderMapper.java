@@ -26,6 +26,8 @@ public interface HotelOrderMapper extends AutoMapper<HotelOrder> {
 	 * @return
 	 */
 	HotelOrder getOrderByNo(String hotelOrderNo);
+	
+	HotelOrder getOrderBySaleOrderNo(Long saleOrderNo);
 
 	/**
 	 * 根据条件查询订单列表
