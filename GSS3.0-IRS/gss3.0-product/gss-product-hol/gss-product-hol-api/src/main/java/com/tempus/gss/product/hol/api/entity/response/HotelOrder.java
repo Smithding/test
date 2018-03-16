@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.tempus.gss.order.entity.SaleOrder;
+import com.tempus.gss.product.hol.api.entity.response.tc.OrderInfoModel;
 import com.tempus.gss.serializer.LongSerializer;
 
 /**
@@ -115,11 +116,6 @@ public class HotelOrder implements Serializable {
      * 入住人姓名
      */
     private String guestName;
-    /**
-     * 入住人姓名转化为集合返回前台
-     */
-    @TableField(exist = false)
-    private List<String> guestNameList;
 
     /**
      * 备注
@@ -325,11 +321,7 @@ public class HotelOrder implements Serializable {
      * 实际入住人
      */
     private String factGuestName;
-    /**
-     * 实际入住人以集合返回前台
-     */
-    @TableField(exist = false)
-    private List<String> factGuestNameList;
+    
     /**
      * 实际房间数
      */
@@ -370,6 +362,11 @@ public class HotelOrder implements Serializable {
 	 * 补单信息出现的关联订单号
 	 */
 	private String relateOrderNo;
+	/**
+	 * SM_USER表中的name
+	 */
+	@TableField(exist = false)
+	private String name;
     
 	public Long getId() {
         return this.id;
@@ -889,28 +886,12 @@ public class HotelOrder implements Serializable {
 		this.factTotalPrice = factTotalPrice;
 	}
 
-	public List<String> getGuestNameList() {
-		return guestNameList;
-	}
-
-	public void setGuestNameList(List<String> guestNameList) {
-		this.guestNameList = guestNameList;
-	}
-
 	public List<String> getRequestNameList() {
 		return requestNameList;
 	}
 
 	public void setRequestNameList(List<String> requestNameList) {
 		this.requestNameList = requestNameList;
-	}
-
-	public List<String> getFactGuestNameList() {
-		return factGuestNameList;
-	}
-
-	public void setFactGuestNameList(List<String> factGuestNameList) {
-		this.factGuestNameList = factGuestNameList;
 	}
 
 	public String getBreakfastCount() {
@@ -976,4 +957,13 @@ public class HotelOrder implements Serializable {
 	public void setRelateOrderNo(String relateOrderNo) {
 		this.relateOrderNo = relateOrderNo;
 	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 }
