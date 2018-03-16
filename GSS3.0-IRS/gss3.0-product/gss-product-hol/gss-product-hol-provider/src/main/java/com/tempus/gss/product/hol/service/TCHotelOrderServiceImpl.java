@@ -918,8 +918,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	        HotelOrder hotelOrder = new HotelOrder();
 	        try {
 	        	hotelOrder.setSaleOrderNo(saleOrderNo);
-		        hotelOrder = hotelOrderMapper.selectOne(hotelOrder);
-		        if (StringUtil.isNotNullOrEmpty(hotelOrder.getHotelOrderNo())) {
+		        //hotelOrder = hotelOrderMapper.selectOne(hotelOrder);
+		        hotelOrder = hotelOrderMapper.getOrderBySaleOrderNo(saleOrderNo);
+		        /*if (StringUtil.isNotNullOrEmpty(hotelOrder.getHotelOrderNo())) {
 		        	OrderDetailInfoReq orderDetailInfoReq=new OrderDetailInfoReq();
 		            String hotelOrderNo = hotelOrder.getHotelOrderNo();
 		            OrderInfoModel info=null;
@@ -930,6 +931,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            			if(orderInfomationDetail.getOrderInfos().size()>0)
 	            			{
 	                			info = orderInfomationDetail.getOrderInfos().get(0);
+	                			
 	                			for(ResourceModel resourmodel : info.getResources()){
 	                				if(StringUtils.isNotEmpty(resourmodel.getSupplierConfirmNumber())){
 	                					hotelOrder.setSupplierNumber(resourmodel.getSupplierConfirmNumber());
@@ -941,7 +943,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	                					if(new Date().before(hotelOrder.getDepartureDate())){
 	                						hotelOrder.setOrderStatus(OwnerOrderStatus.RESIDE_ONGOING.getKey());
 	                    					hotelOrder.setTcOrderStatus(TcOrderStatus.CONFIRM_TO_ROOM.getKey());
-	                    					/*try {
+	                    					try {
 	    	                					String factName = "";
 	    	    								hotelOrder.setFactArriveTime(simple.parse(info.getStartTime()));
 	    	    								for(PassengerModel pm : info.getPassengers()){
@@ -956,17 +958,20 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	    	    								hotelOrder.setFactGuestName(factName);
 	    	    							} catch (ParseException e) {
 	    	    								e.printStackTrace();
-	    	    							}*/
+	    	    							}
+	                    					long startTime6 = System.currentTimeMillis(); 
 	                    					hotelOrderMapper.updateById(hotelOrder);
+	                    			        long endTime6 = System.currentTimeMillis();
+	                    			        System.out.println("updateById运行时间：" + (endTime6 - startTime6) + "ms");
+	                    					
 	                					}
 	                				}
 	                				
 	                			}
 	            			}
-
 	            		}
 	            	}
-		        } 
+		        }*/ 
 	               /* try {
 	                	BeanUtils.copyProperties(tcOrderInfosDetail, info);
 	                	BeanUtils.copyProperties(tcOrderInfosDetail, hotelOrder);
@@ -980,12 +985,12 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	                /*SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, hotelOrder.getSaleOrderNo());
 	                hotelOrder.setSaleOrder(saleOrder);*/
 	                
-	                List<String> guestNameList= Arrays.asList(hotelOrder.getGuestName().split(","));
+	                /*List<String> guestNameList= Arrays.asList(hotelOrder.getGuestName().split(","));
 	                if(StringUtil.isNotNullOrEmpty(hotelOrder.getFactGuestName())){
 	                	List<String> factGuestNameList = Arrays.asList(hotelOrder.getFactGuestName().split(","));
 	                	hotelOrder.setFactGuestNameList(factGuestNameList);
 	                }
-	                hotelOrder.setGuestNameList(guestNameList);
+	                hotelOrder.setGuestNameList(guestNameList);*/
 		        logger.info("根据销售单号查询酒店订单详情结果:" + JSONObject.toJSONString(hotelOrder));
 		        
 			} catch (Exception e) {
@@ -1000,10 +1005,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		if(StringUtil.isNullOrEmpty(rehotelOrderNo)){
 			throw new GSSException("根据供应商订单号查询酒店订单详情", "0101", "供应商订单号为空");
 		}
-		HotelOrder hotelOrder = hotelOrderMapper.getOrderByNo(String.valueOf(rehotelOrderNo));
-		
+		HotelOrder hotelOrder = new HotelOrder();
 		try {
-	        if (StringUtil.isNotNullOrEmpty(hotelOrder.getHotelOrderNo())) {
+			hotelOrder = hotelOrderMapper.getOrderByNo(String.valueOf(rehotelOrderNo));
+	        /*if (StringUtil.isNotNullOrEmpty(hotelOrder.getHotelOrderNo())) {
 	        	OrderDetailInfoReq orderDetailInfoReq=new OrderDetailInfoReq();
 	            String hotelOrderNo = hotelOrder.getHotelOrderNo();
 	            OrderInfoModel info=null;
@@ -1034,18 +1039,19 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 
             		}
             	}
-	        } 
-                List<String> guestNameList= Arrays.asList(hotelOrder.getGuestName().split(","));
+	        }*/ 
+                /*List<String> guestNameList= Arrays.asList(hotelOrder.getGuestName().split(","));
                 if(StringUtil.isNotNullOrEmpty(hotelOrder.getFactGuestName())){
                 	List<String> factGuestNameList = Arrays.asList(hotelOrder.getFactGuestName().split(","));
                 	hotelOrder.setFactGuestNameList(factGuestNameList);
                 }
-                hotelOrder.setGuestNameList(guestNameList);
-	        logger.info("根据供应商订单号查询酒店订单详情结果:" + JSONObject.toJSONString(hotelOrder));
+                hotelOrder.setGuestNameList(guestNameList);*/
 	        
+			logger.info("根据供应商订单号查询酒店订单详情结果:" + JSONObject.toJSONString(hotelOrder));
 		} catch (Exception e) {
 			logger.error("查询订单详情异常：", e);
 		}
+		
 		return hotelOrder;
 	}
 	
