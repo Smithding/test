@@ -24,6 +24,7 @@ import com.tempus.gss.product.ift.api.service.ISaleOrderExtService;
 import com.tempus.gss.product.ift.dao.*;
 import com.tempus.gss.product.ift.mq.IftTicketMqSender;
 import com.tempus.gss.system.service.IMaxNoService;
+import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.slf4j.Logger;
@@ -921,7 +922,9 @@ public class RefundServiceImpl implements IRefundService {
 				throw new GSSException("废退单查询对象为空", "0001", "查询废退改签单失败");
 			}
 			String sourceChannelNo = null;
+			log.info("获取费退改签单的数据,查询条件为："+ JsonUtil.toJson(requestWithActor.getEntity()));
 			List<SaleChangeExt> list = saleChangeExtDao.queryObjByKey(page, requestWithActor.getEntity());
+			log.info("获取费退改签单的集合数据条数为："+list.size());
 			List<SaleChangeVo> saleChangeVoList = new ArrayList<>();
 			for (SaleChangeExt saleChangeExt : list) {
 				SaleChangeVo saleChangeVo = new SaleChangeVo();
@@ -1077,6 +1080,7 @@ public class RefundServiceImpl implements IRefundService {
 				}
 				page.setRecords(saleChangeVoList);
 			}
+			log.info("查询废退改签单结束，获取费退改签单的数据为："+ JsonUtil.toJson(page));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

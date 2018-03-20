@@ -157,6 +157,7 @@ public class InsApiProduct implements Serializable {
 	 */
 	private Integer buyWay;
 
+	
 	/**
 	 * 是否默认.0 否 1 是
 	 */
@@ -166,6 +167,33 @@ public class InsApiProduct implements Serializable {
 	 * 供应商编号
 	 */
 	private Long supplierNo;
+	
+	/**
+	 * 保险类别 1为国内 2为国际  3为国内国际
+	 */
+    private int internatOrcivil;
+    /**
+     * 面价
+     * @return
+     */
+    private BigDecimal facePrice;
+    
+	public BigDecimal getFacePrice() {
+		return facePrice;
+	}
+
+	public void setFacePrice(BigDecimal facePrice) {
+		this.facePrice = facePrice;
+	}
+
+	public int getInternatOrcivil() {
+		return internatOrcivil;
+	}
+
+	public void setInternatOrcivil(int internatOrcivil) {
+		this.internatOrcivil = internatOrcivil;
+	}
+
 
 	public Long getInsuranceNo() {
 		return insuranceNo;
@@ -391,12 +419,14 @@ public class InsApiProduct implements Serializable {
 		this.buyWay = buyWay;
 	}
 
-	public Boolean getDefault() {
+	public Boolean getIsDefault() {
+
 		return isDefault;
 	}
 
-	public void setDefault(Boolean aDefault) {
-		isDefault = aDefault;
+	public void setIsDefault(Boolean isDefault) {
+
+		this.isDefault = isDefault;
 	}
 
 	public Long getSupplierNo() {
