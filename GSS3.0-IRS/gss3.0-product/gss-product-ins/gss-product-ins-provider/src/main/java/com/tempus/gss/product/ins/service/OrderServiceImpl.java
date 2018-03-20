@@ -134,6 +134,9 @@ public class OrderServiceImpl implements IOrderService {
 	private static final String COMPANY_NAME_JUNLONG = "君龙";
 	private static final String COMPANY_NAME_QIANHAICAI = "前海财";
 	private static final String RESPONSE_SUCCESS = "0000";
+	private static final String RETURN_ERROR_REFUND = "该订单已退款！不能重复此操作";
+	private static final String RETURN_ERROR_SURRENDER = "该订单已退保！不能重复此操作";
+	private static final String ERROR_CODE = "该订单已退保！不能重复此操作";
 	//设置投保人为个人   1：个人  2：企业
 	private static final int holderType = 1;
 	
@@ -1311,6 +1314,21 @@ public class OrderServiceImpl implements IOrderService {
 				throw new GSSException("根据保单号查询子订单错误!", "1010", "退保失败");
 			}
 			SaleOrderDetail saleOrderDetail = saleOrderDetails.get(0);
+			if("1".equals(isRefund)){
+				if(saleOrderDetail.getStatus()==10){
+					ResultInsure resultError =	new ResultInsure();
+					resultError.setCode(ERROR_CODE);
+					resultError.setMessage(RETURN_ERROR_REFUND);
+					return resultError;
+				}
+			}else{
+				if(saleOrderDetail.getStatus()==8){
+					ResultInsure resultError =	new ResultInsure();
+					resultError.setCode(ERROR_CODE);
+					resultError.setMessage(RETURN_ERROR_SURRENDER);
+					return resultError;
+				}
+			}
 			saleOrderExt = orderServiceDao.selectByPolicyNo(policyNo);
 			if (saleOrderExt == null) {
 				log.info("根据退保单号查询订单结果为空!");
@@ -1877,6 +1895,15 @@ public class OrderServiceImpl implements IOrderService {
 					throw new GSSException("线下产品退保!", "1003", "根据保单号查询子订单错误");
 				}
 				SaleOrderDetail saleOrderDetail = saleOrderDetails.get(0);
+				if("1".equals(isRefund)){
+					if(saleOrderDetail.getStatus()==10){
+						return false;
+					}
+				}else{
+					if(saleOrderDetail.getStatus()==8){
+						return false;
+					}
+				}
 				if(isRefund==1){
 					saleOrderDetail.setStatus(8);
 				}else{
@@ -2988,7 +3015,37 @@ public class OrderServiceImpl implements IOrderService {
 				throw new GSSException("根据保单号查询子订单错误!", "1010", "退保失败");
 			}
 			SaleOrderDetail saleOrderDetail = saleOrderDetails.get(0);
+			if("1".equals(isRefund)){
+				if(saleOrderDetail.getStatus()==10){
+					ResultInsure resultError =	new ResultInsure();
+					resultError.setCode(ERROR_CODE);
+					resultError.setMessage(RETURN_ERROR_REFUND);
+					return resultError;
+				}
+			}else{
+				if(saleOrderDetail.getStatus()==8){
+					ResultInsure resultError =	new ResultInsure();
+					resultError.setCode(ERROR_CODE);
+					resultError.setMessage(RETURN_ERROR_SURRENDER);
+					return resultError;
+				}
+			}
 			saleOrderExt = orderServiceDao.selectByPolicyNo(policyNo);
+			if("1".equals(isRefund)){
+				if("10".equals(saleOrderDetail.getStatus())){
+					ResultInsure resultError =	new ResultInsure();
+					resultError.setCode(ERROR_CODE);
+					resultError.setMessage(RETURN_ERROR_REFUND);
+					return resultError;
+				}
+			}else{
+				if("8".equals(saleOrderDetail.getStatus())){
+					ResultInsure resultError =	new ResultInsure();
+					resultError.setCode(ERROR_CODE);
+					resultError.setMessage(RETURN_ERROR_SURRENDER);
+					return resultError;
+				}
+			}
 			if (saleOrderExt == null) {
 				log.info("根据退保单号查询订单结果为空!");
 				throw new GSSException("根据退保单号查询订单结果为空!", "1010", "退保失败");
@@ -3241,6 +3298,9 @@ public class OrderServiceImpl implements IOrderService {
 	@Override
 	public boolean cacelForB2BPersonDetail(SaleOrderExt saleOrderExt, SaleOrderDetail saleOrderDetail, Agent agent) {
 		//更改状态为退款审核中的状态
+				if(saleOrderDetail.getStatus()==10){
+					return false;
+				}
 				saleOrderDetail.setStatus(5);
 				saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 				boolean isTrue = true;
