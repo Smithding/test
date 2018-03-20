@@ -15,6 +15,7 @@ import com.tempus.gss.product.hol.api.entity.request.tc.OrderCancelReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.OrderCreateReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.OrderDetailInfoReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.TcPushOrderInfo;
+import com.tempus.gss.product.hol.api.entity.response.HolErrorOrder;
 import com.tempus.gss.product.hol.api.entity.response.HotelOrder;
 import com.tempus.gss.product.hol.api.entity.response.tc.CancelOrderRes;
 import com.tempus.gss.product.hol.api.entity.response.tc.CancelReasonModel;
@@ -45,6 +46,13 @@ public interface ITCHotelOrderService {
 	 * @return
 	 */
 	public OrderInfomationDetail orderDetailInfo(Agent agent, OrderDetailInfoReq orderDetailInfoReq) throws GSSException;
+	/**
+	 * 创建报错订单表
+	 * @param agent
+	 * @param hotelOrder
+	 * @throws GSSException
+	 */
+	public void createErrorOrder(Agent agent, HolErrorOrder holErrorOrder) throws GSSException;
 	
 	/**
 	 * 根据同程订单号向同程发起对应订单的退款申请
@@ -80,7 +88,7 @@ public interface ITCHotelOrderService {
 	 * @param pageRequest
 	 * @return
 	 */
-	public Page<HotelOrder> queryErrorOrderListWithPage(Page<HotelOrder> page, RequestWithActor<HotelOrderVo> pageRequest) throws GSSException;
+	public Page<HolErrorOrder> queryErrorOrderListWithPage(Page<HolErrorOrder> page, RequestWithActor<HotelOrderVo> pageRequest) throws GSSException;
 	
 	/**
 	 * 根据条件查询分销商订单列表
