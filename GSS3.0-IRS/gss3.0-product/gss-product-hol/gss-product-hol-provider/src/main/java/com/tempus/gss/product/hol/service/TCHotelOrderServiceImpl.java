@@ -65,6 +65,7 @@ import com.tempus.gss.product.hol.api.entity.request.tc.ResourceUseDateDetail;
 import com.tempus.gss.product.hol.api.entity.request.tc.SpecialRequest;
 import com.tempus.gss.product.hol.api.entity.request.tc.TcPushOrderInfo;
 import com.tempus.gss.product.hol.api.entity.request.tc.TravlePassengerInfo;
+import com.tempus.gss.product.hol.api.entity.response.HolErrorOrder;
 import com.tempus.gss.product.hol.api.entity.response.HotelOrder;
 import com.tempus.gss.product.hol.api.entity.response.StatusType;
 import com.tempus.gss.product.hol.api.entity.response.tc.AssignDateHotel;
@@ -99,6 +100,7 @@ import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
 import com.tempus.gss.product.hol.api.util.DateUtil;
 import com.tempus.gss.product.hol.api.util.OrderStatusUtils;
 import com.tempus.gss.product.hol.dao.HolSupplierMapper;
+import com.tempus.gss.product.hol.dao.HotelErrorOrderMapper;
 import com.tempus.gss.product.hol.dao.HotelOrderMapper;
 import com.tempus.gss.security.ShiroUser;
 import com.tempus.gss.sms.SMSUtil;
@@ -129,6 +131,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 
     @Autowired
     HotelOrderMapper hotelOrderMapper;
+    
+    @Autowired
+    HotelErrorOrderMapper hotelErrorOrderMapper;
+    
     @Autowired
     HolSupplierMapper supplierMapper;
     
@@ -317,10 +323,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		}
     	//OrderCreateBase orderCreateBase;
     	ResultTc<OrderCreate> orderCreateBase = null;
+    	Long saleOrderNo = maxNoService.generateBizNo("HOL_SALE_ORDER_NO", 13);
     	try{
     		Long businessSignNo = IdWorker.getId();
     		//Long saleOrderNo = IdWorker.getId();
-    		Long saleOrderNo = maxNoService.generateBizNo("HOL_SALE_ORDER_NO", 13);
     		BuyOrder buyOrder = orderCreateReq.getBuyOrder();
             if (buyOrder == null) {
                 buyOrder = new BuyOrder();
@@ -568,12 +574,17 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		}
     	catch(Exception e){
     		logger.error("创建酒店订单请求出错",e);
-    		hotelOrder.setOrderStatus(OwnerOrderStatus.BOOK_FAIL.getKey());
-    		hotelOrder.setMsg(e.getMessage());
-			hotelOrder.setResultCode("0");
-			hotelOrderMapper.insertSelective(hotelOrder);
-            throw new GSSException("创建酒店订单失败", "0137", e.getMessage());
+            throw new GSSException(hotelOrder.getHotelName(), String.valueOf(saleOrderNo), e.getMessage());
     	}
+    	/*finally {
+			if(resultCode.equals("0")) {
+				HolErrorOrder holErrorOrder=new HolErrorOrder();
+				holErrorOrder.setResultCode("resultCode");
+	    		BeanUtils.copyProperties(hotelOrder, holErrorOrder);
+	    		holErrorOrder.setMsg(errMsg);
+	    		hotelErrorOrderMapper.insertSelective(holErrorOrder);
+			}
+		}*/
     	logger.info("创建酒店订单结束=====");
 		return hotelOrder;
 	}
@@ -868,7 +879,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	}
 	
 	@Override
-	public Page<HotelOrder> queryErrorOrderListWithPage(Page<HotelOrder> page, RequestWithActor<HotelOrderVo> pageRequest) throws GSSException{
+	public Page<HolErrorOrder> queryErrorOrderListWithPage(Page<HolErrorOrder> page, RequestWithActor<HotelOrderVo> pageRequest) throws GSSException{
 		logger.info("根据条件查询酒店报错订单列表开始,入参:" + JSONObject.toJSONString(pageRequest));
 		try {
 			Agent agent = pageRequest.getAgent();
@@ -886,7 +897,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	                pageRequest.getEntity().setOwner(pageRequest.getAgent().getOwner());
 	            }
 	        }
-	        List<HotelOrder> hotelOrderList = hotelOrderMapper.queryOrderList(page, pageRequest.getEntity());
+	        List<HolErrorOrder> hotelOrderList = hotelErrorOrderMapper.queryErrorOrderList(page, pageRequest.getEntity());
 	        /**
 	         * 根据saleOrderNo通过API接口去其他子系统去获取数据
 	         * 需要根据list的长度去执行获取数据的次数,此操作可能会存在性能问题
@@ -1245,7 +1256,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	}
 	
 	public String messageReplace(String message, HotelOrder hotelOrder){
-		System.out.println("订单内容: "+JsonUtil.toJson(hotelOrder));
 		SimpleDateFormat simpleorder = new SimpleDateFormat("yyyy-MM-dd");
 		SimpleDateFormat simple = new SimpleDateFormat("yyyy/MM/dd");
 		String replace1 = message.replace("{$OrderNo}", hotelOrder.getSaleOrderNo().toString());
@@ -1314,10 +1324,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							SmsTemplateDetail smsTemplateDetail = new SmsTemplateDetail();
 							smsTemplateDetail.setDictCode("HOTEL_GUARANTEE");
 					    	List<SmsTemplateDetail> stds = smsTemplateDetailService.query(smsTemplateDetail);
-					    	System.out.println("总内容: "+JsonUtil.toJson(stds));
+					    	//System.out.println("总内容: "+JsonUtil.toJson(stds));
 					    	String messageReplace = messageReplace(stds.get(0).getContent(), hotelOrder);
-					    	System.out.println("短信内容1: "+stds.get(0).getContent());
-					    	System.out.println("变化后的内容: "+messageReplace);
+					    	//System.out.println("短信内容1: "+stds.get(0).getContent());
+					    	//System.out.println("变化后的内容: "+messageReplace);
 					    	
 					    	LogRecord logRecord=new LogRecord();
 							logRecord.setAppCode("GSS");
@@ -2120,6 +2130,11 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			throw new GSSException("手动推送修改订单前台展示", "0291", "手动推送修改订单前台展示异常"+e.getMessage());
 		}
 		return flag;
+	}
+
+	@Override
+	public void createErrorOrder(Agent agent, HolErrorOrder holErrorOrder) throws GSSException {
+		hotelErrorOrderMapper.insertSelective(holErrorOrder);
 	}
 
 	
