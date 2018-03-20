@@ -924,7 +924,7 @@ public class RefundServiceImpl implements IRefundService {
 			String sourceChannelNo = null;
 			log.info("获取费退改签单的数据,查询条件为："+ JsonUtil.toJson(requestWithActor.getEntity()));
 			List<SaleChangeExt> list = saleChangeExtDao.queryObjByKey(page, requestWithActor.getEntity());
-			//log.info("获取费退改签单的集合数据为："+ JsonUtil.toJson(list));
+			log.info("获取费退改签单的集合数据条数为："+list.size());
 			List<SaleChangeVo> saleChangeVoList = new ArrayList<>();
 			for (SaleChangeExt saleChangeExt : list) {
 				SaleChangeVo saleChangeVo = new SaleChangeVo();
