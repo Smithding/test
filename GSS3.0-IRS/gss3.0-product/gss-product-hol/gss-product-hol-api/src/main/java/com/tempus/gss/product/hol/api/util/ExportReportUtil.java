@@ -328,7 +328,7 @@ public class ExportReportUtil {
                     break;
                     //实际离店日期
                     case 18: {
-                        if (null != obj.getFactDepartureDateString()) {
+                        if (null != obj.getFactDepartureDate()) {
                             cell.setCellValue(sf.format(obj.getFactDepartureDate()));
                         } else {
                             cell.setCellValue("--");
