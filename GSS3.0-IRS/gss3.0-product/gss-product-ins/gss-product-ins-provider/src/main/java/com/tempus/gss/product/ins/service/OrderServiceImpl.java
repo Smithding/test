@@ -215,7 +215,7 @@ public class OrderServiceImpl implements IOrderService {
     @Reference
     public IInsuranceProfitService insuranceProfitService;
 	SimpleDateFormat simple = new SimpleDateFormat("yyyy-MM-dd");
-	
+	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
 	public Long createOrder(RequestWithActor<OrderCreateVo> requestWithActor) throws Exception {
@@ -475,6 +475,14 @@ public class OrderServiceImpl implements IOrderService {
         		personnum +=saleOrderDetail.getInsuranceNum();
         	}
         }
+        //后台自动获取保期
+        if(saleOrderExt.getEffectDate()==null){
+        	saleOrderExt.setEffectDate(format.parse(simple.format(saleOrderExt.getInsureExtVo().getFlightInfoVo().getFlightDate())));
+        }
+        Calendar ca = Calendar.getInstance();
+        ca.setTime(saleOrderExt.getEffectDate());
+        ca.add(Calendar.DATE, saleOrderExt.getInsurance().getEndDays());
+        SaleOrderExt.setExpireDate(ca.getTime());
         //存储总保险分数
         saleOrderExt.setSumCopies(personnum);
         //存储面价
