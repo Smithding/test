@@ -929,8 +929,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	        HotelOrder hotelOrder = new HotelOrder();
 	        try {
 	        	hotelOrder.setSaleOrderNo(saleOrderNo);
-		        //hotelOrder = hotelOrderMapper.selectOne(hotelOrder);
-		        hotelOrder = hotelOrderMapper.getOrderBySaleOrderNo(saleOrderNo);
+		        hotelOrder = hotelOrderMapper.selectOne(hotelOrder);
+		        //hotelOrder = hotelOrderMapper.getOrderBySaleOrderNo(saleOrderNo);
 		        /*if (StringUtil.isNotNullOrEmpty(hotelOrder.getHotelOrderNo())) {
 		        	OrderDetailInfoReq orderDetailInfoReq=new OrderDetailInfoReq();
 		            String hotelOrderNo = hotelOrder.getHotelOrderNo();
