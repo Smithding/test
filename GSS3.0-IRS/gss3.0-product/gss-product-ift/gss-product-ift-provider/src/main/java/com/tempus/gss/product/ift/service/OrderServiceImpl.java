@@ -317,7 +317,7 @@ public class OrderServiceImpl implements IOrderService {
             if (buyOrderExt.getBuyOrder().getSupplierNo() == null || buyOrderExt.getBuyOrder().getSupplierNo() == 0 || buyOrderExt.getBuyOrder().getSupplierTypeNo() == null || buyOrderExt.getBuyOrder().getSupplierTypeNo() == 0) {
                 /* 查询客商编号，默认第一个数据 */
                 Supplier supplier = new Supplier();
-                supplier.setProductType("2");
+                supplier.setProductType("1000002");
                 List<Supplier> supplierList = supplierService.getSupplierList(agent, supplier);
                 if (supplierList == null || supplierList.size() == 0) {
                     log.error("获取客商编号为空");
@@ -1884,7 +1884,7 @@ public class OrderServiceImpl implements IOrderService {
                 if (buyOrderExt.getBuyOrder().getSupplierNo() == null || buyOrderExt.getBuyOrder().getSupplierNo() == 0 || buyOrderExt.getBuyOrder().getSupplierTypeNo() == null || buyOrderExt.getBuyOrder().getSupplierTypeNo() == 0) {
                     /* 查询客商编号，默认第一个数据 */
                     Supplier supplier = new Supplier();
-                    supplier.setProductType("2");
+                    supplier.setProductType("1000002");
                     List<Supplier> supplierList = supplierService.getSupplierList(agent1, supplier);
                     if (supplierList == null || supplierList.size() == 0) {
                         log.error("获取客商编号为空");
