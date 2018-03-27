@@ -482,6 +482,7 @@ public class OrderServiceImpl implements IOrderService {
         Calendar ca = Calendar.getInstance();
         ca.setTime(saleOrderExt.getEffectDate());
         ca.add(Calendar.DATE, insurance.getEndDays());
+        ca.add (Calendar.SECOND,-1);
         SaleOrderExt.setExpireDate(ca.getTime());
         //存储总保险分数
         saleOrderExt.setSumCopies(personnum);
