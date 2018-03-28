@@ -790,7 +790,7 @@ public class OrderServiceImpl implements IOrderService {
 				if (StringUtils.isNotBlank(policyHolderEmail)) {
 					insureRequestVo.setPolicyHolderEmail(policyHolderEmail);
 				}
-				  insureRequestVo.setPolicyHolderBirthday(simple.format(saleOrderExt.getSaleOrderDetailList().get(0).getInsuredBirthday()));
+				  insureRequestVo.setPolicyHolderBirthday(saleOrderExt.getSaleOrderDetailList().get(0).getInsuredBirthday());
 			}
 		}else{
 			try{
