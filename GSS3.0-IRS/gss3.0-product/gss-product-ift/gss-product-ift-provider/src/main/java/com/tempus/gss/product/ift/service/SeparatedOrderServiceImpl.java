@@ -22,6 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +44,8 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
     private TicketSenderDao ticketSenderDao;
     @Reference
     private IUserService userService;
+    @Value("${dpsconfig.job.owner}")
+    protected String ownerCode;
 
     @Override
     public Page<SeparatedOrder> pageList(Page<SeparatedOrder> page, RequestWithActor<SeparatedOrderVo> requestWithActor) {
@@ -56,6 +59,13 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
         return page;
     }
 
+    /**
+     *
+     * @param saleOrderNo
+     * @param loginName
+     * @param currentUserId  当前分单用户  用于记录是谁操作的分单
+     * @return
+     */
     @Override
     @Transactional
     public int updateSeparatedOrder(Long saleOrderNo,String loginName,String currentUserId) {
@@ -77,7 +87,8 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
             updateTicketSenderInfo(user.getLoginName(), status, currentUserId,"sub");
         }
         //分给指定出票员后，订单被此人ID锁定
-        Agent agent = new Agent(8755);
+        Integer owner = Integer.valueOf(ownerCode);
+        Agent agent = new Agent(owner);
         User tempUser = userService.findUserByLoginName(agent,loginName);
         if(tempUser!=null) {
             saleOrderExt.setLocker(tempUser.getId());

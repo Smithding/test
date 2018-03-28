@@ -23,8 +23,10 @@ import com.tempus.tbd.entity.Airport;
 import com.tempus.tbd.service.IAirportService;
 import com.tempus.tbe.entity.*;
 import com.tempus.tbe.service.IShoppingService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -117,7 +119,7 @@ public class QueryServiceImpl implements IQueryService {
         if (null != flightQuery.getInfantCount() && flightQuery.getInfantCount() > 0) {
             psger.add(new PassengerTypeQuantity("INF", flightQuery.getInfantCount()));
         }
-        if (null != flightQuery.getGrade() && !"".equals(flightQuery.getGrade())) {
+        if (StringUtils.isNotBlank(flightQuery.getGrade())) {
             if (flightQuery.getGrade().equals("F")) {
                 shoppingInput.setCabinPref("First");
             }
@@ -135,10 +137,10 @@ public class QueryServiceImpl implements IQueryService {
         
         shoppingInput.setPsger(psger);
         List<ShoppingSeg> segs = new ArrayList<ShoppingSeg>();
-        ShoppingSeg shoppingSeg = new ShoppingSeg();
-        shoppingSeg.setDepartureDate(flightQuery.getDepDate());
+        ShoppingSeg shoppingSeg = new ShoppingSeg(flightQuery.getDepDate(),flightQuery.getArrAirport(),flightQuery.getDepAirport());
+        /*shoppingSeg.setDepartureDate(flightQuery.getDepDate());
         shoppingSeg.setDestinationLocation(flightQuery.getArrAirport());
-        shoppingSeg.setOriginLocation(flightQuery.getDepAirport());
+        shoppingSeg.setOriginLocation(flightQuery.getDepAirport());*/
         if (null != flightQuery.getTransfers() && flightQuery.getTransfers().size() > 0) {
             List<ConnectionLocation> connectionLocations = new ArrayList<ConnectionLocation>();
             for (String transfer : flightQuery.getTransfers()) {
@@ -148,10 +150,7 @@ public class QueryServiceImpl implements IQueryService {
         }
         segs.add(shoppingSeg);
         if (null != flightQuery.getLegType() && 2 == flightQuery.getLegType()) {
-            shoppingSeg = new ShoppingSeg();
-            shoppingSeg.setDepartureDate(flightQuery.getReturnDate());
-            shoppingSeg.setDestinationLocation(flightQuery.getDepAirport());
-            shoppingSeg.setOriginLocation(flightQuery.getArrAirport());
+            shoppingSeg = new ShoppingSeg(flightQuery.getReturnDate(), flightQuery.getArrAirport(), flightQuery.getDepAirport());
             segs.add(shoppingSeg);
         }
         shoppingInput.setSegs(segs);
@@ -200,7 +199,7 @@ public class QueryServiceImpl implements IQueryService {
         pages.setRecords(queryIBEDetailList);
         return pages;
     }
-    
+
     /**
      * 匹配政策算价格
      *
@@ -969,7 +968,7 @@ public class QueryServiceImpl implements IQueryService {
                                 flight.setBaggage(psgerFlight.getBaggageWeightUnit());
                             }
                         }
-                        
+
                     }
                     String type = null;
                     for (FlightCabinPriceVo flightCabinPriceVo : flightCabinPriceVos) {
@@ -998,7 +997,7 @@ public class QueryServiceImpl implements IQueryService {
         }
         return queryIBEDetails;
     }
-    
+
     /**
      * 得到国内附加段
      *
@@ -1018,7 +1017,7 @@ public class QueryServiceImpl implements IQueryService {
         }
         return flightList;
     }
-    
+
     /**
      * 得到国外延伸段
      *
@@ -1037,9 +1036,9 @@ public class QueryServiceImpl implements IQueryService {
             }
         }
         return flightList;
-        
+
     }
-    
+
     /**
      * 解析运价横式
      *
@@ -1207,10 +1206,10 @@ public class QueryServiceImpl implements IQueryService {
                 }
             }
         }
-        
+
         return map;
     }
-    
+
     /**
      * 计算运价
      *
@@ -1239,7 +1238,7 @@ public class QueryServiceImpl implements IQueryService {
                 saleBrokerage = (BigDecimal) policyMap.get("saleOwBrokerage");
             }
         }
-        
+
         if (null == policy) {
             NoMatchFormulaPara noMatchFormulaPara = formula.getNoMatchFormulaPara();
             boolean iscombination = false;
@@ -1273,7 +1272,7 @@ public class QueryServiceImpl implements IQueryService {
                         reTpm = reTpm + flight.getTpm();
                         reFlights.add(flight);
                     }
-                    
+
                 }
                 if (otherTpm > 0) {
                     FormulaParameters formulaParameters = new FormulaParameters();
@@ -1988,7 +1987,6 @@ public class QueryServiceImpl implements IQueryService {
         QueryIBEDetailVo queryIBEDetailVo = new QueryIBEDetailVo();
         queryIBEDetailVo.setTicketAirline(queryIBEDetail.getTicketAirline());
         queryIBEDetailVo.setDirect(queryIBEDetail.isDirect());
-        ;
         queryIBEDetailVo.setLegType(queryIBEDetail.getLegType());
         queryIBEDetailVo.setGoDepTime(queryIBEDetail.getGoDepTime());
         queryIBEDetailVo.setGoArrTime(queryIBEDetail.getGoArrTime());
@@ -2009,7 +2007,9 @@ public class QueryServiceImpl implements IQueryService {
         queryIBEDetailVo.setCabinsPricesTotalses(cabinsPricesTotalsVoList);
         List<FlightVo> flightVoList = new ArrayList<FlightVo>();
         for (Flight flight : queryIBEDetail.getFlights()) {
-            FlightVo flightVo = copyFlight(flight);
+           // FlightVo flightVo = copyFlight(flight);
+            FlightVo flightVo = new FlightVo();
+            BeanUtils.copyProperties(flight,flightVo);
             flightVoList.add(flightVo);
         }
         queryIBEDetailVo.setFlights(flightVoList);
@@ -2054,9 +2054,9 @@ public class QueryServiceImpl implements IQueryService {
     /**
      * 封装api数据
      *
-     * @param flight
+     * @param
      */
-    private FlightVo copyFlight(Flight flight) {
+   /* private FlightVo copyFlight(Flight flight) {
         FlightVo flightVo = new FlightVo();
         flightVo.setAirline(flight.getAirline());
         flightVo.setFlightNo(flight.getFlightNo());
@@ -2081,7 +2081,7 @@ public class QueryServiceImpl implements IQueryService {
         flightVo.setStopOverDuration(flight.getStopOverDuration());
         flightVo.setFlightNum(flight.getFlightNum());
         return flightVo;
-    }
+    }*/
     
     @Bean
     public ThreadPoolTaskExecutor taskExecutor() {

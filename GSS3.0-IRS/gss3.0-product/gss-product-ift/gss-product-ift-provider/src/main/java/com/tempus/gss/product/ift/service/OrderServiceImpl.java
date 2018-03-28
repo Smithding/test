@@ -1683,7 +1683,7 @@ public class OrderServiceImpl implements IOrderService {
                         log.info("3.增加出票人的未出票订单数量...");
                         increaseOrderCount(peopleInfo);
                         /***发送消息至消息队列 通知出票员*/
-                        sendInfo(peopleInfo.getUserid(), order.getSaleOrderNo());
+                        sendInfo(peopleInfo.getUserid(), order.getSaleOrderNo(),String.valueOf(order.getSaleOrder().getOrderStatus()));
                         log.info("4.发信息通知出票员出票,订单" + order.getSaleOrderNo() + "将分给出票员结束");
                         break;
                     }
@@ -1884,7 +1884,7 @@ public class OrderServiceImpl implements IOrderService {
                 if (buyOrderExt.getBuyOrder().getSupplierNo() == null || buyOrderExt.getBuyOrder().getSupplierNo() == 0 || buyOrderExt.getBuyOrder().getSupplierTypeNo() == null || buyOrderExt.getBuyOrder().getSupplierTypeNo() == 0) {
                     /* 查询客商编号，默认第一个数据 */
                     Supplier supplier = new Supplier();
-                    supplier.setProductType("1000002");
+                    supplier.setProductType("2");
                     List<Supplier> supplierList = supplierService.getSupplierList(agent1, supplier);
                     if (supplierList == null || supplierList.size() == 0) {
                         log.error("获取客商编号为空");
@@ -2562,12 +2562,13 @@ public class OrderServiceImpl implements IOrderService {
             Long saleOrderNum = Long.parseLong(sd.getSaleOrder());
             SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(saleOrderNum);
             if(saleOrderExt!=null){
-                Agent agent = new Agent(8755);
+                Agent agent = new Agent(Integer.valueOf(owner));
                 User user = userService.findUserByLoginName(agent, sd.getLoginName());
                 saleOrderExt.setLocker(user.getId());
                 Date date = new Date();
                 saleOrderExt.setLockTime(date);
                 saleOrderExt.setModifyTime(date);
+                log.info("分单更新销售订单分配信息:"+saleOrderExt.toString());
                 saleOrderExtDao.updateByPrimaryKey(saleOrderExt);
             }
         }catch(Exception e){
@@ -2610,9 +2611,10 @@ public class OrderServiceImpl implements IOrderService {
         }
     }
 
-    private void sendInfo(String userId,Long saleOrderNo){
+    private void sendInfo(String userId,Long saleOrderNo,String orderStatus){
         SocketDO sdo = new SocketDO();
-        sdo.setType(2);
+        sdo.setType(1000002);
+        sdo.setOther(orderStatus);//
         sdo.setLoginName(userId);
         sdo.setSaleOrder(String.valueOf(saleOrderNo));
         mqSender.send("gss-websocket-exchange", "notice", sdo);

@@ -7,7 +7,7 @@ import com.tempus.gss.product.ift.api.service.IPolicyIndexService;
 import com.tempus.gss.product.ift.api.service.IPolicyRedisUtils;
 import com.tempus.gss.util.JsonUtil;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,16 +15,18 @@ import java.util.*;
 
 /**
  * Created by 杨威 on 2017/12/5.
+ * changeRecord zhi.li 2018-03-23
  */
 @Service
 public class PolicyIndexService implements IPolicyIndexService {
-    private static Logger logger = Logger.getLogger(IPolicyIndexService.class);
+   // private static Logger logger = Logger.getLogger(IPolicyIndexService.class);
     @Autowired
     IPolicyRedisUtils policyRedisUtils;
     /**
      *
      *
      *根据Policy记录生成索引记录
+     * 并保存redis 生命周期24小时
      * policy
      */
     public void  policyIndexsProduction(Policy policy) {
@@ -62,7 +64,7 @@ public class PolicyIndexService implements IPolicyIndexService {
                 // policyId 集合
                 Set listPolicy = new HashSet();
                 listPolicy.add(policyId);
-                 policyIndex =new PolicyIndex();
+                policyIndex =new PolicyIndex();
                 policyIndex.setPolicyIds(listPolicy);
                 policyIndex.setIndexPk(key);
                 policyRedisUtils.set(key, JsonUtil.toJson(policyIndex),24*3600L);
@@ -72,10 +74,11 @@ public class PolicyIndexService implements IPolicyIndexService {
 
     /**
      * 根据fromCityDcdo，toCityDcd生产索引表的key
-     *
      * @param flyTypeDid
      * @param fromCityDcdo
      * @param toCityDcd
+     * @param airline
+     * @param getOwner
      * @return
      */
     private List<String> getPolicyTempKeyList(Integer flyTypeDid,
@@ -100,33 +103,46 @@ public class PolicyIndexService implements IPolicyIndexService {
         return keyList;
     }
 
+
     /**
      * 拆分toCity字段
-     *
      * @param fromCityKey
      * @param toCityDid
      * @param flyTypeDid
+     * @param airline
+     * @param getOwner
      * @param keyList
      */
     private void sliptToCityAppendKey(StringBuffer fromCityKey,
                                       String toCityDid, Integer flyTypeDid,String airline,Integer getOwner, List<String> keyList) {
         if (StringUtils.isNotEmpty(toCityDid)) {
+
             if (toCityDid.contains("/")) {
                 String[] arrayToCitys = toCityDid.split("/");
-                for (String toCity : arrayToCitys) {
+               /* for (String toCity : arrayToCitys) {
                     StringBuffer keyBuffer = new StringBuffer(fromCityKey);
-                    keyBuffer.append(toCity.trim());
+                    keyBuffer.append(toCity);
                     keyBuffer.append("-").append(flyTypeDid).append("-").append(airline).append("-").append(getOwner);
                     String key = keyBuffer.toString();
                     keyList.add(key);
-                }
+                }*/
+                Arrays.stream(arrayToCitys).map(toCity -> buildKey(fromCityKey, toCity, flyTypeDid, airline, getOwner)).forEach(keyList::add);
             } else {
-                StringBuffer keyBuffer = new StringBuffer(fromCityKey);
-                keyBuffer.append(toCityDid.trim());
+               /* StringBuffer keyBuffer = new StringBuffer(fromCityKey);
+                keyBuffer.append(toCityDid);
                 keyBuffer.append("-").append(flyTypeDid).append("-").append(airline).append("-").append(getOwner);
-                String key = keyBuffer.toString();
-                keyList.add(key);
+                String key = keyBuffer.toString();*/
+                keyList.add(buildKey(fromCityKey,toCityDid,flyTypeDid,airline,getOwner));
             }
         }
     }
+
+    private String buildKey(StringBuffer fromCityKey,String toCityDid, Integer flyTypeDid,String airline,Integer getOwner){
+        StringBuffer keyBuffer = new StringBuffer(fromCityKey);
+        keyBuffer.append(toCityDid);
+        keyBuffer.append("-").append(flyTypeDid).append("-").append(airline).append("-").append(getOwner);
+        String key = keyBuffer.toString();
+        return  key;
+    }
+
 }
