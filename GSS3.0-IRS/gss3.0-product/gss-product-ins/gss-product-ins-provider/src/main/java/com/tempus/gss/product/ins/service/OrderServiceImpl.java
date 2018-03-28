@@ -773,7 +773,7 @@ public class OrderServiceImpl implements IOrderService {
 			if(saleOrderExt.getSaleOrderDetailList().get(0)!=null){
 				Calendar calendar = Calendar.getInstance();    
 			    calendar.setTime(saleOrderExt.getExpireDate());
-			    calendar.add(Calendar.SECOND, -1);
+/*			    calendar.add(Calendar.SECOND, -1);*/
 				try {
 					insureRequestVo.setExpireDate(sdf.parse(sdf.format(calendar.getTime())));
 				} catch (ParseException e1) {
