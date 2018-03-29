@@ -1281,9 +1281,9 @@ public class OrderServiceImpl implements IOrderService {
                     //saleOrderExt.setModifyTime(new Date());
                 } else {
                     saleOrderExt.setLocker(0L);
-                    //saleOrderExt.setModifier(saleOrderNo.getAgent().getAccount());
+                    saleOrderExt.setModifier(saleOrderNo.getAgent().getAccount());
                     saleOrderExt.setLockTime(new Date());
-                    //saleOrderExt.setModifyTime(new Date());
+                    saleOrderExt.setModifyTime(new Date());
                 }
                 int updateLocker = saleOrderExtDao.updateLocker(saleOrderExt);
                 if (updateLocker == 1) {
@@ -2626,6 +2626,7 @@ public class OrderServiceImpl implements IOrderService {
         saleQueryOrderVo.setPayStatuss("3,4");
         saleQueryOrderVo.setValid((byte) 1);
         saleQueryOrderVo.setOrderStatus(2);
+        saleQueryOrderVo.setLocker(0L);
         List<SaleOrderExt> saleOrderExtList = saleOrderExtDao.queryFromSaleQueryOrderVo(saleQueryOrderVo);
         return saleOrderExtList;
     }
