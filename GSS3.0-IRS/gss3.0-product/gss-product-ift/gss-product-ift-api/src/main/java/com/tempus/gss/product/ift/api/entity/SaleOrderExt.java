@@ -165,6 +165,7 @@ public class SaleOrderExt implements Serializable {
 	private String currency;//采购币种
 	private String saleCurrency;//销售币种
 	private BigDecimal exchangeRate;//汇率
+	private String handlers;//操作人姓名
 
 
 	/**
@@ -523,6 +524,14 @@ public class SaleOrderExt implements Serializable {
 
 	public void setExchangeRate(BigDecimal exchangeRate) {
 		this.exchangeRate = exchangeRate;
+	}
+
+	public String getHandlers() {
+		return handlers;
+	}
+
+	public void setHandlers(String handlers) {
+		this.handlers = handlers;
 	}
 
 	@Override

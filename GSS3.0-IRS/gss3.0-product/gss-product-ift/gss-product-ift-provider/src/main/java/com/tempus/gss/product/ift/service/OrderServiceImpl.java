@@ -2627,7 +2627,7 @@ public class OrderServiceImpl implements IOrderService {
         saleQueryOrderVo.setValid((byte) 1);
         saleQueryOrderVo.setOrderStatus(2);
         saleQueryOrderVo.setLocker(0L);
-        List<SaleOrderExt> saleOrderExtList = saleOrderExtDao.queryFromSaleQueryOrderVo(saleQueryOrderVo);
+        List<SaleOrderExt> saleOrderExtList = saleOrderExtDao.queryAssignOrder(saleQueryOrderVo);
         return saleOrderExtList;
     }
 

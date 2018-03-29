@@ -55,6 +55,7 @@
         <result column="CURRENCY" property="currency" jdbcType="VARCHAR"/>
         <result column="SALE_CURRENCY" property="saleCurrency" jdbcType="VARCHAR"/>
         <result column="EXCHANGE_RATE" property="exchangeRate" javaType="DECIMAL"/>
+        <result column="HANDLERS" property="handlers" jdbcType="VARCHAR"/>
         <association property="saleOrder" column="SALE_ORDER_NO"
                      select="com.tempus.gss.order.dao.SaleOrderMapper.selectByRecordNo"/>
         <!-- 一对一 PNR-->
@@ -510,7 +511,8 @@
         select DISTINCT
         f.SALE_ORDER_NO, f.ID, f.OWNER, f.DEMAND_NO, f.LEG_TYPE, f.CONTACT_NAME, f.CONTACT_PHONE, f.CONTACT_MOBILE,
         f.CONTACT_MAIL, f.SALE_REMARK, f.VALID, f.VERSION, f.LOCKER, f.LOCK_TIME, f.CREATE_TYPE, f.CREATE_TIME,
-        f.MODIFY_TIME,  (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,(select NAME from SM_USER where LOGIN_NAME =aa.MODIFIER) as MODIFIER,o.ORDER_CHILD_STATUS,f.LINKTYPE
+        f.MODIFY_TIME,  (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,(select NAME from SM_USER where LOGIN_NAME =aa.MODIFIER) as MODIFIER,
+        o.ORDER_CHILD_STATUS,f.LINKTYPE,(SELECT NAME FROM SM_USER where ID = f.LOCKER) as HANDLERS
         FROM
         IFT_SALE_ORDER_EXT f
         left join OS_SALEORDER o on f.SALE_ORDER_NO = o.SALE_ORDER_NO
@@ -894,6 +896,39 @@
             <!--  <if test="linkType!=null and linkType !=''">
                  f.LINKTYPE = #{linkType,jdbcType=VARCHAR} AND
              </if> -->
+        </trim>
+        order by f.CREATE_TIME desc
+    </select>
+
+    <select id="queryAssignOrder" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SaleQueryOrderVo">
+         select DISTINCT
+        f.SALE_ORDER_NO, f.ID, f.OWNER, f.DEMAND_NO, f.LEG_TYPE, f.CONTACT_NAME, f.CONTACT_PHONE, f.CONTACT_MOBILE,
+        f.CONTACT_MAIL, f.SALE_REMARK, f.VALID, f.VERSION, f.LOCKER, f.LOCK_TIME, f.CREATE_TYPE, f.CREATE_TIME,
+        f.MODIFY_TIME,  (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,
+        o.ORDER_CHILD_STATUS,f.LINKTYPE as HANDLERS
+        FROM
+        IFT_SALE_ORDER_EXT f
+        left join OS_SALEORDER o on f.SALE_ORDER_NO = o.SALE_ORDER_NO
+        left join IFT_SALE_ORDER_DETAIL d on d.SALE_ORDER_NO = f.SALE_ORDER_NO
+        where
+        <trim suffixOverrides="AND">
+            f.VALID = 1 and
+            <if test="payStatus!=null">
+                o.PAY_STATUS = #{payStatus,jdbcType=BIGINT} AND
+            </if>
+            <if test="locker!=null">
+                <choose>
+                    <when test="locker == 0">f.LOCKER=0 AND</when>
+                    <when test="locker == 1">f.LOCKER!=0 AND</when>
+                    <otherwise>f.LOCKER = #{locker,jdbcType=BIGINT} AND</otherwise>
+                </choose>
+            </if>
+            <if test="orderStatus!=null">
+                d.STATUS = #{orderStatus,jdbcType=BIGINT} AND
+            </if>
+            <if test="payStatuss!=null and payStatuss!='' ">
+                o.PAY_STATUS in (${payStatuss}) AND
+            </if>
         </trim>
         order by f.CREATE_TIME desc
     </select>

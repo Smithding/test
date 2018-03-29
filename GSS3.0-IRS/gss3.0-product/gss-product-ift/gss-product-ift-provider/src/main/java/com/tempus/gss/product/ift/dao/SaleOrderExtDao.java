@@ -46,7 +46,8 @@ public interface SaleOrderExtDao extends BaseDao<SaleOrderExt, SaleOrderExtVo> {
 	 * @param saleQueryOrderVo
 	 * @return
 	 */
-	List<SaleOrderExt> queryFromSaleQueryOrderVo(SaleQueryOrderVo saleQueryOrderVo);
+	//List<SaleOrderExt> queryFromSaleQueryOrderVo(SaleQueryOrderVo saleQueryOrderVo);
+	List<SaleOrderExt> queryAssignOrder(SaleQueryOrderVo saleQueryOrderVo);
 	/**
 	 *查询需求单详情
 	 * 根据特殊查询条件查询订单
