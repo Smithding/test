@@ -1683,7 +1683,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								 buyOrderService.create(agent, buyOrder);
 								 hotelOrderMapper.insertSelective(newHotelOrder);
 							}
-							else if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_TO_ROOM.getKey())){
+							else if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_TO_ROOM.getKey())  || orderInfoModel.getOrderStatus().equals(TcOrderStatus.ORDER_FINISH.getKey())){
 								int startTime = simple.format(newHotelOrder.getArrivalDate()).compareTo(orderInfoModel.getStartTime());
 								int endTime   = simple.format(newHotelOrder.getDepartureDate()).compareTo(orderInfoModel.getEndTime());
 								if(endTime > 0){
