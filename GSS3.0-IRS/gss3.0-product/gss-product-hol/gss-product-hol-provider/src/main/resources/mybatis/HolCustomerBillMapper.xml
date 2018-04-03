@@ -3,6 +3,7 @@
 <mapper namespace="com.tempus.gss.product.hol.dao.HolCustomerBillMapper">
     <resultMap id="ReportVOResultMap" type="com.tempus.gss.product.hol.api.entity.vo.ReportVO">
         <result column="hotelOrderNo" property="hotelOrderNo" jdbcType="VARCHAR"/>
+        <result column="saleOrderNo" property="saleOrderNo" jdbcType="VARCHAR"/>
         <result column="customerType" property="customerType" jdbcType="BIGINT"/>
         <result column="customerTypeName" property="customerTypeName" jdbcType="VARCHAR"/>
         <result column="customerNo" property="customerNo" jdbcType="BIGINT"/>
@@ -44,7 +45,8 @@
     </resultMap>
     <select id="queryInfos" resultMap="ReportVOResultMap" parameterType="com.tempus.gss.product.hol.api.entity.vo.ReportVO">
         SELECT
-        HO.SALE_ORDER_NO AS hotelOrderNo,
+        HO.HOTEL_ORDER_NO AS hotelOrderNo,
+        HO.SALE_ORDER_NO AS saleOrderNo,
         CC.CUSTOMER_TYPE_NO AS customerType,
         CCT.NAME AS customerTypeName,
         HO.CUSTOMER_NO AS customerNo,
