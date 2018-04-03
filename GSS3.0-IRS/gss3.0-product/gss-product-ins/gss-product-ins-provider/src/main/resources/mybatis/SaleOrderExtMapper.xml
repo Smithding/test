@@ -740,11 +740,11 @@
          <if test="endEffectTime != null and endEffectTime != ''">
             AND date(isoe.EFFECT_DATE) &lt;= date(#{endEffectTime,jdbcType=DATE})
          </if>	
-         <if test="startInsureTime != null and startInsureTime != ''">
-            AND date(isoe.ISSUE_DATE) &gt;= date(#{startInsureTime,jdbcType=DATE})
+         	<if test="startInsureTime != null and startInsureTime != ''">
+            AND date(isod.CREATE_TIME) &gt;= date(#{startInsureTime,jdbcType=DATE})
          </if>
          <if test="endInsureTime != null and endInsureTime != ''">
-            AND date(isoe.ISSUE_DATE) &lt;= date(#{endInsureTime,jdbcType=DATE})
+            AND date(isod.CREATE_TIME) &lt;= date(#{endInsureTime,jdbcType=DATE})
          </if>		
          <if test="transactionId != null and transactionId != ''">
           		AND isoe.TRANSACTION_ID = #{transactionId,jdbcType=VARCHAR} 

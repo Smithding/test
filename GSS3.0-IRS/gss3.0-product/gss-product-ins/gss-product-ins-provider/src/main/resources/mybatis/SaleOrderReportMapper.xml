@@ -254,12 +254,16 @@
 		<if test="refundEndDate != null and refundEndDate != ''" >
 			AND date(isoe.MODIFY_TIME) &lt;= date(#{refundEndDate,jdbcType=DATE}) 
 		</if>
-         <if test="startInsureTime != null and startInsureTime != ''">
-            AND date(isoe.ISSUE_DATE) &gt;= date(#{startInsureTime,jdbcType=DATE})
+		  <if test="startInsureTime != null and startInsureTime != ''">
+            AND date(isod.CREATE_TIME) &gt;= date(#{startInsureTime,jdbcType=DATE})
          </if>
          <if test="endInsureTime != null and endInsureTime != ''">
-            AND date(isoe.ISSUE_DATE) &lt;= date(#{endInsureTime,jdbcType=DATE})
-         </if>		
+            AND date(isod.CREATE_TIME) &lt;= date(#{endInsureTime,jdbcType=DATE})
+         </if>	
+<!--         <if test="startInsureTime != null and startInsureTime != '' and endInsureTime != null and endInsureTime != ''">
+            AND ((date(isoe.ISSUE_DATE) &gt;= date(#{startInsureTime,jdbcType=DATE})) AND (date(isoe.ISSUE_DATE) &lt;= date(#{endInsureTime,jdbcType=DATE})))
+         	OR ((date(isoe.MODIFY_TIME) &gt;= date(#{startInsureTime,jdbcType=DATE})) AND (date(isoe.MODIFY_TIME) &lt;= date(#{startInsureTime,jdbcType=DATE})))
+         </if> -->
          <if test="transactionId != null and transactionId != ''">
           		AND isoe.TRANSACTION_ID = #{transactionId,jdbcType=VARCHAR} 
          </if>	
