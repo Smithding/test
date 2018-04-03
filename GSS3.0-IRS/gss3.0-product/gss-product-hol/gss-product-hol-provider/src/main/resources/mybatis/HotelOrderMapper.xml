@@ -519,9 +519,9 @@
             <if test="guestName != null and guestName != ''">
                 AND hho.GUEST_NAME LIKE CONCAT(CONCAT('%', #{guestName}), '%')
             </if>
-            <if test="customerNo != null">
+            <!-- <if test="customerNo != null">
                 AND hho.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT}
-            </if>
+            </if> -->
             <if test="list != null">
                 AND hho.CUSTOMER_NO IN
                 <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
