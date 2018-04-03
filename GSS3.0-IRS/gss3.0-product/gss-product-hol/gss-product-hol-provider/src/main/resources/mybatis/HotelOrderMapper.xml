@@ -381,9 +381,6 @@
             <if test="guestName != null and guestName != ''">
                 AND hho.GUEST_NAME LIKE CONCAT(CONCAT('%', #{guestName}), '%')
             </if>
-            <if test="customerNo != null">
-                AND os.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT}
-            </if>
             <if test="orderStatus != null and orderStatus != ''">
                 AND hho.ORDER_STATUS = #{orderStatus,jdbcType=VARCHAR}
             </if>
