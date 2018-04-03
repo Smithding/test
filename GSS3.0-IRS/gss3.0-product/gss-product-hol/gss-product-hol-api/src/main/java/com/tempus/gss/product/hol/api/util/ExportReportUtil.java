@@ -92,8 +92,8 @@ public class ExportReportUtil {
                     
                     //订单号
                     case 1: {
-                        if (null != obj.getHotelOrderNo()) {
-                            cell.setCellValue(obj.getHotelOrderNo());
+                        if (null != obj.getSaleOrderNo()) {
+                            cell.setCellValue(obj.getSaleOrderNo());
                             cell.setCellType(CellType.STRING);
                         } else {
                             cell.setCellValue("--");
@@ -427,7 +427,7 @@ public class ExportReportUtil {
                     //银行卡号
                     case 28: {
                         if (null != obj.getCardNo()) {
-                            cell.setCellValue(obj.getCardNo());
+                            cell.setCellValue(obj.getCardNo().toString());
                         } else {
                             cell.setCellValue("--");
                             log.info("报表导出模块,0907,第" + (i + 1) + "行的银行卡号为空");
@@ -440,7 +440,7 @@ public class ExportReportUtil {
                     //开户名称
                     case 29: {
                         if (null != obj.getBankName()) {
-                            cell.setCellValue(obj.getBankName());
+                            cell.setCellValue(obj.getUserName());
                         } else {
                             cell.setCellValue("--");
                             log.info("报表导出模块,0907,第" + (i + 1) + "行的开户名称为空");

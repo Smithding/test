@@ -27,6 +27,10 @@ public class ReportVO implements Serializable {
      */
     private String hotelOrderNo;
     /**
+     * 订单号++
+     */
+    private String saleOrderNo;
+    /**
      * 客户类型代码
      */
     private Integer customerType;
@@ -447,7 +451,7 @@ public class ReportVO implements Serializable {
     }
     
     public void setOrderStatusName(String orderStatus) {
-        if (null != orderStatus&&!"".equals(orderStatus)) {
+        if (null != orderStatus && !"".equals(orderStatus)) {
             this.orderStatusName = OwnerOrderStatus.keyOf(orderStatus).getValue();
         } else {
             this.orderStatusName = "";
@@ -756,5 +760,13 @@ public class ReportVO implements Serializable {
         } else {
             return "";
         }
+    }
+    
+    public String getSaleOrderNo() {
+        return saleOrderNo;
+    }
+    
+    public void setSaleOrderNo(String saleOrderNo) {
+        this.saleOrderNo = saleOrderNo;
     }
 }
