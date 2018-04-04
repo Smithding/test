@@ -13,14 +13,18 @@ import com.tempus.gss.dps.refund.entity.vo.RefundMessage;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.log.entity.LogRecord;
 import com.tempus.gss.log.service.ILogService;
+import com.tempus.gss.mq.MqSender;
 import com.tempus.gss.order.entity.*;
 import com.tempus.gss.order.service.*;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.*;
+import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
 import com.tempus.gss.product.ift.api.entity.vo.*;
 import com.tempus.gss.product.ift.api.service.IBuyOrderExtService;
 import com.tempus.gss.product.ift.api.service.IRefundService;
 import com.tempus.gss.product.ift.api.service.ISaleOrderExtService;
+import com.tempus.gss.product.ift.api.service.ITicketSenderService;
+import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.*;
 import com.tempus.gss.product.ift.mq.IftTicketMqSender;
 import com.tempus.gss.system.service.IMaxNoService;
@@ -30,6 +34,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -109,6 +114,14 @@ public class RefundServiceImpl implements IRefundService {
 	IDifferenceOrderService differenceOrderService;
 	@Autowired
 	IftTicketMqSender iftTicketMqSender;
+	@Reference
+	IConfigsService configsService;
+	@Autowired
+	MqSender mqSender;
+	@Reference
+	private ITicketSenderService iTicketSenderService;
+	@Value("${dpsconfig.job.owner}")
+	protected String owner;
 	
 
 	SimpleDateFormat simpleDate = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
@@ -1198,4 +1211,49 @@ public class RefundServiceImpl implements IRefundService {
 		}
 		return 0;
 	}
+
+	public void assign() {
+		try {
+			Page page = new Page<>(1, 10);
+			SaleChangeExtVo vo = new SaleChangeExtVo();
+			vo.setLocker(0L);
+			vo.setOwner(Integer.valueOf(owner));
+			vo.setValid((byte) 1);
+			vo.setStatus("");
+			Integer[] payStatus = {};
+			vo.setPayStatus(payStatus);
+			List<SaleChangeExt> list = saleChangeExtDao.queryObjByKey(page, vo);
+			if (list != null) {
+				log.info("此次分单数量:" + list.size());
+				List<TicketSender> senders = iTicketSenderService.getOnlineTicketSender(3);
+				log.info("是否有在线出票员:" + (senders != null));
+				if (senders != null && senders.size() > 0) {
+					Agent agent = new Agent(Integer.valueOf(owner));
+					IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
+					Map config = configs.getConfig();
+					String str_maxOrderNum = (String) config.get("maxOrderNum");
+					log.info("有在线出票员人数:{},获得配置最大分单数：{}" ,senders.size(),str_maxOrderNum);
+					Long maxOrderNum = Long.valueOf(str_maxOrderNum);
+					Date updateTime = new Date();
+					log.info("第三步：判断出票员手头出票订单数量...");
+					for (SaleChangeExt ext : list) {
+						for (TicketSender peopleInfo : senders) {
+							log.info(peopleInfo.getName() + "订单数量：" + peopleInfo.getOrdercount());
+							if (peopleInfo.getOrdercount() >= maxOrderNum) {
+								continue;
+							} else {
+								saleChangeExtDao.updateLocker(ext);
+							}
+						}
+					}
+
+				}
+			}
+
+		} catch (Exception e) {
+			log.error("", e);
+		}
+		log.info("退费单分单结束");
+	}
+
 }

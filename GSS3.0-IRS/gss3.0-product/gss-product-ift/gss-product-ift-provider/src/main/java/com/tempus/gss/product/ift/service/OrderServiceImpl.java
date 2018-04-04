@@ -349,6 +349,7 @@ public class OrderServiceImpl implements IOrderService {
                 pnr.setPnrType(1);// 1：ETERM
                 pnr.setSourceNo(saleOrderNo);
                 pnr.setValid((byte) 1);
+                log.info("pnr表保存信息:"+pnr.toString());
                 pnrDao.insertSelective(pnr);
             }
 
@@ -2553,28 +2554,10 @@ public class OrderServiceImpl implements IOrderService {
         return page;
     }
 
-    @Override
+   /* @Override
     public void sendWebSocketInfoByMq(String msg) {
-        SocketDO sd = JsonUtil.toBean(msg, SocketDO.class);
-        mqSender.send("gss-websocket-exchange", "notice", sd);
-        log.info("发送websocket消息到mq:"+msg);
-        try {
-            Long saleOrderNum = Long.parseLong(sd.getSaleOrder());
-            SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(saleOrderNum);
-            if(saleOrderExt!=null){
-                Agent agent = new Agent(Integer.valueOf(owner));
-                User user = userService.findUserByLoginName(agent, sd.getLoginName());
-                saleOrderExt.setLocker(user.getId());
-                Date date = new Date();
-                saleOrderExt.setLockTime(date);
-                saleOrderExt.setModifyTime(date);
-                log.info("分单更新销售订单分配信息:"+saleOrderExt.toString());
-                saleOrderExtDao.updateByPrimaryKey(saleOrderExt);
-            }
-        }catch(Exception e){
-            log.error("sendWebSocketInfoByMq 更新时异常",e);
-        }
-    }
+
+    }*/
 
     private void updateSaleOrderDetail(SaleOrderExt order,TicketSender peopleInfo,Date date){
         SaleOrderDetail saleOrderDetail = new SaleOrderDetail();

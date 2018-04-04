@@ -290,5 +290,5 @@ public interface IOrderService {
 	 */
 	Page<SaleOrderExt> selectOutTicketOrder(Page<SaleOrderExt> page,RequestWithActor<SaleQueryOrderVo> saleOrderQueryRequest);
 
-	void sendWebSocketInfoByMq(String msg);
+	//void sendWebSocketInfoByMq(String msg);
 }

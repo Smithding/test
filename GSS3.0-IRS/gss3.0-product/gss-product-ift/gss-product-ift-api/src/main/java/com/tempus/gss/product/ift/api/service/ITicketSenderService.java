@@ -36,4 +36,11 @@ public interface ITicketSenderService {
      * @return
      */
     int updateByPrimaryKey(TicketSender ticketSender);
+
+    /**
+     * 获取在线出票员
+     * @param onLine
+     * @return
+     */
+    List<TicketSender> getOnlineTicketSender(Integer onLine);
 }

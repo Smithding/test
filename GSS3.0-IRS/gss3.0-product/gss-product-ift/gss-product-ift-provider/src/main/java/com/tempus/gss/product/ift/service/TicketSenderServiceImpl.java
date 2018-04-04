@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -79,8 +80,18 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
 
     @Override
     public int updateByPrimaryKey(TicketSender ticketSender) {
+        ticketSender.setUpdatetime(new Date());
         log.info("updateByPrimaryKey更新国际机票业务员信息:"+ticketSenderDao.toString());
         return ticketSenderDao.updateByPrimaryKey(ticketSender);
+    }
+
+    @Override
+    public List<TicketSender> getOnlineTicketSender(Integer onLine) {
+        TicketSenderVo ticketSenderVo = new TicketSenderVo();
+        ticketSenderVo.setStatus(onLine);//只给在线用户分单
+        ticketSenderVo.setTypes("'both','ticketSender'");//只给出票员分单
+        List<TicketSender> ticketSenderList = this.queryByBean(ticketSenderVo);
+        return ticketSenderList;
     }
 
 }

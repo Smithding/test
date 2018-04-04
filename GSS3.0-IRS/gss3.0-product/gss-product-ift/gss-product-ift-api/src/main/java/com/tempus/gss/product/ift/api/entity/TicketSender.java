@@ -51,6 +51,14 @@ public class TicketSender implements Serializable {
     private String type;
     //待处理销售订单数量
     private Integer saleOrderNum;
+    //采购退票数量
+    private Integer buyRefuseNum;
+    //销售退票数量
+    private Integer saleRefuseNum;
+    //采购改签数量
+    private Integer buyChangeNum;
+    //销售改签数量
+    private Integer saleChangeNum;
     /***多个ID组成的字符串*/
     @Transient
     private String ids;
@@ -63,24 +71,61 @@ public class TicketSender implements Serializable {
 
     @Override
     public String toString() {
-        return "TicketSender{" +
-                "id=" + id +
-                ", userid='" + userid + '\'' +
-                ", name='" + name + '\'' +
-                ", status=" + status +
-                ", no=" + no +
-                ", creator='" + creator + '\'' +
-                ", modifier='" + modifier + '\'' +
-                ", createtime=" + createtime +
-                ", updatetime=" + updatetime +
-                ", ordercount=" + ordercount +
-                ", point=" + point +
-                ", sequenceNo=" + sequenceNo +
-                ", type='" + type + '\'' +
-                ", saleOrderNum=" + saleOrderNum +
-                ", ids='" + ids + '\'' +
-                ", updateInfo='" + updateInfo + '\'' +
-                '}';
+        final StringBuffer sb = new StringBuffer("TicketSender{");
+        sb.append("id=").append(id);
+        sb.append(", userid='").append(userid).append('\'');
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", status=").append(status);
+        sb.append(", no=").append(no);
+        sb.append(", creator='").append(creator).append('\'');
+        sb.append(", modifier='").append(modifier).append('\'');
+        sb.append(", createtime=").append(createtime);
+        sb.append(", updatetime=").append(updatetime);
+        sb.append(", ordercount=").append(ordercount);
+        sb.append(", point=").append(point);
+        sb.append(", sequenceNo=").append(sequenceNo);
+        sb.append(", type='").append(type).append('\'');
+        sb.append(", saleOrderNum=").append(saleOrderNum);
+        sb.append(", buyRefuseNum=").append(buyRefuseNum);
+        sb.append(", saleRefuseNum=").append(saleRefuseNum);
+        sb.append(", buyChangeNum=").append(buyChangeNum);
+        sb.append(", saleChangeNum=").append(saleChangeNum);
+        sb.append(", ids='").append(ids).append('\'');
+        sb.append(", updateInfo='").append(updateInfo).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
+
+    public Integer getBuyRefuseNum() {
+        return buyRefuseNum;
+    }
+
+    public void setBuyRefuseNum(Integer buyRefuseNum) {
+        this.buyRefuseNum = buyRefuseNum;
+    }
+
+    public Integer getSaleRefuseNum() {
+        return saleRefuseNum;
+    }
+
+    public void setSaleRefuseNum(Integer saleRefuseNum) {
+        this.saleRefuseNum = saleRefuseNum;
+    }
+
+    public Integer getBuyChangeNum() {
+        return buyChangeNum;
+    }
+
+    public void setBuyChangeNum(Integer buyChangeNum) {
+        this.buyChangeNum = buyChangeNum;
+    }
+
+    public Integer getSaleChangeNum() {
+        return saleChangeNum;
+    }
+
+    public void setSaleChangeNum(Integer saleChangeNum) {
+        this.saleChangeNum = saleChangeNum;
     }
 
     public Long getId() {

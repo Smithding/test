@@ -16,6 +16,10 @@
         <result column="SEQUENCENO" property="sequenceNo" jdbcType="BIGINT"/>
         <result column="SALE_ORDER_NUM" property="saleOrderNum" jdbcType="INTEGER"/>
         <result column="TYPE" property="type" jdbcType="VARCHAR"/>
+        <result column="BUY_CHANGE_NUM" property="buyChangeNum" jdbcType="INTEGER"/>
+        <result column="SALE_CHANGE_NUM" property="saleChangeNum" jdbcType="INTEGER"/>
+        <result column="BUY_REFUSE_NUM" property="buyRefuseNum" jdbcType="INTEGER"/>
+        <result column="SALE_REFUSE_NUM" property="saleRefuseNum" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="sqlwhere">
@@ -49,7 +53,9 @@
 
     <sql id="base_column">
         `ID`,`USERID`,`NAME`,`STATUS`,`NO`,`CREATOR`,`MODIFIER`,
-        `CREATEDATETIME`,`UPDATETIME`,`ORDERCOUNT`,`POINT`,`SEQUENCENO`,`TYPE`,`SALE_ORDER_NUM`
+        `CREATEDATETIME`,`UPDATETIME`,`ORDERCOUNT`,`POINT`,`SEQUENCENO`,
+        `TYPE`,`SALE_ORDER_NUM`,`BUY_CHANGE_NUM`,`SALE_CHANGE_NUM`,`BUY_REFUSE_NUM`,
+        `SALE_REFUSE_NUM`
     </sql>
 
     <select id="queryObjByKey" resultMap="BaseResultMap"
@@ -97,6 +103,10 @@
             <if test="type!=null and type!=''">`TYPE` =#{type},</if>
             <if test="point!=null">point = #{point},</if>
             <if test="sequenceNo!=null">sequenceno = #{sequenceNo},</if>
+            <if test="buyChangeNum!=null">`BUY_CHANGE_NUM`=#{buyChangeNum},</if>
+            <if test="saleChangeNum!=null">`SALE_CHANGE_NUM`=#{saleChangeNum},</if>
+            <if test="buyRefuseNum!=null">`BUY_REFUSE_NUM`=#{buyRefuseNum},</if>
+            <if test="saleRefuseNum!=null">`SALE_REFUSE_NUM`=#{saleRefuseNum},</if>
             <if test="userid!=null and userid!=''">userid = #{userid}</if>
         </set>
         where id in (${ids})
@@ -116,6 +126,10 @@
             <if test="sequenceNo!=null">sequenceno = #{sequenceNo},</if>
             <if test="saleOrderNum!=null">SALE_ORDER_NUM =#{saleOrderNum},</if>
             <if test="type!=null">`TYPE`= #{type},</if>
+            <if test="buyChangeNum!=null">`BUY_CHANGE_NUM`=#{buyChangeNum},</if>
+            <if test="saleChangeNum!=null">`SALE_CHANGE_NUM`=#{saleChangeNum},</if>
+            <if test="buyRefuseNum!=null">`BUY_REFUSE_NUM`=#{buyRefuseNum},</if>
+            <if test="saleRefuseNum!=null">`SALE_REFUSE_NUM`=#{saleRefuseNum},</if>
             <if test="userid!=null and userid!=''">userid = #{userid}</if>
         </set>
         where id =#{id}
