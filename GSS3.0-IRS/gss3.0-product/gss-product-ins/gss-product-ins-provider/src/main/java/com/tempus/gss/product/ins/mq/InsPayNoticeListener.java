@@ -128,8 +128,7 @@ public class InsPayNoticeListener {
 							boolean isCancel = false;
 							 boolean isCancel2 = false;
 							for(SaleOrderDetail saleOrderDetailChange:saleOrderExt.getSaleOrderDetailList()){
-								if(saleOrderDetailChange.getStatus()==8||saleOrderDetailChange.getStatus()==10){
-									if(saleOrderDetailChange.getStatus()==8){
+								if(saleOrderDetailChange.getStatus()==8){
 										try{
 											List<SaleChangeExt> SaleChangeExtList = saleChangeExtDao.selectByInsuredNo(saleOrderDetailChange.getInsuredNo());
 											if(SaleChangeExtList!=null){
@@ -145,8 +144,6 @@ public class InsPayNoticeListener {
 										}catch(Exception e){
 											Log.error("保险变更拓展单更新失败！！"+e);
 										}
-										
-									}
 									SaleOrderDetail saleOrderDetailForBefore = null;
 									saleOrderDetailForBefore = (SaleOrderDetail)saleOrderDetailChange.clone();
 									saleOrderDetailForBefore.setStatus(saleOrderDetailChange.getStatus());
