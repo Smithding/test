@@ -90,6 +90,9 @@
             <if test="hotelOrderNo!=null and hotelOrderNo!=''">
                 AND HO.HOTEL_ORDER_NO=#{hotelOrderNo,jdbcType=VARCHAR}
             </if>
+            <if test="saleOrderNo!=null and saleOrderNo!=''">
+                AND HO.SALE_ORDER_NO=#{saleOrderNo,jdbcType=VARCHAR}
+            </if>
             <if test="customerType!=null and customerType!=''">
                 AND CC.CUSTOMER_TYPE_NO=#{customerType,jdbcType=BIGINT}
             </if>
