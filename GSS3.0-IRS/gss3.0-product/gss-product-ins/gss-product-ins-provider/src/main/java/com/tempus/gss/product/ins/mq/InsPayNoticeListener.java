@@ -125,8 +125,7 @@ public class InsPayNoticeListener {
 						logger.info("支付退单状态------>"+businessType);
 						//1:退款成功2：退款失败
 						if(payStatus==1){
-							boolean isCancel = false;
-							 boolean isCancel2 = false;
+							boolean isCancel = true;
 							for(SaleOrderDetail saleOrderDetailChange:saleOrderExt.getSaleOrderDetailList()){
 								if(saleOrderDetailChange.getStatus()==8){
 										try{
@@ -156,16 +155,19 @@ public class InsPayNoticeListener {
 									saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetailChange);
 									saleOrderDetailDao.insertSelective(saleOrderDetailForBefore);
 				         			isCancel = true;
-				         		}else{
-				         			isCancel2 = true;
 				         		}
 							}
-							if(isCancel==true&&isCancel2==true){
-								saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 9);//部分退款
+							for(SaleOrderDetail saleStatus:saleOrderExt.getSaleOrderDetailList()){
+								if(saleStatus.getStatus()!=10){
+									isCancel = false;
+									break;
+								}
+							}
+							if(isCancel){
+								saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 10);//子订单更改为10 已经退款
 								
-				         	}
-				         	if(isCancel==true&&isCancel2==false){
-				         		saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 10);//子订单更改为10 已经退款
+				         	}else{
+				         		saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 9);//部分退款
 				         	}
 							//存储退款时间
 				         	SaleOrderExt saleOrderExtForTime = new SaleOrderExt();
