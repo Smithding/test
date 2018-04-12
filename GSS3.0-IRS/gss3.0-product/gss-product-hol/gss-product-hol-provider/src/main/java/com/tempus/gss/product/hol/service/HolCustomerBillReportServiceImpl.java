@@ -37,8 +37,8 @@ public class HolCustomerBillReportServiceImpl implements IHolCustomerBillReportS
     public Page<ReportVO> holCustomerBillReport(Page<ReportVO> page, ReportVO reportIn) {
         try {
             if (null == reportIn) {
-                log.error("客户订单查询模块, 0909, 输入参数错误");
-                throw new GSSException("客户订单查询模块", "0909", "输入参数错误");
+                log.error("客户订单查询模块, 0909, 输入参数错误 null");
+                return null;
             }
             List<ReportVO> reportOuts = new ArrayList<>();
             switch (reportIn.getQueryType()) {
@@ -64,8 +64,7 @@ public class HolCustomerBillReportServiceImpl implements IHolCustomerBillReportS
             page.setRecords(reportOuts);
             return page;
         } catch (Exception e) {
-            log.error("客户订单查询模块, 0901, 报表导出失败");
-            e.printStackTrace();
+            log.error("客户订单查询模块, 0901, 报表导出失败", e);
             throw new GSSException("客户订单查询模块", "0901", "报表导出失败");
         }
         
