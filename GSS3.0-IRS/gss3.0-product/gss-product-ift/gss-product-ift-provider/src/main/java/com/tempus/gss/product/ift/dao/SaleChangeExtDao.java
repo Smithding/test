@@ -2,6 +2,7 @@ package com.tempus.gss.product.ift.dao;
 
 import com.tempus.gss.product.ift.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ift.api.entity.vo.SaleChangeExtVo;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -25,4 +26,12 @@ public interface SaleChangeExtDao extends BaseDao<SaleChangeExt, SaleChangeExtVo
 	 * @return
 	 */
 	int updateByOrderNo(SaleChangeExt saleChangeExt);
+
+	/**
+	 * 根据锁定Id和订单业务类型查询数量
+	 * @param lockerId
+	 * @param changeType
+	 * @return
+	 */
+	int queryCountByLockerAndType(@Param("lockerId") Long lockerId, @Param("changeType") int changeType);
 }

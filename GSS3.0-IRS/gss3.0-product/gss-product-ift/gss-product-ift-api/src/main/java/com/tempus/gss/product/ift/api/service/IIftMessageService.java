@@ -7,4 +7,7 @@ public interface IIftMessageService {
 
     //销售退票消息处理
     public void sendRefuseMessage(Long saleOrderNo,String ownerCode);
+
+    //改签消息处理
+    public void sendChangeMessage(Long saleOrderNo,String ownerCode);
 }

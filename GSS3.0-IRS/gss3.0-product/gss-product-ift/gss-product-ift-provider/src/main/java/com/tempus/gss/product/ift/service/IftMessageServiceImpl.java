@@ -121,6 +121,43 @@ public class IftMessageServiceImpl implements IIftMessageService {
         }
     }
 
+    @Override
+    public void sendChangeMessage(Long saleOrderNo, String ownerCode) {
+        {
+            try {
+                TicketSender ticketSender = getSender(ownerCode);
+                if (ticketSender != null) {
+                    SocketDO sdo = buildDo(saleOrderNo, ticketSender.getUserid());
+                    sdo.setOther("6");//改签中
+                    List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryBySaleOrderNo(saleOrderNo);
+                    //将订单锁单
+                    for (SaleChangeExt sext : saleChangeExts) {
+                        Agent agent = new Agent(Integer.valueOf(ownerCode));
+                        User user = userService.findUserByLoginName(agent, sdo.getLoginName());
+
+                        sext.setLocker(user.getId());
+                        Date date = new Date();
+                        sext.setLockTime(date);
+                        sext.setModifyTime(date);
+                        saleChangeExtDao.updateLocker(sext);
+                    }
+                    mqSender.send("gss-websocket-exchange", "notice", sdo);
+                    log.info("放入MQ队列信息:" + sdo.toString());
+
+                    //查询出被出票员锁定的改签类型的数量
+                    Agent agent = new Agent(Integer.valueOf(ownerCode));
+                    User user = userService.findUserByLoginName(agent, sdo.getLoginName());
+                    int lockcount = saleChangeExtDao.queryCountByLockerAndType(user.getId(), 3);
+                    //给出票员赋值他的SALE_CHANGE_NUM字段
+                    ticketSender.setSaleChangeNum(lockcount);
+                    ticketSenderService.updateByPrimaryKey(ticketSender);
+                }
+            } catch (Exception e) {
+                log.error("b2b国际机票添加消息提醒异常", e);
+            }
+        }
+    }
+
     private TicketSender getSender(String ownerCode) {
         TicketSender ticketSender = null;
         TicketSenderVo senderVo = new TicketSenderVo();

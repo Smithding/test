@@ -79,6 +79,11 @@
         CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL,CUSTOMER_NO, 
     CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,CURRENCY,SALE_CURRENCY,EXCHANGE_RATE
     </sql>
+    <select id="queryCountByLockerAndType" resultType="java.lang.Integer">
+        select count(*)
+        from IFT_SALE_CHANGE_EXT
+        where LOCKER = #{lockerId} AND CHANGE_TYPE = #{changeType}
+    </select>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
         <include refid="Base_Column_List"/>

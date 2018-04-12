@@ -21,8 +21,11 @@ import com.tempus.gss.product.ift.api.service.IBuyOrderExtService;
 import com.tempus.gss.product.ift.api.service.IChangeService;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.*;
+import com.tempus.gss.system.entity.User;
 import com.tempus.gss.system.service.IMaxNoService;
+import com.tempus.gss.system.service.IUserService;
 import com.tempus.gss.vo.Agent;
+import com.tempus.gss.websocket.SocketDO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +65,8 @@ public class ChangeServiceImpl implements IChangeService {
     IChangeService changeExtService;
     @Reference
     ICustomerService customerService;
+    @Reference
+    IUserService userService;
     
     @Autowired
     SaleOrderDetailDao saleOrderDetailDao;
@@ -87,6 +92,8 @@ public class ChangeServiceImpl implements IChangeService {
     IMssReserveService mssReserveService;
     @Reference
     IDifferenceOrderService differenceOrderService;
+    @Autowired
+    TicketSenderDao ticketSenderDao;
     
     @Override
     @Transactional
@@ -331,7 +338,7 @@ public class ChangeServiceImpl implements IChangeService {
         log.info("申请改签单结束=========");
         return saleChangeExt;
     }
-    
+
     @Override
     public boolean createChange(RequestWithActor<ChangeCreateVo> requestWithActor) {
         boolean flag = false;
@@ -1001,11 +1008,23 @@ public class ChangeServiceImpl implements IChangeService {
             if (changeExt != null) {
                 //locker 为0表示解锁  大于0表示锁定
                 if (changeExt.getLocker() == null || changeVo.getLocker() == 1) {
+                    Long orilocker = changeExt.getLocker();
                     Long lock = saleChange.getAgent().getId();
                     changeExt.setLocker(lock);
                     changeExt.setModifier(saleChange.getAgent().getAccount());
                     changeExt.setLockTime(new Date());
                     changeExt.setModifyTime(new Date());
+                    //查询出票员锁定的改签记录数+1赋值给SALE_CHANGE_NUM字段
+                    if(lock != null && !lock.equals(orilocker)){
+                        Agent agent = saleChange.getAgent();
+                        List<TicketSender> ticketSenders = ticketSenderDao.queryByLoginId(saleChange.getAgent().getAccount());
+                        User user = userService.findUserByLoginName(agent, saleChange.getAgent().getAccount());
+                        int lockcount = saleChangeExtDao.queryCountByLockerAndType(user.getId(), 3);
+                        TicketSender ticketSender = ticketSenders.get(0);
+                        ticketSender.setSaleChangeNum(lockcount+1);
+                        ticketSenderDao.updateByPrimaryKey(ticketSender);
+                    }
+
                 } else {
                     changeExt.setLocker(0L);
                     changeExt.setModifier(saleChange.getAgent().getAccount());
@@ -1235,5 +1254,5 @@ public class ChangeServiceImpl implements IChangeService {
         }
         return 0;
     }
-    
+
 }
