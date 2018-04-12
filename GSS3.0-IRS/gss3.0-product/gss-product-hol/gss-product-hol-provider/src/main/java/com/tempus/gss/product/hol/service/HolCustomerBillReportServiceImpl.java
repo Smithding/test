@@ -65,7 +65,7 @@ public class HolCustomerBillReportServiceImpl implements IHolCustomerBillReportS
             return page;
         } catch (Exception e) {
             log.error("客户订单查询模块, 0901, 报表导出失败", e);
-            throw new GSSException("客户订单查询模块", "0901", "报表导出失败");
+            throw new GSSException("客户订单查询模块", "0901", "报表导出失败" + e);
         }
         
     }
