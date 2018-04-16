@@ -352,6 +352,7 @@ public class SaleOrderExtVo implements Serializable {
 	private BigDecimal exchangeRate;
 	private String currency;//采购币种
 	private String saleCurrency;//销售币种
+	private String handlers;//当前订单操作人
 	
 	
 	private static final long serialVersionUID = 1L;
@@ -1222,6 +1223,14 @@ public class SaleOrderExtVo implements Serializable {
 
 	public void setSaleCurrency(String saleCurrency) {
 		this.saleCurrency = saleCurrency;
+	}
+
+	public String getHandlers() {
+		return handlers;
+	}
+
+	public void setHandlers(String handlers) {
+		this.handlers = handlers;
 	}
 
 	@Override

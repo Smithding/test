@@ -54,7 +54,8 @@
         <result column="LINKNO" property="linkNo" jdbcType="VARCHAR"/>
         <result column="CURRENCY" property="currency" jdbcType="VARCHAR"/>
         <result column="SALE_CURRENCY" property="saleCurrency" jdbcType="VARCHAR"/>
-        <result column="EXCHANGE_RATE" property="exchangeRate" javaType="DECIMAL"/>
+        <result column="EXCHANGE_RATE" property="exchangeRate" jdbcType="DECIMAL"/>
+        <result column="DRAWER_LOGIN_NAME" property="drawerLoginName" jdbcType="VARCHAR"/>
         <result column="HANDLERS" property="handlers" jdbcType="VARCHAR"/>
         <association property="saleOrder" column="SALE_ORDER_NO"
                      select="com.tempus.gss.order.dao.SaleOrderMapper.selectByRecordNo"/>
@@ -111,7 +112,7 @@
         SALE_ORDER_NO, ID, OWNER, DEMAND_NO, LEG_TYPE, CONTACT_NAME, CONTACT_PHONE, CONTACT_MOBILE,
         CONTACT_MAIL, SALE_REMARK, VALID, VERSION, LOCKER, LOCK_TIME, CREATE_TYPE, CREATE_TIME,
         MODIFY_TIME, CREATOR, MODIFIER, ISSUE_TIME, ORIGINAL_ORDER_NO, LINKNO, LINKTYPE, CURRENCY,
-        SALE_CURRENCY,EXCHANGE_RATE
+        SALE_CURRENCY,EXCHANGE_RATE,DRAWER_LOGIN_NAME
 
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
@@ -395,6 +396,9 @@
             </if>
             <if test="saleCurrency !=null and saleCurrency!=''">
                 SALE_CURRENCY=#{saleCurrency,jdbcType=VARCHAR},
+            </if>
+            <if test="drawerLoginName!='' and drawerLoginName!=null">
+                DRAWER_LOGIN_NAME = #{drawerLoginName},
             </if>
             <if test="exchangeRate!=null">
                 EXCHANGE_RATE = #{exchangeRate}

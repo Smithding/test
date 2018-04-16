@@ -166,6 +166,7 @@ public class SaleOrderExt implements Serializable {
 	private String saleCurrency;//销售币种
 	private BigDecimal exchangeRate;//汇率
 	private String handlers;//操作人姓名
+	private String drawerLoginName;//出票员登录名
 
 
 	/**
@@ -533,6 +534,15 @@ public class SaleOrderExt implements Serializable {
 	public void setHandlers(String handlers) {
 		this.handlers = handlers;
 	}
+
+	public String getDrawerLoginName() {
+		return drawerLoginName;
+	}
+
+	public void setDrawerLoginName(String drawerLoginName) {
+		this.drawerLoginName = drawerLoginName;
+	}
+
 
 	@Override
 	public String toString() {

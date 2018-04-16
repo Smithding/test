@@ -927,6 +927,7 @@ public class OrderServiceImpl implements IOrderService {
             if (pnrNo != null) {
                 saleOrderExt.setPnrNo(pnrNo);
             }
+            saleOrderExt.setDrawerLoginName(agent.getAccount());
             saleOrderExt.setIssueTime(date);
 
             List<SaleOrderDetail> detailList = saleOrderDetailDao.selectBySaleOrderNo(saleOrderNo);
@@ -1664,7 +1665,7 @@ public class OrderServiceImpl implements IOrderService {
             IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
             Map config = configs.getConfig();
             String str_maxOrderNum = (String) config.get("maxOrderNum");
-            log.info("有在线出票员人数:" + (senders.size())+"获得配置最大分单数："+str_maxOrderNum);
+            log.info("有在线出票员人数:{},获得配置最大分单数：{}",senders.size(),str_maxOrderNum);
             Long maxOrderNum = Long.valueOf(str_maxOrderNum);
             Date updateTime = new Date();
             log.info("第三步：判断出票员手头出票订单数量...");
