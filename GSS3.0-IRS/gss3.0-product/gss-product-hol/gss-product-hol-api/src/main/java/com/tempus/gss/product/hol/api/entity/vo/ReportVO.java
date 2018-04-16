@@ -7,7 +7,6 @@ import com.tempus.gss.product.hol.api.entity.response.tc.TcOrderStatus;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -141,7 +140,7 @@ public class ReportVO implements Serializable {
     /**
      * 银行卡号
      */
-    private Long cardNo;
+    private String cardNo;
     /**
      * 开户名称
      */
@@ -635,11 +634,11 @@ public class ReportVO implements Serializable {
         this.bankName = bankName;
     }
     
-    public Long getCardNo() {
+    public String getCardNo() {
         return cardNo;
     }
     
-    public void setCardNo(Long cardNo) {
+    public void setCardNo(String cardNo) {
         this.cardNo = cardNo;
     }
     

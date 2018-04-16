@@ -117,7 +117,7 @@ public class ExportReportUtil {
                     //客户卡号
                     case 3: {
                         if (null != obj.getCustomerNo()) {
-                            cell.setCellValue(obj.getCustomerNo());
+                            cell.setCellValue(obj.getCustomerNo().toString());
                         } else {
                             cell.setCellValue("--");
                             log.info("报表导出模块,0907,第" + (i + 1) + "行的客户卡号为空");
@@ -381,7 +381,7 @@ public class ExportReportUtil {
                         } else {
                             cell.setCellValue(0);
                             log.info("报表导出模块,0907,第" + (i + 1) + "行的实际佣金为空");
-        
+                            
                         }
                         cell.setCellType(CellType.NUMERIC);
                     }
@@ -393,7 +393,7 @@ public class ExportReportUtil {
                         } else {
                             cell.setCellValue(0);
                             log.info("报表导出模块,0907,第" + (i + 1) + "行的实际佣金率为空");
-        
+                            
                         }
                         cell.setCellType(CellType.NUMERIC);
                     }
@@ -427,7 +427,7 @@ public class ExportReportUtil {
                     //银行卡号
                     case 28: {
                         if (null != obj.getCardNo()) {
-                            cell.setCellValue(obj.getCardNo().toString());
+                            cell.setCellValue(obj.getCardNo());
                         } else {
                             cell.setCellValue("--");
                             log.info("报表导出模块,0907,第" + (i + 1) + "行的银行卡号为空");
@@ -921,7 +921,7 @@ public class ExportReportUtil {
         style.setFillBackgroundColor(HSSFColor.LIGHT_TURQUOISE.index);
         int curRow = row.getRowNum();
         row.createCell(0).setCellType(CellType.STRING);
-        for(int cellI=1;cellI<=8;cellI++){
+        for (int cellI = 1; cellI <= 8; cellI++) {
             row.createCell(cellI).setCellType(CellType.BLANK);
             row.getCell(cellI).setCellStyle(style);
         }

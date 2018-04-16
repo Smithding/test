@@ -787,22 +787,23 @@
         TRIP_TYPE = #{tripType,jdbcType=INTEGER} AND
       </if>
             <if test="goStart != null and goStart != ''">
-        GO_START = #{goStart,jdbcType=VARCHAR} AND
+        GO_START LIKE concat('%',concat(#{goStart,jdbcType=VARCHAR}),'%') AND
       </if>
             <if test="exceptGoStart != null and exceptGoStart != ''">
-        EXCEPT_GO_START = #{exceptGoStart,jdbcType=VARCHAR} AND
+        EXCEPT_GO_START LIKE concat('%',concat(#{goStart,jdbcType=VARCHAR}),'%')
+        = #{exceptGoStart,jdbcType=VARCHAR} AND
       </if>
             <if test="goEnd != null and goEnd != ''">
-        GO_END = #{goEnd,jdbcType=VARCHAR} AND
+        GO_END LIKE concat('%',concat(#{goEnd,jdbcType=VARCHAR}),'%') AND
       </if>
             <if test="exceptGoEnd != null and exceptGoEnd != ''">
-        EXCEPT_GO_END = #{exceptGoEnd,jdbcType=VARCHAR} AND
+        EXCEPT_GO_END LIKE concat('%',concat(#{exceptGoEnd,jdbcType=VARCHAR}),'%') AND
       </if>
             <if test="backEnd != null and backEnd != ''">
-        BACK_END = #{backEnd,jdbcType=VARCHAR} AND
+        BACK_END LIKE concat('%',concat(#{backEnd,jdbcType=VARCHAR}),'%')  AND
       </if>
             <if test="exceptBackEnd != null and exceptBackEnd != ''">
-        EXCEPT_BACK_END = #{exceptBackEnd,jdbcType=VARCHAR} AND
+        EXCEPT_BACK_END LIKE concat('%',concat(#{exceptBackEnd,jdbcType=VARCHAR}),'%')  AND
       </if>
             <if test="allowCrossLineMatch != null">
         ALLOW_CROSS_LINE_MATCH = #{allowCrossLineMatch,jdbcType=BIT} AND
