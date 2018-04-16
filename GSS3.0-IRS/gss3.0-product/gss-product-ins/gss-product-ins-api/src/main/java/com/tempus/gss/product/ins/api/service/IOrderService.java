@@ -164,7 +164,13 @@ public interface IOrderService {
 	 * @return
 	 */
 	public Page<SaleOrderExt> querySaleOrderList(Page<SaleOrderExt> page,RequestWithActor<SaleOrderExtVo> pageRequest) ;
-    
+	/**
+	 * 通过交易单号查询保险详情（多个销售单）
+	 * @param pageRequest
+	 * @return
+	 */
+	public List<SaleOrderExt> querySaleOrderListIntransactionNo(RequestWithActor<SaleOrderExtVo> pageRequest) ;
+   
 	/**
 	 * 通过条件查询报表数据
 	 * @param pageRequest
