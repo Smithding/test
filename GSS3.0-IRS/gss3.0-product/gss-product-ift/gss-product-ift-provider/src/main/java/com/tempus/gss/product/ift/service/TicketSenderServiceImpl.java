@@ -1,5 +1,6 @@
 package com.tempus.gss.product.ift.service;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.exception.GSSException;
@@ -8,6 +9,9 @@ import com.tempus.gss.product.ift.api.entity.TicketSender;
 import com.tempus.gss.product.ift.api.entity.vo.TicketSenderVo;
 import com.tempus.gss.product.ift.api.service.ITicketSenderService;
 import com.tempus.gss.product.ift.dao.TicketSenderDao;
+import com.tempus.gss.system.entity.User;
+import com.tempus.gss.system.service.IUserService;
+import com.tempus.gss.vo.Agent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +30,27 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
     protected final transient Logger log = LoggerFactory.getLogger(getClass());
     @Autowired
     TicketSenderDao ticketSenderDao;
+    @Reference
+    IUserService userService;
+    @Override
+    public void decreaseBuyChangeNum(Agent agent, Long lockerId, int type) {
+        if(lockerId == null || lockerId.equals(0l)){
+            return ;
+        }
+        User user = userService.selectById(agent,lockerId);
+        TicketSender sender = getTicketSenderByLoginId(user.getLoginName());
+        if(type == 1){
+            sender.setBuyChangeNum(sender.getBuyChangeNum() - 1);
+        } else if(type == 2){
+            sender.setSaleChangeNum(sender.getSaleChangeNum() - 1);
+        } else if(type == 3){
+            sender.setBuyRefuseNum(sender.getBuyRefuseNum() - 1);
+        } else if(type == 4){
+            sender.setSaleRefuseNum(sender.getSaleRefuseNum() - 1);
+        }
+        sender.setIds(sender.getId() + "");
+        update(sender);
+    }
 
     @Override
     public Page<TicketSender> pageList(Page<TicketSender> page, RequestWithActor<TicketSenderVo> requestWithActor) {

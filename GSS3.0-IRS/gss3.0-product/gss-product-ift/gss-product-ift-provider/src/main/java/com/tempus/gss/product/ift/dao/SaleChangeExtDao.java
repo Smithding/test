@@ -10,6 +10,18 @@ import java.util.List;
 @Component
 public interface SaleChangeExtDao extends BaseDao<SaleChangeExt, SaleChangeExtVo> {
 
+	/*查询采购退票单未锁单的单*/
+	List<SaleChangeExt> queryRefundBylocker(@Param("owner") String owner,@Param("locker")long locker);
+
+	/*查询采购退票单被lockerId锁单的数量*/
+	int queryRefundCountBylocker(@Param("owner") String owner,@Param("locker")long locker);
+
+	/*查询改签支付过但未锁单的单*/
+	List<SaleChangeExt> queryChangeBylocker(@Param("owner") String owner,@Param("locker")long locker);
+
+	/*查询改签支付被lockerID锁单的数量*/
+	int queryChangeCountBylocker(@Param("owner") String owner,@Param("locker")long locker);
+
 	/*根据销售单编号查询销售拓展单*/
 	List<SaleChangeExt> queryBySaleOrderNo(Long saleOrderNo);
 	/**

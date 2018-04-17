@@ -145,8 +145,18 @@ public class SaleChangeVo implements Serializable{
 	 * 提交国际退款申请状态 0新增  1待处理  2 修改   3销售审核不通过  4销售算审核通过  5结算审核通过  6结算审核不通过
 	 */
 	private Integer refundStatus;
-	
-	
+
+	//操作人
+	private String handlers;
+
+	public String getHandlers() {
+		return handlers;
+	}
+
+	public void setHandlers(String handlers) {
+		this.handlers = handlers;
+	}
+
 	public Long getSaleOrderNo() {
 		return saleOrderNo;
 	}

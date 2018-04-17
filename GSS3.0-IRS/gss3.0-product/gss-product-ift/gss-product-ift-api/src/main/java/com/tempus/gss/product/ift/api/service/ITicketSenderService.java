@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.TicketSender;
 import com.tempus.gss.product.ift.api.entity.vo.TicketSenderVo;
+import com.tempus.gss.system.entity.User;
+import com.tempus.gss.vo.Agent;
 
 import java.util.List;
 
@@ -11,6 +13,14 @@ import java.util.List;
  * Created by Administrator on 2017/8/21 0021.
  */
 public interface ITicketSenderService {
+
+    /**
+     * 减少出票员锁定单数量
+     * @param agent
+     * @param lockerId
+     * @param type   1代表BUY_CHANGE_NUM    2代表SALE_CHANGE_NUM    3代表BUY_REFUSE_NUM   4代表SALE_REFUSE_NUM
+     */
+    void decreaseBuyChangeNum(Agent agent, Long lockerId, int type) ;
 
     Page<TicketSender> pageList(Page<TicketSender> page, RequestWithActor<TicketSenderVo> requestWithActor);
 

@@ -158,7 +158,7 @@ public class IftMessageServiceImpl implements IIftMessageService {
         }
     }
 
-    private TicketSender getSender(String ownerCode) {
+    public TicketSender getSender(String ownerCode) {
         TicketSender ticketSender = null;
         TicketSenderVo senderVo = new TicketSenderVo();
         senderVo.setTypes("'both','salesman'");//只给销售员分单
