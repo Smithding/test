@@ -358,7 +358,7 @@ public class OrderServiceImpl implements IOrderService {
 		saleOrderExt.setInsuranceNo(insuranceNo);
 		saleOrderExt.setIssueDate(new Date());
 		saleOrderExt.setOrderType(insurance.getBuyWay());
-		if(insurance.getName().contains("单次")){
+		if(insurance.getName().contains("单次")||insurance.getEndDays()==1){
 			Date flightTime = requestWithActor.getEntity().getSaleOrderExt().getInsureExtVo().getFlightInfoVo().getFlightDate();
 			long time;
 			if(flightTime!=null){
@@ -558,6 +558,11 @@ public class OrderServiceImpl implements IOrderService {
 						saleOrderDetail.setInsuredSex(2);
 					}else{
 						saleOrderDetail.setInsuredSex(1);
+					}
+					//如果出生年月日为空
+					if(saleOrderDetail.getInsuredBirthday()==null||"".equals(saleOrderDetail.getInsuredBirthday())){
+						String birthday = saleOrderDetail.getInsuredCertiNo().substring(6, 10)+"-"+saleOrderDetail.getInsuredCertiNo().substring(10, 12)+"-"+saleOrderDetail.getInsuredCertiNo().substring(12, 14);
+						saleOrderDetail.setInsuredBirthday(birthday);
 					}
 				}
 				saleOrderDetail.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
