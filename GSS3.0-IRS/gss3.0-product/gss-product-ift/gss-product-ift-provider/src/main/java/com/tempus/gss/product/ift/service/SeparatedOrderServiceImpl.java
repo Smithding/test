@@ -69,6 +69,7 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
     @Override
     @Transactional
     public int updateSeparatedOrder(Long saleOrderNo,String loginName,String currentUserId) {
+        log.info("参数：saleOrderNo:{},loginName:{},currentUserId:{}",saleOrderNo,loginName,currentUserId);
         //查询订单，根据订单状态判定是那种情形下的重新分单
         String status = "1";//待核价
         SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(saleOrderNo);
