@@ -1020,9 +1020,11 @@ public class ChangeServiceImpl implements IChangeService {
                         List<TicketSender> ticketSenders = ticketSenderDao.queryByLoginId(saleChange.getAgent().getAccount());
                         User user = userService.findUserByLoginName(agent, saleChange.getAgent().getAccount());
                         int lockcount = saleChangeExtDao.queryCountByLockerAndType(user.getId(), 3);
-                        TicketSender ticketSender = ticketSenders.get(0);
-                        ticketSender.setSaleChangeNum(lockcount+1);
-                        ticketSenderDao.updateByPrimaryKey(ticketSender);
+                        if(ticketSenders!=null&&ticketSenders.size()>0){
+                            TicketSender ticketSender = ticketSenders.get(0);
+                            ticketSender.setSaleChangeNum(lockcount+1);
+                            ticketSenderDao.updateByPrimaryKey(ticketSender);
+                        }
                     }
 
                 } else {
