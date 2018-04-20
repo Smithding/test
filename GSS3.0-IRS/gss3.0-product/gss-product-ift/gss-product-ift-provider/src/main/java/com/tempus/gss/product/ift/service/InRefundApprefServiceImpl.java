@@ -101,7 +101,7 @@ public class InRefundApprefServiceImpl implements InRefundApprefService {
 			log.info(JsonUtil.toJson(list));
 			page.setRecords(list);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("查询国际退款单",e);
 		}
 		log.info("查询国际退款单结束=======");
 		return page;

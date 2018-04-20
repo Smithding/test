@@ -167,7 +167,7 @@ public class QueryServiceImpl implements IQueryService {
         try {
             queryIBEDetailList = shoppingOutPutConvertQueryIBEDetails(shoppingOutPut);
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("开始调用shopping数据转换", e);
         }
         log.info("开始匹配政策");
         ThreadPoolTaskExecutor threadPoolTaskExecutor = taskExecutor();
@@ -189,8 +189,7 @@ public class QueryServiceImpl implements IQueryService {
                 Thread.sleep(200);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
-            log.info(e.getLocalizedMessage());
+            log.error("政策匹配",e);
         }
         log.info("开始组装数据");
         queryIBEDetailList = combineQueryIBEDetails(queryIBEDetailList, flightQueryRequest.getAgent().getDevice(),agent);
@@ -697,7 +696,7 @@ public class QueryServiceImpl implements IQueryService {
                 return false;
             }
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("checkPolicyDate", e);
         }
         if (getDateTime(policy.getPolicyEffectStart()) <= new Date().getTime() && getDateTime(policy.getPolicyEffectEnd()) >= new Date().getTime()) {
             check = true;
@@ -2102,7 +2101,7 @@ public class QueryServiceImpl implements IQueryService {
         try {
             return f2.parse(dateTime.toString()).getTime();
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("getDateTime", e);
             return 0l;
         }
     }

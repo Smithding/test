@@ -17,7 +17,7 @@ import com.tempus.gss.util.EntityUtil;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 
-/*  
+/*
  * 国际政策批量导入处理类
  */
 @Service(value = "product.ift.PolicyIftHelper")
@@ -241,7 +241,7 @@ public class PolicyIftHelper {
 			Policy policy = new Policy();
 			// 可以忽略大小写
 		if (map != null) {
-			if (map.containsKey("airline") 
+			if (map.containsKey("airline")
 					&& map.containsKey("saleConfig") && map.containsKey("travellerType") && map.containsKey("travellerLimit") && map.containsKey("teamTicketType")
 					&& map.containsKey("tripType") && map.containsKey("goStart") && map.containsKey("goEnd") && map.containsKey("travelDate")
 					&& map.containsKey("backDate") && map.containsKey("ticketDate") && map.containsKey("agencyFee") && map.containsKey("policyEffectStart")
@@ -253,7 +253,7 @@ public class PolicyIftHelper {
 						EntityUtil.setAddInfo(policy, agent); // 添加必需信息
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.error("convertToEntity", e);
 					throw new ProductException(Errors.E_UNKNOWN); // 缺少必要参数
 				}
 				return policy;

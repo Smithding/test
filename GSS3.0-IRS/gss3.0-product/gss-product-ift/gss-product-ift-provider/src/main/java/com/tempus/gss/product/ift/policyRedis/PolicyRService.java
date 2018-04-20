@@ -9,8 +9,9 @@ import com.tempus.gss.product.ift.api.service.IPolicyRedisUtils;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.tbd.entity.Airport;
 import com.tempus.tbd.service.IAirportService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class PolicyRService implements IPolicyRService {
+    Logger log = LoggerFactory.getLogger(getClass());
     @Reference
     private IAirportService airportService;
 
@@ -56,7 +58,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryObjByODs", e);
         }
 
         policyVo.setGoStart(dep);
@@ -67,7 +69,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart(dep );
         policyVo.setGoEnd( goArrAirport.getCityCode() );
@@ -77,7 +79,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart( dep );
         policyVo.setGoEnd(goArrAirport.getCountryCode() );
@@ -87,7 +89,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart( dep );
         policyVo.setGoEnd("***" );
@@ -97,7 +99,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
 
         /**
@@ -112,7 +114,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
 
         policyVo.setGoStart(goDepAirport.getAreaCode());
@@ -123,7 +125,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart(goDepAirport.getAreaCode() );
         policyVo.setGoEnd( goArrAirport.getCityCode() );
@@ -133,7 +135,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart( goDepAirport.getAreaCode() );
         policyVo.setGoEnd(goArrAirport.getCountryCode() );
@@ -143,7 +145,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart( goDepAirport.getAreaCode() );
         policyVo.setGoEnd("***" );
@@ -153,7 +155,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
 
         /**
@@ -168,7 +170,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
 
         policyVo.setGoStart(goDepAirport.getCityCode());
@@ -179,7 +181,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart(goDepAirport.getCityCode() );
         policyVo.setGoEnd( goArrAirport.getCityCode() );
@@ -189,7 +191,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart( goDepAirport.getCityCode());
         policyVo.setGoEnd(goArrAirport.getCountryCode() );
@@ -199,7 +201,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart( goDepAirport.getCityCode() );
         policyVo.setGoEnd("***" );
@@ -209,7 +211,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
 
         /**
@@ -224,7 +226,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart(goDepAirport.getCountryCode());
         policyVo.setGoEnd(goArrAirport.getAreaCode() );
@@ -234,7 +236,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart(goDepAirport.getCountryCode() );
         policyVo.setGoEnd( goArrAirport.getCityCode() );
@@ -244,7 +246,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart( goDepAirport.getCountryCode());
         policyVo.setGoEnd(goArrAirport.getCountryCode() );
@@ -254,7 +256,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart( goDepAirport.getCountryCode() );
         policyVo.setGoEnd("***" );
@@ -264,7 +266,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
 
         /**
@@ -278,7 +280,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
 
         policyVo.setGoStart("***");
@@ -289,7 +291,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart("***" );
         policyVo.setGoEnd( goArrAirport.getCityCode() );
@@ -299,7 +301,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart( "***");
         policyVo.setGoEnd(goArrAirport.getCountryCode() );
@@ -309,7 +311,7 @@ public class PolicyRService implements IPolicyRService {
                 goPolicyList.addAll(policys);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         policyVo.setGoStart("***");
         policyVo.setGoEnd("***" );
@@ -320,7 +322,7 @@ public class PolicyRService implements IPolicyRService {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("queryPolicyByOD", e);
         }
         goPolicyList =goPolicyList.stream().filter(e->e.getTravellerType().contains(policyVo.getTravellerType())).collect(Collectors.toList());
         return goPolicyList;
