@@ -185,7 +185,7 @@ public class ChangeServiceImpl implements IChangeService {
             //					}
             //				}
             //			}
-
+            
             /*新增改签航段*/
             for (int i = 0; i < requestWithActor.getEntity().getLegList().size(); i++) {
                 Leg leg = requestWithActor.getEntity().getLegList().get(i);
@@ -232,9 +232,9 @@ public class ChangeServiceImpl implements IChangeService {
                     saleChangeDetailDao.insertSelective(saleChangeDetail);
                 }
             }
-
-
-			/*改签乘客价格*/
+            
+            
+            /*改签乘客价格*/
             for (Long passengerNo : requestWithActor.getEntity().getOldPassengerNoList()) {
                 PassengerChangePrice passengerChangePrice = new PassengerChangePrice();
                 passengerChangePrice.setPassengerNo(passengerNo);
@@ -244,8 +244,8 @@ public class ChangeServiceImpl implements IChangeService {
                 passengerChangePrice.setChangePriceNo(maxNoService.generateBizNo("IFT_PASSENGER_CHANGE_PRICE_NO", 30));
                 passengerChangePriceDao.insertSelective(passengerChangePrice);
             }
-
-			/*通过编号查询出销售单*/
+            
+            /*通过编号查询出销售单*/
             SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleOrderExt.getSaleOrderNo());
             /*创建销售改签单*/
             SaleChange saleChange = new SaleChange();
@@ -264,8 +264,8 @@ public class ChangeServiceImpl implements IChangeService {
             saleChange.setTransationOrderNo(saleOrder.getTransationOrderNo());//交易号
             saleChange.setIncomeExpenseType(1);//收支类型 1.收 2.支
             saleChangeService.create(requestWithActor.getAgent(), saleChange);
-
-			/*创建销售改签单拓展*/
+            
+            /*创建销售改签单拓展*/
             saleChangeExt.setSaleChangeNo(saleChangeNo);
             saleChangeExt.setChangeType(3);//3为改签,同saleChange的orderChangeType
             saleChangeExt.setContactName(requestWithActor.getEntity().getContactName());
@@ -280,8 +280,8 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeExt.setCustomerNo(agent.getNum());
             saleChangeExt.setCustomerTypeNo(agent.getType());
             saleChangeExtDao.insertSelective(saleChangeExt);
-
-			/*通过销售单编号获取采购单*/
+            
+            /*通过销售单编号获取采购单*/
             List<BuyOrderExt> buyOrderExtList = buyOrderExtDao.selectBuyOrderBySaleOrderNo(requestWithActor.getEntity().getSaleOrderNo());
             /*创建采购改签单*/
             BuyChange buyChange = new BuyChange();
@@ -297,10 +297,10 @@ public class ChangeServiceImpl implements IChangeService {
             buyChange.setGoodsSubType(23);//采购改单
             buyChange.setGoodsName("");//TODO
             buyChange.setIncomeExpenseType(2);//收支类型 1.收 2.支
-            if (buyOrderExtList != null && buyOrderExtList.size() != 0) buyChange.setBuyOrderNo(buyOrderExtList.get(0).getBuyOrderNo());
+            if (buyOrderExtList != null && buyOrderExtList.size() != 0) { buyChange.setBuyOrderNo(buyOrderExtList.get(0).getBuyOrderNo()); }
             buyChangeService.create(requestWithActor.getAgent(), buyChange);
-
-			/*创建采购改签单拓展*/
+            
+            /*创建采购改签单拓展*/
             BuyChangeExt buyChangeExt = new BuyChangeExt();
             buyChangeExt.setBuyChangeNo(buyChangeNo);
             buyChangeExt.setOwner(agent.getOwner());
@@ -308,7 +308,7 @@ public class ChangeServiceImpl implements IChangeService {
             buyChangeExt.setValid((byte) 1);
             buyChangeExtDao.insertSelective(buyChangeExt);
             
-			/*创建新增操作日志*/
+            /*创建新增操作日志*/
             try {
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
@@ -338,7 +338,7 @@ public class ChangeServiceImpl implements IChangeService {
         log.info("申请改签单结束=========");
         return saleChangeExt;
     }
-
+    
     @Override
     public boolean createChange(RequestWithActor<ChangeCreateVo> requestWithActor) {
         boolean flag = false;
@@ -595,21 +595,21 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeExt.setCurrency(requestWithActor.getEntity().getCurrency());
             saleChangeExt.setExchangeRate(requestWithActor.getEntity().getExchangeRate());
             saleChangeExt.setSaleCurrency(requestWithActor.getEntity().getSaleCurrency());
-            log.info("保存采购数据"+saleChangeExt.toString());
+            log.info("保存采购数据" + saleChangeExt.toString());
             saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
             List<ChangePriceVo> adtList = requestWithActor.getEntity().getSaleAdtPriceList();
             List<ChangePriceVo> chdList = requestWithActor.getEntity().getSaleChdPriceList();
             List<ChangePriceVo> infList = requestWithActor.getEntity().getSaleInfPriceList();
             List<Leg> legList = requestWithActor.getEntity().getLegList();
-            log.info("保存变更价格数据"+adtList.size());
+            log.info("保存变更价格数据" + adtList.size());
             handle(requestWithActor, adtList);
             handle(requestWithActor, chdList);
             handle(requestWithActor, infList);
             Long saleChangeNo = requestWithActor.getEntity().getSaleChangeNo();
             saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 2);
-            log.info("修改采购状态"+saleChangeNo);
+            log.info("修改采购状态" + saleChangeNo);
             saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 1);
-            log.info("修改采购支付状态"+saleChangeNo);
+            log.info("修改采购支付状态" + saleChangeNo);
             
             if (legList != null && legList.size() > 0) {
                 for (Leg leg : legList) {
@@ -632,8 +632,7 @@ public class ChangeServiceImpl implements IChangeService {
                 log.error("添加(title=国际改签单审核)操作日志异常===" + e);
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            log.error("改签审核失败" + e);
+            log.error("改签审核失败" , e);
             throw new GSSException("改签审核失败", "0103", "改签确认异常,请检查");
         }
         return true;
@@ -702,7 +701,7 @@ public class ChangeServiceImpl implements IChangeService {
                 throw new GSSException("改签审核创建失败", "0101", "创建发生异常,请检查");
             }
             flag = true;
-			/*创建新增操作日志*/
+            /*创建新增操作日志*/
             try {
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
@@ -805,7 +804,7 @@ public class ChangeServiceImpl implements IChangeService {
                 }
             }
         }
-		/*创建新增操作日志*/
+        /*创建新增操作日志*/
         try {
             LogRecord logRecord = new LogRecord();
             logRecord.setAppCode("UBP");
@@ -867,7 +866,7 @@ public class ChangeServiceImpl implements IChangeService {
             }
             
             log.info("拒单结束");
-			/*创建新增操作日志*/
+            /*创建新增操作日志*/
             try {
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
@@ -948,9 +947,9 @@ public class ChangeServiceImpl implements IChangeService {
         SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(saleChangeNo.getEntity().longValue());
         if (saleChangeExt != null) {
             SaleChange change = saleChangeService.getSaleChangeByNo(saleChangeNo.getAgent(), saleChangeNo.getEntity().longValue());
-            if (change != null) saleChangeExt.setSaleChange(change);
+            if (change != null) { saleChangeExt.setSaleChange(change); }
         }
-        if(saleChangeExt != null&&saleChangeExt.getChangeType()==3){
+        if (saleChangeExt != null && saleChangeExt.getChangeType() == 3) {
             saleChangeExt.setPassengerChangePriceList(passengerChangePriceDao.selectPricerByChangeNo(saleChangeExt.getSaleChangeNo()));
         }
         log.info("查询过去改签单详情结束");
@@ -1015,18 +1014,18 @@ public class ChangeServiceImpl implements IChangeService {
                     changeExt.setLockTime(new Date());
                     changeExt.setModifyTime(new Date());
                     //查询出票员锁定的改签记录数+1赋值给SALE_CHANGE_NUM字段
-                    if(lock != null && !lock.equals(orilocker)){
+                    if (lock != null && !lock.equals(orilocker)) {
                         Agent agent = saleChange.getAgent();
                         List<TicketSender> ticketSenders = ticketSenderDao.queryByLoginId(saleChange.getAgent().getAccount());
                         User user = userService.findUserByLoginName(agent, saleChange.getAgent().getAccount());
                         int lockcount = saleChangeExtDao.queryCountByLockerAndType(user.getId(), 3);
-                        if(ticketSenders!=null&&ticketSenders.size()>0){
+                        if (ticketSenders != null && ticketSenders.size() > 0) {
                             TicketSender ticketSender = ticketSenders.get(0);
-                            ticketSender.setSaleChangeNum(lockcount+1);
+                            ticketSender.setSaleChangeNum(lockcount + 1);
                             ticketSenderDao.updateByPrimaryKey(ticketSender);
                         }
                     }
-
+                    
                 } else {
                     changeExt.setLocker(0L);
                     changeExt.setModifier(saleChange.getAgent().getAccount());
@@ -1039,7 +1038,7 @@ public class ChangeServiceImpl implements IChangeService {
                 }
             }
             log.info("锁住订单结束");
-			/*创建新增操作日志*/
+            /*创建新增操作日志*/
             try {
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
@@ -1052,10 +1051,10 @@ public class ChangeServiceImpl implements IChangeService {
                 logRecord.setBizNo(String.valueOf(saleChange.getEntity().getSaleChangeNo()));
                 logService.insert(logRecord);
             } catch (Exception e) {
-                log.error("添加(title=国际改签单锁定)操作日志异常===" + e);
+                log.error("添加(title=国际改签单锁定)操作日志异常===", e);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("锁住销售改签单异常", e);
             throw new GSSException("锁住销售改签单异常", "0202", "锁住销售改签单异常");
         }
         return flag;
@@ -1092,7 +1091,7 @@ public class ChangeServiceImpl implements IChangeService {
                     orderDetail.setTicketNo(priceVo.getTicketNo());
                     saleOrderDetailDao.updateByPrimaryKeySelective(orderDetail);
                 }
-                PassengerChangePrice  passengerChangePrice =new PassengerChangePrice();
+                PassengerChangePrice passengerChangePrice = new PassengerChangePrice();
                 passengerChangePrice.setChangePriceNo(priceVo.getChangePriceNo());
                 passengerChangePrice.setBuyRebate(priceVo.getBuyRebate());
                 passengerChangePrice.setBuyAgencyFee(priceVo.getBuyAgencyFee());
@@ -1102,17 +1101,17 @@ public class ChangeServiceImpl implements IChangeService {
                 passengerChangePrice.setBuyRest(priceVo.getBuyRest());
                 passengerChangePrice.setBuyTax(priceVo.getBuyTax());
                 passengerChangePriceDao.updateByPrimaryKeySelective(passengerChangePrice);
-
+                
             }
             saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 10);
-
+            
             try {
                 mssReserveService.changeInform(requestWithActor.getAgent(), saleChangeNo, "2");
             } catch (Exception e) {
                 log.error("改签出票回调mss接口出错==========e=" + e);
             }
-
-			/*创建新增操作日志*/
+            
+            /*创建新增操作日志*/
             try {
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("GSS");
@@ -1129,8 +1128,7 @@ public class ChangeServiceImpl implements IChangeService {
             }
             flag = true;
         } catch (Exception e) {
-            e.printStackTrace();
-            log.error("改签异常");
+            log.error("改签异常",e);
         }
         log.info("改签确认操作结束");
         return flag;
@@ -1184,7 +1182,7 @@ public class ChangeServiceImpl implements IChangeService {
                     }
                 }
             }
-			/*创建新增操作日志*/
+            /*创建新增操作日志*/
             try {
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
@@ -1256,5 +1254,5 @@ public class ChangeServiceImpl implements IChangeService {
         }
         return 0;
     }
-
+    
 }

@@ -50,7 +50,7 @@ public class BuyOrderExtServiceImpl implements IBuyOrderExtService {
 			if (buyOrder != null)
 				buyOrderExt.setBuyOrder(buyOrder);
 		}catch (Exception e){
-			e.printStackTrace();
+			log.error("获取采购单拓展", e);
 		}
 		log.info("获取采购单拓展结束==");
 		return buyOrderExt;

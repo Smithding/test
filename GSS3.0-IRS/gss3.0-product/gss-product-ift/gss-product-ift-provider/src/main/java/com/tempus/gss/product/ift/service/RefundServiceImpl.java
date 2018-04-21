@@ -316,13 +316,13 @@ public class RefundServiceImpl implements IRefundService {
 			}
 			//根据passengerNo去重
 			List<PassengerLegVo> list=requestWithActor.getEntity().getPassengerLegVoList();
-			for(int i=0;i<list.size();i++){  
+			for(int i=0;i<list.size();i++){
 	            for(int y=list.size()-1;;y--){
 	            	if(i == y){
 	            		break;
 	            	}else{
 	            		if(list.get(i).getPassengerNo().equals(list.get(y).getPassengerNo())){
-	            			list.remove(y);   
+	            			list.remove(y);
 	            		}
 	            	}
 	            }
@@ -1097,7 +1097,7 @@ public class RefundServiceImpl implements IRefundService {
 			}
 			log.info("查询废退改签单结束，获取费退改签单的数据为："+ JsonUtil.toJson(page));
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("查询废退改签单", e);
 		}
 		log.info("查询废退改签单结束=======");
 		return page;
@@ -1143,7 +1143,8 @@ public class RefundServiceImpl implements IRefundService {
 
 			page.setRecords(list);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("查询废退改签单", e);
+			
 		}
 		log.info("查询废退改签单结束=======");
 		return page;
@@ -1209,7 +1210,7 @@ public class RefundServiceImpl implements IRefundService {
 			}
 			saleChangeExtDao.updateByPrimaryKey(saleChangeExt);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("orderRefundInform", e);
 		}
 		return 0;
 	}
@@ -1253,7 +1254,7 @@ public class RefundServiceImpl implements IRefundService {
 			}
 
 		} catch (Exception e) {
-			log.error("", e);
+			log.error("退费单分单", e);
 		}
 		log.info("退费单分单结束");
 	}

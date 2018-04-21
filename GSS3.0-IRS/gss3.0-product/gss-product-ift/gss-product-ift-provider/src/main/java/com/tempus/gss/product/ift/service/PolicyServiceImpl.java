@@ -450,7 +450,7 @@ public class PolicyServiceImpl implements IPolicyService {
 					reStrings.add(errorFilePath);
 					sheet.getWorkbook().close();
 				} catch (IOException e) {
-					e.printStackTrace();
+					log.error("写入错误数据异常", e);
 					String Stringpath = writeErrorToFile("写入错误数据异常，请联系技术人员"+e);
 					reStrings.add("false");
 					reStrings.add(Stringpath);
@@ -692,7 +692,6 @@ public class PolicyServiceImpl implements IPolicyService {
 					return new Result(FAILED_CODE, SAVE_SUCCESS);
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
 				log.error(e.getMessage(), e);
 				return new Result(FAILED_CODE, SAVE_SUCCESS);
 			}

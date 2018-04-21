@@ -148,7 +148,7 @@ public class MultipassMappingServicelmpl implements IMultipassMappingService {
         try {
             queryIBEDetailList = shoppingOutPutConvertQueryIBEDetails(shoppingOutPut, flightQuery.getLegType());
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("shopping数据转换", e);
         }
         log.info("开始匹配政策");
         ThreadPoolTaskExecutor threadPoolTaskExecutor = taskExecutor();
@@ -170,8 +170,7 @@ public class MultipassMappingServicelmpl implements IMultipassMappingService {
                 Thread.sleep(200);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
-            log.info(e.getLocalizedMessage());
+            log.info("匹配政策",e);
         }
         log.info("开始组装数据");
         queryIBEDetailList = combineQueryIBEDetails(queryIBEDetailList, flightQueryRequest.getAgent().getDevice(),flightQueryRequest.getAgent());
@@ -655,7 +654,7 @@ public class MultipassMappingServicelmpl implements IMultipassMappingService {
                 return false;
             }
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("checkPolicyDate", e);
         }
         if (getDateTime(policy.getPolicyEffectStart()) <= new Date().getTime() && getDateTime(policy.getPolicyEffectEnd()) >= new Date().getTime()) {
             check = true;
@@ -1803,7 +1802,7 @@ public class MultipassMappingServicelmpl implements IMultipassMappingService {
         try {
             return f2.parse(dateTime.toString()).getTime();
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("getDateTime", e);
             return 0l;
         }
     }

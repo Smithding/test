@@ -64,7 +64,7 @@ public class IOutSourceingApplyServiceImpl implements IOutSourceingApplyService 
 			log.info(JsonUtil.toJson(list));
 			page.setRecords(list);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error("查询临时外购付款申请", e);
 		}
 		log.info("查询国际临时外购付款单结束=======");
 		return page;
