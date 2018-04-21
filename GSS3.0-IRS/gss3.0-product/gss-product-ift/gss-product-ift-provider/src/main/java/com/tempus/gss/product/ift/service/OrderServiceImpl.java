@@ -2,12 +2,7 @@ package com.tempus.gss.product.ift.service;
 
 import java.math.BigDecimal;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.tempus.gss.mq.MqSender;
 import com.tempus.gss.order.entity.*;
@@ -740,17 +735,17 @@ public class OrderServiceImpl implements IOrderService {
 
             long endTime = System.currentTimeMillis();
             log.info("查询订单接口结束=====" + (endTime - startTime));
-            List<SaleOrderExt> tempList = new ArrayList<>();
+       /*     List<SaleOrderExt> tempList = new ArrayList<>();
             if (null != saleOrderExtList) {
                 for (SaleOrderExt order : saleOrderExtList) {
                     SaleOrder saleOrder = saleOrderService.getSOrderByNo(saleOrderQueryRequest.getAgent(), order.getSaleOrderNo());
                     order.setSaleOrder(saleOrder);
                     tempList.add(order);
                 }
-            }
+            }*/
             long objectTime = System.currentTimeMillis();
             log.info("封装订单接口结束=====" + (objectTime - endTime));
-            page.setRecords(tempList);
+            page.setRecords(saleOrderExtList);
 
             log.info("查询订单模块（为运营平台订单管理提供服务）结束");
         } catch (Exception e) {
