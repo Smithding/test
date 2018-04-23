@@ -516,7 +516,7 @@
         f.SALE_ORDER_NO, f.ID, f.OWNER, f.DEMAND_NO, f.LEG_TYPE, f.CONTACT_NAME, f.CONTACT_PHONE, f.CONTACT_MOBILE,
         f.CONTACT_MAIL, f.SALE_REMARK, f.VALID, f.VERSION, f.LOCKER, f.LOCK_TIME, f.CREATE_TYPE, f.CREATE_TIME,
         f.MODIFY_TIME,  (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,(select NAME from SM_USER where LOGIN_NAME =aa.MODIFIER) as MODIFIER,
-        o.ORDER_CHILD_STATUS,f.LINKTYPE,(SELECT NAME FROM SM_USER where ID = f.LOCKER) as HANDLERS
+        o.ORDER_CHILD_STATUS,f.LINKTYPE,(SELECT NAME FROM SM_USER where ID = f.LOCKER) as HANDLERS,f.ORIGINAL_ORDER_NO
         FROM
         IFT_SALE_ORDER_EXT f
         left join OS_SALEORDER o on f.SALE_ORDER_NO = o.SALE_ORDER_NO
@@ -640,7 +640,7 @@
                 a.CERT_NO like CONCAT('%',#{cardNo,jdbcType=VARCHAR},'%' ) AND
             </if>
             <if test="createTypeStatusArray!=null and createTypeStatusArray!='' ">
-                CREATE_TYPE in
+                f.CREATE_TYPE in
                 <foreach collection="createTypeStatusArray" item="createTypeStatusArray"
                          index="index" open="(" close=")" separator=",">
                     #{createTypeStatusArray[${index}]}

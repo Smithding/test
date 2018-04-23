@@ -362,6 +362,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         Long saleOrderNo = maxNoService.generateBizNo("IFT_SALE_ORDER_NO", 37);
         Long businessSignNo = IdWorker.getId();
+        List<Passenger> passengers =saleOrderExt.getPassengerList();
         try {
             Agent agent = requestWithActor.getAgent();
             Date today = new Date();
@@ -388,7 +389,7 @@ public class OrderServiceImpl implements IOrderService {
                 
             }
             /* 增加旅客信息 */
-            for (Passenger passenger : requestWithActor.getEntity().getSaleOrderExt().getPassengerList()) {
+            for (Passenger passenger : passengers) {
                 if ("1".equals(passenger.getPassengerType())) {
                     passenger.setPassengerType("ADT");
                 }
@@ -502,7 +503,7 @@ public class OrderServiceImpl implements IOrderService {
             /* 封装人+航段对象 */
             List<SaleOrderDetail> saleOrderDetailList = new ArrayList<>();
             for (Leg leg : saleOrderExt.getLegList()) {
-                for (Passenger passenger : saleOrderExt.getPassengerList()) {
+                for (Passenger passenger : passengers) {
                     SaleOrderDetail saleOrderDetail = new SaleOrderDetail();
                     saleOrderDetail.setSaleOrderDetailNo(maxNoService.generateBizNo("IFT_SALE_ORDER_DETAIL_NO", 36));
                     /* 设置航程 */
@@ -738,17 +739,17 @@ public class OrderServiceImpl implements IOrderService {
             
             long endTime = System.currentTimeMillis();
             log.info("查询订单接口结束=====" + (endTime - startTime));
-            List<SaleOrderExt> tempList = new ArrayList<>();
+          /*  List<SaleOrderExt> tempList = new ArrayList<>();
             if (null != saleOrderExtList) {
                 for (SaleOrderExt order : saleOrderExtList) {
                     SaleOrder saleOrder = saleOrderService.getSOrderByNo(saleOrderQueryRequest.getAgent(), order.getSaleOrderNo());
                     order.setSaleOrder(saleOrder);
                     tempList.add(order);
                 }
-            }
+            }*/
             long objectTime = System.currentTimeMillis();
             log.info("封装订单接口结束=====" + (objectTime - endTime));
-            page.setRecords(tempList);
+            page.setRecords(saleOrderExtList);
             
             log.info("查询订单模块（为运营平台订单管理提供服务）结束");
         } catch (Exception e) {
