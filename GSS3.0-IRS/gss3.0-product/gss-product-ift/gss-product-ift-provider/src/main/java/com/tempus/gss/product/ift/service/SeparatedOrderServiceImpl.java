@@ -80,7 +80,7 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
             }
         }
         //更新将被分单人员
-        updateTicketSenderInfo(loginName,status,currentUserId,"add");
+        updateTicketSenderInfo(loginName,status,loginName,"add");
         Long lockerId = saleOrderExt.getLocker();
         //更新原被分配人员
         User user = userService.selectById(lockerId);
@@ -106,9 +106,13 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
             }
         }else{
             if (StringUtils.equals(status, "1")) {
-                ticketSender.setSaleOrderNum(ticketSender.getSaleOrderNum() - 1);
+                int num = ticketSender.getSaleOrderNum() - 1;
+                if(num<0) num =0;
+                ticketSender.setSaleOrderNum(num);
             } else {
-                ticketSender.setOrdercount(ticketSender.getOrdercount() - 1);
+                Long num = ticketSender.getOrdercount() - 1;
+                if(num<0) num =0L;
+                ticketSender.setOrdercount(num);
             }
         }
         return ticketSender;

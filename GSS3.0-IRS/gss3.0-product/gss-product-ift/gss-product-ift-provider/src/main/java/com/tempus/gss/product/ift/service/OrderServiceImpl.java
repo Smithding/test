@@ -709,7 +709,6 @@ public class OrderServiceImpl implements IOrderService {
      */
     @Override
     public Page<SaleOrderExt> queryFromSale(Page<SaleOrderExt> page, RequestWithActor<SaleQueryOrderVo> saleOrderQueryRequest) {
-        log.info("订单查询开始");
         log.info("订单查询参数" + JSON.toJSONString(saleOrderQueryRequest));
         try {
             if (saleOrderQueryRequest.getAgent() == null && saleOrderQueryRequest.getAgent().getOwner() == 0) {
