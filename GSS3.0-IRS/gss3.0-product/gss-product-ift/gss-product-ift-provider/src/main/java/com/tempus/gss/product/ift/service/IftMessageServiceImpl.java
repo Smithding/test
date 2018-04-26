@@ -113,7 +113,7 @@ public class IftMessageServiceImpl implements IIftMessageService {
                 }
                 mqSender.send("gss-websocket-exchange", "notice", sdo);
                 log.info("放入MQ队列信息:" + sdo.toString());
-                ticketSender.setSaleOrderNum(ticketSender.getSaleRefuseNum() + 1);
+                ticketSender.setSaleRefuseNum(ticketSender.getSaleRefuseNum() + 1);
                 ticketSenderService.updateByPrimaryKey(ticketSender);
             }
         } catch (Exception e) {
@@ -161,7 +161,7 @@ public class IftMessageServiceImpl implements IIftMessageService {
     public TicketSender getSender(String ownerCode) {
         TicketSender ticketSender = null;
         TicketSenderVo senderVo = new TicketSenderVo();
-        senderVo.setTypes("'both','salesman'");//只给销售员分单
+        //senderVo.setTypes("'both','salesman'");//只给销售员分单   只分在线即可
         senderVo.setStatus(3);//查询在线销售员 3-在线
         List<TicketSender> ticketSenders = ticketSenderService.queryByBean(senderVo);
         if (ticketSenders != null && ticketSenders.size() > 0) {

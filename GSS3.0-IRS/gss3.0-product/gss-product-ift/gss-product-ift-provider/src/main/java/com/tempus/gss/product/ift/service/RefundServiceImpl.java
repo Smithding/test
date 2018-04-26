@@ -440,6 +440,7 @@ public class RefundServiceImpl implements IRefundService {
 		return saleChangeExt;
 	}
 
+
 	@Override
 	@Transactional
 	public boolean lockRefund(RequestWithActor<Long> requestWithActor) {
@@ -450,6 +451,12 @@ public class RefundServiceImpl implements IRefundService {
 
 			Long saleChangeNo = requestWithActor.getEntity().longValue();
 			SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(saleChangeNo);
+			//锁定前先判断是否有locker
+			if(saleChangeExt.getLocker() != 0l){
+				//对应locker出票员的num-1
+				iTicketSenderService.decreaseBySaleChangeExt(requestWithActor.getAgent(),saleChangeExt,4);
+			}
+
 			saleChangeExt.setLocker(requestWithActor.getAgent().getId());
 			// 锁起状态为Id
 			//saleChangeExt.setLocker(1L);
@@ -493,6 +500,8 @@ public class RefundServiceImpl implements IRefundService {
 			}
 			Long saleChangeNo = requestWithActor.getEntity().longValue();
 			SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(saleChangeNo);
+			//对应出票员num-1
+			iTicketSenderService.decreaseBySaleChangeExt(requestWithActor.getAgent(),saleChangeExt,4);
 			saleChangeExt.setLocker(0L);
 			saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
 			/*创建操作日志*/

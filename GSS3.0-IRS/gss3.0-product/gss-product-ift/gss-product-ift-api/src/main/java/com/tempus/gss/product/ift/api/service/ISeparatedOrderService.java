@@ -23,4 +23,14 @@ public interface ISeparatedOrderService {
      * @param saleOrderNo
      */
     int updateSeparatedOrder(Long saleOrderNo,String loginName,String currentUserId);
+
+    /**
+     * 废退改单修改出票员
+     * @param saleChangeNo
+     * @param loginName
+     * @param currentUserId
+     * @param saleOrBuyType buy 为采购类的分单，sale 为销售类的分单
+     * @return
+     */
+    int updateSeparatedChangeOrder(Long saleChangeNo,String loginName,String currentUserId,String saleOrBuyType);
 }

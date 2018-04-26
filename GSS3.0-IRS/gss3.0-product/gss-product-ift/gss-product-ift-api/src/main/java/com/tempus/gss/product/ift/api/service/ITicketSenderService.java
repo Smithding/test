@@ -2,6 +2,7 @@ package com.tempus.gss.product.ift.api.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.common.entity.RequestWithActor;
+import com.tempus.gss.product.ift.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ift.api.entity.TicketSender;
 import com.tempus.gss.product.ift.api.entity.vo.TicketSenderVo;
 import com.tempus.gss.system.entity.User;
@@ -17,10 +18,17 @@ public interface ITicketSenderService {
     /**
      * 减少出票员锁定单数量
      * @param agent
-     * @param lockerId
+     * @param salechangeExt
      * @param type   1代表BUY_CHANGE_NUM    2代表SALE_CHANGE_NUM    3代表BUY_REFUSE_NUM   4代表SALE_REFUSE_NUM
      */
-    void decreaseBuyChangeNum(Agent agent, Long lockerId, int type) ;
+    void decreaseBySaleChangeExt(Agent agent, SaleChangeExt salechangeExt, int type) ;
+
+    /**
+     * 增加出票员的锁定单数量
+     * @param agent
+     * @param type   1代表BUY_CHANGE_NUM    2代表SALE_CHANGE_NUM    3代表BUY_REFUSE_NUM   4代表SALE_REFUSE_NUM
+     */
+    void increaseByLockerId(Agent agent,Long lockerId,int type);
 
     Page<TicketSender> pageList(Page<TicketSender> page, RequestWithActor<TicketSenderVo> requestWithActor);
 

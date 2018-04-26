@@ -22,7 +22,7 @@
     </sql>
 
     <select id="queryObjByKey" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SeparatedOrderVo">
-        SELECT ift.ID,ift.SALE_ORDER_NO,ift.PNR_NO AS PNR,de.NAME AS DEPNAME,sm.NAME AS MODIFIERNAME,cps.NAME AS COMPNAME,
+        SELECT DISTINCT ift.ID,ift.SALE_ORDER_NO,ift.PNR_NO AS PNR,de.NAME AS DEPNAME,sm.NAME AS MODIFIERNAME,cps.NAME AS COMPNAME,
         (SELECT NAME FROM SM_USER s WHERE s.LOGIN_NAME = ift.CREATOR) AS CUSTOMERNAME,ift.LOCKER,ISOD.`STATUS`
         FROM IFT_SALE_ORDER_EXT ift
         LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ift.SALE_ORDER_NO = ISOD.SALE_ORDER_NO

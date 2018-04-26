@@ -5,9 +5,12 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.common.entity.RequestWithActor;
+import com.tempus.gss.product.ift.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ift.api.entity.TicketSender;
 import com.tempus.gss.product.ift.api.entity.vo.TicketSenderVo;
+import com.tempus.gss.product.ift.api.service.IChangeService;
 import com.tempus.gss.product.ift.api.service.ITicketSenderService;
+import com.tempus.gss.product.ift.dao.SaleChangeExtDao;
 import com.tempus.gss.product.ift.dao.TicketSenderDao;
 import com.tempus.gss.system.entity.User;
 import com.tempus.gss.system.service.IUserService;
@@ -32,24 +35,66 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
     TicketSenderDao ticketSenderDao;
     @Reference
     IUserService userService;
+    @Autowired
+    SaleChangeExtDao saleChangeExtDao;
     @Override
-    public void decreaseBuyChangeNum(Agent agent, Long lockerId, int type) {
+    public void decreaseBySaleChangeExt(Agent agent, SaleChangeExt salechangeExt, int type) {
+
+        Long lockerId = salechangeExt.getLocker();
+        log.info("减少lockerID："+lockerId+" 出票员 第"+type+"类的num值开始");
         if(lockerId == null || lockerId.equals(0l)){
+            log.info("无此lockerID："+lockerId+" 出票员mun减少结束");
             return ;
         }
         User user = userService.selectById(agent,lockerId);
-        TicketSender sender = getTicketSenderByLoginId(user.getLoginName());
-        if(type == 1){
-            sender.setBuyChangeNum(sender.getBuyChangeNum() - 1);
-        } else if(type == 2){
-            sender.setSaleChangeNum(sender.getSaleChangeNum() - 1);
-        } else if(type == 3){
-            sender.setBuyRefuseNum(sender.getBuyRefuseNum() - 1);
-        } else if(type == 4){
-            sender.setSaleRefuseNum(sender.getSaleRefuseNum() - 1);
+        if(user != null){
+            TicketSender sender = getTicketSenderByLoginId(user.getLoginName());
+            if(sender != null){
+                if(type == 1){
+                    sender.setBuyChangeNum(sender.getBuyChangeNum() - 1);
+                } else if(type == 2){
+                    sender.setSaleChangeNum(sender.getSaleChangeNum() - 1);
+                } else if(type == 3){
+                    sender.setBuyRefuseNum(sender.getBuyRefuseNum() - 1);
+                } else if(type == 4){
+                    sender.setSaleRefuseNum(sender.getSaleRefuseNum() - 1);
+                }
+                sender.setIds(sender.getId() + "");
+                update(sender);
+            }
+            //设置单的locker字段为0
+            salechangeExt.setLocker(0L);
+            saleChangeExtDao.updateByPrimaryKeySelective(salechangeExt);
         }
-        sender.setIds(sender.getId() + "");
-        update(sender);
+        log.info("减少lockerID："+lockerId+" 出票员 第"+type+"的num值结束");
+    }
+
+    @Override
+    public void increaseByLockerId(Agent agent,Long lockerId, int type) {
+
+        log.info("增加lockerID："+lockerId+" 出票员 第"+type+"的num值开始");
+        if(lockerId == null || lockerId.equals(0l)){
+            log.info("无此lockerID："+lockerId+" 出票员num增加结束");
+            return ;
+        }
+        User user = userService.selectById(agent,lockerId);
+        if(user != null){
+            TicketSender sender = getTicketSenderByLoginId(user.getLoginName());
+            if(sender != null){
+                if(type == 1){
+                    sender.setBuyChangeNum(sender.getBuyChangeNum() + 1);
+                } else if(type == 2){
+                    sender.setSaleChangeNum(sender.getSaleChangeNum() + 1);
+                } else if(type == 3){
+                    sender.setBuyRefuseNum(sender.getBuyRefuseNum() + 1);
+                } else if(type == 4){
+                    sender.setSaleRefuseNum(sender.getSaleRefuseNum() + 1);
+                }
+                sender.setIds(sender.getId() + "");
+                update(sender);
+            }
+        }
+        log.info("增加lockerID："+lockerId+" 出票员 第"+type+"的num值结束");
     }
 
     @Override
@@ -114,7 +159,7 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
     public List<TicketSender> getOnlineTicketSender(Integer onLine) {
         TicketSenderVo ticketSenderVo = new TicketSenderVo();
         ticketSenderVo.setStatus(onLine);//只给在线用户分单
-        ticketSenderVo.setTypes("'both','ticketSender'");//只给出票员分单
+        //ticketSenderVo.setTypes("'both','ticketSender'");//只给出票员分单
         List<TicketSender> ticketSenderList = this.queryByBean(ticketSenderVo);
         return ticketSenderList;
     }
