@@ -62,8 +62,8 @@
                      select="com.tempus.gss.product.ift.dao.LegDao.selectByPrimaryKey"/>
 
         <!--一对一关联航程-->
-        <!--<association property="saleOrderExt" column="SALE_ORDER_NO"
-                     select="com.tempus.gss.product.ift.dao.SaleOrderExtDao.selectByPrimaryKey"/>-->
+        <association property="saleOrderExt" column="SALE_ORDER_NO"
+                     select="com.tempus.gss.product.ift.dao.SaleOrderExtDao.selectByPrimaryKey"/>
         <!--一对一关联最后销售单
         <association property="buyOrderDetail" column="SALE_ORDER_DETAIL_NO"
                      select="com.tempus.gss.product.ift.dao.BuyOrderDetailDao.selectBySaleNoDesc"/>-->
