@@ -115,6 +115,30 @@
         SALE_CURRENCY,EXCHANGE_RATE,DRAWER_LOGIN_NAME
 
     </sql>
+    <select id="querySaleCountByLocker" resultType="java.lang.Integer">
+        SELECT count(DISTINCT f.SALE_ORDER_NO)
+        FROM
+        IFT_SALE_ORDER_EXT f
+        LEFT JOIN OS_SALEORDER o ON f.SALE_ORDER_NO = o.SALE_ORDER_NO
+        WHERE
+        f.VALID = 1
+        AND o.ORDER_CHILD_STATUS IN (1)
+        AND f.LOCKER = #{locker}
+        AND f.CREATE_TYPE IN (1, 2, 3, 4)
+    </select>
+    <select id="queryBuyCountByLocker" resultType="java.lang.Integer">
+        SELECT count(DISTINCT f.SALE_ORDER_NO)
+        FROM
+            IFT_SALE_ORDER_EXT f
+        LEFT JOIN OS_SALEORDER o ON f.SALE_ORDER_NO = o.SALE_ORDER_NO
+        LEFT JOIN OS_BUYORDER aa ON f.SALE_ORDER_NO = aa.SALE_ORDER_NO
+        WHERE
+            f.VALID = 1
+        AND aa.BUY_CHILD_STATUS IN (1, 2)
+        AND f.CREATE_TYPE IN (1, 2, 3, 4, 6)
+        AND o.PAY_STATUS IN (3, 4)
+        AND f.LOCKER = #{locker}
+    </select>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
         <include refid="Base_Column_List"/>

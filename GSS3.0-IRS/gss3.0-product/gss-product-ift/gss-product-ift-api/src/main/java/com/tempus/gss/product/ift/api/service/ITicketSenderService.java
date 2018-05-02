@@ -24,11 +24,11 @@ public interface ITicketSenderService {
     void decreaseBySaleChangeExt(Agent agent, SaleChangeExt salechangeExt, int type) ;
 
     /**
-     * 增加出票员的锁定单数量
+     * 减少出票员的锁定单数量
      * @param agent
-     * @param type   1代表BUY_CHANGE_NUM    2代表SALE_CHANGE_NUM    3代表BUY_REFUSE_NUM   4代表SALE_REFUSE_NUM
+     * @param type 1.BUY_CHANGE_NUM 2.SALE_CHANGE_NUM  3.BUY_REFUSE_NUM 4.SALE_REFUSE_NUM 5.SALE_ORDER_NUM 6.ORDERCOUNT
      */
-    void increaseByLockerId(Agent agent,Long lockerId,int type);
+    void updateByLockerId(Agent agent,Long lockerId,String type);
 
     Page<TicketSender> pageList(Page<TicketSender> page, RequestWithActor<TicketSenderVo> requestWithActor);
 

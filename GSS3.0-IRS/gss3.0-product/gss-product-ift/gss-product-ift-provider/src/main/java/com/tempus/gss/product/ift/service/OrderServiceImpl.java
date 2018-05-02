@@ -1085,6 +1085,7 @@ public class OrderServiceImpl implements IOrderService {
             }
             //设置采购币种
             saleOrderExt.setCurrency(listVo.getpVoList().get(0).getCurrency());
+            saleOrderExt.setLocker(0L);
             // 修改采购单信息
             updateBuyOrder(agent, saleOrderNo, payable, listVo, ticketNoArray.toString());
             // 更改主订单状态

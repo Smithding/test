@@ -14,6 +14,7 @@ import com.tempus.gss.product.ift.api.service.IIftMessageService;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.SaleChangeExtDao;
 import com.tempus.gss.product.ift.dao.SaleOrderExtDao;
+import com.tempus.gss.security.AgentUtil;
 import com.tempus.gss.system.entity.User;
 import com.tempus.gss.system.service.IUserService;
 import com.tempus.gss.vo.Agent;
@@ -83,10 +84,10 @@ public class IftMessageServiceImpl implements IIftMessageService {
                     saleOrderExt.setModifyTime(date);
                     log.info("分单更新销售订单分配信息:"+saleOrderExt.toString());
                     saleOrderExtDao.updateByPrimaryKey(saleOrderExt);
+                    ticketSenderService.updateByLockerId(agent,user.getId(),"SALE_ORDER_NUM");
                 }
-                ticketSender.setSaleOrderNum(ticketSender.getSaleOrderNum() + 1);
-                ticketSenderService.updateByPrimaryKey(ticketSender);
-
+                /*ticketSender.setSaleOrderNum(ticketSender.getSaleOrderNum() + 1);
+                ticketSenderService.updateByPrimaryKey(ticketSender);*/
             }
         } catch (Exception e) {
             log.error("b2b国际机票添加消息提醒异常", e);

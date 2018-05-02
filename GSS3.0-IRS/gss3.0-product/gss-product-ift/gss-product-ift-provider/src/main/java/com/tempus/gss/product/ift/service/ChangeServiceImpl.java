@@ -1006,20 +1006,18 @@ public class ChangeServiceImpl implements IChangeService {
             throw new GSSException("锁住销售改签单", "0202", "传入参数为空");
         }
         SaleChangeExt changeExt = saleChangeExtDao.selectByPrimaryKey(changeVo.getSaleChangeNo());
+        long originLocker = changeExt.getLocker();
+        long afterLocker = 0l;
         try {
             if (changeExt != null) {
                 //locker 为0表示解锁  大于0表示锁定
                 if (changeExt.getLocker() == null || changeVo.getLocker() == 1) {
-                    //锁定操作 之前的出票员  -1
-                    ticketSenderService.decreaseBySaleChangeExt(saleChange.getAgent(),changeExt,2);
-                    Long orilocker = changeExt.getLocker();
-                    Long lock = saleChange.getAgent().getId();
-                    changeExt.setLocker(lock);
+                    afterLocker = saleChange.getAgent().getId();
+                    changeExt.setLocker(afterLocker);
                     changeExt.setModifier(saleChange.getAgent().getAccount());
                     changeExt.setLockTime(new Date());
                     changeExt.setModifyTime(new Date());
-                    //新锁定的出票员num+1
-                    ticketSenderService.increaseByLockerId(saleChange.getAgent(),lock,2);
+
                    /* if (lock != null && !lock.equals(orilocker)) {
                         Agent agent = saleChange.getAgent();
                         List<TicketSender> ticketSenders = ticketSenderDao.queryByLoginId(saleChange.getAgent().getAccount());
@@ -1033,17 +1031,16 @@ public class ChangeServiceImpl implements IChangeService {
                     }*/
                     
                 } else {
-                    if("sale".equals(type)){
-                        ticketSenderService.decreaseBySaleChangeExt(saleChange.getAgent(),changeExt,2);
-                    } else if("buy".equals(type)){
-                        ticketSenderService.decreaseBySaleChangeExt(saleChange.getAgent(),changeExt,1);
-                    }
                     changeExt.setLocker(0L);
                     changeExt.setModifier(saleChange.getAgent().getAccount());
                     changeExt.setLockTime(new Date());
                     changeExt.setModifyTime(new Date());
                 }
                 int updateLocker = saleChangeExtDao.updateLocker(changeExt);
+                //更新锁定前出票员
+                ticketSenderService.updateByLockerId(saleChange.getAgent(),originLocker,"SALE_CHANGE_NUM");
+                //更新锁定后的出票员
+                ticketSenderService.updateByLockerId(saleChange.getAgent(),afterLocker,"SALE_CHANGE_NUM");
                 if (updateLocker == 1) {
                     flag = true;
                 }
@@ -1265,5 +1262,10 @@ public class ChangeServiceImpl implements IChangeService {
         }
         return 0;
     }
-    
+
+    @Override
+    public int updateByPrimarykey(SaleChangeExt salechangeExt) {
+        return saleChangeExtDao.updateByPrimaryKey(salechangeExt);
+    }
+
 }

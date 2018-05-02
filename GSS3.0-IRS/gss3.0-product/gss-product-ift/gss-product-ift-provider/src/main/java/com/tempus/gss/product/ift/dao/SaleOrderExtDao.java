@@ -11,11 +11,24 @@ import com.tempus.gss.product.ift.api.entity.vo.SaleOrderExtVo;
 import java.util.List;
 
 import com.tempus.gss.product.ift.api.entity.vo.SaleQueryOrderVo;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 @Component
 public interface SaleOrderExtDao extends BaseDao<SaleOrderExt, SaleOrderExtVo> {
 
+	/**
+	 * 待核价被locker锁定的订单数量
+	 * @param locker
+	 * @return
+	 */
+	int querySaleCountByLocker(@Param("locker") long locker);
+	/**
+	 * 待出票被locker锁定的订单数量
+	 * @param locker
+	 * @return
+	 */
+	int queryBuyCountByLocker(@Param("locker") long locker);
 	/**
 	 * 锁定、解锁
 	 *
