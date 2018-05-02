@@ -20,6 +20,8 @@
         <result column="SALE_CHANGE_NUM" property="saleChangeNum" jdbcType="INTEGER"/>
         <result column="BUY_REFUSE_NUM" property="buyRefuseNum" jdbcType="INTEGER"/>
         <result column="SALE_REFUSE_NUM" property="saleRefuseNum" jdbcType="INTEGER"/>
+        <result column="TOTAL_CHANGE_NUM" property="totalChangeNum" jdbcType="INTEGER"/>
+        <result column="TOTAL_REFUSE_NUM" property="totalRefuseNum" jdbcType="INTEGER"/>
     </resultMap>
 
     <sql id="sqlwhere">
@@ -55,7 +57,7 @@
         `ID`,`USERID`,`NAME`,`STATUS`,`NO`,`CREATOR`,`MODIFIER`,
         `CREATEDATETIME`,`UPDATETIME`,`ORDERCOUNT`,`POINT`,`SEQUENCENO`,
         `TYPE`,`SALE_ORDER_NUM`,`BUY_CHANGE_NUM`,`SALE_CHANGE_NUM`,`BUY_REFUSE_NUM`,
-        `SALE_REFUSE_NUM`
+        `SALE_REFUSE_NUM`,(`BUY_CHANGE_NUM`+`SALE_CHANGE_NUM`) as  `TOTAL_CHANGE_NUM`,(`SALE_REFUSE_NUM`+`BUY_REFUSE_NUM`) as `TOTAL_REFUSE_NUM`
     </sql>
 
     <select id="queryObjByKey" resultMap="BaseResultMap"
