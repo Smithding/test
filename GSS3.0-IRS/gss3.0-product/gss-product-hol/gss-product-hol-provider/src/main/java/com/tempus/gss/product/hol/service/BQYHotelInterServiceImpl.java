@@ -2,6 +2,8 @@ package com.tempus.gss.product.hol.service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -95,6 +97,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	@Override
 	public List<HotelId> queryHotelIdList() {
@@ -314,7 +317,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	}
 	
 	@Override
-	public void saveDataToMongoDB(QueryHotelListParam query) {
+	public void saveDataToMongoDB() {
 		//删除Mongo中的数据
 		deleteMongoDBData();
 		//开始拉取城市信息
@@ -344,6 +347,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			queryHotelParam.setHotelId(hotelId.getHotelId());
 			List<ImageList> hotelImageList = this.queryHotelImage(queryHotelParam);
 			hotelInfo.setHotelImageList(hotelImageList);
+			hotelInfo.setLatestUpdateTime(sdf.format(new Date()));
+			hotelInfo.setSaleStatus(1);
 			//保存酒店信息
 			mongoTemplate.save(hotelInfo);
 		}

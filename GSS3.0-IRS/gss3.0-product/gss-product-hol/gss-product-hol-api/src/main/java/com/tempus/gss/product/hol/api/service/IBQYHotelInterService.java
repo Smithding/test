@@ -91,7 +91,7 @@ public interface IBQYHotelInterService{
 	 * 将数据存储到MongoDB中
 	 * @param hotelList
 	 */
-	void saveDataToMongoDB(QueryHotelListParam query);
+	void saveDataToMongoDB();
 	
 	/**
 	 * 拉取酒店信息
