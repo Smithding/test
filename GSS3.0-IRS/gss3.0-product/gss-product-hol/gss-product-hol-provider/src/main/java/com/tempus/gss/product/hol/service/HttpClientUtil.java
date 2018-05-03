@@ -146,6 +146,69 @@ public class HttpClientUtil {
         }
         return t;
     }
+    
+    public static String doJsonPost(String url, String reqJsonStr) {
+        HttpClient client = null;
+        String result = "";
+        try {
+            if (url.startsWith("https")) {
+                client = new DefaultHttpClient();
+                client = WebClientDevWrapper.wrapClient(client);
+            } else {
+                client = HttpClients.createDefault();
+            }
+            HttpPost httpPost = new HttpPost(url);
+            StringEntity entity = new StringEntity(reqJsonStr,
+                    "application/json", "utf-8");// 指定请求头
+            httpPost.setEntity(entity);
+            httpPost.setHeader("Accept", "application/json");
+            httpPost.setHeader("Accept-Charset", "utf-8");
+            HttpResponse res = client.execute(httpPost);// 发送请求
+            if (res.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+				result = EntityUtils.toString(res.getEntity(),"UTF-8");
+                log.info("接口请求返回结果:"+result);
+            }
+
+        } catch (Exception e) {
+            log.info("doJsonPost请求异常");
+            e.printStackTrace();
+        }finally {
+            client.getConnectionManager().shutdown();// 关闭连接
+        }
+        return result;
+    }
+    
+    
+    public static String doJsonPost(String url) {
+        HttpClient client = null;
+        String result = "";
+        try {
+            if (url.startsWith("https")) {
+                client = new DefaultHttpClient();
+                client = WebClientDevWrapper.wrapClient(client);
+            } else {
+                client = HttpClients.createDefault();
+            }
+            HttpPost httpPost = new HttpPost(url);
+            StringEntity entity = new StringEntity(
+                    "application/json", "utf-8");// 指定请求头
+            httpPost.setEntity(entity);
+            httpPost.setHeader("Accept", "application/json");
+            httpPost.setHeader("Accept-Charset", "utf-8");
+            HttpResponse res = client.execute(httpPost);// 发送请求
+            if (res.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+				result = EntityUtils.toString(res.getEntity(),"UTF-8");
+                log.info("接口请求返回结果:"+result);
+            }
+
+        } catch (Exception e) {
+            log.info("doJsonPost请求异常");
+            e.printStackTrace();
+        }finally {
+            client.getConnectionManager().shutdown();// 关闭连接
+        }
+        return result;
+    }
 
     /**
      * 发起post请求
