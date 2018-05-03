@@ -52,7 +52,7 @@ import com.tempus.gss.util.JsonUtil;
 
 import httl.spi.codecs.json.JSON;
 
-@Service(version= "1.1")
+@Service
 public class BQYHotelServiceImpl implements IBQYHotelInterService {
 
 	@Value("${bqy.agentId}")
