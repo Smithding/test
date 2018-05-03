@@ -17,7 +17,7 @@ import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelInfo;
 import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
 
-@Service(version="ljt")
+@Service
 public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 	
 	@Autowired
