@@ -123,4 +123,6 @@ public interface IChangeService {
 	 * @return
 	 */
 	int orderChangeInform(OrderInformVo orderInformVo);
+
+	int updateByPrimarykey(SaleChangeExt salechangeExt);
 }

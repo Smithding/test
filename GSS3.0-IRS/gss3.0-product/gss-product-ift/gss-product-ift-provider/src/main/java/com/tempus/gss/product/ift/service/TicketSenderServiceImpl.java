@@ -11,6 +11,7 @@ import com.tempus.gss.product.ift.api.entity.vo.TicketSenderVo;
 import com.tempus.gss.product.ift.api.service.IChangeService;
 import com.tempus.gss.product.ift.api.service.ITicketSenderService;
 import com.tempus.gss.product.ift.dao.SaleChangeExtDao;
+import com.tempus.gss.product.ift.dao.SaleOrderExtDao;
 import com.tempus.gss.product.ift.dao.TicketSenderDao;
 import com.tempus.gss.system.entity.User;
 import com.tempus.gss.system.service.IUserService;
@@ -37,6 +38,8 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
     IUserService userService;
     @Autowired
     SaleChangeExtDao saleChangeExtDao;
+    @Autowired
+    SaleOrderExtDao saleOrderExtDao;
     @Override
     public void decreaseBySaleChangeExt(Agent agent, SaleChangeExt salechangeExt, int type) {
 
@@ -70,31 +73,69 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
     }
 
     @Override
-    public void increaseByLockerId(Agent agent,Long lockerId, int type) {
+    public void updateByLockerId(Agent agent, Long lockerId, String type) {
 
-        log.info("增加lockerID："+lockerId+" 出票员 第"+type+"的num值开始");
+        log.info("更新lockerID："+lockerId+" 出票员"+type+"值更新开始");
         if(lockerId == null || lockerId.equals(0l)){
-            log.info("无此lockerID："+lockerId+" 出票员num增加结束");
+            log.info("无此lockerID："+lockerId+" 出票员"+type+"值更新结束");
             return ;
         }
         User user = userService.selectById(agent,lockerId);
         if(user != null){
             TicketSender sender = getTicketSenderByLoginId(user.getLoginName());
             if(sender != null){
-                if(type == 1){
-                    sender.setBuyChangeNum(sender.getBuyChangeNum() + 1);
-                } else if(type == 2){
-                    sender.setSaleChangeNum(sender.getSaleChangeNum() + 1);
-                } else if(type == 3){
-                    sender.setBuyRefuseNum(sender.getBuyRefuseNum() + 1);
-                } else if(type == 4){
-                    sender.setSaleRefuseNum(sender.getSaleRefuseNum() + 1);
+                if("BUY_CHANGE_NUM".equals(type)){
+                    //采购改签数量
+                    int count = saleChangeExtDao.queryChangeCountBylocker(null, lockerId);
+                    sender.setBuyChangeNum(count);
+                } else if("SALE_CHANGE_NUM".equals(type)){
+                    //销售改签数量
+                    int count = saleChangeExtDao.querySaleChangeCountBylocker(null, lockerId);
+                    sender.setSaleChangeNum(count);
+                } else if("BUY_REFUSE_NUM".equals(type) || "BUY_DELETE_NUM".equals(type)){
+                    //采购废票和退票数量
+                    int count = saleChangeExtDao.queryBuyRefundAndDelCountBylocker(null, lockerId);
+                    sender.setBuyRefuseNum(count);
+                } else if("SALE_REFUSE_NUM".equals(type) || "SALE_DELTE_NUM".equals(type)){
+                    //销售退票和销售废票数量
+                    int count = saleChangeExtDao.querySaleRefundAndDelCountBylocker(null, lockerId);
+                    sender.setSaleRefuseNum(count);
+                } else if("SALE_ORDER_NUM".equals(type)){
+                    //核价单
+                    int count = saleOrderExtDao.querySaleCountByLocker(lockerId);
+                    sender.setSaleOrderNum(count);
+                } else if("ORDERCOUNT".equals(type)){
+                    //出票单
+                    int count = saleOrderExtDao.queryBuyCountByLocker(lockerId);
+                    sender.setOrdercount(count + 0l);
                 }
                 sender.setIds(sender.getId() + "");
                 update(sender);
             }
         }
-        log.info("增加lockerID："+lockerId+" 出票员 第"+type+"的num值结束");
+        log.info("更新lockerID："+lockerId+" 出票员"+type+"值更新结束");
+    }
+
+    /**
+     * @param type   1代表BUY_CHANGE_NUM    2代表SALE_CHANGE_NUM    3代表BUY_REFUSE_NUM
+     *               4代表SALE_REFUSE_NUM    5代表SALE_ORDER_NUM    6代表ORDERCOUNT
+     */
+    private String getTypeString(int type) {
+        if(type == 1){
+            return "BUY_CHANGE_NUM";
+        } else if(type == 2){
+            return "SALE_CHANGE_NUM";
+        } else if(type == 3){
+            return "BUY_REFUSE_NUM";
+        } else if(type == 4){
+            return "SALE_REFUSE_NUM";
+        } else if(type == 5){
+            return "SALE_ORDER_NUM";
+        } else if(type == 6){
+            return "ORDERCOUNT";
+        } else{
+            return "";
+        }
     }
 
     @Override

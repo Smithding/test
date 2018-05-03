@@ -451,19 +451,23 @@ public class RefundServiceImpl implements IRefundService {
 
 			Long saleChangeNo = requestWithActor.getEntity().longValue();
 			SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(saleChangeNo);
-			//锁定前先判断是否有locker
-			if(saleChangeExt.getLocker() != 0l){
-				//对应locker出票员的num-1
-				iTicketSenderService.decreaseBySaleChangeExt(requestWithActor.getAgent(),saleChangeExt,4);
-			}
+			long originLocker = saleChangeExt.getLocker();
+
 
 			saleChangeExt.setLocker(requestWithActor.getAgent().getId());
 			// 锁起状态为Id
 			//saleChangeExt.setLocker(1L);
 			saleChangeExt.setLockTime(new Date());
 			int updateFlag = saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
+
+			//锁定前先判断是否有locker
+			if(originLocker != 0l){
+				//对应locker出票员的num-1
+				iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),originLocker,"SALE_REFUSE_NUM");
+			}
 			if (updateFlag == 1) {
 				flag = true;
+				iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),requestWithActor.getAgent().getId(),"SALE_REFUSE_NUM");
 			}
 			/*创建操作日志*/
 			try {
@@ -500,10 +504,11 @@ public class RefundServiceImpl implements IRefundService {
 			}
 			Long saleChangeNo = requestWithActor.getEntity().longValue();
 			SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(saleChangeNo);
-			//对应出票员num-1
-			iTicketSenderService.decreaseBySaleChangeExt(requestWithActor.getAgent(),saleChangeExt,4);
+			long locker = saleChangeExt.getLocker();
 			saleChangeExt.setLocker(0L);
 			saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
+			//对应出票员num-1
+			iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),locker,"SALE_REFUSE_NUM");
 			/*创建操作日志*/
 			try {
 				LogRecord logRecord = new LogRecord();
