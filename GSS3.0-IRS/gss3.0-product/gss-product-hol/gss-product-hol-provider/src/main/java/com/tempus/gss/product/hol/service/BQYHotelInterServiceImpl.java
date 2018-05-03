@@ -2,13 +2,10 @@ package com.tempus.gss.product.hol.service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
@@ -49,8 +46,6 @@ import com.tempus.gss.product.hol.api.util.DocumentUtil;
 import com.tempus.gss.product.hol.thread.CityDetailTask;
 import com.tempus.gss.product.hol.thread.HotelInfoTask;
 import com.tempus.gss.util.JsonUtil;
-
-import httl.spi.codecs.json.JSON;
 
 @Service
 public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
