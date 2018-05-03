@@ -19,7 +19,7 @@ import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelInfo;
 import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
 
-@org.springframework.stereotype.Service("bqyHotelSupplierService")
+@Service
 public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 	
 	@Autowired
