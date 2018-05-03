@@ -190,6 +190,18 @@ public class SaleChangeExtVo implements Serializable{
 	//审核人
 	private String modifier;
 
+	public String getHandlers() {
+		return handlers;
+	}
+
+	public void setHandlers(String handlers) {
+		this.handlers = handlers;
+	}
+
+	//操作人
+	private  String handlers;
+
+
 
 	/**
 	 * 原航班信息

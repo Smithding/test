@@ -59,13 +59,13 @@ public interface IRefundService {
 
 	/*
 	*
-	* 锁住废退单
+	* 锁住销售废退单
 	* */
 	boolean lockRefund(RequestWithActor<Long> requestWithActor);
 
 	/*
 	*
-	* 解锁废退单
+	* 解锁销售废退单
 	* */
 	boolean unLock(RequestWithActor<Long> requestWithActor);
 

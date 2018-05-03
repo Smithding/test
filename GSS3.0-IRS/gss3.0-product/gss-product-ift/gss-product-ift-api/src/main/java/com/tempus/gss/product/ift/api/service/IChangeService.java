@@ -104,9 +104,10 @@ public interface IChangeService {
 	/**
 	 * 锁住订单
 	 * @param saleChange
+	 * @param type buy为采购   sale为销售
 	 * @return
 	 */
-	boolean locker(RequestWithActor<SaleChangeExtVo> saleChange);
+	boolean locker(RequestWithActor<SaleChangeExtVo> saleChange,String type);
 	
 	/**
 	 * 当客商编号不一致的时候创建采购单
@@ -122,4 +123,6 @@ public interface IChangeService {
 	 * @return
 	 */
 	int orderChangeInform(OrderInformVo orderInformVo);
+
+	int updateByPrimarykey(SaleChangeExt salechangeExt);
 }

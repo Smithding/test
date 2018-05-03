@@ -87,13 +87,13 @@ import com.tempus.gss.system.service.IParamService;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 import com.tempus.tbe.entity.PnrOutPut;
+import com.tempus.gss.product.ift.dao.setting.ConfigsDao;
 
 @Service
 @org.springframework.stereotype.Service("iftOrderService")
 @EnableAutoConfiguration
 public class OrderServiceImpl implements IOrderService {
-
-
+    
     protected final transient Logger log = LoggerFactory.getLogger(getClass());
     @Autowired
     SaleOrderExtDao saleOrderExtDao;
@@ -105,85 +105,85 @@ public class OrderServiceImpl implements IOrderService {
     SaleOrderDetailDao saleOrderDetailDao;
     @Reference
     IGetPnrService getPnrService;
-
+    
     /* 销售单 */
     @Reference
     ISaleOrderService saleOrderService;
-
+    
     /* 应收应付 */
     @Reference
     IPlanAmountRecordService planAmountRecordService;
-
+    
     /* 采购单 */
     @Reference
     IBuyOrderService buyOrderService;
-
+    
     @Autowired
     PnrDao pnrDao;
-
+    
     @Autowired
     BuyOrderExtDao buyOrderExtDao;
-
+    
     @Autowired
     BuyOrderDetailDao buyOrderDetailDao;
-
+    
     @Reference
     IMaxNoService maxNoService;
-
+    
     @Reference
     ISupplierService supplierService;
-
+    
     @Reference
     ICertificateService certificateService;
-
+    
     @Reference
     ILogService logService;
-
+    
     @Reference
     private IAccountService accountService;
-
+    
     @Reference
     private IPayRestService payRestService;
-
+    
     @Reference
     private ICustomerTypeService customerTypeService;
-
+    
     @Reference
     IMssReserveService mssReserveService;
-
+    
     @Reference
     ICustomerService customerService;
-
+    
     @Reference
     private IOrderService orderService;
-
+    
     @Reference
     private IPassengerService passengerService;
-
+    
     @Reference
     private ITicketSenderService iTicketSenderService;
-
+    
     @Reference
     private ITransationOrderService transationOrderService;
-
+    
     @Reference
     private IWarnOrderService warnOrderService;
-
+    
     @Reference
     protected IPlanAmountRecordService needPayService;
-
+    
     @Autowired
     IftPlaneTicketService planeTicketService;
-
+    
     @Reference
     IParamService paramService;
-
+    
     @Autowired
     GssMainDao gssMainDao;
-
+    
     @Autowired
     AdjustOrderDao adjustOrderDao;
-
+    
     @Autowired
     IftTicketMqSender iftTicketMqSender;
     @Reference
@@ -196,9 +196,126 @@ public class OrderServiceImpl implements IOrderService {
     IConfigsService configsService;
     @Reference
     IUserService userService;
+    @Autowired
+    SaleChangeExtDao saleChangeExtDao;
+    @Reference
+    protected ITicketSenderService ticketSenderService;
+    @Autowired
+    IftMessageServiceImpl iftMessageServiceImpl;
+    
     @Value("${dpsconfig.job.owner}")
     protected String owner;
-
+    
+    /**
+     * 采购退票分单任务
+     */
+    @Override
+    public void assignBuyRefund() {
+        
+        log.info("第一步：查询符合条件的订单...");
+        List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryRefundBylocker(owner, 0l);
+        if (saleChangeExts != null && saleChangeExts.size() > 0) {
+            log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
+        } else {
+            log.info("未查询到可以分配的出票订单,结束此次任务...");
+            return;
+        }
+        log.info("第二步：查询在线出票员...");
+        List<TicketSender> senders = getOnlineTicketSender();
+        log.info("是否有在线出票员:" + (senders != null));
+        if (senders != null && senders.size() > 0) {
+            Agent agent = new Agent(Integer.valueOf(owner));
+            IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
+            Map config = configs.getConfig();
+            String str_maxOrderNum = (String) config.get("maxOrderNum");
+            log.info("有在线出票员人数:" + (senders.size()) + "获得配置最大分单数：" + str_maxOrderNum);
+            Long maxOrderNum = Long.valueOf(str_maxOrderNum);
+            Date updateTime = new Date();
+            log.info("第三步：判断出票员手头出票订单数量...");
+            for (SaleChangeExt order : saleChangeExts) {
+                for (TicketSender peopleInfo : senders) {
+                    log.info(peopleInfo.getName() + "未处理采购退票单数量：" + peopleInfo.getBuyRefuseNum());
+                    if (peopleInfo.getBuyRefuseNum() >= maxOrderNum) {
+                        continue;
+                    } else {
+                        log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
+                        /***修改订单明细表*/
+                        //updateSaleOrderDetail(order, peopleInfo, updateTime);
+                        /**锁单*/
+                        log.info("2.锁单,锁单人是被分配人...");
+                        assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
+                        /***增加出票人订单数*/
+                        log.info("3.增加出票人的未处理采购退票单数量...");
+                        increaseBuyRefuseNum(agent, peopleInfo);
+                        /***发送消息至消息队列 通知出票员*/
+                        //sendInfo(peopleInfo.getUserid(), order.getSaleOrderNo(),String.valueOf(order.getSaleOrder().getOrderStatus()));
+                        //log.info("4.发信息通知出票员出票,订单" + order.getSaleChangeNo() + "将分给出票员结束");
+                        break;
+                    }
+                }
+            }
+            log.info("此次分单结束...");
+        } else {
+            log.info("未查询在线出票员...");
+        }
+        
+    }
+    
+    /**
+     * 采购改签订单分单
+     */
+    @Override
+    public void assignChange() {
+        
+        log.info("第一步：查询符合条件的订单...");
+        List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryChangeBylocker(owner, 0l);
+        if (saleChangeExts != null && saleChangeExts.size() > 0) {
+            log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
+        } else {
+            log.info("未查询到可以分配的出票订单,结束此次任务...");
+            return;
+        }
+        log.info("第二步：查询在线出票员...");
+        List<TicketSender> senders = getOnlineTicketSender();
+        log.info("是否有在线出票员:" + (senders != null));
+        if (senders != null && senders.size() > 0) {
+            Agent agent = new Agent(Integer.valueOf(owner));
+            IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
+            Map config = configs.getConfig();
+            String str_maxOrderNum = (String) config.get("maxOrderNum");
+            log.info("有在线出票员人数:" + (senders.size()) + "获得配置最大分单数：" + str_maxOrderNum);
+            Long maxOrderNum = Long.valueOf(str_maxOrderNum);
+            Date updateTime = new Date();
+            log.info("第三步：判断出票员手头出票订单数量...");
+            for (SaleChangeExt order : saleChangeExts) {
+                for (TicketSender peopleInfo : senders) {
+                    log.info(peopleInfo.getName() + "未处理采购改签单数量：" + peopleInfo.getBuyChangeNum());
+                    if (peopleInfo.getBuyChangeNum() >= maxOrderNum) {
+                        continue;
+                    } else {
+                        log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
+                        /***修改订单明细表*/
+                        //updateSaleOrderDetail(order, peopleInfo, updateTime);
+                        /**锁单*/
+                        log.info("2.锁单,锁单人是被分配人...");
+                        assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
+                        /***增加出票人订单数*/
+                        log.info("3.增加出票人的未处理采购改签单数量...");
+                        increaseBuyChangeNum(agent, peopleInfo);
+                        /***发送消息至消息队列 通知出票员*/
+                        //sendInfo(peopleInfo.getUserid(), order.getSaleOrderNo(),String.valueOf(order.getSaleOrder().getOrderStatus()));
+                        //log.info("4.发信息通知出票员出票,订单" + order.getSaleChangeNo() + "将分给出票员结束");
+                        break;
+                    }
+                }
+            }
+            log.info("此次分单结束...");
+        } else {
+            log.info("未查询在线出票员...");
+        }
+        
+    }
+    
     /**
      * 创建订单. 通过白屏查询、Pnr、需求单、手工方式创建订单.
      *
@@ -208,19 +325,19 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     @Transactional
     public SaleOrderExt createOrder(RequestWithActor<OrderCreateVo> requestWithActor) throws Exception {
-
+        
         //log.info("创建订单开始========"+JsonUtil.toJson(requestWithActor));
-
+        
         /* 校验登录用户 */
         if (requestWithActor.getAgent() == null) {
             throw new GSSException("登录用户为空", "0101", "创建订单失败");
         }
-
+        
         /* 校验条件 */
         if (requestWithActor.getEntity() == null) {
             throw new GSSException("销售单为空", "0101", "创建订单失败");
         }
-
+        
         /* 校验销售单条件 */
         SaleOrderExt saleOrderExt = requestWithActor.getEntity().getSaleOrderExt();
         //System.out.println(JsonUtil.toJson(saleOrderExt));
@@ -245,6 +362,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         Long saleOrderNo = maxNoService.generateBizNo("IFT_SALE_ORDER_NO", 37);
         Long businessSignNo = IdWorker.getId();
+        List<Passenger> passengers =saleOrderExt.getPassengerList();
         try {
             Agent agent = requestWithActor.getAgent();
             Date today = new Date();
@@ -268,10 +386,10 @@ public class OrderServiceImpl implements IOrderService {
                 if (i == requestWithActor.getEntity().getSaleOrderExt().getLegList().size() - 1) {
                     goodsName.append(leg.getArrAirport());
                 }
-
+                
             }
             /* 增加旅客信息 */
-            for (Passenger passenger : requestWithActor.getEntity().getSaleOrderExt().getPassengerList()) {
+            for (Passenger passenger : passengers) {
                 if ("1".equals(passenger.getPassengerType())) {
                     passenger.setPassengerType("ADT");
                 }
@@ -296,7 +414,7 @@ public class OrderServiceImpl implements IOrderService {
                 passenger.setValid((byte) 1);
                 passengerDao.insertSelective(passenger);
             }
-
+            
             /* 创建采购单 */
             Long buyOrderNo = maxNoService.generateBizNo("IFT_BUY_ORDER_NO", 24);
             BuyOrderExt buyOrderExt = requestWithActor.getEntity().getBuyOrderExt();
@@ -313,7 +431,7 @@ public class OrderServiceImpl implements IOrderService {
             //见com.tempus.gss.order.entity.EgoodsSubType（OS）
             buyOrderExt.getBuyOrder().setGoodsSubType(2);// 采购单设为2
             buyOrderExt.getBuyOrder().setGoodsName(goodsName.toString());
-
+            
             if (buyOrderExt.getBuyOrder().getSupplierNo() == null || buyOrderExt.getBuyOrder().getSupplierNo() == 0 || buyOrderExt.getBuyOrder().getSupplierTypeNo() == null || buyOrderExt.getBuyOrder().getSupplierTypeNo() == 0) {
                 /* 查询客商编号，默认第一个数据 */
                 Supplier supplier = new Supplier();
@@ -326,12 +444,12 @@ public class OrderServiceImpl implements IOrderService {
                 buyOrderExt.getBuyOrder().setSupplierNo(supplierList.get(0).getSupplierNo());
                 buyOrderExt.getBuyOrder().setSupplierTypeNo(supplierList.get(0).getCustomerTypeNo());
             }
-
+            
             buyOrderExt.getBuyOrder().setBuyChannelNo(agent.getDevice());
             buyOrderExt.getBuyOrder().setBusinessSignNo(businessSignNo);// 业务批次号
             buyOrderExt.getBuyOrder().setBsignType(1);// 1销采 2换票 3废和退 4改签
             buyOrderExt.getBuyOrder().setBuyChildStatus(1);// 未审核
-
+            
             /* 创建采购单的pnr信息 */
             Pnr pnr = saleOrderExt.getImportPnr();
             if (pnr != null) {
@@ -349,10 +467,10 @@ public class OrderServiceImpl implements IOrderService {
                 pnr.setPnrType(1);// 1：ETERM
                 pnr.setSourceNo(saleOrderNo);
                 pnr.setValid((byte) 1);
-                log.info("pnr表保存信息:"+pnr.toString());
+                log.info("pnr表保存信息:" + pnr.toString());
                 pnrDao.insertSelective(pnr);
             }
-
+            
             /* 创建主订单 */
             SaleOrder saleOrder = saleOrderExt.getSaleOrder();
             if (saleOrder == null) {
@@ -379,13 +497,13 @@ public class OrderServiceImpl implements IOrderService {
             // 4.已出票
             // 5.已取消
             saleOrderService.create(requestWithActor.getAgent(), saleOrder);
-
+            
             buyOrderService.create(requestWithActor.getAgent(), buyOrderExt.getBuyOrder());
-
+            
             /* 封装人+航段对象 */
             List<SaleOrderDetail> saleOrderDetailList = new ArrayList<>();
             for (Leg leg : saleOrderExt.getLegList()) {
-                for (Passenger passenger : saleOrderExt.getPassengerList()) {
+                for (Passenger passenger : passengers) {
                     SaleOrderDetail saleOrderDetail = new SaleOrderDetail();
                     saleOrderDetail.setSaleOrderDetailNo(maxNoService.generateBizNo("IFT_SALE_ORDER_DETAIL_NO", 36));
                     /* 设置航程 */
@@ -407,7 +525,7 @@ public class OrderServiceImpl implements IOrderService {
                     saleOrderDetailList.add(saleOrderDetail);
                 }
             }
-
+            
             /* 采购单明细 */
             for (SaleOrderDetail saleOrderDetail : saleOrderDetailList) {
                 BuyOrderDetail buyOrderDetail = new BuyOrderDetail();
@@ -420,7 +538,7 @@ public class OrderServiceImpl implements IOrderService {
                 buyOrderDetail.setValid((byte) 1);
                 buyOrderDetailDao.insertSelective(buyOrderDetail);
             }
-
+            
             /* 创建销售拓展单 */
             saleOrderExt.setSaleOrderNo(saleOrderNo);
             if (pnr != null && pnr.getPnrNo() != null) {
@@ -432,7 +550,7 @@ public class OrderServiceImpl implements IOrderService {
             saleOrderExt.setValid((byte) 1);
             saleOrderExt.setLocker(0L);// 解锁状态
             saleOrderExtDao.insertSelective(saleOrderExt);
-
+            
             /* 创建采购单 */
             buyOrderExt.setBuyOrderNo(buyOrderNo);
             buyOrderExt.setOwner(agent.getOwner());
@@ -442,7 +560,7 @@ public class OrderServiceImpl implements IOrderService {
             buyOrderExtDao.insertSelective(buyOrderExt);
             log.info("创建国际订单成功=====saleOrderNo=" + saleOrderNo);
             String logstr = "<p>" + String.format("创建国际订单成功=====", new Date()) + ":saleOrderNo=" + JsonUtil.toJson(saleOrderNo);
-
+            
             /* 创建操作日志 */
             try {
                 LogRecord logRecord = new LogRecord();
@@ -461,20 +579,19 @@ public class OrderServiceImpl implements IOrderService {
             } catch (Exception e) {
                 log.error("添加操作日志异常===" + e);
             }
-
+            
         } catch (GSSException ex) {
             log.error("创建订单失败", ex);
             throw ex;
         } catch (Exception e) {
             log.error("创建订单失败", e);
-            e.printStackTrace();
             throw new GSSException("创建订单异常," + e.getMessage(), "0101", "创建订单失败");
         }
-
+        
         log.info("创建订单结束========");
         return saleOrderExt;
     }
-
+    
     /**
      * 根据订单编号查询订单.
      *
@@ -483,7 +600,7 @@ public class OrderServiceImpl implements IOrderService {
      */
     @Override
     public SaleOrderExt getOrder(RequestWithActor<Long> orderNo) {
-
+        
         log.info("订单查询开始======orderNo=" + orderNo);
         SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(orderNo.getEntity().longValue());
         if (saleOrderExt == null) {
@@ -497,7 +614,7 @@ public class OrderServiceImpl implements IOrderService {
         log.info("订单查询结束======");
         return saleOrderExt;
     }
-
+    
     /**
      * @param saleOrderExt
      * @return
@@ -505,7 +622,7 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     @Transactional
     public int updateSaleOrderExt(RequestWithActor<SaleOrderExt> saleOrderExt) {
-
+        
         int flag = saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt.getEntity());
         if (flag == 0) {
             throw new GSSException("修改订单模块", "0301", "修改订单失败");
@@ -527,7 +644,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         return flag;
     }
-
+    
     /**
      * @param saleOrderExt
      * @return
@@ -535,11 +652,11 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     @Transactional
     public int auditOrder(RequestWithActor<SaleOrderExt> saleOrderExt, Long supplierNo, String airLine, String ticketType) {
-
+        
         Agent agent = saleOrderExt.getAgent();
         SaleOrderExt orderExt = saleOrderExt.getEntity();
         int flag = saleOrderExtDao.updateByPrimaryKeySelective(orderExt);
-
+        
         try {
             if (orderExt != null) {
                 // 修改buyOrderExt信息
@@ -554,13 +671,13 @@ public class OrderServiceImpl implements IOrderService {
                     buyOrderExt.setModifyTime(new Date());
                     buyOrderExt.setModifier(agent.getAccount());
                     buyOrderExtDao.updateByPrimaryKeySelective(buyOrderExt);
-
+                    
                     // 修改buyOrder的supplierNo信息
                     BuyOrder buyOrder = buyOrderService.getBOrderByBONo(agent, buyOrderExt.getBuyOrderNo());
                     buyOrder.setSupplierNo(supplierNo);
                     buyOrderService.update(agent, buyOrder);
                 }
-
+                
             }
             /* 创建操作日志 */
             try {
@@ -583,7 +700,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         return flag;
     }
-
+    
     /**
      * 查询订单. 为运营平台订单管理提供服务.(预定)
      *
@@ -592,7 +709,6 @@ public class OrderServiceImpl implements IOrderService {
      */
     @Override
     public Page<SaleOrderExt> queryFromSale(Page<SaleOrderExt> page, RequestWithActor<SaleQueryOrderVo> saleOrderQueryRequest) {
-        log.info("订单查询开始");
         log.info("订单查询参数" + JSON.toJSONString(saleOrderQueryRequest));
         try {
             if (saleOrderQueryRequest.getAgent() == null && saleOrderQueryRequest.getAgent().getOwner() == 0) {
@@ -603,7 +719,7 @@ public class OrderServiceImpl implements IOrderService {
             if (saleOrderQueryRequest.getAgent().getNum() != null) {
                 saleOrderQueryRequest.getEntity().setCustomerNo(saleOrderQueryRequest.getAgent().getNum().toString());
             }
-
+            
             long startTime = System.currentTimeMillis();
             log.info("查询订单接口开始=====");
             Boolean isNeedCustomer = saleOrderQueryRequest.getEntity().getCustomerCount();
@@ -619,21 +735,21 @@ public class OrderServiceImpl implements IOrderService {
                 saleOrderQueryRequest.getEntity().setLongList(longList);
             }
             saleOrderExtList = saleOrderExtDao.queryFromSaleQueryOrderVo(page, saleOrderQueryRequest.getEntity());
-
+            
             long endTime = System.currentTimeMillis();
             log.info("查询订单接口结束=====" + (endTime - startTime));
-            List<SaleOrderExt> tempList = new ArrayList<>();
+          /*  List<SaleOrderExt> tempList = new ArrayList<>();
             if (null != saleOrderExtList) {
                 for (SaleOrderExt order : saleOrderExtList) {
                     SaleOrder saleOrder = saleOrderService.getSOrderByNo(saleOrderQueryRequest.getAgent(), order.getSaleOrderNo());
                     order.setSaleOrder(saleOrder);
                     tempList.add(order);
                 }
-            }
+            }*/
             long objectTime = System.currentTimeMillis();
             log.info("封装订单接口结束=====" + (objectTime - endTime));
-            page.setRecords(tempList);
-
+            page.setRecords(saleOrderExtList);
+            
             log.info("查询订单模块（为运营平台订单管理提供服务）结束");
         } catch (Exception e) {
             log.error("查询订单异常", e);
@@ -641,7 +757,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         return page;
     }
-
+    
     /**
      * 根据业务情况接收出票消息，修改采购单状态为待出票
      *
@@ -660,7 +776,7 @@ public class OrderServiceImpl implements IOrderService {
             log.error("saleOrderNo为空");
             throw new GSSException("saleOrderNo为空", "1002", "修改采购单状态失败");
         }
-
+        
         try {
             log.info("receiveTicket->" + JSON.toJSONString(requestWithActor));
             SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleOrderNo);
@@ -673,14 +789,14 @@ public class OrderServiceImpl implements IOrderService {
                     }
                 }
             }
-
+            
         } catch (Exception e) {
             log.error("修改采购单状态异常");
             throw new GSSException("修改采购单状态异常", "1003", "修改采购单状态失败");
         }
         return true;
     }
-
+    
     /**
      * 生成应收和应付的记录.
      *
@@ -690,7 +806,7 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     @Transactional
     public boolean confirmPrice(RequestWithActor<List<Passenger>> passengerList) {
-
+        
         log.info("订单核价开始");
         boolean flag = false;
         try {
@@ -713,13 +829,13 @@ public class OrderServiceImpl implements IOrderService {
                     serviceTotal = serviceTotal.add(passenger.getServiceCharge());
                 }
             }
-
+            
             // 根据订单编号查询订单
             SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(passengerList.getEntity().get(0).getSaleOrderNo());
-
+            
             List<BuyOrderExt> buyOrderExtList = buyOrderExtDao.selectBuyOrderBySaleOrderNo(passengerList.getEntity().get(0).getSaleOrderNo());
             if (serviceTotal.signum() > 0) {
-
+            
             }
             if (!serviceTotal.equals(BigDecimal.ZERO)) {
                 // 创建服务费应收
@@ -767,7 +883,7 @@ public class OrderServiceImpl implements IOrderService {
             log.info("订单核价，更新saleOrderExt信息" + saleOrderExt.toString());
             saleOrderExtDao.updateByPrimaryKey(saleOrderExt);
             if (saleOrderExt != null) {
-                SaleOrderDetail detail =new SaleOrderDetail();
+                SaleOrderDetail detail = new SaleOrderDetail();
                 detail.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
                 detail.setStatus("2");//设置已核价
                 saleOrderDetailDao.updateByOrderNo(detail);
@@ -777,11 +893,11 @@ public class OrderServiceImpl implements IOrderService {
             log.error("订单核价失败", e);
             throw new GSSException("核价修改失败", "0603", "核价修改失败");
         }
-
+        
         return flag;
-
+        
     }
-
+    
     /**
      * 取消订单.
      *
@@ -792,7 +908,7 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     @Transactional
     public boolean cancelOrder(RequestWithActor<Long> requestWithActor) {
-
+        
         boolean flag = true;
         Agent agent = requestWithActor.getAgent();
         Long saleOrderNo = requestWithActor.getEntity();
@@ -803,7 +919,7 @@ public class OrderServiceImpl implements IOrderService {
                 throw new GSSException("saleOrderNo入参为空==", "1001", "取消订单失败");
             }
             saleOrderService.updateStatus(agent, requestWithActor.getEntity(), 5);// 改为已取消状态
-
+            
             /* 创建操作日志 */
             try {
                 LogRecord logRecord = new LogRecord();
@@ -826,7 +942,7 @@ public class OrderServiceImpl implements IOrderService {
         log.info("取消订单结束");
         return flag;
     }
-
+    
     /**
      * 修改采购价.
      *
@@ -837,7 +953,7 @@ public class OrderServiceImpl implements IOrderService {
     // @Override
     @Transactional
     public boolean editBuyPrice(RequestWithActor<List<Passenger>> passengerList) {
-
+        
         log.info("订单核价开始");
         boolean flag = false;
         try {
@@ -877,7 +993,7 @@ public class OrderServiceImpl implements IOrderService {
             // 商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
             CreatePlanAmountVOType.setGoodsType(saleOrderExt.getSaleOrder().getGoodsType());
             planAmountRecordService.create(passengerList.getAgent(), CreatePlanAmountVOType);
-
+            
             // 创建应付记录
             // planAmountRecordType1.setRecordNo(maxNoService.generateBizNo("OS_PLANAMOUNTRECORD",
             // 80));//记录编号 自动生成
@@ -889,10 +1005,10 @@ public class OrderServiceImpl implements IOrderService {
             log.error("订单核价失败", e);
             throw new GSSException("核价修改失败", "0803", "核价修改失败");
         }
-
+        
         return flag;
     }
-
+    
     /**
      * 确认出单 更改os_sale_order的订单状态 填写sale_order_detail的票号
      *
@@ -901,7 +1017,7 @@ public class OrderServiceImpl implements IOrderService {
      */
     @Transactional(rollbackFor = Exception.class)
     public boolean issuing(RequestWithActor<PassengerListVo> requestWithActor) {
-
+        
         Agent agent = requestWithActor.getAgent();
         log.info("出单开始");
         if (agent == null) {
@@ -922,13 +1038,14 @@ public class OrderServiceImpl implements IOrderService {
                 pnr.setBigPnr(listVo.getBigPnr());
                 pnrDao.updateByPrimaryKey(pnr);
             } else {
-                pnrNo = savePnr(pnrNo,listVo,saleOrderNo,agent,date);
+                pnrNo = savePnr(pnrNo, listVo, saleOrderNo, agent, date);
             }
             if (pnrNo != null) {
                 saleOrderExt.setPnrNo(pnrNo);
             }
+            saleOrderExt.setDrawerLoginName(agent.getAccount());
             saleOrderExt.setIssueTime(date);
-
+            
             List<SaleOrderDetail> detailList = saleOrderDetailDao.selectBySaleOrderNo(saleOrderNo);
             BigDecimal payable = new BigDecimal(0);
             for (PassengerVo pgerVo : listVo.getpVoList()) {
@@ -968,34 +1085,35 @@ public class OrderServiceImpl implements IOrderService {
             }
             //设置采购币种
             saleOrderExt.setCurrency(listVo.getpVoList().get(0).getCurrency());
+            saleOrderExt.setLocker(0L);
             // 修改采购单信息
-            updateBuyOrder(agent,saleOrderNo,payable,listVo,ticketNoArray.toString());
+            updateBuyOrder(agent, saleOrderNo, payable, listVo, ticketNoArray.toString());
             // 更改主订单状态
             saleOrderService.updateStatus(agent, saleOrderNo, 4);// 将状态改为已出票
             saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
-            String logstr="";
-            SaleOrder saleOrder =  saleOrderExt.getSaleOrder();
+            String logstr = "";
+            SaleOrder saleOrder = saleOrderExt.getSaleOrder();
             Long transationOrderNo = null;
             if (null != saleOrder) {
                 transationOrderNo = saleOrder.getTransationOrderNo();
                 //
-                ApiCallBack(saleOrder,agent,logstr,date);
+                ApiCallBack(saleOrder, agent, logstr, date);
             }
             // 配送管理出票队列
-            sendTicketInfoByMq(agent,transationOrderNo);
+            sendTicketInfoByMq(agent, transationOrderNo);
             /* 创建操作日志 */
-            saveLog(agent,saleOrderNo,logstr,transationOrderNo);
+            saveLog(agent, saleOrderNo, logstr, transationOrderNo);
             log.info("出单操作成功");
             //销售员订单数量减一
             subSaleOrderNum(agent);
         } catch (Exception e) {
-            log.error("国际机票出票异常",e);
+            log.error("国际机票出票异常", e);
             throw new GSSException("国际机票出票异常", "0102", "出单操作失败!" + e);
         }
         log.info("出单结束");
         return true;
     }
-
+    
     /**
      * 创建采购付款单
      *
@@ -1023,7 +1141,7 @@ public class OrderServiceImpl implements IOrderService {
      *         第三方业务编号 多个以","隔开
      */
     public void createBuyCertificate(Agent agent, long buyOrderNo, double payAmount, long payAccount, long customerNo, long customerTypeNo, int payType, int payWay, String channel, String thirdBusNo, String thirdPayNo) {
-
+        
         CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
         certificateCreateVO.setAccoutNo(payAccount + ""); // 支付账号
         certificateCreateVO.setChannel(channel); // 渠道 未知
@@ -1047,16 +1165,15 @@ public class OrderServiceImpl implements IOrderService {
         businessOrderInfo.setRecordNo(buyOrderNo);
         orderInfoList.add(businessOrderInfo);
         certificateCreateVO.setOrderInfoList(orderInfoList);
-
+        
         try {
             this.certificateService.createBuyCertificate(agent, certificateCreateVO);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new GSSException("创建采购付款单失败，e=" + e, "10001", "创建采购付款单失败");
         }
-
+        
     }
-
+    
     /**
      * 拒单.
      *
@@ -1067,7 +1184,7 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     @Transactional
     public boolean refuse(RequestWithActor<OrderRefuseRequest> refuseRequest) {
-
+        
         log.info("拒单开始");
         if (refuseRequest.getAgent() == null) {
             log.error("当前用户为空");
@@ -1093,7 +1210,7 @@ public class OrderServiceImpl implements IOrderService {
         saleOrderExt.setSaleOrderNo(saleOrderNo);
         saleOrderExt.setSaleRemark(remark);
         saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
-
+        
         List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(refuseRequest.getAgent(), refuseRequest.getEntity().getSaleOrderNo());
         if (buyOrderList != null && buyOrderList.size() != 0) {
             for (BuyOrder buyOrder : buyOrderList) {
@@ -1102,7 +1219,7 @@ public class OrderServiceImpl implements IOrderService {
                 }
             }
         }
-
+        
         /* 创建操作日志 */
         try {
             LogRecord logRecord = new LogRecord();
@@ -1124,7 +1241,7 @@ public class OrderServiceImpl implements IOrderService {
         log.info("拒单结束");
         return true;
     }
-
+    
     /**
      * 创建销售退款单
      *
@@ -1172,7 +1289,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         return true;
     }
-
+    
     /**
      * 拒单重提.
      *
@@ -1181,12 +1298,12 @@ public class OrderServiceImpl implements IOrderService {
      */
     // @Override
     public boolean resubmit(RequestWithActor<Long> saleOrderNo) {
-
+        
         log.info("拒单重提开始");
         log.info("拒单重提结束");
         return false;
     }
-
+    
     /**
      * 回贴票号.
      *
@@ -1196,7 +1313,7 @@ public class OrderServiceImpl implements IOrderService {
     // @Override
     @Transactional
     public boolean writeTicketNo(RequestWithActor<TicketRequest> ticketRequest) {
-
+        
         log.info("回贴票号开始");
         try {
             if (ticketRequest.getAgent() == null) {
@@ -1224,7 +1341,7 @@ public class OrderServiceImpl implements IOrderService {
                 pnr.setCreator(ticketRequest.getAgent().getAccount());
                 pnr.setCreateTime(new Date());
                 pnrDao.insert(pnr);
-
+                
                 for (BuyOrderDetail buyOrderDetail : ticketRequest.getEntity().getBuyOrderDetailList()) {
                     // 在buyOrderDetail中修改出票时间、票号等属性 并执行update语句进行修改
                     buyOrderDetail.setTicketTime(new Date());// 出票时间
@@ -1255,10 +1372,10 @@ public class OrderServiceImpl implements IOrderService {
             log.error("回贴票号异常", e);
             throw new GSSException("回贴票号模块", "1104", "回贴票号异常");
         }
-
+        
         return true;
     }
-
+    
     /**
      * 锁单、解锁.
      *
@@ -1268,7 +1385,7 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     @Transactional
     public boolean lock(RequestWithActor<Long> saleOrderNo) {
-
+        
         log.info("锁单、解锁开始");
         boolean flag = false;
         try {
@@ -1298,10 +1415,10 @@ public class OrderServiceImpl implements IOrderService {
         }
         return flag;
     }
-
+    
     @Override
     public SaleOrderExt getDemandNo(RequestWithActor<Long> demandNo) {
-
+        
         log.info("查询开始");
         SaleOrderExt saleOrderExt = null;
         try {
@@ -1320,7 +1437,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         return saleOrderExt;
     }
-
+    
     /**
      * 根据机场三字码获取城市名称
      * @param cityCode
@@ -1343,10 +1460,10 @@ public class OrderServiceImpl implements IOrderService {
                 arrAirport = airport.getCityCName();
             }
         }
-
+        
         return arrAirport;
     }
-
+    
     @Override
     @Transactional
     public boolean verify(RequestWithActor<List<Passenger>> passengerList) {
@@ -1370,7 +1487,7 @@ public class OrderServiceImpl implements IOrderService {
             // 根据订单编号查询订单
             SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(passengerList.getEntity().get(0).getSaleOrderNo());
             List<BuyOrderExt> buyOrderExtList = buyOrderExtDao.selectBuyOrderBySaleOrderNo(passengerList.getEntity().get(0).getSaleOrderNo());
-
+            
             if (saleOrderExt != null) {
                 // 销售单应付
                 CreatePlanAmountVO createPlanAmountVOType = new CreatePlanAmountVO();
@@ -1387,7 +1504,7 @@ public class OrderServiceImpl implements IOrderService {
                 throw new GSSException("销售单为空", "0601", "核价修改销售、采购失败");
             }
             if (buyOrderExtList != null && buyOrderExtList.size() != 0) {
-
+                
                 // 采购单应收
                 CreatePlanAmountVO createPlanAmountVOType = new CreatePlanAmountVO();
                 createPlanAmountVOType.setRecordNo(buyOrderExtList.get(0).getBuyOrderNo());// 记录编号
@@ -1410,7 +1527,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         return flag;
     }
-
+    
     /**
      * 根据票号查询
      */
@@ -1428,7 +1545,7 @@ public class OrderServiceImpl implements IOrderService {
         log.info("查询结果为：" + report.toString());
         return report;
     }
-
+    
     @Override
     public List<QueryByPnr> queryByPnr(Agent agent, String pnr) {
         if (agent == null) {
@@ -1443,7 +1560,7 @@ public class OrderServiceImpl implements IOrderService {
         for (Pnr pnrS : pnrList) {
             QueryByPnr query = new QueryByPnr();
             SaleOrderExt ext = saleOrderExtDao.selectByPrimaryKey(pnrS.getSourceNo());
-            if(ext==null) ext = saleOrderExtDao.queryByPnrNo(pnrS.getPnrNo());
+            if (ext == null) { ext = saleOrderExtDao.queryByPnrNo(pnrS.getPnrNo()); }
             if (ext != null) {
                 SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, ext.getSaleOrderNo());
                 ext.setSaleOrder(saleOrder);
@@ -1463,7 +1580,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         return queryByPnr;
     }
-
+    
     @Override
     public boolean queryByPnr(Agent agent, String pnr, int day) {
         if (agent == null) {
@@ -1481,7 +1598,7 @@ public class OrderServiceImpl implements IOrderService {
         now.set(Calendar.DATE, now.get(Calendar.DATE) - day);
         List<Pnr> pneList = pnrDao.selectByPnr(pnr);
         QueryPnrAndTimeVo vo = new QueryPnrAndTimeVo();
-
+        
         for (Pnr pnrS : pneList) {
             vo.setPnrNo(pnrS.getPnrNo());
             vo.setStart(now.getTime());
@@ -1493,7 +1610,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         return false;
     }
-
+    
     /**
      * 黑屏预定
      */
@@ -1514,7 +1631,7 @@ public class OrderServiceImpl implements IOrderService {
 //
             SaleOrderExt saleOrderExt = createOrder(requestWithActor);
             log.info("创建订单结束========");
-
+            
             log.info("核价开始========");
 //			Long saleOrderNo = 371705120453282405l;
 //			Agent agent = new Agent(8023, 1111L, 1111L, 1111L, "测试账号", "测试认证令牌token", "192.168.0.1", "OAPI");
@@ -1561,7 +1678,7 @@ public class OrderServiceImpl implements IOrderService {
                         }
                     }
                 }
-
+                
                 // 创建应收应付
                 RequestWithActor<List<Passenger>> listRequestWithActor = new RequestWithActor<>();
                 listRequestWithActor.setAgent(AgentUtil.getAgent());
@@ -1599,12 +1716,11 @@ public class OrderServiceImpl implements IOrderService {
 //			}
             saleOrderNo = saleOrderExt.getSaleOrderNo();
         } catch (Exception e1) {
-            e1.printStackTrace();
-            log.info("黑屏出票失败，e=" + e1);
+            log.info("黑屏出票失败，e=", e1);
         }
         return saleOrderNo;
     }
-
+    
     @Override
     public boolean createPnr(Agent agent, Pnr insetPnr, SaleOrderExt saleOrderExt) {
         Long pnrNo = null;
@@ -1621,12 +1737,11 @@ public class OrderServiceImpl implements IOrderService {
             insetPnr.setStatus("1");
             pnrDao.insertSelective(insetPnr);
         } catch (Exception e) {
-            e.printStackTrace();
-            log.info("保存PNR，e=" + e);
+            log.info("保存PNR，e=" , e);
         }
         return false;
     }
-
+    
     @Override
     @Transactional
     public SaleOrderExt getTeamDemandNo(RequestWithActor<DemandTeamVo> demandTeamVo) {
@@ -1640,7 +1755,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         return saleOrderExt;
     }
-
+    
     /****
      * 订单分配
      */
@@ -1658,13 +1773,13 @@ public class OrderServiceImpl implements IOrderService {
         }
         log.info("第二步：查询在线出票员...");
         List<TicketSender> senders = getOnlineTicketSender();
-        log.info("是否有在线出票员:"+(senders!=null));
+        log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
             Agent agent = new Agent(Integer.valueOf(owner));
             IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
             Map config = configs.getConfig();
             String str_maxOrderNum = (String) config.get("maxOrderNum");
-            log.info("有在线出票员人数:" + (senders.size())+"获得配置最大分单数："+str_maxOrderNum);
+            log.info("有在线出票员人数:{},获得配置最大分单数：{}", senders.size(), str_maxOrderNum);
             Long maxOrderNum = Long.valueOf(str_maxOrderNum);
             Date updateTime = new Date();
             log.info("第三步：判断出票员手头出票订单数量...");
@@ -1684,7 +1799,7 @@ public class OrderServiceImpl implements IOrderService {
                         log.info("3.增加出票人的未出票订单数量...");
                         increaseOrderCount(peopleInfo);
                         /***发送消息至消息队列 通知出票员*/
-                        sendInfo(peopleInfo.getUserid(), order.getSaleOrderNo(),String.valueOf(order.getSaleOrder().getOrderStatus()));
+                        sendInfo(peopleInfo.getUserid(), order.getSaleOrderNo(), String.valueOf(order.getSaleOrder().getOrderStatus()));
                         log.info("4.发信息通知出票员出票,订单" + order.getSaleOrderNo() + "将分给出票员结束");
                         break;
                     }
@@ -1695,7 +1810,7 @@ public class OrderServiceImpl implements IOrderService {
             log.info("未查询在线出票员...");
         }
     }
-
+    
     @Override
     @Transactional
     public long addInfPassengers(Long saleOrderNo, RequestWithActor<OrderCreateVo> requestWithActor, String remark) {
@@ -1798,9 +1913,9 @@ public class OrderServiceImpl implements IOrderService {
             requestWithActor1.setAgent(agent);
             requestWithActor1.setEntity(Long.valueOf(saleOrderNo));
             SaleOrderExt oldSaleOrderExt = orderService.getOrder(requestWithActor1);
-
+            
             List<Passenger> infList = requestWithActor.getEntity().getSaleOrderExt().getPassengerList();
-
+            
             //获取交易单
             Long transactionId = IdWorker.getId();
             SaleOrder saleOrder1 = new SaleOrder();
@@ -1814,7 +1929,7 @@ public class OrderServiceImpl implements IOrderService {
             TransationOrder tr = setTransationOrderValue(agent, requestWithActor.getEntity().getSaleOrderExt().getContactName(), requestWithActor.getEntity().getSaleOrderExt().getContactMobile(), transactionId);
             //生成交易单
             transationOrderService.create(agent, tr);
-
+            
             Long saleOrderNo1 = maxNoService.generateBizNo("IFT_SALE_ORDER_NO", 37);
             Long businessSignNo = IdWorker.getId();
             try {
@@ -1840,7 +1955,7 @@ public class OrderServiceImpl implements IOrderService {
                     if (i == oldSaleOrderExt.getLegList().size() - 1) {
                         goodsName.append(leg.getArrAirport());
                     }
-
+                    
                 }
                 /* 增加旅客信息 */
                 CollectionUtils.filter(infList, o -> {
@@ -1865,7 +1980,7 @@ public class OrderServiceImpl implements IOrderService {
                     passenger.setValid((byte) 1);
                     passengerDao.insertSelective(passenger);
                 }
-
+                
                 /* 创建采购单 */
                 Long buyOrderNo = maxNoService.generateBizNo("IFT_BUY_ORDER_NO", 24);
                 BuyOrderExt buyOrderExt = requestWithActor.getEntity().getBuyOrderExt();
@@ -1881,7 +1996,7 @@ public class OrderServiceImpl implements IOrderService {
                 buyOrderExt.getBuyOrder().setGoodsType(2);// 商品大类 2=国际机票
                 buyOrderExt.getBuyOrder().setGoodsSubType(2);// 采购单
                 buyOrderExt.getBuyOrder().setGoodsName(goodsName.toString());
-
+                
                 if (buyOrderExt.getBuyOrder().getSupplierNo() == null || buyOrderExt.getBuyOrder().getSupplierNo() == 0 || buyOrderExt.getBuyOrder().getSupplierTypeNo() == null || buyOrderExt.getBuyOrder().getSupplierTypeNo() == 0) {
                     /* 查询客商编号，默认第一个数据 */
                     Supplier supplier = new Supplier();
@@ -1894,12 +2009,12 @@ public class OrderServiceImpl implements IOrderService {
                     buyOrderExt.getBuyOrder().setSupplierNo(supplierList.get(0).getSupplierNo());
                     buyOrderExt.getBuyOrder().setSupplierTypeNo(supplierList.get(0).getCustomerTypeNo());
                 }
-
+                
                 buyOrderExt.getBuyOrder().setBuyChannelNo(agent1.getDevice());
                 buyOrderExt.getBuyOrder().setBusinessSignNo(businessSignNo);// 业务批次号
                 buyOrderExt.getBuyOrder().setBsignType(1);// 1销采 2换票 3废和退 4改签
                 buyOrderExt.getBuyOrder().setBuyChildStatus(1);// 未审核
-
+                
                 /* 创建采购单的pnr信息 */
                 Pnr pnr = saleOrderExt.getImportPnr();
                 if (pnr != null) {
@@ -1938,7 +2053,7 @@ public class OrderServiceImpl implements IOrderService {
                 saleOrder1.setOrderChildStatus(saleOrder1.getOrderChildStatus() == null ? 1 : saleOrder1.getOrderChildStatus());// 1.待核价  2.已核价  3.出票中  4.已出票  5.已取消
                 saleOrderService.create(requestWithActor.getAgent(), saleOrder1);
                 buyOrderService.create(requestWithActor.getAgent(), buyOrderExt.getBuyOrder());
-
+                
                 /* 封装人+航段对象 */
                 List<SaleOrderDetail> saleOrderDetailList = new ArrayList<>();
                 for (Leg leg : oldSaleOrderExt.getLegList()) {
@@ -1962,7 +2077,7 @@ public class OrderServiceImpl implements IOrderService {
                         saleOrderDetailList.add(saleOrderDetail);
                     }
                 }
-
+                
                 /* 采购单明细 */
                 for (SaleOrderDetail saleOrderDetail : saleOrderDetailList) {
                     BuyOrderDetail buyOrderDetail = new BuyOrderDetail();
@@ -1975,7 +2090,7 @@ public class OrderServiceImpl implements IOrderService {
                     buyOrderDetail.setValid((byte) 1);
                     buyOrderDetailDao.insertSelective(buyOrderDetail);
                 }
-
+                
                 /* 创建销售拓展单 */
                 saleOrderExt.setSaleOrderNo(saleOrderNo1);
                 if (pnr != null && pnr.getPnrNo() != null) {
@@ -1991,7 +2106,7 @@ public class OrderServiceImpl implements IOrderService {
                 saleOrderExt.setLegType(oldSaleOrderExt.getLegType());
                 saleOrderExt.setCreateType(oldSaleOrderExt.getCreateType());
                 saleOrderExtDao.insertSelective(saleOrderExt);
-
+                
                 /* 创建采购单 */
                 buyOrderExt.setBuyOrderNo(buyOrderNo);
                 buyOrderExt.setOwner(agent1.getOwner());
@@ -2008,7 +2123,7 @@ public class OrderServiceImpl implements IOrderService {
                 returnOrderRequest.setAgent(agent);
                 orderService.updateSaleOrderExt(returnOrderRequest);
                 String logstr = "<p>" + String.format("创建国际订单成功=====", new Date()) + ":saleOrderNo=" + JsonUtil.toJson(saleOrderNo1);
-
+                
                 /* 创建操作日志 */
                 try {
                     LogRecord logRecord = new LogRecord();
@@ -2027,19 +2142,18 @@ public class OrderServiceImpl implements IOrderService {
                 } catch (Exception e) {
                     log.error("添加操作日志异常===" + e);
                 }
-
+                
             } catch (GSSException ex) {
                 log.error("创建订单失败", ex);
                 throw ex;
             } catch (Exception e) {
                 log.error("创建订单失败", e);
-                e.printStackTrace();
                 throw new GSSException("创建订单异常," + e.getMessage(), "0101", "创建订单失败");
             }
         }
         return 0;
     }
-
+    
     private TransationOrder setTransationOrderValue(Agent agent, String contacts, String mobile, Long transactionId) {
         TransationOrder tr = new TransationOrder();
         tr.setContacts(contacts);
@@ -2055,7 +2169,7 @@ public class OrderServiceImpl implements IOrderService {
         tr.setValid(1);
         return tr;
     }
-
+    
     @Override
     public int outTicketInform(OrderInformVo orderInformVo) {
         if (orderInformVo == null || orderInformVo.getInformType() == null || orderInformVo.getSaleOrderNo() == null) {
@@ -2075,7 +2189,7 @@ public class OrderServiceImpl implements IOrderService {
                 buyOrderExtDao.updateByOrderNo(buyOrderExt);
                 saleOrderExtDao.updateByPrimaryKey(saleOrderExt);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("订单变更通知", e);
             }
         } else if (orderInformVo.getInformType() == 5) {
             saleOrderDetail.setRefuseReason(orderInformVo.getRefuseReason());
@@ -2085,14 +2199,14 @@ public class OrderServiceImpl implements IOrderService {
         saleOrderDetailDao.updateByOrderNo(saleOrderDetail);
         return 0;
     }
-
+    
     @Override
     public String warnOrder(RequestWithActor<WarnOrderRequest> requestWithActor) {
-
+        
         if (null == requestWithActor || null == requestWithActor.getAgent() || null == requestWithActor.getEntity()) {
             throw new GSSException("调整单提醒参数错误", "0403", "调整单提醒参数错误");
         }
-
+        
         WarnOrderRequest warnOrderRequest = requestWithActor.getEntity();
         WarnOrder warnOrder = new WarnOrder();
         int status = warnOrderRequest.getStatus();
@@ -2127,7 +2241,7 @@ public class OrderServiceImpl implements IOrderService {
             return "0";
         }
     }
-
+    
     @Override
     @Transactional
     public ReturnSettInfo uploadUbpInfo(Agent agent, Long supplierNo, SaleOrderExtVo saleOrderExtVo) {
@@ -2154,12 +2268,12 @@ public class OrderServiceImpl implements IOrderService {
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("saleOrdNum", saleOrderExtVo.getSaleOrderNo() + "");
         List<IftPlaneTicket> planeTickets = planeTicketService.selectIftByMap(map);
-
+        
         GssMain gssMain = selectBatchIds(saleOrderExtVo.getSaleOrderNo());
         RequestWithActor<Long> requestWithActor1 = new RequestWithActor<>();
         requestWithActor1.setEntity(saleOrderExtVo.getSaleOrderNo());
         SaleOrderExt saleOrderExt = orderService.getOrder(requestWithActor1);
-
+        
         InallsaleVo sale = new InallsaleVo();
         sale.setOrderid(saleOrderExtVo.getSaleOrderNo() + "");//工单号
         sale.setPnr(saleOrderExt.getPnrNo() + "");// 设置pnr编号;
@@ -2241,7 +2355,7 @@ public class OrderServiceImpl implements IOrderService {
         sale.setPlatfromcustomername("");//平台客户名称
         sale.setTripartiteAgreementNo("");//三方协议号
         sale.setBillingCode("");//开票代码
-
+        
         List<InsaleVo> insaleVoList = new ArrayList<InsaleVo>();
         List<SaleOrderDetail> detailList = saleOrderDetailDao.selectBySaleOrderNo(saleOrderExtVo.getSaleOrderNo());
         for (OrderPriceVo orderPriceVo : saleOrderExtVo.getOrderPriceVoList()) {
@@ -2268,7 +2382,7 @@ public class OrderServiceImpl implements IOrderService {
                         Double qValue = 0d;// Q值
                         Double dijia = orderPriceVo.getBuyFare() == null ? 0d : orderPriceVo.getBuyFare().doubleValue();// 底价
                         jingjia_heji = jingjia_heji + dijia * (100 - daili) / 100 + qValue * (100 - daili) / 100;
-
+                        
                         Double buytax = orderPriceVo.getBuyTax() == null ? 0d : orderPriceVo.getBuyTax().doubleValue();
                         Double saleJgPrice = orderPriceVo.getSaleJgPrice() == null ? 0d : orderPriceVo.getSaleJgPrice().doubleValue();
                         // 营业部毛利=实收-{（底价）*（1-代理费率）*（1-底扣）+税+Q值*(1-代理费%)+加价金额}
@@ -2303,7 +2417,7 @@ public class OrderServiceImpl implements IOrderService {
             }
         }
         sale.setSaleList(insaleVoList);
-
+        
         List<InpayVo> inpayVoList = new ArrayList<InpayVo>();
         //OS_CERTIFICATE   OS_TRANSATIONORDER
         for (IftPlaneTicket planeTicket : planeTickets) {
@@ -2317,7 +2431,7 @@ public class OrderServiceImpl implements IOrderService {
             inpayVoList.add(inpayVo);
         }
         sale.setPayList(inpayVoList);
-
+        
         List<InairlinesVo> inairlinesVoList = new ArrayList<InairlinesVo>();
         for (OrderPriceVo orderPriceVo : saleOrderExtVo.getOrderPriceVoList()) {
             for (SaleOrderDetail saleOrderDetail : saleOrderExt.getSaleOrderDetailList()) {
@@ -2333,7 +2447,7 @@ public class OrderServiceImpl implements IOrderService {
                         Double dikou = orderPriceVo.getBuyAgencyFee() == null ? 0d : orderPriceVo.getBuyAgencyFee().doubleValue();// 底扣
                         Double qValue = 0d;// Q值
                         Double dijia = orderPriceVo.getBuyFare() == null ? 0d : orderPriceVo.getBuyFare().doubleValue();// 底价
-
+                        
                         Double buytax = orderPriceVo.getBuyTax() == null ? 0d : orderPriceVo.getBuyTax().doubleValue();
                         Double saleJgPrice = orderPriceVo.getSaleJgPrice() == null ? 0d : orderPriceVo.getSaleJgPrice().doubleValue();
                         jingjia_heji = jingjia_heji + dijia * (100 - daili) / 100 + qValue * (100 - daili) / 100;
@@ -2370,10 +2484,10 @@ public class OrderServiceImpl implements IOrderService {
             log.info("结算系统解挂返回原始JSON:", JsonUtil.toJson(ubpInfo));
             /**如果创建类型是冲单、补单、调整单1、调整单2、ADM单、ACM单，就不用解挂**/String createTypes = "7,8,9,10,11,12";
             if (ubpInfo.getCode().equals("0") && createTypes.indexOf(saleOrderExt.getCreateType() + "") == -1) {
-
+                
                 List<AdjustOrder> adjustorder = adjustOrderDao.getAdjustOrderByOrderId(saleOrderExtVo.getSaleOrderNo() + "");
                 if (adjustorder != null && adjustorder.size() > 0) {
-
+                    
                     for (AdjustOrder ado : adjustorder) {
                         ado.setAdjustflag("2");// 已解挂
                         adjustOrderDao.updateByPrimaryKey(ado);
@@ -2387,19 +2501,19 @@ public class OrderServiceImpl implements IOrderService {
             }
             log.info("解挂订单结算系统数据响应：{}", ubpInfo);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("解挂异常", e);
             ubpInfo.setMessage("解挂异常,该订单未推送至结算");
             ubpInfo.setCode("400");
         }
         return ubpInfo;
     }
-
+    
     @Override
     @Transactional
     public GssMain selectBatchIds(Long orederNo) {
         return gssMainDao.selectByOrderNo(orederNo);
     }
-
+    
     @Override
     @Transactional
     public void updateBuy(SaleOrderExtVo saleOrderExtVo, Long supplierNo, Agent agent, Long needPayId, Integer incomeExpenseType, Integer recordMovingType, Double planAmount, List<SaleOrderDetail> saleOrderDetailList, String movingReason) throws Exception {
@@ -2457,7 +2571,7 @@ public class OrderServiceImpl implements IOrderService {
             throw new GSSException(e.getMessage(), "0602", "修改采购失败");
         }
     }
-
+    
     @Override
     @Transactional
     public int addAdjustOrder(AdjustOrder adjustOrder, InallsaleRequest inallsaleRequest, SaleOrderExt saleOrderExt) {
@@ -2474,11 +2588,11 @@ public class OrderServiceImpl implements IOrderService {
             }
             num = adjustOrderDao.insert(adjustOrder);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("addAdjustOrder", e);
         }
         return num;
     }
-
+    
     /**
      * 已超过下单时间30分钟,订单被拒
      *
@@ -2496,7 +2610,7 @@ public class OrderServiceImpl implements IOrderService {
         //更新销售订单
         saleOrderService.updateStatus(agent, saleOrderNo, 4);
     }
-
+    
     /**
      * 查询已出票，但是没有配送产品，并且在这个表(LS_DELIVERY_BATCH_OS)没有数据
      *
@@ -2515,7 +2629,7 @@ public class OrderServiceImpl implements IOrderService {
             if (saleOrderQueryRequest.getAgent().getNum() != null) {
                 saleOrderQueryRequest.getEntity().setCustomerNo(saleOrderQueryRequest.getAgent().getNum().toString());
             }
-
+            
             long startTime = System.currentTimeMillis();
             log.info("查询订单接口开始=====");
             Boolean isNeedCustomer = saleOrderQueryRequest.getEntity().getCustomerCount();
@@ -2531,7 +2645,7 @@ public class OrderServiceImpl implements IOrderService {
                 saleOrderQueryRequest.getEntity().setLongList(longList);
             }
             saleOrderExtList = saleOrderExtDao.selectOutTicketOrder(page, saleOrderQueryRequest.getEntity());
-
+            
             long endTime = System.currentTimeMillis();
             log.info("查询订单接口结束=====" + (endTime - startTime));
             List<SaleOrderExt> tempList = new ArrayList<>();
@@ -2545,7 +2659,7 @@ public class OrderServiceImpl implements IOrderService {
             long objectTime = System.currentTimeMillis();
             log.info("封装订单接口结束=====" + (objectTime - endTime));
             page.setRecords(tempList);
-
+            
             log.info("查询订单模块（为运营平台订单管理提供服务）结束");
         } catch (Exception e) {
             log.error("查询订单异常", e);
@@ -2558,8 +2672,8 @@ public class OrderServiceImpl implements IOrderService {
     public void sendWebSocketInfoByMq(String msg) {
 
     }*/
-
-    private void updateSaleOrderDetail(SaleOrderExt order,TicketSender peopleInfo,Date date){
+    
+    private void updateSaleOrderDetail(SaleOrderExt order, TicketSender peopleInfo, Date date) {
         SaleOrderDetail saleOrderDetail = new SaleOrderDetail();
         saleOrderDetail.setStatus("3");//出票中
         saleOrderDetail.setSaleOrderNo(order.getSaleOrderNo());
@@ -2567,34 +2681,61 @@ public class OrderServiceImpl implements IOrderService {
         saleOrderDetail.setModifyTime(date);
         saleOrderDetailDao.updateByOrderNo(saleOrderDetail);
     }
-
-    private void assingLockOrder(SaleOrderExt order,TicketSender sender,Date date,Agent agent){
-        User user = userService.findUserByLoginName(agent,sender.getUserid());
+    
+    private void assingLockOrder(SaleOrderExt order, TicketSender sender, Date date, Agent agent) {
+        User user = userService.findUserByLoginName(agent, sender.getUserid());
         order.setLocker(user.getId());
         order.setModifier(sender.getUserid() + "");
         order.setLockTime(date);
         order.setModifyTime(date);
         saleOrderExtDao.updateLocker(order);
     }
-
-    private void increaseOrderCount(TicketSender sender){
+    
+    private void assingLockSaleChangeExt(SaleChangeExt order, TicketSender sender, Date date, Agent agent) {
+        User user = userService.findUserByLoginName(agent, sender.getUserid());
+        order.setLocker(user.getId());
+        order.setModifier(sender.getUserid() + "");
+        order.setLockTime(date);
+        order.setModifyTime(date);
+        saleChangeExtDao.updateLocker(order);
+    }
+    
+    private void increaseOrderCount(TicketSender sender) {
         sender.setOrdercount(sender.getOrdercount() + 1);
         sender.setIds(sender.getId() + "");
         iTicketSenderService.update(sender);
     }
-
-    private void subSaleOrderNum(Agent agent){
+    
+    private void increaseBuyChangeNum(Agent agent, TicketSender sender) {
+        User user = userService.findUserByLoginName(agent, sender.getUserid());
+        int lockCount = saleChangeExtDao.queryChangeCountBylocker(owner, user.getId());
+        sender.setBuyChangeNum(lockCount);
+        sender.setIds(sender.getId() + "");
+        iTicketSenderService.update(sender);
+    }
+    
+    private void increaseBuyRefuseNum(Agent agent, TicketSender sender) {
+        
+        //查询该种类型单被该业务员锁住的数量赋值给BuyRefuseNum字段
+        User user = userService.findUserByLoginName(agent, sender.getUserid());
+        int lockCount = saleChangeExtDao.queryRefundCountBylocker(owner, user.getId());
+        sender.setBuyRefuseNum(lockCount);
+        sender.setIds(sender.getId() + "");
+        iTicketSenderService.update(sender);
+    }
+    
+    private void subSaleOrderNum(Agent agent) {
         try {
             TicketSender ticketSender = iTicketSenderService.getTicketSenderByLoginId(agent.getAccount());
             ticketSender.setOrdercount(ticketSender.getOrdercount() - 1);
             log.info("更新出票员的订单数量" + ticketSender.toString());
             iTicketSenderService.updateByPrimaryKey(ticketSender);
-        }catch (Exception e){
-            log.error("更新出票员的出票订单数量异常",e);
+        } catch (Exception e) {
+            log.error("更新出票员的出票订单数量异常", e);
         }
     }
-
-    private void sendInfo(String userId,Long saleOrderNo,String orderStatus){
+    
+    private void sendInfo(String userId, Long saleOrderNo, String orderStatus) {
         SocketDO sdo = new SocketDO();
         sdo.setType(1000002);
         sdo.setOther(orderStatus);//
@@ -2602,8 +2743,8 @@ public class OrderServiceImpl implements IOrderService {
         sdo.setSaleOrder(String.valueOf(saleOrderNo));
         mqSender.send("gss-websocket-exchange", "notice", sdo);
     }
-
-    /**获取可以出票的分配订单*/
+    
+    /** 获取可以出票的分配订单 */
     private List<SaleOrderExt> getAssignedOrders() {
         SaleQueryOrderVo saleQueryOrderVo = new SaleQueryOrderVo();
         saleQueryOrderVo.setPayStatuss("3,4");
@@ -2613,16 +2754,16 @@ public class OrderServiceImpl implements IOrderService {
         List<SaleOrderExt> saleOrderExtList = saleOrderExtDao.queryAssignOrder(saleQueryOrderVo);
         return saleOrderExtList;
     }
-
-    private List<TicketSender> getOnlineTicketSender(){
+    
+    private List<TicketSender> getOnlineTicketSender() {
         TicketSenderVo ticketSenderVo = new TicketSenderVo();
         ticketSenderVo.setStatus(3);//只给在线用户分单
-        ticketSenderVo.setTypes("'both','ticketSender'");//只给出票员分单
+        //ticketSenderVo.setTypes("'both','ticketSender'");//只给出票员分单   只分在线即可
         List<TicketSender> ticketSenderList = iTicketSenderService.queryByBean(ticketSenderVo);
         return ticketSenderList;
     }
-
-    private void saveLog(Agent agent,Long saleOrderNo,String logstr,Long transactionOrderNo){
+    
+    private void saveLog(Agent agent, Long saleOrderNo, String logstr, Long transactionOrderNo) {
         try {
             LogRecord logRecord = new LogRecord();
             logRecord.setAppCode("UBP");
@@ -2641,8 +2782,8 @@ public class OrderServiceImpl implements IOrderService {
             log.error("国际机票添加操作日志异常===", e);
         }
     }
-
-    private void sendTicketInfoByMq(Agent agent,Long transationOrderNo) throws RuntimeException{
+    
+    private void sendTicketInfoByMq(Agent agent, Long transationOrderNo) throws RuntimeException {
         /*SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleOrderNo);
         Long transationOrderNo = null;
         if (null != saleOrder) {
@@ -2654,8 +2795,8 @@ public class OrderServiceImpl implements IOrderService {
         log.info("国际机票出票通知--->发送MQ消息：" + ToStringBuilder.reflectionToString(iftTicketMessage));
         iftTicketMqSender.send(IftTicketMqSender.TICKETED_KEY, iftTicketMessage);
     }
-
-    private void updateBuyOrder(Agent agent,Long saleOrderNo,BigDecimal payable,PassengerListVo listVo,String tickets) throws RuntimeException{
+    
+    private void updateBuyOrder(Agent agent, Long saleOrderNo, BigDecimal payable, PassengerListVo listVo, String tickets) throws RuntimeException {
         Supplier supplier = supplierService.getSupplierByNo(agent, listVo.getSupplierNo());
         List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(agent, saleOrderNo);
         if (buyOrderList != null && buyOrderList.size() != 0) {
@@ -2684,8 +2825,8 @@ public class OrderServiceImpl implements IOrderService {
             buyOrderExtDao.updateByPrimaryKeySelective(buyOrderExt);
         }
     }
-
-    private Long savePnr(Long pnrNo,PassengerListVo listVo,Long saleOrderNo,Agent agent,Date date) throws RuntimeException{
+    
+    private Long savePnr(Long pnrNo, PassengerListVo listVo, Long saleOrderNo, Agent agent, Date date) throws RuntimeException {
         Pnr insetPnr = new Pnr();
         pnrNo = maxNoService.generateBizNo("IFT_PNR_NO", 32);
         insetPnr.setPnr(listVo.getPnr());
@@ -2699,8 +2840,8 @@ public class OrderServiceImpl implements IOrderService {
         pnrDao.insertSelective(insetPnr);
         return pnrNo;
     }
-
-    private void ApiCallBack(SaleOrder saleOrder,Agent agent,String logstr,Date date){
+    
+    private void ApiCallBack(SaleOrder saleOrder, Agent agent, String logstr, Date date) {
         if ("API".equals(saleOrder.getSourceChannelNo())) {//外部订单
             try {
                 Agent newAgent = new Agent(agent.getOwner(), saleOrder.getCustomerTypeNo(), saleOrder.getCustomerNo(), agent.getId(), agent.getAccount(), agent.getToken(), agent.getIp(), agent.getDevice(), null);

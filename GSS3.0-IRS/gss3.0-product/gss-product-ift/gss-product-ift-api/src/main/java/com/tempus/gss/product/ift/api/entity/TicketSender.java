@@ -63,6 +63,11 @@ public class TicketSender implements Serializable {
     @Transient
     private String ids;
 
+    //改签数量总和
+    private Integer totalChangeNum;
+    //退票总和
+    private Integer totalRefuseNum;
+
     /**
      * 修改信息
      */
@@ -92,6 +97,8 @@ public class TicketSender implements Serializable {
         sb.append(", saleChangeNum=").append(saleChangeNum);
         sb.append(", ids='").append(ids).append('\'');
         sb.append(", updateInfo='").append(updateInfo).append('\'');
+        sb.append(", totalChangeNum='").append(totalChangeNum).append('\'');
+        sb.append(", totalRefuseNum='").append(totalRefuseNum).append('\'');
         sb.append('}');
         return sb.toString();
     }
@@ -246,6 +253,18 @@ public class TicketSender implements Serializable {
 
     public void setSaleOrderNum(Integer saleOrderNum) {
         this.saleOrderNum = saleOrderNum;
+    }
+
+    public Integer getTotalChangeNum() { return totalChangeNum; }
+
+    public void setTotalChangeNum(Integer totalChangeNum) { this.totalChangeNum = totalChangeNum; }
+
+    public Integer getTotalRefuseNum() {
+        return totalRefuseNum;
+    }
+
+    public void setTotalRefuseNum(Integer totalRefuseNum) {
+        this.totalRefuseNum = totalRefuseNum;
     }
 
     public String getUpdateInfo() {

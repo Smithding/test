@@ -10,6 +10,7 @@
         <result column="COMPNAME" property="compName" jdbcType="VARCHAR"/>
         <result column="CUSTOMERNAME" property="customerName" jdbcType="VARCHAR"/>
         <result column="LOCKER" property="locker" jdbcType="BIGINT"/>
+        <result column="STATUS" property="orderStatus" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="sqlwhere">
@@ -21,8 +22,10 @@
     </sql>
 
     <select id="queryObjByKey" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SeparatedOrderVo">
-        SELECT ift.ID,ift.SALE_ORDER_NO,ift.PNR_NO AS PNR,de.NAME AS DEPNAME,sm.NAME AS MODIFIERNAME,cps.NAME AS COMPNAME,
-        (SELECT NAME FROM SM_USER s WHERE s.LOGIN_NAME = ift.CREATOR) AS CUSTOMERNAME,ift.LOCKER  FROM IFT_SALE_ORDER_EXT ift
+        SELECT DISTINCT ift.ID,ift.SALE_ORDER_NO,ift.PNR_NO AS PNR,de.NAME AS DEPNAME,sm.NAME AS MODIFIERNAME,cps.NAME AS COMPNAME,
+        (SELECT NAME FROM SM_USER s WHERE s.LOGIN_NAME = ift.CREATOR) AS CUSTOMERNAME,ift.LOCKER,ISOD.`STATUS`
+        FROM IFT_SALE_ORDER_EXT ift
+        LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ift.SALE_ORDER_NO = ISOD.SALE_ORDER_NO
         LEFT JOIN SM_USER sm ON sm.ID = ift.LOCKER
         LEFT JOIN SM_DEPT de ON de.ID = sm.DEPT_ID
         LEFT JOIN CPS_CUSTOMER cps ON cps.CUSTOMER_NO = de.CUSTOMER_ID

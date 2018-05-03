@@ -83,7 +83,7 @@ public class FliePriceMappingServicelmpl implements FliePriceMappingService {
             List<FilePrice> policys = filePriceDao.queryObjByOD(filePrice);
             goPolicyList.addAll(policys);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("mappingPolicy", e);
         }
 
         Flight goflight = getMainFlight(goFlights);
@@ -113,7 +113,7 @@ public class FliePriceMappingServicelmpl implements FliePriceMappingService {
                 List<FilePrice> policys = filePriceDao.queryObjByOD(filePrice);//根据机场取返程政策
                 backPolicyList.addAll(policys);
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("mappingPolicy", e);
             }
             Flight backFlight = getMainFlight(backFlights);
             for (int i = backPolicyList.size() - 1; i >= 0; i--) {//根据限制条件去除政策
@@ -205,7 +205,7 @@ public class FliePriceMappingServicelmpl implements FliePriceMappingService {
                 return false;
             }
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("checkPolicyDate", e);
         }
         return check;
     }
@@ -336,7 +336,7 @@ public class FliePriceMappingServicelmpl implements FliePriceMappingService {
         try {
             return f2.parse(dateTime.toString()).getTime();
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("getDateTime", e);
             return 0l;
         }
     }

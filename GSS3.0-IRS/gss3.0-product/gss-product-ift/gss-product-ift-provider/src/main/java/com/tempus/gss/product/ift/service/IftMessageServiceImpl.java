@@ -14,6 +14,7 @@ import com.tempus.gss.product.ift.api.service.IIftMessageService;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.SaleChangeExtDao;
 import com.tempus.gss.product.ift.dao.SaleOrderExtDao;
+import com.tempus.gss.security.AgentUtil;
 import com.tempus.gss.system.entity.User;
 import com.tempus.gss.system.service.IUserService;
 import com.tempus.gss.vo.Agent;
@@ -83,10 +84,10 @@ public class IftMessageServiceImpl implements IIftMessageService {
                     saleOrderExt.setModifyTime(date);
                     log.info("分单更新销售订单分配信息:"+saleOrderExt.toString());
                     saleOrderExtDao.updateByPrimaryKey(saleOrderExt);
+                    ticketSenderService.updateByLockerId(agent,user.getId(),"SALE_ORDER_NUM");
                 }
-                ticketSender.setSaleOrderNum(ticketSender.getSaleOrderNum() + 1);
-                ticketSenderService.updateByPrimaryKey(ticketSender);
-
+                /*ticketSender.setSaleOrderNum(ticketSender.getSaleOrderNum() + 1);
+                ticketSenderService.updateByPrimaryKey(ticketSender);*/
             }
         } catch (Exception e) {
             log.error("b2b国际机票添加消息提醒异常", e);
@@ -113,7 +114,7 @@ public class IftMessageServiceImpl implements IIftMessageService {
                 }
                 mqSender.send("gss-websocket-exchange", "notice", sdo);
                 log.info("放入MQ队列信息:" + sdo.toString());
-                ticketSender.setSaleOrderNum(ticketSender.getSaleRefuseNum() + 1);
+                ticketSender.setSaleRefuseNum(ticketSender.getSaleRefuseNum() + 1);
                 ticketSenderService.updateByPrimaryKey(ticketSender);
             }
         } catch (Exception e) {
@@ -158,10 +159,10 @@ public class IftMessageServiceImpl implements IIftMessageService {
         }
     }
 
-    private TicketSender getSender(String ownerCode) {
+    public TicketSender getSender(String ownerCode) {
         TicketSender ticketSender = null;
         TicketSenderVo senderVo = new TicketSenderVo();
-        senderVo.setTypes("'both','salesman'");//只给销售员分单
+        //senderVo.setTypes("'both','salesman'");//只给销售员分单   只分在线即可
         senderVo.setStatus(3);//查询在线销售员 3-在线
         List<TicketSender> ticketSenders = ticketSenderService.queryByBean(senderVo);
         if (ticketSenders != null && ticketSenders.size() > 0) {

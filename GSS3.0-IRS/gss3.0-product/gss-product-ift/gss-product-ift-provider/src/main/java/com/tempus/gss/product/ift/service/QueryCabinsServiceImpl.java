@@ -146,7 +146,7 @@ public class QueryCabinsServiceImpl implements IQueryCabinsService {
         try {
             shoppingOutPut = shoppingService.shoppingOneI(shoppingOneInput);
         } catch (NotSupportException e) {
-            e.printStackTrace();
+            log.error("调用shopping接口", e);
         }
         log.info("完成调用shopping接口"+shoppingOutPut.getShortText());
         List<AvailableJourney> availableJourneys = shoppingOutPut.getAvailableJourneys();
@@ -158,7 +158,7 @@ public class QueryCabinsServiceImpl implements IQueryCabinsService {
         try {
             queryIBEDetails = dealWithShoppingOut(shoppingOutPut);
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("调用shopping数据转换", e);
         }
         log.info("开始匹配政策");
         for(QueryIBEDetail q:queryIBEDetails){

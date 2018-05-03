@@ -34,6 +34,18 @@ public class SeparatedOrder implements Serializable {
     private String customerName;
     //订单分配人
     private Long locker;
+    //订单状态
+    private String orderStatus;
+    //销售单废退改编号
+    private Long saleChangeNo;
+
+    public Long getSaleChangeNo() {
+        return saleChangeNo;
+    }
+
+    public void setSaleChangeNo(Long saleChangeNo) {
+        this.saleChangeNo = saleChangeNo;
+    }
 
     public Long getId() {
         return id;
@@ -97,5 +109,13 @@ public class SeparatedOrder implements Serializable {
 
     public void setLocker(Long locker) {
         this.locker = locker;
+    }
+
+    public String getOrderStatus() {
+        return orderStatus;
+    }
+
+    public void setOrderStatus(String orderStatus) {
+        this.orderStatus = orderStatus;
     }
 }

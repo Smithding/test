@@ -358,7 +358,7 @@ public class OrderServiceImpl implements IOrderService {
 		saleOrderExt.setInsuranceNo(insuranceNo);
 		saleOrderExt.setIssueDate(new Date());
 		saleOrderExt.setOrderType(insurance.getBuyWay());
-		if(insurance.getName().contains("单次")){
+		if(insurance.getName().contains("单次")||insurance.getEndDays()==1){
 			Date flightTime = requestWithActor.getEntity().getSaleOrderExt().getInsureExtVo().getFlightInfoVo().getFlightDate();
 			long time;
 			if(flightTime!=null){
@@ -558,6 +558,11 @@ public class OrderServiceImpl implements IOrderService {
 						saleOrderDetail.setInsuredSex(2);
 					}else{
 						saleOrderDetail.setInsuredSex(1);
+					}
+					//如果出生年月日为空
+					if(saleOrderDetail.getInsuredBirthday()==null||"".equals(saleOrderDetail.getInsuredBirthday())){
+						String birthday = saleOrderDetail.getInsuredCertiNo().substring(6, 10)+"-"+saleOrderDetail.getInsuredCertiNo().substring(10, 12)+"-"+saleOrderDetail.getInsuredCertiNo().substring(12, 14);
+						saleOrderDetail.setInsuredBirthday(birthday);
 					}
 				}
 				saleOrderDetail.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
@@ -3325,5 +3330,55 @@ public class OrderServiceImpl implements IOrderService {
 					SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 6);//改为已退保
 				}
 		    	return true;
+	}
+	@Override
+	public List<SaleOrderExt> querySaleOrderListIntransactionNo(RequestWithActor<SaleOrderExtVo> pageRequest) {
+		log.info("根据交易单号查询保单开始==============");
+		Agent agent = pageRequest.getAgent();
+		//获取当前客商下的子账户
+		List<SaleOrderExt> saleOrderExtList = new ArrayList<SaleOrderExt>();
+		List<Customer> lowerCustomers = null;
+		if (agent == null) {
+			log.error("当前操作用户不能为空");
+			throw new GSSException("当前操作用户不能为空", "1010", "当前操作用户不能为空");
+		}
+		//如果是运营平台账号，可查看全部订单，否则只能查看当前账号自己创建的订单
+		if(agent.getType() != null && agent.getType() != 0L){ //不是运营平台账号			
+				if(pageRequest.getEntity().isLowerLevel()==true){
+					Date start1 = new Date();
+					lowerCustomers = customerService.getSubCustomerByCno(agent, agent.getNum());
+					log.info("保险订单查询定位getSubCustomerByCno该方法执行的时间为:"+(new Date().getTime()-start1.getTime()));
+					pageRequest.getEntity().setLowerCustomers(lowerCustomers);
+				}
+				pageRequest.getEntity().setOwner(pageRequest.getAgent().getOwner());
+				pageRequest.getEntity().setCreator(pageRequest.getAgent().getAccount());
+				pageRequest.getEntity().setCustomerNo(pageRequest.getAgent().getNum());
+		
+		}
+		/* 分页列表 */
+		try{
+			Date start2 = new Date();
+			List<SaleOrderExt> tempList = orderServiceDao.queryObjByKey(pageRequest.getEntity());
+			log.info("保险订单查询定位queryObjByKey该方法执行的时间为:"+(new Date().getTime()-start2.getTime()));
+		
+			Date start3 = new Date();
+			for(SaleOrderExt order: tempList) {
+				BigDecimal prise = new BigDecimal(order.getSaleOrderDetailList().size());
+				SaleOrder saleOrder = saleOrderService.getSOrderByNo(pageRequest.getAgent(), order.getSaleOrderNo());
+				order.setSaleOrder(saleOrder);
+				order.setLowerCustomers(lowerCustomers);
+				saleOrderExtList.add(order);
+			}
+			log.info("保险订单查询定位getSOrderByNo该方法执行的时间为:"+(new Date().getTime()-start3.getTime()));
+			log.info("根据交易单号条件查询保单结束==============");
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		
+		/**
+		 * 根据saleorderno通过API接口去其他子系统去获取数据
+		 * 需要根据list的长度去执行获取数据的次数,此操作可能会存在性能问题
+		 */
+		return saleOrderExtList;
 	}
 }

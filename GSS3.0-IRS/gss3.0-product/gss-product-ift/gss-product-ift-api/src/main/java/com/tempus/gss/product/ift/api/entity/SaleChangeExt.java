@@ -182,6 +182,16 @@ public class SaleChangeExt implements Serializable {
 	private String saleCurrency;
 	//汇率
 	private BigDecimal exchangeRate;
+	//操作人
+	private String handlers;
+
+	public String getHandlers() {
+		return handlers;
+	}
+
+	public void setHandlers(String handlers) {
+		this.handlers = handlers;
+	}
 
 	@Override
 	public String toString() {

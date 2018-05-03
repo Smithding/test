@@ -68,7 +68,6 @@ public class PNRMappingServiceImpl implements PNRMappingService {
             getFSI( queryIBEDetail);
             queryService.mappingPriceSpec(queryIBEDetail, customerType, agent);
         } catch (Exception e) {
-            e.printStackTrace();
             log.info("pnr匹配出错", e);
             return queryIBEDetail;
         }
@@ -90,7 +89,6 @@ public class PNRMappingServiceImpl implements PNRMappingService {
             queryIBEDetail = getPnrByQueryIBEDetail(pnr);
             getFSI( queryIBEDetail);
         } catch (Exception e) {
-            e.printStackTrace();
             log.info("pnr内容匹配出错", e);
         }
         queryService.mappingPriceSpec(queryIBEDetail, customerType, agent);
@@ -145,7 +143,6 @@ public class PNRMappingServiceImpl implements PNRMappingService {
             pnr = getPnrService.getPnr(office, pnrCode);
             log.info("国际机票PNR预定返回原始信息："+JsonUtil.toJson(pnr));
         }catch (Exception e){
-            e.printStackTrace();
             log.info(e.getMessage());
         }*/
         //JourneyType pnr行程类型  OW:单程 RT:往返 MS:多段
@@ -247,8 +244,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
             getPnrByQueryIBEDetail(queryIBEDetail, pnr.getPnrNo());
 
         } catch (Exception e) {
-            e.printStackTrace();
-            log.info(e.getMessage());
+            log.error("getPnrByQueryIBEDetail", e);
         }
         return queryIBEDetail;
     }
