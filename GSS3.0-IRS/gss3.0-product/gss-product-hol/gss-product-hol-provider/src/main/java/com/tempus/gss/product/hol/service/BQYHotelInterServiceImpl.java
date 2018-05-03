@@ -22,7 +22,6 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.TypeReference;
-import com.tempus.gss.bbp.util.DocumentUtil;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityInfo;
@@ -46,6 +45,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelListParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelLocationEntity;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
+import com.tempus.gss.product.hol.api.util.DocumentUtil;
 import com.tempus.gss.product.hol.thread.CityDetailTask;
 import com.tempus.gss.product.hol.thread.HotelInfoTask;
 import com.tempus.gss.util.JsonUtil;
