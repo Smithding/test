@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.service;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -16,7 +17,11 @@ import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
+import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelInfo;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.ImageList;
 import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
 
 @Service
@@ -37,11 +42,11 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
             logger.error("hotelSearchReq查询条件为空");
             throw new GSSException("获取酒店列表", "0101", "hotelSearchReq查询条件为空");
         }
-       /*
-        if (StringUtil.isNullOrEmpty(hotelSearchReq.getCityCode())) {
-            logger.error("城市编号为空");
-            throw new GSSException("获取酒店列表", "0103", "城市编号为空");
-        }*/
+       
+        if (StringUtil.isNullOrEmpty(hotelSearchReq.getResId()) && StringUtil.isNullOrEmpty(hotelSearchReq.getCityCode()) && StringUtil.isNullOrEmpty(hotelSearchReq.getResGradeId()) && StringUtil.isNullOrEmpty(hotelSearchReq.getKeyword())) {
+        	hotelSearchReq.setCityCode("北京");
+        }
+        
         if (StringUtil.isNullOrEmpty(hotelSearchReq.getPageCount())) {
             logger.error("页码为空");
             throw new GSSException("获取酒店列表", "0107", "页码为空");
@@ -49,10 +54,6 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
         if (StringUtil.isNullOrEmpty(hotelSearchReq.getRowCount())) {
             logger.error("每页条数为空");
             throw new GSSException("获取酒店列表", "0108", "每页条数为空");
-        }
-        if (StringUtil.isNullOrEmpty(hotelSearchReq.getSaleStatus())) {
-            logger.error("可售状态入参为空");
-            throw new GSSException("获取酒店列表", "0118", "可售状态入参为空");
         }
         TCResponse<HotelInfo> response = new TCResponse<HotelInfo>();
 		Query query=new Query();
@@ -93,7 +94,60 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
   		response.setResponseResult(hotelList);
   		logger.info("bqy查询酒店列表结束");
 		return response;
-	
 	}
+
+	@Override
+	public TCResponse<ResBaseInfo> queryHotelList(HotelListSearchReq hotelSearchReq) {
+		TCResponse<HotelInfo> hotelResult = queryHotelListForBack(hotelSearchReq);
+		List<HotelInfo> hotelList = hotelResult.getResponseResult();
+		List<ResBaseInfo> resList = new ArrayList<>();
+		for (HotelInfo h : hotelList) {
+			ResBaseInfo resBaseInfo = new ResBaseInfo();
+			resBaseInfo.setAddress(h.getAddress());
+			//酒店品牌
+			ResBrandInfo brandInfo = new ResBrandInfo();
+			brandInfo.setResBrandName(h.getHotelBrandName());
+			brandInfo.setId(Long.parseLong(String.valueOf(h.getHotelBrandId())));
+			resBaseInfo.setBrandInfo(brandInfo);
+			
+			resBaseInfo.setCityId(Integer.parseInt(h.getCityCode()));
+			resBaseInfo.setCityName(h.getCityName());
+			resBaseInfo.setLocation(h.getRoadCross());
+			resBaseInfo.setId(h.getId());
+			
+			//酒店图片
+			//TODO 酒店图片类型待定
+			List<ImgInfo> imgInfoList = new ArrayList<>();
+			List<ImageList> hotelImageList = h.getHotelImageList();
+			if (null != hotelImageList && hotelImageList.size() > 0) {
+				for (ImageList i : hotelImageList) {
+					ImgInfo imgInfo = new ImgInfo();
+					imgInfo.setImageName(i.getTitleName());
+					imgInfo.setImageUrl(i.getImageUrl());
+					imgInfo.setResId(h.getHotelId());
+				}
+			}  
+			resBaseInfo.setImgInfoList(imgInfoList);
+			
+			resBaseInfo.setLatestUpdateTime(h.getLatestUpdateTime());
+			if (null != h.getLowPrice()) {
+				resBaseInfo.setMinPrice(h.getLowPrice().intValue());
+			}
+			resBaseInfo.setResName(h.getHotelName());
+			resBaseInfo.setSaleStatus(h.getSaleStatus());
+			resBaseInfo.setResPhone(h.getMobile());
+			resBaseInfo.setShortIntro(h.getDescription());
+			resBaseInfo.setIntro(h.getDescription());
+			resList.add(resBaseInfo);
+		}
+		TCResponse<ResBaseInfo> result = new TCResponse<>();
+		result.setResponseResult(resList);
+		result.setPageNumber(hotelResult.getPageNumber());
+		result.setTotalCount(hotelResult.getTotalCount());
+		result.setTotalPatge(hotelResult.getTotalPatge());
+		return result;
+	}
+
+	
 
 }
