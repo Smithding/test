@@ -2,13 +2,12 @@ package com.tempus.gss.product.hol.service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
@@ -22,7 +21,6 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.TypeReference;
-import com.tempus.gss.bbp.util.DocumentUtil;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityInfo;
@@ -46,14 +44,13 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelListParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelLocationEntity;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
+import com.tempus.gss.product.hol.api.util.DocumentUtil;
 import com.tempus.gss.product.hol.thread.CityDetailTask;
 import com.tempus.gss.product.hol.thread.HotelInfoTask;
 import com.tempus.gss.util.JsonUtil;
 
-import httl.spi.codecs.json.JSON;
-
 @Service
-public class BQYHotelServiceImpl implements IBQYHotelInterService {
+public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 
 	@Value("${bqy.agentId}")
 	private String BQY_AGENTID;		//代理人Id
@@ -100,6 +97,7 @@ public class BQYHotelServiceImpl implements IBQYHotelInterService {
 	
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	
+	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	@Override
 	public List<HotelId> queryHotelIdList() {
@@ -319,7 +317,7 @@ public class BQYHotelServiceImpl implements IBQYHotelInterService {
 	}
 	
 	@Override
-	public void saveDataToMongoDB(QueryHotelListParam query) {
+	public void saveDataToMongoDB() {
 		//删除Mongo中的数据
 		deleteMongoDBData();
 		//开始拉取城市信息
@@ -349,6 +347,8 @@ public class BQYHotelServiceImpl implements IBQYHotelInterService {
 			queryHotelParam.setHotelId(hotelId.getHotelId());
 			List<ImageList> hotelImageList = this.queryHotelImage(queryHotelParam);
 			hotelInfo.setHotelImageList(hotelImageList);
+			hotelInfo.setLatestUpdateTime(sdf.format(new Date()));
+			hotelInfo.setSaleStatus(1);
 			//保存酒店信息
 			mongoTemplate.save(hotelInfo);
 		}

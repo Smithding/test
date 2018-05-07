@@ -1039,8 +1039,10 @@ public class ChangeServiceImpl implements IChangeService {
                 int updateLocker = saleChangeExtDao.updateLocker(changeExt);
                 //更新锁定前出票员
                 ticketSenderService.updateByLockerId(saleChange.getAgent(),originLocker,"SALE_CHANGE_NUM");
+                ticketSenderService.updateByLockerId(saleChange.getAgent(),originLocker,"BUY_CHANGE_NUM");
                 //更新锁定后的出票员
                 ticketSenderService.updateByLockerId(saleChange.getAgent(),afterLocker,"SALE_CHANGE_NUM");
+                ticketSenderService.updateByLockerId(saleChange.getAgent(),afterLocker,"BUY_CHANGE_NUM");
                 if (updateLocker == 1) {
                     flag = true;
                 }

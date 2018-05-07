@@ -1054,7 +1054,7 @@ public class RefundServiceImpl implements IRefundService {
 									}
 									if (ticketNo == null || ticketNo.equals("")) {
 										ticketNo = saleOrderDetail.getTicketNo();
-									} else {
+									} else if(!ticketNo.contains(saleOrderDetail.getTicketNo())){
 										ticketNo = ticketNo + "," + saleOrderDetail.getTicketNo();
 									}
 									//客户手续费

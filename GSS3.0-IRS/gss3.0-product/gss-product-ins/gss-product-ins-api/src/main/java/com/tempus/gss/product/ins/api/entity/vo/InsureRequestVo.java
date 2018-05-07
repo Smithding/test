@@ -108,8 +108,51 @@ public class InsureRequestVo implements Serializable {
 	* */
 	@JsonProperty("insuredList")
 	private List<SaleOrderDetail> SaleOrderDetailList;
+	/*
+	 * 航班号
+	 */
+	private String transNum;
+	
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	private Date dptTime;
+	
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	private Date arrTime;
+	
+	private Long orderId;
 
 
+	public Long getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
+	}
+
+	public Date getArrTime() {
+		return arrTime;
+	}
+
+	public void setArrTime(Date arrTime) {
+		this.arrTime = arrTime;
+	}
+
+	public Date getDptTime() {
+		return dptTime;
+	}
+
+	public void setDptTime(Date dptTime) {
+		this.dptTime = dptTime;
+	}
+
+	public String getTransNum() {
+		return transNum;
+	}
+
+	public void setTransNum(String transNum) {
+		this.transNum = transNum;
+	}
 
 	public List<SaleOrderDetail> getInsuredList() {
 		return insuredList;

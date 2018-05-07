@@ -118,6 +118,8 @@ public class HotelInfo implements Serializable {
 	@JSONField(name="LowPrice")
 	private BigDecimal lowPrice;			//房型最低价
 	
+	private String supplierNo;				//供应商编号
+	
 	private String latestUpdateTime;		//数据最近更新时间
 	
 	private Integer saleStatus;				//酒店是否可售状态，默认为1可售， 0位不可售
@@ -432,6 +434,14 @@ public class HotelInfo implements Serializable {
 
 	public void setLowPrice(BigDecimal lowPrice) {
 		this.lowPrice = lowPrice;
+	}
+
+	public String getSupplierNo() {
+		return supplierNo;
+	}
+
+	public void setSupplierNo(String supplierNo) {
+		this.supplierNo = supplierNo;
 	}
 	
 }

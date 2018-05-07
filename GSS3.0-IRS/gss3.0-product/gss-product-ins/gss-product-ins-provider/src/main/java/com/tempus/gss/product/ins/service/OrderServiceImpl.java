@@ -64,6 +64,7 @@ import com.tempus.gss.product.ins.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ins.api.entity.SaleOrderDetail;
 import com.tempus.gss.product.ins.api.entity.SaleOrderExt;
 import com.tempus.gss.product.ins.api.entity.vo.FlightInfoVo;
+import com.tempus.gss.product.ins.api.entity.vo.InsuranceVo;
 import com.tempus.gss.product.ins.api.entity.vo.InsureExtVo;
 import com.tempus.gss.product.ins.api.entity.vo.InsureRequestVo;
 import com.tempus.gss.product.ins.api.entity.vo.OrderCancelVo;
@@ -482,7 +483,9 @@ public class OrderServiceImpl implements IOrderService {
         Calendar ca = Calendar.getInstance();
         ca.setTime(saleOrderExt.getEffectDate());
         ca.add(Calendar.DATE, insurance.getEndDays());
-        ca.add (Calendar.SECOND,-1);
+        if (insurance.getEndDays().intValue()>0) {
+        	ca.add (Calendar.SECOND,-1);
+		}
         SaleOrderExt.setExpireDate(ca.getTime());
         //存储总保险分数
         saleOrderExt.setSumCopies(personnum);
@@ -765,6 +768,8 @@ public class OrderServiceImpl implements IOrderService {
 		//计算总价
 	    for(SaleOrderDetail saleOrderDetail:saleOrderDetailList){
 	    	sum += saleOrderDetail.getInsuranceNum();
+//	    	saleOrderDetail.setPremium(BigDecimal.valueOf(3));
+	    	saleOrderDetail.setCustomerRelations("01");
 	    }
 		insureRequestVo.setTotalPremium(insurance.getFacePrice().multiply(new BigDecimal(sum)));
 		try {
@@ -882,6 +887,7 @@ public class OrderServiceImpl implements IOrderService {
 		InsureExtVo InsureExtVo=null;
 		ObjectMapper mapper = new ObjectMapper();
 		try{
+			InsureExtVo=mapper.readValue(saleOrderExt.getExtendedFieldsJson(), InsureExtVo.class);
 			//太平的扩展字段进行特殊处理   （详细请看文档）
 			if(insurance.getCompanyName().contains(COMPANY_NAME_TAIPING)||insurance.getCompanyName().contains(COMPANY_NAME_JUNLONG)){
 
@@ -914,6 +920,12 @@ public class OrderServiceImpl implements IOrderService {
 		insureRequestVo.setExtendedFieldSJson(extendedFieldsJson);
 		insureRequestVo.setSaleOrderDetailList(null);
 		insureRequestVo.setInsuredList(saleOrderDetailList);
+		insureRequestVo.setTransNum(InsureExtVo.getFlightNo());
+		insureRequestVo.setDptTime(InsureExtVo.getFlightInfoVo().getFlightDate());
+		insureRequestVo.setArrTime(insureRequestVo.getExpireDate());
+//		insureRequestVo.setIsTeam((short) 1);
+		insureRequestVo.setOrderId(saleOrderExt.getSaleOrderNo());
+		insureRequestVo.setTravelDay(insureRequestVo.getExpireDate().getDate()-insureRequestVo.getEffectDate().getDate()+1);
 		return insureRequestVo;
 	}
 	 //计算两个日期差值
@@ -1000,6 +1012,7 @@ public class OrderServiceImpl implements IOrderService {
 						detail.setInsuredBirthday(saleOrderDetail.getInsuredBirthday()); // yyyyMMdd
 						detail.setInsuredSex(saleOrderDetail.getInsuredSex());
 						detail.setInsuranceNum(saleOrderDetail.getInsuranceNum());
+						detail.setPremium(saleOrderDetail.getPremium());
 						if(insurance.getCompanyName().contains(COMPANY_NAME_JUNLONG)||	insurance.getCompanyName().contains(COMPANY_NAME_QIANHAICAI)){
 							detail.setPremium(insurance.getFacePrice().multiply( new BigDecimal(saleOrderDetail.getInsuranceNum())));
 						}
@@ -1140,6 +1153,7 @@ public class OrderServiceImpl implements IOrderService {
 					detail.setInsuredBirthday(saleOrderDetail.getInsuredBirthday()); // yyyyMMdd
 					detail.setInsuredSex(saleOrderDetail.getInsuredSex());
 					detail.setInsuranceNum(saleOrderDetail.getInsuranceNum());
+					detail.setPremium(saleOrderDetail.getPremium());
 					if(insurance.getCompanyName().contains(COMPANY_NAME_JUNLONG)||	insurance.getCompanyName().contains(COMPANY_NAME_QIANHAICAI)){
 						detail.setPremium(insurance.getFacePrice().multiply( new BigDecimal(saleOrderDetail.getInsuranceNum())));
 					}
