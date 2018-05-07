@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -145,6 +146,41 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 			brandInfo.setResBrandName(h.getHotelBrandName());
 			brandInfo.setId(Long.parseLong(String.valueOf(h.getHotelBrandId())));
 			resBaseInfo.setBrandInfo(brandInfo);
+			
+			//酒店星级
+			String hotelStar = h.getHotelStar();
+			switch (hotelStar) {
+			case "5.00"://23
+				//五星级
+				resBaseInfo.setResGradeId("23");
+				resBaseInfo.setResGrade("五星级");
+				break;
+			case "4.00"://24
+				//四星级
+				resBaseInfo.setResGradeId("24");
+				resBaseInfo.setResGrade("四星级");
+				break;
+			case "3.00"://26
+				//三星级
+				resBaseInfo.setResGradeId("26");
+				resBaseInfo.setResGrade("三星级");
+				break;
+			case "2.00":	//27
+				//二星及二星以下
+				resBaseInfo.setResGradeId("27");
+				resBaseInfo.setResGrade("经济型");
+				break;
+			case "1.00":	//27
+				//二星及二星以下
+				resBaseInfo.setResGradeId("27");
+				resBaseInfo.setResGrade("经济型");
+				break;
+			case "0.00":	//27
+				//二星及二星以下
+				resBaseInfo.setResGradeId("27");
+				resBaseInfo.setResGrade("经济型");
+				break;
+			}
 
 			resBaseInfo.setCityId(Integer.parseInt(h.getCityCode()));
 			resBaseInfo.setCityName(h.getCityName());
@@ -162,6 +198,32 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 					imgInfo.setImageName(i.getTitleName());
 					imgInfo.setImageUrl(i.getImageUrl());
 					imgInfo.setResId(h.getHotelId());
+					if (StringUtils.isNotBlank(i.getImageType())) {
+						String imageType = i.getImageType();
+						switch (imageType) {
+						case "1":
+							imgInfo.setImageLabel((byte)0);
+							break;
+						case "2":
+							imgInfo.setImageLabel((byte)9);
+							break;
+						case "4":
+							imgInfo.setImageLabel((byte)6);
+							break;
+						case "5":
+							imgInfo.setImageLabel((byte)11);
+							break;
+						case "6":
+							imgInfo.setImageLabel((byte)4);
+							break;
+						case "20":
+							imgInfo.setImageLabel((byte)20);
+							break;
+						case "15":
+							imgInfo.setImageLabel((byte)15);
+							break;
+						}
+					}
 				}
 			}
 			resBaseInfo.setImgInfoList(imgInfoList);
