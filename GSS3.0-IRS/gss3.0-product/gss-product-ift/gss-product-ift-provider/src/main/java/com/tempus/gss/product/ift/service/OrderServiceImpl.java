@@ -1085,6 +1085,7 @@ public class OrderServiceImpl implements IOrderService {
             }
             //设置采购币种
             saleOrderExt.setCurrency(listVo.getpVoList().get(0).getCurrency());
+            Long preLocker = saleOrderExt.getLocker();
             saleOrderExt.setLocker(0L);
             // 修改采购单信息
             updateBuyOrder(agent, saleOrderNo, payable, listVo, ticketNoArray.toString());
@@ -1105,7 +1106,7 @@ public class OrderServiceImpl implements IOrderService {
             saveLog(agent, saleOrderNo, logstr, transationOrderNo);
             log.info("出单操作成功");
             //销售员订单数量减一
-            subSaleOrderNum(agent);
+            subSaleOrderNum(agent,preLocker);
         } catch (Exception e) {
             log.error("国际机票出票异常", e);
             throw new GSSException("国际机票出票异常", "0102", "出单操作失败!" + e);
@@ -2724,12 +2725,17 @@ public class OrderServiceImpl implements IOrderService {
         iTicketSenderService.update(sender);
     }
     
-    private void subSaleOrderNum(Agent agent) {
+    private void subSaleOrderNum(Agent agent,Long locker) {
         try {
-            TicketSender ticketSender = iTicketSenderService.getTicketSenderByLoginId(agent.getAccount());
-            ticketSender.setOrdercount(ticketSender.getOrdercount() - 1);
-            log.info("更新出票员的订单数量" + ticketSender.toString());
-            iTicketSenderService.updateByPrimaryKey(ticketSender);
+            User user = userService.selectById(agent, locker);
+            if (user != null) {
+                TicketSender ticketSender = iTicketSenderService.getTicketSenderByLoginId(user.getLoginName());
+                if (ticketSender != null) {
+                    ticketSender.setOrdercount(ticketSender.getOrdercount() - 1);
+                    log.info("更新出票员的订单数量" + ticketSender.toString());
+                    iTicketSenderService.updateByPrimaryKey(ticketSender);
+                }
+            }
         } catch (Exception e) {
             log.error("更新出票员的出票订单数量异常", e);
         }
