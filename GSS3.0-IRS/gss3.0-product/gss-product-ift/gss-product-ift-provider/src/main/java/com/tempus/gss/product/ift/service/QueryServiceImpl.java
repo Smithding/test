@@ -137,7 +137,7 @@ public class QueryServiceImpl implements IQueryService {
         
         shoppingInput.setPsger(psger);
         List<ShoppingSeg> segs = new ArrayList<ShoppingSeg>();
-        ShoppingSeg shoppingSeg = new ShoppingSeg(flightQuery.getDepDate(),flightQuery.getArrAirport(),flightQuery.getDepAirport());
+		ShoppingSeg shoppingSeg = new ShoppingSeg(flightQuery.getDepDate(),flightQuery.getDepAirport(),flightQuery.getArrAirport());
         /*shoppingSeg.setDepartureDate(flightQuery.getDepDate());
         shoppingSeg.setDestinationLocation(flightQuery.getArrAirport());
         shoppingSeg.setOriginLocation(flightQuery.getDepAirport());*/
