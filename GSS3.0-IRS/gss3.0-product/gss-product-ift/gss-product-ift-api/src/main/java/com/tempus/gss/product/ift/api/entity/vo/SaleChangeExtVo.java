@@ -132,6 +132,7 @@ public class SaleChangeExtVo implements Serializable{
 	 * 状态 1:待处理(订单子状态为：1,locker:0)  
 	 * 23已处理 (订单子状态为：10,11 locker:0) 
 	 * 22处理中(订单子状态为：1,2 当子状态为1时locker为1  当子状态为2时locker为0 )
+	 * 24退票订单中的退款中有锁单操作(订单子状态为：1，2  当子状态为1时Locker为1  当子状态为2时Locker为1)只适用退票订单的退款中列表查询（因为该列表的子状态全部是2一开始没有点退票时locker为0，点击了退票又返回此时子状态为2locker为1所以22状态是查询不出来）
 	 */
 	private String status;
 

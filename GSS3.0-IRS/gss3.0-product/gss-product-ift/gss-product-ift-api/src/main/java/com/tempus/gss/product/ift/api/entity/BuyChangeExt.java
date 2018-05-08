@@ -79,6 +79,19 @@ public class BuyChangeExt implements Serializable {
 	 */
 	private String status;
 
+	/**
+	 * 审核改签备注 CHANGE_REMARK
+	 */
+	private String changeRemark;
+
+	public String getChangeRemark() {
+		return changeRemark;
+	}
+
+	public void setChangeRemark(String changeRemark) {
+		this.changeRemark = changeRemark;
+	}
+
 	public Long getBuyChangeNo() {
 
 		return buyChangeNo;

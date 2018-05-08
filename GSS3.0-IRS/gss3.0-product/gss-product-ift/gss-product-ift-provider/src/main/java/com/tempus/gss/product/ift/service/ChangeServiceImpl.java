@@ -95,9 +95,8 @@ public class ChangeServiceImpl implements IChangeService {
     IDifferenceOrderService differenceOrderService;
     @Autowired
     TicketSenderDao ticketSenderDao;
-    @Autowired
+    @Reference
     ITicketSenderService ticketSenderService;
-    
     @Override
     @Transactional
     public SaleChangeExt apiCreateChange(RequestWithActor<ChangeCreateVo> requestWithActor) {
@@ -613,7 +612,12 @@ public class ChangeServiceImpl implements IChangeService {
             log.info("修改采购状态" + saleChangeNo);
             saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 1);
             log.info("修改采购支付状态" + saleChangeNo);
-            
+            BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(saleChangeNo);
+            if(buyChangeExt != null){
+                log.info("修改审核备注" + buyChangeExt.getBuyChangeNo());
+                buyChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
+                buyChangeExtDao.updateByPrimaryKey(buyChangeExt);
+            }
             if (legList != null && legList.size() > 0) {
                 for (Leg leg : legList) {
                     legDao.updateByPrimaryKeySelective(leg);
@@ -1270,4 +1274,8 @@ public class ChangeServiceImpl implements IChangeService {
         return saleChangeExtDao.updateByPrimaryKey(salechangeExt);
     }
 
+    @Override
+    public BuyChangeExt getBuyChangeExtBySaleChangeNo(Long saleChangeNo) {
+        return buyChangeExtDao.selectBySaleChangeNo(saleChangeNo);
+    }
 }

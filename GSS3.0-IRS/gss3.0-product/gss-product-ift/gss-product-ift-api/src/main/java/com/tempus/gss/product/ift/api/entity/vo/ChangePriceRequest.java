@@ -66,7 +66,17 @@ public class ChangePriceRequest implements Serializable {
 	private String saleCurrency;
     //采购汇率
 	private BigDecimal exchangeRate;
-	
+	//审核备注
+	private String changeRemark;
+
+	public String getChangeRemark() {
+		return changeRemark;
+	}
+
+	public void setChangeRemark(String changeRemark) {
+		this.changeRemark = changeRemark;
+	}
+
 	public Long getSaleOrderNo() {
 		return saleOrderNo;
 	}
