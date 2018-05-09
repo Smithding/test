@@ -150,7 +150,7 @@ public class QueryServiceImpl implements IQueryService {
         }
         segs.add(shoppingSeg);
         if (null != flightQuery.getLegType() && 2 == flightQuery.getLegType()) {
-            shoppingSeg = new ShoppingSeg(flightQuery.getReturnDate(), flightQuery.getArrAirport(), flightQuery.getDepAirport());
+            shoppingSeg = new ShoppingSeg(flightQuery.getReturnDate(), flightQuery.getDepAirport(), flightQuery.getArrAirport());
             segs.add(shoppingSeg);
         }
         shoppingInput.setSegs(segs);
