@@ -175,4 +175,5 @@ public interface ITCHotelSupplierService {
 	 * @return
 	 */
 	public Boolean changeLuceneData(HotelName hotelName);
+	
 }
