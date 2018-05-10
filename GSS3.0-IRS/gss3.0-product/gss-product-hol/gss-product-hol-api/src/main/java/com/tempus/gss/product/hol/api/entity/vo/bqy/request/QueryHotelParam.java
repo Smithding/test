@@ -14,9 +14,9 @@ public class QueryHotelParam extends BaseQueryParam implements Serializable{
 	
 	private String CityCode;		//城市名称
 	
-	private Date CheckInTime;	//入住时间(2018-04-08)
+	private String CheckInTime;	//入住时间(2018-04-08)
 	
-	private Date CheckOutTime;//离店时间(2018-04-09)
+	private String CheckOutTime;//离店时间(2018-04-09)
 
 	public Long getHotelId() {
 		return HotelId;
@@ -34,19 +34,19 @@ public class QueryHotelParam extends BaseQueryParam implements Serializable{
 		CityCode = cityCode;
 	}
 
-	public Date getCheckInTime() {
+	public String getCheckInTime() {
 		return CheckInTime;
 	}
 
-	public void setCheckInTime(Date checkInTime) {
+	public void setCheckInTime(String checkInTime) {
 		CheckInTime = checkInTime;
 	}
 
-	public Date getCheckOutTime() {
+	public String getCheckOutTime() {
 		return CheckOutTime;
 	}
 
-	public void setCheckOutTime(Date checkOutTime) {
+	public void setCheckOutTime(String checkOutTime) {
 		CheckOutTime = checkOutTime;
 	}
 
