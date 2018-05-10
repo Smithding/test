@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.common.entity.RequestWithActor;
+import com.tempus.gss.product.ift.api.entity.BuyChangeExt;
 import com.tempus.gss.product.ift.api.entity.PassengerChangePrice;
 import com.tempus.gss.product.ift.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ift.api.entity.vo.*;
@@ -125,4 +126,9 @@ public interface IChangeService {
 	int orderChangeInform(OrderInformVo orderInformVo);
 
 	int updateByPrimarykey(SaleChangeExt salechangeExt);
+
+	/**
+	 * 获取改签审核信息
+	 */
+	BuyChangeExt getBuyChangeExtBySaleChangeNo(Long saleChangeNo);
 }

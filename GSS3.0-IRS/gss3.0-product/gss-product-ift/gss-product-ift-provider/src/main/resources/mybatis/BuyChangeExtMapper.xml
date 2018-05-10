@@ -24,16 +24,31 @@
     <result column="VALID" property="valid" jdbcType="TINYINT" />
     <!--启用状态 1：启用，2：停用-->
     <result column="STATUS" property="status" jdbcType="VARCHAR" />
+    <result column="CHANGE_REMARK" property="changeRemark" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
     BUY_CHANGE_NO, ID, OWNER, OFFICE, TICKET_TYPE, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME, 
-    VALID, STATUS
+    VALID, STATUS, CHANGE_REMARK
+  </sql>
+  <sql id="Join_Column_List" >
+    h.BUY_CHANGE_NO, h.ID, h.OWNER, h.OFFICE, h.TICKET_TYPE, h.CREATOR, h.CREATE_TIME, h.MODIFIER, h.MODIFY_TIME,
+    h.VALID, h.STATUS, h.CHANGE_REMARK
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
     <include refid="Base_Column_List" />
     from IFT_BUY_CHANGE_EXT
     where BUY_CHANGE_NO = #{buyChangeNo,jdbcType=BIGINT}
+  </select>
+  <select id="selectBySaleChangeNo" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select
+    <include refid="Join_Column_List" />
+    from IFT_BUY_CHANGE_EXT h
+    left join OS_BUYCHANGE m on h.BUY_CHANGE_NO = m.BUY_CHANGE_NO
+    left join OS_BUYORDER k on m.BUY_ORDER_NO = k.BUY_ORDER_NO
+    left join OS_SALECHANGE o on k.SALE_ORDER_NO = o.SALE_ORDER_NO
+    left join IFT_SALE_CHANGE_EXT i on o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
+    where i.SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from IFT_BUY_CHANGE_EXT
@@ -43,11 +58,11 @@
     insert into IFT_BUY_CHANGE_EXT (BUY_CHANGE_NO, ID, OWNER, 
       OFFICE, TICKET_TYPE, CREATOR, 
       CREATE_TIME, MODIFIER, MODIFY_TIME, 
-      VALID, STATUS)
+      VALID, STATUS, CHANGE_REMARK)
     values (#{buyChangeNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER}, 
       #{office,jdbcType=VARCHAR}, #{ticketType,jdbcType=INTEGER}, #{creator,jdbcType=VARCHAR}, 
       #{createTime,jdbcType=TIMESTAMP}, #{modifier,jdbcType=VARCHAR}, #{modifyTime,jdbcType=TIMESTAMP}, 
-      #{valid,jdbcType=TINYINT}, #{status,jdbcType=VARCHAR})
+      #{valid,jdbcType=TINYINT}, #{status,jdbcType=VARCHAR}, #{changeRemark,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.BuyChangeExt" >
     insert into IFT_BUY_CHANGE_EXT
@@ -85,6 +100,9 @@
       <if test="status != null" >
         STATUS,
       </if>
+      <if test="changeRemark != null" >
+        CHANGE_REMARK,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="buyChangeNo != null" >
@@ -119,6 +137,9 @@
       </if>
       <if test="status != null" >
         #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="changeRemark != null" >
+        #{changeRemark,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -155,6 +176,9 @@
       <if test="status != null" >
         STATUS = #{status,jdbcType=VARCHAR},
       </if>
+      <if test="changeRemark != null" >
+        CHANGE_REMARK = #{changeRemark,jdbcType=VARCHAR},
+      </if>
     </set>
     where BUY_CHANGE_NO = #{buyChangeNo,jdbcType=BIGINT}
   </update>
@@ -169,7 +193,8 @@
       MODIFIER = #{modifier,jdbcType=VARCHAR},
       MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
       VALID = #{valid,jdbcType=TINYINT},
-      STATUS = #{status,jdbcType=VARCHAR}
+      STATUS = #{status,jdbcType=VARCHAR},
+      CHANGE_REMARK = #{changeRemark,jdbcType=VARCHAR}
     where BUY_CHANGE_NO = #{buyChangeNo,jdbcType=BIGINT}
   </update>
 </mapper>

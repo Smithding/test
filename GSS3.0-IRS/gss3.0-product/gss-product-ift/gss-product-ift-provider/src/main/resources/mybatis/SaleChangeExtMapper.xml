@@ -724,6 +724,9 @@
             <if test="status == 22">
                 AND ((o.CHILD_STATUS =1 and i.LOCKER !=0 ) or (o.CHILD_STATUS=2 and i.LOCKER=0))
             </if>
+            <if test="status == 24">
+                AND ((o.CHILD_STATUS =1 and i.LOCKER !=0 ) or (o.CHILD_STATUS=2 ))
+            </if>
             <if test="payStatus!=null">
                 AND o.PAY_STATUS in
                 <foreach collection="payStatus" item="payStatus"
