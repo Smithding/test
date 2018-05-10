@@ -2,6 +2,7 @@ package com.tempus.gss.product.hol.service;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -21,10 +22,20 @@ import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ProDetails;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelEntity;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.ImageList;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomType;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BaseRoomInfo;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BedTypeInfoItem;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomInfoItem;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
+import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
 import com.tempus.gss.vo.Agent;
 
@@ -33,6 +44,9 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 
 	@Autowired
 	MongoTemplate mongoTemplate;
+	
+	@Autowired
+	private IBQYHotelInterService bqyHotelInterService;
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -139,106 +153,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 		List<HotelInfo> hotelList = hotelResult.getResponseResult();
 		List<ResBaseInfo> resList = new ArrayList<>();
 		for (HotelInfo h : hotelList) {
-			ResBaseInfo resBaseInfo = new ResBaseInfo();
-			resBaseInfo.setAddress(h.getAddress());
-			// 酒店品牌
-			ResBrandInfo brandInfo = new ResBrandInfo();
-			brandInfo.setResBrandName(h.getHotelBrandName());
-			brandInfo.setId(Long.parseLong(String.valueOf(h.getHotelBrandId())));
-			resBaseInfo.setBrandInfo(brandInfo);
-			
-			//酒店星级
-			String hotelStar = h.getHotelStar();
-			switch (hotelStar) {
-			case "5.00"://23
-				//五星级
-				resBaseInfo.setResGradeId("23");
-				resBaseInfo.setResGrade("五星级");
-				break;
-			case "4.00"://24
-				//四星级
-				resBaseInfo.setResGradeId("24");
-				resBaseInfo.setResGrade("四星级");
-				break;
-			case "3.00"://26
-				//三星级
-				resBaseInfo.setResGradeId("26");
-				resBaseInfo.setResGrade("三星级");
-				break;
-			case "2.00":	//27
-				//二星及二星以下
-				resBaseInfo.setResGradeId("27");
-				resBaseInfo.setResGrade("经济型");
-				break;
-			case "1.00":	//27
-				//二星及二星以下
-				resBaseInfo.setResGradeId("27");
-				resBaseInfo.setResGrade("经济型");
-				break;
-			case "0.00":	//27
-				//二星及二星以下
-				resBaseInfo.setResGradeId("27");
-				resBaseInfo.setResGrade("经济型");
-				break;
-			}
-
-			resBaseInfo.setCityId(Integer.parseInt(h.getCityCode()));
-			resBaseInfo.setCityName(h.getCityName());
-			resBaseInfo.setLocation(h.getRoadCross());
-			resBaseInfo.setId(h.getId());
-			resBaseInfo.setResId(h.getId());
-
-			// 酒店图片
-			// TODO 酒店图片类型待定
-			List<ImgInfo> imgInfoList = new ArrayList<>();
-			List<ImageList> hotelImageList = h.getHotelImageList();
-			if (null != hotelImageList && hotelImageList.size() > 0) {
-				for (ImageList i : hotelImageList) {
-					ImgInfo imgInfo = new ImgInfo();
-					imgInfo.setImageName(i.getTitleName());
-					imgInfo.setImageUrl(i.getImageUrl());
-					imgInfo.setResId(h.getHotelId());
-					if (StringUtils.isNotBlank(i.getImageType())) {
-						String imageType = i.getImageType();
-						switch (imageType) {
-						case "1":
-							imgInfo.setImageLabel((byte)0);
-							break;
-						case "2":
-							imgInfo.setImageLabel((byte)9);
-							break;
-						case "4":
-							imgInfo.setImageLabel((byte)6);
-							break;
-						case "5":
-							imgInfo.setImageLabel((byte)11);
-							break;
-						case "6":
-							imgInfo.setImageLabel((byte)4);
-							break;
-						case "20":
-							imgInfo.setImageLabel((byte)20);
-							break;
-						case "15":
-							imgInfo.setImageLabel((byte)15);
-							break;
-						}
-					}
-				}
-			}
-			resBaseInfo.setImgInfoList(imgInfoList);
-
-			resBaseInfo.setLatestUpdateTime(h.getLatestUpdateTime());
-			if (null != h.getLowPrice()) {
-				resBaseInfo.setMinPrice(h.getLowPrice().intValue());
-				resBaseInfo.setResCommonPrice(h.getLowPrice().intValue());
-			}
-			resBaseInfo.setResName(h.getHotelName());
-			resBaseInfo.setSaleStatus(h.getSaleStatus());
-			resBaseInfo.setResPhone(h.getMobile());
-			resBaseInfo.setShortIntro(h.getDescription());
-			resBaseInfo.setIntro(h.getDescription());
-			resBaseInfo.setSupplierNo(h.getSupplierNo());
+			ResBaseInfo resBaseInfo = bqyConvertTcHotelEntity(h);
 			resList.add(resBaseInfo);
 		}
 		TCResponse<ResBaseInfo> result = new TCResponse<>();
@@ -271,4 +186,168 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 		return 1;
 	}
 
+	@Override
+	public ResBaseInfo singleHotelDetail(String hotelId) {
+		Criteria criteria = Criteria.where("_id").is(Long.parseLong(hotelId));
+		List<HotelInfo> hotelList = mongoTemplate.find(new Query(criteria),HotelInfo.class);
+		if (null != hotelList && hotelList.size() > 0) {
+			HotelInfo hotelInfo = hotelList.get(0);
+			ResBaseInfo resBaseInfo = bqyConvertTcHotelEntity(hotelInfo);
+			QueryHotelParam query = new QueryHotelParam();
+			Calendar date = Calendar.getInstance();  
+	        Calendar dateAdd = Calendar.getInstance();
+	        dateAdd.add(Calendar.MONTH, 2);
+	        dateAdd.add(Calendar.DAY_OF_MONTH, -1);
+			query.setCityCode(hotelInfo.getCityCode());
+			query.setHotelId(hotelInfo.getHotelId());
+			query.setCheckInTime(sdf.format(date.getTime()));
+			query.setCheckOutTime(sdf.format(dateAdd.getTime()));
+			HotelEntity hotelEntity = bqyHotelInterService.queryHotelDetail(query);
+			List<RoomPriceItem> roomPriceItemList = hotelEntity.getRoomPriceItem();
+			
+			if (null != roomPriceItemList && roomPriceItemList.size() > 0) {
+				List<ProDetails> proDetails = new ArrayList<>();
+				
+				for (RoomPriceItem roomPriceItem : roomPriceItemList) {
+					ProDetails proDetail = new ProDetails();
+					BaseRoomInfo baseRoomInfo = roomPriceItem.getBaseRoomInfo();
+					proDetail.setProId(baseRoomInfo.getRoomTypeID());
+					proDetail.setResProName(baseRoomInfo.getRoomName());
+					proDetail.setRoomFloor(baseRoomInfo.getFloorRange());
+					proDetail.setRoomSize(baseRoomInfo.getAreaRange());
+					List<RoomInfoItem> roomInfoList = roomPriceItem.getRoomInfo();
+					List<ResProBaseInfo> resProBaseInfos = new ArrayList<>();
+					for (RoomInfoItem roomInfo : roomInfoList) {
+						ResProBaseInfo resProBaseInfo = new ResProBaseInfo();
+						resProBaseInfo.setResId(Long.parseLong(hotelId));
+						//产品名称
+						resProBaseInfo.setSupPriceName(roomInfo.getRoomName());
+						List<BedTypeInfoItem> roomTypeList = baseRoomInfo.getRoomTypeId();
+						//床型
+						if (null != roomTypeList && roomTypeList.size() > 0){
+							resProBaseInfo.setBedTypeName(roomTypeList.get(0).getBedType()+"\\" + roomTypeList.get(0).getBedName());
+						}
+						//房间ID
+						resProBaseInfo.setProductUniqueId(Integer.parseInt(roomInfo.getRoomID()));
+						//TODO 	是否无烟
+						//TODO	是否有宽带
+						//TODO	是否有早餐
+					}
+					proDetails.add(proDetail);
+				}
+				resBaseInfo.setProDetails(proDetails);
+			}
+			
+			return resBaseInfo;
+		}
+		return null;
+	}
+
+	/**
+	 * bqy酒店信息转换tc实体
+	 * @param hotel
+	 * @return
+	 */
+	private ResBaseInfo bqyConvertTcHotelEntity(HotelInfo hotel) {
+		ResBaseInfo resBaseInfo = new ResBaseInfo();
+		resBaseInfo.setAddress(hotel.getAddress());
+		// 酒店品牌
+		ResBrandInfo brandInfo = new ResBrandInfo();
+		brandInfo.setResBrandName(hotel.getHotelBrandName());
+		brandInfo.setId(Long.parseLong(String.valueOf(hotel.getHotelBrandId())));
+		resBaseInfo.setBrandInfo(brandInfo);
+		
+		//酒店星级
+		String hotelStar = hotel.getHotelStar();
+		switch (hotelStar) {
+		case "5.00"://23
+			//五星级
+			resBaseInfo.setResGradeId("23");
+			resBaseInfo.setResGrade("五星级");
+			break;
+		case "4.00"://24
+			//四星级
+			resBaseInfo.setResGradeId("24");
+			resBaseInfo.setResGrade("四星级");
+			break;
+		case "3.00"://26
+			//三星级
+			resBaseInfo.setResGradeId("26");
+			resBaseInfo.setResGrade("三星级");
+			break;
+		case "2.00":	//27
+			//二星及二星以下
+			resBaseInfo.setResGradeId("27");
+			resBaseInfo.setResGrade("经济型");
+			break;
+		case "1.00":	//27
+			//二星及二星以下
+			resBaseInfo.setResGradeId("27");
+			resBaseInfo.setResGrade("经济型");
+			break;
+		case "0.00":	//27
+			//二星及二星以下
+			resBaseInfo.setResGradeId("27");
+			resBaseInfo.setResGrade("经济型");
+			break;
+		}
+
+		resBaseInfo.setCityId(Integer.parseInt(hotel.getCityCode()));
+		resBaseInfo.setCityName(hotel.getCityName());
+		resBaseInfo.setLocation(hotel.getRoadCross());
+		resBaseInfo.setId(hotel.getId());
+		resBaseInfo.setResId(hotel.getId());
+
+		// 酒店图片
+		List<ImgInfo> imgInfoList = new ArrayList<>();
+		List<ImageList> hotelImageList = hotel.getHotelImageList();
+		if (null != hotelImageList && hotelImageList.size() > 0) {
+			for (ImageList i : hotelImageList) {
+				ImgInfo imgInfo = new ImgInfo();
+				imgInfo.setImageName(i.getTitleName());
+				imgInfo.setImageUrl(i.getImageUrl());
+				imgInfo.setResId(hotel.getHotelId());
+				if (StringUtils.isNotBlank(i.getImageType())) {
+					String imageType = i.getImageType();
+					switch (imageType) {
+					case "1":
+						imgInfo.setImageLabel((byte)0);
+						break;
+					case "2":
+						imgInfo.setImageLabel((byte)9);
+						break;
+					case "4":
+						imgInfo.setImageLabel((byte)6);
+						break;
+					case "5":
+						imgInfo.setImageLabel((byte)11);
+						break;
+					case "6":
+						imgInfo.setImageLabel((byte)4);
+						break;
+					case "20":
+						imgInfo.setImageLabel((byte)20);
+						break;
+					case "15":
+						imgInfo.setImageLabel((byte)15);
+						break;
+					}
+				}
+			}
+		}
+		resBaseInfo.setImgInfoList(imgInfoList);
+
+		resBaseInfo.setLatestUpdateTime(hotel.getLatestUpdateTime());
+		if (null != hotel.getLowPrice()) {
+			resBaseInfo.setMinPrice(hotel.getLowPrice().intValue());
+			resBaseInfo.setResCommonPrice(hotel.getLowPrice().intValue());
+		}
+		resBaseInfo.setResName(hotel.getHotelName());
+		resBaseInfo.setSaleStatus(hotel.getSaleStatus());
+		resBaseInfo.setResPhone(hotel.getMobile());
+		resBaseInfo.setShortIntro(hotel.getDescription());
+		resBaseInfo.setIntro(hotel.getDescription());
+		resBaseInfo.setSupplierNo(hotel.getSupplierNo());
+		return resBaseInfo;
+	}
 }

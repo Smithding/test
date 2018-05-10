@@ -550,4 +550,5 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	}
 
 }
+
  

@@ -107,5 +107,5 @@ public interface IBQYHotelInterService{
 	 * 删除MongoDB数据
 	 */
 	void deleteMongoDBData();
-	
+
 }
