@@ -233,7 +233,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 
 	@Override
 	@Async
-	public Future<TCResponse<ResBaseInfo>> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException{
+	public TCResponse<ResBaseInfo> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException{
 		System.out.println("开始做任务一");  
         long start = System.currentTimeMillis();
         System.out.println("f1 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
@@ -549,9 +549,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		log.info("查询酒店列表结束");
 		long end = System.currentTimeMillis();  
         System.out.println("完成任务一，耗时：" + (end - start) + "毫秒");  
-		//return response;
+		return response;
         
-		return new AsyncResult<TCResponse<ResBaseInfo>>(response);
+		//return new AsyncResult<TCResponse<ResBaseInfo>>(response);
 	}
 	
 	
