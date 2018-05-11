@@ -154,10 +154,10 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 
 	@Override
 	@Async
-	public TCResponse<ResBaseInfo> queryHotelList(HotelListSearchReq hotelSearchReq) {
-		System.out.println("开始做任务二");  
-        long start = System.currentTimeMillis();
-		System.out.println("f2 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
+	public Future<TCResponse<ResBaseInfo>> queryHotelList(HotelListSearchReq hotelSearchReq) {
+		//System.out.println("开始做任务二");  
+        //long start = System.currentTimeMillis();
+		//System.out.println("f2 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
 		TCResponse<HotelInfo> hotelResult = queryHotelListForBack(hotelSearchReq);
 		List<HotelInfo> hotelList = hotelResult.getResponseResult();
 		List<ResBaseInfo> resList = new ArrayList<>();
@@ -170,10 +170,10 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 		result.setPageNumber(hotelResult.getPageNumber());
 		result.setTotalCount(hotelResult.getTotalCount());
 		result.setTotalPatge(hotelResult.getTotalPatge());
-		long end = System.currentTimeMillis();  
-        System.out.println("完成任务二，耗时：" + (end - start) + "毫秒");  
-		//return new AsyncResult<TCResponse<ResBaseInfo>>(result);
-		return result;
+		//long end = System.currentTimeMillis();  
+       // System.out.println("完成任务二，耗时：" + (end - start) + "毫秒");  
+		return new AsyncResult<TCResponse<ResBaseInfo>>(result);
+		//return result;
 	}
 
 	@Override
