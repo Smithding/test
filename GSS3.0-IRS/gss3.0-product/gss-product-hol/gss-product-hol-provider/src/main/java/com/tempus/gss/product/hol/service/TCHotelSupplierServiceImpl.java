@@ -902,7 +902,8 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	
 	
 	@Override
-	public TCResponse<ResBaseInfo> queryHotelListForBack(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException{
+	@Async
+	public Future<TCResponse<ResBaseInfo>> queryHotelListForBack(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException{
 		log.info("查询酒店列表开始");
         if (StringUtil.isNullOrEmpty(hotelSearchReq)) {
             log.error("hotelSearchReq查询条件为空");
@@ -961,7 +962,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
             throw new GSSException("获取酒店列表出错", "0109", "获取酒店列表出错");
 		}
         
-		return response;
+		return new AsyncResult<TCResponse<ResBaseInfo>>(response);
 	}
 
 	@Override

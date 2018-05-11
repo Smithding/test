@@ -58,5 +58,42 @@ public class ISyncHotelInfoImpl implements ISyncHotelInfo {
 		return tcResponse;
 		//return null;
 	}
+
+	@Override
+	public TCResponse<ResBaseInfo> queryHotelListForBack(Agent agent, HotelListSearchReq hotelSearchReq)
+			throws GSSException {
+		Future<TCResponse<ResBaseInfo>> queryHotelList = iTCHotelSupplierService.queryHotelListForBack(agent, hotelSearchReq);
+		Future<TCResponse<ResBaseInfo>> queryHotelList2 = iBQYHotelSupplierService.queryHotelList(hotelSearchReq);
+		TCResponse<ResBaseInfo> tcResponse = null;
+		TCResponse<ResBaseInfo> bqyResponse = null;
+		try {
+			//Future<TCResponse<ResBaseInfo>> future = RpcContext.getContext().getFuture();
+			
+			while(true) {
+				if(queryHotelList.isDone() && queryHotelList2.isDone()) {
+					tcResponse = queryHotelList.get();
+					bqyResponse = queryHotelList2.get();
+					/*System.out.println("bqy Size: "+bqyResponse.getResponseResult().size());
+					System.out.println(JsonUtil.toJson(bqyResponse.getResponseResult()));
+					for(ResBaseInfo rs : bqyResponse.getResponseResult()) {
+						System.out.println("bqy: "+rs.getResName());
+					}*/
+					break;
+				}
+			}
+			if(StringUtil.isNullOrEmpty(hotelSearchReq.getAirRailWay())) {
+				
+			}
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+		
+		return tcResponse;
+		//return null;
+	}
 	
 }	
