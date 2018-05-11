@@ -25,7 +25,7 @@ public interface IBQYHotelSupplierService {
 	 * @param hotelSearchReq
 	 * @return
 	 */
-	Future<TCResponse<ResBaseInfo>> queryHotelList(HotelListSearchReq hotelSearchReq);
+	TCResponse<ResBaseInfo> queryHotelList(HotelListSearchReq hotelSearchReq);
 	
 	/**
 	 * 修改酒店可售状态
