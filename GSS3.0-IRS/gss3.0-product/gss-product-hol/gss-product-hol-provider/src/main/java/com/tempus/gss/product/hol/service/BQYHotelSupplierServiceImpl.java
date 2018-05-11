@@ -154,7 +154,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 
 	@Override
 	@Async
-	public Future<TCResponse<ResBaseInfo>> queryHotelList(HotelListSearchReq hotelSearchReq) {
+	public TCResponse<ResBaseInfo> queryHotelList(HotelListSearchReq hotelSearchReq) {
 		System.out.println("开始做任务二");  
         long start = System.currentTimeMillis();
 		System.out.println("f2 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
@@ -172,8 +172,8 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 		result.setTotalPatge(hotelResult.getTotalPatge());
 		long end = System.currentTimeMillis();  
         System.out.println("完成任务二，耗时：" + (end - start) + "毫秒");  
-		return new AsyncResult<TCResponse<ResBaseInfo>>(result);
-		//return result;
+		//return new AsyncResult<TCResponse<ResBaseInfo>>(result);
+		return result;
 	}
 
 	@Override
