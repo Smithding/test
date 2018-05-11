@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.UUID;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -57,10 +59,13 @@ import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.wltea.analyzer.lucene.IKAnalyzer;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.dubbo.rpc.RpcContext;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.tempus.gss.bbp.util.StringUtil;
@@ -86,6 +91,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ResInfoList;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResTrafficInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.TCHotelDetailResult;
+import com.tempus.gss.product.hol.api.service.FutureResult;
 import com.tempus.gss.product.hol.api.service.IHolProfitService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
@@ -226,7 +232,11 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	}
 
 	@Override
-	public TCResponse<ResBaseInfo> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException{
+	@Async
+	public Future<TCResponse<ResBaseInfo>> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException{
+		System.out.println("开始做任务一");  
+        long start = System.currentTimeMillis();
+        System.out.println("f1 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
 		log.info("查询酒店列表开始");
         if (StringUtil.isNullOrEmpty(hotelSearchReq)) {
             log.error("hotelSearchReq查询条件为空");
@@ -372,7 +382,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
  	        	throw new GSSException("获取酒店列表", "0999", "时间选择不对,只能选择即日起两个月之内的日期");
  	        }
  		
-        if(StringUtil.isNotNullOrEmpty(res)){
+        /*if(StringUtil.isNotNullOrEmpty(res)){
         	for(ResBaseInfo rs: res){
             	//Map<String, List<ResProBaseInfo>> proMap= rs.getProMap();
             	List<ProDetails> lii = rs.getProDetails();
@@ -402,19 +412,19 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
                      				}
                         			//List<Integer> proInventory = new ArrayList<Integer>();
                         			//List<Integer> guaranteeType = new ArrayList<Integer>();
-                        			/*if(proInfoDetail != null && proInfoDetail.getProSaleInfoDetails() == null){
+                        			if(proInfoDetail != null && proInfoDetail.getProSaleInfoDetails() == null){
                         				 iter.remove();
                         				 if(p.size() == 0){
                         					 iterlii.remove();	
                         				 }
-                        			}*/
+                        			}
                             		if(StringUtil.isNotNullOrEmpty(proInfoDetail) && StringUtil.isNotNullOrEmpty(proInfoDetail.getProSaleInfoDetails())){
-                            			/*if(!proInfoDetail.getProSaleInfoDetails().containsKey(DateUtil.stringToLonString(hotelSearchReq.getBegin()))){
+                            			if(!proInfoDetail.getProSaleInfoDetails().containsKey(DateUtil.stringToLonString(hotelSearchReq.getBegin()))){
                             				 iter.remove();
                             				 if(p.size() == 0){
                             					 iterlii.remove();
                             				 }
-                            			}*/
+                            			}
                             			if(proInfoDetail.getProSaleInfoDetails().containsKey(DateUtil.stringToLonString(hotelSearchReq.getBegin()))){
                             				Integer firProPrice = proInfoDetail.getProSaleInfoDetails().get(DateUtil.stringToLonString(hotelSearchReq.getBegin())).getDistributionSalePrice();
                             				
@@ -468,7 +478,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
             			rs.setProDetails(lii);
             		}
             	}
-        	}
+        	}*/
         } catch (Exception e) {
         	log.error("查询酒店列表异常：",e);
  		}
@@ -478,7 +488,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
   		int totalPage= (int)(count/hotelSearchReq.getRowCount()+1);
   		response.setTotalPatge(Integer.valueOf(totalPage));
   		response.setTotalCount(Integer.valueOf(count));
-		if(StringUtil.isNotNullOrEmpty(res)){
+		/*if(StringUtil.isNotNullOrEmpty(res)){
 				for(ResBaseInfo resInfo : res){
 					if(StringUtil.isNotNullOrEmpty(resInfo)){
 						List<ProDetails> proDetails = resInfo.getProDetails();
@@ -532,9 +542,16 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 					}
 				}
 			response.setResponseResult(res);
-		}
+		}*/
+  		response.setResponseResult(res);
+  		//Future<TCResponse<ResBaseInfo>> rrr = new AsyncResult<TCResponse<ResBaseInfo>>(response);
+  		//RpcContext.getContext().setFuture(rrr);
 		log.info("查询酒店列表结束");
-		return response;
+		long end = System.currentTimeMillis();  
+        System.out.println("完成任务一，耗时：" + (end - start) + "毫秒");  
+		//return response;
+        
+		return new AsyncResult<TCResponse<ResBaseInfo>>(response);
 	}
 	
 	
