@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.Future;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +17,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.tempus.gss.bbp.util.StringUtil;
@@ -35,6 +39,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BaseRoomInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BedTypeInfoItem;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomInfoItem;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
+import com.tempus.gss.product.hol.api.service.FutureResult;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
 import com.tempus.gss.vo.Agent;
@@ -148,7 +153,11 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 	}
 
 	@Override
-	public TCResponse<ResBaseInfo> queryHotelList(HotelListSearchReq hotelSearchReq) {
+	@Async
+	public Future<TCResponse<ResBaseInfo>> queryHotelList(HotelListSearchReq hotelSearchReq) {
+		//System.out.println("开始做任务二");  
+        //long start = System.currentTimeMillis();
+		//System.out.println("f2 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
 		TCResponse<HotelInfo> hotelResult = queryHotelListForBack(hotelSearchReq);
 		List<HotelInfo> hotelList = hotelResult.getResponseResult();
 		List<ResBaseInfo> resList = new ArrayList<>();
@@ -161,7 +170,10 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 		result.setPageNumber(hotelResult.getPageNumber());
 		result.setTotalCount(hotelResult.getTotalCount());
 		result.setTotalPatge(hotelResult.getTotalPatge());
-		return result;
+		//long end = System.currentTimeMillis();  
+       // System.out.println("完成任务二，耗时：" + (end - start) + "毫秒");  
+		return new AsyncResult<TCResponse<ResBaseInfo>>(result);
+		//return result;
 	}
 
 	@Override

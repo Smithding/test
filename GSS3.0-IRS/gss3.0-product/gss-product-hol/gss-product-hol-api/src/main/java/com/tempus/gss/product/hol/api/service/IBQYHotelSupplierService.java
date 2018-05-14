@@ -1,5 +1,7 @@
 package com.tempus.gss.product.hol.api.service;
 
+import java.util.concurrent.Future;
+
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
@@ -23,7 +25,7 @@ public interface IBQYHotelSupplierService {
 	 * @param hotelSearchReq
 	 * @return
 	 */
-	TCResponse<ResBaseInfo> queryHotelList(HotelListSearchReq hotelSearchReq);
+	Future<TCResponse<ResBaseInfo>> queryHotelList(HotelListSearchReq hotelSearchReq);
 	
 	/**
 	 * 修改酒店可售状态
