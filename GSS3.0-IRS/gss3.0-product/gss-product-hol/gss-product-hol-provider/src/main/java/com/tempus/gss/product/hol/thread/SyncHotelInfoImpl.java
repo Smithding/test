@@ -16,7 +16,7 @@ import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
 import com.tempus.gss.vo.Agent;
 
 @Service
-public class ISyncHotelInfoImpl implements ISyncHotelInfo {
+public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	@Autowired
 	private ITCHotelSupplierService iTCHotelSupplierService;
 	
