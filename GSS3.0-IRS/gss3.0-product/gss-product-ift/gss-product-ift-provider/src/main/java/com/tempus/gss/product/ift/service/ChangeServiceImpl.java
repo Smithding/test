@@ -608,22 +608,10 @@ public class ChangeServiceImpl implements IChangeService {
             handle(requestWithActor, chdList);
             handle(requestWithActor, infList);
             Long saleChangeNo = requestWithActor.getEntity().getSaleChangeNo();
-            //判断费用是否为0
-            if(isNoFee(requestWithActor.getEntity().getSaleAdtPriceList())){
-                saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 3);
-                log.info("修改采购状态" + saleChangeNo);
-               /* saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 3);
-                log.info("修改采购支付状态" + saleChangeNo);*/
-            } else{
-                saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 2);
-                log.info("修改采购状态" + saleChangeNo);
-                saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 1);
-                log.info("修改采购支付状态" + saleChangeNo);
-            }
-                /*saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 2);
-                log.info("修改采购状态" + saleChangeNo);
-                saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 1);
-                log.info("修改采购支付状态" + saleChangeNo);*/
+            saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 2);
+            log.info("修改采购状态" + saleChangeNo);
+            saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 1);
+            log.info("修改采购支付状态" + saleChangeNo);
             BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(saleChangeNo);
             if(buyChangeExt != null){
                 log.info("修改审核备注" + buyChangeExt.getBuyChangeNo());
@@ -656,32 +644,7 @@ public class ChangeServiceImpl implements IChangeService {
         }
         return true;
     }
-
-    private boolean isNoFee(List<ChangePriceVo> saleAdtPriceList) {
-
-        boolean isNoFee = false;
-        BigDecimal all = new BigDecimal(0);
-        if(saleAdtPriceList == null )
-            return true;
-        for (ChangePriceVo changePriceVo : saleAdtPriceList) {
-           all = all.add(changePriceVo.getSalePrice());
-           all = all.add(changePriceVo.getSaleTax());
-           all = all.add(changePriceVo.getSaleBrokerage());
-           all = all.add(changePriceVo.getSaleRest());
-           all = all.add(changePriceVo.getCountPrice());
-           all = all.add(changePriceVo.getBuyPrice());
-           all = all.add(changePriceVo.getBuyTax());
-           all = all.add(changePriceVo.getBuyBrokerage());
-           all = all.add(changePriceVo.getBuyRest());
-           all = all.add(changePriceVo.getBuyCountPrice());
-        }
-        BigDecimal zore = new BigDecimal("0");
-        if(all.compareTo(zore) <= 0){
-            isNoFee = true;
-        }
-        return isNoFee;
-    }
-
+    
     public boolean handle(RequestWithActor<ChangePriceRequest> requestWithActor, List<ChangePriceVo> voList) {
         boolean flag = false;
         if (voList == null) {
