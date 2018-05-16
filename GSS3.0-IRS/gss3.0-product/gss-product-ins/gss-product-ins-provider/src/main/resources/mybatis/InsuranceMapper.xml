@@ -418,6 +418,9 @@
       <if test="del != null" >
         DEL = #{del,jdbcType=INTEGER},
       </if>
+      <if test="internatOrcivil != null" >
+        INTERNAT_ORCIVIL = #{internatOrcivil,jdbcType=INTEGER},
+      </if>
     </set>
     where INSURANCE_NO = #{insuranceNo,jdbcType=BIGINT}
   </update>
