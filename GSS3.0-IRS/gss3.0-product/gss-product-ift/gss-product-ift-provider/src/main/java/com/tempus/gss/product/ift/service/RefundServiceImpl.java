@@ -267,6 +267,7 @@ public class RefundServiceImpl implements IRefundService {
 			saleChange.setChildStatus(1);// 1.待审核 2.已审核 3.退票中 废票中 改签中 10.已完成
 			// 11.已取消
 			saleChange.setChangeReason(requestWithActor.getEntity().getRefundReason());
+			saleChange.setKeepSeat(requestWithActor.getEntity().getKeepSeat());// 默认 0.不留席位,1 留席位
 			saleChange.setGoodsType(2);// 商品大类 2=国际机票
 			saleChange.setGoodsSubType(12);// 销售退单
 			saleChange.setGoodsName("");// TODO
