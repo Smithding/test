@@ -10,7 +10,11 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ResGPSInfo;
 
 public class HolMidBaseInfo implements Serializable{
 	private static final long serialVersionUID = 1L;
-	
+	/**
+	 * 主键ID同酒店id
+	 */
+	@JSONField(name = "Id")
+	private String id;
 	/**
 	 * 酒店id
 	 */
@@ -145,6 +149,14 @@ public class HolMidBaseInfo implements Serializable{
 	private String bookInfo;
 	
 	private List<Object> bookItems;
+	
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public Long getResId() {
 		return resId;
