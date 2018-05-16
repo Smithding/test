@@ -50,6 +50,19 @@ public class RefundCreateVo implements Serializable{
 	public String refundReason;
 
 	/**
+	 * 是否保留席位
+	 * 1 保留 2 不保留
+	 */
+	private Integer keepSeat;
+
+
+	/**
+
+	 * 其他原因
+	 *//*
+	public String otherReason;
+*/
+	/**
 	 * 图片文件路径
 	 */
 	public String refundFileUrl;
@@ -146,6 +159,19 @@ public class RefundCreateVo implements Serializable{
 	public void setCustomerRemark(String customerRemark) {
 		this.customerRemark = customerRemark;
 	}
-	
-	
+
+	/*public String getOtherReason() {
+		return otherReason;
+	}
+
+	public void setOtherReason(String otherReason) {
+		this.otherReason = otherReason;
+	}*/
+	public Integer getKeepSeat() {
+		return keepSeat;
+	}
+
+	public void setKeepSeat(Integer keepSeat) {
+		this.keepSeat = keepSeat;
+	}
 }
