@@ -1,6 +1,7 @@
 package com.tempus.gss.product.ift.api.entity.vo;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/8/21 0021.
@@ -23,6 +24,16 @@ public class TicketSenderVo implements Serializable {
     private String sort;
     //类型
     private String types;
+    //多种状态
+    private List<Integer> statusList;
+
+    public List<Integer> getStatusList() {
+        return statusList;
+    }
+
+    public void setStatusList(List<Integer> statusList) {
+        this.statusList = statusList;
+    }
 
     @Override
     public String toString() {

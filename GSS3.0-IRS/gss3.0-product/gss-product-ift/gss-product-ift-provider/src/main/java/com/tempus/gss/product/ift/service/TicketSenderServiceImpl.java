@@ -23,6 +23,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2017/8/21 0021.
@@ -203,6 +204,11 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
         //ticketSenderVo.setTypes("'both','ticketSender'");//只给出票员分单
         List<TicketSender> ticketSenderList = this.queryByBean(ticketSenderVo);
         return ticketSenderList;
+    }
+
+    @Override
+    public List<Map<String, Object>> queryTicketNameAndLockerId() {
+        return ticketSenderDao.queryTicketNameAndLockerId();
     }
 
 }

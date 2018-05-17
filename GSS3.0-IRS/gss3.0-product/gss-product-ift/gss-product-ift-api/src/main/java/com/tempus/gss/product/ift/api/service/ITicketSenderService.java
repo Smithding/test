@@ -9,6 +9,7 @@ import com.tempus.gss.system.entity.User;
 import com.tempus.gss.vo.Agent;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2017/8/21 0021.
@@ -61,4 +62,10 @@ public interface ITicketSenderService {
      * @return
      */
     List<TicketSender> getOnlineTicketSender(Integer onLine);
+
+    /**
+     * 查询出票员名称和对应的LockId
+     * @return
+     */
+    List<Map<String,Object>> queryTicketNameAndLockerId();
 }
