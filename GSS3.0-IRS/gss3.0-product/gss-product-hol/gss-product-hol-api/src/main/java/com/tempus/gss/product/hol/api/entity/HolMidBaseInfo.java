@@ -11,114 +11,93 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ResGPSInfo;
 public class HolMidBaseInfo implements Serializable{
 	private static final long serialVersionUID = 1L;
 	/**
-	 * 主键ID同酒店id
+	 * 主键ID
 	 */
-	@JSONField(name = "Id")
 	private String id;
 	/**
-	 * 酒店id
+	 * TC酒店id
 	 */
-	@JSONField(name = "ResId")
-	private Long resId;
+	private Long tcResId;
 	
 	/**
-	 * 酒店名称
+	 * BQY酒店id
 	 */
-	@JSONField(name = "ResName")
-	private String resName;
+	private Long bqyResId;
+	
+	/**
+	 * TC酒店名称
+	 */
+	private String tcResName;
+	
+	/**
+	 * BQY酒店名称
+	 */
+	private String bqyResName;
 	
 	/**
 	 * 省份名称
 	 */
-	@JSONField(name = "ProvName")
 	private String provName;
-	/**
-	 * 城市id
-	 */
-	@JSONField(name = "CityId")
-	private Integer cityId;
+	
 	/**
 	 * 城市名称
 	 */
-	@JSONField(name = "CityName")
 	private String cityName;
 	
 	/**
 	 * 酒店全球位置（0：未知；1：大陆；2：港澳台；3：国际）
 	 */
-	@JSONField(name = "IsInter")
 	private Integer isInter;
 	
 	/**
 	 * 品牌信息
 	 */
-	@JSONField(name = "BrandInfo")
 	private ResBrandInfo brandInfo;
 	
 	/**
 	 * 酒店地址
 	 */
-	@JSONField(name = "Address")
 	private String address;
 	/**
 	 * 酒店电话
 	 */
-	@JSONField(name = "ResPhone")
 	private String resPhone;
 	/**
-	 * 酒店介绍（html 字符串）
+	 * 酒店介绍
 	 */
-	@JSONField(name = "Intro")
 	private String intro;
 	
 	/**
-	 * 预订须知（html 字符串）
+	 * 交通指南
 	 */
-	@JSONField(name = "TravelGuide")
 	private String travelGuide;
 	/**
 	 * 酒店等级
 	 */
-	@JSONField(name = "ResGrade")
 	private String resGrade;
 	
 	/**
-	 * 交通指南（html 字符串）
-	 */
-	@JSONField(name = "TrafficGuid")
-	private String trafficGuid;
-	/**
 	 * 酒店坐标信息
 	 */
-	@JSONField(name = "ResGPS")
 	private List<ResGPSInfo> resGPS;
 	
 	/**
-	 * 国家
-	 */
-	@JSONField(name = "CountryId")
-	private Integer countryId;
-	/**
 	 * 国家名称（默认为中国）
 	 */
-	@JSONField(name = "CountryName")
 	private String countryName;
 	/**
 	 * 一句话介绍
 	 */
-	@JSONField(name = "ShortIntro")
 	private String shortIntro;
 	
 	/**
 	 * 图片列表
 	 */
-	@JSONField(name = "ImgInfoList")
 	private List<ImgInfo> imgInfoList;
 	
 	/**
 	 * 酒店最低价
 	 */
-	@JSONField(name = "MinPrice")
 	private Integer minPrice;
 	
 	/**
@@ -149,7 +128,7 @@ public class HolMidBaseInfo implements Serializable{
 	private String bookInfo;
 	
 	private List<Object> bookItems;
-	
+
 	public String getId() {
 		return id;
 	}
@@ -158,20 +137,36 @@ public class HolMidBaseInfo implements Serializable{
 		this.id = id;
 	}
 
-	public Long getResId() {
-		return resId;
+	public Long getTcResId() {
+		return tcResId;
 	}
 
-	public void setResId(Long resId) {
-		this.resId = resId;
+	public void setTcResId(Long tcResId) {
+		this.tcResId = tcResId;
 	}
 
-	public String getResName() {
-		return resName;
+	public Long getBqyResId() {
+		return bqyResId;
 	}
 
-	public void setResName(String resName) {
-		this.resName = resName;
+	public void setBqyResId(Long bqyResId) {
+		this.bqyResId = bqyResId;
+	}
+
+	public String getTcResName() {
+		return tcResName;
+	}
+
+	public void setTcResName(String tcResName) {
+		this.tcResName = tcResName;
+	}
+
+	public String getBqyResName() {
+		return bqyResName;
+	}
+
+	public void setBqyResName(String bqyResName) {
+		this.bqyResName = bqyResName;
 	}
 
 	public String getProvName() {
@@ -180,14 +175,6 @@ public class HolMidBaseInfo implements Serializable{
 
 	public void setProvName(String provName) {
 		this.provName = provName;
-	}
-
-	public Integer getCityId() {
-		return cityId;
-	}
-
-	public void setCityId(Integer cityId) {
-		this.cityId = cityId;
 	}
 
 	public String getCityName() {
@@ -254,28 +241,12 @@ public class HolMidBaseInfo implements Serializable{
 		this.resGrade = resGrade;
 	}
 
-	public String getTrafficGuid() {
-		return trafficGuid;
-	}
-
-	public void setTrafficGuid(String trafficGuid) {
-		this.trafficGuid = trafficGuid;
-	}
-
 	public List<ResGPSInfo> getResGPS() {
 		return resGPS;
 	}
 
 	public void setResGPS(List<ResGPSInfo> resGPS) {
 		this.resGPS = resGPS;
-	}
-
-	public Integer getCountryId() {
-		return countryId;
-	}
-
-	public void setCountryId(Integer countryId) {
-		this.countryId = countryId;
 	}
 
 	public String getCountryName() {
@@ -334,6 +305,14 @@ public class HolMidBaseInfo implements Serializable{
 		this.saleStatus = saleStatus;
 	}
 
+	public Long getBookTimes() {
+		return bookTimes;
+	}
+
+	public void setBookTimes(Long bookTimes) {
+		this.bookTimes = bookTimes;
+	}
+
 	public String getBookRemark() {
 		return bookRemark;
 	}
@@ -350,14 +329,6 @@ public class HolMidBaseInfo implements Serializable{
 		this.bookInfo = bookInfo;
 	}
 
-	public Long getBookTimes() {
-		return bookTimes;
-	}
-
-	public void setBookTimes(Long bookTimes) {
-		this.bookTimes = bookTimes;
-	}
-
 	public List<Object> getBookItems() {
 		return bookItems;
 	}
@@ -365,5 +336,6 @@ public class HolMidBaseInfo implements Serializable{
 	public void setBookItems(List<Object> bookItems) {
 		this.bookItems = bookItems;
 	}
+	
 	
 }
