@@ -16,7 +16,7 @@ import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
 import com.tempus.gss.vo.Agent;
 
 @Service
-public class ISyncHotelInfoImpl implements ISyncHotelInfo {
+public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	@Autowired
 	private ITCHotelSupplierService iTCHotelSupplierService;
 	
@@ -26,16 +26,18 @@ public class ISyncHotelInfoImpl implements ISyncHotelInfo {
 	@Override
 	public TCResponse<ResBaseInfo> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException {
 		Future<TCResponse<ResBaseInfo>> queryHotelList = iTCHotelSupplierService.queryHotelList(agent, hotelSearchReq);
-		Future<TCResponse<ResBaseInfo>> queryHotelList2 = iBQYHotelSupplierService.queryHotelList(hotelSearchReq);
+		//Future<TCResponse<ResBaseInfo>> queryHotelList2 = iBQYHotelSupplierService.queryHotelList(hotelSearchReq);
 		TCResponse<ResBaseInfo> tcResponse = null;
-		TCResponse<ResBaseInfo> bqyResponse = null;
+		//TCResponse<ResBaseInfo> bqyResponse = null;
 		try {
 			//Future<TCResponse<ResBaseInfo>> future = RpcContext.getContext().getFuture();
 			
 			while(true) {
-				if(queryHotelList.isDone() && queryHotelList2.isDone()) {
-					tcResponse = queryHotelList.get();
-					bqyResponse = queryHotelList2.get();
+				if(queryHotelList.isDone()) {
+					if(StringUtil.isNotNullOrEmpty(queryHotelList)) {
+						tcResponse = queryHotelList.get();
+					}
+					//bqyResponse = queryHotelList2.get();
 					/*System.out.println("bqy Size: "+bqyResponse.getResponseResult().size());
 					System.out.println(JsonUtil.toJson(bqyResponse.getResponseResult()));
 					for(ResBaseInfo rs : bqyResponse.getResponseResult()) {
@@ -44,10 +46,9 @@ public class ISyncHotelInfoImpl implements ISyncHotelInfo {
 					break;
 				}
 			}
-			if(StringUtil.isNullOrEmpty(hotelSearchReq.getAirRailWay())) {
+			/*if(StringUtil.isNullOrEmpty(hotelSearchReq.getAirRailWay())) {
 				
-			}
-			
+			}*/
 			
 		} catch (Exception e) {
 			e.printStackTrace();

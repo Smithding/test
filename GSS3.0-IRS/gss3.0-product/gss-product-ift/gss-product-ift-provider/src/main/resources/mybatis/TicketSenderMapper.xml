@@ -29,6 +29,12 @@
             <if test="userId!=null and userId!=''">and USERID=#{userId}</if>
             <if test="status!=null">and status = #{status}</if>
             <if test="types!=null and types!=''">and TYPE IN(${types})</if>
+            <if test="statusList!=null">
+                and status in
+                <foreach collection="statusList" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
             <if test="name!=null and name!=''">
                 <![CDATA[
                 and name like '%'#{name}'%'
@@ -66,6 +72,14 @@
         <include refid="base_column"/>
         FROM IFT_TICKETSENDER
         <include refid="sqlwhere"/>
+        order by SEQUENCENO,ORDERCOUNT ASC
+    </select>
+
+    <select id="queryTicketNameAndLockerId" resultType="map">
+        SELECT
+        i.`NAME`,u.ID AS locker
+        FROM IFT_TICKETSENDER i
+        LEFT JOIN SM_USER u on i.USERID = u.LOGIN_NAME
         order by SEQUENCENO,ORDERCOUNT ASC
     </select>
 

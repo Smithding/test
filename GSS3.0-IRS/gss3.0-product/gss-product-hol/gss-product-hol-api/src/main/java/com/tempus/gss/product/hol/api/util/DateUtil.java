@@ -522,5 +522,14 @@ public class DateUtil {
         return Integer.parseInt(String.valueOf(between_days));
     }
 	
+	public static Long getLongTypedTimeFromTimeStr(String strTime, String format) {
+		if(format.equals(NORM_DATETIME_PATTERN)) {
+			Date parseDateTime = parseDateTime(strTime);
+			return parseDateTime.getTime();
+		}
+		
+		return null;
+		
+	}
 
 }

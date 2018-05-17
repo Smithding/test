@@ -737,7 +737,7 @@ public class OrderServiceImpl implements IOrderService {
             saleOrderExtList = saleOrderExtDao.queryFromSaleQueryOrderVo(page, saleOrderQueryRequest.getEntity());
             
             long endTime = System.currentTimeMillis();
-            log.info("查询订单接口结束=====" + (endTime - startTime));
+            //log.info("查询订单接口结束=====" + (endTime - startTime));
           /*  List<SaleOrderExt> tempList = new ArrayList<>();
             if (null != saleOrderExtList) {
                 for (SaleOrderExt order : saleOrderExtList) {
@@ -746,8 +746,8 @@ public class OrderServiceImpl implements IOrderService {
                     tempList.add(order);
                 }
             }*/
-            long objectTime = System.currentTimeMillis();
-            log.info("封装订单接口结束=====" + (objectTime - endTime));
+           // long objectTime = System.currentTimeMillis();
+           // log.info("封装订单接口结束=====" + (objectTime - endTime));
             page.setRecords(saleOrderExtList);
             
             log.info("查询订单模块（为运营平台订单管理提供服务）结束");
@@ -1197,7 +1197,13 @@ public class OrderServiceImpl implements IOrderService {
         }
         Long saleOrderNo = refuseRequest.getEntity().getSaleOrderNo();
         String remark = refuseRequest.getEntity().getRemark();
-        SaleOrder saleOrder = saleOrderService.updateStatus(refuseRequest.getAgent(), saleOrderNo, 5);// 销售单改为已取消
+        //杂费单特殊处理
+        SaleOrder saleOrder = null;
+        if(StringUtils.isNotBlank(refuseRequest.getEntity().getChildStatus())){
+            saleOrder = saleOrderService.updateStatus(refuseRequest.getAgent(), saleOrderNo, 14);// 销售单改为已拒单
+        }else{
+            saleOrder = saleOrderService.updateStatus(refuseRequest.getAgent(), saleOrderNo, 5);// 销售单改为已取消
+        }
         List<SaleOrderDetail> saleOrderDetailList = saleOrderDetailDao.selectBySaleOrderNo(saleOrderNo);
         if (saleOrderDetailList != null && saleOrderDetailList.size() > 0) {
             for (SaleOrderDetail bean : saleOrderDetailList) {

@@ -33,6 +33,8 @@ public class OrderRefuseRequest implements Serializable {
 	 */
 	private String remark;
 
+	private String childStatus;
+
 	public Long getSaleOrderNo() {
 
 		return saleOrderNo;
@@ -51,5 +53,13 @@ public class OrderRefuseRequest implements Serializable {
 	public void setRemark(String remark) {
 
 		this.remark = remark;
+	}
+
+	public String getChildStatus() {
+		return childStatus;
+	}
+
+	public void setChildStatus(String childStatus) {
+		this.childStatus = childStatus;
 	}
 }

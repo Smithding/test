@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Administrator on 2017/8/21 0021.
@@ -20,4 +21,6 @@ public interface TicketSenderDao extends BaseDao<TicketSender,TicketSenderVo> {
     List<TicketSender> queryObjByKey(TicketSenderVo ticketSenderVo);
 
     List<TicketSender> queryByLoginId(@Param("loginId") String loginId);
+
+    List<Map<String,Object>> queryTicketNameAndLockerId();
 }
