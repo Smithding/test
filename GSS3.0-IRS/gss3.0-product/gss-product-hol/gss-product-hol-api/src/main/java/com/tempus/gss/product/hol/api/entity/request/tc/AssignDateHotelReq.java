@@ -59,6 +59,12 @@ public class AssignDateHotelReq implements Serializable{
 	 */
 	@JSONField(name = "SourceFrom")
 	private String sourceFrom;
+	/**
+	 * 价格计划 id（新增参数，一个 RatePlanId对应多个 ProductUniqueId）
+	 */
+	@JSONField(name = "RatePlanId")
+	private Long ratePlanId;
+	
 	public Long getResId() {
 		return resId;
 	}
@@ -113,4 +119,11 @@ public class AssignDateHotelReq implements Serializable{
 	public void setSourceFrom(String sourceFrom) {
 		this.sourceFrom = sourceFrom;
 	}
+	public Long getRatePlanId() {
+		return ratePlanId;
+	}
+	public void setRatePlanId(Long ratePlanId) {
+		this.ratePlanId = ratePlanId;
+	}
+	
 }
