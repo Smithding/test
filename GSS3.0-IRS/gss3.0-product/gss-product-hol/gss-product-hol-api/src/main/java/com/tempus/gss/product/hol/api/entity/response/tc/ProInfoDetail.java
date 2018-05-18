@@ -64,6 +64,21 @@ public class ProInfoDetail implements Serializable{
 	@JSONField(name = "ProSaleInfoDetails")
 	private TreeMap<String, ProSaleInfoDetail> proSaleInfoDetails;
 	/**
+	 * 最严取消规则
+	 */
+	@JSONField(name = "CancelRulesStrict")
+	private CancelRulesStrictInfo cancelRulesStrict;
+	/**
+	 * 连住天数
+	 */
+	@JSONField(name = "CheckInDays")
+	private Integer checkInDays;
+	/**
+	 * 价格计划 id（新增参数，一个RatePlanId 对 应 多 个ProductUniqueId）
+	 */
+	@JSONField(name = "RatePlanId")
+	private Long ratePlanId;
+	/**
 	 * 酒店id
 	 */
 	@JSONField(name = "ResId")
@@ -71,8 +86,11 @@ public class ProInfoDetail implements Serializable{
 	/**
 	 * 更新库存价格的时间
 	 */
-	@JSONField(name = "StartDate")
 	private String updateInvenTime;
+	/**
+	 * 该房间是否下线，上线为1， 下线为0
+	 */
+	private Integer saleStatus;
 	
 	
 	public String getProId() {
@@ -148,4 +166,29 @@ public class ProInfoDetail implements Serializable{
 	public void setId(Long id) {
 		this.id = id;
 	}
+	public CancelRulesStrictInfo getCancelRulesStrict() {
+		return cancelRulesStrict;
+	}
+	public void setCancelRulesStrict(CancelRulesStrictInfo cancelRulesStrict) {
+		this.cancelRulesStrict = cancelRulesStrict;
+	}
+	public Integer getCheckInDays() {
+		return checkInDays;
+	}
+	public void setCheckInDays(Integer checkInDays) {
+		this.checkInDays = checkInDays;
+	}
+	public Long getRatePlanId() {
+		return ratePlanId;
+	}
+	public void setRatePlanId(Long ratePlanId) {
+		this.ratePlanId = ratePlanId;
+	}
+	public Integer getSaleStatus() {
+		return saleStatus;
+	}
+	public void setSaleStatus(Integer saleStatus) {
+		this.saleStatus = saleStatus;
+	}
+	
 }
