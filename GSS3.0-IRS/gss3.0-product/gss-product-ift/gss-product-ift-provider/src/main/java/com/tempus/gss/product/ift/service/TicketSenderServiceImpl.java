@@ -208,6 +208,7 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
 
     @Override
     public List<Map<String, Object>> queryTicketNameAndLockerId() {
+        log.info("查询出票人信息开始");
         return ticketSenderDao.queryTicketNameAndLockerId();
     }
 
