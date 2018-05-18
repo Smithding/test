@@ -119,9 +119,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			count = totalHotelIdNum % PAGE_SIZE == 0 ? totalHotelIdNum / PAGE_SIZE : totalHotelIdNum / PAGE_SIZE + 1;
 		}
 		for (int i = 0; i < count; i++) {
-			long lastIndex = ((i * PAGE_SIZE) + PAGE_SIZE) > totalHotelIdNum ? totalHotelIdNum : (i * PAGE_SIZE) + PAGE_SIZE;
-			
-			Query query = new Query().skip(i * PAGE_SIZE).limit(Integer.valueOf(String.valueOf(lastIndex)));
+			int start = i * PAGE_SIZE;
+			//long lastIndex = (start + PAGE_SIZE) > totalHotelIdNum ? totalHotelIdNum : start + PAGE_SIZE;
+			Query query = new Query().skip(start).limit(PAGE_SIZE);
 			hotelIdList = mongoTemplate.find(query, HotelId.class);
 			//开启线程拉去酒店数量
 			bqyHotelService.pullHotelInfoByIdList(hotelIdList);

@@ -121,7 +121,6 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	
 	@Override
 	public HotelInfo queryHotelInfo(QueryHotelInfoParam query) {
-		logger.info("BQY酒店信息获取开始...");
 		query.setAgentId(Long.parseLong(BQY_AGENTID));
 		query.setToken(md5Encryption());
 		HotelInfo hotelInfo = null;
@@ -137,7 +136,6 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		}else {
 			throw new GSSException("获取BQY酒店信息失败!", "0111", "BQY酒店信息返回空值");
 		}
-		logger.info("BQY酒店信息获取成功...");
 		return hotelInfo;
 	}
 	
@@ -177,7 +175,6 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 
 	@Override
 	public HotelEntity queryHotelDetail(QueryHotelParam query) {
-		logger.info("BQY酒店详情开始查询...");
 		query.setAgentId(Long.parseLong(BQY_AGENTID));
 		query.setToken(md5Encryption());
 		HotelEntity hotelEntity = null;
@@ -196,7 +193,6 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		} else {
 			throw new GSSException("获取TC酒店详情", "0111", "BQY酒店详情请求返回空值");
 		}
-		logger.info("BQY酒店详情获取成功!");
 		return hotelEntity;
 	}
 
@@ -321,7 +317,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	@Override
 	@Async
 	public void pullHotelInfoByIdList(List<HotelId> hotelIdList) {
-		logger.info(Thread.currentThread().getName() + "线程开始拉取数据...");
+		logger.info(Thread.currentThread().getName() + "线程开始拉取数据...集合大小为：" + hotelIdList.size());
 		for (HotelId hotelId : hotelIdList) {
 			QueryHotelInfoParam hotelInfoParam = new QueryHotelInfoParam();
 			hotelInfoParam.setHotelId(hotelId.getHotelId());
