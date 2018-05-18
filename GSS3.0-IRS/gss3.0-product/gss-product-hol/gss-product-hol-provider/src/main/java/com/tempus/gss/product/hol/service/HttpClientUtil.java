@@ -40,7 +40,6 @@ import com.thoughtworks.xstream.XStream;
 
 /**
  * HttpClient工具类
- * Created by luofengjie on 2017/3/24.
  */
 @Component
 public class HttpClientUtil {

@@ -2,6 +2,7 @@ package com.tempus.gss.product.hol.api.syn;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.HotelName;
@@ -76,7 +77,7 @@ public interface ITCHotelSupplierService {
 	 * @param hotelSearchReq
 	 * @return
 	 */
-	public TCResponse<ResBaseInfo> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException;
+	public Future<TCResponse<ResBaseInfo>> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException;
 	
 	/**
 	 * 后台查询酒店列表(结构简单一些)
@@ -84,7 +85,7 @@ public interface ITCHotelSupplierService {
 	 * @param hotelSearchReq
 	 * @return
 	 */
-	public TCResponse<ResBaseInfo> queryHotelListForBack(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException;
+	public Future<TCResponse<ResBaseInfo>> queryHotelListForBack(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException;
 	
 	/**
 	 * 根据酒店id和时间查询具体酒店房型信息

@@ -29,6 +29,16 @@ public class SeparatedOrderVo implements Serializable {
 
     private String owner;
 
+    private Long locker;
+
+    public Long getLocker() {
+        return locker;
+    }
+
+    public void setLocker(Long locker) {
+        this.locker = locker;
+    }
+
     public Long getSaleOrderNo() {
         return saleOrderNO;
     }
