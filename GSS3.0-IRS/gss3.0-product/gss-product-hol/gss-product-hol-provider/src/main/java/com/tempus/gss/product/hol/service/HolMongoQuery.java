@@ -46,7 +46,7 @@ public class HolMongoQuery implements IHolMongoQuery {
 				query.addCriteria(criteria);
 			}
 			long totalCount = mongoTemplate.count(query, clazz);
-			query.skip(page);// skip相当于从那条记录开始
+			query.skip(page-1);// skip相当于从那条记录开始
 			query.limit(pageSize);// 从skip开始,取多少条记录
 			Sort sort = pageable.getSort();
 			if (sort != null) {
@@ -87,55 +87,67 @@ public class HolMongoQuery implements IHolMongoQuery {
 				proName = proNames.get(i);
 				operate = operates.get(i);
 				value = values.get(i);
-				if (i == 0) {
-					criteria = new Criteria(proName);
-				} else {
-					criteria = criteria.and(proName);
+				if(operate.equals(OperateEnum.OROPERATOR)) {
+					if(i == 0) {
+						criteria = new Criteria(proName);
+						String[] split = value.toString().split(",");
+						criteria.orOperator(Criteria.where(proName).regex(".*?\\" +split[0]+ ".*"), Criteria.where(proName).regex(".*?\\" +split[1]+ ".*"));
+					} else {
+						String[] split = value.toString().split(",");
+						criteria.orOperator(Criteria.where(proName).regex(".*?\\" +split[0]+ ".*"), Criteria.where(proName).regex(".*?\\" +split[1]+ ".*"));
+					}
+				}else {
+					if (i == 0) {
+						criteria = new Criteria(proName);
+					} else {
+						criteria = criteria.and(proName);
+					}
+					switch (operate) {
+					case GT:
+						criteria.gt(value);
+						break;
+					case LT:
+						criteria.lt(value);
+						break;
+					case GTE:
+						criteria.gte(value);
+						break;
+					case LTE:
+						criteria.lte(value);
+						break;
+					case EQ:
+						criteria.is(value);
+						break;
+					case NE:
+						criteria.ne(value);
+						break;
+					case IN:
+						criteria.in(value);
+						break;
+					case NIN:
+						criteria.nin(value);
+						break;
+					case NOT:
+						criteria.not();
+						break;
+					case ALL:
+						criteria.all(value);
+						break;
+					case REGEX:
+						criteria.regex(escapeRegexString(String.valueOf(value)), "i");
+						break;
+					case BETWEENLONG:
+						String val = String.valueOf(value);
+						long from = NumberUtils.toLong(val.split(",")[0]);
+						long to = NumberUtils.toLong(val.split(",")[1]);
+						criteria.gte(from).lte(to);
+						break;
+					default:
+						criteria.is(value);
+						break;
+					}
 				}
-				switch (operate) {
-				case GT:
-					criteria.gt(value);
-					break;
-				case LT:
-					criteria.lt(value);
-					break;
-				case GTE:
-					criteria.gte(value);
-					break;
-				case LTE:
-					criteria.lte(value);
-					break;
-				case EQ:
-					criteria.is(value);
-					break;
-				case NE:
-					criteria.ne(value);
-					break;
-				case IN:
-					criteria.in(value);
-					break;
-				case NIN:
-					criteria.nin(value);
-					break;
-				case NOT:
-					criteria.not();
-					break;
-				case ALL:
-					criteria.all(value);
-					break;
-				case REGEX:
-					criteria.regex(escapeRegexString(String.valueOf(value)), "i");
-					break;
-				case BETWEENLONG:
-					String val = String.valueOf(value);
-					long from = NumberUtils.toLong(val.split(",")[0]);
-					long to = NumberUtils.toLong(val.split(",")[1]);
-					criteria.gte(from).lte(to);
-					break;
-				default:
-					criteria.is(value);
-					break;
-				}
+				
 			}
 			return criteria;
 		}
