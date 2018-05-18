@@ -499,6 +499,12 @@
             <if test="policyNo != null" >
                 POLICY_NO = #{policyNo,jdbcType=BIGINT},
             </if>
+            <if test="deptProfit != null" >
+                DEPT_PROFIT = #{deptProfit,jdbcType=DECIMAL},
+            </if>
+            <if test="profit != null" >
+                PROFIT = #{profit,jdbcType=DECIMAL},
+            </if>
         </set>
         where PASSENGER_NO = #{passengerNo,jdbcType=BIGINT}
     </update>

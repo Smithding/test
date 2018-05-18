@@ -99,6 +99,14 @@ public class OrderPriceVo implements Serializable{
 	 * 解挂计算使用销售价结算价.
 	 */
 	private BigDecimal saleJgPrice;
+	/**
+	 * 营业部门毛利
+	 */
+	private BigDecimal deptProfit;
+	/**
+	 *	毛利
+	 */
+	private BigDecimal profit;
 
 	
 	public String getPassengerType() {
@@ -249,7 +257,19 @@ public class OrderPriceVo implements Serializable{
 		this.saleJgPrice = saleJgPrice;
 	}
 
-	
-	
-	
+	public BigDecimal getDeptProfit() {
+		return deptProfit;
+	}
+
+	public void setDeptProfit(BigDecimal deptProfit) {
+		this.deptProfit = deptProfit;
+	}
+
+	public BigDecimal getProfit() {
+		return profit;
+	}
+
+	public void setProfit(BigDecimal profit) {
+		this.profit = profit;
+	}
 }

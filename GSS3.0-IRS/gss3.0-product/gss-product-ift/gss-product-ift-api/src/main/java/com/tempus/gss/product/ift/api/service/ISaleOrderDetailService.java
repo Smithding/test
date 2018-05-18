@@ -13,12 +13,12 @@ public interface ISaleOrderDetailService {
 	public List<SaleOrderDetail> selectBySaleOrderNo(Long saleOrderNo);
 
 	/**
-	 * 根据乘客编号，行程单编号获取人+航段信息
+	 * 根据乘客编号，销售单编号详情信息
 	 * @param passengerNo
-	 * @param legNo
+	 * @param saleOrderNo
 	 * @return
 	 */
-	public SaleOrderDetail selectByPassengerAndLeg(Long passengerNo,Long legNo);
+	public List<SaleOrderDetail> selectByPassengerAndSaleOrder(Long passengerNo,Long saleOrderNo);
 
 	/**
 	* 根据销售编号更新销售单状态

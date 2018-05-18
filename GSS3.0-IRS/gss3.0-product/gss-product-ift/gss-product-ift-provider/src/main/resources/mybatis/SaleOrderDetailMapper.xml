@@ -75,7 +75,7 @@
     <sql id="Base_Column_List">
         SALE_ORDER_DETAIL_NO, ID,CABIN, OWNER,TICKET_NO, SALE_ORDER_NO, PASSENGER_NO, LEG_NO,
         FARE, TAX, BROKERAGE, AGENCY_FEE, REBATE, AWARD_PRICE, PARENT_SECTION, CHILD_SECTION,
-        IS_CHANGE, MODIFIER, MODIFY_TIME, CREATOR, CREATE_TIME, STATUS, VALID, REFUSE_REASON
+        IS_CHANGE, MODIFIER, MODIFY_TIME, CREATOR, CREATE_TIME, STATUS, VALID, REFUSE_REASON,DEPT_PROFIT,PROFIT
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -340,6 +340,12 @@
             <if test="refuseReason != null">
                 REFUSE_REASON = #{refuseReason,jdbcType=VARCHAR},
             </if>
+            <if test="deptProfit !=null">
+                DEPT_PROFIT = #{deptProfit,jdbcType=DECIMAL},
+            </if>
+            <if test="profit !=null">
+                PROFIT = #{profit,jdbcType=DECIMAL},
+            </if>
         </set>
         where SALE_ORDER_DETAIL_NO = #{saleOrderDetailNo,jdbcType=BIGINT}
     </update>
@@ -548,5 +554,7 @@ SET ISOE.STATUS=1  WHERE ISOE.STATUS=2 AND OS.PAY_STATUS=1
          UPDATE  OS_SALEORDER OS
         SET   OS.ORDER_CHILD_STATUS=1  WHERE OS.SALE_ORDER_NO=#{saleOrderNo}
     </update>
-
+    <select id="selectByPassengerAndSaleOrder" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderDetail">
+        select <include refid="Base_Column_List"/> from IFT_SALE_ORDER_DETAIL where  PASSENGER_NO = #{passengerNo} and SALE_ORDER_NO = #{saleOrderNo}
+    </select>
 </mapper>

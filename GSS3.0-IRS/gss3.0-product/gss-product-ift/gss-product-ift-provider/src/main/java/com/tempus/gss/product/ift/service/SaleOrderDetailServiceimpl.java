@@ -36,8 +36,12 @@ public class SaleOrderDetailServiceimpl implements ISaleOrderDetailService{
 	}
 
 	@Override
-	public SaleOrderDetail selectByPassengerAndLeg(Long passengerNo, Long legNo) {
-		return null;
+	public List<SaleOrderDetail> selectByPassengerAndSaleOrder(Long passengerNo, Long saleOrderNo) {
+		SaleOrderDetail saleOrderDetail = new SaleOrderDetail();
+		saleOrderDetail.setPassengerNo(passengerNo);
+		saleOrderDetail.setSaleOrderNo(saleOrderNo);
+		List<SaleOrderDetail> saleOrderDetailList = detailDao.selectByPassengerAndSaleOrder(saleOrderDetail);
+		return saleOrderDetailList;
 	}
 
 	@Override
