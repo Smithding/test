@@ -88,6 +88,10 @@
     <result column="CUSTOMER_NAME" property="customerName" jdbcType="VARCHAR" />
      <!--客户类型-->
     <result column="CUSTOMER_TYPE_NAME" property="customerType" jdbcType="VARCHAR" />
+         <!--客户类型-->
+    <result column="CUSTOMER_TYPE_NAME" property="customerType" jdbcType="VARCHAR" />
+    <!--订票员-->
+    <result column="BOOKING_CLERK" property="bookingClerk" jdbcType="VARCHAR" />
     <!-- 一对一 保险产品-->
     <association property="insurance" column="INSURANCE_NO" 
                      select="com.tempus.gss.product.ins.dao.InsuranceDao.selectByPrimaryKey"/>
@@ -145,24 +149,26 @@
 	    isoe.MODIFY_TIME,
 	    isoe.CREATOR,
 	    isoe.MODIFIER,
-	    isoe.VALID,
+        isoe.VALID,
 	    si.NAME,
 	    cc.NAME AS CUSTOMER_NAME,
-	    cct.NAME AS CUSTOMER_TYPE_NAME
-     FROM  INS_SALE_ORDER_EXT isoe,
+	    cct.NAME AS CUSTOMER_TYPE_NAME,
+	    su.NAME BOOKING_CLERK
+        FROM  INS_SALE_ORDER_EXT isoe 
+        LEFT JOIN SM_USER su ON isoe.CREATOR = su.LOGIN_NAME,
      	   INS_INSURANCE ii,
      	   INS_SALE_ORDER_DETAIL isod,
      	   OS_SALEORDER os,
      	   SM_OWNER_INFO si,
      	   CPS_CUSTOMER_TYPE cct,
      	   CPS_CUSTOMER cc
-     where 	isoe.VALID = 1 and os.PAY_STATUS != 1 and isod.STATUS != 1 and isod.STATUS != 3
-     and	isoe.SALE_ORDER_NO = os.SALE_ORDER_NO
-     and	isoe.INSURANCE_NO = ii.INSURANCE_NO
-     and 	isoe.SALE_ORDER_NO = isod.SALE_ORDER_NO
-     and    isoe.OWNER = si.OWNER
-     and    cct.CUSTOMER_TYPE_NO = os.CUSTOMER_TYPE_NO
-     and    cc.CUSTOMER_NO = os.CUSTOMER_NO
+     WHERE 	isoe.VALID = 1 AND os.PAY_STATUS != 1 AND isod.STATUS != 1 AND isod.STATUS != 3
+     AND	isoe.SALE_ORDER_NO = os.SALE_ORDER_NO
+     AND	isoe.INSURANCE_NO = ii.INSURANCE_NO
+     AND 	isoe.SALE_ORDER_NO = isod.SALE_ORDER_NO
+     AND    isoe.OWNER = si.OWNER
+     AND    cct.CUSTOMER_TYPE_NO = os.CUSTOMER_TYPE_NO
+     AND    cc.CUSTOMER_NO = os.CUSTOMER_NO
      <trim suffixOverrides="AND" >
      
      	<if test="owner != null">

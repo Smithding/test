@@ -820,6 +820,7 @@ public class OrderServiceImpl implements IOrderService {
 					if (insurance.getCompanyName().contains(COMPANY_NAME_HEZONG)&&saleOrderDetailList.get(0).getInsuredSex()!=null) {
 						insureRequestVo.setPolicyHolderSex(Integer.valueOf(saleOrderDetailList.get(0).getInsuredSex()));
 					}
+					insureRequestVo.setPolicyHolderSex(Integer.valueOf(saleOrderDetailList.get(0).getInsuredSex()));
 				}else{
 					String policyHolderType = paramService.getValueByKey("ins_holder_type");
 					if (StringUtils.isNoneBlank(policyHolderType)) {
@@ -926,6 +927,7 @@ public class OrderServiceImpl implements IOrderService {
 //		insureRequestVo.setIsTeam((short) 1);
 		insureRequestVo.setOrderId(saleOrderExt.getSaleOrderNo());
 		insureRequestVo.setTravelDay(insureRequestVo.getExpireDate().getDate()-insureRequestVo.getEffectDate().getDate()+1);
+		insureRequestVo.setInsuredCount(saleOrderDetailList.size());
 		return insureRequestVo;
 	}
 	 //计算两个日期差值
