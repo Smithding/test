@@ -165,7 +165,6 @@ public class HttpClientUtil {
             HttpResponse res = client.execute(httpPost);// 发送请求
             if (res.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 				result = EntityUtils.toString(res.getEntity(),"UTF-8");
-                log.info("接口请求返回结果:"+result);
             }
 
         } catch (Exception e) {

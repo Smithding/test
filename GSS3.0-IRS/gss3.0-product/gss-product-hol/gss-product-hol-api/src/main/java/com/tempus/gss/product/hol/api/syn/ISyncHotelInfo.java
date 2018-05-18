@@ -15,5 +15,5 @@ public interface ISyncHotelInfo {
 	 * 拉取BQY酒店信息
 	 * @param hotelIdList
 	 */
-	void pullBQYHotelInfoByIdList();
+	void pullBQYHotelInfo();
 }

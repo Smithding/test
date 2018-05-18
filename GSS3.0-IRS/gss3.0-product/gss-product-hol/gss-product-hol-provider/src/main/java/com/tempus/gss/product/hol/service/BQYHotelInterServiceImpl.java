@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -19,16 +18,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Async;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.TypeReference;
+import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
-import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
-import com.tempus.gss.product.hol.api.entity.response.tc.ResGPSInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelBrand;
@@ -52,8 +51,6 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelLocationEntity;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.util.DocumentUtil;
-import com.tempus.gss.product.hol.thread.CityDetailTask;
-import com.tempus.gss.product.hol.thread.HotelInfoTask;
 import com.tempus.gss.util.JsonUtil;
 
 @Service
@@ -346,62 +343,91 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			hotelInfo.setLowPrice(new BigDecimal((int)((Math.random() + 1) * 100)));
 			//保存酒店信息
 			mongoTemplate.save(hotelInfo);
-			
 			/**
-			 * 保存中间表
+			 * 判断中间表中是否有相同的酒店
+			 * 通过酒店经纬度和酒店电话匹配是否为同一家酒店
 			 */
-			HolMidBaseInfo holMidBaseInfo = new HolMidBaseInfo();
-			//holMidBaseInfo.setId(BQYIDPRE + hotelId.getHotelId());
-			holMidBaseInfo.setTcResId(hotelId.getHotelId());
-			holMidBaseInfo.setBqyResName(hotelInfo.getHotelName());
-			holMidBaseInfo.setProvName(hotelInfo.getProvinceName());
-			//holMidBaseInfo.setCityId(Integer.parseInt(hotelInfo.getCityCode()));
-			holMidBaseInfo.setCityName(hotelInfo.getCityName());
-			//酒店品牌
-			ResBrandInfo resBrandInfo = new ResBrandInfo();
-			resBrandInfo.setResBrandName(hotelInfo.getHotelBrandName());
-			resBrandInfo.setId(Long.parseLong(String.valueOf(hotelInfo.getHotelBrandId())));
-			holMidBaseInfo.setBrandInfo(resBrandInfo);
+			//纬度
+			String latitude = hotelInfo.getLatitude().toString();
+			//经度
+			String longitude = hotelInfo.getLongitude().toString();
+			//电话
+			String mobile = hotelInfo.getMobile();
 			
-			holMidBaseInfo.setAddress(hotelInfo.getAddress());
-			holMidBaseInfo.setResPhone(hotelInfo.getMobile());
-			holMidBaseInfo.setIntro(hotelInfo.getDescription());
-			//酒店等级
-			holMidBaseInfo.setResGrade(tcHolGrade(hotelInfo.getHotelStar()));
-			
-			//酒店坐标
-			holMidBaseInfo.setLatLonType(hotelInfo.getCoordinatesType());
-			holMidBaseInfo.setLat(hotelInfo.getLatitude().toString());
-			holMidBaseInfo.setLon(hotelInfo.getLongitude().toString());
-			
-			//一句话介绍...酒店描述
-			holMidBaseInfo.setShortIntro(hotelInfo.getDescription());
-			
-			//酒店图片
-			holMidBaseInfo.setTitleImg(hotelInfo.getTitleImgUrl());
-			/*if (null != hotelImageList && hotelImageList.size() > 0) {
-				List<ImgInfo> imgList = new ArrayList<>();
-				for (ImageList img : hotelImageList) {
-					if ("1".equals(img.getImageType())) {
-						ImgInfo imgInfo = new ImgInfo();
-						imgInfo.setImageName(img.getTitleName());
-						imgInfo.setImageUrl(img.getImageUrl());
-						imgInfo.setResId(Long.parseLong(String.valueOf(img.getHotelId())));
-						imgList.add(imgInfo);
-						break;
+			List<HolMidBaseInfo> holMidList = SearchHoltel(latitude, longitude, mobile);
+			if (null != holMidList && holMidList.size() > 0) {
+				if (holMidList.size() == 1) {
+					//合并酒店
+					HolMidBaseInfo holMid = holMidList.get(0);
+					holMid.setBqyResId(hotelInfo.getHotelId());
+					holMid.setBqyResName(hotelInfo.getHotelName());
+					int lowPrice = hotelInfo.getLowPrice().intValue();
+					if (holMid.getMinPrice() > lowPrice) {
+						holMid.setMinPrice(lowPrice);
 					}
+					mongoTemplate.save(holMid);
+				}else if (holMidList.size() > 1) {
+					throw new GSSException("bqy拉取酒店信息", "0111", "酒店纬度:" + latitude +"经度:" + longitude + "电话:" + mobile + "在中间表中有" + holMidList.size() + "个");
 				}
-				holMidBaseInfo.setImgInfoList(imgList);
-			}*/
-			
-			holMidBaseInfo.setBookRemark(hotelInfo.getRoadCross());
-			holMidBaseInfo.setMinPrice(hotelInfo.getLowPrice().intValue());
-			holMidBaseInfo.setSupplierNo(hotelInfo.getSupplierNo());
-			holMidBaseInfo.setLatestUpdateTime(hotelInfo.getLatestUpdateTime());
-			holMidBaseInfo.setSaleStatus(1);
-			holMidBaseInfo.setBookTimes(1L);
-			
-			mongoTemplate.save(holMidBaseInfo);
+			}else {
+				/**
+				 * 保存中间表
+				 */
+				HolMidBaseInfo holMidBaseInfo = new HolMidBaseInfo();
+				//holMidBaseInfo.setId(BQYIDPRE + hotelId.getHotelId());
+				holMidBaseInfo.setId(IdWorker.getId());
+				holMidBaseInfo.setBqyResId(hotelId.getHotelId());
+				holMidBaseInfo.setBqyResName(hotelInfo.getHotelName());
+				holMidBaseInfo.setProvName(hotelInfo.getProvinceName());
+				//holMidBaseInfo.setCityId(Integer.parseInt(hotelInfo.getCityCode()));
+				holMidBaseInfo.setCityName(hotelInfo.getCityName());
+				holMidBaseInfo.setIsInter(1);
+				//酒店品牌
+				ResBrandInfo resBrandInfo = new ResBrandInfo();
+				resBrandInfo.setResBrandName(hotelInfo.getHotelBrandName());
+				resBrandInfo.setId(Long.parseLong(String.valueOf(hotelInfo.getHotelBrandId())));
+				holMidBaseInfo.setBrandInfo(resBrandInfo);
+				
+				holMidBaseInfo.setAddress(hotelInfo.getAddress());
+				holMidBaseInfo.setResPhone(hotelInfo.getMobile());
+				holMidBaseInfo.setIntro(hotelInfo.getDescription());
+				//酒店等级
+				holMidBaseInfo.setResGrade(tcHolGrade(hotelInfo.getHotelStar()));
+				
+				//酒店坐标
+				holMidBaseInfo.setLatLonType(hotelInfo.getCoordinatesType());
+				holMidBaseInfo.setLat(hotelInfo.getLatitude().toString());
+				holMidBaseInfo.setLon(hotelInfo.getLongitude().toString());
+				
+				holMidBaseInfo.setCountryName("中国");
+				//一句话介绍...酒店描述
+				holMidBaseInfo.setShortIntro(hotelInfo.getDescription());
+				
+				//酒店图片
+				holMidBaseInfo.setTitleImg(hotelInfo.getTitleImgUrl());
+				/*if (null != hotelImageList && hotelImageList.size() > 0) {
+					List<ImgInfo> imgList = new ArrayList<>();
+					for (ImageList img : hotelImageList) {
+						if ("1".equals(img.getImageType())) {
+							ImgInfo imgInfo = new ImgInfo();
+							imgInfo.setImageName(img.getTitleName());
+							imgInfo.setImageUrl(img.getImageUrl());
+							imgInfo.setResId(Long.parseLong(String.valueOf(img.getHotelId())));
+							imgList.add(imgInfo);
+							break;
+						}
+					}
+					holMidBaseInfo.setImgInfoList(imgList);
+				}*/
+				
+				holMidBaseInfo.setBookRemark(hotelInfo.getRoadCross());
+				holMidBaseInfo.setMinPrice(hotelInfo.getLowPrice().intValue());
+				holMidBaseInfo.setSupplierNo(hotelInfo.getSupplierNo());
+				holMidBaseInfo.setLatestUpdateTime(hotelInfo.getLatestUpdateTime());
+				holMidBaseInfo.setSaleStatus(1);
+				holMidBaseInfo.setBookTimes(1L);
+				mongoTemplate.save(holMidBaseInfo);
+			}
 		}
 		logger.info(Thread.currentThread().getName() + "线程完成拉取数据...");
 	}
@@ -413,11 +439,41 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	@Override
 	public void deleteMongoDBData() {
 		mongoTemplate.remove(new Query(), HotelInfo.class);
-		mongoTemplate.remove(new Query(), CityDetail.class);
-		mongoTemplate.remove(new Query(), HotelId.class);
+		//mongoTemplate.remove(new Query(), CityDetail.class);
+		//mongoTemplate.remove(new Query(), HotelId.class);
 		//TODO 需要修改中间表的清空
 		mongoTemplate.remove(new Query(), HolMidBaseInfo.class);
 		//mongoTemplate.remove(new Query(Criteria.where("supplierNo").is("411805040103290132")), HolMidBaseInfo.class);
+	}
+	
+	@Override
+	public List<HolMidBaseInfo> SearchHoltel(String lat, String lon, String phone) {
+		List<HolMidBaseInfo> holMidList = null;
+		String latitude = lat.substring(0, lat.indexOf(".") + 2);
+		String longitude = lon.substring(0, lon.indexOf(".") + 2);
+		String mobile = phone.substring(phone.indexOf("-")+1);
+		if (mobile.indexOf("/") > -1) {
+			String[] mobileArr = mobile.split("/");
+			for (String m : mobileArr) {
+				holMidList = searchHol(latitude, longitude, m);
+				if (null != holMidList && holMidList.size() > 0) {
+					break;
+				}
+			}
+		}else {
+			holMidList = searchHol(latitude, longitude, mobile);
+		}
+		return holMidList;
+	}
+	
+	private List<HolMidBaseInfo> searchHol(String latitude, String longitude, String mobile) {
+		Criteria gpsCriteria = new Criteria();
+		gpsCriteria.and("lon").regex("^" + longitude + ".*$")
+					.and("lat").regex("^" + latitude + ".*$");
+		Criteria criteria = Criteria.where("resGPS").elemMatch(gpsCriteria);
+		criteria.and("resPhone").regex("^.*" + mobile + ".*$");
+		List<HolMidBaseInfo> holMidList = mongoTemplate.find(new Query(criteria), HolMidBaseInfo.class);
+		return holMidList;
 	}
 
 	/**

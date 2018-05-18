@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.Future;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -25,6 +24,7 @@ import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
+import com.tempus.gss.product.hol.api.entity.response.tc.FacilityServices;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProDetails;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
@@ -33,13 +33,14 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelEntity;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.ImageList;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomType;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.Policy;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BaseRoomInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BedTypeInfoItem;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BroadNetInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomInfoItem;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
-import com.tempus.gss.product.hol.api.service.FutureResult;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
 import com.tempus.gss.vo.Agent;
@@ -200,7 +201,8 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 
 	@Override
 	public ResBaseInfo singleHotelDetail(String hotelId) {
-		Criteria criteria = Criteria.where("_id").is(Long.parseLong(hotelId));
+		//Criteria criteria = Criteria.where("_id").is(Long.parseLong(hotelId));
+		Criteria criteria = Criteria.where("hotelId").is(Long.parseLong(hotelId));
 		List<HotelInfo> hotelList = mongoTemplate.find(new Query(criteria),HotelInfo.class);
 		if (null != hotelList && hotelList.size() > 0) {
 			HotelInfo hotelInfo = hotelList.get(0);
@@ -210,7 +212,8 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 	        Calendar dateAdd = Calendar.getInstance();
 	        dateAdd.add(Calendar.MONTH, 2);
 	        dateAdd.add(Calendar.DAY_OF_MONTH, -1);
-			query.setCityCode(hotelInfo.getCityCode());
+//					query.setCityCode(hotelInfo.getCityCode());
+			query.setCityCode("2511");
 			query.setHotelId(hotelInfo.getHotelId());
 			query.setCheckInTime(sdf.format(date.getTime()));
 			query.setCheckOutTime(sdf.format(dateAdd.getTime()));
@@ -232,24 +235,115 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 					for (RoomInfoItem roomInfo : roomInfoList) {
 						ResProBaseInfo resProBaseInfo = new ResProBaseInfo();
 						resProBaseInfo.setResId(Long.parseLong(hotelId));
+						resProBaseInfo.setBedSize(baseRoomInfo.getBedTypeInfo().get(0).getBedWidth());
 						//产品名称
 						resProBaseInfo.setSupPriceName(roomInfo.getRoomName());
-						List<BedTypeInfoItem> roomTypeList = baseRoomInfo.getRoomTypeId();
+						List<BedTypeInfoItem> roomTypeList =  baseRoomInfo.getBedTypeInfo();
 						//床型
 						if (null != roomTypeList && roomTypeList.size() > 0){
-							resProBaseInfo.setBedTypeName(roomTypeList.get(0).getBedType()+"\\" + roomTypeList.get(0).getBedName());
+							if (StringUtils.isNoneBlank(roomTypeList.get(0).getBedType()) && roomTypeList.get(0).getBedType().equals(roomTypeList.get(0).getBedName())) {
+				                resProBaseInfo.setBedTypeName(roomTypeList.get(0).getBedType());
+				             }else {
+				                resProBaseInfo.setBedTypeName(roomTypeList.get(0).getBedType()+"\\" + roomTypeList.get(0).getBedName());
+				             }
 						}
 						//房间ID
 						resProBaseInfo.setProductUniqueId(Integer.parseInt(roomInfo.getRoomID()));
 						//TODO 	是否无烟
+						if (null != roomInfo.getSmokeInfo()) {
+			                  String hasRoomInNonSmokeArea = roomInfo.getSmokeInfo().getHasRoomInNonSmokeArea();
+			                  if ("T".equals(hasRoomInNonSmokeArea)) {
+			                      resProBaseInfo.setNonSmoking((byte) 1);
+			                  }else {
+			                      resProBaseInfo.setNonSmoking((byte) 0);
+			                  }
+			              }
+						
 						//TODO	是否有宽带
+						BroadNetInfo broadNetInfo = roomInfo.getBroadNetInfo();
+						if (null != broadNetInfo) {
+						    String hasBroadnet = broadNetInfo.getHasBroadnet();
+						    if (!"0".equals(hasBroadnet)) {
+						        String hasWirelessBroadnet = broadNetInfo.getHasWirelessBroadnet();
+						        List<String> hasBroadband = new ArrayList<>();
+						        if ("T".equals(hasWirelessBroadnet)) {
+						            hasBroadband.add("FreeWifi");
+						            if ("0".equals(broadNetInfo.getWirelessBroadnetFee())) {
+						                hasBroadband.add("FreeWiredBroadband");
+						            }
+						        }
+						        String hasWiredBroadnet = broadNetInfo.getHasWiredBroadnet();
+						        if ("T".equals(hasWiredBroadnet)) {
+						            hasBroadband.add("ChargeWiredBroadband");
+						        }
+						        resProBaseInfo.setHasBroadband(hasBroadband);
+						    }
+						}
 						//TODO	是否有早餐
+						List<RoomPriceDetail> roomPriceDetail = roomInfo.getRoomPriceInfo().getRoomPriceDetail();
+						if (null != roomPriceDetail && roomPriceDetail.size() > 0) {
+							//早餐(0.无早;1.一份; 2.双份; 3.三份…)
+							String hasBreakfast = roomPriceDetail.get(0).getBreakfast();
+							resProBaseInfo.setBreakfastCount(Integer.parseInt(hasBreakfast));
+						}
+						
+						//TODO 	是否有窗bqy(0.无窗; 1.部分有窗; 2.有窗;)
+						//			  TC(0.无窗;  1.有窗;   2.部分有窗)
+						String hasWindow = roomInfo.getHasWindow();
+						if ("1".equals(hasWindow)) {
+							resProBaseInfo.setHasWindows((byte)2);
+						}else if ("2".equals(hasWindow)) {
+							resProBaseInfo.setHasWindows((byte)1);
+						}else {
+							resProBaseInfo.setHasWindows(Byte.parseByte(hasWindow));
+						}
+						resProBaseInfos.add(resProBaseInfo);
 					}
+					proDetail.setResProBaseInfoList(resProBaseInfos);
 					proDetails.add(proDetail);
 				}
 				resBaseInfo.setProDetails(proDetails);
 			}
-			
+			//TODO 酒店政策
+			List<Policy> policyList = hotelEntity.getPolicy();
+			for (Policy policy : policyList) {
+				String ploicyName = policy.getPloicyName();
+				switch (ploicyName) {
+					/*case "Meals":
+						
+						break;*/
+					case "ArrivalAndDeparture":
+						resBaseInfo.setArrivalAndDeparture(policy.getPolicyText());
+						break;
+					case "Cancel":
+						resBaseInfo.setCancelDescription(policy.getPolicyText());
+						break;
+					case "DepositAndPrepaid":
+						resBaseInfo.setDepositAndPrepaid(policy.getPolicyText());
+						break;
+					case "Pet":
+						resBaseInfo.setPetDescription(policy.getPolicyText());
+						break;
+					/*case "Requirements":
+						
+						break;*/
+					case "Child":
+						resBaseInfo.setChildDescription(policy.getPolicyText());
+						break;
+				}
+			}
+			//TODO 酒店服务
+			String serviceNameStr = hotelEntity.getServiceName();
+			if (StringUtils.isNoneBlank(serviceNameStr)) {
+				List<FacilityServices> resFacilities = new ArrayList<>();
+				String[] serviceNameArr = serviceNameStr.split(",");
+				for (String serviceName : serviceNameArr) {
+					FacilityServices facilityServices = new FacilityServices();
+					facilityServices.setFacilityServicesName(serviceName);
+					resFacilities.add(facilityServices);
+				}
+				resBaseInfo.setResFacilities(resFacilities);
+			}
 			return resBaseInfo;
 		}
 		return null;

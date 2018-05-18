@@ -83,49 +83,37 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		TCResponse<ResBaseInfo> tcResponse = null;
 		TCResponse<ResBaseInfo> bqyResponse = null;
 		try {
-			//Future<TCResponse<ResBaseInfo>> future = RpcContext.getContext().getFuture();
-			
 			while(true) {
 				if(queryHotelList.isDone() && queryHotelList2.isDone()) {
 					tcResponse = queryHotelList.get();
 					bqyResponse = queryHotelList2.get();
-					/*System.out.println("bqy Size: "+bqyResponse.getResponseResult().size());
-					System.out.println(JsonUtil.toJson(bqyResponse.getResponseResult()));
-					for(ResBaseInfo rs : bqyResponse.getResponseResult()) {
-						System.out.println("bqy: "+rs.getResName());
-					}*/
 					break;
 				}
 			}
 			if(StringUtil.isNullOrEmpty(hotelSearchReq.getAirRailWay())) {
 				
 			}
-			
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
-		
 		return tcResponse;
-		//return null;
 	}
 
 	@Override
-	public void pullBQYHotelInfoByIdList() {
+	public void pullBQYHotelInfo() {
 		//将MongoDB中数据清空
 		bqyHotelService.deleteMongoDBData();
 		//拉取城市信息
-		bqyHotelService.pullCityDetail();
+		//bqyHotelService.pullCityDetail();
 		//拉取酒店ID并存储MongoDB
 		//获取BQY酒店ID
-		List<HotelId> hotelIdList = bqyHotelService.queryHotelIdList();
+		//List<HotelId> hotelIdList = bqyHotelService.queryHotelIdList();
 		//将获取的酒店ID保存到mongoDB中
-		mongoTemplate.insert(hotelIdList, HotelId.class);
-		
+		//mongoTemplate.insert(hotelIdList, HotelId.class);
+		List<HotelId> hotelIdList = null;
 		//获取ID数量
-		long totalHotelIdNum = hotelIdList.size();
+		//long totalHotelIdNum = hotelIdList.size();
+		long totalHotelIdNum = mongoTemplate.count(new Query(), HotelId.class);
 		long count = 1;
 		if ((totalHotelIdNum / PAGE_SIZE) > 1) {
 			count = totalHotelIdNum % PAGE_SIZE == 0 ? totalHotelIdNum / PAGE_SIZE : totalHotelIdNum / PAGE_SIZE + 1;

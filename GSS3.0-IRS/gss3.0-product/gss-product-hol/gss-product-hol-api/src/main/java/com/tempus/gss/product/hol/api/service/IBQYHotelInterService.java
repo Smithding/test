@@ -2,6 +2,7 @@ package com.tempus.gss.product.hol.api.service;
 
 import java.util.List;
 
+import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelEntity;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelId;
@@ -102,4 +103,12 @@ public interface IBQYHotelInterService{
 	 */
 	void deleteMongoDBData();
 
+	/**
+	 * 根据纬度、经度、酒店电话查询中间表中的酒店
+	 * @param lat		纬度
+	 * @param lon		经度
+	 * @param phone		酒店电话
+	 * @return
+	 */
+	List<HolMidBaseInfo> SearchHoltel(String lat, String lon, String phone);
 }
