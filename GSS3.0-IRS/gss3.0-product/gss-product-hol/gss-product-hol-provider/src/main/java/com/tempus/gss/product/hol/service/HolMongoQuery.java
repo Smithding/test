@@ -174,6 +174,12 @@ public class HolMongoQuery implements IHolMongoQuery {
 		 * @return
 		 */
 		public Criteria createCriteria(String proName, OperateEnum operat, Object value) {
+			String thirdProName = "";
+			if(proName.contains(",")) {
+				String[] split = proName.split(",");
+				proName = split[0];
+				thirdProName = split[1];
+			}
 			Criteria criteria = Criteria.where(proName);
 			switch (operat) {
 			case GT:
@@ -222,6 +228,11 @@ public class HolMongoQuery implements IHolMongoQuery {
 				break;
 			case REGEX:
 				criteria.regex(escapeRegexString(String.valueOf(value)), "i");
+				break;
+			case ELEMMATCH:
+				Criteria criatiraCityScenic = new Criteria();
+				criatiraCityScenic.and(thirdProName).regex(escapeRegexString(String.valueOf(value)), "i");
+				criteria.elemMatch(criatiraCityScenic);
 				break;
 			case BETWEENLONG:
 				String val = String.valueOf(value);
