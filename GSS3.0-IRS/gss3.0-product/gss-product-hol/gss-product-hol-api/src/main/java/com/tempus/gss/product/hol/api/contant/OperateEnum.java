@@ -16,6 +16,7 @@ public enum OperateEnum implements Serializable {
 	NOT("$not"), 
 	REGEX("$lte"), 
 	ELEMMATCH("$elemMatch"),
+	OROPERATOR("OROPERATOR"),
 	BETWEENLONG("此操作mongoTemplate中没有自己封装,依照betweenlong可以类推betweenDate,betweenint等between的比较");
 
 	private String op;
