@@ -88,12 +88,6 @@ public interface IBQYHotelInterService{
 	HotelInfo queryHotelInfo(QueryHotelInfoParam query);
 	
 	/**
-	 * 将数据存储到MongoDB中
-	 * @param hotelList
-	 */
-	void saveDataToMongoDB();
-	
-	/**
 	 * 拉取酒店信息
 	 */
 	void pullHotelInfoByIdList(List<HotelId> hotelIdList);

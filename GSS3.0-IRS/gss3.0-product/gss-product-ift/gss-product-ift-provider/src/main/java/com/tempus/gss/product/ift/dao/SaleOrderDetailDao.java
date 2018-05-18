@@ -46,4 +46,6 @@ public interface SaleOrderDetailDao extends BaseDao<SaleOrderDetail, SaleOrderDe
 	int updateSaleOrderDetailStatus();
 
     int updateSaleOrderDetailStatusByNo(Long saleOrderNo);
+
+	List<SaleOrderDetail> selectByPassengerAndSaleOrder(SaleOrderDetail saleOrderDetail);
 }

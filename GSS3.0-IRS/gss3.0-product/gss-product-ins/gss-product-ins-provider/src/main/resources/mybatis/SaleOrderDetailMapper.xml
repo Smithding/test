@@ -44,6 +44,10 @@
     <result column="MODIFY_TIME" property="modifyTime" jdbcType="TIMESTAMP" />
     <!--创建者-->
     <result column="CREATOR" property="creator" jdbcType="VARCHAR" />
+    <!--票号-->
+    <result column="TICKET_NO" property="ticketNo" jdbcType="VARCHAR" />
+    <!--pnr 报表导出 机票表中数据-->
+    <result column="PNR" property="pnr" jdbcType="VARCHAR" />
     <!--操作人 默认为：sys-->
     <result column="MODIFIER" property="modifier" jdbcType="VARCHAR" />
     <!--删除标志 0 无效 已删除 1 有效-->
@@ -69,9 +73,15 @@
   </select>
     <select id="selectReportBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select 
-        <include refid="Base_Column_List"/> 
-        from INS_SALE_ORDER_DETAIL 
-        where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+         isod.INSURED_NO, isod.ID, isod.OWNER, isod.SALE_ORDER_NO, isod.INSURED_NAME, isod.INSURED_CERTI_TYPE, isod.INSURED_CERTI_NO, 
+    isod.POLICY_NO, isod.ELE_URL, isod.INSURED_BIRTHDAY, isod.INSURED_SEX, isod.INSURED_PHONE, isod.INSURED_EMAIL,isod.PREMIUM, 
+    isod.BENEFICIARY_TYPE, isod.CUSTOMER_RELATIONS, isod.INSURANCE_NUM, isod.STATUS, isod.CREATE_TIME, isod.MODIFY_TIME, isod.CREATOR, 
+    isod.MODIFIER, isod.VALID,dsi.TICKET_NO,dsi.PNR
+        FROM INS_SALE_ORDER_DETAIL isod
+        LEFT JOIN INS_SALE_ORDER_EXT isoe ON isod.SALE_ORDER_NO=isoe.SALE_ORDER_NO
+        LEFT JOIN DPS_SALE ds ON ds.TRADE_NO=isoe.TRANSACTION_ID
+        LEFT JOIN DPS_SALE_ITEM dsi ON ds.ID = dsi.SALE_ID AND isod.INSURED_NAME=dsi.NAME
+        where isod.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from INS_SALE_ORDER_DETAIL

@@ -153,6 +153,31 @@ public class SaleOrderDetail implements Serializable,Cloneable {
 	 * 0代表订单管理数据  1代表报表生成数据
 	 */
 	private String isReport;
+	public String getTicketNo() {
+		return ticketNo;
+	}
+
+	public void setTicketNo(String ticketNo) {
+		this.ticketNo = ticketNo;
+	}
+
+	public String getPnr() {
+		return pnr;
+	}
+
+	public void setPnr(String pnr) {
+		this.pnr = pnr;
+	}
+
+	/**
+	 * 票号(保险报表使用)
+	 */
+	private String ticketNo;
+
+	/**
+	 * pnr(保险报表使用)
+	 */
+	private String pnr;
     public String getIsReport() {
 		return isReport;
 	}

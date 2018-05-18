@@ -371,6 +371,21 @@ public class DateUtil {
 		}
 		return date;
 	}
+
+	/**
+	 * 固定格式string转换成时间
+	 * @param dateStr
+	 * @return
+	 */
+	public static Date getDate(String dateStr,String format) {
+		Date date = null;
+		try {
+			date =  new SimpleDateFormat(format).parse(dateStr);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return date;
+	}
 	/**
 	 * 将/Date(..)格式的字符串时间转换为yyyy-MM-dd格式的年月日字符串时间
 	 * @param strDate

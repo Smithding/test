@@ -11,4 +11,9 @@ public interface ISyncHotelInfo {
 	public TCResponse<ResBaseInfo> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException;
 	public TCResponse<ResBaseInfo> queryHotelListForBack(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException;
 	
+	/**
+	 * 拉取BQY酒店信息
+	 * @param hotelIdList
+	 */
+	void pullBQYHotelInfoByIdList();
 }
