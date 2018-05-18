@@ -13,7 +13,7 @@ public class HolMidBaseInfo implements Serializable{
 	/**
 	 * 主键ID
 	 */
-	private String id;
+	private Long id;
 	/**
 	 * TC酒店id
 	 */
@@ -77,9 +77,17 @@ public class HolMidBaseInfo implements Serializable{
 	private String resGrade;
 	
 	/**
-	 * 酒店坐标信息
+	 * 坐标类型（1-百度坐标 2-图吧坐标 3-谷歌坐标）
 	 */
-	private List<ResGPSInfo> resGPS;
+	private Integer type;
+	/**
+	 * 经度
+	 */
+	private String lon;
+	/**
+	 * 纬度
+	 */
+	private String lat;
 	
 	/**
 	 * 国家名称（默认为中国）
@@ -128,12 +136,12 @@ public class HolMidBaseInfo implements Serializable{
 	private String bookInfo;
 	
 	private List<Object> bookItems;
-
-	public String getId() {
+	
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -241,12 +249,28 @@ public class HolMidBaseInfo implements Serializable{
 		this.resGrade = resGrade;
 	}
 
-	public List<ResGPSInfo> getResGPS() {
-		return resGPS;
+	public Integer getType() {
+		return type;
 	}
 
-	public void setResGPS(List<ResGPSInfo> resGPS) {
-		this.resGPS = resGPS;
+	public void setType(Integer type) {
+		this.type = type;
+	}
+
+	public String getLon() {
+		return lon;
+	}
+
+	public void setLon(String lon) {
+		this.lon = lon;
+	}
+
+	public String getLat() {
+		return lat;
+	}
+
+	public void setLat(String lat) {
+		this.lat = lat;
 	}
 
 	public String getCountryName() {
