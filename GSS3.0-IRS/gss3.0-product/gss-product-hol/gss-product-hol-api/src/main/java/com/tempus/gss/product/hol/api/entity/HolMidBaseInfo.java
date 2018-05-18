@@ -79,7 +79,7 @@ public class HolMidBaseInfo implements Serializable{
 	/**
 	 * 坐标类型（1-百度坐标 2-图吧坐标 3-谷歌坐标）
 	 */
-	private Integer type;
+	private Integer latLonType;
 	/**
 	 * 经度
 	 */
@@ -99,9 +99,10 @@ public class HolMidBaseInfo implements Serializable{
 	private String shortIntro;
 	
 	/**
-	 * 图片列表
+	 * 酒店头图
 	 */
-	private List<ImgInfo> imgInfoList;
+	//private List<ImgInfo> imgInfoList;
+	private String titleImg;
 	
 	/**
 	 * 酒店最低价
@@ -249,12 +250,12 @@ public class HolMidBaseInfo implements Serializable{
 		this.resGrade = resGrade;
 	}
 
-	public Integer getType() {
-		return type;
+	public Integer getLatLonType() {
+		return latLonType;
 	}
 
-	public void setType(Integer type) {
-		this.type = type;
+	public void setLatLonType(Integer latLonType) {
+		this.latLonType = latLonType;
 	}
 
 	public String getLon() {
@@ -289,12 +290,12 @@ public class HolMidBaseInfo implements Serializable{
 		this.shortIntro = shortIntro;
 	}
 
-	public List<ImgInfo> getImgInfoList() {
-		return imgInfoList;
+	public String getTitleImg() {
+		return titleImg;
 	}
 
-	public void setImgInfoList(List<ImgInfo> imgInfoList) {
-		this.imgInfoList = imgInfoList;
+	public void setTitleImg(String titleImg) {
+		this.titleImg = titleImg;
 	}
 
 	public Integer getMinPrice() {
