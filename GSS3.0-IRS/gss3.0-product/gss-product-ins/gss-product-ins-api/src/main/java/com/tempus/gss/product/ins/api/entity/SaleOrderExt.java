@@ -242,7 +242,20 @@ public class SaleOrderExt implements Serializable {
     private String ownerName;
 
     private String customerType;
-    public String getCustomerType() {
+	/**
+     * 订票员
+     * @return
+     */
+    private String bookingClerk;
+    public String getBookingClerk() {
+		return bookingClerk;
+	}
+
+	public void setBookingClerk(String bookingClerk) {
+		this.bookingClerk = bookingClerk;
+	}
+
+	public String getCustomerType() {
 		return customerType;
 	}
 

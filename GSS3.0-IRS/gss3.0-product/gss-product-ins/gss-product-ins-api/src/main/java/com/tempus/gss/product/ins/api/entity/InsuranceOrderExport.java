@@ -65,6 +65,22 @@ private String customerName;
 private String internatOrcivil;
 /*保单号*/
 private String policyNo;
+public String getTicketNo() {
+	return ticketNo;
+}
+public void setTicketNo(String ticketNo) {
+	this.ticketNo = ticketNo;
+}
+public String getBookingClerk() {
+	return bookingClerk;
+}
+public void setBookingClerk(String bookingClerk) {
+	this.bookingClerk = bookingClerk;
+}
+/*票号*/
+private String ticketNo;
+/*订票员*/
+private String bookingClerk;
 public String getPnr() {
 	return pnr;
 }
