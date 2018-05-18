@@ -336,9 +336,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			QueryHotelParam queryHotelParam = new QueryHotelParam();
 			//queryHotelParam.setHotelId(hotelId.getHotelId());
 			//TODO 酒店ID需要改
-			queryHotelParam.setHotelId(1916232L);
-			List<ImageList> hotelImageList = queryHotelImage(queryHotelParam);
-			hotelInfo.setHotelImageList(hotelImageList);
+			queryHotelParam.setHotelId(hotelInfo.getHotelId());
+			//List<ImageList> hotelImageList = queryHotelImage(queryHotelParam);
+			//hotelInfo.setHotelImageList(hotelImageList);
 			hotelInfo.setSupplierNo("411805040103290132");
 			hotelInfo.setLatestUpdateTime(sdf.format(new Date()));
 			hotelInfo.setSaleStatus(1);
@@ -370,18 +370,16 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			holMidBaseInfo.setResGrade(tcHolGrade(hotelInfo.getHotelStar()));
 			
 			//酒店坐标
-			List<ResGPSInfo> gpsInfoList = new ArrayList<>();
-			ResGPSInfo gpsInfo = new ResGPSInfo();
-			gpsInfo.setLat(hotelInfo.getLatitude().toString());
-			gpsInfo.setLon(hotelInfo.getLongitude().toString());
-			gpsInfoList.add(gpsInfo);
-			holMidBaseInfo.setResGPS(gpsInfoList);
+			holMidBaseInfo.setLatLonType(hotelInfo.getCoordinatesType());
+			holMidBaseInfo.setLat(hotelInfo.getLatitude().toString());
+			holMidBaseInfo.setLon(hotelInfo.getLongitude().toString());
 			
 			//一句话介绍...酒店描述
 			holMidBaseInfo.setShortIntro(hotelInfo.getDescription());
 			
 			//酒店图片
-			if (null != hotelImageList && hotelImageList.size() > 0) {
+			holMidBaseInfo.setTitleImg(hotelInfo.getTitleImgUrl());
+			/*if (null != hotelImageList && hotelImageList.size() > 0) {
 				List<ImgInfo> imgList = new ArrayList<>();
 				for (ImageList img : hotelImageList) {
 					if ("1".equals(img.getImageType())) {
@@ -394,7 +392,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 					}
 				}
 				holMidBaseInfo.setImgInfoList(imgList);
-			}
+			}*/
 			
 			holMidBaseInfo.setBookRemark(hotelInfo.getRoadCross());
 			holMidBaseInfo.setMinPrice(hotelInfo.getLowPrice().intValue());
