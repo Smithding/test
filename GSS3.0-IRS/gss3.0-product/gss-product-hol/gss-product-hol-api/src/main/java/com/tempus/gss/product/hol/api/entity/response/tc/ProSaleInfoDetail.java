@@ -73,6 +73,37 @@ public class ProSaleInfoDetail implements Serializable{
 	 */
 	@JSONField(name = "CancelRules")
 	private List<CancelRule> cancelRules;
+	/**
+	 * 超量担保数量
+	 */
+	@JSONField(name = "GuaranteeRoomAmount")
+	private Integer guaranteeRoomAmount;
+	/**
+	 * 预订担保类型（0：为首晚房费担保， 1：为全额房费担保）
+	 */
+	@JSONField(name = "BookingGuaranteeType")
+	private Integer bookingGuaranteeType;
+	/**
+	 * 可用开始日期
+	 */
+	@JSONField(name = "StartDate")
+	private String startDate;
+	/**
+	 * 可用结束日期
+	 */
+	@JSONField(name = "EndDate")
+	private String endDate;
+	/**
+	 * 预订当天库存，须校验库存可用开始时间
+	 */
+	@JSONField(name = "StartTime")
+	private String startTime;
+	/**
+	 * 预订当天库存，须校验库存可用结束时间; 若为 23:59:59 则为无限制
+	 */
+	@JSONField(name = "EndTime")
+	private String endTime;
+	
 	public Integer getDistributionSalePrice() {
 		return distributionSalePrice;
 	}
@@ -146,6 +177,41 @@ public class ProSaleInfoDetail implements Serializable{
 	public void setCancelRules(List<CancelRule> cancelRules) {
 		this.cancelRules = cancelRules;
 	}
-	
+	public Integer getGuaranteeRoomAmount() {
+		return guaranteeRoomAmount;
+	}
+	public void setGuaranteeRoomAmount(Integer guaranteeRoomAmount) {
+		this.guaranteeRoomAmount = guaranteeRoomAmount;
+	}
+	public Integer getBookingGuaranteeType() {
+		return bookingGuaranteeType;
+	}
+	public void setBookingGuaranteeType(Integer bookingGuaranteeType) {
+		this.bookingGuaranteeType = bookingGuaranteeType;
+	}
+	public String getStartDate() {
+		return startDate;
+	}
+	public void setStartDate(String startDate) {
+		this.startDate = startDate;
+	}
+	public String getEndDate() {
+		return endDate;
+	}
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
+	}
+	public String getStartTime() {
+		return startTime;
+	}
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
+	public String getEndTime() {
+		return endTime;
+	}
+	public void setEndTime(String endTime) {
+		this.endTime = endTime;
+	}
 	
 }
