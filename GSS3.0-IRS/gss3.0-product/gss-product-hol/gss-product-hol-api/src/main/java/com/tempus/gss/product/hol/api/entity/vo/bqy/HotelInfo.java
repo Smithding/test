@@ -123,6 +123,17 @@ public class HotelInfo implements Serializable {
 	private String latestUpdateTime;		//数据最近更新时间
 	
 	private Integer saleStatus;				//酒店是否可售状态，默认为1可售， 0位不可售
+	
+	/**
+	 * 坐标类型
+	 */
+	@JSONField(name="CoordinatesType")
+	private Integer coordinatesType;
+	/**
+	 * 酒店头图
+	 */
+	@JSONField(name="TitleImgUrl")
+	private String titleImgUrl;
 
 	public long getHotelId() {
 		return hotelId;
@@ -442,6 +453,22 @@ public class HotelInfo implements Serializable {
 
 	public void setSupplierNo(String supplierNo) {
 		this.supplierNo = supplierNo;
+	}
+
+	public Integer getCoordinatesType() {
+		return coordinatesType;
+	}
+
+	public void setCoordinatesType(Integer coordinatesType) {
+		this.coordinatesType = coordinatesType;
+	}
+
+	public String getTitleImgUrl() {
+		return titleImgUrl;
+	}
+
+	public void setTitleImgUrl(String titleImgUrl) {
+		this.titleImgUrl = titleImgUrl;
 	}
 	
 }
