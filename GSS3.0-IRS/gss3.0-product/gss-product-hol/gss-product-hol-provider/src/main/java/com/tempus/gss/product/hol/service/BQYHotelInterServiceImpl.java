@@ -447,8 +447,49 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		List<HolMidBaseInfo> holMidList = null;
 		String latitude = lat.substring(0, lat.indexOf(".") + 2);
 		String longitude = lon.substring(0, lon.indexOf(".") + 2);
-		String mobile = phone.substring(phone.indexOf("-")+1);
-		if (mobile.indexOf("/") > -1) {
+		String mobile = null;
+		if (StringUtils.isNotBlank(phone) && phone.length() > 7) {
+			//mobile = phone.substring(phone.indexOf("-")+1);
+			if (phone.contains("、")) {
+				String[] phoneArr = phone.split("、");
+				outer: 
+				for (String p : phoneArr) {
+					if (p.length() > 7) {
+						if (p.contains("-")) {
+							String[] holPhoneArr = p.split("-");
+							for (String holPhone : holPhoneArr) {
+								if (holPhone.length() > 7) {
+									holMidList = searchHol(latitude, longitude, holPhone);
+									if (null != holMidList && holMidList.size() > 0) {
+										break outer;
+									} 
+								}
+							}
+						}else {
+							holMidList = searchHol(latitude, longitude, p);
+						}
+					}
+				}
+			}else if (phone.contains("-")) {
+				String[] holPhoneArr = phone.split("-");
+				for (String holPhone : holPhoneArr) {
+					if (holPhone.length() > 7) {
+						holMidList = searchHol(latitude, longitude, holPhone);
+						if (null != holMidList && holMidList.size() > 0) {
+							break;
+							} 
+						}
+					}
+				}else if (phone.contains("(")) {
+					phone = phone.substring(0, phone.indexOf("("));
+					holMidList = searchHol(latitude, longitude, phone);
+				}else {
+					holMidList = searchHol(latitude, longitude, phone);
+				}
+		}else {
+			holMidList = searchHol(latitude, longitude, mobile);
+		}
+		/*if (mobile.indexOf("/") > -1) {
 			String[] mobileArr = mobile.split("/");
 			for (String m : mobileArr) {
 				holMidList = searchHol(latitude, longitude, m);
@@ -458,16 +499,17 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			}
 		}else {
 			holMidList = searchHol(latitude, longitude, mobile);
-		}
+		}*/
 		return holMidList;
 	}
 	
 	private List<HolMidBaseInfo> searchHol(String latitude, String longitude, String mobile) {
-		Criteria gpsCriteria = new Criteria();
-		gpsCriteria.and("lon").regex("^" + longitude + ".*$")
+		Criteria criteria = new Criteria();
+		criteria.and("lon").regex("^" + longitude + ".*$")
 					.and("lat").regex("^" + latitude + ".*$");
-		Criteria criteria = Criteria.where("resGPS").elemMatch(gpsCriteria);
-		criteria.and("resPhone").regex("^.*" + mobile + ".*$");
+		if (StringUtils.isNoneBlank(mobile) && mobile.length() > 7) {
+			criteria.and("resPhone").regex("^.*" + mobile + ".*$");
+		}
 		List<HolMidBaseInfo> holMidList = mongoTemplate.find(new Query(criteria), HolMidBaseInfo.class);
 		return holMidList;
 	}
