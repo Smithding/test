@@ -448,17 +448,17 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		String latitude = lat.substring(0, lat.indexOf(".") + 2);
 		String longitude = lon.substring(0, lon.indexOf(".") + 2);
 		String mobile = null;
-		if (StringUtils.isNotBlank(phone) && phone.length() > 7) {
+		if (StringUtils.isNotBlank(phone) && phone.length() >= 7) {
 			//mobile = phone.substring(phone.indexOf("-")+1);
 			if (phone.contains("、")) {
 				String[] phoneArr = phone.split("、");
 				outer: 
 				for (String p : phoneArr) {
-					if (p.length() > 7) {
+					if (p.length() >= 7) {
 						if (p.contains("-")) {
 							String[] holPhoneArr = p.split("-");
 							for (String holPhone : holPhoneArr) {
-								if (holPhone.length() > 7) {
+								if (holPhone.length() >= 7) {
 									holMidList = searchHol(latitude, longitude, holPhone);
 									if (null != holMidList && holMidList.size() > 0) {
 										break outer;
@@ -473,7 +473,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			}else if (phone.contains("-")) {
 				String[] holPhoneArr = phone.split("-");
 				for (String holPhone : holPhoneArr) {
-					if (holPhone.length() > 7) {
+					if (holPhone.length() >= 7) {
 						holMidList = searchHol(latitude, longitude, holPhone);
 						if (null != holMidList && holMidList.size() > 0) {
 							break;
