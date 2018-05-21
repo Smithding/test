@@ -90,7 +90,7 @@ public class ProInfoDetail implements Serializable{
 	/**
 	 * 该房间是否下线，上线为1， 下线为0
 	 */
-	private Integer saleStatus;
+	private Integer saleStatus = 1;
 	
 	
 	public String getProId() {
