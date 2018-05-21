@@ -395,9 +395,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 				holMidBaseInfo.setLat(hotelInfo.getLatitude().toString());
 				holMidBaseInfo.setLon(hotelInfo.getLongitude().toString());
 				
-				holMidBaseInfo.setCountryName("中国");
+				//holMidBaseInfo.setCountryName("中国");
 				//一句话介绍...酒店描述
-				holMidBaseInfo.setShortIntro(hotelInfo.getDescription());
+				//holMidBaseInfo.setShortIntro(hotelInfo.getDescription());
 				
 				//酒店图片
 				holMidBaseInfo.setTitleImg(hotelInfo.getTitleImgUrl());
@@ -434,11 +434,11 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	 */
 	@Override
 	public void deleteMongoDBData() {
-		mongoTemplate.remove(new Query(), HotelInfo.class);
-		//mongoTemplate.remove(new Query(), CityDetail.class);
+		//mongoTemplate.remove(new Query(), HotelInfo.class);
+		mongoTemplate.remove(new Query(), CityDetail.class);
 		//mongoTemplate.remove(new Query(), HotelId.class);
 		//TODO 需要修改中间表的清空
-		mongoTemplate.remove(new Query(), HolMidBaseInfo.class);
+		//mongoTemplate.remove(new Query(), HolMidBaseInfo.class);
 		//mongoTemplate.remove(new Query(Criteria.where("supplierNo").is("411805040103290132")), HolMidBaseInfo.class);
 	}
 	
@@ -466,18 +466,42 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 								}
 							}
 						}else {
-							holMidList = searchHol(latitude, longitude, p);
+							if (p.contains("(")) {
+								p = p.substring(0, phone.indexOf("("));
+								holMidList = searchHol(latitude, longitude, p);
+							}else {
+								holMidList = searchHol(latitude, longitude, p);
+							}
 						}
 					}
 				}
 			}else if (phone.contains("-")) {
 				String[] holPhoneArr = phone.split("-");
+				outer:
 				for (String holPhone : holPhoneArr) {
 					if (holPhone.length() >= 7) {
-						holMidList = searchHol(latitude, longitude, holPhone);
-						if (null != holMidList && holMidList.size() > 0) {
-							break;
-							} 
+						if (holPhone.contains("/")) {
+							String[] phoneArr = holPhone.split("/");
+							for (String p : phoneArr) {
+								holMidList = searchHol(latitude, longitude, p);
+								if (null != holMidList && holMidList.size() > 0) {
+									break outer;
+								} 
+							}
+						}else if (holPhone.contains("\\")) {
+							String[] phoneArr = holPhone.split("\\");
+							for (String p : phoneArr) {
+								holMidList = searchHol(latitude, longitude, p);
+								if (null != holMidList && holMidList.size() > 0) {
+									break outer;
+								} 
+							}
+						}else {
+							holMidList = searchHol(latitude, longitude, holPhone);
+							if (null != holMidList && holMidList.size() > 0) {
+									break outer;
+								} 
+							}
 						}
 					}
 				}else if (phone.contains("(")) {
@@ -489,17 +513,6 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		}else {
 			holMidList = searchHol(latitude, longitude, mobile);
 		}
-		/*if (mobile.indexOf("/") > -1) {
-			String[] mobileArr = mobile.split("/");
-			for (String m : mobileArr) {
-				holMidList = searchHol(latitude, longitude, m);
-				if (null != holMidList && holMidList.size() > 0) {
-					break;
-				}
-			}
-		}else {
-			holMidList = searchHol(latitude, longitude, mobile);
-		}*/
 		return holMidList;
 	}
 	
@@ -522,10 +535,11 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	 */
 	private void packingCityLocation(CityDetail cityDetail, HotelLocationEntity cityInfo) {
 		//酒店品牌
-		Set<String> hotelbrandSet = new HashSet<>();
+		Set<HotelBrand> hotelbrandSet = new HashSet<>();
 		List<HotelBrand> hotelbrandList = cityInfo.getHotelbrand();
 		for (HotelBrand hotelBrand : hotelbrandList) {
-			hotelbrandSet.add(hotelBrand.getHotelBrandName());
+			//hotelbrandSet.add(hotelBrand.getHotelBrandName());
+			hotelbrandSet.add(hotelBrand);
 		}
 		cityDetail.setHotelBrands(hotelbrandSet);
 		

@@ -24,7 +24,7 @@ public class CityDetail implements Serializable {
 //	
 //	private List<InfoShowlist> cityBusinessSectionInfo;	//商圈
 	
-	private Set<String> hotelBrands; 		    		//酒店品牌
+	private Set<HotelBrand> hotelBrands; 		    		//酒店品牌
 	
 	private Set<String> hotelFacilitys;	    			//设施服务
 	
@@ -72,11 +72,11 @@ public class CityDetail implements Serializable {
 		this.cityName = cityName;
 	}
 
-	public Set<String> getHotelBrands() {
+	public Set<HotelBrand> getHotelBrands() {
 		return hotelBrands;
 	}
 
-	public void setHotelBrands(Set<String> hotelBrands) {
+	public void setHotelBrands(Set<HotelBrand> hotelBrands) {
 		this.hotelBrands = hotelBrands;
 	}
 
