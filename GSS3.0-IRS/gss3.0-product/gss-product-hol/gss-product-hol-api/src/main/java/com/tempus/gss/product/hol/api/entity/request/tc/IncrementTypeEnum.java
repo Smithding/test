@@ -8,23 +8,23 @@ import java.io.Serializable;
  */
 public enum IncrementTypeEnum implements Serializable{
 	/**
-	 * 信息变更
+	 * 信息变更 1
 	 */
 	INFOCHANGE(1),  
 	/**
-	 * 价格变动
+	 * 价格变动 2
 	 */
 	PRICECHANGE(2),
 	/**
-	 * 无效增量
+	 * 无效增量 3
 	 */
 	INVALIDINCR(3),
 	/**
-	 * 有效增量
+	 * 有效增量 4
 	 */
 	VALIDINCR(4),
 	/**
-	 * 库存变动
+	 * 库存变动 7
 	 */
 	STORECHANGE(7);
 	
