@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -434,82 +435,102 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	 */
 	@Override
 	public void deleteMongoDBData() {
-		//mongoTemplate.remove(new Query(), HotelInfo.class);
+		mongoTemplate.remove(new Query(), HotelInfo.class);
 		mongoTemplate.remove(new Query(), CityDetail.class);
 		//mongoTemplate.remove(new Query(), HotelId.class);
 		//TODO 需要修改中间表的清空
 		//mongoTemplate.remove(new Query(), HolMidBaseInfo.class);
-		//mongoTemplate.remove(new Query(Criteria.where("supplierNo").is("411805040103290132")), HolMidBaseInfo.class);
+		mongoTemplate.remove(new Query(Criteria.where("supplierNo").is("411805040103290132")), HolMidBaseInfo.class);
 	}
 	
 	@Override
 	public List<HolMidBaseInfo> SearchHoltel(String lat, String lon, String phone) {
 		List<HolMidBaseInfo> holMidList = null;
-		String latitude = lat.substring(0, lat.indexOf(".") + 2);
-		String longitude = lon.substring(0, lon.indexOf(".") + 2);
+		int latSubLen = lat.substring(lat.indexOf(".")).length();
+		int lonSubLen = lon.substring(lon.indexOf(".")).length();
+		String latitude = null;
+		String longitude = null;
+		if (latSubLen >= 4) {
+			latitude = lat.substring(0, lat.indexOf(".") + 4);
+		}else {
+			latitude = lat.substring(0, lat.indexOf(".") + 2);
+		}
+		if (lonSubLen >= 4) {
+			longitude = lon.substring(0, lon.indexOf(".") + 4);
+		}else {
+			longitude = lon.substring(0, lon.indexOf(".") + 2);
+		}
 		String mobile = null;
+		List<String> phoneList = new ArrayList<>();
 		if (StringUtils.isNotBlank(phone) && phone.length() >= 7) {
-			//mobile = phone.substring(phone.indexOf("-")+1);
 			if (phone.contains("、")) {
 				String[] phoneArr = phone.split("、");
-				outer: 
 				for (String p : phoneArr) {
 					if (p.length() >= 7) {
 						if (p.contains("-")) {
 							String[] holPhoneArr = p.split("-");
 							for (String holPhone : holPhoneArr) {
 								if (holPhone.length() >= 7) {
-									holMidList = searchHol(latitude, longitude, holPhone);
-									if (null != holMidList && holMidList.size() > 0) {
-										break outer;
-									} 
+									phoneList.add(holPhone);
 								}
 							}
 						}else {
 							if (p.contains("(")) {
 								p = p.substring(0, phone.indexOf("("));
-								holMidList = searchHol(latitude, longitude, p);
+								phoneList.add(p);
 							}else {
-								holMidList = searchHol(latitude, longitude, p);
+								phoneList.add(p);
 							}
 						}
 					}
 				}
 			}else if (phone.contains("-")) {
 				String[] holPhoneArr = phone.split("-");
-				outer:
 				for (String holPhone : holPhoneArr) {
 					if (holPhone.length() >= 7) {
 						if (holPhone.contains("/")) {
 							String[] phoneArr = holPhone.split("/");
 							for (String p : phoneArr) {
-								holMidList = searchHol(latitude, longitude, p);
-								if (null != holMidList && holMidList.size() > 0) {
-									break outer;
-								} 
+								phoneList.add(p);
 							}
 						}else if (holPhone.contains("\\")) {
 							String[] phoneArr = holPhone.split("\\");
 							for (String p : phoneArr) {
-								holMidList = searchHol(latitude, longitude, p);
-								if (null != holMidList && holMidList.size() > 0) {
-									break outer;
-								} 
+								phoneList.add(p);
 							}
 						}else {
-							holMidList = searchHol(latitude, longitude, holPhone);
-							if (null != holMidList && holMidList.size() > 0) {
-									break outer;
-								} 
+							phoneList.add(holPhone);
 							}
 						}
 					}
 				}else if (phone.contains("(")) {
 					phone = phone.substring(0, phone.indexOf("("));
-					holMidList = searchHol(latitude, longitude, phone);
+					phoneList.add(phone);
 				}else {
-					holMidList = searchHol(latitude, longitude, phone);
+					phoneList.add(phone);
 				}
+			if (phoneList.size() == 1) {
+				holMidList = searchHol(latitude, longitude, phoneList.get(0));
+			}else if (phoneList.size() > 1) {
+				Criteria criteria = new Criteria();
+				List<Criteria> criteriaList = new ArrayList<>();
+				for (String p : phoneList) {
+					if (StringUtils.isNoneBlank(p) && p.length() >= 7) {
+						Criteria orCriteria = createCriteria(latitude, longitude, p);
+						criteriaList.add(orCriteria);
+					}
+				}
+				if (criteriaList.size() == 0) {
+					holMidList = searchHol(latitude, longitude, null);
+				}else if (criteriaList.size() == 1) {
+					criteria.orOperator(criteriaList.get(0));
+				}else if (criteriaList.size() == 2) {
+					criteria.orOperator(criteriaList.get(0), criteriaList.get(1));
+				}else {
+					criteria.orOperator(criteriaList.get(0), criteriaList.get(1), criteriaList.get(2));
+				}
+				holMidList = mongoTemplate.find(new Query(criteria), HolMidBaseInfo.class);
+			}
 		}else {
 			holMidList = searchHol(latitude, longitude, mobile);
 		}
@@ -517,14 +538,19 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	}
 	
 	private List<HolMidBaseInfo> searchHol(String latitude, String longitude, String mobile) {
+		Criteria criteria = createCriteria(latitude, longitude, mobile);
+		List<HolMidBaseInfo> holMidList = mongoTemplate.find(new Query(criteria), HolMidBaseInfo.class);
+		return holMidList;
+	}
+
+	private Criteria createCriteria(String latitude, String longitude, String mobile) {
 		Criteria criteria = new Criteria();
 		criteria.and("lon").regex("^" + longitude + ".*$")
 					.and("lat").regex("^" + latitude + ".*$");
-		if (StringUtils.isNoneBlank(mobile) && mobile.length() > 7) {
+		if (StringUtils.isNoneBlank(mobile) && mobile.length() >= 7) {
 			criteria.and("resPhone").regex("^.*" + mobile + ".*$");
 		}
-		List<HolMidBaseInfo> holMidList = mongoTemplate.find(new Query(criteria), HolMidBaseInfo.class);
-		return holMidList;
+		return criteria;
 	}
 
 	/**
