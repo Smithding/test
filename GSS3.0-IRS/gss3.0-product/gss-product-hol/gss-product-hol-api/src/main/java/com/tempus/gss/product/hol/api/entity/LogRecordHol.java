@@ -48,6 +48,8 @@ public class LogRecordHol implements Serializable {
 	
 	protected Long proId;
 	
+	protected Long ratePlanId;
+	
 	protected Long productUniqueId;
 	
 	/** 其它自定义属性 */
@@ -171,6 +173,14 @@ public class LogRecordHol implements Serializable {
 
 	public void setProId(Long proId) {
 		this.proId = proId;
+	}
+	
+	public Long getRatePlanId() {
+		return ratePlanId;
+	}
+
+	public void setRatePlanId(Long ratePlanId) {
+		this.ratePlanId = ratePlanId;
 	}
 
 	public Long getProductUniqueId() {
