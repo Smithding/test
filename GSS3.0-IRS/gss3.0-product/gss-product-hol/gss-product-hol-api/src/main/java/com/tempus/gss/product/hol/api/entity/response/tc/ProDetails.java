@@ -53,6 +53,10 @@ public class ProDetails implements Serializable {
 	 * 用来排序的均价
 	 */
 	private Integer proDetailConPrice;
+	/**
+	 * 0代表下线， 1代表上线
+	 */
+	private Integer saleStatus = 1;
 
 	public String getProId() {
 		return proId;
@@ -117,4 +121,13 @@ public class ProDetails implements Serializable {
 	public void setProDetailConPrice(Integer proDetailConPrice) {
 		this.proDetailConPrice = proDetailConPrice;
 	}
+
+	public Integer getSaleStatus() {
+		return saleStatus;
+	}
+
+	public void setSaleStatus(Integer saleStatus) {
+		this.saleStatus = saleStatus;
+	}
+	
 }
