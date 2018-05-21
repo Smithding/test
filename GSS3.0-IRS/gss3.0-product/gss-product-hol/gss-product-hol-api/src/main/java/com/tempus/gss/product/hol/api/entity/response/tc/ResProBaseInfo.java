@@ -201,6 +201,8 @@ public class ResProBaseInfo implements Serializable{
 	 */
 	private BigDecimal totalRebateRateProfit;
 	
+	private Integer saleStatus = 1;
+	
 	public Long getResId() {
 		return resId;
 	}
@@ -436,6 +438,12 @@ public class ResProBaseInfo implements Serializable{
 	@JSONField(deserialize=false)
 	public void setTotalRebateRateProfit(BigDecimal totalRebateRateProfit) {
 		this.totalRebateRateProfit = totalRebateRateProfit;
+	}
+	public Integer getSaleStatus() {
+		return saleStatus;
+	}
+	public void setSaleStatus(Integer saleStatus) {
+		this.saleStatus = saleStatus;
 	}
 	
 }
