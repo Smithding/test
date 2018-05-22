@@ -111,4 +111,11 @@ public interface IBQYHotelInterService{
 	 * @return
 	 */
 	List<HolMidBaseInfo> SearchHoltel(String lat, String lon, String phone);
+	
+	/**
+	 * 保存中间表
+	 * @param hotelId
+	 * @param hotelInfo
+	 */
+	void saveMidHol(HotelId hotelId, HotelInfo hotelInfo);
 }

@@ -102,7 +102,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	@Override
 	public void pullBQYHotelInfo() {
 		//将MongoDB中数据清空
-		bqyHotelService.deleteMongoDBData();
+		//bqyHotelService.deleteMongoDBData();
 		//拉取城市信息
 		//bqyHotelService.pullCityDetail();
 		//拉取酒店ID并存储MongoDB
