@@ -340,93 +340,86 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			hotelInfo.setLowPrice(new BigDecimal((int)((Math.random() + 1) * 100)));
 			//保存酒店信息
 			mongoTemplate.save(hotelInfo);
-			/**
-			 * 判断中间表中是否有相同的酒店
-			 * 通过酒店经纬度和酒店电话匹配是否为同一家酒店
-			 */
-			//纬度
-			String latitude = hotelInfo.getLatitude().toString();
-			//经度
-			String longitude = hotelInfo.getLongitude().toString();
-			//电话
-			String mobile = hotelInfo.getMobile();
-			
-			List<HolMidBaseInfo> holMidList = SearchHoltel(latitude, longitude, mobile);
-			if (null != holMidList && holMidList.size() > 0) {
-				if (holMidList.size() == 1) {
-					//合并酒店
-					HolMidBaseInfo holMid = holMidList.get(0);
-					holMid.setBqyResId(hotelInfo.getHotelId());
-					holMid.setBqyResName(hotelInfo.getHotelName());
-					int lowPrice = hotelInfo.getLowPrice().intValue();
-					if (holMid.getMinPrice() > lowPrice) {
-						holMid.setMinPrice(lowPrice);
-					}
-					mongoTemplate.save(holMid);
-				}else if (holMidList.size() > 1) {
-					throw new GSSException("bqy拉取酒店信息", "0111", "酒店纬度:" + latitude +"经度:" + longitude + "电话:" + mobile + "在中间表中有" + holMidList.size() + "个");
-				}
-			}else {
-				/**
-				 * 保存中间表
-				 */
-				HolMidBaseInfo holMidBaseInfo = new HolMidBaseInfo();
-				//holMidBaseInfo.setId(BQYIDPRE + hotelId.getHotelId());
-				holMidBaseInfo.setId(IdWorker.getId());
-				holMidBaseInfo.setBqyResId(hotelId.getHotelId());
-				holMidBaseInfo.setBqyResName(hotelInfo.getHotelName());
-				holMidBaseInfo.setProvName(hotelInfo.getProvinceName());
-				//holMidBaseInfo.setCityId(Integer.parseInt(hotelInfo.getCityCode()));
-				holMidBaseInfo.setCityName(hotelInfo.getCityName());
-				holMidBaseInfo.setIsInter(1);
-				//酒店品牌
-				ResBrandInfo resBrandInfo = new ResBrandInfo();
-				resBrandInfo.setResBrandName(hotelInfo.getHotelBrandName());
-				resBrandInfo.setId(Long.parseLong(String.valueOf(hotelInfo.getHotelBrandId())));
-				holMidBaseInfo.setBrandInfo(resBrandInfo);
-				
-				holMidBaseInfo.setAddress(hotelInfo.getAddress());
-				holMidBaseInfo.setResPhone(hotelInfo.getMobile());
-				holMidBaseInfo.setIntro(hotelInfo.getDescription());
-				//酒店等级
-				holMidBaseInfo.setResGrade(tcHolGrade(hotelInfo.getHotelStar()));
-				
-				//酒店坐标
-				holMidBaseInfo.setLatLonType(hotelInfo.getCoordinatesType());
-				holMidBaseInfo.setLat(hotelInfo.getLatitude().toString());
-				holMidBaseInfo.setLon(hotelInfo.getLongitude().toString());
-				
-				//holMidBaseInfo.setCountryName("中国");
-				//一句话介绍...酒店描述
-				//holMidBaseInfo.setShortIntro(hotelInfo.getDescription());
-				
-				//酒店图片
-				holMidBaseInfo.setTitleImg(hotelInfo.getTitleImgUrl());
-				/*if (null != hotelImageList && hotelImageList.size() > 0) {
-					List<ImgInfo> imgList = new ArrayList<>();
-					for (ImageList img : hotelImageList) {
-						if ("1".equals(img.getImageType())) {
-							ImgInfo imgInfo = new ImgInfo();
-							imgInfo.setImageName(img.getTitleName());
-							imgInfo.setImageUrl(img.getImageUrl());
-							imgInfo.setResId(Long.parseLong(String.valueOf(img.getHotelId())));
-							imgList.add(imgInfo);
-							break;
-						}
-					}
-					holMidBaseInfo.setImgInfoList(imgList);
-				}*/
-				
-				holMidBaseInfo.setBookRemark(hotelInfo.getRoadCross());
-				holMidBaseInfo.setMinPrice(hotelInfo.getLowPrice().intValue());
-				holMidBaseInfo.setSupplierNo(hotelInfo.getSupplierNo());
-				holMidBaseInfo.setLatestUpdateTime(hotelInfo.getLatestUpdateTime());
-				holMidBaseInfo.setSaleStatus(1);
-				holMidBaseInfo.setBookTimes(1L);
-				mongoTemplate.save(holMidBaseInfo);
-			}
+			//保存中间表
+			saveMidHol(hotelId, hotelInfo);
 		}
 		logger.info(Thread.currentThread().getName() + "线程完成拉取数据...");
+	}
+
+	@Override
+	public void saveMidHol(HotelId hotelId, HotelInfo hotelInfo) {
+		/**
+		 * 判断中间表中是否有相同的酒店
+		 * 通过酒店经纬度和酒店电话匹配是否为同一家酒店
+		 */
+		//纬度
+		String latitude = hotelInfo.getLatitude().toString();
+		//经度
+		String longitude = hotelInfo.getLongitude().toString();
+		//电话
+		String mobile = hotelInfo.getMobile();
+		
+		List<HolMidBaseInfo> holMidList = SearchHoltel(latitude, longitude, mobile);
+		if (null != holMidList && holMidList.size() > 0) {
+			if (holMidList.size() == 1) {
+				//合并酒店
+				HolMidBaseInfo holMid = holMidList.get(0);
+				holMid.setBqyResId(hotelInfo.getHotelId());
+				holMid.setBqyResName(hotelInfo.getHotelName());
+				int lowPrice = hotelInfo.getLowPrice().intValue();
+				if (holMid.getMinPrice() > lowPrice) {
+					holMid.setMinPrice(lowPrice);
+				}
+				mongoTemplate.save(holMid);
+				System.out.println(JsonUtil.toJson(holMid));
+			}else if (holMidList.size() > 1) {
+				throw new GSSException("bqy拉取酒店信息", "0111", "酒店纬度:" + latitude +"经度:" + longitude + "电话:" + mobile + "在中间表中有" + holMidList.size() + "个");
+			}
+		}else {
+			/**
+			 * 保存中间表
+			 */
+			HolMidBaseInfo holMidBaseInfo = new HolMidBaseInfo();
+			//holMidBaseInfo.setId(BQYIDPRE + hotelId.getHotelId());
+			holMidBaseInfo.setId(IdWorker.getId());
+			holMidBaseInfo.setBqyResId(hotelId.getHotelId());
+			holMidBaseInfo.setBqyResName(hotelInfo.getHotelName());
+			holMidBaseInfo.setProvName(hotelInfo.getProvinceName());
+			//holMidBaseInfo.setCityId(Integer.parseInt(hotelInfo.getCityCode()));
+			holMidBaseInfo.setCityName(hotelInfo.getCityName());
+			holMidBaseInfo.setIsInter(1);
+			//酒店品牌
+			ResBrandInfo resBrandInfo = new ResBrandInfo();
+			resBrandInfo.setResBrandName(hotelInfo.getHotelBrandName());
+			resBrandInfo.setId(Long.parseLong(String.valueOf(hotelInfo.getHotelBrandId())));
+			holMidBaseInfo.setBrandInfo(resBrandInfo);
+			
+			holMidBaseInfo.setAddress(hotelInfo.getAddress());
+			holMidBaseInfo.setResPhone(hotelInfo.getMobile());
+			holMidBaseInfo.setIntro(hotelInfo.getDescription());
+			//酒店等级
+			holMidBaseInfo.setResGrade(tcHolGrade(hotelInfo.getHotelStar()));
+			
+			//酒店坐标
+			holMidBaseInfo.setLatLonType(hotelInfo.getCoordinatesType());
+			holMidBaseInfo.setLat(hotelInfo.getLatitude().toString());
+			holMidBaseInfo.setLon(hotelInfo.getLongitude().toString());
+			
+			//holMidBaseInfo.setCountryName("中国");
+			//一句话介绍...酒店描述
+			//holMidBaseInfo.setShortIntro(hotelInfo.getDescription());
+			
+			//酒店图片
+			holMidBaseInfo.setTitleImg(hotelInfo.getTitleImgUrl());
+			
+			holMidBaseInfo.setBookRemark(hotelInfo.getRoadCross());
+			holMidBaseInfo.setMinPrice(hotelInfo.getLowPrice().intValue());
+			holMidBaseInfo.setSupplierNo(hotelInfo.getSupplierNo());
+			holMidBaseInfo.setLatestUpdateTime(hotelInfo.getLatestUpdateTime());
+			holMidBaseInfo.setSaleStatus(1);
+			holMidBaseInfo.setBookTimes(1L);
+			mongoTemplate.save(holMidBaseInfo);
+		}
 	}
 	
 
