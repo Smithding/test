@@ -256,7 +256,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			AssignDateHotelReq assignDateHotelReq=new AssignDateHotelReq();
 			assignDateHotelReq.setResId(resId);
 			assignDateHotelReq.setSourceFrom("-1");
-			assignDateHotelReq.setNeedSpecialPolicy(1);
+			//assignDateHotelReq.setNeedSpecialPolicy(1);
 			assignDateHotelReq.setStartTime(calStartTime);
 			assignDateHotelReq.setEndTime(calEndTime);
 			AssignDateHotel assignDateHotel=  queryAssignDateHotel(assignDateHotelReq);
@@ -286,133 +286,106 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 	@Override
 	public void doIncrHotelDetail(Long resId){
 		try {
+    		//logger.info("ScheduledTest.executeFileDownLoadTask 定时任务: ###"+current.getId()+ ",name:"+current.getName());
 			SingleHotelDetailReq singleHotelDetailReq=new SingleHotelDetailReq();
 			String ResId= String.valueOf(resId);
 			singleHotelDetailReq.setResId(ResId);
 			singleHotelDetailReq.setSourceForm("-1");
-			singleHotelDetailReq.setRequestContent("res,respro");
+			singleHotelDetailReq.setRequestContent("res,respro,rimg");
 			TCHotelDetailResult hotelDetail=queryTCHotelDetail(singleHotelDetailReq);
-			
-			SingleHotelDetailReq singleHotelDetailReqImg=new SingleHotelDetailReq();
-			singleHotelDetailReqImg.setResId(ResId);
-			singleHotelDetailReqImg.setSourceForm("-1");
-			singleHotelDetailReqImg.setRequestContent("rimg");
-			TCHotelDetailResult hotelDetailImg=queryTCHotelDetail(singleHotelDetailReqImg);
 			
 			if(StringUtil.isNotNullOrEmpty(hotelDetail)){
 				List<ResBaseInfo> resBaseInfoList =hotelDetail.getResBaseInfos();
 				List<ResProBaseInfo> resProBaseInfoList= hotelDetail.getResProBaseInfos();
+				List<ImgInfo> imgInfoList = hotelDetail.getResImages();
+				/*if(hotelDetailImg != null) {
+					imgInfoList= hotelDetailImg.getResImages();
+				}*/
 				
 				if(resBaseInfoList.size() > 0 && resProBaseInfoList.size() > 0){
-					resBaseInfoList.get(0).setSupplierNo("411709261204150108");
-					if(StringUtil.isNotNullOrEmpty(resBaseInfoList.get(0).getResGrade())){
-						if(resBaseInfoList.get(0).getResGrade().equals("豪华型")){
-							resBaseInfoList.get(0).setResGradeId("23");
-						}else if(resBaseInfoList.get(0).getResGrade().equals("高档型")){
-							resBaseInfoList.get(0).setResGradeId("24");
-						}else if(resBaseInfoList.get(0).getResGrade().equals("舒适型")){
-							resBaseInfoList.get(0).setResGradeId("26");
-						}else if(resBaseInfoList.get(0).getResGrade().equals("经济型")){
-							resBaseInfoList.get(0).setResGradeId("27");
+					ResBaseInfo tcResBaseInfo = resBaseInfoList.get(0);
+					tcResBaseInfo.setId(resId);
+					tcResBaseInfo.setSupplierNo("411709261204150108");
+					if(tcResBaseInfo.getResGrade() != null){
+						if(tcResBaseInfo.getResGrade().equals("豪华型")){
+							tcResBaseInfo.setResGradeId("23");
+						}else if(tcResBaseInfo.getResGrade().equals("高档型")){
+							tcResBaseInfo.setResGradeId("24");
+						}else if(tcResBaseInfo.getResGrade().equals("舒适型")){
+							tcResBaseInfo.setResGradeId("26");
+						}else if(tcResBaseInfo.getResGrade().equals("经济型")){
+							tcResBaseInfo.setResGradeId("27");
 						}
 					}
 					Map<String, List<ResProBaseInfo>> proMap=new HashMap<String, List<ResProBaseInfo>>();
 					String key="";
-					List<Integer> minResPriceList=new ArrayList<Integer>();
-					List<Integer> commonResPriceList= new ArrayList<Integer>();
-						for(ResProBaseInfo proList: resProBaseInfoList){
-								key= proList.getResProName();
-								if(!proMap.containsKey(key)){
-									List<ResProBaseInfo> proBedList=new ArrayList<ResProBaseInfo>();
-									proBedList.add(proList);
-									proMap.put(key, proBedList); 
-								}else{
-									List<ResProBaseInfo> proBedList = proMap.get(key);
-									proBedList.add(proList);
-								}
-							List<Integer> minProPrice=new ArrayList<Integer>();
-							ProInfoDetail proInfoDetail= hotelFind.queryListByProductUniqueId(proList.getProductUniqueId().longValue(), ProInfoDetail.class);
-							if(proInfoDetail != null && proInfoDetail.getProSaleInfoDetails()!= null && proInfoDetail.getProSaleInfoDetails().size() > 0){
-								TreeMap<String, ProSaleInfoDetail> map= proInfoDetail.getProSaleInfoDetails();
-								if(map != null){
-									for (Map.Entry<String, ProSaleInfoDetail> entry : map.entrySet()) {
-										minProPrice.add(entry.getValue().getDistributionSalePrice());
-									}
-									if(StringUtil.isNotNullOrEmpty(minProPrice)){
-										if(minProPrice.size() >= 2){
-											Integer sumPrice= 0;
-											for(int k=0; k< minProPrice.size();k++){
-												sumPrice += minProPrice.get(k);
+					List<ProInfoDetail> proInfoDetailList = mongoTemplate.find(new Query(Criteria.where("resId").is(resId)),ProInfoDetail.class);
+					List<Integer> minProPrice=new ArrayList<Integer>();
+					Integer minPrice = 999999;
+					for(ResProBaseInfo proList: resProBaseInfoList){
+							key= proList.getResProName();
+							if(!proMap.containsKey(key)){
+								List<ResProBaseInfo> proBedList=new ArrayList<ResProBaseInfo>();
+								proBedList.add(proList);
+								proMap.put(key, proBedList); 
+							}else{
+								List<ResProBaseInfo> proBedList = proMap.get(key);
+								proBedList.add(proList);
+							}
+						if(StringUtil.isNotNullOrEmpty(proInfoDetailList)){
+							outer : 
+							for(ProInfoDetail proInfoDetail : proInfoDetailList) {
+								if(proInfoDetail.getProductUniqueId().equals(proList.getProductUniqueId().longValue())) {
+									TreeMap<String, ProSaleInfoDetail> map= proInfoDetail.getProSaleInfoDetails();
+									if(StringUtil.isNotNullOrEmpty(map)){
+										for (Map.Entry<String, ProSaleInfoDetail> entry : map.entrySet()) {
+											minProPrice.add(entry.getValue().getDistributionSalePrice());
+											if(minProPrice.size() >= 1) {
+												break outer;
 											}
-											Integer commonProPrice = sumPrice/minProPrice.size();
-											Integer minPrice= Collections.min(minProPrice);
-											minResPriceList.add(minPrice);
-											commonResPriceList.add(commonProPrice);
-										}else if(minProPrice.size() == 1){
-											Integer minPrice= minProPrice.get(0);
-											minResPriceList.add(minPrice);
-											commonResPriceList.add(minPrice);
-										}else{
-											Integer minPrice = 999999;
-											minResPriceList.add(minPrice);
-											commonResPriceList.add(minPrice);
 										}
 									}
 								}
 							}
 						}
-							if(StringUtil.isNotNullOrEmpty(minResPriceList)){
-								if(minResPriceList.size() >=2){
-									Integer minResPrice= Collections.min(minResPriceList);
-									resBaseInfoList.get(0).setMinPrice(minResPrice);
-								}else if(minResPriceList.size() == 1){
-									Integer minResPrice= minResPriceList.get(0);
-									resBaseInfoList.get(0).setMinPrice(minResPrice);
-								}else{
-									Integer minResPrice = 999999;
-									resBaseInfoList.get(0).setMinPrice(minResPrice);
-								}
-							}
-							if(commonResPriceList.size() > 0){
-								Integer comResPrice = 0;
-								for(int kk=0; kk<commonResPriceList.size();kk++){
-									comResPrice += commonResPriceList.get(kk);
-								}
-								resBaseInfoList.get(0).setResCommonPrice(comResPrice/commonResPriceList.size());
-							}else{
-								resBaseInfoList.get(0).setResCommonPrice(999999);
-							}
-							List<ProDetails> ProInfoDetaisList=new ArrayList<ProDetails>();
-							if(StringUtil.isNotNullOrEmpty(proMap)){
-								for (Map.Entry<String, List<ResProBaseInfo>> baseList : proMap.entrySet()) {
-									ProDetails proInfoDetai=new ProDetails();
-									proInfoDetai.setProId(proMap.get(baseList.getKey()).get(0).getProId());
-									proInfoDetai.setResProName(baseList.getKey());
-									proInfoDetai.setRoomSize(proMap.get(baseList.getKey()).get(0).getRoomSize());
-									proInfoDetai.setRoomFloor(proMap.get(baseList.getKey()).get(0).getRoomFloor());
-									proInfoDetai.setRoomFacilities(proMap.get(baseList.getKey()).get(0).getRoomFacilities());
-									proInfoDetai.setHasBroadband(proMap.get(baseList.getKey()).get(0).getHasBroadband());
-									proInfoDetai.setResProBaseInfoList(baseList.getValue());
-									ProInfoDetaisList.add(proInfoDetai);
-								}
-								resBaseInfoList.get(0).setProDetails(ProInfoDetaisList);
-							}
-							if(StringUtil.isNotNullOrEmpty(hotelDetailImg)){
-								List<ImgInfo> imgInfoList= hotelDetailImg.getResImages();
-								List<ImgInfo> list2=new ArrayList<ImgInfo>();
-								list2.addAll(imgInfoList);
-								resBaseInfoList.get(0).setImgInfoList(list2);
-							}
-							resBaseInfoList.get(0).setId(resId);
-							Integer saleStatus = 1;
-							resBaseInfoList.get(0).setSaleStatus(saleStatus);
-							resBaseInfoList.get(0).setLatestUpdateTime(sdfupdate.format(new Date()));
-							mongoTemplate.save(resBaseInfoList.get(0),"resBaseInfo");
-						//log.info("插入酒店详细信息到mongodb成功!");
-							log.info("插入酒店详细信息到mongodb成功!");
+					}
+					if(minProPrice != null){
+						if(minProPrice.size() >= 2){
+							minPrice= Collections.min(minProPrice); 
+						}else if(minProPrice.size() == 1){
+							minPrice= minProPrice.get(0);
+						}
+					}
+					tcResBaseInfo.setMinPrice(minPrice);
+					List<ProDetails> ProInfoDetaisList=new ArrayList<ProDetails>();
+					if(proMap != null){
+						for (Map.Entry<String, List<ResProBaseInfo>> baseList : proMap.entrySet()) {
+							ProDetails proInfoDetai=new ProDetails();
+							proInfoDetai.setProId(proMap.get(baseList.getKey()).get(0).getProId());
+							proInfoDetai.setResProName(baseList.getKey());
+							proInfoDetai.setRoomSize(proMap.get(baseList.getKey()).get(0).getRoomSize());
+							proInfoDetai.setRoomFloor(proMap.get(baseList.getKey()).get(0).getRoomFloor());
+							proInfoDetai.setRoomFacilities(proMap.get(baseList.getKey()).get(0).getRoomFacilities());
+							proInfoDetai.setHasBroadband(proMap.get(baseList.getKey()).get(0).getHasBroadband());
+							proInfoDetai.setResProBaseInfoList(baseList.getValue());
+							ProInfoDetaisList.add(proInfoDetai);
+						}
+						tcResBaseInfo.setProDetails(ProInfoDetaisList);
+					}
+					if(imgInfoList.size() >0) {
+						List<ImgInfo> list2=new ArrayList<ImgInfo>();
+						list2.addAll(imgInfoList);
+						tcResBaseInfo.setImgInfoList(list2);
+					}
+					
+					Integer salaStatus = 1;
+					tcResBaseInfo.setSaleStatus(salaStatus);
+					tcResBaseInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
+					mongoTemplate.save(tcResBaseInfo,"resBaseInfo");
+							
 				}
 			}
-		} catch (Exception e) {
+		} catch (GSSException e) {
 			LogRecordHol logRecordHol=new LogRecordHol();
 			logRecordHol.setBizCode("HOL-IncrDetail");
 			logRecordHol.setCreateTime(new Date());
@@ -420,7 +393,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			logRecordHol.setDesc("同步酒店信息失败,酒店ID为："+String.valueOf(resId));
 			logRecordHol.setResId(resId);
 			mongoTemplate.save(logRecordHol, "logRecordHol");
-			//log.error("同步酒店详情失败, 酒店ID为: "+resId);
+			//logger.error("同步酒店详情失败, 酒店ID为: "+resId+", "+e.getMessage());
 		}
 	}
 
@@ -512,7 +485,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			assignDateHotelReq.setResId(resId);
 			assignDateHotelReq.setProductUniqueId(productUniqueId);
 			assignDateHotelReq.setSourceFrom("-1");
-			assignDateHotelReq.setNeedSpecialPolicy(1);
+			//assignDateHotelReq.setNeedSpecialPolicy(1);
 			assignDateHotelReq.setStartTime(calStartTime);
 			assignDateHotelReq.setEndTime(calEndTime);
 			AssignDateHotel assignDateHotel=  queryAssignDateHotel(assignDateHotelReq);
@@ -575,7 +548,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			assignDateHotelReq.setResId(resId);
 			assignDateHotelReq.setProductUniqueId(productUniqueId);
 			assignDateHotelReq.setSourceFrom("-1");
-			assignDateHotelReq.setNeedSpecialPolicy(1);
+			//assignDateHotelReq.setNeedSpecialPolicy(1);
 			assignDateHotelReq.setStartTime(calStartTime);
 			assignDateHotelReq.setEndTime(calEndTime);
 			AssignDateHotel assignDateHotel=  queryAssignDateHotel(assignDateHotelReq);
