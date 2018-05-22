@@ -313,7 +313,6 @@ public class ChangeServiceImpl implements IChangeService {
             /*创建新增操作日志*/
             try {
                 LogRecord logRecord = new LogRecord();
-                logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("创建国际改签单");
                 logRecord.setDesc(JSON.toJSONString(requestWithActor));
@@ -645,10 +644,10 @@ public class ChangeServiceImpl implements IChangeService {
                 logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
                 logRecord.setRequestIp(requestWithActor.getAgent().getIp());
                 logRecord.setBizCode("IFT-ChangeServiceImpl-changeAudit");
-                logRecord.setBizNo(String.valueOf(requestWithActor.getEntity()));
+                logRecord.setBizNo(String.valueOf(requestWithActor.getEntity().getSaleChangeNo()));
                 logService.insert(logRecord);
             } catch (Exception e) {
-                log.error("添加(title=国际改签单审核)操作日志异常===" + e);
+                log.error("添加(title=国际改签单审核)操作日志异常===" , e);
             }
         } catch (Exception e) {
             log.error("改签审核失败" , e);

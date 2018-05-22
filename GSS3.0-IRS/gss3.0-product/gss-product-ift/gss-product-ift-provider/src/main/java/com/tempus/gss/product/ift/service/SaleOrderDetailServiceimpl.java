@@ -64,7 +64,7 @@ public class SaleOrderDetailServiceimpl implements ISaleOrderDetailService{
 			logRecord.setBizNo(String.valueOf(saleOrderDetail.getEntity().getSaleOrderNo()));
 //			logService.insert(logRecord);
 		} catch (Exception e) {
-			log.error("添加操作日志异常===" + e);
+			log.error("添加操作日志异常===" , e);
 		}
 		return flag;
 	}
