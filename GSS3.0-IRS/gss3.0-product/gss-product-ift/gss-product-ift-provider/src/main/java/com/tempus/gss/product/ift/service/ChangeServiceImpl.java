@@ -19,6 +19,7 @@ import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
 import com.tempus.gss.product.ift.api.entity.vo.*;
 import com.tempus.gss.product.ift.api.service.IBuyOrderExtService;
 import com.tempus.gss.product.ift.api.service.IChangeService;
+import com.tempus.gss.product.ift.api.service.IPassengerChangePriceService;
 import com.tempus.gss.product.ift.api.service.ITicketSenderService;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.*;
@@ -42,6 +43,8 @@ import java.util.*;
 public class ChangeServiceImpl implements IChangeService {
     
     protected final transient Logger log = LoggerFactory.getLogger(getClass());
+    @Reference
+    private IPassengerChangePriceService pgerChangePriceService;
     @Reference
     ISaleChangeService saleChangeService;
     @Reference
@@ -97,6 +100,8 @@ public class ChangeServiceImpl implements IChangeService {
     TicketSenderDao ticketSenderDao;
     @Reference
     ITicketSenderService ticketSenderService;
+    @Reference
+    ICertificateService certificateService;
     @Override
     @Transactional
     public SaleChangeExt apiCreateChange(RequestWithActor<ChangeCreateVo> requestWithActor) {
@@ -439,7 +444,198 @@ public class ChangeServiceImpl implements IChangeService {
         }
         return flag;
     }
-    
+
+    @Override
+    @Transactional
+    public boolean refundVerify(RequestWithActor<List<PassengerChangePrice>> passengerChangeList) {
+
+        log.info("改签单审核开始");
+        boolean flag = false;
+        try {
+            BigDecimal saleTotal = new BigDecimal(0);// 销售单合计
+            BigDecimal buyTotal = new BigDecimal(0);// 采购单合计
+            for (PassengerChangePrice passenger : passengerChangeList.getEntity()) {
+                if (passenger.getSaleCountPrice() != null) {
+                    saleTotal = saleTotal.add(passenger.getSaleCountPrice());
+                }
+                if (passenger.getBuyCountPrice() != null) {
+                    buyTotal = buyTotal.add(passenger.getBuyCountPrice());
+                }
+            }
+            // 根据订单编号查询订单
+            SaleChange saleChange = saleChangeService.getSaleChangeByNo(passengerChangeList.getAgent(),
+                    passengerChangeList.getEntity().get(0).getSaleChangeNo());
+            if (saleChange != null) {
+                // 销售单应收
+                CreatePlanAmountVO createPlanAmountVOType = new CreatePlanAmountVO();
+                createPlanAmountVOType.setRecordNo(saleChange.getSaleChangeNo());// 记录编号
+                createPlanAmountVOType.setIncomeExpenseType(2);// 收支类型 1 收，2 为支
+                createPlanAmountVOType.setRecordMovingType(CostType.COMMISSION_CHARGE.getKey());
+                createPlanAmountVOType.setPlanAmount(saleTotal);// 合计
+                createPlanAmountVOType
+                        .setBusinessType(BusinessType.SALECHANGE.getKey());// 业务类型 2，销售单，3，采购单，4,变更单（可以根据变更表设计情况将废退改分开）
+                createPlanAmountVOType.setGoodsType(2);// 商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
+                planAmountRecordService.create(passengerChangeList.getAgent(), createPlanAmountVOType);
+            } else {
+                log.error("改签单为空");
+                throw new GSSException("改签单为空", "0601", "核价修改销售、采购失败");
+            }
+
+            List<BuyOrder> buyOrderList = buyOrderService
+                    .getBuyOrdersBySONo(passengerChangeList.getAgent(), saleChange.getSaleOrderNo());
+            if (buyOrderList != null) {
+                for (BuyOrder buyOrder : buyOrderList) {
+                    List<BuyChange> buyChangeList = buyChangeService
+                            .getBuyChangesByBONo(passengerChangeList.getAgent(), buyOrder.getBuyOrderNo());
+                    for (BuyChange buyChange : buyChangeList) {
+                        if (buyChange.getBusinessSignNo().equals(saleChange.getBusinessSignNo())) {
+                            // 采购单应付
+                            CreatePlanAmountVO createPlanAmountVOType = new CreatePlanAmountVO();
+                            createPlanAmountVOType.setRecordNo(buyChange.getBuyChangeNo());// 记录编号
+                            createPlanAmountVOType.setIncomeExpenseType(1);// 收支类型 1 收，2 为支
+                            createPlanAmountVOType.setRecordMovingType(CostType.COMMISSION_CHARGE.getKey());
+                            createPlanAmountVOType.setPlanAmount(buyTotal);// 合计
+                            createPlanAmountVOType.setBusinessType(
+                                    BusinessType.BUYCHANGE.getKey());// 业务类型 2，销售单，3，采购单，4，变更单（可以根据变更表设计情况将废退改分开）
+                            createPlanAmountVOType.setGoodsType(2);// 商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
+                            planAmountRecordService.create(passengerChangeList.getAgent(), createPlanAmountVOType);
+                        }
+                    }
+                }
+            } else {
+                log.error("改签单为空");
+                throw new GSSException("改签单为空", "0601", "核价修改销售、采购失败");
+            }
+            log.info("订单核价结束");
+            flag = true;
+        } catch (Exception e) {
+            log.error("订单核价失败", e);
+            throw new GSSException("核价修改失败", "0603", "核价修改失败");
+        }
+        return flag;
+    }
+
+    @Override
+    public boolean saleRefund(Agent agent, Long saleChangeNo) throws GSSException {
+
+        if (agent == null) {
+            log.error("agent 为空");
+            throw new GSSException("agent 为空", "1001", "创建销售退款单失败");
+        }
+        if (saleChangeNo == null) {
+            log.error("saleChangeNo 为空");
+            throw new GSSException("saleChangeNo 为空", "1001", "创建销售退款单失败");
+        }
+        SaleChangeExt saleChangeExt = this.getSaleChangeExtByNo(new RequestWithActor<>(agent, saleChangeNo));
+        SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleChangeExt.getSaleChange().getSaleOrderNo());
+        //当支付状态为已支付（payStatus=3）时创建销售退款单
+        if (saleChangeExt != null && saleChangeExt.getSaleChange() != null) {
+            if (saleChangeExt.getSaleChange().getPayStatus() == 1) {
+                try {
+                    CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
+                    certificateCreateVO.setIncomeExpenseType(2); //收支类型 1 收，2 为支
+                    certificateCreateVO.setReason("销售付款单信息"); //补充说明
+                    certificateCreateVO.setSubBusinessType(4); //业务小类 1.销采 2.补收退 3.废退 4.变更 5.错误修改
+                    List<BusinessOrderInfo> orderInfoList = new ArrayList<>(); //支付订单
+                    BusinessOrderInfo businessOrderInfo = new BusinessOrderInfo();
+
+                    businessOrderInfo.setActualAmount(saleChangeExt.getSaleChange().getPlanAmount());
+                    certificateCreateVO.setCustomerNo(saleOrder.getCustomerNo());
+                    certificateCreateVO.setCustomerTypeNo(saleOrder.getCustomerTypeNo());
+
+                    businessOrderInfo.setBusinessType(4);//1.交易单，2.销售单，3.采购单，4.销售变更单，5.采购变更单
+                    businessOrderInfo.setRecordNo(saleChangeNo);
+                    orderInfoList.add(businessOrderInfo);
+                    certificateCreateVO.setOrderInfoList(orderInfoList);
+                    certificateCreateVO.setServiceLine("2");
+                    certificateService.saleRefundCert(agent, certificateCreateVO);
+                } catch (Exception e) {
+                    log.error("创建销售退款单失败," + e);
+                    throw new GSSException("创建销售退款单失败," + e, "1001", "创建销售退款单失败");
+                }
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean buyRefund(Agent agent, Long saleChangeNo, Long saleOrderNo) throws GSSException {
+
+        if (agent == null) {
+            log.error("agent 为空");
+            throw new GSSException("agent 为空", "1001", "创建销售退款单失败");
+        }
+        if (saleChangeNo == null) {
+            log.error("saleChangeNo 为空");
+            throw new GSSException("saleChangeNo 为空", "1001", "创建销售退款单失败");
+        }
+        try {
+            CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
+            certificateCreateVO.setIncomeExpenseType(1); //收支类型 1 收，2 为支
+            certificateCreateVO.setReason("创建采购退款单信息"); //补充说明
+            certificateCreateVO.setSubBusinessType(4); //业务小类 1.销采 2.补收退 3.废退 4.变更 5.错误修改
+            certificateCreateVO.setServiceLine("2");
+            List<BusinessOrderInfo> orderInfoList = new ArrayList<>(); //支付订单
+            BusinessOrderInfo businessOrderInfo = new BusinessOrderInfo();
+
+            List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(agent, saleOrderNo);
+            if (buyOrderList != null && buyOrderList.size() != 0) {
+                BuyOrder buyOrder = buyOrderList.get(0);
+                certificateCreateVO.setCustomerNo(buyOrder.getSupplierNo());
+                certificateCreateVO.setCustomerTypeNo(buyOrder.getSupplierTypeNo());
+
+                List<BuyChange> buyChangeList = buyChangeService.getBuyChangesByBONo(agent, buyOrder.getBuyOrderNo());
+                SaleChange saleChange = saleChangeService.getSaleChangeByNo(agent, saleChangeNo);
+                if (buyChangeList != null && buyChangeList.size() != 0 && saleChange != null) {
+                    for (BuyChange buyChange : buyChangeList) {
+                        if (buyChange.getBusinessSignNo().equals(saleChange.getBusinessSignNo())) {
+                            businessOrderInfo.setActualAmount(buyChange.getPlanAmount());
+                            businessOrderInfo.setBusinessType(5);//1.交易单，2.销售单，3.采购单，4.销售变更单，5.采购变更单
+                            businessOrderInfo.setRecordNo(buyChange.getBuyChangeNo());
+                        }
+                    }
+                }
+            }
+            orderInfoList.add(businessOrderInfo);
+            certificateCreateVO.setOrderInfoList(orderInfoList);
+            certificateService.buyRefundCert(agent, certificateCreateVO);
+        } catch (Exception e) {
+            log.error("创建采购退款单单失败," + e);
+            throw new GSSException("创建采购退款单失败," + e, "1001", "创建采购退款单失败");
+        }
+        return true;
+    }
+
+    /**
+     * 通过废退单编号获取销售废退单（包含saleChange）
+     *
+     * @param requestWithActor
+     */
+    @Override
+    public SaleChangeExt getSaleChangeExtByNo(RequestWithActor<Long> requestWithActor) {
+
+        SaleChangeExt saleChangeExt = new SaleChangeExt();
+        log.info("获取销售废退单开始============");
+        try {
+            if (requestWithActor.getEntity().longValue() == 0) {
+                log.error("销售单废退编号为空");
+                throw new GSSException("销售单废退编号为空", "0001", "获取销售废退单失败");
+            }
+            // 销售单编号
+            saleChangeExt = saleChangeExtDao.selectByPrimaryKey(requestWithActor.getEntity().longValue());
+            SaleChange saleChange = saleChangeService.getSaleChangeByNo(requestWithActor.getAgent(),requestWithActor.getEntity());
+            if (saleChangeExt != null) {
+                saleChangeExt.setSaleChange(saleChange == null ? new SaleChange() : saleChange);
+            }
+            log.info("获取销售单结束============");
+        } catch (Exception e) {
+            log.info("------------", e);
+        }
+
+        return saleChangeExt;
+    }
+
     /**
      * 改签处理
      *
@@ -542,27 +738,36 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeExtRequest.setEntity(saleChangeNo);
             SaleChangeExt changeExt = changeExtService.getSaleChange(saleChangeExtRequest);
             if (saleChange != null) {
-                if (null != changeExt) {
-                    Integer ticketChangeType = changeExt.getTicketChangeType();
-                    if (null != ticketChangeType) {
-                        String type = ticketChangeType.toString();
-                        if (changeAfterTicketer) {
-                            //需要审核
-                            if ("2".equals(type)) {// 2 改期 ---> 销售
-                                saleChangeService.updateStatus(agent, saleChange.getSaleChangeNo(), 6);// 将销售状态改为销售审核
-                            } else {// 3 换开---> 出票
+                List<BuyChange> buyChangeList = buyChangeService.getBuyChangesByBONo(agent, saleChangeNo);
+                if(isSaleChangeRefund(saleChange,buyChangeList)){
+                    //采购改签打回销售退费
+                    saleChangeService.updateStatus(agent, saleChange.getSaleChangeNo(), 11);// 将销售状态改为销售审核
+                    for (BuyChange buyChange : buyChangeList) {
+                        buyOrderService.updateStatus(agent, buyChange.getBuyChangeNo(), 11);//将采购单状态改为待出票
+                    }
+                } else{
+                    if (null != changeExt) {
+                        Integer ticketChangeType = changeExt.getTicketChangeType();
+                        if (null != ticketChangeType) {
+                            String type = ticketChangeType.toString();
+                            if (changeAfterTicketer) {
+                                //需要审核
+                                if ("2".equals(type)) {// 2 改期 ---> 销售
+                                    saleChangeService.updateStatus(agent, saleChange.getSaleChangeNo(), 6);// 将销售状态改为销售审核
+                                } else {// 3 换开---> 出票
+                                    saleChangeService.updateStatus(agent, saleChange.getSaleChangeNo(), 3);// 将销售状态改为改签中
+                                }
+                            } else {
+                                //不需要审核
                                 saleChangeService.updateStatus(agent, saleChange.getSaleChangeNo(), 3);// 将销售状态改为改签中
                             }
-                        } else {
-                            //不需要审核
-                            saleChangeService.updateStatus(agent, saleChange.getSaleChangeNo(), 3);// 将销售状态改为改签中
                         }
                     }
-                }
-                List<BuyChange> buyChangeList = buyChangeService.getBuyChangesByBONo(agent, saleChangeNo);
-                for (BuyChange buyChange : buyChangeList) {
-                    if (buyChange.getBusinessSignNo().equals(saleChange.getBusinessSignNo())) {
-                        buyOrderService.updateStatus(agent, buyChange.getBuyChangeNo(), 2);//将采购单状态改为待出票
+
+                    for (BuyChange buyChange : buyChangeList) {
+                        if (buyChange.getBusinessSignNo().equals(saleChange.getBusinessSignNo())) {
+                            buyOrderService.updateStatus(agent, buyChange.getBuyChangeNo(), 2);//将采购单状态改为待出票
+                        }
                     }
                 }
             }
@@ -573,7 +778,20 @@ public class ChangeServiceImpl implements IChangeService {
         }
         return true;
     }
-    
+
+    private boolean isSaleChangeRefund(SaleChange saleChange, List<BuyChange> buyChangeList) {
+        boolean result = false;
+        if(saleChange.getChildStatus().equals(15)){
+            result = true;
+        }
+        for (BuyChange buyChange : buyChangeList) {
+            if (!buyChange.getChildStatus().equals(15)) {
+                result = false;
+            }
+        }
+        return result;
+    }
+
     /**
      * 改签单审核
      * 修改状态主订单os_sale_change的状态
@@ -874,7 +1092,7 @@ public class ChangeServiceImpl implements IChangeService {
     @Override
     @Transactional
     public boolean refuse(RequestWithActor<Long> saleChangeNo, String reason) {
-        log.info("拒单开始");
+       /* log.info("拒单开始");
         try {
             if (saleChangeNo.getAgent() == null) {
                 throw new GSSException("当前用户不能为空", "0101", "当前操作用户为空");
@@ -909,6 +1127,69 @@ public class ChangeServiceImpl implements IChangeService {
             }
             
             log.info("拒单结束");
+            *//*创建新增操作日志*//*
+            try {
+                LogRecord logRecord = new LogRecord();
+                logRecord.setAppCode("UBP");
+                logRecord.setCreateTime(new Date());
+                logRecord.setTitle("国际改签单拒单");
+                logRecord.setDesc(JSON.toJSONString(saleChangeNo));
+                logRecord.setOptLoginName(saleChangeNo.getAgent().getAccount());
+                logRecord.setRequestIp(saleChangeNo.getAgent().getIp());
+                logRecord.setBizCode("IFT-ChangeServiceImpl-refuse");
+                logRecord.setBizNo(String.valueOf(saleChangeNo.getEntity()));
+                logService.insert(logRecord);
+            } catch (Exception e) {
+                log.error("添加(title=国际改签单拒单)操作日志异常===" + e);
+            }
+        } catch (Exception e) {
+            log.error("改签拒单异常！！！" + e);
+        }
+        return true;*/
+        log.info("拒单开始");
+        try {
+            if (saleChangeNo.getAgent() == null) {
+                throw new GSSException("当前用户不能为空", "0101", "当前操作用户为空");
+            }
+            if (saleChangeNo == null || saleChangeNo.getEntity() == null) {
+                throw new GSSException("改签确认失败", "0102", "改签确认发生异常,请检查");
+            }
+            Long changeNo = saleChangeNo.getEntity().longValue();
+            SaleChangeExt changeExt = saleChangeExtDao.selectByPrimaryKey(changeNo);
+            changeExt.setRefuseReason(reason);
+            changeExt.setAirlineStatus(4);
+            saleChangeExtDao.updateByPrimaryKey(changeExt);
+
+          /*  RequestWithActor<Long> requesChangePrice = new RequestWithActor<Long>();
+            requesChangePrice.setAgent(AgentUtil.getAgent());
+            requesChangePrice.setEntity(saleChangeNo);*/
+            List<PassengerChangePrice> priceList = pgerChangePriceService.getChangePriceList(saleChangeNo);
+            int chaildStatus = 15;//打回
+            if (priceListIsNoFee(priceList)) {
+                chaildStatus = 11; //取消
+            }
+            //主订单状态改成 11=拒单
+            saleChangeService.updateStatus(saleChangeNo.getAgent(), changeNo, chaildStatus);
+            //修改采购单的状态为11
+            List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(saleChangeNo.getAgent(), changeExt.getSaleChange().getSaleOrderNo());
+            if (buyOrderList != null && buyOrderList.size() > 0) {
+                for (BuyOrder buyOrder : buyOrderList) {
+                    if (buyOrder.getBsignType() == 4) {
+                        List<BuyChange> buyChangeList = buyChangeService.getBuyChangesByBONo(saleChangeNo.getAgent(), buyOrder.getBuyOrderNo());
+                        for (BuyChange buyChange : buyChangeList) {
+                            buyChangeService.updateStatus(saleChangeNo.getAgent(), buyChange.getBuyChangeNo(), chaildStatus);
+                        }
+                    }
+                }
+            }
+
+            try {
+                mssReserveService.changeInform(saleChangeNo.getAgent(), changeNo, "2");
+            } catch (Exception e) {
+                log.error("改签出票回调mss接口出错==========e=" + e);
+            }
+
+            log.info("拒单结束");
             /*创建新增操作日志*/
             try {
                 LogRecord logRecord = new LogRecord();
@@ -929,7 +1210,33 @@ public class ChangeServiceImpl implements IChangeService {
         }
         return true;
     }
-    
+
+    private boolean priceListIsNoFee(List<PassengerChangePrice> priceList) {
+
+
+        boolean isNoFee = false;
+        BigDecimal all = new BigDecimal(0);
+        if(priceList == null )
+            return true;
+        for (PassengerChangePrice changePriceVo : priceList) {
+            all = all.add(changePriceVo.getSalePrice());
+            all = all.add(changePriceVo.getSaleTax());
+            all = all.add(changePriceVo.getSaleBrokerage());
+            all = all.add(changePriceVo.getSaleRest());
+            all = all.add(changePriceVo.getBuyPrice());
+            all = all.add(changePriceVo.getBuyTax());
+            all = all.add(changePriceVo.getBuyBrokerage());
+            all = all.add(changePriceVo.getBuyRest());
+            all = all.add(changePriceVo.getBuyCountPrice());
+        }
+        BigDecimal zore = new BigDecimal("0");
+        if(all.compareTo(zore) <= 0){
+            isNoFee = true;
+        }
+        return isNoFee;
+
+    }
+
     /**
      * 改签单查询.
      *
