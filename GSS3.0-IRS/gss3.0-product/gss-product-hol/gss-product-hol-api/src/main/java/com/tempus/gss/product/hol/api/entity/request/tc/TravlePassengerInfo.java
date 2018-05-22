@@ -46,6 +46,13 @@ public class TravlePassengerInfo implements Serializable{
 	 */
 	@JSONField(name = "BirthDay")
 	private String birthDay;
+	
+	/**
+	 * 有些酒店在预订规则BookingRule中规定需要提供国籍；填写具体的国籍,如中国、日本、美国、 USA 等
+	 */
+	@JSONField(name = "Nationality")
+	private String nationality;
+	
 	public String getName() {
 		return name;
 	}
@@ -81,6 +88,12 @@ public class TravlePassengerInfo implements Serializable{
 	}
 	public void setBirthDay(String birthDay) {
 		this.birthDay = birthDay;
+	}
+	public String getNationality() {
+		return nationality;
+	}
+	public void setNationality(String nationality) {
+		this.nationality = nationality;
 	}
 	
 }
