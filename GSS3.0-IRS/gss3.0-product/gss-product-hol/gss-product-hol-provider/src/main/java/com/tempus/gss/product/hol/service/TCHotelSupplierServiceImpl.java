@@ -120,7 +120,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	protected final transient Logger log = LogManager.getLogger(TCHotelSupplierServiceImpl.class);
 	
 	@Autowired
-	MongoTemplate mongoTemplate;
+	MongoTemplate mongoTemplate1;
 	
 	@Reference
 	ITCHotelInterService hotel;
@@ -137,7 +137,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	public void deleteProInfoDetailByDate(String strDate) {
 		log.info("每天删除当天日期前一天的酒店价格库存信息开始");
 		Query query = Query.query(Criteria.where("startDate").lte(strDate));
-		mongoTemplate.remove(query, ProInfoDetail.class);
+		mongoTemplate1.remove(query, ProInfoDetail.class);
 		log.info("每天晚上十一点删除结束");
 	}
 	
@@ -148,7 +148,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	@Override
 	public ResBaseInfo queryListByResId(Agent agent, Long id) {
 		
-		ResBaseInfo resDetail= mongoTemplate.findOne(new Query(Criteria.where("_id").is(id)), ResBaseInfo.class);
+		ResBaseInfo resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), ResBaseInfo.class);
 		if(StringUtil.isNotNullOrEmpty(resDetail)){
 			List<String> strs  = Tool.intToTwoPower(resDetail.getCreditCards().intValue());
         	resDetail.setCreditCardsTarget(strs);
@@ -158,21 +158,21 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	
 	@Override
 	public <T> T queryListByProId(String id, Class<T> clazz) {
-		T t= mongoTemplate.findOne(new Query(Criteria.where("proId").is(id)),clazz);
+		T t= mongoTemplate1.findOne(new Query(Criteria.where("proId").is(id)),clazz);
 		
 		return t;
 	}
 	@Override
 	public <T> T queryListByProductUniqueId(Long id, Class<T> clazz) {
 		
-		T t= mongoTemplate.findOne(new Query(Criteria.where("_id").is(id)),clazz);
+		T t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
 		
 		return t;
 	}
 	
 	@Override
 	public <T> List<T> queryAllNotNull(Class<T> clazz) {
-		List<T> res = mongoTemplate.find(new Query(Criteria.where("_id").ne("").ne(null)),clazz);
+		List<T> res = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)),clazz);
 		return res;
 	}
 	
@@ -181,7 +181,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	public List<ResInfoList> queryResInfoListByVague(String cityName, String vague, String startTime, String endTime) {
 		Criteria criatira = new Criteria();
 		criatira.andOperator(Criteria.where("cityName").is(cityName), Criteria.where("resName").regex(".*?\\" +vague+ ".*"));
-		List<ResInfoList> res = mongoTemplate.find(new Query(criatira), ResInfoList.class);
+		List<ResInfoList> res = mongoTemplate1.find(new Query(criatira), ResInfoList.class);
 		return res;
 	}
 	
@@ -197,7 +197,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
             throw new GSSException("获取城市景点列表", "0102", "cityName入参为空");
         }
 		
-		CityAreaScenic result = mongoTemplate.findOne(new Query(Criteria.where("cityName").is(cityName)),CityAreaScenic.class);
+		CityAreaScenic result = mongoTemplate1.findOne(new Query(Criteria.where("cityName").is(cityName)),CityAreaScenic.class);
 		if(StringUtil.isNotNullOrEmpty(result)){
 			return result;
 		}else{
@@ -209,7 +209,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			Set<String> citySubWay=new HashSet<String>();//城市的地铁站
 			Set<String> cityBusinessSectionInfo=new HashSet<String>();//热门商圈
 			
-			List<ResBaseInfo> res= mongoTemplate.find(new Query(Criteria.where("cityName").is(cityName)),ResBaseInfo.class);
+			List<ResBaseInfo> res= mongoTemplate1.find(new Query(Criteria.where("cityName").is(cityName)),ResBaseInfo.class);
 			for(ResBaseInfo rs : res){
 				cityArea.add(rs.getSectionName());
 				for(BusinessSection bus : rs.getBusinessSectionInfoList()){
@@ -234,9 +234,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			cityAreaScenic.setCitySubWay(citySubWay);
 			cityAreaScenic.setCityBusinessSectionInfo(cityBusinessSectionInfo);
 			cityAreaScenicList.add(cityAreaScenic);
-			//mongoTemplate.insert(cityAreaScenic, "cityAreaScenic");
-			mongoTemplate.insert(cityAreaScenicList, CityAreaScenic.class);
-			//mongoTemplate.save(cityAreaScenic, "cityAreaScenic");
+			//mongoTemplate1.insert(cityAreaScenic, "cityAreaScenic");
+			mongoTemplate1.insert(cityAreaScenicList, CityAreaScenic.class);
+			//mongoTemplate1.save(cityAreaScenic, "cityAreaScenic");
 			
 			return cityAreaScenic;
 		}
@@ -387,7 +387,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
  				}
  				criatira.and("resCommonPrice").ne(999999);
  				log.info("酒店查询条件："+JsonUtil.toJson(criatira));
- 				res = mongoTemplate.find(query.addCriteria(criatira), ResBaseInfo.class);
+ 				res = mongoTemplate1.find(query.addCriteria(criatira), ResBaseInfo.class);
  	        }else{
  	        	log.error("时间选择不对");
  	        	throw new GSSException("获取酒店列表", "0999", "时间选择不对,只能选择即日起两个月之内的日期");
@@ -494,7 +494,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         	log.error("查询酒店列表异常：",e);
  		}
         //总条数
-  		int count= (int)mongoTemplate.count(query, ResBaseInfo.class);
+  		int count= (int)mongoTemplate1.count(query, ResBaseInfo.class);
   		//总页数
   		int totalPage= (int)(count/hotelSearchReq.getRowCount()+1);
   		response.setTotalPatge(Integer.valueOf(totalPage));
@@ -597,18 +597,18 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         	e.printStackTrace();
         }
        
-        ResBaseInfo resDetail =mongoTemplate.findOne(new Query(Criteria.where("_id").is(resId)),ResBaseInfo.class);
+        ResBaseInfo resDetail =mongoTemplate1.findOne(new Query(Criteria.where("_id").is(resId)),ResBaseInfo.class);
         Long checkTimes = 1L;
         Integer saleStatus = 1;
 		Query query = Query.query(Criteria.where("_id").is(resId));
-		HotelName findOne = mongoTemplate.findOne(query, HotelName.class);
+		HotelName findOne = mongoTemplate1.findOne(query, HotelName.class);
 		if(StringUtil.isNotNullOrEmpty(findOne)){
 			if(StringUtil.isNotNullOrEmpty(findOne.getCheckTimes())){
 				checkTimes = findOne.getCheckTimes() + checkTimes;
 			}
 			findOne.setCheckTimes(checkTimes);
 			findOne.setSaleStatus(saleStatus);
-			mongoTemplate.save(findOne, "hotelName");
+			mongoTemplate1.save(findOne, "hotelName");
 		}else{
 			HotelName HotelName=new HotelName();
     		HotelName.setId(resDetail.getId());
@@ -616,7 +616,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     		HotelName.setCity(resDetail.getCityName());
     		HotelName.setCheckTimes(checkTimes);
     		HotelName.setSaleStatus(saleStatus);
-    		mongoTemplate.save(HotelName, "hotelName");
+    		mongoTemplate1.save(HotelName, "hotelName");
     		
 		}
         try {
@@ -785,7 +785,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	        	lastestResRecord.setResGrade(resDetail.getResGrade());
 	        	lastestResRecord.setMinPrice(resDetail.getMinPrice());
 	        	lastestResRecord.setRecordDate(newDate);
-	        	mongoTemplate.insert(lastestResRecord, "lastestResRecord");
+	        	mongoTemplate1.insert(lastestResRecord, "lastestResRecord");
 	        	//lastestResRecordList.add(lastestResRecord);
 				}
 			}
@@ -806,7 +806,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
             throw new GSSException("获取某一用户最近10条浏览记录", "0100", "用户id为空");
         }
 		Query query = Query.query(Criteria.where("userId").is(userId)).with(new Sort(Direction.DESC, "recordDate")).limit(30);
-		List<LastestResRecord> lastestResRecordList= mongoTemplate.find(query,LastestResRecord.class);
+		List<LastestResRecord> lastestResRecordList= mongoTemplate1.find(query,LastestResRecord.class);
 		try {
 			if(StringUtil.isNotNullOrEmpty(lastestResRecordList)){
 				if(lastestResRecordList.size() >= 2){
@@ -956,9 +956,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     		if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getResGradeId())){
     			criatira.and("resGradeId").is(hotelSearchReq.getResGradeId());
     		}
-    		res = mongoTemplate.find(query.addCriteria(criatira), ResBaseInfo.class);
+    		res = mongoTemplate1.find(query.addCriteria(criatira), ResBaseInfo.class);
     		//总条数
-      		int count= (int)mongoTemplate.count(query, ResBaseInfo.class);
+      		int count= (int)mongoTemplate1.count(query, ResBaseInfo.class);
       		//总页数
       		int totalPage= (int)(count/hotelSearchReq.getRowCount()+1);
       		response.setTotalPatge(Integer.valueOf(totalPage));
@@ -1003,7 +1003,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     	  
     	Query query = new BasicQuery(dbObject,fieldsObject).limit(20);
     	query.with(new Sort(Direction.DESC, "checkTimes"));
-    	List<HotelName> hns = mongoTemplate.find(query, HotelName.class);
+    	List<HotelName> hns = mongoTemplate1.find(query, HotelName.class);
     	log.info("查询酒店名称列表结束**************");
 		for (HotelName h : hns) {
 			result.add(h.getName());
@@ -1025,8 +1025,8 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         	String updateTime = sdfupdate.format(new Date());
         	Query query = Query.query(Criteria.where("_id").is(resId));
         	Update update = Update.update("saleStatus", saleStatus).set("latestUpdateTime", updateTime);
-        	mongoTemplate.upsert(query, update, ResBaseInfo.class);
-          // mongoTemplate.upsert(new Query(Criteria.where("_id").is(resId)), new Update().set("saleStatus", saleStatus), "resBaseInfo");
+        	mongoTemplate1.upsert(query, update, ResBaseInfo.class);
+          // mongoTemplate1.upsert(new Query(Criteria.where("_id").is(resId)), new Update().set("saleStatus", saleStatus), "resBaseInfo");
 		} catch (Exception e) {
 			log.error("修改可售状态出错"+e);
 			throw new GSSException("修改可售状态", "0118", "修改可售状态失败");
@@ -1043,7 +1043,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	   	BasicDBObject fieldsObject=new BasicDBObject();        
 	   	Query query = new BasicQuery(dbObject,fieldsObject);  
 	   	long b = System.currentTimeMillis();
-	   	List<ResBaseInfo> rbis = mongoTemplate.find(query, ResBaseInfo.class);
+	   	List<ResBaseInfo> rbis = mongoTemplate1.find(query, ResBaseInfo.class);
 	   	long e = System.currentTimeMillis();
 	   
 	   	int i=0;
@@ -1087,7 +1087,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     	BasicDBObject fieldsObject=new BasicDBObject();
     	Query query = new BasicQuery(dbObject,fieldsObject).limit(10);
     	query.with(new Sort(Direction.DESC, "checkTimes"));
-    	List<HotelName> hns = mongoTemplate.find(query, HotelName.class);
+    	List<HotelName> hns = mongoTemplate1.find(query, HotelName.class);
     	log.info("关键字模糊查询酒店名称列表结束**************");
 		
 		return hns;
@@ -1123,7 +1123,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 							pro.setId(pro.getProductUniqueId());
 							pro.setResId(assignDateHotelFirstMonth.getResId());
 							pro.setUpdateInvenTime(sdfupdate.format(new Date()));
-							mongoTemplate.save(pro, "proInfoDetail");
+							mongoTemplate1.save(pro, "proInfoDetail");
 						} 
 						SingleHotelDetailReq singleHotelDetailReq=new SingleHotelDetailReq();
 		    			singleHotelDetailReq.setResId(String.valueOf(resId));
@@ -1223,7 +1223,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     							
     							tcResBaseInfo.setSaleStatus(saleStatus);
 	    						tcResBaseInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
-	    						mongoTemplate.save(tcResBaseInfo, "resBaseInfo");
+	    						mongoTemplate1.save(tcResBaseInfo, "resBaseInfo");
 	    						
 	    						List<ResGPSInfo> resGPS = tcResBaseInfo.getResGPS();
 	    						QueryProperty queryProperty = new QueryProperty();
@@ -1317,7 +1317,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	    								oneMidInfo.setTcResName(tcResBaseInfo.getResName());
 	    								oneMidInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
 	    								oneMidInfo.setSupplierNo(oneMidInfo.getSupplierNo()+",411709261204150108");
-	    								mongoTemplate.save(oneMidInfo, "holMidBaseInfo");
+	    								mongoTemplate1.save(oneMidInfo, "holMidBaseInfo");
 	    							}else {
 		    							/**
 		    							 * 保存中间表
@@ -1372,12 +1372,12 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		    							holMidBaseInfo.setSaleStatus(1);
 		    							holMidBaseInfo.setBookTimes(1L);
 		    							holMidBaseInfo.setBookRemark(tcResBaseInfo.getLocation());
-		    							mongoTemplate.save(holMidBaseInfo, "holMidBaseInfo");
+		    							mongoTemplate1.save(holMidBaseInfo, "holMidBaseInfo");
 		    						}
 	    						}
 	    						ResIdList resIdList =new ResIdList();
 	    						resIdList.setId(resId);
-	    						mongoTemplate.save(resIdList, "resIdList");
+	    						mongoTemplate1.save(resIdList, "resIdList");
 	    						flag = true;
     					}
     				}
@@ -1390,14 +1390,14 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		logRecordHol.setTitle("更新酒店详细信息");
 		logRecordHol.setDesc("同步酒店全部信息失败,酒店ID为："+String.valueOf(resId));
 		logRecordHol.setResId(resId);
-		mongoTemplate.save(logRecordHol, "logRecordHol");
+		mongoTemplate1.save(logRecordHol, "logRecordHol");
 	}
 		return flag;
 	}
 
 	@Override
 	public Boolean updateLuceneDate(Agent agent,List<HotelName> list) throws IOException {
-		//List<HotelName> list = mongoTemplate.find(new Query(Criteria.where("_id").ne("").ne(null)), HotelName.class);
+		//List<HotelName> list = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)), HotelName.class);
 		//try {
 			Directory directory = FSDirectory.open(Paths.get("./index"));
 	    	//Version version = Version.LUCENE_7_1_0;
@@ -1412,7 +1412,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			/*Query query = Query.query(Criteria.where("_id").ne("").ne(null));
 			query.skip(i);
 			query.limit(100);
-			List<HotelName> list = mongoTemplate.find(query,HotelName.class);*/
+			List<HotelName> list = mongoTemplate1.find(query,HotelName.class);*/
 			if(StringUtil.isNotNullOrEmpty(list)) {
 				System.out.println(list.size());
 				for (int j = 0; j < list.size(); j++) {
