@@ -30,7 +30,7 @@ public class FlightQueryRequest implements Serializable {
     private String grade;
     
     /**
-     * 航程类型：1:单程; 2:往返.
+     * 航程类型：1:单程; 2:往返 3:联程.
      * 目前仅支持单程和往返.
      */
     private Integer legType;

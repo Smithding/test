@@ -640,7 +640,7 @@ public class OrderServiceImpl implements IOrderService {
             logRecord.setBizNo(String.valueOf(saleOrderExt.getEntity().getSaleOrderNo()));
             logService.insert(logRecord);
         } catch (Exception e) {
-            log.error("添加操作日志异常===" + e);
+            log.error("添加操作日志异常===" , e);
         }
         return flag;
     }
