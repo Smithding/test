@@ -24,10 +24,10 @@ import com.tempus.gss.product.hol.api.syn.IHolMongoQuery;
 public class HolMongoQuery implements IHolMongoQuery {
 
 	@Autowired
-	MongoTemplate mongoTemplate;
+	MongoTemplate mongoTemplate1;
 	
 	public <T> List<T> findByQuery(Query query, Class<T> clazz) {
-		return mongoTemplate.find(query, clazz);
+		return mongoTemplate1.find(query, clazz);
 	}
 	
 	
@@ -45,14 +45,14 @@ public class HolMongoQuery implements IHolMongoQuery {
 				Criteria criteria = createCriteria(queryProperty);
 				query.addCriteria(criteria);
 			}
-			long totalCount = mongoTemplate.count(query, clazz);
+			long totalCount = mongoTemplate1.count(query, clazz);
 			query.skip(page-1);// skip相当于从那条记录开始
 			query.limit(pageSize);// 从skip开始,取多少条记录
 			Sort sort = pageable.getSort();
 			if (sort != null) {
 				query.with(sort);
 			}
-			List<T> items = mongoTemplate.find(query, clazz);
+			List<T> items = mongoTemplate1.find(query, clazz);
 			pagination.setTotalCount(NumberUtils.toInt(totalCount + "", 0));
 			int maxPage = 0;
 			if (totalCount == 0) {
