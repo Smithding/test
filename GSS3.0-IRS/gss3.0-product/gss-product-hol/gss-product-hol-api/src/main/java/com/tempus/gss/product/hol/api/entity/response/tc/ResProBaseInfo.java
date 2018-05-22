@@ -442,6 +442,7 @@ public class ResProBaseInfo implements Serializable{
 	public Integer getSaleStatus() {
 		return saleStatus;
 	}
+	@JSONField(deserialize=false)
 	public void setSaleStatus(Integer saleStatus) {
 		this.saleStatus = saleStatus;
 	}
