@@ -49,7 +49,7 @@ import com.tempus.gss.vo.Agent;
 public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 
 	@Autowired
-	MongoTemplate mongoTemplate;
+	MongoTemplate mongoTemplate1;
 	
 	@Autowired
 	private IBQYHotelInterService bqyHotelInterService;
@@ -140,9 +140,9 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 		
 		query = query.addCriteria(criatira);
 		// 获取酒店列表
-		List<HotelInfo> hotelList = mongoTemplate.find(query, HotelInfo.class);
+		List<HotelInfo> hotelList = mongoTemplate1.find(query, HotelInfo.class);
 		// 查询总数
-		int totalCount = (int) mongoTemplate.count(query, HotelInfo.class);
+		int totalCount = (int) mongoTemplate1.count(query, HotelInfo.class);
 		// 总页数
 		int totalPage = (int) (totalCount % hotelSearchReq.getRowCount() == 0
 				? totalCount / hotelSearchReq.getRowCount() : (totalCount / hotelSearchReq.getRowCount() + 1));
@@ -191,7 +191,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 			String updateTime = sdfupdate.format(new Date());
 			Query query = Query.query(Criteria.where("_id").is(hotelId));
 			Update update = Update.update("saleStatus", saleStatus).set("latestUpdateTime", updateTime);
-			mongoTemplate.upsert(query, update, HotelInfo.class);
+			mongoTemplate1.upsert(query, update, HotelInfo.class);
 		} catch (Exception e) {
 			logger.error("修改可售状态出错" + e);
 			throw new GSSException("修改可售状态", "0118", "修改可售状态失败");
@@ -203,7 +203,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 	public ResBaseInfo singleHotelDetail(String hotelId) {
 		//Criteria criteria = Criteria.where("_id").is(Long.parseLong(hotelId));
 		Criteria criteria = Criteria.where("hotelId").is(Long.parseLong(hotelId));
-		List<HotelInfo> hotelList = mongoTemplate.find(new Query(criteria),HotelInfo.class);
+		List<HotelInfo> hotelList = mongoTemplate1.find(new Query(criteria),HotelInfo.class);
 		if (null != hotelList && hotelList.size() > 0) {
 			HotelInfo hotelInfo = hotelList.get(0);
 			ResBaseInfo resBaseInfo = bqyConvertTcHotelEntity(hotelInfo);
