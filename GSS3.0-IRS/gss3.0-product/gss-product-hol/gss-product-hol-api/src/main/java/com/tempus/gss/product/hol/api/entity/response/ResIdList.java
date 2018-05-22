@@ -18,26 +18,20 @@ public class ResIdList implements Serializable{
 	/**
 	 * 酒店 Id
 	 */
-	@JSONField(name = "ResId")
-	private Long resId;
+	@JSONField(name = "Id")
+	private Long id;
 
 
-
-
-	public Long getResId() {
-		return resId;
+	public Long getId() {
+		return id;
 	}
 
 
-	public void setResId(Long resId) {
-		this.resId = resId;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 
-	
 
-	
-	
-	
 
 }

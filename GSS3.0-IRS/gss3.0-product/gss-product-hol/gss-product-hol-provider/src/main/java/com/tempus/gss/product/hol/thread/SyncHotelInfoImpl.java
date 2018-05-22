@@ -33,7 +33,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	private IBQYHotelInterService bqyHotelService;
 	
 	@Autowired
-	private MongoTemplate mongoTemplate;
+	private MongoTemplate mongoTemplate1;
 	
 	@Value("${bqy.count}")
 	private int PAGE_SIZE;			//查询id数量
@@ -109,11 +109,11 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		//获取BQY酒店ID
 		//List<HotelId> hotelIdList = bqyHotelService.queryHotelIdList();
 		//将获取的酒店ID保存到mongoDB中
-		//mongoTemplate.insert(hotelIdList, HotelId.class);
+		//mongoTemplate1.insert(hotelIdList, HotelId.class);
 		List<HotelId> hotelIdList = null;
 		//获取ID数量
 		//long totalHotelIdNum = hotelIdList.size();
-		long totalHotelIdNum = mongoTemplate.count(new Query(), HotelId.class);
+		long totalHotelIdNum = mongoTemplate1.count(new Query(), HotelId.class);
 		long count = 1;
 		if ((totalHotelIdNum / PAGE_SIZE) > 1) {
 			count = totalHotelIdNum % PAGE_SIZE == 0 ? totalHotelIdNum / PAGE_SIZE : totalHotelIdNum / PAGE_SIZE + 1;
@@ -122,7 +122,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			int start = i * PAGE_SIZE;
 			//long lastIndex = (start + PAGE_SIZE) > totalHotelIdNum ? totalHotelIdNum : start + PAGE_SIZE;
 			Query query = new Query().skip(start).limit(PAGE_SIZE);
-			hotelIdList = mongoTemplate.find(query, HotelId.class);
+			hotelIdList = mongoTemplate1.find(query, HotelId.class);
 			//开启线程拉去酒店数量
 			bqyHotelService.pullHotelInfoByIdList(hotelIdList);
 		}

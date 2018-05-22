@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.entity.request.tc;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -61,6 +62,21 @@ public class IsBookOrderReq implements Serializable{
 	 */
 //	@JSONField(serialize = false)
 //	private Integer factGuestCount;
+	/**
+	 * 总价格
+	 */
+	@JSONField(name = "TotalPrice")
+	private BigDecimal totalPrice;
+	/**
+	 * 最早到店时间
+	 */
+	@JSONField(name = "EarliestArrivalTime")
+	private String earliestArrivalTime;
+	/**
+	 * 最晚到店时间
+	 */
+	@JSONField(name = "LatestArrivalTime")
+	private String latestArrivalTime;
 	
 	public Long getResId() {
 		return resId;
@@ -110,16 +126,24 @@ public class IsBookOrderReq implements Serializable{
 	public void setGuestCount(Integer guestCount) {
 		this.guestCount = guestCount;
 	}
-//	public Integer getFactBookingCount() {
-//		return factBookingCount;
-//	}
-//	public void setFactBookingCount(Integer factBookingCount) {
-//		this.factBookingCount = factBookingCount;
-//	}
-//	public Integer getFactGuestCount() {
-//		return factGuestCount;
-//	}
-//	public void setFactGuestCount(Integer factGuestCount) {
-//		this.factGuestCount = factGuestCount;
-//	}
+	public BigDecimal getTotalPrice() {
+		return totalPrice;
+	}
+	public void setTotalPrice(BigDecimal totalPrice) {
+		this.totalPrice = totalPrice;
+	}
+	public String getEarliestArrivalTime() {
+		return earliestArrivalTime;
+	}
+	public void setEarliestArrivalTime(String earliestArrivalTime) {
+		this.earliestArrivalTime = earliestArrivalTime;
+	}
+	public String getLatestArrivalTime() {
+		return latestArrivalTime;
+	}
+	public void setLatestArrivalTime(String latestArrivalTime) {
+		this.latestArrivalTime = latestArrivalTime;
+	}
+	
+	
 }

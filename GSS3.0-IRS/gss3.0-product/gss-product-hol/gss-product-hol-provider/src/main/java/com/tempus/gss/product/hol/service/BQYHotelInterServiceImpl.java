@@ -93,7 +93,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	private String TOKEN;
 	
 	@Autowired
-	private MongoTemplate mongoTemplate;
+	private MongoTemplate mongoTemplate1;
 	
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	
@@ -339,7 +339,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			//TODO 随机最低价格
 			hotelInfo.setLowPrice(new BigDecimal((int)((Math.random() + 1) * 100)));
 			//保存酒店信息
-			mongoTemplate.save(hotelInfo);
+			mongoTemplate1.save(hotelInfo);
 			//保存中间表
 			saveMidHol(hotelId, hotelInfo);
 		}
@@ -370,7 +370,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 				if (holMid.getMinPrice() > lowPrice) {
 					holMid.setMinPrice(lowPrice);
 				}
-				mongoTemplate.save(holMid);
+				mongoTemplate1.save(holMid);
 				System.out.println(JsonUtil.toJson(holMid));
 			}else if (holMidList.size() > 1) {
 				throw new GSSException("bqy拉取酒店信息", "0111", "酒店纬度:" + latitude +"经度:" + longitude + "电话:" + mobile + "在中间表中有" + holMidList.size() + "个");
@@ -418,7 +418,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			holMidBaseInfo.setLatestUpdateTime(hotelInfo.getLatestUpdateTime());
 			holMidBaseInfo.setSaleStatus(1);
 			holMidBaseInfo.setBookTimes(1L);
-			mongoTemplate.save(holMidBaseInfo);
+			mongoTemplate1.save(holMidBaseInfo);
 		}
 	}
 	
@@ -428,12 +428,12 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	 */
 	@Override
 	public void deleteMongoDBData() {
-		mongoTemplate.remove(new Query(), HotelInfo.class);
-		mongoTemplate.remove(new Query(), CityDetail.class);
-		//mongoTemplate.remove(new Query(), HotelId.class);
+		mongoTemplate1.remove(new Query(), HotelInfo.class);
+		mongoTemplate1.remove(new Query(), CityDetail.class);
+		//mongoTemplate1.remove(new Query(), HotelId.class);
 		//TODO 需要修改中间表的清空
-		//mongoTemplate.remove(new Query(), HolMidBaseInfo.class);
-		mongoTemplate.remove(new Query(Criteria.where("supplierNo").is("411805040103290132")), HolMidBaseInfo.class);
+		//mongoTemplate1.remove(new Query(), HolMidBaseInfo.class);
+		mongoTemplate1.remove(new Query(Criteria.where("supplierNo").is("411805040103290132")), HolMidBaseInfo.class);
 	}
 	
 	@Override
@@ -522,7 +522,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 				}else {
 					criteria.orOperator(criteriaList.get(0), criteriaList.get(1), criteriaList.get(2));
 				}
-				holMidList = mongoTemplate.find(new Query(criteria), HolMidBaseInfo.class);
+				holMidList = mongoTemplate1.find(new Query(criteria), HolMidBaseInfo.class);
 			}
 		}else {
 			holMidList = searchHol(latitude, longitude, mobile);
@@ -532,7 +532,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	
 	private List<HolMidBaseInfo> searchHol(String latitude, String longitude, String mobile) {
 		Criteria criteria = createCriteria(latitude, longitude, mobile);
-		List<HolMidBaseInfo> holMidList = mongoTemplate.find(new Query(criteria), HolMidBaseInfo.class);
+		List<HolMidBaseInfo> holMidList = mongoTemplate1.find(new Query(criteria), HolMidBaseInfo.class);
 		return holMidList;
 	}
 
@@ -671,7 +671,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 				
 				HotelLocationEntity hotelLocationEntity = queryCityInfo2(cityInfoParam);
 				packingCityLocation(cityDetail, hotelLocationEntity);
-				mongoTemplate.save(cityDetail);
+				mongoTemplate1.save(cityDetail);
 			}
 		}
 	}

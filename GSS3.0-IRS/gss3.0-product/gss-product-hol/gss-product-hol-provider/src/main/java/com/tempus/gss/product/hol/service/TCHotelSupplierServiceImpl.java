@@ -51,6 +51,8 @@ import org.apache.lucene.store.FSDirectory;
 import org.assertj.core.util.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
@@ -66,10 +68,14 @@ import org.wltea.analyzer.lucene.IKAnalyzer;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.dubbo.rpc.RpcContext;
+import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
+import com.tempus.gss.product.hol.api.contant.OperateEnum;
+import com.tempus.gss.product.hol.api.contant.QueryProperty;
+import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
 import com.tempus.gss.product.hol.api.entity.HotelName;
 import com.tempus.gss.product.hol.api.entity.LastestResRecord;
 import com.tempus.gss.product.hol.api.entity.LogRecordHol;
@@ -86,6 +92,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ProDetails;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProSaleInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResGPSInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResInfoList;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
@@ -93,6 +100,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ResTrafficInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.TCHotelDetailResult;
 import com.tempus.gss.product.hol.api.service.FutureResult;
 import com.tempus.gss.product.hol.api.service.IHolProfitService;
+import com.tempus.gss.product.hol.api.syn.IHolMongoQuery;
 import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
 import com.tempus.gss.product.hol.api.util.DateUtil;
@@ -112,10 +120,13 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	protected final transient Logger log = LogManager.getLogger(TCHotelSupplierServiceImpl.class);
 	
 	@Autowired
-	MongoTemplate mongoTemplate;
+	MongoTemplate mongoTemplate1;
 	
 	@Reference
 	ITCHotelInterService hotel;
+	
+	@Reference
+    IHolMongoQuery holMongoQuery;
 	
 	@Reference
 	IHolProfitService holProfitService;
@@ -126,7 +137,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	public void deleteProInfoDetailByDate(String strDate) {
 		log.info("每天删除当天日期前一天的酒店价格库存信息开始");
 		Query query = Query.query(Criteria.where("startDate").lte(strDate));
-		mongoTemplate.remove(query, ProInfoDetail.class);
+		mongoTemplate1.remove(query, ProInfoDetail.class);
 		log.info("每天晚上十一点删除结束");
 	}
 	
@@ -137,7 +148,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	@Override
 	public ResBaseInfo queryListByResId(Agent agent, Long id) {
 		
-		ResBaseInfo resDetail= mongoTemplate.findOne(new Query(Criteria.where("_id").is(id)), ResBaseInfo.class);
+		ResBaseInfo resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), ResBaseInfo.class);
 		if(StringUtil.isNotNullOrEmpty(resDetail)){
 			List<String> strs  = Tool.intToTwoPower(resDetail.getCreditCards().intValue());
         	resDetail.setCreditCardsTarget(strs);
@@ -147,21 +158,21 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	
 	@Override
 	public <T> T queryListByProId(String id, Class<T> clazz) {
-		T t= mongoTemplate.findOne(new Query(Criteria.where("proId").is(id)),clazz);
+		T t= mongoTemplate1.findOne(new Query(Criteria.where("proId").is(id)),clazz);
 		
 		return t;
 	}
 	@Override
 	public <T> T queryListByProductUniqueId(Long id, Class<T> clazz) {
 		
-		T t= mongoTemplate.findOne(new Query(Criteria.where("_id").is(id)),clazz);
+		T t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
 		
 		return t;
 	}
 	
 	@Override
 	public <T> List<T> queryAllNotNull(Class<T> clazz) {
-		List<T> res = mongoTemplate.find(new Query(Criteria.where("_id").ne("").ne(null)),clazz);
+		List<T> res = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)),clazz);
 		return res;
 	}
 	
@@ -170,7 +181,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	public List<ResInfoList> queryResInfoListByVague(String cityName, String vague, String startTime, String endTime) {
 		Criteria criatira = new Criteria();
 		criatira.andOperator(Criteria.where("cityName").is(cityName), Criteria.where("resName").regex(".*?\\" +vague+ ".*"));
-		List<ResInfoList> res = mongoTemplate.find(new Query(criatira), ResInfoList.class);
+		List<ResInfoList> res = mongoTemplate1.find(new Query(criatira), ResInfoList.class);
 		return res;
 	}
 	
@@ -186,7 +197,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
             throw new GSSException("获取城市景点列表", "0102", "cityName入参为空");
         }
 		
-		CityAreaScenic result = mongoTemplate.findOne(new Query(Criteria.where("cityName").is(cityName)),CityAreaScenic.class);
+		CityAreaScenic result = mongoTemplate1.findOne(new Query(Criteria.where("cityName").is(cityName)),CityAreaScenic.class);
 		if(StringUtil.isNotNullOrEmpty(result)){
 			return result;
 		}else{
@@ -198,7 +209,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			Set<String> citySubWay=new HashSet<String>();//城市的地铁站
 			Set<String> cityBusinessSectionInfo=new HashSet<String>();//热门商圈
 			
-			List<ResBaseInfo> res= mongoTemplate.find(new Query(Criteria.where("cityName").is(cityName)),ResBaseInfo.class);
+			List<ResBaseInfo> res= mongoTemplate1.find(new Query(Criteria.where("cityName").is(cityName)),ResBaseInfo.class);
 			for(ResBaseInfo rs : res){
 				cityArea.add(rs.getSectionName());
 				for(BusinessSection bus : rs.getBusinessSectionInfoList()){
@@ -223,9 +234,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			cityAreaScenic.setCitySubWay(citySubWay);
 			cityAreaScenic.setCityBusinessSectionInfo(cityBusinessSectionInfo);
 			cityAreaScenicList.add(cityAreaScenic);
-			//mongoTemplate.insert(cityAreaScenic, "cityAreaScenic");
-			mongoTemplate.insert(cityAreaScenicList, CityAreaScenic.class);
-			//mongoTemplate.save(cityAreaScenic, "cityAreaScenic");
+			//mongoTemplate1.insert(cityAreaScenic, "cityAreaScenic");
+			mongoTemplate1.insert(cityAreaScenicList, CityAreaScenic.class);
+			//mongoTemplate1.save(cityAreaScenic, "cityAreaScenic");
 			
 			return cityAreaScenic;
 		}
@@ -376,7 +387,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
  				}
  				criatira.and("resCommonPrice").ne(999999);
  				log.info("酒店查询条件："+JsonUtil.toJson(criatira));
- 				res = mongoTemplate.find(query.addCriteria(criatira), ResBaseInfo.class);
+ 				res = mongoTemplate1.find(query.addCriteria(criatira), ResBaseInfo.class);
  	        }else{
  	        	log.error("时间选择不对");
  	        	throw new GSSException("获取酒店列表", "0999", "时间选择不对,只能选择即日起两个月之内的日期");
@@ -483,7 +494,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         	log.error("查询酒店列表异常：",e);
  		}
         //总条数
-  		int count= (int)mongoTemplate.count(query, ResBaseInfo.class);
+  		int count= (int)mongoTemplate1.count(query, ResBaseInfo.class);
   		//总页数
   		int totalPage= (int)(count/hotelSearchReq.getRowCount()+1);
   		response.setTotalPatge(Integer.valueOf(totalPage));
@@ -586,18 +597,18 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         	e.printStackTrace();
         }
        
-        ResBaseInfo resDetail =mongoTemplate.findOne(new Query(Criteria.where("_id").is(resId)),ResBaseInfo.class);
+        ResBaseInfo resDetail =mongoTemplate1.findOne(new Query(Criteria.where("_id").is(resId)),ResBaseInfo.class);
         Long checkTimes = 1L;
         Integer saleStatus = 1;
 		Query query = Query.query(Criteria.where("_id").is(resId));
-		HotelName findOne = mongoTemplate.findOne(query, HotelName.class);
+		HotelName findOne = mongoTemplate1.findOne(query, HotelName.class);
 		if(StringUtil.isNotNullOrEmpty(findOne)){
 			if(StringUtil.isNotNullOrEmpty(findOne.getCheckTimes())){
 				checkTimes = findOne.getCheckTimes() + checkTimes;
 			}
 			findOne.setCheckTimes(checkTimes);
 			findOne.setSaleStatus(saleStatus);
-			mongoTemplate.save(findOne, "hotelName");
+			mongoTemplate1.save(findOne, "hotelName");
 		}else{
 			HotelName HotelName=new HotelName();
     		HotelName.setId(resDetail.getId());
@@ -605,7 +616,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     		HotelName.setCity(resDetail.getCityName());
     		HotelName.setCheckTimes(checkTimes);
     		HotelName.setSaleStatus(saleStatus);
-    		mongoTemplate.save(HotelName, "hotelName");
+    		mongoTemplate1.save(HotelName, "hotelName");
     		
 		}
         try {
@@ -774,7 +785,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	        	lastestResRecord.setResGrade(resDetail.getResGrade());
 	        	lastestResRecord.setMinPrice(resDetail.getMinPrice());
 	        	lastestResRecord.setRecordDate(newDate);
-	        	mongoTemplate.insert(lastestResRecord, "lastestResRecord");
+	        	mongoTemplate1.insert(lastestResRecord, "lastestResRecord");
 	        	//lastestResRecordList.add(lastestResRecord);
 				}
 			}
@@ -795,7 +806,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
             throw new GSSException("获取某一用户最近10条浏览记录", "0100", "用户id为空");
         }
 		Query query = Query.query(Criteria.where("userId").is(userId)).with(new Sort(Direction.DESC, "recordDate")).limit(30);
-		List<LastestResRecord> lastestResRecordList= mongoTemplate.find(query,LastestResRecord.class);
+		List<LastestResRecord> lastestResRecordList= mongoTemplate1.find(query,LastestResRecord.class);
 		try {
 			if(StringUtil.isNotNullOrEmpty(lastestResRecordList)){
 				if(lastestResRecordList.size() >= 2){
@@ -945,9 +956,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     		if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getResGradeId())){
     			criatira.and("resGradeId").is(hotelSearchReq.getResGradeId());
     		}
-    		res = mongoTemplate.find(query.addCriteria(criatira), ResBaseInfo.class);
+    		res = mongoTemplate1.find(query.addCriteria(criatira), ResBaseInfo.class);
     		//总条数
-      		int count= (int)mongoTemplate.count(query, ResBaseInfo.class);
+      		int count= (int)mongoTemplate1.count(query, ResBaseInfo.class);
       		//总页数
       		int totalPage= (int)(count/hotelSearchReq.getRowCount()+1);
       		response.setTotalPatge(Integer.valueOf(totalPage));
@@ -992,7 +1003,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     	  
     	Query query = new BasicQuery(dbObject,fieldsObject).limit(20);
     	query.with(new Sort(Direction.DESC, "checkTimes"));
-    	List<HotelName> hns = mongoTemplate.find(query, HotelName.class);
+    	List<HotelName> hns = mongoTemplate1.find(query, HotelName.class);
     	log.info("查询酒店名称列表结束**************");
 		for (HotelName h : hns) {
 			result.add(h.getName());
@@ -1014,8 +1025,8 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         	String updateTime = sdfupdate.format(new Date());
         	Query query = Query.query(Criteria.where("_id").is(resId));
         	Update update = Update.update("saleStatus", saleStatus).set("latestUpdateTime", updateTime);
-        	mongoTemplate.upsert(query, update, ResBaseInfo.class);
-          // mongoTemplate.upsert(new Query(Criteria.where("_id").is(resId)), new Update().set("saleStatus", saleStatus), "resBaseInfo");
+        	mongoTemplate1.upsert(query, update, ResBaseInfo.class);
+          // mongoTemplate1.upsert(new Query(Criteria.where("_id").is(resId)), new Update().set("saleStatus", saleStatus), "resBaseInfo");
 		} catch (Exception e) {
 			log.error("修改可售状态出错"+e);
 			throw new GSSException("修改可售状态", "0118", "修改可售状态失败");
@@ -1032,7 +1043,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	   	BasicDBObject fieldsObject=new BasicDBObject();        
 	   	Query query = new BasicQuery(dbObject,fieldsObject);  
 	   	long b = System.currentTimeMillis();
-	   	List<ResBaseInfo> rbis = mongoTemplate.find(query, ResBaseInfo.class);
+	   	List<ResBaseInfo> rbis = mongoTemplate1.find(query, ResBaseInfo.class);
 	   	long e = System.currentTimeMillis();
 	   
 	   	int i=0;
@@ -1076,7 +1087,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     	BasicDBObject fieldsObject=new BasicDBObject();
     	Query query = new BasicQuery(dbObject,fieldsObject).limit(10);
     	query.with(new Sort(Direction.DESC, "checkTimes"));
-    	List<HotelName> hns = mongoTemplate.find(query, HotelName.class);
+    	List<HotelName> hns = mongoTemplate1.find(query, HotelName.class);
     	log.info("关键字模糊查询酒店名称列表结束**************");
 		
 		return hns;
@@ -1085,194 +1096,308 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	@Override
 	public Boolean insertNewRes(Agent agent, Long resId) {
 		log.info("手动添加酒店开始, 入参："+resId);
-			SimpleDateFormat sdfupdate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    		Calendar cal = Calendar.getInstance();  
-    		Calendar calAdd = Calendar.getInstance();
-    		String calStartTime= sdf.format(cal.getTime());
-    		
-    		calAdd.add(Calendar.MONTH, 2);
-    		calAdd.add(Calendar.DAY_OF_MONTH, -1);
-    		String calAddTime= sdf.format(calAdd.getTime());
-    		Boolean flag = false;
-    			try {
-	    			AssignDateHotelReq assignDateHotelReqFirstMonth=new AssignDateHotelReq();
-	    			assignDateHotelReqFirstMonth.setResId(resId);
-	    			assignDateHotelReqFirstMonth.setSourceFrom("-1");
-	    			assignDateHotelReqFirstMonth.setNeedSpecialPolicy(1);
-	    			assignDateHotelReqFirstMonth.setStartTime(calStartTime);
-	    			assignDateHotelReqFirstMonth.setEndTime(calAddTime);
-	    			AssignDateHotel assignDateHotelFirstMonth=  hotel.queryAssignDateHotel(assignDateHotelReqFirstMonth);
-	    			if(StringUtil.isNullOrEmpty(assignDateHotelFirstMonth.getProInfoDetailList())){
-	    				log.info("手动添加酒店, 入参："+resId+", 查询该ID库存为空");
-	    				return flag;
-	    			}
-	    			if(StringUtil.isNotNullOrEmpty(assignDateHotelFirstMonth)){
-	    				List<ProInfoDetail> proInfoDetailList= assignDateHotelFirstMonth.getProInfoDetailList();
-	    					if(proInfoDetailList != null && proInfoDetailList.size() > 0){
-	    						for(ProInfoDetail pro : proInfoDetailList){
-	    							pro.setId(pro.getProductUniqueId());
-	    							pro.setResId(assignDateHotelFirstMonth.getResId());
-	    							pro.setUpdateInvenTime(sdfupdate.format(new Date()));
-	    							mongoTemplate.save(pro, "proInfoDetail");
-	    						} 
-	    						SingleHotelDetailReq singleHotelDetailReq=new SingleHotelDetailReq();
-				    			singleHotelDetailReq.setResId(String.valueOf(resId));
-				    			singleHotelDetailReq.setSourceForm("-1");
-				    			singleHotelDetailReq.setRequestContent("res,respro");
-				    			TCHotelDetailResult hotelDetail=hotel.queryTCHotelDetail(singleHotelDetailReq);
-				    			if(StringUtil.isNullOrEmpty(hotelDetail)){
-				    				return flag;
-				    			}
-				    			SingleHotelDetailReq singleHotelDetailReqImg=new SingleHotelDetailReq();
-				    			singleHotelDetailReqImg.setResId(String.valueOf(resId));
-				    			singleHotelDetailReqImg.setSourceForm("-1");
-				    			singleHotelDetailReqImg.setRequestContent("rimg");
-				    			TCHotelDetailResult hotelDetailImg=hotel.queryTCHotelDetail(singleHotelDetailReqImg);
-				    			
-				    			if(null != hotelDetail){ 
-				    				List<ResBaseInfo> resBaseInfoList =hotelDetail.getResBaseInfos();
-				    				List<ResProBaseInfo> resProBaseInfoList= hotelDetail.getResProBaseInfos();
-				    				
-				    				if(resBaseInfoList.size() > 0 && resProBaseInfoList.size() > 0){
-				    					resBaseInfoList.get(0).setId(resId);
-				    					resBaseInfoList.get(0).setSupplierNo("411709261204150108");
-				    					if(resBaseInfoList.get(0).getResGrade() != null){
-				    						if(resBaseInfoList.get(0).getResGrade().equals("豪华型")){
-				    							resBaseInfoList.get(0).setResGradeId("23");
-				    						}else if(resBaseInfoList.get(0).getResGrade().equals("高档型")){
-				    							resBaseInfoList.get(0).setResGradeId("24");
-				    						}else if(resBaseInfoList.get(0).getResGrade().equals("舒适型")){
-				    							resBaseInfoList.get(0).setResGradeId("26");
-				    						}else if(resBaseInfoList.get(0).getResGrade().equals("经济型")){
-				    							resBaseInfoList.get(0).setResGradeId("27");
-				    						}
-				    					}
-				    					Map<String, List<ResProBaseInfo>> proMap=new HashMap<String, List<ResProBaseInfo>>();
-				    					String key="";
-				    					List<Integer> minResPriceList=new ArrayList<Integer>();
-				    					List<Integer> commonResPriceList= new ArrayList<Integer>();
-				    					//for(ResBaseInfo resList: resBaseInfoList){
-				    						for(ResProBaseInfo proList: resProBaseInfoList){
-				    								key= proList.getResProName();
-				    								if(!proMap.containsKey(key)){
-				    									List<ResProBaseInfo> proBedList=new ArrayList<ResProBaseInfo>();
-				    									proBedList.add(proList);
-				    									proMap.put(key, proBedList); 
-				    								}else{
-				    									List<ResProBaseInfo> proBedList = proMap.get(key);
-				    									proBedList.add(proList);
-				    								}
-				    							List<Integer> minProPrice=new ArrayList<Integer>();
-				    							for(ProInfoDetail proInfoDetail : proInfoDetailList){
-				    								if(Long.valueOf(proList.getProductUniqueId()).equals(proInfoDetail.getProductUniqueId())){
-				    									if(proInfoDetail.getProSaleInfoDetails()!= null && proInfoDetail.getProSaleInfoDetails().size() > 0){ 
-						    								TreeMap<String, ProSaleInfoDetail> map= proInfoDetail.getProSaleInfoDetails();
-						    								//TreeMap<String, ProSaleInfoDetail> map1= new TreeMap<String, ProSaleInfoDetail>();
-						    								//map1.putAll(map);
-						    								if(map != null){
-						    									//proList.setProSaleInfoDetails(map1);
-						    									for (Map.Entry<String, ProSaleInfoDetail> entry : map.entrySet()) {
-						    										minProPrice.add(entry.getValue().getDistributionSalePrice());
-						    									}
-						    									if(minProPrice != null){
-						    										if(minProPrice.size() >= 2){
-						    											Integer sumPrice= 0;
-						    											for(int k=0; k< minProPrice.size();k++){
-						    												sumPrice += minProPrice.get(k);
-						    											}
-						    											Integer commonProPrice = sumPrice/minProPrice.size();
-						    											Integer minPrice= Collections.min(minProPrice); 
-						    											minResPriceList.add(minPrice);
-						    											commonResPriceList.add(commonProPrice);
-						    										}else if(minProPrice.size() == 1){
-						    											Integer minPrice= minProPrice.get(0);
-						    											minResPriceList.add(minPrice);
-						    											commonResPriceList.add(minPrice);
-						    										}else{
-						    											Integer minPrice = 999999;
-						    											minResPriceList.add(minPrice);
-						    											commonResPriceList.add(minPrice);
-						    										}
-						    									}
-						    								}
-						    							}
-				    								}
-				    							}
-				    							//ProInfoDetail proInfoDetail= hotelFind.queryListByProductUniqueId(proList.getProductUniqueId().longValue(), ProInfoDetail.class);
-				    						}
-				    							if(minResPriceList != null){
-				    								if(minResPriceList.size() >=2){
-				    									Integer minResPrice= Collections.min(minResPriceList); 
-				    									resBaseInfoList.get(0).setMinPrice(minResPrice);
-				    								}else if(minResPriceList.size() == 1){
-				    									Integer minResPrice= minResPriceList.get(0);
-				    									resBaseInfoList.get(0).setMinPrice(minResPrice);
-				    								}else{
-				    									Integer minResPrice = 999999;
-				    									resBaseInfoList.get(0).setMinPrice(minResPrice);
-				    								}
-				    							}
-				    							if(commonResPriceList.size() > 0){
-				    								Integer comResPrice = 0;
-				    								for(int kk=0; kk<commonResPriceList.size();kk++){
-				    									comResPrice += commonResPriceList.get(kk);
-				    								}
-				    								resBaseInfoList.get(0).setResCommonPrice(comResPrice/commonResPriceList.size());
-				    							}else{
-				    								resBaseInfoList.get(0).setResCommonPrice(999999);
-				    							}
-				    							List<ProDetails> ProInfoDetaisList=new ArrayList<ProDetails>();
-				    							if(proMap != null){
-				    								for (Map.Entry<String, List<ResProBaseInfo>> baseList : proMap.entrySet()) {
-				    									ProDetails proInfoDetai=new ProDetails();
-				    									proInfoDetai.setProId(proMap.get(baseList.getKey()).get(0).getProId());
-				    									proInfoDetai.setResProName(baseList.getKey());
-				    									proInfoDetai.setRoomSize(proMap.get(baseList.getKey()).get(0).getRoomSize());
-				    									proInfoDetai.setRoomFloor(proMap.get(baseList.getKey()).get(0).getRoomFloor());
-				    									proInfoDetai.setRoomFacilities(proMap.get(baseList.getKey()).get(0).getRoomFacilities());
-				    									proInfoDetai.setHasBroadband(proMap.get(baseList.getKey()).get(0).getHasBroadband());
-				    									proInfoDetai.setResProBaseInfoList(baseList.getValue());
-				    									ProInfoDetaisList.add(proInfoDetai);
-				    								}
-				    								resBaseInfoList.get(0).setProDetails(ProInfoDetaisList);
-				    							}
-				    							if(StringUtil.isNotNullOrEmpty(hotelDetailImg)){
-				    								List<ImgInfo> imgInfoList= hotelDetailImg.getResImages();
-				    								List<ImgInfo> list2=new ArrayList<ImgInfo>();
-				    								list2.addAll(imgInfoList);
-				    								resBaseInfoList.get(0).setImgInfoList(list2);
-				    							}
-				    							Integer saleStatus = 1;
-				    							resBaseInfoList.get(0).setSaleStatus(saleStatus);
-					    						resBaseInfoList.get(0).setLatestUpdateTime(sdfupdate.format(new Date()));
-					    						mongoTemplate.save(resBaseInfoList.get(0), "resBaseInfo");
-					    						
-					    						ResIdList resIdList =new ResIdList();
-					    						resIdList.setResId(resId);
-					    						mongoTemplate.save(resIdList, "resIdList");
-					    						
-					    						flag = true;
-				    					}
-				    				}
-	    					}
-	    			}
-				} catch (GSSException e) {
-					LogRecordHol logRecordHol=new LogRecordHol();
-					logRecordHol.setBizCode("HOL-All");
-					logRecordHol.setCreateTime(new Date());
-					logRecordHol.setTitle("更新酒店详细信息");
-					logRecordHol.setDesc("同步酒店全部信息失败,酒店ID为："+String.valueOf(resId));
-					logRecordHol.setResId(resId);
-					mongoTemplate.save(logRecordHol, "logRecordHol");
-					return false;
-					//logger.error("同步酒店详情失败, 酒店ID为: "+resId+", "+e.getMessage());
-				}
+		Boolean flag = false;
+		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat sdfupdate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Calendar cal = Calendar.getInstance();  
+		Calendar calAdd = Calendar.getInstance();
+		String calStartTime= sdf.format(cal.getTime());
+		
+		calAdd.add(Calendar.MONTH, 2);
+		calAdd.add(Calendar.DAY_OF_MONTH, -1);
+		String calAddTime= sdf.format(calAdd.getTime());
+		Integer saleStatus = 1;
+		try {
+			AssignDateHotelReq assignDateHotelReqFirstMonth=new AssignDateHotelReq();
+			assignDateHotelReqFirstMonth.setResId(resId);
+			assignDateHotelReqFirstMonth.setSourceFrom("-1");
+			//assignDateHotelReqFirstMonth.setNeedSpecialPolicy(1);
+			assignDateHotelReqFirstMonth.setStartTime(calStartTime);
+			assignDateHotelReqFirstMonth.setEndTime(calAddTime);
+			AssignDateHotel assignDateHotelFirstMonth=  hotel.queryAssignDateHotel(assignDateHotelReqFirstMonth);
+			
+			if(assignDateHotelFirstMonth !=null){
+				List<ProInfoDetail> proInfoDetailList= assignDateHotelFirstMonth.getProInfoDetailList();
+					if(proInfoDetailList != null && proInfoDetailList.size() > 0){
+						for(ProInfoDetail pro : proInfoDetailList){
+							pro.setId(pro.getProductUniqueId());
+							pro.setResId(assignDateHotelFirstMonth.getResId());
+							pro.setUpdateInvenTime(sdfupdate.format(new Date()));
+							mongoTemplate1.save(pro, "proInfoDetail");
+						} 
+						SingleHotelDetailReq singleHotelDetailReq=new SingleHotelDetailReq();
+		    			singleHotelDetailReq.setResId(String.valueOf(resId));
+		    			singleHotelDetailReq.setSourceForm("-1");
+		    			singleHotelDetailReq.setRequestContent("res,respro,rimg");
+		    			TCHotelDetailResult hotelDetail=hotel.queryTCHotelDetail(singleHotelDetailReq);
+		    			
+		    			if(StringUtil.isNotNullOrEmpty(hotelDetail)){ 
+		    				List<ResBaseInfo> resBaseInfoList =hotelDetail.getResBaseInfos();
+		    				List<ResProBaseInfo> resProBaseInfoList= hotelDetail.getResProBaseInfos();
+		    				//List<ImgInfo> imgInfoList= hotelDetailImg.getResImages();
+		    				List<ImgInfo> imgInfoList= hotelDetail.getResImages();
+		    				
+		    				if(StringUtil.isNotNullOrEmpty(resBaseInfoList) && StringUtil.isNotNullOrEmpty(resProBaseInfoList)){
+		    					ResBaseInfo tcResBaseInfo = resBaseInfoList.get(0);
+		    					tcResBaseInfo.setId(resId);
+		    					tcResBaseInfo.setSupplierNo("411709261204150108");
+		    					if(tcResBaseInfo.getResGrade() != null){
+		    						if(tcResBaseInfo.getResGrade().equals("豪华型")){
+		    							tcResBaseInfo.setResGradeId("23");
+		    						}else if(tcResBaseInfo.getResGrade().equals("高档型")){
+		    							tcResBaseInfo.setResGradeId("24");
+		    						}else if(tcResBaseInfo.getResGrade().equals("舒适型")){
+		    							tcResBaseInfo.setResGradeId("26");
+		    						}else if(tcResBaseInfo.getResGrade().equals("经济型")){
+		    							tcResBaseInfo.setResGradeId("27");
+		    						}
+		    					}
+		    					Map<String, List<ResProBaseInfo>> proMap=new HashMap<String, List<ResProBaseInfo>>();
+		    					String key="";
+		    					List<Integer> minProPrice=new ArrayList<Integer>();
+    							Integer minPrice = 999999;
+	    						for(ResProBaseInfo proList: resProBaseInfoList){
+	    								key= proList.getResProName();
+	    								if(!proMap.containsKey(key)){
+	    									List<ResProBaseInfo> proBedList=new ArrayList<ResProBaseInfo>();
+	    									proBedList.add(proList);
+	    									proMap.put(key, proBedList); 
+	    								}else{
+	    									List<ResProBaseInfo> proBedList = proMap.get(key);
+	    									proBedList.add(proList);
+	    								}
+	    							outer:
+	    							for(ProInfoDetail proInfoDetail : proInfoDetailList){
+	    								if(Long.valueOf(proList.getProductUniqueId()).equals(proInfoDetail.getProductUniqueId())){
+	    									if(proInfoDetail.getProSaleInfoDetails()!= null && proInfoDetail.getProSaleInfoDetails().size() > 0){ 
+			    								TreeMap<String, ProSaleInfoDetail> map= proInfoDetail.getProSaleInfoDetails();
+			    								if(StringUtil.isNotNullOrEmpty(map)){
+			    									for (Map.Entry<String, ProSaleInfoDetail> entry : map.entrySet()) {
+			    										minProPrice.add(entry.getValue().getDistributionSalePrice());
+			    										if(minProPrice.size() >= 1) {
+			    											break outer;
+			    										}
+			    									}
+			    								}
+			    							}
+	    								}
+	    							}
+	    						}
+	    						if(minProPrice != null){
+									if(minProPrice.size() >= 2){
+										/*Integer sumPrice= 0;
+										for(int k=0; k< minProPrice.size();k++){
+											sumPrice += minProPrice.get(k);
+										}
+										Integer commonProPrice = sumPrice/minProPrice.size();*/
+										minPrice= Collections.min(minProPrice);
+										//minResPriceList.add(minPrice);
+										//commonResPriceList.add(commonProPrice);
+									}else if(minProPrice.size() == 1){
+										minPrice= minProPrice.get(0);
+										//minResPriceList.add(minPrice);
+										//commonResPriceList.add(minPrice);
+									}
+								}
+	    						tcResBaseInfo.setMinPrice(minPrice);
+    							List<ProDetails> ProInfoDetaisList=new ArrayList<ProDetails>();
+    							if(proMap != null){
+    								for (Map.Entry<String, List<ResProBaseInfo>> baseList : proMap.entrySet()) {
+    									ProDetails proInfoDetai=new ProDetails();
+    									proInfoDetai.setProId(proMap.get(baseList.getKey()).get(0).getProId());
+    									proInfoDetai.setResProName(baseList.getKey());
+    									proInfoDetai.setRoomSize(proMap.get(baseList.getKey()).get(0).getRoomSize());
+    									proInfoDetai.setRoomFloor(proMap.get(baseList.getKey()).get(0).getRoomFloor());
+    									proInfoDetai.setRoomFacilities(proMap.get(baseList.getKey()).get(0).getRoomFacilities());
+    									proInfoDetai.setHasBroadband(proMap.get(baseList.getKey()).get(0).getHasBroadband());
+    									proInfoDetai.setResProBaseInfoList(baseList.getValue());
+    									ProInfoDetaisList.add(proInfoDetai);
+    								}
+    								tcResBaseInfo.setProDetails(ProInfoDetaisList);
+    							}
+    							if(imgInfoList!=null && imgInfoList.size() > 0) {
+    								List<ImgInfo> list2=new ArrayList<ImgInfo>();
+	    							list2.addAll(imgInfoList);
+	    							tcResBaseInfo.setImgInfoList(list2);
+    							}
+    							
+    							tcResBaseInfo.setSaleStatus(saleStatus);
+	    						tcResBaseInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
+	    						mongoTemplate1.save(tcResBaseInfo, "resBaseInfo");
+	    						
+	    						List<ResGPSInfo> resGPS = tcResBaseInfo.getResGPS();
+	    						QueryProperty queryProperty = new QueryProperty();
+	    						for(ResGPSInfo gps : resGPS) {
+	    							if(gps.getType().equals(1)) {
+	    								String lat = gps.getLat();
+	    								String lon = gps.getLon();
+	    								int latPos = lat.length() - lat.indexOf(".") - 1;
+	    								int lonPos = lon.length() - lon.indexOf(".") - 1;
+	    								String latSubstring = "";
+	    								String lonSubstring = "";
+	    								if(latPos >= 3) {
+	    									latSubstring = lat.substring(0,  lat.indexOf(".")+4);
+	    								}else {
+	    									latSubstring = lat;
+	    								}
+	    								if(lonPos >= 3) {
+	    									lonSubstring = lon.substring(0,  lon.indexOf(".")+4);
+	    								}else {
+	    									lonSubstring = lon;
+	    								}
+	    								queryProperty.addQueryProperties("lat", OperateEnum.REGEX, latSubstring);
+	    								queryProperty.addQueryProperties("lon", OperateEnum.REGEX, lonSubstring);
+	    								break;
+	    							}
+	    						}
+	    						if(StringUtil.isNotNullOrEmpty(tcResBaseInfo.getResPhone())) {
+	    							String phone = tcResBaseInfo.getResPhone().replaceAll(" ", "");
+	    							if(phone != null && !"".equals(phone)) {
+	    								List<String> splitPhone = new ArrayList<String>();
+	    								String realPhone = "";
+	    								String[] mobileArr = null;
+	    								String substring = "";
+	    								String thirdEndStr = "";
+	    								if(phone.contains("-")) {
+	    									mobileArr = phone.split("-");
+	    									if(mobileArr.length>=2) {
+	    										for(String ss : mobileArr) {
+	    											if(ss.length() == 7) {
+	    												substring = ss.substring(0, 7);
+	    												splitPhone.add(substring);
+	    											}
+	    											if(ss.length()>7) {
+	    												substring = ss.substring(0, 7);
+	    												String endString = ss.substring(7, ss.length());
+	    												if(endString.length()>=8) {
+	    													if(endString.contains("/")) {
+	    														if(endString.length() - endString.indexOf("/") >= 8) {
+	    															thirdEndStr = endString.substring(endString.indexOf("/")+1, endString.indexOf("/")+8);
+	    														}
+	    													}else if(endString.contains("、")) {
+	    														if(endString.length() - endString.indexOf("、") >= 8) {
+	    															thirdEndStr = endString.substring(endString.indexOf("、")+1, endString.indexOf("、")+8);
+	    														}
+	    													}else if(endString.contains("\\")) {
+	    														if(endString.length() - endString.indexOf("\\") >= 8) {
+	    															thirdEndStr = endString.substring(endString.indexOf("\\\\")+1, endString.indexOf("\\\\")+8);
+	    														}
+	    													}
+	    													if(thirdEndStr.length() == 7) {
+	    														splitPhone.add(thirdEndStr);
+	    													}
+	    												}
+	    												splitPhone.add(substring);
+	    											}
+	    										}
+	    									}
+	    								}else {
+	    									if(phone.length() >= 11) {
+	    										substring = phone.substring(0, 11);
+	    										splitPhone.add(substring);
+	    									}
+	    								}
+	    								if(splitPhone.size() == 1) {
+	    									realPhone = splitPhone.get(0);
+	    									queryProperty.addQueryProperties("resPhone", OperateEnum.REGEX, realPhone);
+	    								}else if(splitPhone.size() >= 2) {
+	    									realPhone = splitPhone.get(0)+","+splitPhone.get(1);
+	    									queryProperty.addQueryProperties("resPhone", OperateEnum.OROPERATOR, realPhone);
+	    								}
+	    							}
+	    						}
+	    						if(StringUtil.isNotNullOrEmpty(queryProperty)) {
+	    							int page = 1;
+	    							int pageSize = 10;
+	    							Pageable pageable  = new PageRequest(page, pageSize);
+	    							TCResponse<HolMidBaseInfo> findByProperty = holMongoQuery.findByProperty(queryProperty, pageable, HolMidBaseInfo.class);
+	    							if(StringUtil.isNotNullOrEmpty(findByProperty) && StringUtil.isNotNullOrEmpty(findByProperty.getResponseResult())) {
+	    								HolMidBaseInfo oneMidInfo = findByProperty.getResponseResult().get(0);
+	    								oneMidInfo.setTcResId(tcResBaseInfo.getResId());
+	    								oneMidInfo.setTcResName(tcResBaseInfo.getResName());
+	    								oneMidInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
+	    								oneMidInfo.setSupplierNo(oneMidInfo.getSupplierNo()+",411709261204150108");
+	    								mongoTemplate1.save(oneMidInfo, "holMidBaseInfo");
+	    							}else {
+		    							/**
+		    							 * 保存中间表
+		    							 */
+		    							HolMidBaseInfo holMidBaseInfo =new HolMidBaseInfo();
+		    							holMidBaseInfo.setId(IdWorker.getId());
+		    							holMidBaseInfo.setTcResId(tcResBaseInfo.getResId());
+		    							holMidBaseInfo.setTcResName(tcResBaseInfo.getResName());
+		    							holMidBaseInfo.setProvName(tcResBaseInfo.getProvName());
+		    							holMidBaseInfo.setCityName(tcResBaseInfo.getCityName());
+		    							holMidBaseInfo.setIsInter(tcResBaseInfo.getIsInter());
+		    							//酒店品牌
+		    							ResBrandInfo resBrandInfo = new ResBrandInfo();
+		    							ResBrandInfo tcBrandInfo = tcResBaseInfo.getBrandInfo();
+		    							if(StringUtil.isNotNullOrEmpty(tcBrandInfo)) {
+		    								if(StringUtils.isNotEmpty(tcBrandInfo.getResBrandName())) {
+		    									resBrandInfo.setResBrandName(tcBrandInfo.getResBrandName());
+		    								}
+		    								if(StringUtil.isNotNullOrEmpty(tcBrandInfo.getResBrandType())) {
+		    									resBrandInfo.setResBrandType(tcBrandInfo.getResBrandType());
+		    								}
+			    							holMidBaseInfo.setBrandInfo(resBrandInfo);
+		    							}
+		    							
+		    							holMidBaseInfo.setAddress(tcResBaseInfo.getAddress());
+		    							if(StringUtil.isNotNullOrEmpty(tcResBaseInfo.getResPhone())) {
+		    								String replaceAll = tcResBaseInfo.getResPhone().replaceAll(" ", "");
+		    								holMidBaseInfo.setResPhone(replaceAll);
+		    							}
+		    							holMidBaseInfo.setIntro(tcResBaseInfo.getIntro());
+		    							//酒店等级
+		    							holMidBaseInfo.setResGrade(tcResBaseInfo.getResGradeId());
+		    							
+		    							//酒店坐标
+		    							for(ResGPSInfo gps : tcResBaseInfo.getResGPS()) {
+		    								if(gps.getType().equals(1)) {
+		    									holMidBaseInfo.setLatLonType(gps.getType());
+				    							holMidBaseInfo.setLat(gps.getLat());
+				    							holMidBaseInfo.setLon(gps.getLon());
+				    							break;
+		    								}
+		    							}
+		    							//holMidBaseInfo.setCountryName("中国");
+		    							//一句话介绍...酒店描述
+		    							//酒店图片
+		    							if(StringUtil.isNotNullOrEmpty(tcResBaseInfo.getImgInfoList())) {
+		    								holMidBaseInfo.setTitleImg(tcResBaseInfo.getImgInfoList().get(0).getImageUrl());
+		    							}
+		    							holMidBaseInfo.setMinPrice(tcResBaseInfo.getMinPrice());
+		    							holMidBaseInfo.setSupplierNo("411709261204150108");
+		    							holMidBaseInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
+		    							holMidBaseInfo.setSaleStatus(1);
+		    							holMidBaseInfo.setBookTimes(1L);
+		    							holMidBaseInfo.setBookRemark(tcResBaseInfo.getLocation());
+		    							mongoTemplate1.save(holMidBaseInfo, "holMidBaseInfo");
+		    						}
+	    						}
+	    						ResIdList resIdList =new ResIdList();
+	    						resIdList.setId(resId);
+	    						mongoTemplate1.save(resIdList, "resIdList");
+	    						flag = true;
+    					}
+    				}
+			}
+		}
+	} catch (GSSException e) {
+		LogRecordHol logRecordHol=new LogRecordHol();
+		logRecordHol.setBizCode("HOL-All");
+		logRecordHol.setCreateTime(new Date());
+		logRecordHol.setTitle("更新酒店详细信息");
+		logRecordHol.setDesc("同步酒店全部信息失败,酒店ID为："+String.valueOf(resId));
+		logRecordHol.setResId(resId);
+		mongoTemplate1.save(logRecordHol, "logRecordHol");
+	}
 		return flag;
 	}
 
 	@Override
 	public Boolean updateLuceneDate(Agent agent,List<HotelName> list) throws IOException {
-		//List<HotelName> list = mongoTemplate.find(new Query(Criteria.where("_id").ne("").ne(null)), HotelName.class);
+		//List<HotelName> list = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)), HotelName.class);
 		//try {
 			Directory directory = FSDirectory.open(Paths.get("./index"));
 	    	//Version version = Version.LUCENE_7_1_0;
@@ -1287,7 +1412,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			/*Query query = Query.query(Criteria.where("_id").ne("").ne(null));
 			query.skip(i);
 			query.limit(100);
-			List<HotelName> list = mongoTemplate.find(query,HotelName.class);*/
+			List<HotelName> list = mongoTemplate1.find(query,HotelName.class);*/
 			if(StringUtil.isNotNullOrEmpty(list)) {
 				System.out.println(list.size());
 				for (int j = 0; j < list.size(); j++) {

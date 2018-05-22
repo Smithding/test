@@ -27,14 +27,14 @@ public class ResBrandInfoServiceImpl  implements IResBrandInfoService {
 
 	protected final transient Logger log = LoggerFactory.getLogger(getClass());
 	@Autowired 
-	MongoTemplate mongoTemplate;
+	MongoTemplate mongoTemplate1;
 	
 	
 	@Cacheable(value = "ResBrandInfos", key = "#agent.owner",unless="")
 	@Override
 	public List<ResBrandInfo> findAll(Agent agent) {
 		Query query=new Query();
-		List<ResBrandInfo> resBrandInfos = mongoTemplate.find(query , ResBrandInfo.class);
+		List<ResBrandInfo> resBrandInfos = mongoTemplate1.find(query , ResBrandInfo.class);
 		return resBrandInfos;
 	}
 	
