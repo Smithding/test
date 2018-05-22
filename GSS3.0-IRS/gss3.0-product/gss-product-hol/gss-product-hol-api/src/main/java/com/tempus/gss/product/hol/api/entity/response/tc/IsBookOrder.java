@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.entity.response.tc;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.alibaba.fastjson.annotation.JSONField;
@@ -16,6 +17,12 @@ public class IsBookOrder implements Serializable{
 	 */
 	@JSONField(name = "CanBooking")
 	private Integer canBooking;
+	
+	/**
+	 * 担保金额
+	 */
+	@JSONField(name = "AmountPercent")
+	private BigDecimal amountPercent;
 	
 	/**
 	 * 可订检查错误消息
@@ -109,6 +116,12 @@ public class IsBookOrder implements Serializable{
 	@JSONField(deserialize=false)
 	public void setSelfMessage(String selfMessage) {
 		this.selfMessage = selfMessage;
+	}
+	public BigDecimal getAmountPercent() {
+		return amountPercent;
+	}
+	public void setAmountPercent(BigDecimal amountPercent) {
+		this.amountPercent = amountPercent;
 	}
 	
 }
