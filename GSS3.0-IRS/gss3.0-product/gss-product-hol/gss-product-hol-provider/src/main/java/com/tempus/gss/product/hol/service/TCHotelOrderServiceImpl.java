@@ -118,7 +118,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	@Autowired
 	HttpClientUtil httpClientUtil;
 	@Autowired
-	MongoTemplate mongoTemplate;
+	MongoTemplate mongoTemplate1;
 	
 	@Reference
     ISaleOrderService saleOrderService;
@@ -290,7 +290,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 					}
 					totalPrice = totalPrice.multiply(new BigDecimal(orderCreateReq.getBookCount()));
 					hotelOrder.setEachNightPrice(eachNightPrice);
-					ResBaseInfo resInfomation =mongoTemplate.findOne(new Query(Criteria.where("_id").is(orderCreateReq.getResId())),ResBaseInfo.class);
+					ResBaseInfo resInfomation =mongoTemplate1.findOne(new Query(Criteria.where("_id").is(orderCreateReq.getResId())),ResBaseInfo.class);
 	
 					if(resInfomation != null){
 						hotelName =  resInfomation.getResName();
@@ -696,17 +696,17 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						logRecordHol.setCreateTime(new Date());
 						logRecordHol.setResId(isBookOrderReq.getResId());
 						logRecordHol.setProductUniqueId(isBookOrderReq.getProductUniqueId());
-						mongoTemplate.save(logRecordHol, "logRecordHol");*/
+						mongoTemplate1.save(logRecordHol, "logRecordHol");*/
 						Integer saleStatus = 0;
 						SimpleDateFormat sdfupdate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			        	String updateTime = sdfupdate.format(new Date());
 						Query query = Query.query(Criteria.where("_id").is(isBookOrderReq.getResId()));
 			        	Update update = Update.update("saleStatus", saleStatus).set("latestUpdateTime", updateTime);
-			        	mongoTemplate.upsert(query, update, ResBaseInfo.class);
+			        	mongoTemplate1.upsert(query, update, ResBaseInfo.class);
 						return isBookOrderBase.getResult();
 					}
 					if(isBookOrderBase.getResult().getCanBooking().equals(1)){
-						List<PaymentWay> list = mongoTemplate.find(new Query(Criteria.where("_id").ne("").ne(null)),PaymentWay.class);
+						List<PaymentWay> list = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)),PaymentWay.class);
 						BookableMessage jobj=JSON.parseObject(isBookOrderBase.getResult().getBookableMessage(), BookableMessage.class);  
 						isBookOrderBase.getResult().setBookableMessageTarget(jobj);
 						isBookOrderBase.getResult().setPaymentWayList(list);
@@ -755,7 +755,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 									}
 									
 									if(isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo().getCgCode()[0].equals(GuaranteeTypeIsBook.THREE.getKey())){
-										ProInfoDetail proInfoDetail = mongoTemplate.findOne(new Query(Criteria.where("_id").is(isBookOrderReq.getProductUniqueId())),ProInfoDetail.class);
+										ProInfoDetail proInfoDetail = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(isBookOrderReq.getProductUniqueId())),ProInfoDetail.class);
 										int comres = 0;
 										for (Map.Entry<String, ProSaleInfoDetail> entry : proInfoDetail.getProSaleInfoDetails().entrySet()) {
 		 	    	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(isBookOrderReq.getComeDate());
@@ -1084,7 +1084,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
             logger.error("agent对象为空");
             throw new GSSException("取消酒店订单", "0102", "agent对象为空");
         }
-		List<CancelReasonModel> res = mongoTemplate.find(new Query(Criteria.where("_id").ne("").ne(null)),CancelReasonModel.class);
+		List<CancelReasonModel> res = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)),CancelReasonModel.class);
 		return res;
 	}
 	
@@ -2136,6 +2136,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	public void createErrorOrder(Agent agent, HolErrorOrder holErrorOrder) throws GSSException {
 		hotelErrorOrderMapper.insertSelective(holErrorOrder);
 	}
+
 
 	
 }
