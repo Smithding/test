@@ -17,10 +17,7 @@ import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.*;
 import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
 import com.tempus.gss.product.ift.api.entity.vo.*;
-import com.tempus.gss.product.ift.api.service.IBuyOrderExtService;
-import com.tempus.gss.product.ift.api.service.IChangeService;
-import com.tempus.gss.product.ift.api.service.IPassengerChangePriceService;
-import com.tempus.gss.product.ift.api.service.ITicketSenderService;
+import com.tempus.gss.product.ift.api.service.*;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.*;
 import com.tempus.gss.system.entity.User;
@@ -41,7 +38,7 @@ import java.util.*;
 @org.springframework.stereotype.Service
 @EnableAutoConfiguration
 public class ChangeServiceImpl implements IChangeService {
-    
+
     protected final transient Logger log = LoggerFactory.getLogger(getClass());
     @Reference
     private IPassengerChangePriceService pgerChangePriceService;
@@ -71,7 +68,10 @@ public class ChangeServiceImpl implements IChangeService {
     ICustomerService customerService;
     @Reference
     IUserService userService;
-    
+    @Reference
+    ISaleOrderExtService saleOrderExtService;
+    @Reference
+    ISaleOrderDetailService saleOrderDetailService;
     @Autowired
     SaleOrderDetailDao saleOrderDetailDao;
     @Autowired
@@ -150,7 +150,7 @@ public class ChangeServiceImpl implements IChangeService {
             for (SaleOrderDetail saleOrderDetail : saleOrderDetailList) {
                 for (Long oldPassengerNo : requestWithActor.getEntity().getOldPassengerNoList()) {
                     if (saleOrderDetail.getPassengerNo().equals(oldPassengerNo)) {
-                        
+
                         for (Long oldLegNo : requestWithActor.getEntity().getOldLegNoList()) {
                             if (saleOrderDetail.getLegNo().equals(oldLegNo)) {
                                 if (!"4".equals(saleOrderDetail.getStatus())) {
@@ -163,7 +163,7 @@ public class ChangeServiceImpl implements IChangeService {
                                 } else {
                                     saleOrderDetail.setStatus("10");//TODO 将状态修改为改签状态
                                     saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
-                                    
+
                                     //添加旧改签单明细
                                     SaleChangeDetail saleChangeDetail = new SaleChangeDetail();
                                     saleChangeDetail.setSaleChangeDetailNo(maxNoService.generateBizNo("IFT_SALE_CHANGE_DETAIL_NO", 49));
@@ -182,7 +182,7 @@ public class ChangeServiceImpl implements IChangeService {
                     }
                 }
             }
-            
+
             //            /*修改改签的航程信息*/
             //			for (Leg leg : saleOrderExt.getLegList()) {
             //				for (Long oldLegNo : requestWithActor.getEntity().getOldLegNoList()) {
@@ -192,7 +192,7 @@ public class ChangeServiceImpl implements IChangeService {
             //					}
             //				}
             //			}
-            
+
             /*新增改签航段*/
             for (int i = 0; i < requestWithActor.getEntity().getLegList().size(); i++) {
                 Leg leg = requestWithActor.getEntity().getLegList().get(i);
@@ -207,7 +207,7 @@ public class ChangeServiceImpl implements IChangeService {
                 leg.setChildSection(1);//改签过的航段
                 legDao.insertSelective(leg);
             }
-            
+
             //TODO 这里需要重新获得新的行程信息
             /*新增人+航段行程*/
             for (Long passengerNo : requestWithActor.getEntity().getOldPassengerNoList()) {
@@ -224,7 +224,7 @@ public class ChangeServiceImpl implements IChangeService {
                     saleOrderDetail.setStatus("1");
                     saleOrderDetail.setIsChange(true);
                     saleOrderDetailDao.insertSelective(saleOrderDetail);
-                    
+
                     //添加新改签单明细
                     SaleChangeDetail saleChangeDetail = new SaleChangeDetail();
                     saleChangeDetail.setSaleChangeDetailNo(maxNoService.generateBizNo("IFT_SALE_CHANGE_DETAIL_NO", 49));
@@ -239,8 +239,8 @@ public class ChangeServiceImpl implements IChangeService {
                     saleChangeDetailDao.insertSelective(saleChangeDetail);
                 }
             }
-            
-            
+
+
             /*改签乘客价格*/
             for (Long passengerNo : requestWithActor.getEntity().getOldPassengerNoList()) {
                 PassengerChangePrice passengerChangePrice = new PassengerChangePrice();
@@ -251,7 +251,7 @@ public class ChangeServiceImpl implements IChangeService {
                 passengerChangePrice.setChangePriceNo(maxNoService.generateBizNo("IFT_PASSENGER_CHANGE_PRICE_NO", 30));
                 passengerChangePriceDao.insertSelective(passengerChangePrice);
             }
-            
+
             /*通过编号查询出销售单*/
             SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleOrderExt.getSaleOrderNo());
             /*创建销售改签单*/
@@ -271,7 +271,7 @@ public class ChangeServiceImpl implements IChangeService {
             saleChange.setTransationOrderNo(saleOrder.getTransationOrderNo());//交易号
             saleChange.setIncomeExpenseType(1);//收支类型 1.收 2.支
             saleChangeService.create(requestWithActor.getAgent(), saleChange);
-            
+
             /*创建销售改签单拓展*/
             saleChangeExt.setSaleChangeNo(saleChangeNo);
             saleChangeExt.setChangeType(3);//3为改签,同saleChange的orderChangeType
@@ -287,7 +287,7 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeExt.setCustomerNo(agent.getNum());
             saleChangeExt.setCustomerTypeNo(agent.getType());
             saleChangeExtDao.insertSelective(saleChangeExt);
-            
+
             /*通过销售单编号获取采购单*/
             List<BuyOrderExt> buyOrderExtList = buyOrderExtDao.selectBuyOrderBySaleOrderNo(requestWithActor.getEntity().getSaleOrderNo());
             /*创建采购改签单*/
@@ -306,7 +306,7 @@ public class ChangeServiceImpl implements IChangeService {
             buyChange.setIncomeExpenseType(2);//收支类型 1.收 2.支
             if (buyOrderExtList != null && buyOrderExtList.size() != 0) { buyChange.setBuyOrderNo(buyOrderExtList.get(0).getBuyOrderNo()); }
             buyChangeService.create(requestWithActor.getAgent(), buyChange);
-            
+
             /*创建采购改签单拓展*/
             BuyChangeExt buyChangeExt = new BuyChangeExt();
             buyChangeExt.setBuyChangeNo(buyChangeNo);
@@ -314,7 +314,7 @@ public class ChangeServiceImpl implements IChangeService {
             buyChangeExt.setCreateTime(new Date());
             buyChangeExt.setValid((byte) 1);
             buyChangeExtDao.insertSelective(buyChangeExt);
-            
+
             /*创建新增操作日志*/
             try {
                 LogRecord logRecord = new LogRecord();
@@ -332,11 +332,11 @@ public class ChangeServiceImpl implements IChangeService {
             } catch (Exception e) {
                 log.error("添加(title=创建国际改签单)操作日志异常===" + e);
             }
-            
+
         } catch (GSSException ubp) {
             log.error("创建改签单失败", ubp);
             throw ubp;
-            
+
         } catch (Exception e) {
             log.error("创建改签单失败", e);
             throw new GSSException("创建改签单失败", "0003", "创建改签单失败");
@@ -344,7 +344,7 @@ public class ChangeServiceImpl implements IChangeService {
         log.info("申请改签单结束=========");
         return saleChangeExt;
     }
-    
+
     @Override
     public boolean createChange(RequestWithActor<ChangeCreateVo> requestWithActor) {
         boolean flag = false;
@@ -360,7 +360,7 @@ public class ChangeServiceImpl implements IChangeService {
         }
         return flag;
     }
-    
+
     /**
      * 改签单创建应收应付.
      *
@@ -670,7 +670,7 @@ public class ChangeServiceImpl implements IChangeService {
                 pnr.setCreator(changeTicketRequest.getAgent().getAccount());
                 pnr.setCreateTime(new Date());
                 pnrDao.insert(pnr);
-                
+
                 for (BuyOrderDetail buyOrderDetail : changeTicketRequest.getEntity().getBuyOrderDetailList()) {
                     //在buyOrderDetail中票号等属性  并执行update语句进行修改
                     buyOrderDetail.setModifier(changeTicketRequest.getAgent().getAccount());//修改人
@@ -705,7 +705,7 @@ public class ChangeServiceImpl implements IChangeService {
         log.info("改签处理结束");
         return false;
     }
-    
+
     /**
      * 根据业务情况接收出票消息，修改采购变更单状态为待出票
      *
@@ -732,7 +732,7 @@ public class ChangeServiceImpl implements IChangeService {
         try {
             log.info("receiveTicket->" + JSON.toJSONString(requestWithActor));
             SaleChange saleChange = saleChangeService.getSaleChangeByNo(agent, saleChangeNo);
-            
+
             RequestWithActor<Long> saleChangeExtRequest = new RequestWithActor<Long>();
             saleChangeExtRequest.setAgent(agent);
             saleChangeExtRequest.setEntity(saleChangeNo);
@@ -771,7 +771,7 @@ public class ChangeServiceImpl implements IChangeService {
                     }
                 }
             }
-            
+
         } catch (Exception e) {
             log.error("修改采购变更单状态异常");
             throw new GSSException("修改采购变更单状态异常", "1003", "修改采购变更单状态失败");
@@ -882,16 +882,16 @@ public class ChangeServiceImpl implements IChangeService {
         if(saleAdtPriceList == null )
             return true;
         for (ChangePriceVo changePriceVo : saleAdtPriceList) {
-           all = all.add(changePriceVo.getSalePrice());
-           all = all.add(changePriceVo.getSaleTax());
-           all = all.add(changePriceVo.getSaleBrokerage());
-           all = all.add(changePriceVo.getSaleRest());
-           all = all.add(changePriceVo.getCountPrice());
-           all = all.add(changePriceVo.getBuyPrice());
-           all = all.add(changePriceVo.getBuyTax());
-           all = all.add(changePriceVo.getBuyBrokerage());
-           all = all.add(changePriceVo.getBuyRest());
-           all = all.add(changePriceVo.getBuyCountPrice());
+            all = all.add(changePriceVo.getSalePrice());
+            all = all.add(changePriceVo.getSaleTax());
+            all = all.add(changePriceVo.getSaleBrokerage());
+            all = all.add(changePriceVo.getSaleRest());
+            all = all.add(changePriceVo.getCountPrice());
+            all = all.add(changePriceVo.getBuyPrice());
+            all = all.add(changePriceVo.getBuyTax());
+            all = all.add(changePriceVo.getBuyBrokerage());
+            all = all.add(changePriceVo.getBuyRest());
+            all = all.add(changePriceVo.getBuyCountPrice());
         }
         BigDecimal zore = new BigDecimal("0");
         if(all.compareTo(zore) <= 0){
@@ -925,7 +925,7 @@ public class ChangeServiceImpl implements IChangeService {
                 priceVo.setBuyRebate(temp.getBuyRebate());
                 priceVo.setBuyTax(temp.getBuyTax());
                 priceVo.setBuyRest(temp.getBuyRest());
-                
+
             } else {
                 priceVo = voList.get(i);
             }
@@ -979,10 +979,10 @@ public class ChangeServiceImpl implements IChangeService {
                 log.error("添加(title=国际创建审核改签单)操作日志异常===" + e);
             }
         }
-        
+
         return flag;
     }
-    
+
     /**
      * 取消改签.
      * 拒单
@@ -1003,9 +1003,9 @@ public class ChangeServiceImpl implements IChangeService {
             log.error("saleChangeNo 为空");
             throw new GSSException("saleChangeNo 为空", "0101", "取消该签单失败");
         }
-        
+
         SaleChange saleChange = saleChangeService.getSaleChangeByNo(agent, saleChangeNo);
-        
+
         if (saleChange == null) {
             log.error("saleChangeNo=" + saleChangeNo + ",该改签单不存在");
             throw new GSSException("saleChangeNo=" + saleChangeNo + ",该该签单不存在", "0101", "取消该签单失败");
@@ -1023,7 +1023,7 @@ public class ChangeServiceImpl implements IChangeService {
             log.error("该签单更新失败，e=" + e);
             throw new GSSException("该签单更新失败，e=" + e, "0101", "取消该签单失败");
         }
-        
+
         //将saleOrderDetail的订单详情的状态改为已取消
         SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(saleChangeNo);
         if (saleChangeExt != null) {
@@ -1047,9 +1047,9 @@ public class ChangeServiceImpl implements IChangeService {
                     }
                 }
             }
-            
+
         }
-        
+
         //修改采购废退单信息
         List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(agent, saleChange.getSaleOrderNo());
         if (buyOrderList != null && buyOrderList.size() != 0) {
@@ -1083,7 +1083,7 @@ public class ChangeServiceImpl implements IChangeService {
         }
         return true;
     }
-    
+
     /**
      * 改签拒单
      *
@@ -1120,13 +1120,13 @@ public class ChangeServiceImpl implements IChangeService {
                     }
                 }
             }
-            
+
             try {
                 mssReserveService.changeInform(saleChangeNo.getAgent(), changeNo, "2");
             } catch (Exception e) {
                 log.error("改签出票回调mss接口出错==========e=" + e);
             }
-            
+
             log.info("拒单结束");
             *//*创建新增操作日志*//*
             try {
@@ -1160,10 +1160,8 @@ public class ChangeServiceImpl implements IChangeService {
             changeExt.setRefuseReason(reason);
             changeExt.setAirlineStatus(4);
             saleChangeExtDao.updateByPrimaryKey(changeExt);
+            SaleChange saleChange = saleChangeService.getSaleChangeByNo(saleChangeNo.getAgent(), saleChangeNo.getEntity());
 
-          /*  RequestWithActor<Long> requesChangePrice = new RequestWithActor<Long>();
-            requesChangePrice.setAgent(AgentUtil.getAgent());
-            requesChangePrice.setEntity(saleChangeNo);*/
             List<PassengerChangePrice> priceList = pgerChangePriceService.getChangePriceList(saleChangeNo);
             int chaildStatus = 15;//打回
             if (priceListIsNoFee(priceList)) {
@@ -1172,7 +1170,7 @@ public class ChangeServiceImpl implements IChangeService {
             //主订单状态改成 11=拒单
             saleChangeService.updateStatus(saleChangeNo.getAgent(), changeNo, chaildStatus);
             //修改采购单的状态为11
-            List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(saleChangeNo.getAgent(), changeExt.getSaleChange().getSaleOrderNo());
+            List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(saleChangeNo.getAgent(), saleChange.getSaleOrderNo());
             if (buyOrderList != null && buyOrderList.size() > 0) {
                 for (BuyOrder buyOrder : buyOrderList) {
                     if (buyOrder.getBsignType() == 4) {
@@ -1183,6 +1181,23 @@ public class ChangeServiceImpl implements IChangeService {
                     }
                 }
             }
+
+            //原单状态恢复 TODO
+            SaleOrderExt saleOrderExt = saleOrderExtService.
+                    selectBySaleOrderNo(saleChangeNo.getAgent(), saleChange.getSaleOrderNo());
+            List<SaleOrderDetail> saleOrderDetailList = saleOrderExt.getSaleOrderDetailList();
+            for (SaleOrderDetail saleOrderDetail : saleOrderDetailList) {
+                if(!saleOrderDetail.getIsChange()){
+                    saleOrderDetail.setStatus("4");
+                    saleOrderDetail.setModifier(saleChangeNo.getAgent().getAccount());
+                    saleOrderDetail.setModifyTime(new Date());
+                    RequestWithActor<SaleOrderDetail> saleOrderDetailRequestWithActor = new RequestWithActor<>();
+                    saleOrderDetailRequestWithActor.setAgent(saleChangeNo.getAgent());
+                    saleOrderDetailRequestWithActor.setEntity(saleOrderDetail);
+                    saleOrderDetailService.upateSaleOrder(saleOrderDetailRequestWithActor);
+                }
+            }
+            saleOrderService.updateStatus(saleChangeNo.getAgent(),saleOrderExt.getSaleOrderNo(),4);
 
             try {
                 mssReserveService.changeInform(saleChangeNo.getAgent(), changeNo, "2");
@@ -1204,9 +1219,11 @@ public class ChangeServiceImpl implements IChangeService {
                 logRecord.setBizNo(String.valueOf(saleChangeNo.getEntity()));
                 logService.insert(logRecord);
             } catch (Exception e) {
+                e.printStackTrace();
                 log.error("添加(title=国际改签单拒单)操作日志异常===" + e);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("改签拒单异常！！！" + e);
         }
         return true;
@@ -1281,7 +1298,7 @@ public class ChangeServiceImpl implements IChangeService {
         log.info("改签单查询结束");
         return page;
     }
-    
+
     /**
      * 根据改签单编号查询详情.
      *
@@ -1306,7 +1323,7 @@ public class ChangeServiceImpl implements IChangeService {
         log.info("查询过去改签单详情结束");
         return saleChangeExt;
     }
-    
+
     @Override
     public List<SaleChangeExt> getSaleChangeExt(RequestWithActor<Long> requestWithActor) {
         log.info("获取销售单开始============");
@@ -1314,7 +1331,7 @@ public class ChangeServiceImpl implements IChangeService {
             log.error("销售单编号为空");
             throw new GSSException("销售单编号为空", "0001", "获取销售单失败");
         }
-        
+
         if (requestWithActor.getAgent() == null) {
             log.error("agent为空");
             throw new GSSException("agent为空", "0001", "获取销售单失败");
@@ -1333,11 +1350,11 @@ public class ChangeServiceImpl implements IChangeService {
                 }
             }
         }
-        
+
         log.info("获取销售单结束============");
         return newSaleChangeExtList;
     }
-    
+
     /**
      * 锁住
      *
@@ -1377,7 +1394,7 @@ public class ChangeServiceImpl implements IChangeService {
                             ticketSenderDao.updateByPrimaryKey(ticketSender);
                         }
                     }*/
-                    
+
                 } else {
                     changeExt.setLocker(0L);
                     changeExt.setModifier(saleChange.getAgent().getAccount());
@@ -1417,7 +1434,7 @@ public class ChangeServiceImpl implements IChangeService {
         }
         return flag;
     }
-    
+
     /**
      * 改签单出单确认
      * 状态改成10=已改签
@@ -1459,10 +1476,10 @@ public class ChangeServiceImpl implements IChangeService {
                 passengerChangePrice.setBuyRest(priceVo.getBuyRest());
                 passengerChangePrice.setBuyTax(priceVo.getBuyTax());
                 passengerChangePriceDao.updateByPrimaryKeySelective(passengerChangePrice);
-                
+
             }
             saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 10);
-            
+
             try {
                 mssReserveService.changeInform(requestWithActor.getAgent(), saleChangeNo, "2");
             } catch (Exception e) {
@@ -1491,7 +1508,7 @@ public class ChangeServiceImpl implements IChangeService {
         log.info("改签确认操作结束");
         return flag;
     }
-    
+
     /**
      * 更改客商时需要创建(BuyOrder/BuyOrderExt/BuyOrderDetail)
      */
@@ -1559,9 +1576,9 @@ public class ChangeServiceImpl implements IChangeService {
             e.getMessage();
         }
         return true;
-        
+
     }
-    
+
     /**
      * 订单改签通知
      *
@@ -1578,16 +1595,16 @@ public class ChangeServiceImpl implements IChangeService {
         if (orderInformVo.getInformType() == 2 || orderInformVo.getInformType() == 4) {
             saleChangeDetail.setTicketNo(orderInformVo.getTicketNo());
             saleChangeDetail.setSaleChangeNo(orderInformVo.getSaleOrderNo());
-            
+
             saleOrderDetail.setStatus(orderInformVo.getStatus());
             saleOrderDetail.setChangeOrderNo(orderInformVo.getSaleOrderNo());
-            
+
             buyOrderExt.setChangeOrderNo(orderInformVo.getSaleOrderNo());
             buyOrderExt.setSupplierNo(orderInformVo.getSupplierNo());
-            
+
             saleChangeExt.setChangeRemark(orderInformVo.getSaleRemark());
             saleChangeExt.setSaleChangeNo(orderInformVo.getSaleOrderNo());
-            
+
             saleChangeDetailDao.updateByChangeOrderNo(saleChangeDetail);
             saleOrderDetailDao.updateByChangeOrderNo(saleOrderDetail);
             buyOrderExtDao.updateByChangeOrderNo(buyOrderExt);
@@ -1595,7 +1612,7 @@ public class ChangeServiceImpl implements IChangeService {
         } else if (orderInformVo.getInformType() == 3) {
             saleChangeExt.setChangeRemark(orderInformVo.getSaleRemark());
             saleChangeExt.setSaleChangeNo(orderInformVo.getSaleOrderNo());
-            
+
             passengerChangePrice.setBuyBrokerage(orderInformVo.getBuyBrokerage());
             passengerChangePrice.setSaleChangeNo(orderInformVo.getSaleOrderNo());
             passengerChangePriceDao.updateByChangeOrderNo(passengerChangePrice);
@@ -1604,7 +1621,7 @@ public class ChangeServiceImpl implements IChangeService {
             saleOrderDetail.setStatus(orderInformVo.getStatus());
             saleOrderDetail.setChangeOrderNo(orderInformVo.getSaleOrderNo());
             saleOrderDetailDao.updateByChangeOrderNo(saleOrderDetail);
-            
+
             saleChangeExt.setSaleChangeNo(orderInformVo.getSaleOrderNo());
             saleChangeExt.setChangeType(orderInformVo.getChangeType());
             saleChangeExt.setRefuseReason(orderInformVo.getRefuseReason());
