@@ -18,6 +18,11 @@ public class ResInfoList implements Serializable{
 	 */
 	@JSONField(name = "ResId")
 	private Long resId;
+	/**
+	 * 酒店名字
+	 */
+	@JSONField(name = "ResName")
+	private String resName;
 	
 	/**
 	 * 城市名称（去除“市”字样，例如：“苏州”）
@@ -31,7 +36,12 @@ public class ResInfoList implements Serializable{
 	public void setResId(Long resId) {
 		this.resId = resId;
 	}
-	
+	public String getResName() {
+		return resName;
+	}
+	public void setResName(String resName) {
+		this.resName = resName;
+	}
 	public String getCityName() {
 		return cityName;
 	}
