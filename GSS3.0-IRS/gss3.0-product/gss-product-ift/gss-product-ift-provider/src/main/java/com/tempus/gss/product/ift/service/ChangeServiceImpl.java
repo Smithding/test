@@ -798,7 +798,8 @@ public class ChangeServiceImpl implements IChangeService {
      * 已审核:child_status=2
      * 待支付:pay_status=1
      */
-    @Transactional
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean changeAudit(RequestWithActor<ChangePriceRequest> requestWithActor) {
         if (requestWithActor.getAgent() == null) {
             throw new GSSException("当前用户不能为空", "0101", "当前操作用户为空");

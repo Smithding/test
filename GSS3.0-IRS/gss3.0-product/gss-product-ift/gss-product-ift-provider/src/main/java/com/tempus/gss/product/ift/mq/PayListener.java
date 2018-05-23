@@ -58,7 +58,6 @@ public class PayListener {
 					boolean flag = changeService
 							.updateBuyChangeStatus(new RequestWithActor<>(agent, payNoticeVO.getBusinessNo()));
 					logger.info("修改采购变更单操作是否成功,销售变更单号:" + payNoticeVO.getBusinessNo() + "->" + flag);
-
 				}
 			}
 

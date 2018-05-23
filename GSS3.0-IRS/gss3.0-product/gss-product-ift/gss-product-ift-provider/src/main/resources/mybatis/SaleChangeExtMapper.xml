@@ -62,6 +62,7 @@
         <result column="EXCHANGE_RATE" property="exchangeRate" jdbcType="DECIMAL"/>
          <!--操作人名-->
         <result column="LOGIN_NAME" property="handlers" jdbcType="VARCHAR"/>
+        <result column="OFFICE" property="office" jdbcType="VARCHAR"/>
         <!--一对多关联销售单明细-->
         <collection property="saleChangeDetailList" ofType="com.tempus.gss.product.ift.api.entity.SaleChangeDetail"
                     column="SALE_CHANGE_NO"
@@ -78,7 +79,7 @@
     <sql id="Base_Column_List">
         SALE_CHANGE_NO, ID, OWNER, REFUND_WAY,  MODIFIER, STATUS, MODIFY_TIME,
         VALID, CREATE_TIME, CREATOR, LOCKER, LOCK_TIME, CHANGE_TYPE, CONTACT_NAME, CONTACT_MOBILE,
-        CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL,CUSTOMER_NO, 
+        CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL,CUSTOMER_NO,
     CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,CURRENCY,SALE_CURRENCY,EXCHANGE_RATE
     </sql>
 
@@ -271,7 +272,7 @@
         STATUS, MODIFY_TIME, VALID,
         CREATE_TIME, CREATOR, LOCKER,
         LOCK_TIME, CHANGE_TYPE, CONTACT_NAME,
-        CONTACT_MOBILE, CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL, 
+        CONTACT_MOBILE, CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL,
       	CUSTOMER_NO, CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK
         )
         values (#{saleChangeNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
@@ -752,7 +753,7 @@
     </select>
     <update id="updateAirlineStatus">
         update IFT_SALE_CHANGE_EXT
-        set 
+        set
         AIRLINE_STATUS =  #{airlineStatus,jdbcType=INTEGER}
         where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
     </update>

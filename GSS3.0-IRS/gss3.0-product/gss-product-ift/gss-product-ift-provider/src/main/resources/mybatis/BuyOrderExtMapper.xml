@@ -32,6 +32,7 @@
         <result column="SUPPLIER_NO" property="supplierNo" jdbcType="BIGINT" />
         <!-- 采购商备注 -->
         <result column="BUY_REMARKE" property="buyRemarke" jdbcType="CLOB" />
+        <result column="OFFICE" property="office" jdbcType="VARCHAR"/>
         <!--一对多关联采购单详情信息-->
         <collection property="buyOrderDetailList" ofType="com.tempus.gss.product.ift.api.entity.BuyOrderDetail"
                     column="BUY_ORDER_NO"

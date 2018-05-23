@@ -57,6 +57,7 @@
         <result column="EXCHANGE_RATE" property="exchangeRate" jdbcType="DECIMAL"/>
         <result column="DRAWER_LOGIN_NAME" property="drawerLoginName" jdbcType="VARCHAR"/>
         <result column="HANDLERS" property="handlers" jdbcType="VARCHAR"/>
+        <result column="OFFICE" property="office" jdbcType="VARCHAR"/>
         <association property="saleOrder" column="SALE_ORDER_NO"
                      select="com.tempus.gss.order.dao.SaleOrderMapper.selectByRecordNo"/>
         <!-- 一对一 PNR-->
