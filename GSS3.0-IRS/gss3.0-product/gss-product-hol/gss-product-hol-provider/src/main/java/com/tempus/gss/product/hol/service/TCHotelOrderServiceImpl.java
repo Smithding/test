@@ -447,6 +447,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            String requestText = null;
 	            String requestName = null;
 	            for (TravlePassengerInfo guest : orderCreateReq.getOrderPassengerDetails()) {
+	            	guest.setNationality("中国");
 	                if (guestName == null || "".equals(guestName)) {
 	                    guestName = guest.getName();
 	                } else {
