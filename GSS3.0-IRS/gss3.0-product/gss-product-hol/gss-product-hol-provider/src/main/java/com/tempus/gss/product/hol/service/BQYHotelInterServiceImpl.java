@@ -558,6 +558,14 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		List<HotelBrand> hotelbrandList = cityInfo.getHotelbrand();
 		for (HotelBrand hotelBrand : hotelbrandList) {
 			//hotelbrandSet.add(hotelBrand.getHotelBrandName());
+			String brandType = hotelBrand.getHotelBrandType();
+			if ("经济".equals(brandType.trim()) || "舒适".equals(brandType.trim())) {
+				hotelBrand.setHotelBrandType("1");
+			}else if ("高档".equals(brandType.trim())) {
+				hotelBrand.setHotelBrandType("2");
+			}else if ("豪华".equals(brandType.trim())) {
+				hotelBrand.setHotelBrandType("3");
+			}
 			hotelbrandSet.add(hotelBrand);
 		}
 		cityDetail.setHotelBrands(hotelbrandSet);
