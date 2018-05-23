@@ -598,32 +598,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         }
        
         ResBaseInfo resDetail =mongoTemplate1.findOne(new Query(Criteria.where("_id").is(resId)),ResBaseInfo.class);
-        Long checkTimes = 1L;
-        Integer saleStatus = 1;
-		Query query = Query.query(Criteria.where("_id").is(resId));
-		HotelName findOne = mongoTemplate1.findOne(query, HotelName.class);
-		if(StringUtil.isNotNullOrEmpty(findOne)){
-			if(StringUtil.isNotNullOrEmpty(findOne.getCheckTimes())){
-				checkTimes = findOne.getCheckTimes() + checkTimes;
-			}
-			findOne.setCheckTimes(checkTimes);
-			findOne.setSaleStatus(saleStatus);
-			mongoTemplate1.save(findOne, "hotelName");
-		}else{
-			HotelName HotelName=new HotelName();
-    		HotelName.setId(resDetail.getId());
-    		HotelName.setName(resDetail.getResName());
-    		HotelName.setCity(resDetail.getCityName());
-    		HotelName.setCheckTimes(checkTimes);
-    		HotelName.setSaleStatus(saleStatus);
-    		mongoTemplate1.save(HotelName, "hotelName");
-    		
-		}
+        List<ProInfoDetail> proInfoDetailList = mongoTemplate1.find(new Query(Criteria.where("resId").is(resId)),ProInfoDetail.class);
         try {
         	 if(StringUtil.isNotNullOrEmpty(resDetail) && StringUtil.isNotNullOrEmpty(resDetail.getProDetails())){
-             	List<String> strs  = Tool.intToTwoPower(resDetail.getCreditCards().intValue());
-             	resDetail.setCreditCardsTarget(strs);
-             	//Map<String, List<ResProBaseInfo>> proMap= resDetail.getProMap();
              	List<ProDetails> lii = resDetail.getProDetails();
              	if(StringUtil.isNotNullOrEmpty(lii)){
          			for(ProDetails ppp : lii){
@@ -639,105 +616,61 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
                    				 da.add(Calendar.DAY_OF_MONTH, i);
                    				 mapPro.put(sdf.format(da.getTime()), ProSaleInfoDetail);
                 				}
-     	            			ProInfoDetail proInfoDetail=queryListByProductUniqueId(pro.getProductUniqueId().longValue(), ProInfoDetail.class);
-     	            			if(StringUtil.isNotNullOrEmpty(proInfoDetail) && StringUtil.isNotNullOrEmpty(proInfoDetail.getProSaleInfoDetails())){
-     	            				if(proInfoDetail.getProSaleInfoDetails().containsKey(DateUtil.stringToLonString(startTime))){
-     	                				Integer firProPrice = proInfoDetail.getProSaleInfoDetails().get(DateUtil.stringToLonString(startTime)).getDistributionSalePrice();
-     	                				BigDecimal profitPrice = holProfitService.computeTcProfitPrice(agent, firProPrice, agent.getType());
-     	                				if(StringUtil.isNotNullOrEmpty(profitPrice)){
-     	                					pro.setRebateRateProfit(profitPrice);
-     	                				}
-     	                			}
-     	            				int kk = 0;
-     	    	        			for (Map.Entry<String, ProSaleInfoDetail> entry : proInfoDetail.getProSaleInfoDetails().entrySet()) {
-     	    	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(startTime);
-     	    	        				int endCompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(endTime);
-     	    	        					if(begincompare >= 0 && endCompare < 0){
-     	    	        						mapPro.put(DateUtil.stringToSimpleString(entry.getKey()), entry.getValue());
-     	    	        						Integer price= entry.getValue().getDistributionSalePrice();
-     	    	        						sumPrice += price;
-     	    	        						kk += 1;
-     	    	        					}
-     	            					}
-     	    	        				if(mapPro.size() >= 1){
-     	    	        					pro.setProSaleInfoDetailsTarget(mapPro);
-     	    	        					if(StringUtil.isNotNullOrEmpty(mapPro.get(startTime))){
-     	    	        						pro.setFirPrice(mapPro.get(startTime).getDistributionSalePrice());
-     	    	        					}
-     	    	        					if(kk != 0){
-        	    	        					pro.setConPrice(sumPrice/kk);
-        	    	        				}
-        	    	        				kk = 0;
-     	    	        				}else{
-     	    	        					pro.setFirPrice(987654321);
-     	    	        				}
-     	    	        				sumPrice =0;
-     	            				}else{
-     	         						pro.setFirPrice(987654321);
-     	         					}
-     	            				if(StringUtil.isNullOrEmpty(pro.getFirPrice()) || 0 == pro.getFirPrice()){
-     	            					pro.setFirPrice(987654321);
-     	            				}
+		                   			 if(StringUtil.isNotNullOrEmpty(proInfoDetailList)) {
+		                   				 for(ProInfoDetail proInfo : proInfoDetailList) {
+		                   			 		if(proInfo.getProductUniqueId().equals(pro.getProductUniqueId().longValue())) {
+		                   			 			TreeMap<String, ProSaleInfoDetail> proSaleInfoDetails = proInfo.getProSaleInfoDetails();
+		                   			 			if(StringUtil.isNotNullOrEmpty(proSaleInfoDetails)) {
+		                   			 				if(proSaleInfoDetails.containsKey(DateUtil.stringToLonString(startTime))) {
+		                   			 				Integer firProPrice = proSaleInfoDetails.get(DateUtil.stringToLonString(startTime)).getDistributionSalePrice();
+		         	                				BigDecimal profitPrice = holProfitService.computeTcProfitPrice(agent, firProPrice, agent.getType());
+			         	                				if(StringUtil.isNotNullOrEmpty(profitPrice)){
+			         	                					pro.setRebateRateProfit(profitPrice);
+			         	                				}
+		                   			 				}
+			                   			 			int kk = 0;
+			         	    	        			for (Map.Entry<String, ProSaleInfoDetail> entry : proSaleInfoDetails.entrySet()) {
+			         	    	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(startTime);
+			         	    	        				int endCompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(endTime);
+			         	    	        					if(begincompare >= 0 && endCompare < 0){
+			         	    	        						mapPro.put(DateUtil.stringToSimpleString(entry.getKey()), entry.getValue());
+			         	    	        						Integer price= entry.getValue().getDistributionSalePrice();
+			         	    	        						sumPrice += price;
+			         	    	        						kk += 1;
+			         	    	        					}
+			         	    	        					if(kk == days.intValue()) {
+		         	    	        							break;
+		         	    	        						}
+			         	            					}
+			         	    	        			if(mapPro.size() >= 1){
+			     	    	        					pro.setProSaleInfoDetailsTarget(mapPro);
+			     	    	        					if(StringUtil.isNotNullOrEmpty(mapPro.get(startTime))){
+			     	    	        						pro.setFirPrice(mapPro.get(startTime).getDistributionSalePrice());
+			     	    	        					}
+			     	    	        					if(kk != 0){
+			        	    	        					pro.setConPrice(sumPrice/kk);
+			        	    	        				}
+			        	    	        				kk = 0;
+			     	    	        				}else{
+			     	    	        					pro.setFirPrice(987654321);
+			     	    	        					pro.setConPrice(987654321);
+			     	    	        				}
+			     	    	        				sumPrice =0;
+		                   			 			}else {
+		                   			 				pro.setFirPrice(987654321);
+		                   			 				pro.setConPrice(987654321);
+		                   			 			}
+			                   			 		if(StringUtil.isNullOrEmpty(pro.getFirPrice()) || pro.getFirPrice().equals(0)){
+			     	            					pro.setFirPrice(987654321);
+			     	            					pro.setConPrice(987654321);
+			     	            				}
+		                   			 		}
+		                   			 	}
+		                   			 }
      		            		}
          					}
-	         				if(StringUtil.isNotNullOrEmpty(ppp.getResProBaseInfoList())){
-	         					if(StringUtil.isNotNullOrEmpty(ppp.getResProBaseInfoList().get(0))){
-	            					if(StringUtil.isNotNullOrEmpty(ppp.getResProBaseInfoList().get(0).getFirPrice())){
-	            						ppp.setProDetailConPrice(ppp.getResProBaseInfoList().get(0).getFirPrice());
-	            					}else{
-	            						ppp.setProDetailConPrice(987654321);
-	            					}
-	            				}else{
-	            					ppp.setProDetailConPrice(987654321);
-	            				}
-	         				}else{
-	         					ppp.setProDetailConPrice(987654321);
-	         				}
          				}
-         				resDetail.setProDetails(lii);
              		}
-    					if(StringUtil.isNotNullOrEmpty(resDetail)){
-    						List<ProDetails> proDetails = resDetail.getProDetails();
-    						if(proDetails.size() >= 2){
-    							Collections.sort(proDetails, new Comparator<ProDetails>() {
-    								@Override
-    								public int compare(ProDetails o1, ProDetails o2) {
-    									if(StringUtil.isNotNullOrEmpty(o1.getProDetailConPrice()) && StringUtil.isNotNullOrEmpty(o2.getProDetailConPrice())){
-    										if(o1.getProDetailConPrice() > o2.getProDetailConPrice()){
-    											return 1;
-    										}else if(o1.getProDetailConPrice() < o2.getProDetailConPrice()){
-    											return -1;
-    										}
-    										else{
-    											return 0;
-    										}
-    									}
-    										return 0;
-    								}
-    							});
-    						}
-    						for(ProDetails pros :proDetails){
-    							List<ResProBaseInfo> resProBaseInfoList = pros.getResProBaseInfoList();
-    							if(resProBaseInfoList.size() >= 2){
-    								Collections.sort(resProBaseInfoList, new Comparator<ResProBaseInfo>() {
-    									@Override
-    									public int compare(ResProBaseInfo o1, ResProBaseInfo o2) {
-    										if(StringUtil.isNotNullOrEmpty(o1.getFirPrice()) && StringUtil.isNotNullOrEmpty(o2.getFirPrice())){
-    											if(o1.getFirPrice() > o2.getFirPrice()){
-    												return 1;
-    											}else if(o1.getFirPrice() < o2.getFirPrice()){
-    												return -1;
-    											}
-    											else{
-    												return 0;
-    											}
-    										}
-    											return 0;
-    									}
-    								});
-    							}
-    						}
-    					}
              	}else{
              		throw new GSSException("查询某一酒店详情出错", "0130", "酒店信息为空");
              	}
