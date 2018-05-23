@@ -1028,6 +1028,13 @@ public class OrderServiceImpl implements IOrderService {
         Date date = new Date();
         try {
             PassengerListVo listVo = requestWithActor.getEntity();
+            
+            //判断资金帐号提前至此
+            Account account = accountService.getAccountByAccountNo(agent, listVo.getAccountNo());
+            if (account == null) {
+            	throw new GSSException("创建采购付款单失败", "0102", "资金帐号未能查出相应数据!account为空！accountNo=" + listVo.getAccountNo());
+            }
+            
             Long saleOrderNo = listVo.getpVoList().get(0).getSaleOrderNo();
             SaleOrderExt saleOrderExt = null;
             saleOrderExt = saleOrderExtDao.selectByPrimaryKey(saleOrderNo);
@@ -1088,6 +1095,7 @@ public class OrderServiceImpl implements IOrderService {
             Long preLocker = saleOrderExt.getLocker();
             saleOrderExt.setLocker(0L);
             // 修改采购单信息
+            //TODO
             updateBuyOrder(agent, saleOrderNo, payable, listVo, ticketNoArray.toString());
             // 更改主订单状态
             saleOrderService.updateStatus(agent, saleOrderNo, 4);// 将状态改为已出票
