@@ -1033,7 +1033,7 @@ public class OrderServiceImpl implements IOrderService {
             //判断资金帐号提前至此
             Account account = accountService.getAccountByAccountNo(agent, listVo.getAccountNo());
             if (account == null) {
-            	throw new GSSException("创建采购付款单失败", "0102", "资金帐号未能查出相应数据!account为空！accountNo=" + listVo.getAccountNo());
+                throw new GSSException("创建采购付款单失败", "0102", "资金帐号未能查出相应数据!account为空！accountNo=" + listVo.getAccountNo());
             }
             
             Long saleOrderNo = listVo.getpVoList().get(0).getSaleOrderNo();
@@ -1101,8 +1101,10 @@ public class OrderServiceImpl implements IOrderService {
             //TODO
             updateBuyOrder(agent, saleOrderNo, payable, listVo, ticketNoArray.toString());
             // 更改主订单状态
+            int result = 0;
             saleOrderService.updateStatus(agent, saleOrderNo, 4);// 将状态改为已出票
-            saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
+            result = saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
+            log.info("saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt):result={}", result);
             String logstr = "";
             SaleOrder saleOrder = saleOrderExt.getSaleOrder();
             Long transationOrderNo = null;
