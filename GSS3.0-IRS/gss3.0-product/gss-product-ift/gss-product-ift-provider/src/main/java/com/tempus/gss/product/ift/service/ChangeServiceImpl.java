@@ -101,7 +101,6 @@ public class ChangeServiceImpl implements IChangeService {
     @Transactional
     public SaleChangeExt apiCreateChange(RequestWithActor<ChangeCreateVo> requestWithActor) {
         log.info("申请改签单开始=========");
-        SaleChangeExt saleChangeExt = new SaleChangeExt();
         if (requestWithActor.getEntity().getSaleOrderNo() == null || requestWithActor.getEntity().getSaleOrderNo() == 0) {
             log.error("需要改签的销售单编号为空");
             throw new GSSException("需要改签的销售单编号为空", "0001", "创建改签单失败");
@@ -135,6 +134,7 @@ public class ChangeServiceImpl implements IChangeService {
             log.error("改签原因为空");
             throw new GSSException("改签原因为空", "0008", "创建改签单失败");
         }
+        SaleChangeExt saleChangeExt = new SaleChangeExt();
         try {
             Long businessSignNo = IdWorker.getId();
             Agent agent = requestWithActor.getAgent();
