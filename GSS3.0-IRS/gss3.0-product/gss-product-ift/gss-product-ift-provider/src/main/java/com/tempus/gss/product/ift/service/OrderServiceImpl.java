@@ -221,7 +221,7 @@ public class OrderServiceImpl implements IOrderService {
             return;
         }
         log.info("第二步：查询在线出票员...");
-        List<TicketSender> senders = getOnlineTicketSender();
+        List<TicketSender> senders = getOnlineTicketSender("'both','ticketSender'");
         log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
             Agent agent = new Agent(Integer.valueOf(owner));
@@ -276,7 +276,7 @@ public class OrderServiceImpl implements IOrderService {
             return;
         }
         log.info("第二步：查询在线出票员...");
-        List<TicketSender> senders = getOnlineTicketSender();
+        List<TicketSender> senders = getOnlineTicketSender("'both','ticketSender'");
         log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
             Agent agent = new Agent(Integer.valueOf(owner));
@@ -1793,7 +1793,7 @@ public class OrderServiceImpl implements IOrderService {
             return;
         }
         log.info("第二步：查询在线出票员...");
-        List<TicketSender> senders = getOnlineTicketSender();
+        List<TicketSender> senders = getOnlineTicketSender("'both','ticketSender'");
         log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
             Agent agent = new Agent(Integer.valueOf(owner));
@@ -2781,10 +2781,10 @@ public class OrderServiceImpl implements IOrderService {
         return saleOrderExtList;
     }
     
-    private List<TicketSender> getOnlineTicketSender() {
+    private List<TicketSender> getOnlineTicketSender(String type) {
         TicketSenderVo ticketSenderVo = new TicketSenderVo();
         ticketSenderVo.setStatus(3);//只给在线用户分单
-        ticketSenderVo.setTypes("'both','ticketSender'");//只给出票员分单   只分在线即可
+        ticketSenderVo.setTypes(type);//只给出票员分单   只分在线即可
         List<TicketSender> ticketSenderList = iTicketSenderService.queryByBean(ticketSenderVo);
         return ticketSenderList;
     }
