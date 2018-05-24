@@ -2784,7 +2784,7 @@ public class OrderServiceImpl implements IOrderService {
     private List<TicketSender> getOnlineTicketSender() {
         TicketSenderVo ticketSenderVo = new TicketSenderVo();
         ticketSenderVo.setStatus(3);//只给在线用户分单
-        //ticketSenderVo.setTypes("'both','ticketSender'");//只给出票员分单   只分在线即可
+        ticketSenderVo.setTypes("'both','ticketSender'");//只给出票员分单   只分在线即可
         List<TicketSender> ticketSenderList = iTicketSenderService.queryByBean(ticketSenderVo);
         return ticketSenderList;
     }
