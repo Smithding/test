@@ -88,8 +88,8 @@
     <result column="CUSTOMER_NAME" property="customerName" jdbcType="VARCHAR" />
      <!--客户类型-->
     <result column="CUSTOMER_TYPE_NAME" property="customerType" jdbcType="VARCHAR" />
-         <!--客户类型-->
-    <result column="CUSTOMER_TYPE_NAME" property="customerType" jdbcType="VARCHAR" />
+    <!--客户类型-->
+    <result column="INTERNAT_ORCIVIL" property="internatOrcivil" jdbcType="INTEGER" />
     <!--订票员-->
     <result column="BOOKING_CLERK" property="bookingClerk" jdbcType="VARCHAR" />
     <!-- 一对一 保险产品-->
@@ -150,6 +150,7 @@
 	    isoe.CREATOR,
 	    isoe.MODIFIER,
         isoe.VALID,
+        isoe.INTERNAT_ORCIVIL,
 	    si.NAME,
 	    cc.NAME AS CUSTOMER_NAME,
 	    cct.NAME AS CUSTOMER_TYPE_NAME,

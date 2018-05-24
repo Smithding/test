@@ -51,7 +51,11 @@ public class SaleOrderExtVo implements Serializable {
 	/** 客户类型 */
 	@JsonSerialize(using = LongSerializer.class)
 	private Long customerTypeNo;
-
+	/**
+	 * office
+	 */
+	private String office;
+	
 	/** 客户编号 */
 	@JsonSerialize(using = LongSerializer.class)
 	private Long customerNo;
@@ -333,7 +337,7 @@ public class SaleOrderExtVo implements Serializable {
 	private String policyType;
 	
 	/**
-	 * 
+	 *
 	 */
 	@JsonSerialize(using = LongSerializer.class)
 	private Long agentId;
@@ -1241,7 +1245,15 @@ public class SaleOrderExtVo implements Serializable {
 	public void setOriginalOrderNo(Long originalOrderNo) {
 		this.originalOrderNo = originalOrderNo;
 	}
-
+	
+	public String getOffice() {
+		return office;
+	}
+	
+	public void setOffice(String office) {
+		this.office = office;
+	}
+	
 	@Override
 	public String toString() {
 		return "SaleOrderExtVo{" +

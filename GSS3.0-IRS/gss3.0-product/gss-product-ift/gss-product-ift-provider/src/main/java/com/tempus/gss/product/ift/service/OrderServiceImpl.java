@@ -362,7 +362,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         Long saleOrderNo = maxNoService.generateBizNo("IFT_SALE_ORDER_NO", 37);
         Long businessSignNo = IdWorker.getId();
-        List<Passenger> passengers =saleOrderExt.getPassengerList();
+        List<Passenger> passengers = saleOrderExt.getPassengerList();
         try {
             Agent agent = requestWithActor.getAgent();
             Date today = new Date();
@@ -640,7 +640,7 @@ public class OrderServiceImpl implements IOrderService {
             logRecord.setBizNo(String.valueOf(saleOrderExt.getEntity().getSaleOrderNo()));
             logService.insert(logRecord);
         } catch (Exception e) {
-            log.error("添加操作日志异常===" , e);
+            log.error("添加操作日志异常===", e);
         }
         return flag;
     }
@@ -746,8 +746,8 @@ public class OrderServiceImpl implements IOrderService {
                     tempList.add(order);
                 }
             }*/
-           // long objectTime = System.currentTimeMillis();
-           // log.info("封装订单接口结束=====" + (objectTime - endTime));
+            // long objectTime = System.currentTimeMillis();
+            // log.info("封装订单接口结束=====" + (objectTime - endTime));
             page.setRecords(saleOrderExtList);
             
             log.info("查询订单模块（为运营平台订单管理提供服务）结束");
@@ -1015,7 +1015,8 @@ public class OrderServiceImpl implements IOrderService {
      * @param requestWithActor
      * @return
      */
-    @Transactional(rollbackFor = Exception.class)
+    @Override
+    @Transactional
     public boolean issuing(RequestWithActor<PassengerListVo> requestWithActor) {
         
         Agent agent = requestWithActor.getAgent();
@@ -1028,7 +1029,15 @@ public class OrderServiceImpl implements IOrderService {
         Date date = new Date();
         try {
             PassengerListVo listVo = requestWithActor.getEntity();
+            
+            //判断资金帐号提前至此
+            Account account = accountService.getAccountByAccountNo(agent, listVo.getAccountNo());
+            if (account == null) {
+                throw new GSSException("创建采购付款单失败", "0102", "资金帐号未能查出相应数据!account为空！accountNo=" + listVo.getAccountNo());
+            }
+            
             Long saleOrderNo = listVo.getpVoList().get(0).getSaleOrderNo();
+            String office = listVo.getOffice();
             SaleOrderExt saleOrderExt = null;
             saleOrderExt = saleOrderExtDao.selectByPrimaryKey(saleOrderNo);
             Long pnrNo = null;
@@ -1043,6 +1052,7 @@ public class OrderServiceImpl implements IOrderService {
             if (pnrNo != null) {
                 saleOrderExt.setPnrNo(pnrNo);
             }
+            saleOrderExt.setOffice(office);
             saleOrderExt.setDrawerLoginName(agent.getAccount());
             saleOrderExt.setIssueTime(date);
             
@@ -1088,10 +1098,13 @@ public class OrderServiceImpl implements IOrderService {
             Long preLocker = saleOrderExt.getLocker();
             saleOrderExt.setLocker(0L);
             // 修改采购单信息
+            //TODO
             updateBuyOrder(agent, saleOrderNo, payable, listVo, ticketNoArray.toString());
             // 更改主订单状态
+            int result = 0;
             saleOrderService.updateStatus(agent, saleOrderNo, 4);// 将状态改为已出票
-            saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
+            result = saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
+            log.info("saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt):result={}", result);
             String logstr = "";
             SaleOrder saleOrder = saleOrderExt.getSaleOrder();
             Long transationOrderNo = null;
@@ -1106,7 +1119,7 @@ public class OrderServiceImpl implements IOrderService {
             saveLog(agent, saleOrderNo, logstr, transationOrderNo);
             log.info("出单操作成功");
             //销售员订单数量减一
-            subSaleOrderNum(agent,preLocker);
+            subSaleOrderNum(agent, preLocker);
         } catch (Exception e) {
             log.error("国际机票出票异常", e);
             throw new GSSException("国际机票出票异常", "0102", "出单操作失败!" + e);
@@ -1199,9 +1212,9 @@ public class OrderServiceImpl implements IOrderService {
         String remark = refuseRequest.getEntity().getRemark();
         //杂费单特殊处理
         SaleOrder saleOrder = null;
-        if(StringUtils.isNotBlank(refuseRequest.getEntity().getChildStatus())){
+        if (StringUtils.isNotBlank(refuseRequest.getEntity().getChildStatus())) {
             saleOrder = saleOrderService.updateStatus(refuseRequest.getAgent(), saleOrderNo, 14);// 销售单改为已拒单
-        }else{
+        } else {
             saleOrder = saleOrderService.updateStatus(refuseRequest.getAgent(), saleOrderNo, 5);// 销售单改为已取消
         }
         List<SaleOrderDetail> saleOrderDetailList = saleOrderDetailDao.selectBySaleOrderNo(saleOrderNo);
@@ -1254,6 +1267,7 @@ public class OrderServiceImpl implements IOrderService {
      *
      * @return
      */
+    @Override
     public boolean saleRefund(Agent agent, Long saleOrderNo) throws GSSException {
         if (agent == null) {
             log.error("agent 为空");
@@ -1744,7 +1758,7 @@ public class OrderServiceImpl implements IOrderService {
             insetPnr.setStatus("1");
             pnrDao.insertSelective(insetPnr);
         } catch (Exception e) {
-            log.info("保存PNR，e=" , e);
+            log.info("保存PNR，e=", e);
         }
         return false;
     }
@@ -2731,7 +2745,7 @@ public class OrderServiceImpl implements IOrderService {
         iTicketSenderService.update(sender);
     }
     
-    private void subSaleOrderNum(Agent agent,Long locker) {
+    private void subSaleOrderNum(Agent agent, Long locker) {
         try {
             User user = userService.selectById(agent, locker);
             if (user != null) {

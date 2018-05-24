@@ -76,7 +76,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
     HotelOrderMapper hotelOrderMapper;
 	
 	@Autowired
-	MongoTemplate mongoTemplate;
+	MongoTemplate mongoTemplate1;
 	
 	@Reference
 	ITCHotelSupplierService hotelFind;
@@ -143,7 +143,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 		        	String updateTime = sdfupdate.format(new Date());
 		        	Query query = Query.query(Criteria.where("_id").is(Long.valueOf(singleHotelDetailReq.getResId())));
 		        	Update update = Update.update("saleStatus", saleStatus).set("latestUpdateTime", updateTime);
-		        	mongoTemplate.upsert(query, update, ResBaseInfo.class);
+		        	mongoTemplate1.upsert(query, update, ResBaseInfo.class);
 		        	log.error("酒店详情请求出错 "+result);
 					//throw new GSSException("获取酒店详情", "0111", "酒店详情请求出错,"+hotelDetail.getErr_msg());
 		        	return null;
@@ -267,7 +267,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 							pro.setId(pro.getProductUniqueId());
 							pro.setResId(assignDateHotel.getResId());
 							pro.setUpdateInvenTime(sdfupdate.format(new Date()));
-							mongoTemplate.save(pro, "proInfoDetail");
+							mongoTemplate1.save(pro, "proInfoDetail");
 						}
 					}
 			}
@@ -278,7 +278,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			logRecordHol.setTitle("更新酒店最新价格信息");
 			logRecordHol.setDesc("同步更新酒店价格库存失败,酒店ID为："+String.valueOf(resId));
 			logRecordHol.setResId(resId);
-			mongoTemplate.save(logRecordHol, "logRecordHol");
+			mongoTemplate1.save(logRecordHol, "logRecordHol");
 		}
 		return true;
 	}
@@ -319,7 +319,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 					}
 					Map<String, List<ResProBaseInfo>> proMap=new HashMap<String, List<ResProBaseInfo>>();
 					String key="";
-					List<ProInfoDetail> proInfoDetailList = mongoTemplate.find(new Query(Criteria.where("resId").is(resId)),ProInfoDetail.class);
+					List<ProInfoDetail> proInfoDetailList = mongoTemplate1.find(new Query(Criteria.where("resId").is(resId)),ProInfoDetail.class);
 					List<Integer> minProPrice=new ArrayList<Integer>();
 					Integer minPrice = 999999;
 					for(ResProBaseInfo proList: resProBaseInfoList){
@@ -381,7 +381,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 					Integer salaStatus = 1;
 					tcResBaseInfo.setSaleStatus(salaStatus);
 					tcResBaseInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
-					mongoTemplate.save(tcResBaseInfo,"resBaseInfo");
+					mongoTemplate1.save(tcResBaseInfo,"resBaseInfo");
 							
 				}
 			}
@@ -392,7 +392,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			logRecordHol.setTitle("更新酒店详细信息");
 			logRecordHol.setDesc("同步酒店信息失败,酒店ID为："+String.valueOf(resId));
 			logRecordHol.setResId(resId);
-			mongoTemplate.save(logRecordHol, "logRecordHol");
+			mongoTemplate1.save(logRecordHol, "logRecordHol");
 			//logger.error("同步酒店详情失败, 酒店ID为: "+resId+", "+e.getMessage());
 		}
 	}
@@ -455,7 +455,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 						List<String> strs  = Tool.intToTwoPower(resBaseInfoList.get(0).getCreditCards().intValue());
 						resBaseInfoList.get(0).setCreditCardsTarget(strs);
 						String updateTime = sdfupdate.format(new Date());
-						mongoTemplate.upsert(new Query(Criteria.where("_id").is(resId)), new Update().set("latestUpdateTime", updateTime), "resBaseInfo");
+						mongoTemplate1.upsert(new Query(Criteria.where("_id").is(resId)), new Update().set("latestUpdateTime", updateTime), "resBaseInfo");
 						return resBaseInfoList.get(0);
 			}
 		}
@@ -489,7 +489,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			assignDateHotelReq.setStartTime(calStartTime);
 			assignDateHotelReq.setEndTime(calEndTime);
 			AssignDateHotel assignDateHotel=  queryAssignDateHotel(assignDateHotelReq);
-			ProInfoDetail proinfo = mongoTemplate.findOne(new Query(Criteria.where("_id").is(productUniqueId)),ProInfoDetail.class);
+			ProInfoDetail proinfo = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(productUniqueId)),ProInfoDetail.class);
 			
 			if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(proinfo)){
 				List<ProInfoDetail> proInfoDetailList= assignDateHotel.getProInfoDetailList();
@@ -559,7 +559,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 							pro.setId(pro.getProductUniqueId());
 							pro.setResId(assignDateHotel.getResId());
 							pro.setUpdateInvenTime(sdfupdate.format(new Date()));
-							mongoTemplate.save(pro, "proInfoDetail");
+							mongoTemplate1.save(pro, "proInfoDetail");
 						}
 						log.info("库存插入成功");
 					}
@@ -572,7 +572,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			logRecordHol.setDesc("同步更新酒店政策价格失败,酒店ID为："+String.valueOf(resId));
 			logRecordHol.setResId(resId);
 			logRecordHol.setProductUniqueId(productUniqueId);
-			mongoTemplate.save(logRecordHol, "logRecordHol");
+			mongoTemplate1.save(logRecordHol, "logRecordHol");
 			//log.error("同步插入库存失败, 酒店ID为: "+resId+"政策ID为: "+productUniqueId);
 		}
 		return true;

@@ -122,8 +122,11 @@ public class BuyOrderExt implements Serializable {
 	 */
 	@Transient
 	private Long changeOrderNo;
-
-
+	/**
+	 * office
+	 */
+	private String office;
+	
 	private String  buyRemarke;
 
 	private static final long serialVersionUID = 1L;
@@ -132,7 +135,15 @@ public class BuyOrderExt implements Serializable {
 
 		return buyOrderNo;
 	}
-
+	
+	public String getOffice() {
+		return office;
+	}
+	
+	public void setOffice(String office) {
+		this.office = office;
+	}
+	
 	public void setBuyOrderNo(Long buyOrderNo) {
 
 		this.buyOrderNo = buyOrderNo;

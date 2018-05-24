@@ -3,11 +3,13 @@ package com.tempus.gss.product.ift.api.service;
 import java.util.List;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.BuyChangeExt;
 import com.tempus.gss.product.ift.api.entity.PassengerChangePrice;
 import com.tempus.gss.product.ift.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ift.api.entity.vo.*;
+import com.tempus.gss.vo.Agent;
 
 /**
  * 国际机票改签服务接口.
@@ -37,6 +39,41 @@ public interface IChangeService {
 	 * @return
 	 */
 	boolean verify(RequestWithActor<List<PassengerChangePrice>> passengerChangeList);
+
+	/**
+	 * 改签单打回退款创建应收应付
+	 *
+	 * @param passengerChangeList
+	 * @return
+	 */
+	boolean refundVerify(RequestWithActor<List<PassengerChangePrice>> passengerChangeList);
+
+	/**
+	 * 创建销售退款单
+	 * @param agent
+	 * @param saleChangeNo
+	 * @return
+	 * @throws GSSException
+	 */
+	boolean saleRefund(Agent agent, Long saleChangeNo) throws GSSException;
+
+	/**
+	 * 创建采购退款单
+	 * @param agent
+	 * @param saleChangeNo
+	 * @param saleOrderNo
+	 * @return
+	 * @throws GSSException
+	 */
+	boolean buyRefund(Agent agent, Long saleChangeNo,Long saleOrderNo) throws GSSException;
+
+	/**
+	 * 通过废退单编号获取销售废退单（包含saleChange）
+	 * @param requestWithActor  saleChangeNo
+	 * @return
+	 */
+	SaleChangeExt getSaleChangeExtByNo(RequestWithActor<Long> requestWithActor);
+
 	/**
 	 * 审核改签单.
 	 * @param requestWithActor

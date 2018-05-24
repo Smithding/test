@@ -184,7 +184,19 @@ public class SaleChangeExt implements Serializable {
 	private BigDecimal exchangeRate;
 	//操作人
 	private String handlers;
-
+	/**
+	 * office
+	 */
+	private String office;
+	
+	public String getOffice() {
+		return office;
+	}
+	
+	public void setOffice(String office) {
+		this.office = office;
+	}
+	
 	public String getHandlers() {
 		return handlers;
 	}

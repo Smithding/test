@@ -663,6 +663,10 @@ public class OrderServiceImpl implements IOrderService {
 				log.info("根据销售单编号查询保险订单结果为空");
 				throw new GSSException("根据销售单编号查询保险订单结果为空", "1010", "投保失败");
 			}
+			if(saleOrderExt.getSaleOrder().getPayStatus()==1||saleOrderExt.getSaleOrder().getPayStatus()==2){
+				log.info("保险投保支付状态为未支付或支付中，此时不能投保");
+				throw new GSSException("保险投保支付状态为未支付或支付中", "1010", "投保失败");
+			}
 			String sourceName = paramService.getValueByKey(INS_SOURCE_NAME);
 			saleOrderExt.setSourceName(sourceName);
 			Insurance insurance = saleOrderExt.getInsurance();
@@ -967,6 +971,10 @@ public class OrderServiceImpl implements IOrderService {
 				log.info("根据销售单编号查询保险订单结果为空");
 				throw new GSSException("根据销售单编号查询保险订单结果为空", "1010", "投保失败");
 			}
+			if(saleOrderExt.getSaleOrder().getPayStatus()==1||saleOrderExt.getSaleOrder().getPayStatus()==2){
+				log.info("保险投保支付状态为未支付或支付中，此时不能投保");
+				throw new GSSException("保险投保支付状态为未支付或支付中", "1010", "投保失败");
+			}
 			String sourceName = paramService.getValueByKey(INS_SOURCE_NAME);
 			saleOrderExt.setSourceName(sourceName);
 			Insurance insurance = saleOrderExt.getInsurance();
@@ -1112,6 +1120,10 @@ public class OrderServiceImpl implements IOrderService {
 			if (saleOrderExt == null) {
 				log.info("根据销售单编号查询保险订单结果为空");
 				throw new GSSException("根据销售单编号查询保险订单结果为空", "1010", "投保失败");
+			}
+			if(saleOrderExt.getSaleOrder().getPayStatus()==1||saleOrderExt.getSaleOrder().getPayStatus()==2){
+				log.info("保险投保支付状态为未支付或支付中，此时不能投保");
+				throw new GSSException("保险投保支付状态为未支付或支付中", "1010", "投保失败");
 			}
 			String sourceName = paramService.getValueByKey(INS_SOURCE_NAME);
 			saleOrderExt.setSourceName(sourceName);
