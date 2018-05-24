@@ -462,7 +462,7 @@
             CREATOR        = #{creator,jdbcType=VARCHAR},
             ISSUE_TIME     = #{issueTime,jdbcType=TIMESTAMP},
             MODIFIER       = #{modifier,jdbcType=VARCHAR},
-            OFFICE         = #{OFFICE,jdbcType=VARCHAR}
+            OFFICE         = #{office,jdbcType=VARCHAR}
         WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
     </update>
     <select id="queryByPnrNoAndTime" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.QueryPnrAndTimeVo">
@@ -568,92 +568,32 @@
             f.VALID = 1 and
             <if test="bookStartDate != null and bookStartDate !=''">
                 <![CDATA[
-
-
-
-
-
                   DATE_FORMAT(o.ORDERING_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{bookStartDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
-
-
-
-
                 ]]>
             </if>
             <if test="bookEndDate !=null and bookEndDate !=''">
                 <![CDATA[
-
-
-
-
-
                   DATE_FORMAT(o.ORDERING_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{bookEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
-
-
-
-
                 ]]>
             </if>
             <if test="flyStartDate != null and flyStartDate !=''">
                 <![CDATA[
-
-
-
-
-
                   DATE_FORMAT(l.DEP_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{flyStartDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
-
-
-
-
                 ]]>
             </if>
             <if test="flyStartEndDate !=null and flyStartEndDate !=''">
                 <![CDATA[
-
-
-
-
-
                   DATE_FORMAT(l.DEP_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{flyStartEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
-
-
-
-
                 ]]>
             </if>
             <if test="flyEndDate != null and flyEndDate !=''">
                 <![CDATA[
-
-
-
-
-
                   DATE_FORMAT(l.ARR_TIME , '%Y-%m-%d') >= DATE_FORMAT(#{flyEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
-
-
-
-
                 ]]>
             </if>
             <if test=" flyEndArrDate !=null and flyEndArrDate !='' ">
                 <![CDATA[
-
-
-
-
-
                   DATE_FORMAT(l.ARR_TIME , '%Y-%m-%d')<= DATE_FORMAT(#{flyEndArrDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
-
-
-
-
                 ]]>
             </if>
             <if test="customerType != null and customerType !='' ">
@@ -850,92 +790,32 @@
             (SELECT ls.ORDER_NO FROM LS_DELIVERY_BATCH_OS ls) AND f.VALID = 1 AND
             <if test="bookStartDate != null and bookStartDate !=''">
                 <![CDATA[
-
-
-
-
-
                   DATE_FORMAT(o.ORDERING_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{bookStartDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
-
-
-
-
                 ]]>
             </if>
             <if test="bookEndDate !=null and bookEndDate !=''">
                 <![CDATA[
-
-
-
-
-
                   DATE_FORMAT(o.ORDERING_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{bookEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
-
-
-
-
                 ]]>
             </if>
             <if test="flyStartDate != null and flyStartDate !=''">
                 <![CDATA[
-
-
-
-
-
                   DATE_FORMAT(l.DEP_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{flyStartDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
-
-
-
-
                 ]]>
             </if>
             <if test="flyStartEndDate !=null and flyStartEndDate !=''">
                 <![CDATA[
-
-
-
-
-
                   DATE_FORMAT(l.DEP_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{flyStartEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
-
-
-
-
                 ]]>
             </if>
             <if test="flyEndDate != null and flyEndDate !=''">
                 <![CDATA[
-
-
-
-
-
                   DATE_FORMAT(l.ARR_TIME , '%Y-%m-%d') >= DATE_FORMAT(#{flyEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
-
-
-
-
                 ]]>
             </if>
             <if test=" flyEndArrDate !=null and flyEndArrDate !='' ">
                 <![CDATA[
-
-
-
-
-
-                  DATE_FORMAT(l.ARR_TIME , '%Y-%m-%d')<= DATE_FORMAT(#{flyEndArrDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
-
-
-
-
+                 DATE_FORMAT(l.ARR_TIME , '%Y-%m-%d')<= DATE_FORMAT(#{flyEndArrDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
                 ]]>
             </if>
             <if test="customerType != null and customerType !='' ">
