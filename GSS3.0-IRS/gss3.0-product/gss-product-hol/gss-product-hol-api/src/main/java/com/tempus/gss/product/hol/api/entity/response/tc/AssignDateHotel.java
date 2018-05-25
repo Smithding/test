@@ -13,6 +13,11 @@ import com.alibaba.fastjson.annotation.JSONField;
 public class AssignDateHotel implements Serializable{
 	private static final long serialVersionUID = 1L;
 	/**
+	 * 主键ID同酒店id
+	 */
+	@JSONField(name = "Id")
+	private Long id;
+	/**
 	 * 酒店 Id
 	 */
 	@JSONField(name = "ResId")
@@ -34,5 +39,11 @@ public class AssignDateHotel implements Serializable{
 	}
 	public void setProInfoDetailList(List<ProInfoDetail> proInfoDetailList) {
 		this.proInfoDetailList = proInfoDetailList;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

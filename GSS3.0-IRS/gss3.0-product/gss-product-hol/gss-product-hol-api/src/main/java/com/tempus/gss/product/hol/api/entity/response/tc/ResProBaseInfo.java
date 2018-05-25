@@ -73,7 +73,7 @@ public class ResProBaseInfo implements Serializable{
 	 * 销售策略 Id
 	 */
 	@JSONField(name = "ProductUniqueId")
-	private Integer productUniqueId;
+	private String productUniqueId;
 	/**
 	 * 客房特点等信息：外宾专用等
 	 */
@@ -203,7 +203,7 @@ public class ResProBaseInfo implements Serializable{
 	
 	private Integer saleStatus = 1;
 	
-	private Integer bookStatus;
+	private Integer bookStatus = 1;
 	
 	public Long getResId() {
 		return resId;
@@ -271,10 +271,10 @@ public class ResProBaseInfo implements Serializable{
 	public void setRemark(String remark) {
 		this.remark = remark;
 	}
-	public Integer getProductUniqueId() {
+	public String getProductUniqueId() {
 		return productUniqueId;
 	}
-	public void setProductUniqueId(Integer productUniqueId) {
+	public void setProductUniqueId(String productUniqueId) {
 		this.productUniqueId = productUniqueId;
 	}
 	public String getRoomFeature() {

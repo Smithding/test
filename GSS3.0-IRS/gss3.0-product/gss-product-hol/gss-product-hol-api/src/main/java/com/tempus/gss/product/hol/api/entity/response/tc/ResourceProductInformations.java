@@ -20,7 +20,7 @@ public class ResourceProductInformations implements Serializable{
 	 * 销售策略 Id
 	 */
 	@JSONField(name = "ProductUniqueId")
-	private Long productUniqueId;
+	private String productUniqueId;
 	/**
 	 * 价 格 计 划 id （ 新 增 参 数 ， 一 个RatePlanId 对应多个 ProductUniqueId）
 	 */
@@ -33,10 +33,11 @@ public class ResourceProductInformations implements Serializable{
 	public void setResourceProductId(Long resourceProductId) {
 		this.resourceProductId = resourceProductId;
 	}
-	public Long getProductUniqueId() {
+	
+	public String getProductUniqueId() {
 		return productUniqueId;
 	}
-	public void setProductUniqueId(Long productUniqueId) {
+	public void setProductUniqueId(String productUniqueId) {
 		this.productUniqueId = productUniqueId;
 	}
 	public Long getRatePlanId() {

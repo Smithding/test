@@ -19,19 +19,20 @@ public class ResourceProductInfo implements Serializable{
 	 * 销售策略 Id
 	 */
 	@JSONField(name = "ProductUniqueId")
-	private Long productUniqueId;
+	private String productUniqueId;
 	public Long getResourceProductId() {
 		return resourceProductId;
 	}
 	public void setResourceProductId(Long resourceProductId) {
 		this.resourceProductId = resourceProductId;
 	}
-	public Long getProductUniqueId() {
+	public String getProductUniqueId() {
 		return productUniqueId;
 	}
-	public void setProductUniqueId(Long productUniqueId) {
+	public void setProductUniqueId(String productUniqueId) {
 		this.productUniqueId = productUniqueId;
 	}
+	
 	
 	
 	

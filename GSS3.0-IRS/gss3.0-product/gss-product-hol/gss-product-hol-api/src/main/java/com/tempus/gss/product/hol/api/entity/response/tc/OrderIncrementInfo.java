@@ -21,7 +21,7 @@ public class OrderIncrementInfo implements Serializable{
 	 *  1：OrderFlagChange订单状态变化
 	 */
 	@JSONField(name = "IncrementType")
-	private Integer incrementType;
+	private String incrementType;
 	/**
 	 * 变化时间
 	 */
@@ -38,7 +38,7 @@ public class OrderIncrementInfo implements Serializable{
 	 * 6：OrderCreate 订单创建
 	 */
 	@JSONField(name = "IncrementReason")
-	private Integer incrementReason;
+	private String incrementReason;
 	/**
 	 * 订单状态
 	 * 0：WaitInventoryConfirm 待确认库存
@@ -54,36 +54,35 @@ public class OrderIncrementInfo implements Serializable{
 	 * 35：Finished 已结算
 	 */
 	@JSONField(name = "OrderFlag")
-	private Integer orderFlag;
+	private String orderFlag;
 	public String getOrderId() {
 		return orderId;
 	}
 	public void setOrderId(String orderId) {
 		this.orderId = orderId;
 	}
-	public Integer getIncrementType() {
+	public String getIncrementType() {
 		return incrementType;
 	}
-	public void setIncrementType(Integer incrementType) {
+	public void setIncrementType(String incrementType) {
 		this.incrementType = incrementType;
 	}
 	public String getIncrementDate() {
 		return incrementDate;
 	}
 	public void setIncrementDate(String incrementDate) {
-		incrementDate= DateUtil.stringToStrDate(incrementDate);
 		this.incrementDate = incrementDate;
 	}
-	public Integer getIncrementReason() {
+	public String getIncrementReason() {
 		return incrementReason;
 	}
-	public void setIncrementReason(Integer incrementReason) {
+	public void setIncrementReason(String incrementReason) {
 		this.incrementReason = incrementReason;
 	}
-	public Integer getOrderFlag() {
+	public String getOrderFlag() {
 		return orderFlag;
 	}
-	public void setOrderFlag(Integer orderFlag) {
+	public void setOrderFlag(String orderFlag) {
 		this.orderFlag = orderFlag;
 	}
 	

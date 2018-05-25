@@ -67,7 +67,15 @@ public enum TcOrderStatus implements Serializable{
 	/**
 	 * 订单结束
 	 */
-	ORDER_FINISH("40","订单结束");
+	ORDER_FINISH("40","订单结束"),
+	/**
+	 * 新单
+	 */
+	NEW_ORDER("45","新单"),
+	/**
+	 * 订单变更
+	 */
+	ORDER_CHANGED("50","订单变化");
 	
 	private String key;
 	private String value;
@@ -88,11 +96,11 @@ public enum TcOrderStatus implements Serializable{
 	public void setKey(String key) {
 		this.key = key;
 	}
-	 public static TcOrderStatus keyOf(int index)
+	 public static TcOrderStatus keyOf(String index)
 	    {
 	        for (TcOrderStatus key : values())
 	        {
-	            if (key.getKey().equals(String.valueOf(index)))
+	            if (key.getKey().equals(index))
 	            {
 	                return key;
 	            }

@@ -17,6 +17,11 @@ public class IncrOrderChangeInfo implements Serializable{
 	 */
 	@JSONField(name = "OrderIncrementList")
 	private List<OrderIncrementInfo> orderIncrementList;
+	/**
+	 * 最后的更新 id
+	 */
+	@JSONField(name = "EndIncrementId")
+	private Long endIncrementId;
 
 	public List<OrderIncrementInfo> getOrderIncrementList() {
 		return orderIncrementList;
@@ -25,5 +30,14 @@ public class IncrOrderChangeInfo implements Serializable{
 	public void setOrderIncrementList(List<OrderIncrementInfo> orderIncrementList) {
 		this.orderIncrementList = orderIncrementList;
 	}
+
+	public Long getEndIncrementId() {
+		return endIncrementId;
+	}
+
+	public void setEndIncrementId(Long endIncrementId) {
+		this.endIncrementId = endIncrementId;
+	}
+	
 	
 }

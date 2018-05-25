@@ -56,7 +56,7 @@ public class ResourceModel implements Serializable{
 	 * 销售策略 Id
 	 */
 	@JSONField(name = "ProductUniqueId")
-	private Integer productUniqueId;
+	private String productUniqueId;
 	/**
 	 * 供应商资源扩展信息，可存放供应商提供的资源额外非标准信息
 	 * （比如：携程的酒店基本信息）
@@ -142,11 +142,12 @@ public class ResourceModel implements Serializable{
 		this.remark = remark;
 	}
 
-	public Integer getProductUniqueId() {
+
+	public String getProductUniqueId() {
 		return productUniqueId;
 	}
 
-	public void setProductUniqueId(Integer productUniqueId) {
+	public void setProductUniqueId(String productUniqueId) {
 		this.productUniqueId = productUniqueId;
 	}
 

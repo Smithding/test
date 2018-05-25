@@ -9,23 +9,23 @@ import java.io.Serializable;
 public enum IncrementReason implements Serializable{
 	
 	
-	ORDER_CANCEL(0, "订单取消"),
+	ORDER_CANCEL("0", "订单取消"),
 	
-	INVENTORY_CONFIRM(1, "库存确认"),
+	INVENTORY_CONFIRM("1", "库存确认"),
 	
-	ORDER_PAY(2,"订单支付"),
+	ORDER_PAY("2","订单支付"),
 	
-	ORDER_CONFIRM(3, "订单库存确认"),
+	ORDER_CONFIRM("3", "订单库存确认"),
 	
-	ORDER_REFUND(4, "订单申请退款"),
+	ORDER_REFUND("4", "订单申请退款"),
 	
-	ORDER_REFUND_FINISH(5, "订单确认退款"),
+	ORDER_REFUND_FINISH("5", "订单确认退款"),
 	
-	ORDER_CREATE(6, "订单创建");
+	ORDER_CREATE("6", "订单创建");
 	
-	private Integer key;
+	private String key;
 	private String value;
-	private IncrementReason(Integer key,String value) {
+	private IncrementReason(String key,String value) {
         this.key=key;
         this.value=value;
     }
@@ -35,17 +35,17 @@ public enum IncrementReason implements Serializable{
 	public void setValue(String value) {
 		this.value = value;
 	}
-	public Integer getKey() {
+	public String getKey() {
 		return key;
 	}
-	public void setKey(Integer key) {
+	public void setKey(String key) {
 		this.key = key;
 	}
-	 public static IncrementReason keyOf(int index)
+	 public static IncrementReason keyOf(String index)
 	    {
 	        for (IncrementReason key : values())
 	        {
-	            if (key.getKey()==index)
+	            if (key.getKey().equals(index))
 	            {
 	                return key;
 	            }

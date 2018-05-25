@@ -16,7 +16,7 @@ public class ProInfoDetail implements Serializable{
 	 * 主键ID 同销售策略 Id
 	 */
 	@JSONField(name = "Id")
-	private Long id;
+	private String id;
 	
 	/**
 	 * 房型 Id 房型/票种标示 id
@@ -42,7 +42,7 @@ public class ProInfoDetail implements Serializable{
 	 * 销售策略 Id
 	 */
 	@JSONField(name = "ProductUniqueId")
-	private Long productUniqueId;
+	private String productUniqueId;
 	/**
 	 * 政策名称
 	 */
@@ -88,6 +88,18 @@ public class ProInfoDetail implements Serializable{
 	 */
 	private String updateInvenTime;
 	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
+	public String getProductUniqueId() {
+		return productUniqueId;
+	}
+	public void setProductUniqueId(String productUniqueId) {
+		this.productUniqueId = productUniqueId;
+	}
 	public String getProId() {
 		return proId;
 	}
@@ -112,12 +124,7 @@ public class ProInfoDetail implements Serializable{
 	public void setReserveTime(String reserveTime) {
 		this.reserveTime = reserveTime;
 	}
-	public Long getProductUniqueId() {
-		return productUniqueId;
-	}
-	public void setProductUniqueId(Long productUniqueId) {
-		this.productUniqueId = productUniqueId;
-	}
+	
 	public String getPolicyName() {
 		return policyName;
 	}
@@ -155,12 +162,7 @@ public class ProInfoDetail implements Serializable{
 	public void setUpdateInvenTime(String updateInvenTime) {
 		this.updateInvenTime = updateInvenTime;
 	}
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
+	
 	public CancelRulesStrictInfo getCancelRulesStrict() {
 		return cancelRulesStrict;
 	}
