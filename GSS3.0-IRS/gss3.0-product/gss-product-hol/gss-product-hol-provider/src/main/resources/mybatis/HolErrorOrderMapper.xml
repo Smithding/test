@@ -13,7 +13,7 @@
         <result column="GUEST_NAME" property="guestName" jdbcType="VARCHAR"/>
         <result column="CREATOR" property="creator" jdbcType="VARCHAR"/>
         <result column="CREATE_ORDER_TIME" property="createOrderTime" jdbcType="TIMESTAMP"/>
-        <result column="PRODUCT_UNIQUE_ID" property="productUniqueId" jdbcType="BIGINT"/>
+        <result column="PRODUCT_UNIQUE_ID" property="productUniqueId" jdbcType="VARCHAR"/>
         <result column="ORDER_STATUS" property="orderStatus" jdbcType="VARCHAR"/>
         <result column="MSG" property="msg" jdbcType="VARCHAR"/>
         <result column="OWNER" property="owner" jdbcType="INTEGER"/>
