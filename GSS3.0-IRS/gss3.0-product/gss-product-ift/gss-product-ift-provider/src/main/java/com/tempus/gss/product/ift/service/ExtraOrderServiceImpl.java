@@ -129,8 +129,8 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
     private void saveLog(Long orderNo,Date date){
         try {
             LogRecord logRecord = new LogRecord();
-            logRecord.setAppCode("UBP");
-            logRecord.setCreateTime(new Date());
+            logRecord.setAppCode("IFT");
+            logRecord.setCreateTime(date);
             logRecord.setTitle("国际杂费单");
             logRecord.setDesc("定时更新已支付杂费单状态");
             logRecord.setOptLoginName("sys");
