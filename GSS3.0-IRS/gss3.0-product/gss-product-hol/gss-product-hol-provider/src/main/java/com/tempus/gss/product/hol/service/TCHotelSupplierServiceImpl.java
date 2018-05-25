@@ -163,7 +163,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		return t;
 	}
 	@Override
-	public <T> T queryListByProductUniqueId(Long id, Class<T> clazz) {
+	public <T> T queryListByProductUniqueId(String id, Class<T> clazz) {
 		
 		T t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
 		
@@ -618,7 +618,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
                 				}
 		                   			 if(StringUtil.isNotNullOrEmpty(proInfoDetailList)) {
 		                   				 for(ProInfoDetail proInfo : proInfoDetailList) {
-		                   			 		if(proInfo.getProductUniqueId().equals(pro.getProductUniqueId().longValue())) {
+		                   			 		if(proInfo.getProductUniqueId().equals(pro.getProductUniqueId())) {
 		                   			 			TreeMap<String, ProSaleInfoDetail> proSaleInfoDetails = proInfo.getProSaleInfoDetails();
 		                   			 			if(StringUtil.isNotNullOrEmpty(proSaleInfoDetails)) {
 		                   			 				if(proSaleInfoDetails.containsKey(DateUtil.stringToLonString(startTime))) {
@@ -629,41 +629,52 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			         	                				}
 		                   			 				}
 			                   			 			int kk = 0;
+			                   			 			Integer firstPrice = 999999;
 			         	    	        			for (Map.Entry<String, ProSaleInfoDetail> entry : proSaleInfoDetails.entrySet()) {
 			         	    	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(startTime);
 			         	    	        				int endCompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(endTime);
 			         	    	        					if(begincompare >= 0 && endCompare < 0){
 			         	    	        						mapPro.put(DateUtil.stringToSimpleString(entry.getKey()), entry.getValue());
 			         	    	        						Integer price= entry.getValue().getDistributionSalePrice();
+			         	    	        						if(!entry.getValue().getInventoryStats().equals(4)) {
+			         	    	        							int startDate = DateUtil.stringToSimpleString(entry.getValue().getStartDate()).compareTo(startTime);
+			         	    	        							int endDate = DateUtil.stringToSimpleString(entry.getValue().getEndDate()).compareTo(endTime);
+			         	    	        							if(startDate > 0 && endDate < 0) {
+			         	    	        								pro.setBookStatus(0);
+			         	    	        							}
+			         	    	        						}
 			         	    	        						sumPrice += price;
 			         	    	        						kk += 1;
+			         	    	        						if(kk == 1) {
+			         	    	        							firstPrice = entry.getValue().getDistributionSalePrice();
+			         	    	        						}
 			         	    	        					}
 			         	    	        					if(kk == days.intValue()) {
 		         	    	        							break;
 		         	    	        						}
 			         	            					}
-			         	    	        			if(mapPro.size() >= 1){
 			     	    	        					pro.setProSaleInfoDetailsTarget(mapPro);
-			     	    	        					if(StringUtil.isNotNullOrEmpty(mapPro.get(startTime))){
+			     	    	        					pro.setFirPrice(firstPrice);
+			     	    	        					/*if(StringUtil.isNotNullOrEmpty(mapPro.get(startTime))){
 			     	    	        						pro.setFirPrice(mapPro.get(startTime).getDistributionSalePrice());
-			     	    	        					}
+			     	    	        					}*/
+			     	    	        					if(kk < days.intValue()) {
+			     	    	        						pro.setBookStatus(0);
+		        	    	        					}
 			     	    	        					if(kk != 0){
 			        	    	        					pro.setConPrice(sumPrice/kk);
 			        	    	        				}
 			        	    	        				kk = 0;
-			     	    	        				}else{
-			     	    	        					pro.setFirPrice(987654321);
-			     	    	        					pro.setConPrice(987654321);
-			     	    	        				}
-			     	    	        				sumPrice =0;
+			        	    	        				sumPrice =0;
 		                   			 			}else {
-		                   			 				pro.setFirPrice(987654321);
-		                   			 				pro.setConPrice(987654321);
+		                   			 				//pro.setFirPrice(987654321);
+		                   			 				//pro.setConPrice(987654321);
+		                   			 				pro.setBookStatus(0);
 		                   			 			}
-			                   			 		if(StringUtil.isNullOrEmpty(pro.getFirPrice()) || pro.getFirPrice().equals(0)){
+			                   			 		/*if(StringUtil.isNullOrEmpty(pro.getFirPrice()) || pro.getFirPrice().equals(0)){
 			     	            					pro.setFirPrice(987654321);
 			     	            					pro.setConPrice(987654321);
-			     	            				}
+			     	            				}*/
 		                   			 		}
 		                   			 	}
 		                   			 }
@@ -777,7 +788,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	}
 
 	@Override
-	public ResProBaseInfo queryInventPrice(Agent agent, Long productUniqueId, String startTime, String endTime) throws GSSException{
+	public ResProBaseInfo queryInventPrice(Agent agent, String productUniqueId, String startTime, String endTime) throws GSSException{
 		if (StringUtil.isNullOrEmpty(agent)) {
             log.error("agent对象为空");
             throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
