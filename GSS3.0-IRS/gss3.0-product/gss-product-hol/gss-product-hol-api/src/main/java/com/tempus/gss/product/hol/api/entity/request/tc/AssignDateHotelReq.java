@@ -45,7 +45,7 @@ public class AssignDateHotelReq implements Serializable{
 	 * 销售策略 Id(请求单个房型政策，需要填写)
 	 */
 	@JSONField(name = "ProductUniqueId")
-	private Long productUniqueId;
+	private String productUniqueId;
 	/**
 	 * 是否需要输出特殊策略的日期
 	 * 0:不输出
@@ -101,10 +101,10 @@ public class AssignDateHotelReq implements Serializable{
 	public void setEndTime(String endTime) {
 		this.endTime = endTime;
 	}
-	public Long getProductUniqueId() {
+	public String getProductUniqueId() {
 		return productUniqueId;
 	}
-	public void setProductUniqueId(Long productUniqueId) {
+	public void setProductUniqueId(String productUniqueId) {
 		this.productUniqueId = productUniqueId;
 	}
 	public Integer getNeedSpecialPolicy() {
