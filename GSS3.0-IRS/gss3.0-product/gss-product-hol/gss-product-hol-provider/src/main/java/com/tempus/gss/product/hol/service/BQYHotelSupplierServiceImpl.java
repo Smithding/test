@@ -248,7 +248,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 				             }
 						}
 						//房间ID
-						resProBaseInfo.setProductUniqueId(Integer.parseInt(roomInfo.getRoomID()));
+						resProBaseInfo.setProductUniqueId(roomInfo.getRoomID());
 						//TODO 	是否无烟
 						if (null != roomInfo.getSmokeInfo()) {
 			                  String hasRoomInNonSmokeArea = roomInfo.getSmokeInfo().getHasRoomInNonSmokeArea();
