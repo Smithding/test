@@ -1785,7 +1785,8 @@ public class OrderServiceImpl implements IOrderService {
     @Deprecated
     public void assign() {
         log.info("第一步：查询符合条件的出票订单...");
-        List<SaleOrderExt> saleOrderExtList = getAssignedOrders();
+        Integer[] createTypeStatusArray={1,2,3,4,6};
+        List<SaleOrderExt> saleOrderExtList = getAssignedOrders(createTypeStatusArray);
         if (saleOrderExtList != null && saleOrderExtList.size() > 0) {
             log.info("查询到" + saleOrderExtList.size() + "条可分配订单...");
         } else {
@@ -2771,12 +2772,13 @@ public class OrderServiceImpl implements IOrderService {
     }
     
     /** 获取可以出票的分配订单 */
-    private List<SaleOrderExt> getAssignedOrders() {
+    public List<SaleOrderExt> getAssignedOrders(Integer[] createTypeStatusArray) {
         SaleQueryOrderVo saleQueryOrderVo = new SaleQueryOrderVo();
         saleQueryOrderVo.setPayStatuss("3,4");
         saleQueryOrderVo.setValid((byte) 1);
         saleQueryOrderVo.setOrderStatus(2);
         saleQueryOrderVo.setLocker(0L);
+        saleQueryOrderVo.setCreateTypeStatusArray(createTypeStatusArray);
         List<SaleOrderExt> saleOrderExtList = saleOrderExtDao.queryAssignOrder(saleQueryOrderVo);
         return saleOrderExtList;
     }

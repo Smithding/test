@@ -300,5 +300,5 @@ public interface IOrderService {
 	 */
 	Page<SaleOrderExt> selectOutTicketOrder(Page<SaleOrderExt> page,RequestWithActor<SaleQueryOrderVo> saleOrderQueryRequest);
 
-	//void sendWebSocketInfoByMq(String msg);
+	public List<SaleOrderExt> getAssignedOrders(Integer[] createTypeArray);
 }

@@ -962,6 +962,14 @@
                     <otherwise>f.LOCKER = #{locker,jdbcType=BIGINT} AND</otherwise>
                 </choose>
             </if>
+            <if test="createTypeStatusArray!=null and createTypeStatusArray!='' ">
+                f.CREATE_TYPE in
+                <foreach collection="createTypeStatusArray" item="createTypeStatusArray"
+                         index="index" open="(" close=")" separator=",">
+                    #{createTypeStatusArray[${index}]}
+                </foreach>
+                AND
+            </if>
             <if test="orderStatus!=null">
                 d.STATUS = #{orderStatus,jdbcType=BIGINT} AND
             </if>
