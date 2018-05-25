@@ -168,8 +168,8 @@ public class HotelOrder implements Serializable {
     /**
 	 * 销售策略 Id
 	 */
-    @JsonSerialize(using = LongSerializer.class)
-	private Long productUniqueId;
+   // @JsonSerialize(using = LongSerializer.class)
+	private String productUniqueId;
 	/**
 	 * 预定份数
 	 */
@@ -543,11 +543,11 @@ public class HotelOrder implements Serializable {
         this.saleOrder = saleOrder;
     }
 
-	public Long getProductUniqueId() {
+	public String getProductUniqueId() {
 		return productUniqueId;
 	}
 
-	public void setProductUniqueId(Long productUniqueId) {
+	public void setProductUniqueId(String productUniqueId) {
 		this.productUniqueId = productUniqueId;
 	}
 
