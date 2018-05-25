@@ -49,8 +49,8 @@ public class HolErrorOrder implements Serializable {
 	/**
 	 * 销售策略 Id
 	 */
-    @JsonSerialize(using = LongSerializer.class)
-	private Long productUniqueId;
+   // @JsonSerialize(using = LongSerializer.class)
+	private String productUniqueId;
 	
 	/**
      * 入住人姓名
@@ -221,11 +221,12 @@ public class HolErrorOrder implements Serializable {
 		this.hotelCode = hotelCode;
 	}
 
-	public Long getProductUniqueId() {
+
+	public String getProductUniqueId() {
 		return productUniqueId;
 	}
 
-	public void setProductUniqueId(Long productUniqueId) {
+	public void setProductUniqueId(String productUniqueId) {
 		this.productUniqueId = productUniqueId;
 	}
 
