@@ -24,7 +24,7 @@
         <result column="CREATE_ORDER_TIME" property="createOrderTime" jdbcType="TIMESTAMP"/>
         <result column="MODIFIER" property="modifier" jdbcType="VARCHAR"/>
         <result column="MODIFY_TIME" property="modifyTime" jdbcType="TIMESTAMP"/>
-        <result column="PRODUCT_UNIQUE_ID" property="productUniqueId" jdbcType="BIGINT"/>
+        <result column="PRODUCT_UNIQUE_ID" property="productUniqueId" jdbcType="VARCHAR"/>
         <result column="BOOK_COUNT" property="bookCount" jdbcType="TINYINT"/>
         <result column="PAYMENT_SIGN" property="paymentSign" jdbcType="TINYINT"/>
         <result column="BANK_ID" property="bankId" jdbcType="BIGINT"/>
