@@ -41,7 +41,7 @@ public interface ITCHotelSupplierService {
 	 * @param clazz
 	 * @return
 	 */
-	public <T> T queryListByProductUniqueId(Long id, Class<T> clazz);
+	public <T> T queryListByProductUniqueId(String id, Class<T> clazz);
 	
 	
 	/**
@@ -114,7 +114,7 @@ public interface ITCHotelSupplierService {
 	 * 根据政策ID查询每日价格和总价平均价
 	 * @return
 	 */
-	public ResProBaseInfo queryInventPrice(Agent agent, Long productUniqueId, String startTime, String endTime) throws GSSException;
+	public ResProBaseInfo queryInventPrice(Agent agent, String productUniqueId, String startTime, String endTime) throws GSSException;
 	/**
 	 * 获取城市名模糊匹配列表
 	 * @param agent
