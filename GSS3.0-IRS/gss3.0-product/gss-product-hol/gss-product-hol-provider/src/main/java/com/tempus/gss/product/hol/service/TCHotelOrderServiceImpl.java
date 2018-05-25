@@ -354,7 +354,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			assignDateHotelReq.setNeedSpecialPolicy(1);
 			assignDateHotelReq.setSourceFrom("-1");
 			assignDateHotelReq.setProId(orderCreateReq.getProId());
-			assignDateHotelReq.setProductUniqueId(orderCreateReq.getProductUniqueId().longValue());
+			assignDateHotelReq.setProductUniqueId(orderCreateReq.getProductUniqueId());
 			Integer newInventoryRemainder = 0;
 			Integer newInventoryStats = 0;
 			Boolean newOpenSale=false;
@@ -493,7 +493,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            hotelOrder.setOrderStatus(OwnerOrderStatus.ORDER_ONGOING.getKey());
 	            hotelOrder.setCreator(agent.getAccount());
 	            hotelOrder.setCreateOrderTime(new Date());
-	            hotelOrder.setProductUniqueId(orderCreateReq.getProductUniqueId().longValue());
+	            hotelOrder.setProductUniqueId(orderCreateReq.getProductUniqueId());
 	            hotelOrder.setBookCount(orderCreateReq.getBookCount());
 	            hotelOrder.setPaymentSign(orderCreateReq.getPaymentSign());
 	            if(StringUtil.isNotNullOrEmpty(orderCreateReq.getBankId())){
@@ -1209,19 +1209,33 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	
 	@Override
 	public String incrOrderChangeInfo(Agent agent, IncrOrderChangeInfoReq incrOrderChangeInfoReq) throws GSSException{
-		List<HotelOrder> res = hotelOrderMapper.queryOrderByOrderResultCode("1");
+		//List<HotelOrder> res = hotelOrderMapper.queryOrderByOrderResultCode("1");
 		String reqJson = JSONObject.toJSONString(incrOrderChangeInfoReq);
 		String result= httpClientUtil.doTCJsonPost(ORDER_CHANGE_URL, reqJson);
-		HotelOrder hotelOrder = new HotelOrder();
+		//HotelOrder hotelOrder = new HotelOrder();
 		try {
 			if(StringUtil.isNotNullOrEmpty(result)){
-					//IncrOrderChangeInfoBase incr = JsonUtil.toBean(result, IncrOrderChangeInfoBase.class);
 					ResultTc<IncrOrderChangeInfo> incr= JsonUtil.toBean(result, new TypeReference<ResultTc<IncrOrderChangeInfo>>(){});
 					if(StringUtil.isNotNullOrEmpty(incr) && StringUtil.isNotNullOrEmpty(incr.getResult())){
 						List<OrderIncrementInfo> IncrOrderChangeInfoList = incr.getResult().getOrderIncrementList();
 						if(StringUtil.isNotNullOrEmpty(IncrOrderChangeInfoList)){
 							for(OrderIncrementInfo oii : IncrOrderChangeInfoList){
-								for(HotelOrder ho : res){
+								HotelOrder hotelOrder = hotelOrderMapper.getOrderByNo(oii.getOrderId());
+						        if(StringUtil.isNotNullOrEmpty(hotelOrder)) {
+						        	if(oii.getOrderFlag().equals(StatusType.ORDER_CONFIRM.getKey())) {
+						        		
+						        	}
+						        }
+								
+								
+								
+								
+								
+								
+								
+								
+								
+								/*for(HotelOrder ho : res){
 									if(oii.getOrderId().equals(ho.getHotelOrderNo())){
 										LogRecord LogRecord=new LogRecord();
 										LogRecord.setBizCode("HOL-Order");
@@ -1239,7 +1253,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 										hotelOrderMapper.updateById(hotelOrder); 
 										iLogService.insert(LogRecord);
 									}
-								}
+								}*/
 							}
 						}else{
 							throw new GSSException("增量获取酒店订单状态", "0111", "增量获取酒店订单状态空值");
@@ -1489,8 +1503,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								priceFraction = resourceModel.getPriceFraction();
 								String newRemark = resourceModel.getRemark();
 								newHotelOrder.setRemark(newRemark);
-								long productUniqueId = resourceModel.getProductUniqueId().longValue();
-								newHotelOrder.setProductUniqueId(Long.valueOf(productUniqueId));
+								String productUniqueId = resourceModel.getProductUniqueId();
+								newHotelOrder.setProductUniqueId(productUniqueId);
 								if(StringUtils.isNotEmpty(resourceModel.getSupplierConfirmNumber())){
 									newSupplierNo = resourceModel.getSupplierConfirmNumber();
 									newHotelOrder.setSupplierNumber(newSupplierNo);
@@ -1981,8 +1995,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							Integer priceFraction = 0;
 							if(StringUtil.isNotNullOrEmpty(orderInfoModel.getResources())){
 								priceFraction = orderInfoModel.getResources().get(0).getPriceFraction();
-								long longValue = orderInfoModel.getResources().get(0).getProductUniqueId().longValue();
-								hotelOrder.setProductUniqueId(Long.valueOf(longValue));
+								String longValue = orderInfoModel.getResources().get(0).getProductUniqueId();
+								hotelOrder.setProductUniqueId(longValue);
 								for(ResourceModel resource : orderInfoModel.getResources()){
 									if(StringUtils.isNotEmpty(resource.getSupplierConfirmNumber())){
 										hotelOrder.setSupplierNumber(resource.getSupplierConfirmNumber());
