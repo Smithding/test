@@ -26,7 +26,7 @@ public class IsBookOrderReq implements Serializable{
 	 * 政策 id
 	 */
 	@JSONField(name = "ProductUniqueId")
-	private Long productUniqueId;
+	private String productUniqueId;
 	/**
 	 * 入住日期
 	 */
@@ -90,10 +90,10 @@ public class IsBookOrderReq implements Serializable{
 	public void setProId(Long proId) {
 		this.proId = proId;
 	}
-	public Long getProductUniqueId() {
+	public String getProductUniqueId() {
 		return productUniqueId;
 	}
-	public void setProductUniqueId(Long productUniqueId) {
+	public void setProductUniqueId(String productUniqueId) {
 		this.productUniqueId = productUniqueId;
 	}
 	public String getComeDate() {

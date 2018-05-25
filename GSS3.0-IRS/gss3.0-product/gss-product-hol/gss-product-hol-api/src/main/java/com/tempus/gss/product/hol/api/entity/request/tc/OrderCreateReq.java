@@ -96,7 +96,7 @@ public class OrderCreateReq implements Serializable{
 	 * 销售策略 Id
 	 */
 	@JSONField(name = "ProductUniqueId")
-	private Integer productUniqueId;
+	private String productUniqueId;
 	/**
 	 * 联系人姓名
 	 */
@@ -318,10 +318,10 @@ public class OrderCreateReq implements Serializable{
 	public void setOrderRemark(String orderRemark) {
 		this.orderRemark = orderRemark;
 	}
-	public Integer getProductUniqueId() {
+	public String getProductUniqueId() {
 		return productUniqueId;
 	}
-	public void setProductUniqueId(Integer productUniqueId) {
+	public void setProductUniqueId(String productUniqueId) {
 		this.productUniqueId = productUniqueId;
 	}
 	public String getLinkManName() {
