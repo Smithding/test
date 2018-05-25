@@ -57,6 +57,7 @@
         <result column="EXCHANGE_RATE" property="exchangeRate" jdbcType="DECIMAL"/>
         <result column="DRAWER_LOGIN_NAME" property="drawerLoginName" jdbcType="VARCHAR"/>
         <result column="HANDLERS" property="handlers" jdbcType="VARCHAR"/>
+        <result column="OFFICE" property="office" jdbcType="VARCHAR"/>
         <association property="saleOrder" column="SALE_ORDER_NO"
                      select="com.tempus.gss.order.dao.SaleOrderMapper.selectByRecordNo"/>
         <!-- 一对一 PNR-->
@@ -112,32 +113,32 @@
         SALE_ORDER_NO, ID, OWNER, DEMAND_NO, LEG_TYPE, CONTACT_NAME, CONTACT_PHONE, CONTACT_MOBILE,
         CONTACT_MAIL, SALE_REMARK, VALID, VERSION, LOCKER, LOCK_TIME, CREATE_TYPE, CREATE_TIME,
         MODIFY_TIME, CREATOR, MODIFIER, ISSUE_TIME, ORIGINAL_ORDER_NO, LINKNO, LINKTYPE, CURRENCY,
-        SALE_CURRENCY,EXCHANGE_RATE,DRAWER_LOGIN_NAME
+        SALE_CURRENCY,EXCHANGE_RATE,DRAWER_LOGIN_NAME,OFFICE
 
     </sql>
     <select id="querySaleCountByLocker" resultType="java.lang.Integer">
         SELECT count(DISTINCT f.SALE_ORDER_NO)
         FROM
-        IFT_SALE_ORDER_EXT f
-        LEFT JOIN OS_SALEORDER o ON f.SALE_ORDER_NO = o.SALE_ORDER_NO
+            IFT_SALE_ORDER_EXT f
+            LEFT JOIN OS_SALEORDER o ON f.SALE_ORDER_NO = o.SALE_ORDER_NO
         WHERE
-        f.VALID = 1
-        AND o.ORDER_CHILD_STATUS IN (1)
-        AND f.LOCKER = #{locker}
-        AND f.CREATE_TYPE IN (1, 2, 3, 4)
+            f.VALID = 1
+            AND o.ORDER_CHILD_STATUS IN (1)
+            AND f.LOCKER = #{locker}
+            AND f.CREATE_TYPE IN (1, 2, 3, 4)
     </select>
     <select id="queryBuyCountByLocker" resultType="java.lang.Integer">
         SELECT count(DISTINCT f.SALE_ORDER_NO)
         FROM
             IFT_SALE_ORDER_EXT f
-        LEFT JOIN OS_SALEORDER o ON f.SALE_ORDER_NO = o.SALE_ORDER_NO
-        LEFT JOIN OS_BUYORDER aa ON f.SALE_ORDER_NO = aa.SALE_ORDER_NO
+            LEFT JOIN OS_SALEORDER o ON f.SALE_ORDER_NO = o.SALE_ORDER_NO
+            LEFT JOIN OS_BUYORDER aa ON f.SALE_ORDER_NO = aa.SALE_ORDER_NO
         WHERE
             f.VALID = 1
-        AND aa.BUY_CHILD_STATUS IN (1, 2)
-        AND f.CREATE_TYPE IN (1, 2, 3, 4, 6)
-        AND o.PAY_STATUS IN (3, 4)
-        AND f.LOCKER = #{locker}
+            AND aa.BUY_CHILD_STATUS IN (1, 2)
+            AND f.CREATE_TYPE IN (1, 2, 3, 4, 6)
+            AND o.PAY_STATUS IN (3, 4)
+            AND f.LOCKER = #{locker}
     </select>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -258,6 +259,9 @@
             <if test="originalOrderNo != null">
                 ORIGINAL_ORDER_NO,
             </if>
+            <if test="office != null">
+                OFFICE,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="saleOrderNo != null">
@@ -344,6 +348,9 @@
             <if test="originalOrderNo != null">
                 #{originalOrderNo,jdbcType=BIGINT},
             </if>
+            <if test="office != null and office !=''">
+                #{office,jdbcType=VARCHAR}
+            </if>
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderExt">
@@ -425,7 +432,10 @@
                 DRAWER_LOGIN_NAME = #{drawerLoginName},
             </if>
             <if test="exchangeRate!=null">
-                EXCHANGE_RATE = #{exchangeRate}
+                EXCHANGE_RATE = #{exchangeRate},
+            </if>
+            <if test="office!=null">
+                OFFICE = #{office}
             </if>
         </set>
         where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
@@ -451,7 +461,8 @@
             MODIFY_TIME    = #{modifyTime,jdbcType=TIMESTAMP},
             CREATOR        = #{creator,jdbcType=VARCHAR},
             ISSUE_TIME     = #{issueTime,jdbcType=TIMESTAMP},
-            MODIFIER       = #{modifier,jdbcType=VARCHAR}
+            MODIFIER       = #{modifier,jdbcType=VARCHAR},
+            OFFICE         = #{office,jdbcType=VARCHAR}
         WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
     </update>
     <select id="queryByPnrNoAndTime" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.QueryPnrAndTimeVo">
@@ -539,7 +550,7 @@
         select DISTINCT
         f.SALE_ORDER_NO, f.ID, f.OWNER, f.DEMAND_NO, f.LEG_TYPE, f.CONTACT_NAME, f.CONTACT_PHONE, f.CONTACT_MOBILE,
         f.CONTACT_MAIL, f.SALE_REMARK, f.VALID, f.VERSION, f.LOCKER, f.LOCK_TIME, f.CREATE_TYPE, f.CREATE_TIME,
-        f.MODIFY_TIME,  (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,(select NAME from SM_USER where LOGIN_NAME =aa.MODIFIER) as MODIFIER,
+        f.MODIFY_TIME, (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,(select NAME from SM_USER where LOGIN_NAME =aa.MODIFIER) as MODIFIER,
         o.ORDER_CHILD_STATUS,f.LINKTYPE,(SELECT NAME FROM SM_USER where ID = f.LOCKER) as HANDLERS,f.ORIGINAL_ORDER_NO
         FROM
         IFT_SALE_ORDER_EXT f
@@ -551,7 +562,7 @@
         left join OS_BUYORDER aa ON f.SALE_ORDER_NO=aa.SALE_ORDER_NO
         left join IFT_BUY_ORDER_EXT ab ON aa.BUY_ORDER_NO=ab.BUY_ORDER_NO
         left join CPS_CUSTOMER CC ON CC.CUSTOMER_NO=o.CUSTOMER_NO
-        left join  IFT_BUY_ORDER_DETAIL IBOD ON IBOD.BUY_ORDER_NO=aa.BUY_ORDER_NO
+        left join IFT_BUY_ORDER_DETAIL IBOD ON IBOD.BUY_ORDER_NO=aa.BUY_ORDER_NO
         where
         <trim suffixOverrides="AND">
             f.VALID = 1 and
@@ -761,7 +772,7 @@
         select DISTINCT
         f.SALE_ORDER_NO, f.ID, f.OWNER, f.DEMAND_NO, f.LEG_TYPE, f.CONTACT_NAME, f.CONTACT_PHONE, f.CONTACT_MOBILE,
         f.CONTACT_MAIL, f.SALE_REMARK, f.VALID, f.VERSION, f.LOCKER, f.LOCK_TIME, f.CREATE_TYPE, f.CREATE_TIME,
-        f.MODIFY_TIME,  (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,(select NAME from SM_USER where LOGIN_NAME =aa.MODIFIER) as MODIFIER,o.ORDER_CHILD_STATUS,f.LINKTYPE
+        f.MODIFY_TIME, (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,(select NAME from SM_USER where LOGIN_NAME =aa.MODIFIER) as MODIFIER,o.ORDER_CHILD_STATUS,f.LINKTYPE
         FROM
         IFT_SALE_ORDER_EXT f
         left join OS_SALEORDER o on f.SALE_ORDER_NO = o.SALE_ORDER_NO
@@ -772,7 +783,7 @@
         left join OS_BUYORDER aa ON f.SALE_ORDER_NO=aa.SALE_ORDER_NO
         left join IFT_BUY_ORDER_EXT ab ON aa.BUY_ORDER_NO=ab.BUY_ORDER_NO
         left join CPS_CUSTOMER CC ON CC.CUSTOMER_NO=o.CUSTOMER_NO
-        left join  IFT_BUY_ORDER_DETAIL IBOD ON IBOD.BUY_ORDER_NO=aa.BUY_ORDER_NO
+        left join IFT_BUY_ORDER_DETAIL IBOD ON IBOD.BUY_ORDER_NO=aa.BUY_ORDER_NO
         where
         <trim suffixOverrides="AND">
             o.ORDER_CHILD_STATUS = 4 AND o.GOODS_TYPE != 6 AND o.TRANSATION_ORDER_NO NOT IN
@@ -804,7 +815,7 @@
             </if>
             <if test=" flyEndArrDate !=null and flyEndArrDate !='' ">
                 <![CDATA[
-                  DATE_FORMAT(l.ARR_TIME , '%Y-%m-%d')<= DATE_FORMAT(#{flyEndArrDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
+                 DATE_FORMAT(l.ARR_TIME , '%Y-%m-%d')<= DATE_FORMAT(#{flyEndArrDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
                 ]]>
             </if>
             <if test="customerType != null and customerType !='' ">
@@ -929,10 +940,10 @@
     </select>
 
     <select id="queryAssignOrder" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SaleQueryOrderVo">
-         select DISTINCT
+        select DISTINCT
         f.SALE_ORDER_NO, f.ID, f.OWNER, f.DEMAND_NO, f.LEG_TYPE, f.CONTACT_NAME, f.CONTACT_PHONE, f.CONTACT_MOBILE,
         f.CONTACT_MAIL, f.SALE_REMARK, f.VALID, f.VERSION, f.LOCKER, f.LOCK_TIME, f.CREATE_TYPE, f.CREATE_TIME,
-        f.MODIFY_TIME,  (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,
+        f.MODIFY_TIME, (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,
         o.ORDER_CHILD_STATUS,f.LINKTYPE as HANDLERS
         FROM
         IFT_SALE_ORDER_EXT f
@@ -950,6 +961,14 @@
                     <when test="locker == 1">f.LOCKER!=0 AND</when>
                     <otherwise>f.LOCKER = #{locker,jdbcType=BIGINT} AND</otherwise>
                 </choose>
+            </if>
+            <if test="createTypeStatusArray!=null and createTypeStatusArray!='' ">
+                f.CREATE_TYPE in
+                <foreach collection="createTypeStatusArray" item="createTypeStatusArray"
+                         index="index" open="(" close=")" separator=",">
+                    #{createTypeStatusArray[${index}]}
+                </foreach>
+                AND
             </if>
             <if test="orderStatus!=null">
                 d.STATUS = #{orderStatus,jdbcType=BIGINT} AND

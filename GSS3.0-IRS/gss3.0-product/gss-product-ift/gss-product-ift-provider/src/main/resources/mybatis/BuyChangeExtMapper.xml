@@ -27,7 +27,7 @@
     <result column="CHANGE_REMARK" property="changeRemark" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
-    BUY_CHANGE_NO, ID, OWNER, OFFICE, TICKET_TYPE, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME, 
+    BUY_CHANGE_NO, ID, OWNER, OFFICE, TICKET_TYPE, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME,
     VALID, STATUS, CHANGE_REMARK
   </sql>
   <sql id="Join_Column_List" >
@@ -35,7 +35,7 @@
     h.VALID, h.STATUS, h.CHANGE_REMARK
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
-    select 
+    select
     <include refid="Base_Column_List" />
     from IFT_BUY_CHANGE_EXT
     where BUY_CHANGE_NO = #{buyChangeNo,jdbcType=BIGINT}
@@ -55,13 +55,13 @@
     where BUY_CHANGE_NO = #{buyChangeNo,jdbcType=BIGINT}
   </delete>
   <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.BuyChangeExt" >
-    insert into IFT_BUY_CHANGE_EXT (BUY_CHANGE_NO, ID, OWNER, 
-      OFFICE, TICKET_TYPE, CREATOR, 
-      CREATE_TIME, MODIFIER, MODIFY_TIME, 
+    insert into IFT_BUY_CHANGE_EXT (BUY_CHANGE_NO, ID, OWNER,
+      OFFICE, TICKET_TYPE, CREATOR,
+      CREATE_TIME, MODIFIER, MODIFY_TIME,
       VALID, STATUS, CHANGE_REMARK)
-    values (#{buyChangeNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER}, 
-      #{office,jdbcType=VARCHAR}, #{ticketType,jdbcType=INTEGER}, #{creator,jdbcType=VARCHAR}, 
-      #{createTime,jdbcType=TIMESTAMP}, #{modifier,jdbcType=VARCHAR}, #{modifyTime,jdbcType=TIMESTAMP}, 
+    values (#{buyChangeNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
+      #{office,jdbcType=VARCHAR}, #{ticketType,jdbcType=INTEGER}, #{creator,jdbcType=VARCHAR},
+      #{createTime,jdbcType=TIMESTAMP}, #{modifier,jdbcType=VARCHAR}, #{modifyTime,jdbcType=TIMESTAMP},
       #{valid,jdbcType=TINYINT}, #{status,jdbcType=VARCHAR}, #{changeRemark,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.BuyChangeExt" >

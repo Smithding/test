@@ -60,9 +60,9 @@ public class IftMessageServiceImpl implements IIftMessageService {
     String ownerCode  private ;*/
 
     @Override
-    public void sendMessage(String ownerCode, Long saleOrderNo) {
+    public void sendMessage(String ownerCode, Long saleOrderNo,String type) {
         try {
-            TicketSender ticketSender = getSender(ownerCode);
+            TicketSender ticketSender = getSender(ownerCode,type);
             if (ticketSender != null) {
                /* SocketDO sdo = new SocketDO();
                 sdo.setSaleOrder(String.valueOf(saleOrderNo));
@@ -95,9 +95,9 @@ public class IftMessageServiceImpl implements IIftMessageService {
     }
 
     @Override
-    public void sendRefuseMessage(Long saleOrderNo,String ownerCode) {
+    public void sendRefuseMessage(Long saleOrderNo,String ownerCode,String type) {
         try {
-            TicketSender ticketSender = getSender(ownerCode);
+            TicketSender ticketSender = getSender(ownerCode,type);
             if (ticketSender != null) {
                 SocketDO sdo = buildDo(0L,ticketSender.getUserid());
                 sdo.setOther("5");//退票中
@@ -123,10 +123,10 @@ public class IftMessageServiceImpl implements IIftMessageService {
     }
 
     @Override
-    public void sendChangeMessage(Long saleOrderNo, String ownerCode) {
+    public void sendChangeMessage(Long saleOrderNo, String ownerCode,String type) {
         {
             try {
-                TicketSender ticketSender = getSender(ownerCode);
+                TicketSender ticketSender = getSender(ownerCode,type);
                 if (ticketSender != null) {
                     SocketDO sdo = buildDo(saleOrderNo, ticketSender.getUserid());
                     sdo.setOther("6");//改签中
@@ -159,10 +159,10 @@ public class IftMessageServiceImpl implements IIftMessageService {
         }
     }
 
-    public TicketSender getSender(String ownerCode) {
+    public TicketSender getSender(String ownerCode,String type) {
         TicketSender ticketSender = null;
         TicketSenderVo senderVo = new TicketSenderVo();
-        //senderVo.setTypes("'both','salesman'");//只给销售员分单   只分在线即可
+        senderVo.setTypes("'both','"+type+"'");//只给销售员分单   只分在线即可
         senderVo.setStatus(3);//查询在线销售员 3-在线
         List<TicketSender> ticketSenders = ticketSenderService.queryByBean(senderVo);
         if (ticketSenders != null && ticketSenders.size() > 0) {
