@@ -50,7 +50,7 @@ public class LogRecordHol implements Serializable {
 	
 	protected Long ratePlanId;
 	
-	protected Long productUniqueId;
+	protected String productUniqueId;
 	
 	/** 其它自定义属性 */
 	protected Map<String, Object> otherOpts = new HashMap<>();
@@ -183,11 +183,11 @@ public class LogRecordHol implements Serializable {
 		this.ratePlanId = ratePlanId;
 	}
 
-	public Long getProductUniqueId() {
+	public String getProductUniqueId() {
 		return productUniqueId;
 	}
 
-	public void setProductUniqueId(Long productUniqueId) {
+	public void setProductUniqueId(String productUniqueId) {
 		this.productUniqueId = productUniqueId;
 	}
 
