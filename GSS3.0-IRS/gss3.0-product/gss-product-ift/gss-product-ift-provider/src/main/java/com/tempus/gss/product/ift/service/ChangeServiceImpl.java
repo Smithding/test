@@ -827,7 +827,7 @@ public class ChangeServiceImpl implements IChangeService {
             handle(requestWithActor, infList);
             Long saleChangeNo = requestWithActor.getEntity().getSaleChangeNo();
             //判断费用是否为0
-            if(isNoFee(requestWithActor.getEntity().getSaleAdtPriceList())){
+            if(isNoFee(requestWithActor.getEntity().getSaleAdtPriceList(),requestWithActor.getEntity().getSaleChdPriceList(),requestWithActor.getEntity().getSaleInfPriceList())){
                 saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 3);
                 log.info("修改采购状态" + saleChangeNo);
                /* saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 3);
@@ -875,24 +875,68 @@ public class ChangeServiceImpl implements IChangeService {
         return true;
     }
 
-    private boolean isNoFee(List<ChangePriceVo> saleAdtPriceList) {
+    private boolean isNoFee(List<ChangePriceVo> saleAdtPriceList,List<ChangePriceVo> saleChdPriceList,List<ChangePriceVo> saleInfPriceList) {
 
         boolean isNoFee = false;
         BigDecimal all = new BigDecimal(0);
-        if(saleAdtPriceList == null )
-            return true;
-        for (ChangePriceVo changePriceVo : saleAdtPriceList) {
-            all = all.add(changePriceVo.getSalePrice());
-            all = all.add(changePriceVo.getSaleTax());
-            all = all.add(changePriceVo.getSaleBrokerage());
-            all = all.add(changePriceVo.getSaleRest());
-            all = all.add(changePriceVo.getCountPrice());
-            all = all.add(changePriceVo.getBuyPrice());
-            all = all.add(changePriceVo.getBuyTax());
-            all = all.add(changePriceVo.getBuyBrokerage());
-            all = all.add(changePriceVo.getBuyRest());
-            all = all.add(changePriceVo.getBuyCountPrice());
+
+        if(saleAdtPriceList != null && saleAdtPriceList.get(0) != null){
+            ChangePriceVo changePriceVo = saleAdtPriceList.get(0);
+            if(changePriceVo.getSalePrice() != null){
+                all = all.add(changePriceVo.getSalePrice());
+            }
+            if(changePriceVo.getSaleTax() != null){
+                all = all.add(changePriceVo.getSaleTax());
+            }
+            if(changePriceVo.getSaleBrokerage() != null){
+                all = all.add(changePriceVo.getSaleBrokerage());
+            }
+            if(changePriceVo.getSaleRest() != null){
+                all = all.add(changePriceVo.getSaleRest());
+            }
+            if(changePriceVo.getCountPrice() != null){
+                all = all.add(changePriceVo.getCountPrice());
+            }
         }
+
+        if (saleChdPriceList !=null && saleChdPriceList.get(0) != null) {
+            ChangePriceVo changePriceVo2 = saleChdPriceList.get(0);
+            if(changePriceVo2.getSalePrice() != null){
+                all = all.add(changePriceVo2.getSalePrice());
+            }
+            if(changePriceVo2.getSaleTax() != null){
+                all = all.add(changePriceVo2.getSaleTax());
+            }
+            if(changePriceVo2.getSaleBrokerage() != null){
+                all = all.add(changePriceVo2.getSaleBrokerage());
+            }
+            if(changePriceVo2.getSaleRest() != null){
+                all = all.add(changePriceVo2.getSaleRest());
+            }
+            if(changePriceVo2.getCountPrice() != null){
+                all = all.add(changePriceVo2.getCountPrice());
+            }
+        }
+
+        if (saleInfPriceList != null && saleInfPriceList.get(0) != null) {
+            ChangePriceVo changePriceVo3 = saleInfPriceList.get(0);
+            if(changePriceVo3.getSalePrice() != null){
+                all = all.add(changePriceVo3.getSalePrice());
+            }
+            if(changePriceVo3.getSaleTax() != null){
+                all = all.add(changePriceVo3.getSaleTax());
+            }
+            if(changePriceVo3.getSaleBrokerage() != null){
+                all = all.add(changePriceVo3.getSaleBrokerage());
+            }
+            if(changePriceVo3.getSaleRest() != null){
+                all = all.add(changePriceVo3.getSaleRest());
+            }
+            if(changePriceVo3.getCountPrice() != null){
+                all = all.add(changePriceVo3.getCountPrice());
+            }
+        }
+
         BigDecimal zore = new BigDecimal("0");
         if(all.compareTo(zore) <= 0){
             isNoFee = true;
