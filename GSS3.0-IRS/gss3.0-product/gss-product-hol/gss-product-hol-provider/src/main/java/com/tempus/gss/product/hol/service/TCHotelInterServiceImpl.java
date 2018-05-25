@@ -335,7 +335,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 						if(StringUtil.isNotNullOrEmpty(proInfoDetailList)){
 							outer : 
 							for(ProInfoDetail proInfoDetail : proInfoDetailList) {
-								if(proInfoDetail.getProductUniqueId().equals(proList.getProductUniqueId().longValue())) {
+								if(proInfoDetail.getProductUniqueId().equals(proList.getProductUniqueId())) {
 									TreeMap<String, ProSaleInfoDetail> map= proInfoDetail.getProSaleInfoDetails();
 									if(StringUtil.isNotNullOrEmpty(map)){
 										for (Map.Entry<String, ProSaleInfoDetail> entry : map.entrySet()) {
@@ -463,7 +463,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 	}
 
 	@Override
-	public List<FormDate> updateProductunique(Agent agent, Long resId, Long productUniqueId) {
+	public List<FormDate> updateProductunique(Agent agent, Long resId, String productUniqueId) {
 		//Long resId = 883364L;	
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 		Calendar cal = Calendar.getInstance();  
@@ -535,7 +535,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 	}
 
 	@Override
-	public Boolean doIncrInventoryWithProductUnique(Agent agent, Long resId, Long productUniqueId) {
+	public Boolean doIncrInventoryWithProductUnique(Agent agent, Long resId, String productUniqueId) {
 		SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 		Calendar cal = Calendar.getInstance();  
 		Calendar calAdd = Calendar.getInstance();
