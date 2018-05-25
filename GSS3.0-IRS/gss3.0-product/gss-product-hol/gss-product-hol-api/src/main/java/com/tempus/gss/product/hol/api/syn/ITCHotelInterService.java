@@ -84,7 +84,7 @@ public interface ITCHotelInterService {
 	 * 同步更新某一个房间的库存价格信息
 	 * @param resId
 	 */
-	public Boolean doIncrInventoryWithProductUnique(Agent agent, Long resId, Long productUniqueId);
+	public Boolean doIncrInventoryWithProductUnique(Agent agent, Long resId, String productUniqueId);
 	/**
 	 * 实时获取同程单个酒店信息
 	 * @return
@@ -93,7 +93,7 @@ public interface ITCHotelInterService {
 	/**
 	 * 实时获取同程的价格库存展示在后台
 	 */
-	public List<FormDate> updateProductunique(Agent agent, Long resId, Long productUniqueId);
+	public List<FormDate> updateProductunique(Agent agent, Long resId, String productUniqueId);
 	
 	
 }
