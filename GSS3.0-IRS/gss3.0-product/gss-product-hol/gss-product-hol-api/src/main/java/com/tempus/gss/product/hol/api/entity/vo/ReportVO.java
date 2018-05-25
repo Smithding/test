@@ -439,7 +439,7 @@ public class ReportVO implements Serializable {
     
     public void setCheckStatusName(Integer checkStatus) {
         if (null != checkStatus) {
-            setCheckStatusName(TcOrderStatus.keyOf(checkStatus).getValue());
+            setCheckStatusName(TcOrderStatus.keyOf(checkStatus.toString()).getValue());
         } else {
             this.checkStatusName = "";
         }
