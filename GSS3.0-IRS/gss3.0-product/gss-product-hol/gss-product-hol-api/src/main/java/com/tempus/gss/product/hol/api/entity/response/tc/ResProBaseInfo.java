@@ -205,6 +205,8 @@ public class ResProBaseInfo implements Serializable{
 	
 	private Integer bookStatus = 1;
 	
+	private Integer supplierType = 2;
+	
 	public Long getResId() {
 		return resId;
 	}
@@ -454,6 +456,13 @@ public class ResProBaseInfo implements Serializable{
 	@JSONField(deserialize=false)
 	public void setBookStatus(Integer bookStatus) {
 		this.bookStatus = bookStatus;
+	}
+	public Integer getSupplierType() {
+		return supplierType;
+	}
+	@JSONField(deserialize=false)
+	public void setSupplierType(Integer supplierType) {
+		this.supplierType = supplierType;
 	}
 	
 	
