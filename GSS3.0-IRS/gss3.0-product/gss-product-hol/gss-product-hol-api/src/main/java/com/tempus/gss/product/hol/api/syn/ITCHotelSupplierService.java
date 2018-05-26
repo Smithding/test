@@ -77,7 +77,7 @@ public interface ITCHotelSupplierService {
 	 * @param hotelSearchReq
 	 * @return
 	 */
-	public Future<TCResponse<ResBaseInfo>> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException;
+	public TCResponse<ResBaseInfo> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException;
 	
 	/**
 	 * 后台查询酒店列表(结构简单一些)
