@@ -243,8 +243,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	}
 
 	@Override
-	@Async
-	public Future<TCResponse<ResBaseInfo>> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException{
+	public TCResponse<ResBaseInfo> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException{
 		//System.out.println("开始做任务一");  
        // long start = System.currentTimeMillis();
        // System.out.println("f1 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
@@ -560,9 +559,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		log.info("查询酒店列表结束");
 		//long end = System.currentTimeMillis();  
       //  System.out.println("完成任务一，耗时：" + (end - start) + "毫秒");  
-		//return response;
+		return response;
         
-		return new AsyncResult<TCResponse<ResBaseInfo>>(response);
+		//return new AsyncResult<TCResponse<ResBaseInfo>>(response);
 	}
 	
 	
@@ -622,11 +621,13 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		                   			 			TreeMap<String, ProSaleInfoDetail> proSaleInfoDetails = proInfo.getProSaleInfoDetails();
 		                   			 			if(StringUtil.isNotNullOrEmpty(proSaleInfoDetails)) {
 		                   			 				if(proSaleInfoDetails.containsKey(DateUtil.stringToLonString(startTime))) {
-		                   			 				Integer firProPrice = proSaleInfoDetails.get(DateUtil.stringToLonString(startTime)).getDistributionSalePrice();
-		         	                				BigDecimal profitPrice = holProfitService.computeTcProfitPrice(agent, firProPrice, agent.getType());
-			         	                				if(StringUtil.isNotNullOrEmpty(profitPrice)){
-			         	                					pro.setRebateRateProfit(profitPrice);
-			         	                				}
+			                   			 				Integer firProPrice = proSaleInfoDetails.get(DateUtil.stringToLonString(startTime)).getDistributionSalePrice();
+			                   			 				if(StringUtil.isNotNullOrEmpty(firProPrice)) {
+				                   			 				BigDecimal profitPrice = holProfitService.computeTcProfitPrice(agent, firProPrice, agent.getType());
+				         	                				if(StringUtil.isNotNullOrEmpty(profitPrice)){
+				         	                					pro.setRebateRateProfit(profitPrice);
+				         	                				}
+			                   			 				}
 		                   			 				}
 			                   			 			int kk = 0;
 			                   			 			Integer firstPrice = 999999;
@@ -1112,7 +1113,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	    								}
 	    							outer:
 	    							for(ProInfoDetail proInfoDetail : proInfoDetailList){
-	    								if(Long.valueOf(proList.getProductUniqueId()).equals(proInfoDetail.getProductUniqueId())){
+	    								if(proList.getProductUniqueId().equals(proInfoDetail.getProductUniqueId())){
 	    									if(proInfoDetail.getProSaleInfoDetails()!= null && proInfoDetail.getProSaleInfoDetails().size() > 0){ 
 			    								TreeMap<String, ProSaleInfoDetail> map= proInfoDetail.getProSaleInfoDetails();
 			    								if(StringUtil.isNotNullOrEmpty(map)){
@@ -1489,5 +1490,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		
 		return null;
 	}
+
+	
 
 }
