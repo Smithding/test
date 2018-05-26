@@ -36,6 +36,11 @@ public class IncrHotelList implements Serializable{
 	 */
 	@JSONField(name = "IncrementType")
 	private Integer incrementType;
+	/**
+	 * 上一次调用的标记符号ID
+	 */
+	@JSONField(name = "EndIncrementId")
+	private Long endIncrementId;
 
 	public String getStartTime() {
 		return startTime;
@@ -61,7 +66,13 @@ public class IncrHotelList implements Serializable{
 		this.incrementType = incrementType;
 	}
 
-	
+	public Long getEndIncrementId() {
+		return endIncrementId;
+	}
+
+	public void setEndIncrementId(Long endIncrementId) {
+		this.endIncrementId = endIncrementId;
+	}
 	
 	
 }	
