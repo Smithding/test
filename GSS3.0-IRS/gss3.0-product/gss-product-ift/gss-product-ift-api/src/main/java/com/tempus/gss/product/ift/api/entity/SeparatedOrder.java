@@ -38,6 +38,16 @@ public class SeparatedOrder implements Serializable {
     private String orderStatus;
     //销售单废退改编号
     private Long saleChangeNo;
+    //ticketsenderType
+    private String ticketsenderType;
+
+    public String getTicketsenderType() {
+        return ticketsenderType;
+    }
+
+    public void setTicketsenderType(String ticketsenderType) {
+        this.ticketsenderType = ticketsenderType;
+    }
 
     public Long getSaleChangeNo() {
         return saleChangeNo;

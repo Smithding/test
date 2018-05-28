@@ -20,10 +20,7 @@ import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.*;
 import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
 import com.tempus.gss.product.ift.api.entity.vo.*;
-import com.tempus.gss.product.ift.api.service.IBuyOrderExtService;
-import com.tempus.gss.product.ift.api.service.IRefundService;
-import com.tempus.gss.product.ift.api.service.ISaleOrderExtService;
-import com.tempus.gss.product.ift.api.service.ITicketSenderService;
+import com.tempus.gss.product.ift.api.service.*;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.*;
 import com.tempus.gss.product.ift.mq.IftTicketMqSender;
@@ -122,7 +119,8 @@ public class RefundServiceImpl implements IRefundService {
 	private ITicketSenderService iTicketSenderService;
 	@Value("${dpsconfig.job.owner}")
 	protected String owner;
-	
+	@Reference
+	IIftMessageService	IIftMessageService;
 
 	SimpleDateFormat simpleDate = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
 
@@ -132,6 +130,7 @@ public class RefundServiceImpl implements IRefundService {
 		boolean flag=false;
 		try{
 			SaleChangeExt ext=this.createRefundExt(requestWithActor);
+			//退废分单
 			if(ext == null){
 				flag = false;
 			}
@@ -140,6 +139,21 @@ public class RefundServiceImpl implements IRefundService {
 			flag = false;
 			throw new GSSException("创建改签单失败", "0003", "创建改签单失败"+e);
 		}
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				//销售退废分单操作 (开启线程分单，因为不结束这个方法，数据库中的saleChangeOrder未生成，在其他dubbo服务空间内无法查找到)
+				Integer refundType = requestWithActor.getEntity().getRefundType();
+				String refundTypeStr = "";
+				if(new Integer(1).equals(refundType)){
+					//废票
+					refundTypeStr ="salesman-waste";
+				} else {
+					refundTypeStr ="salesman-refund";
+				}
+				IIftMessageService.sendRefuseMessage(requestWithActor.getEntity().getSaleOrderNo(),requestWithActor.getAgent().getOwner()+"",refundTypeStr);
+			}
+		}).start();
 		return flag;
 	}
 	
@@ -294,6 +308,16 @@ public class RefundServiceImpl implements IRefundService {
 			saleChangeExt.setCustomerNo(agent.getNum());
 			saleChangeExt.setCustomerTypeNo(agent.getType());
 			saleChangeExtDao.insertSelective(saleChangeExt);
+			/*//销售退废分单操作
+			Integer refundType = requestWithActor.getEntity().getRefundType();
+			String refundTypeStr = "";
+			if(new Integer(1).equals(refundType)){
+				//废票
+				refundTypeStr ="salesman-waste";
+			} else {
+				refundTypeStr ="salesman-refund";
+			}
+			IIftMessageService.sendRefuseMessage(requestWithActor.getEntity().getSaleOrderNo(),agent.getOwner()+"",refundTypeStr);*/
 
 			/* 修改销售单明细 */
 			if (requestWithActor.getEntity().getPassengerLegVoList() != null
@@ -365,12 +389,26 @@ public class RefundServiceImpl implements IRefundService {
 			} catch (Exception e) {
 				log.error("添加(title=创建国际退/废销售单)操作日志异常===" + e);
 			}
-
 		} catch (Exception e) {
 			log.error("创建废退单失败", e);
 			throw new GSSException("创建废退单失败" + e, "0002", "创建废退单失败");
 		}
 		log.info("创建废退单申请结束===========");
+		/*new Thread(new Runnable() {
+			@Override
+			public void run() {
+				//销售退废分单操作 (开启线程分单，因为不结束这个方法，数据库中的saleChangeOrder未生成，在其他dubbo服务空间内无法查找到)
+				Integer refundType = requestWithActor.getEntity().getRefundType();
+				String refundTypeStr = "";
+				if(new Integer(1).equals(refundType)){
+					//废票
+					refundTypeStr ="salesman-waste";
+				} else {
+					refundTypeStr ="salesman-refund";
+				}
+				IIftMessageService.sendRefuseMessage(requestWithActor.getEntity().getSaleOrderNo(),requestWithActor.getAgent().getOwner()+"",refundTypeStr);
+			}
+		}).start();*/
 		return saleChangeExt;
 	}
 
@@ -1243,7 +1281,7 @@ public class RefundServiceImpl implements IRefundService {
 			List<SaleChangeExt> list = saleChangeExtDao.queryObjByKey(page, vo);
 			if (list != null) {
 				log.info("此次分单数量:" + list.size());
-				List<TicketSender> senders = iTicketSenderService.getOnlineTicketSender(3);
+				List<TicketSender> senders = iTicketSenderService.getOnlineTicketSender(3);  //没用
 				log.info("是否有在线出票员:" + (senders != null));
 				if (senders != null && senders.size() > 0) {
 					Agent agent = new Agent(Integer.valueOf(owner));

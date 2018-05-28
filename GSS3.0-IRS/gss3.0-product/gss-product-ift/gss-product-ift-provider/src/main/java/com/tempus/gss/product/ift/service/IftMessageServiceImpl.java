@@ -111,11 +111,12 @@ public class IftMessageServiceImpl implements IIftMessageService {
                     sext.setLockTime(date);
                     sext.setModifyTime(date);
                     saleChangeExtDao.updateLocker(sext);
+                    ticketSenderService.updateByLockerId(agent,user.getId(),"SALE_REFUSE_NUM");
                 }
                 mqSender.send("gss-websocket-exchange", "notice", sdo);
                 log.info("放入MQ队列信息:" + sdo.toString());
-                ticketSender.setSaleRefuseNum(ticketSender.getSaleRefuseNum() + 1);
-                ticketSenderService.updateByPrimaryKey(ticketSender);
+               /* ticketSender.setSaleRefuseNum(ticketSender.getSaleRefuseNum() + 1);
+                ticketSenderService.updateByPrimaryKey(ticketSender);*/
             }
         } catch (Exception e) {
             log.error("b2b国际机票添加消息提醒异常", e);
@@ -141,17 +142,18 @@ public class IftMessageServiceImpl implements IIftMessageService {
                         sext.setLockTime(date);
                         sext.setModifyTime(date);
                         saleChangeExtDao.updateLocker(sext);
+                        ticketSenderService.updateByLockerId(agent,user.getId(),"SALE_CHANGE_NUM");
                     }
                     mqSender.send("gss-websocket-exchange", "notice", sdo);
                     log.info("放入MQ队列信息:" + sdo.toString());
 
-                    //查询出被出票员锁定的改签类型的数量
+                   /* //查询出被出票员锁定的改签类型的数量
                     Agent agent = new Agent(Integer.valueOf(ownerCode));
                     User user = userService.findUserByLoginName(agent, sdo.getLoginName());
                     int lockcount = saleChangeExtDao.queryCountByLockerAndType(user.getId(), 3);
                     //给出票员赋值他的SALE_CHANGE_NUM字段
                     ticketSender.setSaleChangeNum(lockcount);
-                    ticketSenderService.updateByPrimaryKey(ticketSender);
+                    ticketSenderService.updateByPrimaryKey(ticketSender);*/
                 }
             } catch (Exception e) {
                 log.error("b2b国际机票添加消息提醒异常", e);
@@ -162,7 +164,7 @@ public class IftMessageServiceImpl implements IIftMessageService {
     public TicketSender getSender(String ownerCode,String type) {
         TicketSender ticketSender = null;
         TicketSenderVo senderVo = new TicketSenderVo();
-        senderVo.setTypes("'both','"+type+"'");//只给销售员分单   只分在线即可
+        senderVo.setTypes("'"+type+"'");//只给销售员分单   只分在线即可
         senderVo.setStatus(3);//查询在线销售员 3-在线
         List<TicketSender> ticketSenders = ticketSenderService.queryByBean(senderVo);
         if (ticketSenders != null && ticketSenders.size() > 0) {

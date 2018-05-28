@@ -13,6 +13,9 @@ public interface SaleChangeExtDao extends BaseDao<SaleChangeExt, SaleChangeExtVo
 	/*查询采购退票单未锁单的单*/
 	List<SaleChangeExt> queryRefundBylocker(@Param("owner") String owner,@Param("locker")long locker);
 
+	/*查询采购废票单未锁单的单*/
+	List<SaleChangeExt> queryBuyWasteBylocker(@Param("owner") String owner,@Param("locker")long locker);
+
 	/*查询采购退票单被lockerId锁单的数量*/
 	int queryRefundCountBylocker(@Param("owner") String owner,@Param("locker")long locker);
 
@@ -56,4 +59,5 @@ public interface SaleChangeExtDao extends BaseDao<SaleChangeExt, SaleChangeExtVo
 	 * @return
 	 */
 	int queryCountByLockerAndType(@Param("lockerId") Long lockerId, @Param("changeType") int changeType);
+
 }

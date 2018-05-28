@@ -220,8 +220,8 @@ public class OrderServiceImpl implements IOrderService {
             log.info("未查询到可以分配的出票订单,结束此次任务...");
             return;
         }
-        log.info("第二步：查询在线出票员...");
-        List<TicketSender> senders = getOnlineTicketSender("'both','ticketSender'");
+        log.info("第二步：查询在线采购退票员...");
+        List<TicketSender> senders = getOnlineTicketSender("'buysman-refund'"); //采购退票人员
         log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
             Agent agent = new Agent(Integer.valueOf(owner));
@@ -260,6 +260,61 @@ public class OrderServiceImpl implements IOrderService {
         }
         
     }
+
+    /**
+     * 采购废票分单任务
+     */
+    @Override
+    public void assignBuyWaste() {
+
+        log.info("第一步：查询符合条件的订单...");
+        List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryBuyWasteBylocker(owner, 0l);
+        if (saleChangeExts != null && saleChangeExts.size() > 0) {
+            log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
+        } else {
+            log.info("未查询到可以分配的出票订单,结束此次任务...");
+            return;
+        }
+        log.info("第二步：查询在线采购废票员...");
+        List<TicketSender> senders = getOnlineTicketSender("'buysman-waste'"); //采购废票人员
+        log.info("是否有在线出票员:" + (senders != null));
+        if (senders != null && senders.size() > 0) {
+            Agent agent = new Agent(Integer.valueOf(owner));
+            IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
+            Map config = configs.getConfig();
+            String str_maxOrderNum = (String) config.get("maxOrderNum");
+            log.info("有在线出票员人数:" + (senders.size()) + "获得配置最大分单数：" + str_maxOrderNum);
+            Long maxOrderNum = Long.valueOf(str_maxOrderNum);
+            Date updateTime = new Date();
+            log.info("第三步：判断出票员手头出票订单数量...");
+            for (SaleChangeExt order : saleChangeExts) {
+                for (TicketSender peopleInfo : senders) {
+                    log.info(peopleInfo.getName() + "未处理采购退票单数量：" + peopleInfo.getBuyRefuseNum());
+                    if (peopleInfo.getBuyRefuseNum() >= maxOrderNum) {
+                        continue;
+                    } else {
+                        log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
+                        /***修改订单明细表*/
+                        //updateSaleOrderDetail(order, peopleInfo, updateTime);
+                        /**锁单*/
+                        log.info("2.锁单,锁单人是被分配人...");
+                        assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
+                        /***增加出票人订单数*/
+                        log.info("3.增加出票人的未处理采购退票单数量...");
+                        increaseBuyRefuseNum(agent, peopleInfo);
+                        /***发送消息至消息队列 通知出票员*/
+                        //sendInfo(peopleInfo.getUserid(), order.getSaleOrderNo(),String.valueOf(order.getSaleOrder().getOrderStatus()));
+                        //log.info("4.发信息通知出票员出票,订单" + order.getSaleChangeNo() + "将分给出票员结束");
+                        break;
+                    }
+                }
+            }
+            log.info("此次分单结束...");
+        } else {
+            log.info("未查询在线出票员...");
+        }
+
+    }
     
     /**
      * 采购改签订单分单
@@ -275,8 +330,8 @@ public class OrderServiceImpl implements IOrderService {
             log.info("未查询到可以分配的出票订单,结束此次任务...");
             return;
         }
-        log.info("第二步：查询在线出票员...");
-        List<TicketSender> senders = getOnlineTicketSender("'both','ticketSender'");
+        log.info("第二步：查询在线采购改签员...");
+        List<TicketSender> senders = getOnlineTicketSender("'buysman-change'");  //采购改签员
         log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
             Agent agent = new Agent(Integer.valueOf(owner));
@@ -1793,8 +1848,8 @@ public class OrderServiceImpl implements IOrderService {
             log.info("未查询到可以分配的出票订单,结束此次任务...");
             return;
         }
-        log.info("第二步：查询在线出票员...");
-        List<TicketSender> senders = getOnlineTicketSender("'both','ticketSender'");
+        log.info("第二步：查询在线采购出票员...");
+        List<TicketSender> senders = getOnlineTicketSender("'buysman-ticketSender'"); //采购出票员
         log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
             Agent agent = new Agent(Integer.valueOf(owner));
@@ -2773,13 +2828,8 @@ public class OrderServiceImpl implements IOrderService {
     
     /** 获取可以出票的分配订单 */
     public List<SaleOrderExt> getAssignedOrders(Integer[] createTypeStatusArray) {
-        SaleQueryOrderVo saleQueryOrderVo = new SaleQueryOrderVo();
-        saleQueryOrderVo.setPayStatuss("3,4");
-        saleQueryOrderVo.setValid((byte) 1);
-        saleQueryOrderVo.setOrderStatus(2);
-        saleQueryOrderVo.setLocker(0L);
-        saleQueryOrderVo.setCreateTypeStatusArray(createTypeStatusArray);
-        List<SaleOrderExt> saleOrderExtList = saleOrderExtDao.queryAssignOrder(saleQueryOrderVo);
+
+        List<SaleOrderExt> saleOrderExtList = saleOrderExtDao.queryNoHandOrder(); //获取未锁定的出票单
         return saleOrderExtList;
     }
     

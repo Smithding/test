@@ -301,4 +301,6 @@ public interface IOrderService {
 	Page<SaleOrderExt> selectOutTicketOrder(Page<SaleOrderExt> page,RequestWithActor<SaleQueryOrderVo> saleOrderQueryRequest);
 
 	public List<SaleOrderExt> getAssignedOrders(Integer[] createTypeArray);
+
+	void assignBuyWaste();
 }

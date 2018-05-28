@@ -102,6 +102,8 @@ public class ChangeServiceImpl implements IChangeService {
     ITicketSenderService ticketSenderService;
     @Reference
     ICertificateService certificateService;
+    @Reference
+    IIftMessageService iftMessageService;
     @Override
     @Transactional
     public SaleChangeExt apiCreateChange(RequestWithActor<ChangeCreateVo> requestWithActor) {
@@ -287,6 +289,9 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeExt.setCustomerNo(agent.getNum());
             saleChangeExt.setCustomerTypeNo(agent.getType());
             saleChangeExtDao.insertSelective(saleChangeExt);
+
+            //销售改签分单
+            iftMessageService.sendChangeMessage(saleOrderExt.getSaleOrderNo(),agent.getOwner()+"","salesman-change");
 
             /*通过销售单编号获取采购单*/
             List<BuyOrderExt> buyOrderExtList = buyOrderExtDao.selectBuyOrderBySaleOrderNo(requestWithActor.getEntity().getSaleOrderNo());
