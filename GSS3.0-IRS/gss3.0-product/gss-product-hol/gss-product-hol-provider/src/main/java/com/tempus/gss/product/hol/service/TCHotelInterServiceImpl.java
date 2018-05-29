@@ -37,6 +37,7 @@ import com.tempus.gss.product.hol.api.entity.request.tc.GetOrderLogInfoReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.GetTcOrderCancelListReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.IncrHotelList;
 import com.tempus.gss.product.hol.api.entity.request.tc.SingleHotelDetailReq;
+import com.tempus.gss.product.hol.api.entity.response.ResIdList;
 import com.tempus.gss.product.hol.api.entity.response.tc.AllHotelList;
 import com.tempus.gss.product.hol.api.entity.response.tc.AssignDateHotel;
 import com.tempus.gss.product.hol.api.entity.response.tc.CancelReasonModel;
@@ -188,10 +189,11 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 	public AssignDateHotel queryAssignDateHotel(AssignDateHotelReq assignDateHotelReq) throws GSSException{
 		//log.info("查询某一时间内的酒店价格和库存信息开始");
 		String reqJson= JSONObject.toJSONString(assignDateHotelReq);
-		//System.out.println("查询某一时间内的酒店价格的入参为：--------"+reqJson);
+		System.out.println("查询某一时间内的酒店价格的入参为：--------"+reqJson);
 		try {
 			String resultJson= httpClientUtil.doTCJsonPost(PRICE_REPO_URL, reqJson);
 			if(StringUtil.isNotNullOrEmpty(resultJson)){
+				System.out.println("返回值为：--------"+resultJson);
 				ResultTc<AssignDateHotel> ass=JsonUtil.toBean(resultJson, new TypeReference<ResultTc<AssignDateHotel>>(){} );
 				if(ass.getRet_code().equals("200") && StringUtil.isNotNullOrEmpty(ass.getResult())){
 					AssignDateHotel assignDateHotel= ass.getResult();
@@ -291,114 +293,312 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 	@Override
 	public void doIncrHotelDetail(Long resId){
 		try {
-    		//logger.info("ScheduledTest.executeFileDownLoadTask 定时任务: ###"+current.getId()+ ",name:"+current.getName());
-			SingleHotelDetailReq singleHotelDetailReq=new SingleHotelDetailReq();
-			String ResId= String.valueOf(resId);
-			singleHotelDetailReq.setResId(ResId);
-			singleHotelDetailReq.setSourceForm("-1");
-			singleHotelDetailReq.setRequestContent("res,respro,rimg");
-			TCHotelDetailResult hotelDetail=queryTCHotelDetail(singleHotelDetailReq);
+			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+    		Calendar cal = Calendar.getInstance();  
+    		Calendar calAdd = Calendar.getInstance();
+    		//Calendar calEnd = Calendar.getInstance();
+    		String calStartTime= sdf.format(cal.getTime());
+    		
+    		calAdd.add(Calendar.MONTH, 2);
+    		calAdd.add(Calendar.DAY_OF_MONTH, -10);
+    		String calAddTime= sdf.format(calAdd.getTime());
+    		Integer saleStatus = 1;
+    		
+    		AssignDateHotelReq assignDateHotelReqFirstMonth=new AssignDateHotelReq();
+			assignDateHotelReqFirstMonth.setResId(resId);
+			assignDateHotelReqFirstMonth.setSourceFrom("-1");
+			//assignDateHotelReqFirstMonth.setNeedSpecialPolicy(1);
+			assignDateHotelReqFirstMonth.setStartTime(calStartTime);
+			assignDateHotelReqFirstMonth.setEndTime(calAddTime);
+			AssignDateHotel assignDateHotel=  queryAssignDateHotel(assignDateHotelReqFirstMonth);
 			
-			if(StringUtil.isNotNullOrEmpty(hotelDetail)){
-				List<ResBaseInfo> resBaseInfoList =hotelDetail.getResBaseInfos();
-				List<ResProBaseInfo> resProBaseInfoList= hotelDetail.getResProBaseInfos();
-				List<ImgInfo> imgInfoList = hotelDetail.getResImages();
-				/*if(hotelDetailImg != null) {
-					imgInfoList= hotelDetailImg.getResImages();
-				}*/
-				
-				if(resBaseInfoList.size() > 0 && resProBaseInfoList.size() > 0){
-					ResBaseInfo tcResBaseInfo = resBaseInfoList.get(0);
-					tcResBaseInfo.setId(resId);
-					tcResBaseInfo.setSupplierNo("411709261204150108");
-					if(tcResBaseInfo.getResGrade() != null){
-						if(tcResBaseInfo.getResGrade().equals("豪华型")){
-							tcResBaseInfo.setResGradeId("23");
-						}else if(tcResBaseInfo.getResGrade().equals("高档型")){
-							tcResBaseInfo.setResGradeId("24");
-						}else if(tcResBaseInfo.getResGrade().equals("舒适型")){
-							tcResBaseInfo.setResGradeId("26");
-						}else if(tcResBaseInfo.getResGrade().equals("经济型")){
-							tcResBaseInfo.setResGradeId("27");
-						}
-					}
-					Map<String, List<ResProBaseInfo>> proMap=new HashMap<String, List<ResProBaseInfo>>();
-					String key="";
-					List<ProInfoDetail> proInfoDetailList = mongoTemplate1.find(new Query(Criteria.where("resId").is(resId)),ProInfoDetail.class);
-					List<Integer> minProPrice=new ArrayList<Integer>();
-					Integer minPrice = 999999;
-					for(ResProBaseInfo proList: resProBaseInfoList){
-							key= proList.getResProName();
-							if(!proMap.containsKey(key)){
-								List<ResProBaseInfo> proBedList=new ArrayList<ResProBaseInfo>();
-								proBedList.add(proList);
-								proMap.put(key, proBedList); 
-							}else{
-								List<ResProBaseInfo> proBedList = proMap.get(key);
-								proBedList.add(proList);
-							}
-						if(StringUtil.isNotNullOrEmpty(proInfoDetailList)){
-							outer : 
-							for(ProInfoDetail proInfoDetail : proInfoDetailList) {
-								if(proInfoDetail.getProductUniqueId().equals(proList.getProductUniqueId())) {
-									TreeMap<String, ProSaleInfoDetail> map= proInfoDetail.getProSaleInfoDetails();
-									if(StringUtil.isNotNullOrEmpty(map)){
-										for (Map.Entry<String, ProSaleInfoDetail> entry : map.entrySet()) {
-											minProPrice.add(entry.getValue().getDistributionSalePrice());
-											if(minProPrice.size() >= 1) {
-												break outer;
-											}
+			if(assignDateHotel !=null){
+				List<ProInfoDetail> proInfoDetailList= assignDateHotel.getProInfoDetailList();
+					if(proInfoDetailList != null && proInfoDetailList.size() > 0){
+						for(ProInfoDetail pro : proInfoDetailList){
+							pro.setId(pro.getProductUniqueId());
+							pro.setResId(assignDateHotel.getResId());
+							pro.setUpdateInvenTime(sdfupdate.format(new Date()));
+							mongoTemplate1.save(pro, "proInfoDetail");
+						} 
+						SingleHotelDetailReq singleHotelDetailReq=new SingleHotelDetailReq();
+		    			singleHotelDetailReq.setResId(String.valueOf(resId));
+		    			singleHotelDetailReq.setSourceForm("-1");
+		    			singleHotelDetailReq.setRequestContent("res,respro,rimg");
+		    			TCHotelDetailResult hotelDetail=queryTCHotelDetail(singleHotelDetailReq);
+		    			
+		    			/*SingleHotelDetailReq singleHotelDetailReqImg=new SingleHotelDetailReq();
+		    			singleHotelDetailReqImg.setResId(String.valueOf(resId));
+		    			singleHotelDetailReqImg.setSourceForm("-1");
+		    			singleHotelDetailReqImg.setRequestContent("rimg");
+		    			TCHotelDetailResult hotelDetailImg=queryTCHotelDetail(singleHotelDetailReqImg);*/
+		    			
+		    			if(StringUtil.isNotNullOrEmpty(hotelDetail)){ 
+		    				List<ResBaseInfo> resBaseInfoList =hotelDetail.getResBaseInfos();
+		    				List<ResProBaseInfo> resProBaseInfoList= hotelDetail.getResProBaseInfos();
+		    				//List<ImgInfo> imgInfoList= hotelDetailImg.getResImages();
+		    				List<ImgInfo> imgInfoList= hotelDetail.getResImages();
+		    				
+		    				if(StringUtil.isNotNullOrEmpty(resBaseInfoList) && StringUtil.isNotNullOrEmpty(resProBaseInfoList)){
+		    					ResBaseInfo tcResBaseInfo = resBaseInfoList.get(0);
+		    					tcResBaseInfo.setId(resId);
+		    					tcResBaseInfo.setSupplierNo("411709261204150108");
+		    					if(tcResBaseInfo.getResGrade() != null){
+		    						if(tcResBaseInfo.getResGrade().equals("豪华型")){
+		    							tcResBaseInfo.setResGradeId("23");
+		    						}else if(tcResBaseInfo.getResGrade().equals("高档型")){
+		    							tcResBaseInfo.setResGradeId("24");
+		    						}else if(tcResBaseInfo.getResGrade().equals("舒适型")){
+		    							tcResBaseInfo.setResGradeId("26");
+		    						}else if(tcResBaseInfo.getResGrade().equals("经济型")){
+		    							tcResBaseInfo.setResGradeId("27");
+		    						}
+		    					}
+		    					Map<String, List<ResProBaseInfo>> proMap=new HashMap<String, List<ResProBaseInfo>>();
+		    					String key="";
+		    					//List<Integer> minResPriceList=new ArrayList<Integer>();
+		    					//List<Integer> commonResPriceList= new ArrayList<Integer>();
+		    					//for(ResBaseInfo resList: resBaseInfoList){
+		    					List<Integer> minProPrice=new ArrayList<Integer>();
+    							Integer minPrice = 999999;
+	    						for(ResProBaseInfo proList: resProBaseInfoList){
+	    								key= proList.getResProName();
+	    								if(!proMap.containsKey(key)){
+	    									List<ResProBaseInfo> proBedList=new ArrayList<ResProBaseInfo>();
+	    									proBedList.add(proList);
+	    									proMap.put(key, proBedList); 
+	    								}else{
+	    									List<ResProBaseInfo> proBedList = proMap.get(key);
+	    									proBedList.add(proList);
+	    								}
+	    							outer:
+	    							for(ProInfoDetail proInfoDetail : proInfoDetailList){
+	    								if(proList.getProductUniqueId().equals(proInfoDetail.getProductUniqueId())){
+	    									if(proInfoDetail.getProSaleInfoDetails()!= null && proInfoDetail.getProSaleInfoDetails().size() > 0){ 
+			    								TreeMap<String, ProSaleInfoDetail> map= proInfoDetail.getProSaleInfoDetails();
+			    								//TreeMap<String, ProSaleInfoDetail> map1= new TreeMap<String, ProSaleInfoDetail>();
+			    								//map1.putAll(map);
+			    								if(StringUtil.isNotNullOrEmpty(map)){
+			    									//proList.setProSaleInfoDetails(map1);
+			    									for (Map.Entry<String, ProSaleInfoDetail> entry : map.entrySet()) {
+			    										minProPrice.add(entry.getValue().getDistributionSalePrice());
+			    										if(minProPrice.size() >= 1) {
+			    											break outer;
+			    										}
+			    									}
+			    								}
+			    							}
+	    								}
+	    							}
+	    						}
+	    						if(minProPrice != null){
+									if(minProPrice.size() >= 2){
+										/*Integer sumPrice= 0;
+										for(int k=0; k< minProPrice.size();k++){
+											sumPrice += minProPrice.get(k);
 										}
+										Integer commonProPrice = sumPrice/minProPrice.size();*/
+										minPrice= Collections.min(minProPrice);
+										//minResPriceList.add(minPrice);
+										//commonResPriceList.add(commonProPrice);
+									}else if(minProPrice.size() == 1){
+										minPrice= minProPrice.get(0);
+										//minResPriceList.add(minPrice);
+										//commonResPriceList.add(minPrice);
 									}
 								}
-							}
-						}
-					}
-					if(minProPrice != null){
-						if(minProPrice.size() >= 2){
-							minPrice= Collections.min(minProPrice); 
-						}else if(minProPrice.size() == 1){
-							minPrice= minProPrice.get(0);
-						}
-					}
-					tcResBaseInfo.setMinPrice(minPrice);
-					List<ProDetails> ProInfoDetaisList=new ArrayList<ProDetails>();
-					if(proMap != null){
-						for (Map.Entry<String, List<ResProBaseInfo>> baseList : proMap.entrySet()) {
-							ProDetails proInfoDetai=new ProDetails();
-							proInfoDetai.setProId(proMap.get(baseList.getKey()).get(0).getProId());
-							proInfoDetai.setResProName(baseList.getKey());
-							proInfoDetai.setRoomSize(proMap.get(baseList.getKey()).get(0).getRoomSize());
-							proInfoDetai.setRoomFloor(proMap.get(baseList.getKey()).get(0).getRoomFloor());
-							proInfoDetai.setRoomFacilities(proMap.get(baseList.getKey()).get(0).getRoomFacilities());
-							proInfoDetai.setHasBroadband(proMap.get(baseList.getKey()).get(0).getHasBroadband());
-							proInfoDetai.setResProBaseInfoList(baseList.getValue());
-							ProInfoDetaisList.add(proInfoDetai);
-						}
-						tcResBaseInfo.setProDetails(ProInfoDetaisList);
-					}
-					List<ImgInfo> list2=new ArrayList<ImgInfo>();
-					ImgInfoSum imgInfoSum = new ImgInfoSum();
-					if(imgInfoList!=null && imgInfoList.size() > 0) {
-						for(ImgInfo img : imgInfoList) {
-							if(img.getIsResDefault().equals(1) || img.getIsResProDefault().equals(1)) {
-								list2.add(img);
-							}
-						}
-						//list2.addAll(imgInfoList);
-						tcResBaseInfo.setImgInfoList(list2);
-						imgInfoSum.setId(imgInfoList.get(0).getResId());
-						imgInfoSum.setImgInfoList(imgInfoList);
-						mongoTemplate1.save(imgInfoSum, "imgInfoSum");
-					}
-					
-					Integer salaStatus = 1;
-					tcResBaseInfo.setSaleStatus(salaStatus);
-					tcResBaseInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
-					mongoTemplate1.save(tcResBaseInfo,"resBaseInfo");
-							
-				}
+	    						tcResBaseInfo.setMinPrice(minPrice);
+	    						tcResBaseInfo.setResCommonPrice(minPrice);
+    							List<ProDetails> ProInfoDetaisList=new ArrayList<ProDetails>();
+    							if(proMap != null){
+    								for (Map.Entry<String, List<ResProBaseInfo>> baseList : proMap.entrySet()) {
+    									ProDetails proInfoDetai=new ProDetails();
+    									proInfoDetai.setProId(proMap.get(baseList.getKey()).get(0).getProId());
+    									proInfoDetai.setResProName(baseList.getKey());
+    									proInfoDetai.setRoomSize(proMap.get(baseList.getKey()).get(0).getRoomSize());
+    									proInfoDetai.setRoomFloor(proMap.get(baseList.getKey()).get(0).getRoomFloor());
+    									proInfoDetai.setRoomFacilities(proMap.get(baseList.getKey()).get(0).getRoomFacilities());
+    									proInfoDetai.setHasBroadband(proMap.get(baseList.getKey()).get(0).getHasBroadband());
+    									proInfoDetai.setResProBaseInfoList(baseList.getValue());
+    									ProInfoDetaisList.add(proInfoDetai);
+    								}
+    								tcResBaseInfo.setProDetails(ProInfoDetaisList);
+    							}
+    							
+    							if(imgInfoList!=null && imgInfoList.size() > 0) {
+    								List<ImgInfo> list2=new ArrayList<ImgInfo>();
+	    							list2.addAll(imgInfoList);
+	    							tcResBaseInfo.setImgInfoList(list2);
+    							}
+    							
+    							tcResBaseInfo.setSaleStatus(saleStatus);
+	    						tcResBaseInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
+	    						mongoTemplate1.save(tcResBaseInfo, "resBaseInfo");
+	    						
+	    						
+	    						/*List<ResGPSInfo> resGPS = tcResBaseInfo.getResGPS();
+	    						QueryProperty queryProperty = new QueryProperty();
+	    						for(ResGPSInfo gps : resGPS) {
+	    							if(gps.getType().equals(1)) {
+	    								String lat = gps.getLat();
+	    								String lon = gps.getLon();
+	    								int latPos = lat.length() - lat.indexOf(".") - 1;
+	    								int lonPos = lon.length() - lon.indexOf(".") - 1;
+	    								String latSubstring = "";
+	    								String lonSubstring = "";
+	    								if(latPos >= 3) {
+	    									latSubstring = lat.substring(0,  lat.indexOf(".")+4);
+	    								}else {
+	    									latSubstring = lat;
+	    								}
+	    								if(lonPos >= 3) {
+	    									lonSubstring = lon.substring(0,  lon.indexOf(".")+4);
+	    								}else {
+	    									lonSubstring = lon;
+	    								}
+	    								queryProperty.addQueryProperties("lat", OperateEnum.REGEX, latSubstring);
+	    								queryProperty.addQueryProperties("lon", OperateEnum.REGEX, lonSubstring);
+	    								break;
+	    							}
+	    						}
+	    						if(StringUtil.isNotNullOrEmpty(tcResBaseInfo.getResPhone())) {
+	    							String phone = tcResBaseInfo.getResPhone().replaceAll(" ", "");
+	    							if(phone != null && !"".equals(phone)) {
+	    								List<String> splitPhone = new ArrayList<String>();
+	    								String realPhone = "";
+	    								String[] mobileArr = null;
+	    								String substring = "";
+	    								String thirdEndStr = "";
+	    								if(phone.contains("-")) {
+	    									mobileArr = phone.split("-");
+	    									if(mobileArr.length>=2) {
+	    										for(String ss : mobileArr) {
+	    											if(ss.length() == 7) {
+	    												substring = ss.substring(0, 7);
+	    												splitPhone.add(substring);
+	    											}
+	    											if(ss.length()>7) {
+	    												substring = ss.substring(0, 7);
+	    												String endString = ss.substring(7, ss.length());
+	    												if(endString.length()>=8) {
+	    													if(endString.contains("/")) {
+	    														if(endString.length() - endString.indexOf("/") >= 8) {
+	    															thirdEndStr = endString.substring(endString.indexOf("/")+1, endString.indexOf("/")+8);
+	    														}
+	    													}else if(endString.contains("、")) {
+	    														if(endString.length() - endString.indexOf("、") >= 8) {
+	    															thirdEndStr = endString.substring(endString.indexOf("、")+1, endString.indexOf("、")+8);
+	    														}
+	    													}else if(endString.contains("\\")) {
+	    														if(endString.length() - endString.indexOf("\\") >= 8) {
+	    															thirdEndStr = endString.substring(endString.indexOf("\\\\")+1, endString.indexOf("\\\\")+8);
+	    														}
+	    													}
+	    													if(thirdEndStr.length() == 7) {
+	    														splitPhone.add(thirdEndStr);
+	    													}
+	    												}
+	    												splitPhone.add(substring);
+	    											}
+	    										}
+	    									}
+	    								}else {
+	    									if(phone.length() >= 11) {
+	    										substring = phone.substring(0, 11);
+	    										splitPhone.add(substring);
+	    									}
+	    								}
+	    								if(splitPhone.size() == 1) {
+	    									realPhone = splitPhone.get(0);
+	    									queryProperty.addQueryProperties("resPhone", OperateEnum.REGEX, realPhone);
+	    								}else if(splitPhone.size() >= 2) {
+	    									realPhone = splitPhone.get(0)+","+splitPhone.get(1);
+	    									queryProperty.addQueryProperties("resPhone", OperateEnum.OROPERATOR, realPhone);
+	    								}
+	    							}
+	    						}
+	    						if(StringUtil.isNotNullOrEmpty(queryProperty)) {
+	    							int page = 1;
+	    							int pageSize = 10;
+	    							Pageable pageable  = new PageRequest(page, pageSize);
+	    							TCResponse<HolMidBaseInfo> findByProperty = holMongoQuery.findByProperty(queryProperty, pageable, HolMidBaseInfo.class);
+	    							if(StringUtil.isNotNullOrEmpty(findByProperty) && StringUtil.isNotNullOrEmpty(findByProperty.getResponseResult())) {
+	    								HolMidBaseInfo oneMidInfo = findByProperty.getResponseResult().get(0);
+	    								oneMidInfo.setTcResId(tcResBaseInfo.getResId());
+	    								oneMidInfo.setTcResName(tcResBaseInfo.getResName());
+	    								oneMidInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
+	    								oneMidInfo.setSupplierNo(oneMidInfo.getSupplierNo()+",411709261204150108");
+	    								mongoTemplate.save(oneMidInfo, "holMidBaseInfo");
+	    							}else {
+		    							*//**
+		    							 * 保存中间表
+		    							 *//*
+		    							HolMidBaseInfo holMidBaseInfo =new HolMidBaseInfo();
+		    							holMidBaseInfo.setId(IdWorker.getId());
+		    							holMidBaseInfo.setTcResId(tcResBaseInfo.getResId());
+		    							holMidBaseInfo.setTcResName(tcResBaseInfo.getResName());
+		    							holMidBaseInfo.setProvName(tcResBaseInfo.getProvName());
+		    							holMidBaseInfo.setCityName(tcResBaseInfo.getCityName());
+		    							holMidBaseInfo.setIsInter(tcResBaseInfo.getIsInter());
+		    							//酒店品牌
+		    							ResBrandInfo resBrandInfo = new ResBrandInfo();
+		    							ResBrandInfo tcBrandInfo = tcResBaseInfo.getBrandInfo();
+		    							if(StringUtil.isNotNullOrEmpty(tcBrandInfo)) {
+		    								if(StringUtils.isNotEmpty(tcBrandInfo.getResBrandName())) {
+		    									resBrandInfo.setResBrandName(tcBrandInfo.getResBrandName());
+		    								}
+		    								if(StringUtil.isNotNullOrEmpty(tcBrandInfo.getResBrandType())) {
+		    									resBrandInfo.setResBrandType(tcBrandInfo.getResBrandType());
+		    								}
+			    							holMidBaseInfo.setBrandInfo(resBrandInfo);
+		    							}
+		    							
+		    							holMidBaseInfo.setAddress(tcResBaseInfo.getAddress());
+		    							if(StringUtil.isNotNullOrEmpty(tcResBaseInfo.getResPhone())) {
+		    								String replaceAll = tcResBaseInfo.getResPhone().replaceAll(" ", "");
+		    								holMidBaseInfo.setResPhone(replaceAll);
+		    							}
+		    							holMidBaseInfo.setIntro(tcResBaseInfo.getIntro());
+		    							//酒店等级
+		    							holMidBaseInfo.setResGrade(tcResBaseInfo.getResGradeId());
+		    							
+		    							//酒店坐标
+		    							for(ResGPSInfo gps : tcResBaseInfo.getResGPS()) {
+		    								if(gps.getType().equals(1)) {
+		    									holMidBaseInfo.setLatLonType(gps.getType());
+				    							holMidBaseInfo.setLat(gps.getLat());
+				    							holMidBaseInfo.setLon(gps.getLon());
+				    							break;
+		    								}
+		    							}
+		    							
+		    							
+		    							//holMidBaseInfo.setCountryName("中国");
+		    							//一句话介绍...酒店描述
+		    							
+		    							//酒店图片
+		    							if(StringUtil.isNotNullOrEmpty(tcResBaseInfo.getImgInfoList())) {
+		    								holMidBaseInfo.setTitleImg(tcResBaseInfo.getImgInfoList().get(0).getImageUrl());
+		    							}
+		    							holMidBaseInfo.setMinPrice(tcResBaseInfo.getMinPrice());
+		    							holMidBaseInfo.setSupplierNo("411709261204150108");
+		    							holMidBaseInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
+		    							holMidBaseInfo.setSaleStatus(1);
+		    							holMidBaseInfo.setBookTimes(1L);
+		    							holMidBaseInfo.setBookRemark(tcResBaseInfo.getLocation());
+		    							mongoTemplate.save(holMidBaseInfo, "holMidBaseInfo");
+		    						}
+	    						}*/
+	    						
+	    						ResIdList resIdList =new ResIdList();
+	    						resIdList.setId(resId);
+	    						mongoTemplate1.save(resIdList, "resIdList");
+    					}
+    				}
 			}
+	}
+			
+			
 		} catch (GSSException e) {
 			LogRecordHol logRecordHol=new LogRecordHol();
 			logRecordHol.setBizCode("HOL-IncrDetail");
@@ -460,12 +660,12 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 							}
 							resBaseInfoList.get(0).setProDetails(ProInfoDetaisList);
 						}
-						/*if(StringUtil.isNotNullOrEmpty(hotelDetailImg)){
+						if(StringUtil.isNotNullOrEmpty(hotelDetailImg)){
 							List<ImgInfo> list2=new ArrayList<ImgInfo>();
 							list2.addAll(imgInfoList);
 							resBaseInfoList.get(0).setImgInfoList(list2);
-						}*/
-						List<ImgInfo> list2=new ArrayList<ImgInfo>();
+						}
+						/*List<ImgInfo> list2=new ArrayList<ImgInfo>();
 						ImgInfoSum imgInfoSum = new ImgInfoSum();
 						if(imgInfoList!=null && imgInfoList.size() > 0) {
 							for(ImgInfo img : imgInfoList) {
@@ -477,7 +677,8 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 							imgInfoSum.setId(imgInfoList.get(0).getResId());
 							imgInfoSum.setImgInfoList(imgInfoList);
 							mongoTemplate1.save(imgInfoSum, "imgInfoSum");
-						}
+						}*/
+						
 						resBaseInfoList.get(0).setId(Long.valueOf(resId));
 						List<String> strs  = Tool.intToTwoPower(resBaseInfoList.get(0).getCreditCards().intValue());
 						resBaseInfoList.get(0).setCreditCardsTarget(strs);
