@@ -11,6 +11,7 @@ import com.tempus.gss.product.hol.api.entity.request.tc.IncrHotelList;
 import com.tempus.gss.product.hol.api.entity.request.tc.SingleHotelDetailReq;
 import com.tempus.gss.product.hol.api.entity.response.tc.AssignDateHotel;
 import com.tempus.gss.product.hol.api.entity.response.tc.CancelReasonModel;
+import com.tempus.gss.product.hol.api.entity.response.tc.IncrHotelPrice;
 import com.tempus.gss.product.hol.api.entity.response.tc.OrderLogModel;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResInfoList;
@@ -44,7 +45,7 @@ public interface ITCHotelInterService {
 	 * @param incrHotelList
 	 * @return
 	 */
-	public List<ResourceProductIds> queryIncrHotelList(IncrHotelList incrHotelList) throws GSSException;
+	public IncrHotelPrice queryIncrHotelList(IncrHotelList incrHotelList) throws GSSException;
 	
 	/**
 	 * 获取同程某一时间段/某个月的酒店价格和库存信息
