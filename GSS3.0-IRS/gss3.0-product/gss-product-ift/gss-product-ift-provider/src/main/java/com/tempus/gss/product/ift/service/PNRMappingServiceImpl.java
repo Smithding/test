@@ -68,7 +68,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
             getFSI( queryIBEDetail);
             queryService.mappingPriceSpec(queryIBEDetail, customerType, agent);
         } catch (Exception e) {
-            log.info("pnr匹配出错", e);
+            log.error("pnr匹配出错", e);
             return queryIBEDetail;
         }
         return queryIBEDetail;
