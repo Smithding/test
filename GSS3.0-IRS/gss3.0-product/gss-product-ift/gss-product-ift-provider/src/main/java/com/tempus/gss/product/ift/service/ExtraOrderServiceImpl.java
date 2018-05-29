@@ -107,6 +107,7 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
         Integer[] createTypeArray ={7,8,9,10,11,12};
         List<SaleOrderExt> saleOrderExts =orderService.getAssignedOrders(createTypeArray);
         if(saleOrderExts!=null && saleOrderExts.size()>0) {
+            logger.info("更新杂费单订单数量："+saleOrderExts.size());
             Date date = new Date();
             for (SaleOrderExt orderExt : saleOrderExts) {
                 Long saleOrderNo = orderExt.getSaleOrderNo();
