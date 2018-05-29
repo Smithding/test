@@ -633,7 +633,8 @@
         i.SALE_CHANGE_NO, i.ID, i.OWNER, i.REFUND_WAY, i.MODIFIER, i.STATUS, i.MODIFY_TIME,
         i.VALID, i.CREATE_TIME, i.CREATOR, i.LOCKER, i.LOCK_TIME, i.CHANGE_TYPE, i.CONTACT_NAME, i.CONTACT_MOBILE,
         i.CUSTOMER_REMARK, i.REFUSE_REASON,i.TICKET_CHANGE_TYPE
-        ,i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO,su.LOGIN_NAME
+        ,i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO,/*su.LOGIN_NAME,*/
+        (SELECT NAME FROM SM_USER where ID = i.LOCKER) as LOGIN_NAME
         FROM
         IFT_SALE_CHANGE_EXT i
         left join OS_SALECHANGE o on o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
@@ -659,57 +660,33 @@
             </if>
             <if test="beforeDate!=null and beforeDate !='' ">
                 <![CDATA[
-
-
                     AND    DATE_FORMAT(i.CREATE_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{beforeDate,jdbcType=TIMESTAMP},'%Y-%m-%d')
-
-
                 ]]>
             </if>
             <if test="endDate!=null and endDate !=''">
                 <![CDATA[
-
-
 	            	AND DATE_FORMAT(i.CREATE_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{endDate,jdbcType=TIMESTAMP},'%Y-%m-%d')
-
-
                 ]]>
             </if>
             <if test="auditStartTime!=null and auditStartTime !='' ">
                 <![CDATA[
-
-
 	                AND DATE_FORMAT(i.AUDIT_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{auditStartTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
-
-
                 ]]>
             </if>
             <if test="auditEndTime!=null and auditEndTime !=''">
                 <![CDATA[
-
-
 	             	AND DATE_FORMAT(i.AUDIT_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{auditEndTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
-
-
                 ]]>
             </if>
 
             <if test="depStartTime!=null and depStartTime !='' ">
                 <![CDATA[
-
-
 	                AND DATE_FORMAT(l.DEP_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{depStartTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
-
-
                 ]]>
             </if>
             <if test="depEndTime!=null and depEndTime !=''">
                 <![CDATA[
-
-
 	             	AND DATE_FORMAT(l.DEP_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{depEndTime,jdbcType=TIMESTAMP},'%Y-%m-%d')
-
-
                 ]]>
             </if>
             <if test="refundWay != null">

@@ -4,37 +4,27 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
-import com.tempus.gss.cps.entity.Supplier;
-import com.tempus.gss.cps.service.ISupplierService;
+import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.log.entity.LogRecord;
 import com.tempus.gss.log.service.ILogService;
-import com.tempus.gss.order.entity.BuyOrder;
 import com.tempus.gss.order.entity.SaleOrder;
 import com.tempus.gss.order.entity.TransationOrder;
-import com.tempus.gss.order.service.IBuyOrderService;
 import com.tempus.gss.order.service.ISaleOrderService;
 import com.tempus.gss.order.service.ITransationOrderService;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.*;
 import com.tempus.gss.product.ift.api.entity.vo.OrderCreateVo;
-import com.tempus.gss.product.ift.api.entity.vo.SaleQueryOrderVo;
 import com.tempus.gss.product.ift.api.service.IExtraOrderService;
 import com.tempus.gss.product.ift.api.service.IOrderService;
-import com.tempus.gss.product.ift.dao.BuyOrderExtDao;
-import com.tempus.gss.product.ift.dao.LegDao;
-import com.tempus.gss.product.ift.dao.PassengerDao;
-import com.tempus.gss.product.ift.dao.PnrDao;
+import com.tempus.gss.product.ift.dao.*;
 import com.tempus.gss.system.service.IMaxNoService;
 import com.tempus.gss.vo.Agent;
-import com.tempus.tbe.entity.PnrOutPut;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
-import sun.print.SunMinMaxPage;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -47,9 +37,9 @@ import java.util.*;
  **/
 @Service
 public class ExtraOrderServiceImpl implements IExtraOrderService {
-
+    
     private static Logger logger = LogManager.getLogger(ExtraOrderServiceImpl.class);
-
+    
     @Reference
     ITransationOrderService transationOrderService;
     @Reference
@@ -65,69 +55,93 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
     @Autowired
     PassengerDao passengerDao;
     @Autowired
+    SaleOrderDetailDao saleOrderDetailDao;
+    @Autowired
     PnrDao pnrDao;
     @Autowired
     BuyOrderExtDao buyOrderExtDao;
     @Value("${dpsconfig.job.owner}")
     protected String owner;
-
-
-
+    
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void createExtraOrder(Agent agent, RequestWithActor<OrderCreateVo> requestWithActor) {
         validateParam(requestWithActor);
-        logger.info("开始国际机票预订,预订参数:"+ JSONObject.toJSONString(requestWithActor));
-        SaleOrderExt saleOrderExt =  requestWithActor.getEntity().getSaleOrderExt();
+        logger.info("开始国际机票预订,预订参数:" + JSONObject.toJSONString(requestWithActor));
+        SaleOrderExt saleOrderExt = requestWithActor.getEntity().getSaleOrderExt();
         Long transactionId = IdWorker.getId();
-        logger.info("国际机票白屏预订交易单号:{}",transactionId);
+        logger.info("国际机票白屏预订交易单号:{}", transactionId);
         //saleOrderExt.setSaleOrder(getSaleOrder(agent,transactionId));
         String contact = saleOrderExt.getContactName();//联系人
         String mobile = saleOrderExt.getContactMobile();
         Date createTime = new Date();
         //保存交易单信息
-        saveTransactionOrder(agent,contact,mobile,transactionId,createTime);
+        saveTransactionOrder(agent, contact, mobile, transactionId, createTime);
         List<Passenger> passengers = saleOrderExt.getPassengerList();
         BigDecimal receivable = this.getRecivable(passengers);
-        SaleOrder saleOrder = getSaleOrder(agent,transactionId);
+        SaleOrder saleOrder = getSaleOrder(agent, transactionId);
         saleOrder.setReceivable(receivable);
         saleOrderExt.setSaleOrder(saleOrder);
+        List<SaleOrderDetail> oldSDList = saleOrderExt.getSaleOrderDetailList();
+        Map<String, String> passengerTicketMap = new HashMap<>(200);
+        for (SaleOrderDetail oldSD : oldSDList) {
+            if (null != oldSD.getPassenger()) {
+                if (StringUtil.isNotNullOrEmpty(oldSD.getPassenger().getName()) && StringUtil.isNotNullOrEmpty(oldSD.getPassenger().getSurname())) {
+                    String key = oldSD.getPassenger().getSurname() + oldSD.getPassenger().getName();
+                    if (!passengerTicketMap.containsKey(key)) {
+                        passengerTicketMap.put(key, oldSD.getTicketNo());
+                    }
+                }
+            }
+        }
         requestWithActor.getEntity().setSaleOrderExt(saleOrderExt);
         try {
             //调用国际订单创建接口
-          orderService.createOrder(requestWithActor);
+            SaleOrderExt createResult = orderService.createOrder(requestWithActor);
+            if (null != createResult) {
+                //用legNo来对应修改票号
+                List<SaleOrderDetail> detaiList = createResult.getSaleOrderDetailList();
+                for (SaleOrderDetail saleOrderDetail : detaiList) {
+                    /* 设置票号*/
+                    if (null != saleOrderDetail.getPassenger()) {
+                        String newKey = saleOrderDetail.getPassenger().getSurname() + saleOrderDetail.getPassenger().getName();
+                        saleOrderDetail.setTicketNo(passengerTicketMap.get(newKey));
+                        int u = saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
+                        logger.info("更新：{}----{}", saleOrderDetail.getSaleOrderDetailNo(), u >= 1);
+                    }
+                }
+            }
         } catch (Exception e) {
-            logger.error("国际机票白屏预订有误",e);
+            logger.error("国际机票白屏预订有误", e);
             throw new RuntimeException(e);
         }
     }
-
+    
     @Override
     public void updateExtraOrderStatus() {
-        Integer[] createTypeArray ={7,8,9,10,11,12};
-        List<SaleOrderExt> saleOrderExts =orderService.getAssignedOrders(createTypeArray);
-        if(saleOrderExts!=null && saleOrderExts.size()>0) {
-            logger.info("更新杂费单订单数量："+saleOrderExts.size());
+        Integer[] createTypeArray = {7, 8, 9, 10, 11, 12};
+        List<SaleOrderExt> saleOrderExts = orderService.getAssignedOrders(createTypeArray);
+        if (saleOrderExts != null && saleOrderExts.size() > 0) {
+            logger.info("更新杂费单订单数量：" + saleOrderExts.size());
             Date date = new Date();
             for (SaleOrderExt orderExt : saleOrderExts) {
                 Long saleOrderNo = orderExt.getSaleOrderNo();
                 Agent agent = new Agent(Integer.valueOf(owner));
                 try {
                     saleOrderService.updateStatus(agent, saleOrderNo, 4);
-                    saveLog(saleOrderNo,date);
+                    saveLog(saleOrderNo, date);
                 } catch (Exception e) {
                     logger.error("杂费单状态修改异常：", e);
                 }
             }
             logger.info("本次更新杂费单状态结束");
-        }else{
+        } else {
             logger.info("本次更新杂费单状态数量为0");
         }
     }
-
-
+    
     //保存日志
-    private void saveLog(Long orderNo,Date date){
+    private void saveLog(Long orderNo, Date date) {
         try {
             LogRecord logRecord = new LogRecord();
             logRecord.setAppCode("IFT");
@@ -139,25 +153,25 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
             logRecord.setBizCode("IFT-ExtraOrderServiceImpl-updateExtraOrderStatus");
             logRecord.setBizNo(String.valueOf(orderNo));
             logerService.insert(logRecord);
-        }catch (Exception e){
-            logger.error("定时更新杂费单状态时保存日志异常",e);
+        } catch (Exception e) {
+            logger.error("定时更新杂费单状态时保存日志异常", e);
         }
     }
-
+    
     /** 获取已支付的杂费订单 */
-    private void validateParam(RequestWithActor<OrderCreateVo> requestWithActor){
-          /* 校验登录用户 */
+    private void validateParam(RequestWithActor<OrderCreateVo> requestWithActor) {
+        /* 校验登录用户 */
         if (requestWithActor.getAgent() == null) {
             throw new GSSException("登录用户为空", "0101", "创建订单失败");
         }
-
-         /* 校验条件 */
+        
+        /* 校验条件 */
         if (requestWithActor.getEntity() == null) {
             throw new GSSException("销售单为空", "0101", "创建订单失败");
         }
-
-        SaleOrderExt saleOrderExt =  requestWithActor.getEntity().getSaleOrderExt();
-
+        
+        SaleOrderExt saleOrderExt = requestWithActor.getEntity().getSaleOrderExt();
+        
         if (saleOrderExt.getLegList() == null && saleOrderExt.getPassengerList() == null) {
             throw new GSSException("航程或乘客为空", "0102", "创建订单失败");
         }
@@ -178,9 +192,9 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
             throw new GSSException("销售单的用户登录名为空(OrderingLoginName)", "0102", "创建订单失败");
         }
     }
-
+    
     //获取交易单
-    private SaleOrder getSaleOrder(Agent agent,Long transactionId){
+    private SaleOrder getSaleOrder(Agent agent, Long transactionId) {
         SaleOrder saleOrder = new SaleOrder();
         saleOrder.setTransationOrderNo(transactionId);
         saleOrder.setSourceChannelNo(agent.getDevice());
@@ -190,9 +204,9 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
         saleOrder.setOrderType(1);
         return saleOrder;
     }
-
+    
     //构造交易单信息
-    private void saveTransactionOrder(Agent agent,String contacts,String mobile,Long transactionId,Date createTime){
+    private void saveTransactionOrder(Agent agent, String contacts, String mobile, Long transactionId, Date createTime) {
         TransationOrder transationOrder = new TransationOrder();
         transationOrder.setContacts(contacts);
         transationOrder.setCreateTime(createTime);
@@ -207,11 +221,10 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
         transationOrder.setValid(1);
         //生成交易单
         transationOrderService.create(agent, transationOrder);
-        logger.info("杂费单交易信息：{}",transationOrder.toString());
+        logger.info("杂费单交易信息：{}", transationOrder.toString());
     }
-
-
-    private BigDecimal getRecivable(List<Passenger> passengers){
+    
+    private BigDecimal getRecivable(List<Passenger> passengers) {
         BigDecimal sum = new BigDecimal(0);
         for (Passenger passenger : passengers) {
             if ("1".equals(passenger.getPassengerType())) {
@@ -231,8 +244,7 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
             }
             sum = sum.add(passenger.getSalePrice());
         }
-        return  sum;
+        return sum;
     }
-
-
+    
 }

@@ -380,22 +380,19 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     @Transactional
     public SaleOrderExt createOrder(RequestWithActor<OrderCreateVo> requestWithActor) throws Exception {
-        
-        //log.info("创建订单开始========"+JsonUtil.toJson(requestWithActor));
+
+//        log.info("创建订单开始========" + JsonUtil.toJson(requestWithActor));
         
         /* 校验登录用户 */
         if (requestWithActor.getAgent() == null) {
             throw new GSSException("登录用户为空", "0101", "创建订单失败");
         }
-        
         /* 校验条件 */
         if (requestWithActor.getEntity() == null) {
             throw new GSSException("销售单为空", "0101", "创建订单失败");
         }
-        
         /* 校验销售单条件 */
         SaleOrderExt saleOrderExt = requestWithActor.getEntity().getSaleOrderExt();
-        //System.out.println(JsonUtil.toJson(saleOrderExt));
         if (saleOrderExt.getLegList() == null && saleOrderExt.getPassengerList() == null) {
             throw new GSSException("航程或乘客为空", "0102", "创建订单失败");
         }
@@ -429,12 +426,14 @@ public class OrderServiceImpl implements IOrderService {
                 leg.setSaleOrderNo(saleOrderNo);
                 leg.setLegNo(maxNoService.generateBizNo("IFT_LEG_NO", 27));
                 leg.setParentSection(i);
-                leg.setStatus(String.valueOf(1));// 启用状态
+                // 启用状态
+                leg.setStatus(String.valueOf(1));
                 leg.setValid((byte) 1);
                 leg.setCreator(creator);
                 leg.setCreateTime(today);
                 leg.setOwner(agent.getOwner());
-                leg.setChildSection(0);// 原始航段
+                // 原始航段
+                leg.setChildSection(0);
                 legdao.insertSelective(leg);
                 goodsName.append(leg.getDepAirport());
                 goodsName.append("-");
@@ -577,6 +576,7 @@ public class OrderServiceImpl implements IOrderService {
                     saleOrderDetail.setProfit(passenger.getProfit());
                     /* 创建销售订单明细 */
                     saleOrderDetailDao.insertSelective(saleOrderDetail);
+                    saleOrderDetail.setPassenger(passenger);
                     saleOrderDetailList.add(saleOrderDetail);
                 }
             }
@@ -634,6 +634,8 @@ public class OrderServiceImpl implements IOrderService {
             } catch (Exception e) {
                 log.error("添加操作日志异常===" + e);
             }
+            //将插入的数据原样返回
+            saleOrderExt.setSaleOrderDetailList(saleOrderDetailList);
             
         } catch (GSSException ex) {
             log.error("创建订单失败", ex);
@@ -1840,7 +1842,7 @@ public class OrderServiceImpl implements IOrderService {
     @Deprecated
     public void assign() {
         log.info("第一步：查询符合条件的出票订单...");
-        Integer[] createTypeStatusArray={1,2,3,4,6};
+        Integer[] createTypeStatusArray = {1, 2, 3, 4, 6};
         List<SaleOrderExt> saleOrderExtList = getAssignedOrders(createTypeStatusArray);
         if (saleOrderExtList != null && saleOrderExtList.size() > 0) {
             log.info("查询到" + saleOrderExtList.size() + "条可分配订单...");
