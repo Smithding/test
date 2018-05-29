@@ -331,8 +331,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
  			int endResult= hotelSearchReq.getEnd().compareTo(sdf.format(dateAdd.getTime()));
  			if(beginResult >= 0 && endResult <= 0){
  				if(StringUtils.isNotEmpty(hotelSearchReq.getCityCode())){
+ 					criatira.and("cityName").regex("^.*"+hotelSearchReq.getCityCode()+".*$");
  					//criatira.and("cityName").is(hotelSearchReq.getCityCode());
- 					criatira.orOperator(Criteria.where("cityName").is(hotelSearchReq.getCityCode()), Criteria.where("sectionName").regex(".*?\\" +hotelSearchReq.getCityCode()+ ".*"));
+ 					//criatira.orOperator(Criteria.where("cityName").is(hotelSearchReq.getCityCode()), Criteria.where("sectionName").regex(".*?\\" +hotelSearchReq.getCityCode()+ ".*"));
  				}
  				if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getSaleStatus())){
  					criatira.and("saleStatus").is(hotelSearchReq.getSaleStatus());
