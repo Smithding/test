@@ -88,6 +88,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.AssignDateHotel;
 import com.tempus.gss.product.hol.api.entity.response.tc.BusinessSection;
 import com.tempus.gss.product.hol.api.entity.response.tc.CityAreaScenic;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfoSum;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProDetails;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProSaleInfoDetail;
@@ -637,21 +638,21 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			         	    	        					if(begincompare >= 0 && endCompare < 0){
 			         	    	        						mapPro.put(DateUtil.stringToSimpleString(entry.getKey()), entry.getValue());
 			         	    	        						Integer price= entry.getValue().getDistributionSalePrice();
-			         	    	        						/*if(!entry.getValue().getInventoryStats().equals(4)) {
+			         	    	        						if(!entry.getValue().getInventoryStats().equals(4)) {
 			         	    	        							int startDate = DateUtil.stringToSimpleString(entry.getValue().getStartDate()).compareTo(startTime);
 			         	    	        							int endDate = DateUtil.stringToSimpleString(entry.getValue().getEndDate()).compareTo(endTime);
 			         	    	        							if(startDate > 0 && endDate < 0) {
 			         	    	        								pro.setBookStatus(0);
 			         	    	        							}
-			         	    	        						}*/
-			         	    	        						/*if(days.equals(1)) {
+			         	    	        						}
+			         	    	        						if(days.equals(1)) {
 			         	    	        							Date startTime1 = DateUtil.stringToSimpleDate(entry.getValue().getStartTime());
 			         	    	        							Date endTime1 = DateUtil.stringToSimpleDate(entry.getValue().getEndTime());
 			         	    	        							Date nowDate = new Date();
 			         	    	        							if(nowDate.before(startTime1) || endTime1.before(nowDate)) {
 			         	    	        								pro.setBookStatus(0);
 			         	    	        							}
-			         	    	        						}*/
+			         	    	        						}
 			         	    	        						sumPrice += price;
 			         	    	        						kk += 1;
 			         	    	        						if(kk == 1) {
@@ -1168,10 +1169,19 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     								}
     								tcResBaseInfo.setProDetails(ProInfoDetaisList);
     							}
+    							List<ImgInfo> list2=new ArrayList<ImgInfo>();
+    							ImgInfoSum imgInfoSum = new ImgInfoSum();
     							if(imgInfoList!=null && imgInfoList.size() > 0) {
-    								List<ImgInfo> list2=new ArrayList<ImgInfo>();
-	    							list2.addAll(imgInfoList);
+    								for(ImgInfo img : imgInfoList) {
+    									if(img.getIsResDefault().equals(1) || img.getIsResProDefault().equals(1)) {
+    										list2.add(img);
+    									}
+    								}
+	    							//list2.addAll(imgInfoList);
 	    							tcResBaseInfo.setImgInfoList(list2);
+	    							imgInfoSum.setId(imgInfoList.get(0).getResId());
+	    							imgInfoSum.setImgInfoList(imgInfoList);
+	    							mongoTemplate1.save(imgInfoSum, "imgInfoSum");
     							}
     							
     							tcResBaseInfo.setSaleStatus(saleStatus);
