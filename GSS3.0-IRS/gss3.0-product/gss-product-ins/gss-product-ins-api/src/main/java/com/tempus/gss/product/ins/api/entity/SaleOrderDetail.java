@@ -153,6 +153,19 @@ public class SaleOrderDetail implements Serializable,Cloneable {
 	 * 0代表订单管理数据  1代表报表生成数据
 	 */
 	private String isReport;
+	/**
+	 * 投保失败错误信息
+	 * @return
+	 */
+	private String errorMessage;
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
 	public String getTicketNo() {
 		return ticketNo;
 	}

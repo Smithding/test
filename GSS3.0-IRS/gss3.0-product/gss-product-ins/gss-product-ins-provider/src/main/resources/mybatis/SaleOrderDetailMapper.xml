@@ -52,12 +52,13 @@
     <result column="MODIFIER" property="modifier" jdbcType="VARCHAR" />
     <!--删除标志 0 无效 已删除 1 有效-->
     <result column="VALID" property="valid" jdbcType="BIT" />
+    <result column="ERROR_MESSAGE" property="errorMessage" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
     INSURED_NO, ID, OWNER, SALE_ORDER_NO, INSURED_NAME, INSURED_CERTI_TYPE, INSURED_CERTI_NO, 
     POLICY_NO, ELE_URL, INSURED_BIRTHDAY, INSURED_SEX, INSURED_PHONE, INSURED_EMAIL, PREMIUM, 
     BENEFICIARY_TYPE, CUSTOMER_RELATIONS, INSURANCE_NUM, STATUS, CREATE_TIME, MODIFY_TIME, CREATOR, 
-    MODIFIER, VALID
+    MODIFIER, VALID,ERROR_MESSAGE
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
@@ -94,7 +95,7 @@
       INSURED_SEX, INSURED_PHONE, INSURED_EMAIL, 
       PREMIUM, BENEFICIARY_TYPE, CUSTOMER_RELATIONS, 
       INSURANCE_NUM, STATUS, CREATE_TIME, MODIFY_TIME, 
-      CREATOR, MODIFIER, VALID,ISREPORT
+      CREATOR, MODIFIER, VALID,ISREPORT,ERROR_MESSAGE
       )
     values (#{insuredNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER}, 
       #{saleOrderNo,jdbcType=BIGINT}, #{insuredName,jdbcType=VARCHAR}, #{insuredCertiType,jdbcType=VARCHAR}, 
@@ -102,7 +103,7 @@
       #{insuredSex,jdbcType=INTEGER}, #{insuredPhone,jdbcType=VARCHAR}, #{insuredEmail,jdbcType=VARCHAR}, 
       #{premium,jdbcType=DECIMAL}, #{beneficiaryType,jdbcType=INTEGER}, #{customerRelations,jdbcType=VARCHAR}, 
       #{insuranceNum,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP}, 
-      #{creator,jdbcType=VARCHAR}, #{modifier,jdbcType=VARCHAR}, #{valid,jdbcType=BIT},#{isReport,jdbcType=VARCHAR}
+      #{creator,jdbcType=VARCHAR}, #{modifier,jdbcType=VARCHAR}, #{valid,jdbcType=BIT},#{isReport,jdbcType=VARCHAR},#{errorMessage,jdbcType=VARCHAR}
       )
   </insert>
   <insert id="insertSelective" parameterType="com.tempus.gss.product.ins.api.entity.SaleOrderDetail" >
@@ -180,6 +181,9 @@
       <if test="isReport != null" >
         ISREPORT,
       </if>
+       <if test="errorMessage != null" >
+        ERROR_MESSAGE,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="insuredNo != null" >
@@ -254,6 +258,9 @@
       <if test="isReport != null" >
         #{isReport,jdbcType=VARCHAR},
       </if>
+       <if test="errorMessage != null" >
+        #{errorMessage,jdbcType=VARCHAR},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ins.api.entity.SaleOrderDetail" >
@@ -325,6 +332,9 @@
       <if test="valid != null" >
         VALID = #{valid,jdbcType=BIT},
       </if>
+       <if test="errorMessage != null" >
+        ERROR_MESSAGE = #{errorMessage,jdbcType=VARCHAR},
+      </if>
     </set>
     where INSURED_NO = #{insuredNo,jdbcType=BIGINT}
   </update>
@@ -351,7 +361,8 @@
       MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
       CREATOR = #{creator,jdbcType=VARCHAR},
       MODIFIER = #{modifier,jdbcType=VARCHAR},
-      VALID = #{valid,jdbcType=BIT}
+      VALID = #{valid,jdbcType=BIT},
+      ERROR_MESSAGE = #{errorMessage,jdbcType=VARCHAR}
     where INSURED_NO = #{insuredNo,jdbcType=BIGINT}
   </update>
   
