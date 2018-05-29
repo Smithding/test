@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.entity.response.tc;
 
 import java.io.Serializable;
+import java.util.List;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -42,7 +43,7 @@ public class ImgInfo implements Serializable{
 	 * 例：ProId=123_4_5,则 123 即为 ResProId）
 	 */
 	@JSONField(name = "ResProId")
-	private Integer resProId;
+	private String resProId;
 	/**
 	 * 排 序 值 （ 倒 序 ， 酒 店 的 排 序 ：ResDefault > ResProDefault > Sort）
 	 */
@@ -61,6 +62,11 @@ public class ImgInfo implements Serializable{
 	 */
 	@JSONField(name = "Description")
 	private String description;
+	/**
+	 * 文字描述
+	 */
+	@JSONField(name = "Location")
+	private List<Location> location;
 	public Long getResId() {
 		return resId;
 	}
@@ -70,6 +76,7 @@ public class ImgInfo implements Serializable{
 	public String getImageName() {
 		return imageName;
 	}
+	@JSONField(deserialize=false)
 	public void setImageName(String imageName) {
 		this.imageName = imageName;
 	}
@@ -91,10 +98,10 @@ public class ImgInfo implements Serializable{
 	public void setIsResProDefault(Integer isResProDefault) {
 		this.isResProDefault = isResProDefault;
 	}
-	public Integer getResProId() {
+	public String getResProId() {
 		return resProId;
 	}
-	public void setResProId(Integer resProId) {
+	public void setResProId(String resProId) {
 		this.resProId = resProId;
 	}
 	public Integer getSort() {
@@ -114,6 +121,13 @@ public class ImgInfo implements Serializable{
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	public List<Location> getLocation() {
+		return location;
+	}
+	@JSONField(deserialize=false)
+	public void setLocation(List<Location> location) {
+		this.location = location;
 	}
 	
 	
