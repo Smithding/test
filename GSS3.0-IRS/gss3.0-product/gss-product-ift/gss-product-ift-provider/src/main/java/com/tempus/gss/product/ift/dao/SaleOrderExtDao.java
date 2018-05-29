@@ -88,6 +88,6 @@ public interface SaleOrderExtDao extends BaseDao<SaleOrderExt, SaleOrderExtVo> {
 	 */
 	List<SaleOrderExt> selectOutTicketOrder(Page<SaleOrderExt> page,SaleQueryOrderVo saleQueryOrderVo);
 
-	//获取未锁定的出票单
-	List<SaleOrderExt> queryNoHandOrder();
+	/*//获取未锁定的出票单
+	List<SaleOrderExt> queryNoHandOrder();*/
 }
