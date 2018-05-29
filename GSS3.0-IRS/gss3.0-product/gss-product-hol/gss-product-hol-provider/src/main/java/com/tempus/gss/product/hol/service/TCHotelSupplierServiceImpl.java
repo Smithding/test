@@ -637,13 +637,21 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			         	    	        					if(begincompare >= 0 && endCompare < 0){
 			         	    	        						mapPro.put(DateUtil.stringToSimpleString(entry.getKey()), entry.getValue());
 			         	    	        						Integer price= entry.getValue().getDistributionSalePrice();
-			         	    	        						if(!entry.getValue().getInventoryStats().equals(4)) {
+			         	    	        						/*if(!entry.getValue().getInventoryStats().equals(4)) {
 			         	    	        							int startDate = DateUtil.stringToSimpleString(entry.getValue().getStartDate()).compareTo(startTime);
 			         	    	        							int endDate = DateUtil.stringToSimpleString(entry.getValue().getEndDate()).compareTo(endTime);
 			         	    	        							if(startDate > 0 && endDate < 0) {
 			         	    	        								pro.setBookStatus(0);
 			         	    	        							}
-			         	    	        						}
+			         	    	        						}*/
+			         	    	        						/*if(days.equals(1)) {
+			         	    	        							Date startTime1 = DateUtil.stringToSimpleDate(entry.getValue().getStartTime());
+			         	    	        							Date endTime1 = DateUtil.stringToSimpleDate(entry.getValue().getEndTime());
+			         	    	        							Date nowDate = new Date();
+			         	    	        							if(nowDate.before(startTime1) || endTime1.before(nowDate)) {
+			         	    	        								pro.setBookStatus(0);
+			         	    	        							}
+			         	    	        						}*/
 			         	    	        						sumPrice += price;
 			         	    	        						kk += 1;
 			         	    	        						if(kk == 1) {
