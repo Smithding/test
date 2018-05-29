@@ -2830,8 +2830,13 @@ public class OrderServiceImpl implements IOrderService {
     
     /** 获取可以出票的分配订单 */
     public List<SaleOrderExt> getAssignedOrders(Integer[] createTypeStatusArray) {
-
-        List<SaleOrderExt> saleOrderExtList = saleOrderExtDao.queryNoHandOrder(); //获取未锁定的出票单
+        SaleQueryOrderVo saleQueryOrderVo = new SaleQueryOrderVo();
+        saleQueryOrderVo.setPayStatuss("3,4");
+        saleQueryOrderVo.setValid((byte) 1);
+        saleQueryOrderVo.setOrderStatus(2);
+        saleQueryOrderVo.setLocker(0L);
+        saleQueryOrderVo.setCreateTypeStatusArray(createTypeStatusArray);
+        List<SaleOrderExt> saleOrderExtList = saleOrderExtDao.queryAssignOrder(saleQueryOrderVo);
         return saleOrderExtList;
     }
     
