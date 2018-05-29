@@ -189,11 +189,11 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 	public AssignDateHotel queryAssignDateHotel(AssignDateHotelReq assignDateHotelReq) throws GSSException{
 		//log.info("查询某一时间内的酒店价格和库存信息开始");
 		String reqJson= JSONObject.toJSONString(assignDateHotelReq);
-		System.out.println("查询某一时间内的酒店价格的入参为：--------"+reqJson);
+		//System.out.println("查询某一时间内的酒店价格的入参为：--------"+reqJson);
 		try {
 			String resultJson= httpClientUtil.doTCJsonPost(PRICE_REPO_URL, reqJson);
 			if(StringUtil.isNotNullOrEmpty(resultJson)){
-				System.out.println("返回值为：--------"+resultJson);
+				//System.out.println("返回值为：--------"+resultJson);
 				ResultTc<AssignDateHotel> ass=JsonUtil.toBean(resultJson, new TypeReference<ResultTc<AssignDateHotel>>(){} );
 				if(ass.getRet_code().equals("200") && StringUtil.isNotNullOrEmpty(ass.getResult())){
 					AssignDateHotel assignDateHotel= ass.getResult();
