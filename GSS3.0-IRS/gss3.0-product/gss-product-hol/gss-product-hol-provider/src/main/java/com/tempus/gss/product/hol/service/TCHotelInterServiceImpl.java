@@ -8,8 +8,10 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import org.apache.commons.lang.StringUtils;
@@ -425,10 +427,30 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
     								tcResBaseInfo.setProDetails(ProInfoDetaisList);
     							}
     							
-    							if(imgInfoList!=null && imgInfoList.size() > 0) {
+    							/*if(imgInfoList!=null && imgInfoList.size() > 0) {
     								List<ImgInfo> list2=new ArrayList<ImgInfo>();
 	    							list2.addAll(imgInfoList);
 	    							tcResBaseInfo.setImgInfoList(list2);
+    							}*/
+    							List<ImgInfo> list2=new ArrayList<ImgInfo>();
+    							ImgInfoSum imgInfoSum = new ImgInfoSum();
+    							Map<String, ImgInfo> mm = new HashMap<String, ImgInfo>();
+    							if(imgInfoList!=null && imgInfoList.size() > 0) {
+    								for(ImgInfo img : imgInfoList) {
+    									if(img.getIsResDefault().equals(1)) {
+    										mm.put("1", img);
+    									}else if(img.getIsResProDefault().equals(1)){
+    										mm.put(img.getResProId(), img);
+    									}
+    								}
+    								for (Map.Entry<String, ImgInfo> entry : mm.entrySet()) {
+    									list2.add(entry.getValue());
+    								}
+	    							//list2.addAll(imgInfoList);
+	    							tcResBaseInfo.setImgInfoList(list2);
+	    							imgInfoSum.setId(imgInfoList.get(0).getResId());
+	    							imgInfoSum.setImgInfoList(imgInfoList);
+	    							mongoTemplate1.save(imgInfoSum, "imgInfoSum");
     							}
     							
     							tcResBaseInfo.setSaleStatus(saleStatus);
@@ -660,24 +682,31 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 							}
 							resBaseInfoList.get(0).setProDetails(ProInfoDetaisList);
 						}
-						if(StringUtil.isNotNullOrEmpty(hotelDetailImg)){
+						/*if(StringUtil.isNotNullOrEmpty(hotelDetailImg)){
 							List<ImgInfo> list2=new ArrayList<ImgInfo>();
 							list2.addAll(imgInfoList);
 							resBaseInfoList.get(0).setImgInfoList(list2);
-						}
-						/*List<ImgInfo> list2=new ArrayList<ImgInfo>();
+						}*/
+						List<ImgInfo> list2=new ArrayList<ImgInfo>();
 						ImgInfoSum imgInfoSum = new ImgInfoSum();
+						Map<String, ImgInfo> mm = new HashMap<String, ImgInfo>();
 						if(imgInfoList!=null && imgInfoList.size() > 0) {
 							for(ImgInfo img : imgInfoList) {
-								if(img.getIsResDefault().equals(1) || img.getIsResProDefault().equals(1)) {
-									list2.add(img);
+								if(img.getIsResDefault().equals(1)) {
+									mm.put("1", img);
+								}else if(img.getIsResProDefault().equals(1)){
+									mm.put(img.getResProId(), img);
 								}
 							}
+							for (Map.Entry<String, ImgInfo> entry : mm.entrySet()) {
+								list2.add(entry.getValue());
+							}
+							//list2.addAll(imgInfoList);
 							resBaseInfoList.get(0).setImgInfoList(list2);
 							imgInfoSum.setId(imgInfoList.get(0).getResId());
 							imgInfoSum.setImgInfoList(imgInfoList);
 							mongoTemplate1.save(imgInfoSum, "imgInfoSum");
-						}*/
+						}
 						
 						resBaseInfoList.get(0).setId(Long.valueOf(resId));
 						List<String> strs  = Tool.intToTwoPower(resBaseInfoList.get(0).getCreditCards().intValue());
