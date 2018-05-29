@@ -197,6 +197,9 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
         return ticketSenderDao.updateByPrimaryKey(ticketSender);
     }
 
+    /*
+        没有用
+     */
     @Override
     public List<TicketSender> getOnlineTicketSender(Integer onLine) {
         TicketSenderVo ticketSenderVo = new TicketSenderVo();

@@ -727,6 +727,8 @@ public class OrderServiceImpl implements IOrderService {
 					// 更新采购单状态为2(已投保)
 					saleOrderService.updateStatus(requestWithActor.getAgent(), requestWithActor.getEntity(), 2);
 				} else {
+					saleOrderDetail.setErrorMessage(response.getMsg());
+					saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					log.error(response.getMsg());
 					throw new GSSException(response.getMsg(), "1010", "投保失败");
 				}
@@ -1085,6 +1087,8 @@ public class OrderServiceImpl implements IOrderService {
 						insureNoArray.append(policyNo).append(",");
 					}
 				} else {
+					saleOrderDetail.setErrorMessage(response.getMsg());
+					saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					log.error(response.getMsg());
 					saleOrderService.updateStatus(agent, saleOrderNo, 4);
 					buyOrderService.updateStatus(agent, buyOrderNo, 4);
@@ -1217,6 +1221,8 @@ public class OrderServiceImpl implements IOrderService {
 					buyOrderService.updateStatus(agent,buyOrderNo,2);
 					log.error("调用采购单结束--------》");
 				} else {
+					saleOrderDetail.setErrorMessage(response.getMsg());
+					saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					log.error(response.getMsg());
 					saleOrderService.updateStatus(agent, saleOrderNo, 4);
 					buyOrderService.updateStatus(agent, buyOrderNo, 4);
@@ -1251,9 +1257,10 @@ public class OrderServiceImpl implements IOrderService {
 			e.printStackTrace();
 			log.error("调用保险经纪接口出错");
 			throw new GSSException("调用保险经纪接口出错", "1010", "投保失败");
+		}finally{
+			log.info("退出投保接口==============");
+			return true;	
 		}
-		log.info("退出投保接口==============");
-		return true;
 	}
 
 	/**

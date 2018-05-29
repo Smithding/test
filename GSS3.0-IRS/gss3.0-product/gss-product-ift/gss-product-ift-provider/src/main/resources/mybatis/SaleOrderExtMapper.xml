@@ -938,6 +938,72 @@
         </trim>
         order by f.CREATE_TIME desc
     </select>
+    <select id="queryNoHandOrder" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SaleQueryOrderVo">
+        SELECT DISTINCT
+			f.SALE_ORDER_NO,
+			f.ID,
+			f. OWNER,
+			f.DEMAND_NO,
+			f.LEG_TYPE,
+			f.CONTACT_NAME,
+			f.CONTACT_PHONE,
+			f.CONTACT_MOBILE,
+			f.CONTACT_MAIL,
+			f.SALE_REMARK,
+			f.VALID,
+			f.VERSION,
+			f.LOCKER,
+			f.LOCK_TIME,
+			f.CREATE_TYPE,
+			f.CREATE_TIME,
+			f.MODIFY_TIME,
+			(
+				SELECT
+					NAME
+				FROM
+					SM_USER
+				WHERE
+					LOGIN_NAME = f.CREATOR
+			) AS CREATOR,
+			(
+				SELECT
+					NAME
+				FROM
+					SM_USER
+				WHERE
+					LOGIN_NAME = aa.MODIFIER
+			) AS MODIFIER,
+			o.ORDER_CHILD_STATUS,
+			f.LINKTYPE,
+			(
+				SELECT
+					NAME
+				FROM
+					SM_USER
+				WHERE
+					ID = f.LOCKER
+			) AS HANDLERS,
+			f.ORIGINAL_ORDER_NO
+		FROM
+			IFT_SALE_ORDER_EXT f
+		LEFT JOIN OS_SALEORDER o ON f.SALE_ORDER_NO = o.SALE_ORDER_NO
+		LEFT JOIN IFT_LEG l ON l.SALE_ORDER_NO = f.SALE_ORDER_NO
+		LEFT JOIN IFT_PNR p ON p.SOURCE_NO = f.SALE_ORDER_NO
+		LEFT JOIN IFT_SALE_ORDER_DETAIL d ON d.SALE_ORDER_NO = f.SALE_ORDER_NO
+		LEFT JOIN IFT_PASSENGER a ON a.SALE_ORDER_NO = f.SALE_ORDER_NO
+		LEFT JOIN OS_BUYORDER aa ON f.SALE_ORDER_NO = aa.SALE_ORDER_NO
+		LEFT JOIN IFT_BUY_ORDER_EXT ab ON aa.BUY_ORDER_NO = ab.BUY_ORDER_NO
+		LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO = o.CUSTOMER_NO
+		LEFT JOIN IFT_BUY_ORDER_DETAIL IBOD ON IBOD.BUY_ORDER_NO = aa.BUY_ORDER_NO
+		WHERE
+			f.VALID = 1
+		 AND aa.BUY_CHILD_STATUS IN (1, 2)
+		AND f.LOCKER = 0
+		AND f.CREATE_TYPE IN (1, 2, 3, 4, 6)
+		AND o.PAY_STATUS IN (3, 4)
+		ORDER BY
+			f.CREATE_TIME DESC
+    </select>
 
     <select id="queryAssignOrder" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SaleQueryOrderVo">
         select DISTINCT
