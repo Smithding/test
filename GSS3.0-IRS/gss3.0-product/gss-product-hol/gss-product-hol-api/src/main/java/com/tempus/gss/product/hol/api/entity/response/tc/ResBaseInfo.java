@@ -465,6 +465,7 @@ public class ResBaseInfo implements Serializable{
 	public String getShortIntro() {
 		return shortIntro;
 	}
+	@JSONField(deserialize=false)
 	public void setShortIntro(String shortIntro) {
 		this.shortIntro = shortIntro;
 	}
