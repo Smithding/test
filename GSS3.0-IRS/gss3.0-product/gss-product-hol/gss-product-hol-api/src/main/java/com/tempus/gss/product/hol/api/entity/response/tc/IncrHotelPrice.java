@@ -17,6 +17,11 @@ public class IncrHotelPrice implements Serializable{
 	 */
 	@JSONField(name = "ResourceProductIdsList")
 	private List<ResourceProductIds> resourceProductIdsList;
+	/**
+	 * 最后更新的 id
+	 */
+	@JSONField(name = "EndIncrementId")
+	private Long endIncrementId;
 	
 	
 	public List<ResourceProductIds> getResourceProductIdsList() {
@@ -25,4 +30,11 @@ public class IncrHotelPrice implements Serializable{
 	public void setResourceProductIdsList(List<ResourceProductIds> resourceProductIdsList) {
 		this.resourceProductIdsList = resourceProductIdsList;
 	}
+	public Long getEndIncrementId() {
+		return endIncrementId;
+	}
+	public void setEndIncrementId(Long endIncrementId) {
+		this.endIncrementId = endIncrementId;
+	}
+	
 }
