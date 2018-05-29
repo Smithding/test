@@ -128,7 +128,7 @@ public interface ITCHotelOrderService {
 	 * 获取某一时间段内的发生变更的订单号及变更信息
 	 * @return
 	 */
-	public String incrOrderChangeInfo(Agent agent, IncrOrderChangeInfoReq incrOrderChangeInfoReq) throws GSSException;
+	public Long incrOrderChangeInfo(Agent agent, IncrOrderChangeInfoReq incrOrderChangeInfoReq) throws GSSException;
 	
 	/**
 	 * 同程推送订单状态
