@@ -41,6 +41,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.AllHotelList;
 import com.tempus.gss.product.hol.api.entity.response.tc.AssignDateHotel;
 import com.tempus.gss.product.hol.api.entity.response.tc.CancelReasonModel;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfoSum;
 import com.tempus.gss.product.hol.api.entity.response.tc.IncrHotelPrice;
 import com.tempus.gss.product.hol.api.entity.response.tc.OrderLogModel;
 import com.tempus.gss.product.hol.api.entity.response.tc.OrderLogModelList;
@@ -161,19 +162,23 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 	}
 
 	@Override
-	public List<ResourceProductIds> queryIncrHotelList(IncrHotelList incrHotelList) throws GSSException{
-		String reqJson= JSONObject.toJSONString(incrHotelList);
-		String result= httpClientUtil.doTCJsonPost(ASSIGN_LIST_URL, reqJson);
-		if(StringUtil.isNotNullOrEmpty(result)){
-			ResultTc<IncrHotelPrice> incrHotelPriceBase= JsonUtil.toBean(result, new TypeReference<ResultTc<IncrHotelPrice>>(){});
-			if(StringUtil.isNotNullOrEmpty(incrHotelPriceBase) && StringUtil.isNotNullOrEmpty(incrHotelPriceBase.getResult())){
-				return incrHotelPriceBase.getResult().getResourceProductIdsList();
-			}
+	public IncrHotelPrice queryIncrHotelList(IncrHotelList incrHotelList) throws GSSException{
+		try {
+			String reqJson= JSONObject.toJSONString(incrHotelList);
+			String result= httpClientUtil.doTCJsonPost(ASSIGN_LIST_URL, reqJson);
+			if(StringUtil.isNotNullOrEmpty(result)){
+				ResultTc<IncrHotelPrice> incrHotelPriceBase= JsonUtil.toBean(result, new TypeReference<ResultTc<IncrHotelPrice>>(){});
+				if(StringUtil.isNotNullOrEmpty(incrHotelPriceBase) && StringUtil.isNotNullOrEmpty(incrHotelPriceBase.getResult())){
+					return incrHotelPriceBase.getResult();
+				}
+			}else{
+		            //log.error("定时器获取酒店增量数据");
+		            throw new GSSException("定时器获取酒店增量数据", "0111", "定时器获取酒店增量数据请求返回空值");
+		        } 
+			
+		} catch (Exception e) {
+			throw new GSSException("定时器获取酒店增量数据", "0111", "定时器获取酒店增量数据异常");
 		}
-		 else{
-	            //log.error("定时器获取酒店增量数据");
-	            throw new GSSException("定时器获取酒店增量数据", "0111", "定时器获取酒店增量数据请求返回空值");
-	        } 
 		return null;
 		
 	}
@@ -372,10 +377,19 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 						}
 						tcResBaseInfo.setProDetails(ProInfoDetaisList);
 					}
-					if(imgInfoList.size() >0) {
-						List<ImgInfo> list2=new ArrayList<ImgInfo>();
-						list2.addAll(imgInfoList);
+					List<ImgInfo> list2=new ArrayList<ImgInfo>();
+					ImgInfoSum imgInfoSum = new ImgInfoSum();
+					if(imgInfoList!=null && imgInfoList.size() > 0) {
+						for(ImgInfo img : imgInfoList) {
+							if(img.getIsResDefault().equals(1) || img.getIsResProDefault().equals(1)) {
+								list2.add(img);
+							}
+						}
+						//list2.addAll(imgInfoList);
 						tcResBaseInfo.setImgInfoList(list2);
+						imgInfoSum.setId(imgInfoList.get(0).getResId());
+						imgInfoSum.setImgInfoList(imgInfoList);
+						mongoTemplate1.save(imgInfoSum, "imgInfoSum");
 					}
 					
 					Integer salaStatus = 1;
@@ -411,6 +425,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 		singleHotelDetailReqImg.setSourceForm("-1");
 		singleHotelDetailReqImg.setRequestContent("rimg");
 		TCHotelDetailResult hotelDetailImg=queryTCHotelDetail(singleHotelDetailReqImg);
+		List<ImgInfo> imgInfoList= hotelDetailImg.getResImages();
 		
 		if(StringUtil.isNotNullOrEmpty(hotelDetail)){
 			List<ResBaseInfo> resBaseInfoList =hotelDetail.getResBaseInfos();
@@ -445,11 +460,23 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 							}
 							resBaseInfoList.get(0).setProDetails(ProInfoDetaisList);
 						}
-						if(StringUtil.isNotNullOrEmpty(hotelDetailImg)){
-							List<ImgInfo> imgInfoList= hotelDetailImg.getResImages();
+						/*if(StringUtil.isNotNullOrEmpty(hotelDetailImg)){
 							List<ImgInfo> list2=new ArrayList<ImgInfo>();
 							list2.addAll(imgInfoList);
 							resBaseInfoList.get(0).setImgInfoList(list2);
+						}*/
+						List<ImgInfo> list2=new ArrayList<ImgInfo>();
+						ImgInfoSum imgInfoSum = new ImgInfoSum();
+						if(imgInfoList!=null && imgInfoList.size() > 0) {
+							for(ImgInfo img : imgInfoList) {
+								if(img.getIsResDefault().equals(1) || img.getIsResProDefault().equals(1)) {
+									list2.add(img);
+								}
+							}
+							resBaseInfoList.get(0).setImgInfoList(list2);
+							imgInfoSum.setId(imgInfoList.get(0).getResId());
+							imgInfoSum.setImgInfoList(imgInfoList);
+							mongoTemplate1.save(imgInfoSum, "imgInfoSum");
 						}
 						resBaseInfoList.get(0).setId(Long.valueOf(resId));
 						List<String> strs  = Tool.intToTwoPower(resBaseInfoList.get(0).getCreditCards().intValue());
