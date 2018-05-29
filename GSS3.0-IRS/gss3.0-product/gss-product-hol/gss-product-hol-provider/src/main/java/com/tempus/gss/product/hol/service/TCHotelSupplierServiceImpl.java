@@ -1169,7 +1169,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     								}
     								tcResBaseInfo.setProDetails(ProInfoDetaisList);
     							}
-    							List<ImgInfo> list2=new ArrayList<ImgInfo>();
+    							/*List<ImgInfo> list2=new ArrayList<ImgInfo>();
     							ImgInfoSum imgInfoSum = new ImgInfoSum();
     							if(imgInfoList!=null && imgInfoList.size() > 0) {
     								for(ImgInfo img : imgInfoList) {
@@ -1182,6 +1182,11 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	    							imgInfoSum.setId(imgInfoList.get(0).getResId());
 	    							imgInfoSum.setImgInfoList(imgInfoList);
 	    							mongoTemplate1.save(imgInfoSum, "imgInfoSum");
+    							}*/
+    							if(imgInfoList!=null && imgInfoList.size() > 0) {
+    								List<ImgInfo> list2=new ArrayList<ImgInfo>();
+	    							list2.addAll(imgInfoList);
+	    							tcResBaseInfo.setImgInfoList(list2);
     							}
     							
     							tcResBaseInfo.setSaleStatus(saleStatus);
