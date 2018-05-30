@@ -609,6 +609,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
          				List<ResProBaseInfo> p = ppp.getResProBaseInfoList();
          				if(StringUtil.isNotNullOrEmpty(p)){
      	            		for(ResProBaseInfo pro : p){
+     	            			pro.setSupplierType(1);
      	            			Integer firstPrice = 999999;
      	            			TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
      	            			Calendar da = Calendar.getInstance(); 
