@@ -1529,6 +1529,17 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		return null;
 	}
 
+	@Override
+	public ImgInfoSum queryImgInfoSum(Agent agent, Long resId) {
+		ImgInfoSum imgInfoSum = null;
+		try {
+			imgInfoSum = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(resId)),ImgInfoSum.class);
+		} catch (Exception e) {
+			throw new GSSException("查询酒店图片", "0220", "查询酒店图片异常, "+e.getMessage());
+		}
+		return imgInfoSum;
+	}
+
 	
 
 }
