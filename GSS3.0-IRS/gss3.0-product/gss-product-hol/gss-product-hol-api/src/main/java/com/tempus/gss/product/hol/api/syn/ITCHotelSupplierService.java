@@ -10,6 +10,7 @@ import com.tempus.gss.product.hol.api.entity.LastestResRecord;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.entity.response.tc.CityAreaScenic;
+import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfoSum;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResInfoList;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
@@ -176,5 +177,12 @@ public interface ITCHotelSupplierService {
 	 * @return
 	 */
 	public Boolean changeLuceneData(HotelName hotelName);
+	/**
+	 * 
+	 * @param agent
+	 * @param resId
+	 * @return
+	 */
+	public ImgInfoSum queryImgInfoSum(Agent agent, Long resId);
 	
 }
