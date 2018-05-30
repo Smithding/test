@@ -1170,25 +1170,31 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
     								}
     								tcResBaseInfo.setProDetails(ProInfoDetaisList);
     							}
-    							/*List<ImgInfo> list2=new ArrayList<ImgInfo>();
+    							List<ImgInfo> list2=new ArrayList<ImgInfo>();
     							ImgInfoSum imgInfoSum = new ImgInfoSum();
+    							Map<String, ImgInfo> mm = new HashMap<String, ImgInfo>();
     							if(imgInfoList!=null && imgInfoList.size() > 0) {
     								for(ImgInfo img : imgInfoList) {
-    									if(img.getIsResDefault().equals(1) || img.getIsResProDefault().equals(1)) {
-    										list2.add(img);
+    									if(img.getIsResDefault().equals(1)) {
+    										mm.put("1", img);
+    									}else if(img.getIsResProDefault().equals(1)){
+    										mm.put(img.getResProId(), img);
     									}
     								}
-	    							//list2.addAll(imgInfoList);
-	    							tcResBaseInfo.setImgInfoList(list2);
-	    							imgInfoSum.setId(imgInfoList.get(0).getResId());
-	    							imgInfoSum.setImgInfoList(imgInfoList);
-	    							mongoTemplate1.save(imgInfoSum, "imgInfoSum");
-    							}*/
-    							if(imgInfoList!=null && imgInfoList.size() > 0) {
+    								for (Map.Entry<String, ImgInfo> entry : mm.entrySet()) {
+    									list2.add(entry.getValue());
+    								}
+    								//list2.addAll(imgInfoList);
+    								resBaseInfoList.get(0).setImgInfoList(list2);
+    								imgInfoSum.setId(imgInfoList.get(0).getResId());
+    								imgInfoSum.setImgInfoList(imgInfoList);
+    								mongoTemplate1.save(imgInfoSum, "imgInfoSum");
+    							}
+    							/*if(imgInfoList!=null && imgInfoList.size() > 0) {
     								List<ImgInfo> list2=new ArrayList<ImgInfo>();
 	    							list2.addAll(imgInfoList);
 	    							tcResBaseInfo.setImgInfoList(list2);
-    							}
+    							}*/
     							
     							tcResBaseInfo.setSaleStatus(saleStatus);
 	    						tcResBaseInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
