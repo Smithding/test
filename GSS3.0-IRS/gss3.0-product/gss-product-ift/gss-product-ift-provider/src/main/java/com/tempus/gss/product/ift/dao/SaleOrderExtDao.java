@@ -43,7 +43,7 @@ public interface SaleOrderExtDao extends BaseDao<SaleOrderExt, SaleOrderExtVo> {
 	 * @param record
 	 * @return
 	 */
-	List<SaleOrderExt> queryNoHandleList(Page<SaleOrderExt> page,SaleOrderExtVo record);
+	//List<SaleOrderExt> queryNoHandleList(Page<SaleOrderExt> page,SaleOrderExtVo record);
 
 	/**
 	 *为运营平台订单管理提供服务.(预定)
