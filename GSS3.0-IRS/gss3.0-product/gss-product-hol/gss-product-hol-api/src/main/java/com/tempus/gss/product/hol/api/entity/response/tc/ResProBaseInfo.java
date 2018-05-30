@@ -200,11 +200,17 @@ public class ResProBaseInfo implements Serializable{
 	 * 总佣金
 	 */
 	private BigDecimal totalRebateRateProfit;
-	
+	/**
+	 * 0为下线，默认1上线
+	 */
 	private Integer saleStatus = 1;
-	
+	/**
+	 * 0为不可售，默认1可售
+	 */
 	private Integer bookStatus = 1;
-	
+	/**
+	 * 房间类型 1是TC, 默认2为BQY
+	 */
 	private Integer supplierType = 2;
 	
 	public Long getResId() {
