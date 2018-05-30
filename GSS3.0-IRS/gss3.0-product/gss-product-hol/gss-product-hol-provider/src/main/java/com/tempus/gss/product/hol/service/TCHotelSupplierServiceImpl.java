@@ -599,15 +599,17 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         }
        
         ResBaseInfo resDetail =mongoTemplate1.findOne(new Query(Criteria.where("_id").is(resId)),ResBaseInfo.class);
-        List<ProInfoDetail> proInfoDetailList = mongoTemplate1.find(new Query(Criteria.where("resId").is(resId)),ProInfoDetail.class);
+        //List<ProInfoDetail> proInfoDetailList = mongoTemplate1.find(new Query(Criteria.where("resId").is(resId)),ProInfoDetail.class);
         try {
         	 if(StringUtil.isNotNullOrEmpty(resDetail) && StringUtil.isNotNullOrEmpty(resDetail.getProDetails())){
              	List<ProDetails> lii = resDetail.getProDetails();
              	if(StringUtil.isNotNullOrEmpty(lii)){
          			for(ProDetails ppp : lii){
+         				List<Integer> pppRice = new ArrayList<Integer>();
          				List<ResProBaseInfo> p = ppp.getResProBaseInfoList();
          				if(StringUtil.isNotNullOrEmpty(p)){
      	            		for(ResProBaseInfo pro : p){
+     	            			Integer firstPrice = 999999;
      	            			TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
      	            			Calendar da = Calendar.getInstance(); 
                    			 for (int i = 0; i < days; i++) {
@@ -617,9 +619,10 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
                    				 da.add(Calendar.DAY_OF_MONTH, i);
                    				 mapPro.put(sdf.format(da.getTime()), ProSaleInfoDetail);
                 				}
-		                   			 if(StringUtil.isNotNullOrEmpty(proInfoDetailList)) {
-		                   				 for(ProInfoDetail proInfo : proInfoDetailList) {
-		                   			 		if(proInfo.getProductUniqueId().equals(pro.getProductUniqueId())) {
+		                   			// if(StringUtil.isNotNullOrEmpty(proInfoDetailList)) {
+		                   				 //for(ProInfoDetail proInfo : proInfoDetailList) {
+		                   				ProInfoDetail proInfo = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(pro.getProductUniqueId())),ProInfoDetail.class);
+		                   			 		if(StringUtil.isNotNullOrEmpty(proInfo)) {
 		                   			 			TreeMap<String, ProSaleInfoDetail> proSaleInfoDetails = proInfo.getProSaleInfoDetails();
 		                   			 			if(StringUtil.isNotNullOrEmpty(proSaleInfoDetails)) {
 		                   			 				if(proSaleInfoDetails.containsKey(DateUtil.stringToLonString(startTime))) {
@@ -632,13 +635,13 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			                   			 				}
 		                   			 				}
 			                   			 			int kk = 0;
-			                   			 			Integer firstPrice = 999999;
 			         	    	        			for (Map.Entry<String, ProSaleInfoDetail> entry : proSaleInfoDetails.entrySet()) {
 			         	    	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(startTime);
 			         	    	        				int endCompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(endTime);
 			         	    	        					if(begincompare >= 0 && endCompare < 0){
 			         	    	        						mapPro.put(DateUtil.stringToSimpleString(entry.getKey()), entry.getValue());
 			         	    	        						Integer price= entry.getValue().getDistributionSalePrice();
+			         	    	        						pppRice.add(price);
 			         	    	        						if(!entry.getValue().getInventoryStats().equals(4)) {
 			         	    	        							int startDate = DateUtil.stringToSimpleString(entry.getValue().getStartDate()).compareTo(startTime);
 			         	    	        							int endDate = DateUtil.stringToSimpleString(entry.getValue().getEndDate()).compareTo(endTime);
@@ -646,14 +649,14 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			         	    	        								pro.setBookStatus(0);
 			         	    	        							}
 			         	    	        						}
-			         	    	        						if(days.equals(1)) {
-			         	    	        							Date startTime1 = DateUtil.stringToSimpleDate(entry.getValue().getStartTime());
+		         	    	        							if(sdf.format(new Date()).equals(startTime)) {
+		         	    	        								Date startTime1 = DateUtil.stringToSimpleDate(entry.getValue().getStartTime());
 			         	    	        							Date endTime1 = DateUtil.stringToSimpleDate(entry.getValue().getEndTime());
 			         	    	        							Date nowDate = new Date();
 			         	    	        							if(nowDate.before(startTime1) || endTime1.before(nowDate)) {
 			         	    	        								pro.setBookStatus(0);
 			         	    	        							}
-			         	    	        						}
+		         	    	        							}
 			         	    	        						sumPrice += price;
 			         	    	        						kk += 1;
 			         	    	        						if(kk == 1) {
@@ -666,9 +669,13 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			         	            					}
 			     	    	        					pro.setProSaleInfoDetailsTarget(mapPro);
 			     	    	        					pro.setFirPrice(firstPrice);
-			     	    	        					/*if(StringUtil.isNotNullOrEmpty(mapPro.get(startTime))){
-			     	    	        						pro.setFirPrice(mapPro.get(startTime).getDistributionSalePrice());
-			     	    	        					}*/
+			     	    	        					if(pppRice.size() == 1){
+			     	    	        						ppp.setProDetailConPrice(pppRice.get(0));
+			     	    	        					}else if(pppRice.size() >= 2){
+			     	    	        						ppp.setProDetailConPrice(Collections.min(pppRice));
+			     	    	        					}else {
+			     	    	        						ppp.setSaleStatus(0);
+			     	    	        					}
 			     	    	        					if(kk < days.intValue()) {
 			     	    	        						pro.setBookStatus(0);
 		        	    	        					}
@@ -678,19 +685,20 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			        	    	        				kk = 0;
 			        	    	        				sumPrice =0;
 		                   			 			}else {
-		                   			 				//pro.setFirPrice(987654321);
-		                   			 				//pro.setConPrice(987654321);
 		                   			 				pro.setBookStatus(0);
+		                   			 				pro.setFirPrice(firstPrice);
 		                   			 			}
-			                   			 		/*if(StringUtil.isNullOrEmpty(pro.getFirPrice()) || pro.getFirPrice().equals(0)){
-			     	            					pro.setFirPrice(987654321);
-			     	            					pro.setConPrice(987654321);
-			     	            				}*/
+		                   			 		}else {
+		                   			 			pro.setBookStatus(0);
+		                   			 			pro.setFirPrice(firstPrice);
 		                   			 		}
-		                   			 	}
-		                   			 }
+		                   			 	//}
+		                   			// }
      		            		}
          					}
+	         				if(pppRice.size() == 0) {
+	         					ppp.setSaleStatus(0);
+	         				}
          				}
              		}
              	}else{
