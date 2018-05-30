@@ -29,6 +29,11 @@ public class ResInfoList implements Serializable{
 	 */
 	@JSONField(name = "CityName")
 	private String cityName;
+	/**
+	 * 酒店是否有效, 0为有效, 1为无效
+	 */
+	@JSONField(name = "Status")
+	private String status;
 	
 	public Long getResId() {
 		return resId;
@@ -47,6 +52,12 @@ public class ResInfoList implements Serializable{
 	}
 	public void setCityName(String cityName) {
 		this.cityName = cityName;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
 	}
 	
 	
