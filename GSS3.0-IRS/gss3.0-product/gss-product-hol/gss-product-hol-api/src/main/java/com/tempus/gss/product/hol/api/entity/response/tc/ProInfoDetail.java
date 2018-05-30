@@ -26,8 +26,8 @@ public class ProInfoDetail implements Serializable{
 	/**
 	 * 房型名称
 	 */
-	@JSONField(name = "RoomName")
-	private String roomName;
+	/*@JSONField(name = "RoomName")
+	private String roomName;*/
 	/**
 	 * 房型提前预定天数
 	 */
@@ -106,12 +106,7 @@ public class ProInfoDetail implements Serializable{
 	public void setProId(String proId) {
 		this.proId = proId;
 	}
-	public String getRoomName() {
-		return roomName;
-	}
-	public void setRoomName(String roomName) {
-		this.roomName = roomName;
-	}
+	
 	public Integer getBeforehandBookingDay() {
 		return beforehandBookingDay;
 	}
