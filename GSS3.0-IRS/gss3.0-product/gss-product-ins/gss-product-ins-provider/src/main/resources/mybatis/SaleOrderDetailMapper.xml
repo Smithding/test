@@ -81,7 +81,7 @@
         FROM INS_SALE_ORDER_DETAIL isod
         LEFT JOIN INS_SALE_ORDER_EXT isoe ON isod.SALE_ORDER_NO=isoe.SALE_ORDER_NO
         LEFT JOIN DPS_SALE ds ON ds.TRADE_NO=isoe.TRANSACTION_ID
-        LEFT JOIN DPS_SALE_ITEM dsi ON ds.ID = dsi.SALE_ID AND isod.INSURED_NAME=dsi.NAME
+        LEFT JOIN DPS_SALE_ITEM dsi ON ds.ID = dsi.SALE_ID AND isod.INSURED_NAME=dsi.NAME AND isoe.EXTENDED_FIELDS_JSON LIKE dsi.FLIGHT_NO
         where isod.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
