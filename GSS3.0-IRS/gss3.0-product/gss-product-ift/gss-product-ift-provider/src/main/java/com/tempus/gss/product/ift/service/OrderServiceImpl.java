@@ -1843,7 +1843,7 @@ public class OrderServiceImpl implements IOrderService {
     public void assign() {
         log.info("第一步：查询符合条件的出票订单...");
         Integer[] createTypeStatusArray = {1, 2, 3, 4, 6};
-        List<SaleOrderExt> saleOrderExtList = getAssignedOrders(createTypeStatusArray);
+        List<SaleOrderExt> saleOrderExtList = getNoHandleOrders(createTypeStatusArray);
         if (saleOrderExtList != null && saleOrderExtList.size() > 0) {
             log.info("查询到" + saleOrderExtList.size() + "条可分配订单...");
         } else {
@@ -2839,7 +2839,18 @@ public class OrderServiceImpl implements IOrderService {
         List<SaleOrderExt> saleOrderExtList = saleOrderExtDao.queryAssignOrder(saleQueryOrderVo);
         return saleOrderExtList;
     }
-    
+
+    /**
+     * 定时器获取待出票订单
+     * @param createTypeStatusArray
+     * @return
+     */
+    public List<SaleOrderExt> getNoHandleOrders(Integer[] createTypeStatusArray) {
+
+        List<SaleOrderExt> saleOrderExtList = saleOrderExtDao.queryNoHandOrder(); //获取未锁定的出票单
+        return saleOrderExtList;
+    }
+
     private List<TicketSender> getOnlineTicketSender(String type) {
         TicketSenderVo ticketSenderVo = new TicketSenderVo();
         ticketSenderVo.setStatus(3);//只给在线用户分单

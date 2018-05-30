@@ -39,4 +39,39 @@
         <include refid="sqlwhere"/>
         ORDER BY ${sort}
     </select>
+
+    <sql id="noHandleSqlwhere">
+        <where>
+            ift.CREATE_TYPE in(1,2,3,4,6)  and ift.LOCKER!=0
+            <if test="type=='sale'"> AND  o.ORDER_CHILD_STATUS  in (${status})</if>
+            <if test="type=='buy'"> AND o.PAY_STATUS IN (3, 4)  AND aa.BUY_CHILD_STATUS IN (1, 2)</if>
+            <if test="saleOrderNO!=null"> and ift.SALE_ORDER_NO = #{saleOrderNO}</if>
+            <if test="pnr!=null"> and ift.PNR_NO = #{pnr}</if>
+            <if test="locker!=null">
+                <choose>
+                    <when test="locker == 1"></when>
+                    <otherwise>AND ift.LOCKER = #{locker,jdbcType=BIGINT} </otherwise>
+                </choose>
+            </if>
+        </where>
+    </sql>
+
+    <select id="queryNoHandleByKey" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SeparatedOrderVo">
+        SELECT DISTINCT ift.ID,ift.SALE_ORDER_NO,ift.PNR_NO AS PNR,de.NAME AS DEPNAME,sm.NAME AS MODIFIERNAME,cps.NAME AS COMPNAME,
+        (SELECT NAME FROM SM_USER s WHERE s.LOGIN_NAME = ift.CREATOR) AS CUSTOMERNAME,ift.LOCKER,ISOD.`STATUS`
+        FROM IFT_SALE_ORDER_EXT ift
+        LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ift.SALE_ORDER_NO = ISOD.SALE_ORDER_NO
+        LEFT JOIN SM_USER sm ON sm.ID = ift.LOCKER
+        LEFT JOIN SM_DEPT de ON de.ID = sm.DEPT_ID
+        LEFT JOIN CPS_CUSTOMER cps ON cps.CUSTOMER_NO = de.CUSTOMER_ID
+        LEFT JOIN OS_SALEORDER o ON ift.SALE_ORDER_NO = o.SALE_ORDER_NO
+        LEFT JOIN OS_BUYORDER aa ON ift.SALE_ORDER_NO = aa.SALE_ORDER_NO
+        /*WHERE
+		ift.CREATE_TYPE IN (1, 2, 3, 4, 6)
+	    AND o.PAY_STATUS IN (3, 4)
+	    AND ift.LOCKER != 0
+        AND aa.BUY_CHILD_STATUS IN (1, 2)*/
+        <include refid="noHandleSqlwhere"/>
+        ORDER BY ${sort}
+    </select>
 </mapper>

@@ -938,7 +938,7 @@
         </trim>
         order by f.CREATE_TIME desc
     </select>
-   <!-- <select id="queryNoHandOrder" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SaleQueryOrderVo">
+    <select id="queryNoHandOrder" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SaleQueryOrderVo">
         SELECT DISTINCT
 			f.SALE_ORDER_NO,
 			f.ID,
@@ -1003,7 +1003,7 @@
 		AND o.PAY_STATUS IN (3, 4)
 		ORDER BY
 			f.CREATE_TIME DESC
-    </select>-->
+    </select>
 
     <select id="queryAssignOrder" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SaleQueryOrderVo">
         select DISTINCT
