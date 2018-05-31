@@ -212,12 +212,12 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     public void assignBuyRefund() {
         
-        log.info("第一步：查询符合条件的订单...");
+        log.info("第一步：查询符合条件采购退票的订单...");
         List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryRefundBylocker(owner, 0l);
         if (saleChangeExts != null && saleChangeExts.size() > 0) {
             log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
         } else {
-            log.info("未查询到可以分配的出票订单,结束此次任务...");
+            log.info("未查询到可以分配的采购退票订单,结束此次任务...");
             return;
         }
         log.info("第二步：查询在线采购退票员...");
@@ -267,12 +267,12 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     public void assignBuyWaste() {
 
-        log.info("第一步：查询符合条件的订单...");
+        log.info("第一步：查询符合条件采购废票分单的订单...");
         List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryBuyWasteBylocker(owner, 0l);
         if (saleChangeExts != null && saleChangeExts.size() > 0) {
             log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
         } else {
-            log.info("未查询到可以分配的出票订单,结束此次任务...");
+            log.info("未查询到可以分配的采购废票订单,结束此次任务...");
             return;
         }
         log.info("第二步：查询在线采购废票员...");
@@ -322,12 +322,12 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     public void assignChange() {
         
-        log.info("第一步：查询符合条件的订单...");
+        log.info("第一步：查询符合条件的采购改签订单...");
         List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryChangeBylocker(owner, 0l);
         if (saleChangeExts != null && saleChangeExts.size() > 0) {
             log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
         } else {
-            log.info("未查询到可以分配的出票订单,结束此次任务...");
+            log.info("未查询到可以分配的采购改签订单,结束此次任务...");
             return;
         }
         log.info("第二步：查询在线采购改签员...");
