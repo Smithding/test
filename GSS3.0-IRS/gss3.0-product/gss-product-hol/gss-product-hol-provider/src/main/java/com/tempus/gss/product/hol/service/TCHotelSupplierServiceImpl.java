@@ -98,6 +98,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResGPSInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResInfoList;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfos;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResTrafficInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.TCHotelDetailResult;
 import com.tempus.gss.product.hol.api.service.FutureResult;
@@ -1118,10 +1119,11 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			SingleHotelDetailReq singleHotelDetailReq=new SingleHotelDetailReq();
 			singleHotelDetailReq.setResId(String.valueOf(resId));
 			singleHotelDetailReq.setSourceForm("-1");
-			singleHotelDetailReq.setRequestContent("res,rimg");
+			singleHotelDetailReq.setRequestContent("res,respro,rimg");
 			TCHotelDetailResult hotelDetail=hotel.queryTCHotelDetail(singleHotelDetailReq);
 			List<ResBaseInfo> resBaseInfos = hotelDetail.getResBaseInfos();
 			List<ImgInfo> resImages = hotelDetail.getResImages();
+			List<ResProBaseInfo> resProBaseInfos = hotelDetail.getResProBaseInfos();
 			ResBaseInfo resBaseInfo = null;
 			if(StringUtil.isNotNullOrEmpty(resBaseInfos)) {
 				resBaseInfo = resBaseInfos.get(0);
@@ -1147,6 +1149,14 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 				mongoTemplate1.save(imgInfoSum, "imgInfoSum");
 				mongoTemplate1.save(resBaseInfo, "resBaseInfo");
 			}
+			
+			if(StringUtil.isNotNullOrEmpty(resProBaseInfos)) {
+				ResProBaseInfos resProBase =new ResProBaseInfos();
+				resProBase.setId(resId);
+				resProBase.setResProBaseInfos(resProBaseInfos);
+				mongoTemplate1.save(resProBase, "resProBaseInfos");
+			}
+			
 			
 			
 		} catch (Exception e) {
