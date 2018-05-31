@@ -212,12 +212,12 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     public void assignBuyRefund() {
         
-        log.info("第一步：查询符合条件的订单...");
+        log.info("第一步：查询符合条件采购退票的订单...");
         List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryRefundBylocker(owner, 0l);
         if (saleChangeExts != null && saleChangeExts.size() > 0) {
             log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
         } else {
-            log.info("未查询到可以分配的出票订单,结束此次任务...");
+            log.info("未查询到可以分配的采购退票订单,结束此次任务...");
             return;
         }
         log.info("第二步：查询在线采购退票员...");
@@ -267,12 +267,12 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     public void assignBuyWaste() {
 
-        log.info("第一步：查询符合条件的订单...");
+        log.info("第一步：查询符合条件采购废票分单的订单...");
         List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryBuyWasteBylocker(owner, 0l);
         if (saleChangeExts != null && saleChangeExts.size() > 0) {
             log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
         } else {
-            log.info("未查询到可以分配的出票订单,结束此次任务...");
+            log.info("未查询到可以分配的采购废票订单,结束此次任务...");
             return;
         }
         log.info("第二步：查询在线采购废票员...");
@@ -322,12 +322,12 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     public void assignChange() {
         
-        log.info("第一步：查询符合条件的订单...");
+        log.info("第一步：查询符合条件的采购改签订单...");
         List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryChangeBylocker(owner, 0l);
         if (saleChangeExts != null && saleChangeExts.size() > 0) {
             log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
         } else {
-            log.info("未查询到可以分配的出票订单,结束此次任务...");
+            log.info("未查询到可以分配的采购改签订单,结束此次任务...");
             return;
         }
         log.info("第二步：查询在线采购改签员...");
@@ -1843,7 +1843,7 @@ public class OrderServiceImpl implements IOrderService {
     public void assign() {
         log.info("第一步：查询符合条件的出票订单...");
         Integer[] createTypeStatusArray = {1, 2, 3, 4, 6};
-        List<SaleOrderExt> saleOrderExtList = getAssignedOrders(createTypeStatusArray);
+        List<SaleOrderExt> saleOrderExtList = getNoHandleOrders(createTypeStatusArray);
         if (saleOrderExtList != null && saleOrderExtList.size() > 0) {
             log.info("查询到" + saleOrderExtList.size() + "条可分配订单...");
         } else {
@@ -2839,7 +2839,18 @@ public class OrderServiceImpl implements IOrderService {
         List<SaleOrderExt> saleOrderExtList = saleOrderExtDao.queryAssignOrder(saleQueryOrderVo);
         return saleOrderExtList;
     }
-    
+
+    /**
+     * 定时器获取待出票订单
+     * @param createTypeStatusArray
+     * @return
+     */
+    public List<SaleOrderExt> getNoHandleOrders(Integer[] createTypeStatusArray) {
+
+        List<SaleOrderExt> saleOrderExtList = saleOrderExtDao.queryNoHandOrder(); //获取未锁定的出票单
+        return saleOrderExtList;
+    }
+
     private List<TicketSender> getOnlineTicketSender(String type) {
         TicketSenderVo ticketSenderVo = new TicketSenderVo();
         ticketSenderVo.setStatus(3);//只给在线用户分单

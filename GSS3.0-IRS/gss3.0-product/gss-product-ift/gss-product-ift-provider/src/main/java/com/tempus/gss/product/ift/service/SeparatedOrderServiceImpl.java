@@ -53,7 +53,8 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
         if (requestWithActor == null ) {
             throw new GSSException("查询订单分配模块", "0301", "传入参数为空");
         }
-        List<SeparatedOrder> SeparatedOrderList = separatedOrderDao.queryObjByKey(page,requestWithActor.getEntity());
+
+        List<SeparatedOrder> SeparatedOrderList = separatedOrderDao.queryNoHandleByKey(page,requestWithActor.getEntity());
         page.setRecords(SeparatedOrderList);
         log.info("查询订单分配列表结束");
         return page;
