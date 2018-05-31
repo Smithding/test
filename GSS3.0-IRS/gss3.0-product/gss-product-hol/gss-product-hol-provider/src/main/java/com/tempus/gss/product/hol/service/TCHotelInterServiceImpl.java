@@ -302,6 +302,9 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			ResBaseInfo resBaseInfo = null;
 			if(StringUtil.isNotNullOrEmpty(resBaseInfos)) {
 				resBaseInfo = resBaseInfos.get(0);
+				Integer minPrice = new Random().nextInt(1000);
+				resBaseInfo.setMinPrice(minPrice);
+				resBaseInfo.setResCommonPrice(minPrice);
 				resBaseInfo.setSaleStatus(1);
 				resBaseInfo.setId(resId);
 				resBaseInfo.setSupplierNo("411709261204150108");
@@ -352,6 +355,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 					minPrice = resBaseInfoMongo.getMinPrice();
 				}
 				resBaseInfo.setMinPrice(minPrice);
+				resBaseInfo.setResCommonPrice(minPrice);
 				resBaseInfo.setSaleStatus(1);
 				resBaseInfo.setId(Long.valueOf(resId));
 				resBaseInfo.setSupplierNo("411709261204150108");
