@@ -18,4 +18,6 @@ public interface ISyncHotelInfo {
 	void pullBQYHotelInfo();
 	
 	public ResBaseInfo queryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException;
+	
+	public <T> T queryDetailById(Long id, Class<T> clazz) throws GSSException;
 }
