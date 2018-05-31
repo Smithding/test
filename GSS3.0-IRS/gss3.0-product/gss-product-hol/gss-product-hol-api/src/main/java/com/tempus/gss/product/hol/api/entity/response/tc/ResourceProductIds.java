@@ -27,7 +27,7 @@ public class ResourceProductIds implements Serializable{
 	 * 酒店房型政策集合
 	 */
 	@JSONField(name = "ResourceProductInformations")
-	private List<ResourceProductInformations> resourceProductInformations;
+	private List<ResourceProductInformation> resourceProductInformations;
 
 	public Long getResId() {
 		return resId;
@@ -45,11 +45,11 @@ public class ResourceProductIds implements Serializable{
 		this.proIds = proIds;
 	}
 
-	public List<ResourceProductInformations> getResourceProductInformations() {
+	public List<ResourceProductInformation> getResourceProductInformations() {
 		return resourceProductInformations;
 	}
 
-	public void setResourceProductInformations(List<ResourceProductInformations> resourceProductInformations) {
+	public void setResourceProductInformations(List<ResourceProductInformation> resourceProductInformations) {
 		this.resourceProductInformations = resourceProductInformations;
 	}
 	
