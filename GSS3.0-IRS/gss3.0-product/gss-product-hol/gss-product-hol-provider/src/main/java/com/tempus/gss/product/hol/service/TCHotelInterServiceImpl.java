@@ -39,7 +39,6 @@ import com.tempus.gss.product.hol.api.entity.request.tc.GetOrderLogInfoReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.GetTcOrderCancelListReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.IncrHotelList;
 import com.tempus.gss.product.hol.api.entity.request.tc.SingleHotelDetailReq;
-import com.tempus.gss.product.hol.api.entity.response.ResIdList;
 import com.tempus.gss.product.hol.api.entity.response.tc.AllHotelList;
 import com.tempus.gss.product.hol.api.entity.response.tc.AssignDateHotel;
 import com.tempus.gss.product.hol.api.entity.response.tc.CancelReasonModel;
@@ -119,9 +118,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			 		if(StringUtil.isNotNullOrEmpty(res) && res.getRet_code().equals("200")){
 			 			list= res.getResult().getResInfoList();
 			 		}
-			    }else{
-		            throw new GSSException("获取酒店列表", "0111", "酒店列表请求返回空值");
-		        }
+			    }
 			}catch(Exception e){
 				e.printStackTrace();
 	            throw new GSSException("获取酒店列表", "0112", "酒店列表请求出错");
@@ -611,10 +608,6 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 		    							mongoTemplate.save(holMidBaseInfo, "holMidBaseInfo");
 		    						}
 	    						}*/
-	    						
-	    						ResIdList resIdList =new ResIdList();
-	    						resIdList.setId(resId);
-	    						mongoTemplate1.save(resIdList, "resIdList");
     					}
     				}
 			}
@@ -709,8 +702,8 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 						}
 						
 						resBaseInfoList.get(0).setId(Long.valueOf(resId));
-						List<String> strs  = Tool.intToTwoPower(resBaseInfoList.get(0).getCreditCards().intValue());
-						resBaseInfoList.get(0).setCreditCardsTarget(strs);
+						//List<String> strs  = Tool.intToTwoPower(resBaseInfoList.get(0).getCreditCards().intValue());
+						//resBaseInfoList.get(0).setCreditCardsTarget(strs);
 						String updateTime = sdfupdate.format(new Date());
 						mongoTemplate1.upsert(new Query(Criteria.where("_id").is(resId)), new Update().set("latestUpdateTime", updateTime), "resBaseInfo");
 						return resBaseInfoList.get(0);
