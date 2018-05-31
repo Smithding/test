@@ -82,7 +82,6 @@ import com.tempus.gss.product.hol.api.entity.LogRecordHol;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.AssignDateHotelReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.SingleHotelDetailReq;
-import com.tempus.gss.product.hol.api.entity.response.ResIdList;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.entity.response.tc.AssignDateHotel;
 import com.tempus.gss.product.hol.api.entity.response.tc.BusinessSection;
@@ -150,10 +149,10 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	public ResBaseInfo queryListByResId(Agent agent, Long id) {
 		
 		ResBaseInfo resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), ResBaseInfo.class);
-		if(StringUtil.isNotNullOrEmpty(resDetail)){
+		/*if(StringUtil.isNotNullOrEmpty(resDetail)){
 			List<String> strs  = Tool.intToTwoPower(resDetail.getCreditCards().intValue());
         	resDetail.setCreditCardsTarget(strs);
-		}
+		}*/
 		return resDetail;
 	}
 	
@@ -169,6 +168,25 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		T t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
 		
 		return t;
+	}
+	
+	@Override
+	@Async
+	public <T> Future<T> queryListById(Long id, Class<T> clazz) {
+		
+		T t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
+		
+		return new AsyncResult<T>(t);
+		//return t;
+	}
+	
+	@Override
+	@Async
+	public <T> Future<T> queryProSaleListByResId(Long id, Class<T> clazz) {
+		
+		T t= mongoTemplate1.findOne(new Query(Criteria.where("resId").is(id)),clazz);
+		return new AsyncResult<T>(t);
+		//return t;
 	}
 	
 	@Override
@@ -216,7 +234,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 				for(BusinessSection bus : rs.getBusinessSectionInfoList()){
 					cityBusinessSectionInfo.add(bus.getBusinessSectionName().trim());
 				}
-				for(ResTrafficInfo traffic : rs.getHotelTrafficInfo()){
+				/*for(ResTrafficInfo traffic : rs.getHotelTrafficInfo()){
 					if(traffic.getStartLocation().contains("景点")){
 						cityScenic.add(traffic.getDescription().trim());
 					}
@@ -226,7 +244,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 					if(traffic.getStartLocation().contains("地铁站")){
 						citySubWay.add(traffic.getDescription().trim());
 					}
-				}
+				}*/
 			}
 			cityAreaScenic.setCityName(cityName);
 			cityAreaScenic.setCityArea(cityArea);
@@ -1359,9 +1377,6 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		    							mongoTemplate1.save(holMidBaseInfo, "holMidBaseInfo");
 		    						}
 	    						}
-	    						ResIdList resIdList =new ResIdList();
-	    						resIdList.setId(resId);
-	    						mongoTemplate1.save(resIdList, "resIdList");
 	    						flag = true;
     					}
     				}
