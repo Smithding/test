@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -163,6 +164,15 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		
 		return t;
 	}
+	
+	
+	@Override
+	public <T> T queryDetailById(Long id, Class<T> clazz) {
+		T t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
+		
+		return t;
+	}
+	
 	@Override
 	public <T> T queryListByProductUniqueId(String id, Class<T> clazz) {
 		
@@ -1115,6 +1125,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			ResBaseInfo resBaseInfo = null;
 			if(StringUtil.isNotNullOrEmpty(resBaseInfos)) {
 				resBaseInfo = resBaseInfos.get(0);
+				Integer minPrice = new Random().nextInt(1000);
+				resBaseInfo.setMinPrice(minPrice);
+				resBaseInfo.setResCommonPrice(minPrice);
 				resBaseInfo.setSaleStatus(1);
 				resBaseInfo.setId(resId);
 				resBaseInfo.setSupplierNo("411709261204150108");
