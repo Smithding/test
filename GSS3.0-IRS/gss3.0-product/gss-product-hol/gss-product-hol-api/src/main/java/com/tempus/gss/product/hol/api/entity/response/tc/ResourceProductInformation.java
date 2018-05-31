@@ -9,7 +9,7 @@ import com.alibaba.fastjson.annotation.JSONField;
  * @author kai.yang
  *
  */
-public class ResourceProductInformations implements Serializable{
+public class ResourceProductInformation implements Serializable{
 	private static final long serialVersionUID = 1L;
 	/**
 	 * 房型 Id
@@ -26,6 +26,17 @@ public class ResourceProductInformations implements Serializable{
 	 */
 	@JSONField(name = "RatePlanId")
 	private Long ratePlanId;
+	/**
+	 * 子酒店编码
+	 */
+	@JSONField(name = "HotelCode")
+	private String hotelCode;
+	
+	/**
+	 * 销售房型 ID（子房型 ID）
+	 */
+	@JSONField(name = "RoomTypeId")
+	private String roomTypeId;
 	
 	public Long getResourceProductId() {
 		return resourceProductId;
@@ -45,6 +56,18 @@ public class ResourceProductInformations implements Serializable{
 	}
 	public void setRatePlanId(Long ratePlanId) {
 		this.ratePlanId = ratePlanId;
+	}
+	public String getHotelCode() {
+		return hotelCode;
+	}
+	public void setHotelCode(String hotelCode) {
+		this.hotelCode = hotelCode;
+	}
+	public String getRoomTypeId() {
+		return roomTypeId;
+	}
+	public void setRoomTypeId(String roomTypeId) {
+		this.roomTypeId = roomTypeId;
 	}
 	
 }
