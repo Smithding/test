@@ -52,6 +52,12 @@ public class LogRecordHol implements Serializable {
 	
 	protected String productUniqueId;
 	
+	protected String hotelCode;
+	
+	protected String roomTypeId;
+	
+	
+	
 	/** 其它自定义属性 */
 	protected Map<String, Object> otherOpts = new HashMap<>();
 
@@ -189,6 +195,22 @@ public class LogRecordHol implements Serializable {
 
 	public void setProductUniqueId(String productUniqueId) {
 		this.productUniqueId = productUniqueId;
+	}
+
+	public String getHotelCode() {
+		return hotelCode;
+	}
+
+	public void setHotelCode(String hotelCode) {
+		this.hotelCode = hotelCode;
+	}
+
+	public String getRoomTypeId() {
+		return roomTypeId;
+	}
+
+	public void setRoomTypeId(String roomTypeId) {
+		this.roomTypeId = roomTypeId;
 	}
 
 	public String toString() {
