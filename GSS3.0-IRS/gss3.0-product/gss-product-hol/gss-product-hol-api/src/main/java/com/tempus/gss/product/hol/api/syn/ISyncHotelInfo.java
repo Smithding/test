@@ -16,4 +16,6 @@ public interface ISyncHotelInfo {
 	 * @param hotelIdList
 	 */
 	void pullBQYHotelInfo();
+	
+	public ResBaseInfo queryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException;
 }
