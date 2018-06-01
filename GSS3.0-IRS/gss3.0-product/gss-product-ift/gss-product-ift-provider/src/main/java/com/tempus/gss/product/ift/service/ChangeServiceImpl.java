@@ -225,6 +225,7 @@ public class ChangeServiceImpl implements IChangeService {
                     saleOrderDetail.setValid((byte) 1);
                     saleOrderDetail.setStatus("1");
                     saleOrderDetail.setIsChange(true);
+                    saleOrderDetail.setCabin(leg.getCabin());
                     saleOrderDetailDao.insertSelective(saleOrderDetail);
 
                     //添加新改签单明细
@@ -244,7 +245,7 @@ public class ChangeServiceImpl implements IChangeService {
 
 
             /*改签乘客价格*/
-            for (Long passengerNo : requestWithActor.getEntity().getOldPassengerNoList()) {
+           /* for (Long passengerNo : requestWithActor.getEntity().getOldPassengerNoList()) {
                 PassengerChangePrice passengerChangePrice = new PassengerChangePrice();
                 passengerChangePrice.setPassengerNo(passengerNo);
                 passengerChangePrice.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
@@ -252,7 +253,7 @@ public class ChangeServiceImpl implements IChangeService {
                 passengerChangePrice.setValid((byte) 1);
                 passengerChangePrice.setChangePriceNo(maxNoService.generateBizNo("IFT_PASSENGER_CHANGE_PRICE_NO", 30));
                 passengerChangePriceDao.insertSelective(passengerChangePrice);
-            }
+            }*/
 
             /*通过编号查询出销售单*/
             SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleOrderExt.getSaleOrderNo());
