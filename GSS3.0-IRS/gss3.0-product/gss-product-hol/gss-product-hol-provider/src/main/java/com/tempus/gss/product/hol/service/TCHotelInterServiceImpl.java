@@ -56,6 +56,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ProSaleInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResInfoList;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfos;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResourceProductIds;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResultTc;
 import com.tempus.gss.product.hol.api.entity.response.tc.TCHotelDetailResult;
@@ -302,7 +303,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			ResBaseInfo resBaseInfo = null;
 			if(StringUtil.isNotNullOrEmpty(resBaseInfos)) {
 				resBaseInfo = resBaseInfos.get(0);
-				Integer minPrice = new Random().nextInt(1000);
+				Integer minPrice = new Random().nextInt(800) + 100;
 				resBaseInfo.setMinPrice(minPrice);
 				resBaseInfo.setResCommonPrice(minPrice);
 				resBaseInfo.setSaleStatus(1);
@@ -323,6 +324,22 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 				}
 				mongoTemplate1.save(imgInfoSum, "imgInfoSum");
 				mongoTemplate1.save(resBaseInfo, "resBaseInfo");
+			}
+			
+			SingleHotelDetailReq singleHotelDetailReq2=new SingleHotelDetailReq();
+			singleHotelDetailReq2.setResId(String.valueOf(resId));
+			singleHotelDetailReq2.setSourceForm("-1");
+			singleHotelDetailReq2.setRequestContent("respro");
+			TCHotelDetailResult hotelDetail2=queryTCHotelDetail(singleHotelDetailReq2);
+			if(StringUtil.isNotNullOrEmpty(hotelDetail2) && StringUtil.isNotNullOrEmpty(hotelDetail2.getResProBaseInfos())) {
+				List<ResProBaseInfo> resProBaseInfo = hotelDetail2.getResProBaseInfos();
+				
+				if(StringUtil.isNotNullOrEmpty(resProBaseInfo)) {
+					ResProBaseInfos resProBaseInfos=new ResProBaseInfos();
+					resProBaseInfos.setId(resId);
+					resProBaseInfos.setResProBaseInfos(resProBaseInfo);
+					mongoTemplate1.save(resProBaseInfos, "resProBaseInfos");
+				}
 			}
 			
 			
@@ -349,7 +366,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			List<ResBaseInfo> resBaseInfos = hotelDetail.getResBaseInfos();
 			if(StringUtil.isNotNullOrEmpty(resBaseInfos)) {
 				resBaseInfo = resBaseInfos.get(0);
-				Integer minPrice = new Random().nextInt(1000);
+				Integer minPrice = new Random().nextInt(800) + 100;
 				ResBaseInfo resBaseInfoMongo = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(resId)),ResBaseInfo.class);
 				if(StringUtil.isNotNullOrEmpty(resBaseInfoMongo)) {
 					minPrice = resBaseInfoMongo.getMinPrice();
