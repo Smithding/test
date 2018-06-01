@@ -567,8 +567,9 @@
                 SALE_CURRENCY=#{saleCurrency,jdbcType=VARCHAR},
             </if>
             <if test="exchangeRate!=null">
-                EXCHANGE_RATE =#{exchangeRate,jdbcType=DECIMAL}
+                EXCHANGE_RATE =#{exchangeRate,jdbcType=DECIMAL},
             </if>
+            SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
         </set>
         where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
     </update>

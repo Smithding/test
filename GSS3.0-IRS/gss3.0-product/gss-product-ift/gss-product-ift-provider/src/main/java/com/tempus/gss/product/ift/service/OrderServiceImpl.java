@@ -614,10 +614,11 @@ public class OrderServiceImpl implements IOrderService {
             buyOrderExt.setValid((byte) 1);
             buyOrderExtDao.insertSelective(buyOrderExt);
             log.info("创建国际订单成功=====saleOrderNo=" + saleOrderNo);
-            String logstr = "<p>" + String.format("创建国际订单成功=====", new Date()) + ":saleOrderNo=" + JsonUtil.toJson(saleOrderNo);
+           // String logstr = "<p>" + String.format("创建国际订单成功=====", new Date()) + ":saleOrderNo=" + JsonUtil.toJson(saleOrderNo);
             
             /* 创建操作日志 */
             try {
+                String logstr ="用户"+agent.getAccount()+"创建国际销售单："+"["+saleOrderNo+"]";
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
@@ -625,7 +626,7 @@ public class OrderServiceImpl implements IOrderService {
                 logRecord.setDesc(logstr);
                 logRecord.setOptLoginName(agent.getAccount());
                 logRecord.setRequestIp(agent.getIp());
-                logRecord.setBizCode("IFT-OrderServiceImpl-createOrder");
+                logRecord.setBizCode("IFT");
                 logRecord.setBizNo(String.valueOf(saleOrderNo));
                 Map<String, Object> otherOpts = new HashMap<String, Object>();
                 otherOpts.put("transationOrderNo", saleOrder.getTransationOrderNo());
@@ -686,14 +687,24 @@ public class OrderServiceImpl implements IOrderService {
         }
         /* 创建操作日志 */
         try {
+            String logstr=null;
+            if (saleOrderExt.getEntity().getSaleOrderDetailList() !=null && saleOrderExt.getEntity().getSaleOrderDetailList().get(0).getStatus().equals("1")){
+                logstr ="用户"+ saleOrderExt.getAgent().getAccount()+"锁定国际销售单："+"["+saleOrderExt.getEntity().getSaleOrderNo()+"]";
+
+            }else if(saleOrderExt.getEntity().getSaleOrderDetailList() !=null && saleOrderExt.getEntity().getSaleOrderDetailList().get(0).getStatus().equals("15")){
+                logstr ="用户"+ saleOrderExt.getAgent().getAccount()+"打回订单："+"["+saleOrderExt.getEntity().getSaleOrderNo()+"]";
+
+            }else {
+             logstr ="用户"+ saleOrderExt.getAgent().getAccount()+"修改国际销售单："+"["+saleOrderExt.getEntity().getSaleOrderNo()+"]";
+            }
             LogRecord logRecord = new LogRecord();
             logRecord.setAppCode("UBP");
             logRecord.setCreateTime(new Date());
             logRecord.setTitle("修改国际销售单");
-            logRecord.setDesc(JSON.toJSONString(saleOrderExt));
+            logRecord.setDesc(logstr);
             logRecord.setOptLoginName(saleOrderExt.getAgent().getAccount());
             logRecord.setRequestIp(saleOrderExt.getAgent().getIp());
-            logRecord.setBizCode("IFT-OrderServiceImpl-updateSaleOrderExt");
+            logRecord.setBizCode("IFT");
             logRecord.setBizNo(String.valueOf(saleOrderExt.getEntity().getSaleOrderNo()));
             logService.insert(logRecord);
         } catch (Exception e) {
@@ -738,14 +749,15 @@ public class OrderServiceImpl implements IOrderService {
             }
             /* 创建操作日志 */
             try {
+                String logstr ="用户"+agent.getAccount()+"国际订单核价："+"["+orderExt.getSaleOrderNo()+"]成功";
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("国际订单核价");
-                logRecord.setDesc(JSON.toJSONString(saleOrderExt));
+                logRecord.setDesc(logstr);
                 logRecord.setOptLoginName(saleOrderExt.getAgent().getAccount());
                 logRecord.setRequestIp(saleOrderExt.getAgent().getIp());
-                logRecord.setBizCode("IFT-OrderServiceImpl-auditOrder");
+                logRecord.setBizCode("IFT");
                 logRecord.setBizNo(String.valueOf(orderExt.getSaleOrderNo()));
                 logService.insert(logRecord);
             } catch (Exception e) {
@@ -846,7 +858,22 @@ public class OrderServiceImpl implements IOrderService {
                     }
                 }
             }
-            
+            /* 创建操作日志 */
+            try {
+                String logstr ="用户"+saleOrder.getModifier()+"成功支付："+"["+saleOrderNo+"]"+"￥"+saleOrder.getReceived();
+                LogRecord logRecord = new LogRecord();
+                logRecord.setAppCode("UBP");
+                logRecord.setCreateTime(new Date());
+                logRecord.setTitle("订单支付");
+                logRecord.setDesc(logstr);
+                logRecord.setOptLoginName(saleOrder.getModifier());
+                logRecord.setRequestIp(agent.getIp());
+                logRecord.setBizCode("IFT");
+                logRecord.setBizNo(String.valueOf(saleOrderNo));
+                logService.insert(logRecord);
+            } catch (Exception e) {
+                log.error("添加操作日志异常===" + e);
+            }
         } catch (Exception e) {
             log.error("修改采购单状态异常");
             throw new GSSException("修改采购单状态异常", "1003", "修改采购单状态失败");
@@ -979,14 +1006,15 @@ public class OrderServiceImpl implements IOrderService {
             
             /* 创建操作日志 */
             try {
+                String logstr ="用户"+agent.getAccount()+"国际订单取消："+"["+saleOrderNo+"]";
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("国际订单取消");
-                logRecord.setDesc(JSON.toJSONString(saleOrderNo));
+                logRecord.setDesc(logstr);
                 logRecord.setOptLoginName(agent.getAccount());
                 logRecord.setRequestIp(agent.getIp());
-                logRecord.setBizCode("IFT-OrderServiceImpl-auditOrder");
+                logRecord.setBizCode("IFT");
                 logRecord.setBizNo(String.valueOf(saleOrderNo));
                 logService.insert(logRecord);
             } catch (Exception e) {
@@ -1162,7 +1190,7 @@ public class OrderServiceImpl implements IOrderService {
             saleOrderService.updateStatus(agent, saleOrderNo, 4);// 将状态改为已出票
             result = saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
             log.info("saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt):result={}", result);
-            String logstr = "";
+            String logstr ="用户"+agent.getAccount()+"成功出票："+"["+saleOrderNo+"]";
             SaleOrder saleOrder = saleOrderExt.getSaleOrder();
             Long transationOrderNo = null;
             if (null != saleOrder) {
@@ -1299,14 +1327,15 @@ public class OrderServiceImpl implements IOrderService {
         
         /* 创建操作日志 */
         try {
+            String logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际订单拒单："+"["+saleOrderNo+"]";
             LogRecord logRecord = new LogRecord();
             logRecord.setAppCode("UBP");
             logRecord.setCreateTime(new Date());
             logRecord.setTitle("国际订单拒单");
-            logRecord.setDesc(JSON.toJSONString(saleOrderNo));
+            logRecord.setDesc(logstr);
             logRecord.setOptLoginName(refuseRequest.getAgent().getAccount());
             logRecord.setRequestIp(refuseRequest.getAgent().getIp());
-            logRecord.setBizCode("IFT-OrderServiceImpl-auditOrder");
+            logRecord.setBizCode("IFT");
             logRecord.setBizNo(String.valueOf(saleOrderNo));
             Map<String, Object> otherOpts = new HashMap<String, Object>();
             otherOpts.put("transationOrderNo", saleOrder.getTransationOrderNo());
@@ -2201,10 +2230,11 @@ public class OrderServiceImpl implements IOrderService {
                 returnOrderRequest.setEntity(oldSaleOrderExt);
                 returnOrderRequest.setAgent(agent);
                 orderService.updateSaleOrderExt(returnOrderRequest);
-                String logstr = "<p>" + String.format("创建国际订单成功=====", new Date()) + ":saleOrderNo=" + JsonUtil.toJson(saleOrderNo1);
+                //String logstr = "<p>" + String.format("创建国际订单成功=====", new Date()) + ":saleOrderNo=" + JsonUtil.toJson(saleOrderNo1);
                 
                 /* 创建操作日志 */
                 try {
+                    String logstr ="用户"+agent1.getAccount()+"创建国际销售单："+"["+saleOrderNo1+"]";
                     LogRecord logRecord = new LogRecord();
                     logRecord.setAppCode("UBP");
                     logRecord.setCreateTime(new Date());
@@ -2868,7 +2898,7 @@ public class OrderServiceImpl implements IOrderService {
             logRecord.setDesc(logstr);
             logRecord.setOptLoginName(agent.getAccount());
             logRecord.setRequestIp(agent.getIp());
-            logRecord.setBizCode("IFT-OrderServiceImpl-issuing");
+            logRecord.setBizCode("IFT");
             logRecord.setBizNo(String.valueOf(saleOrderNo));
             Map<String, Object> otherOpts = new HashMap<String, Object>();
             otherOpts.put("transationOrderNo", transactionOrderNo);
