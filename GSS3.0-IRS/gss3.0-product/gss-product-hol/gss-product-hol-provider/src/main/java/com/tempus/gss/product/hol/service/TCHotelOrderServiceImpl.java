@@ -691,21 +691,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			if(StringUtil.isNotNullOrEmpty(resultJson)){
 				isBookOrderBase= JsonUtil.toBean(resultJson, new TypeReference<ResultTc<IsBookOrder>>(){});
 				if(StringUtil.isNotNullOrEmpty(isBookOrderBase)){
-					if(isBookOrderBase.getResult().getCanBooking().equals(2)){
-						/*LogRecordHol logRecordHol=new LogRecordHol();
-						logRecordHol.setBizCode("HOL-CanBook");
-						logRecordHol.setCreateTime(new Date());
-						logRecordHol.setResId(isBookOrderReq.getResId());
-						logRecordHol.setProductUniqueId(isBookOrderReq.getProductUniqueId());
-						mongoTemplate1.save(logRecordHol, "logRecordHol");*/
-						Integer saleStatus = 0;
-						SimpleDateFormat sdfupdate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			        	String updateTime = sdfupdate.format(new Date());
-						Query query = Query.query(Criteria.where("_id").is(isBookOrderReq.getResId()));
-			        	Update update = Update.update("saleStatus", saleStatus).set("latestUpdateTime", updateTime);
-			        	mongoTemplate1.upsert(query, update, ResBaseInfo.class);
-						return isBookOrderBase.getResult();
-					}
 					if(isBookOrderBase.getResult().getCanBooking().equals(1)){
 						List<PaymentWay> list = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)),PaymentWay.class);
 						BookableMessage jobj=JSON.parseObject(isBookOrderBase.getResult().getBookableMessage(), BookableMessage.class);  
@@ -1475,8 +1460,18 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 										hotelOrder.setNightCount(factNight);
 										String eachNightPrice = null;
 										String breakfastNum = null;
-										ProInfoDetail proInfoDetail=tCHotelSupplierService.queryListByProductUniqueId(hotelOrder.getProductUniqueId(), ProInfoDetail.class);
-										if(StringUtil.isNotNullOrEmpty(proInfoDetail)){
+										ProInfoDetail proInfoDetail=null;
+										//ProInfoDetail proInfoDetail=tCHotelSupplierService.queryListByProductUniqueId(hotelOrder.getProductUniqueId(), ProInfoDetail.class);
+										 AssignDateHotel assignDateHotel = tCHotelSupplierService.queryDetailById(Long.valueOf(hotelOrder.getHotelCode()), AssignDateHotel.class);
+										if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())) {
+											for(ProInfoDetail pinfo : assignDateHotel.getProInfoDetailList()) {
+												if(pinfo.getProductUniqueId().equals(hotelOrder.getProductUniqueId())) {
+													proInfoDetail = pinfo;
+													break;
+												}
+											}
+										}
+										 if(StringUtil.isNotNullOrEmpty(proInfoDetail)){
 											for (Map.Entry<String, ProSaleInfoDetail> entry : proInfoDetail.getProSaleInfoDetails().entrySet()) {
 			        	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(orderInfoModel.getStartTime());
 			        	        				int endCompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(orderInfoModel.getEndTime());
@@ -1828,7 +1823,18 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							newHotelOrder.setNightCount(factNight);
 							String eachNightPrice = null;
 							String breakfastNum = null;
-							ProInfoDetail proInfoDetail=tCHotelSupplierService.queryListByProductUniqueId(newHotelOrder.getProductUniqueId(), ProInfoDetail.class);
+							//ProInfoDetail proInfoDetail=tCHotelSupplierService.queryListByProductUniqueId(newHotelOrder.getProductUniqueId(), ProInfoDetail.class);
+							ProInfoDetail proInfoDetail=null;
+							//ProInfoDetail proInfoDetail=tCHotelSupplierService.queryListByProductUniqueId(hotelOrder.getProductUniqueId(), ProInfoDetail.class);
+							 AssignDateHotel assignDateHotel = tCHotelSupplierService.queryDetailById(Long.valueOf(hotelOrder.getHotelCode()), AssignDateHotel.class);
+							if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())) {
+								for(ProInfoDetail pinfo : assignDateHotel.getProInfoDetailList()) {
+									if(pinfo.getProductUniqueId().equals(hotelOrder.getProductUniqueId())) {
+										proInfoDetail = pinfo;
+										break;
+									}
+								}
+							}
 							if(StringUtil.isNotNullOrEmpty(proInfoDetail)){
 								for (Map.Entry<String, ProSaleInfoDetail> entry : proInfoDetail.getProSaleInfoDetails().entrySet()) {
         	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(orderInfoModel.getStartTime());
@@ -2272,7 +2278,18 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							if(StringUtil.isNullOrEmpty(hotelOrder.getEachNightPrice()) || StringUtil.isNullOrEmpty(hotelOrder.getBreakfastCount())){
 								String eachNightPrice = null;
 								String breakfastNum = null;
-								ProInfoDetail proInfoDetail=tCHotelSupplierService.queryListByProductUniqueId(hotelOrder.getProductUniqueId(), ProInfoDetail.class);
+								//ProInfoDetail proInfoDetail=tCHotelSupplierService.queryListByProductUniqueId(hotelOrder.getProductUniqueId(), ProInfoDetail.class);
+								ProInfoDetail proInfoDetail=null;
+								//ProInfoDetail proInfoDetail=tCHotelSupplierService.queryListByProductUniqueId(hotelOrder.getProductUniqueId(), ProInfoDetail.class);
+								 AssignDateHotel assignDateHotel = tCHotelSupplierService.queryDetailById(Long.valueOf(hotelOrder.getHotelCode()), AssignDateHotel.class);
+								if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())) {
+									for(ProInfoDetail pinfo : assignDateHotel.getProInfoDetailList()) {
+										if(pinfo.getProductUniqueId().equals(hotelOrder.getProductUniqueId())) {
+											proInfoDetail = pinfo;
+											break;
+										}
+									}
+								}
 								if(StringUtil.isNotNullOrEmpty(proInfoDetail)){
 									for (Map.Entry<String, ProSaleInfoDetail> entry : proInfoDetail.getProSaleInfoDetails().entrySet()) {
 	        	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(orderInfoModel.getStartTime());
