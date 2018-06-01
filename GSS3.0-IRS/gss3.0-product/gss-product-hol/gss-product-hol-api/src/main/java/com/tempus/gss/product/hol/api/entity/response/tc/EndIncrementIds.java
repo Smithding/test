@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.entity.response.tc;
 
 import java.io.Serializable;
+import java.util.Date;
 
 public class EndIncrementIds implements Serializable{
 	private static final long serialVersionUID = 1L;
@@ -9,7 +10,7 @@ public class EndIncrementIds implements Serializable{
 	
 	private Long endIncrementId;
 	
-	private String incrTime;
+	private Date incrTime;
 	
 	private String remark;
 
@@ -29,11 +30,11 @@ public class EndIncrementIds implements Serializable{
 		this.endIncrementId = endIncrementId;
 	}
 
-	public String getIncrTime() {
+	public Date getIncrTime() {
 		return incrTime;
 	}
 
-	public void setIncrTime(String incrTime) {
+	public void setIncrTime(Date incrTime) {
 		this.incrTime = incrTime;
 	}
 

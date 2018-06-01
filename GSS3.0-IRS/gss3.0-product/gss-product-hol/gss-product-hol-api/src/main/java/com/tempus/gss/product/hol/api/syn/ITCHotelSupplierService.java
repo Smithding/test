@@ -44,6 +44,28 @@ public interface ITCHotelSupplierService {
 	 */
 	public <T> T queryListByProductUniqueId(String id, Class<T> clazz);
 	
+	/**
+	 * 根据id查找
+	 * @param id
+	 * @param clazz
+	 * @return
+	 */
+	public <T> T queryDetailById(Long id, Class<T> clazz);
+	/**
+	 * 多线程根据id查找
+	 * @param id
+	 * @param clazz
+	 * @return
+	 */
+	public <T> Future<T> queryListById(Long id, Class<T> clazz);
+	
+	/**
+	 * 根据id查找
+	 * @param id
+	 * @param clazz
+	 * @return
+	 */
+	public <T> Future<T> queryProSaleListByResId(Long resId, Class<T> clazz);
 	
 	/**
 	 * 根据房型id查询

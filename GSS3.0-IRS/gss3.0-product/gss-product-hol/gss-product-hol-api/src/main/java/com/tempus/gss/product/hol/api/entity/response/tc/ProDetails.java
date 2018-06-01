@@ -57,6 +57,10 @@ public class ProDetails implements Serializable {
 	 * 0代表下线， 1代表上线
 	 */
 	private Integer saleStatus = 1;
+	/**
+	 * 房型图片
+	 */
+	private String imgUrl;
 
 	public String getProId() {
 		return proId;
@@ -128,6 +132,14 @@ public class ProDetails implements Serializable {
 
 	public void setSaleStatus(Integer saleStatus) {
 		this.saleStatus = saleStatus;
+	}
+
+	public String getImgUrl() {
+		return imgUrl;
+	}
+
+	public void setImgUrl(String imgUrl) {
+		this.imgUrl = imgUrl;
 	}
 	
 }

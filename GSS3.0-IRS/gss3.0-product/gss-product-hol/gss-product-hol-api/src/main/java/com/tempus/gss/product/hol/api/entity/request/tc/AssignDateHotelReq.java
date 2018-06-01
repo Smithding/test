@@ -65,6 +65,17 @@ public class AssignDateHotelReq implements Serializable{
 	@JSONField(name = "RatePlanId")
 	private Long ratePlanId;
 	
+	/**
+	 * 子酒店编码
+	 */
+	@JSONField(name = "HotelCode")
+	private String hotelCode;
+	/**
+	 * 销售房型 id（子房型 id）
+	 */
+	@JSONField(name = "RoomTypeId")
+	private String roomTypeId;
+	
 	public Long getResId() {
 		return resId;
 	}
@@ -124,6 +135,18 @@ public class AssignDateHotelReq implements Serializable{
 	}
 	public void setRatePlanId(Long ratePlanId) {
 		this.ratePlanId = ratePlanId;
+	}
+	public String getHotelCode() {
+		return hotelCode;
+	}
+	public void setHotelCode(String hotelCode) {
+		this.hotelCode = hotelCode;
+	}
+	public String getRoomTypeId() {
+		return roomTypeId;
+	}
+	public void setRoomTypeId(String roomTypeId) {
+		this.roomTypeId = roomTypeId;
 	}
 	
 }
