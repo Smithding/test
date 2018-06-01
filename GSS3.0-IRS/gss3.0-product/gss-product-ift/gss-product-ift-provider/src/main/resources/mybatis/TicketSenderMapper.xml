@@ -28,7 +28,11 @@
         <where>
             <if test="userId!=null and userId!=''">and USERID=#{userId}</if>
             <if test="status!=null">and status = #{status}</if>
-            <if test="types!=null and types!=''">and TYPE IN(${types})</if>
+            <if test="types!=null and types!=''">
+                <![CDATA[
+                and TYPE like "%"#{types}"%"
+                ]]>
+            </if>
             <if test="statusList!=null">
                 and status in
                 <foreach collection="statusList" index="index" item="item" open="(" separator="," close=")">

@@ -225,6 +225,7 @@ public class ChangeServiceImpl implements IChangeService {
                     saleOrderDetail.setValid((byte) 1);
                     saleOrderDetail.setStatus("1");
                     saleOrderDetail.setIsChange(true);
+                    saleOrderDetail.setCabin(leg.getCabin());
                     saleOrderDetailDao.insertSelective(saleOrderDetail);
 
                     //添加新改签单明细
@@ -244,7 +245,7 @@ public class ChangeServiceImpl implements IChangeService {
 
 
             /*改签乘客价格*/
-            for (Long passengerNo : requestWithActor.getEntity().getOldPassengerNoList()) {
+           /* for (Long passengerNo : requestWithActor.getEntity().getOldPassengerNoList()) {
                 PassengerChangePrice passengerChangePrice = new PassengerChangePrice();
                 passengerChangePrice.setPassengerNo(passengerNo);
                 passengerChangePrice.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
@@ -252,7 +253,7 @@ public class ChangeServiceImpl implements IChangeService {
                 passengerChangePrice.setValid((byte) 1);
                 passengerChangePrice.setChangePriceNo(maxNoService.generateBizNo("IFT_PASSENGER_CHANGE_PRICE_NO", 30));
                 passengerChangePriceDao.insertSelective(passengerChangePrice);
-            }
+            }*/
 
             /*通过编号查询出销售单*/
             SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleOrderExt.getSaleOrderNo());
@@ -322,14 +323,15 @@ public class ChangeServiceImpl implements IChangeService {
 
             /*创建新增操作日志*/
             try {
+                String logstr ="用户"+agent.getAccount()+"申请改签："+"["+requestWithActor.getEntity().getSaleOrderNo()+"]";
                 LogRecord logRecord = new LogRecord();
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("创建国际改签单");
-                logRecord.setDesc(JSON.toJSONString(requestWithActor));
+                logRecord.setDesc(logstr);
                 logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
                 logRecord.setRequestIp(requestWithActor.getAgent().getIp());
-                logRecord.setBizCode("IFT-ChangeServiceImpl-createChange");
-                logRecord.setBizNo(String.valueOf(requestWithActor.getEntity()));
+                logRecord.setBizCode("IFT");
+                logRecord.setBizNo(String.valueOf(requestWithActor.getEntity().getSaleOrderNo()));
                 Map<String, Object> otherOpts = new HashMap<String, Object>();
                 otherOpts.put("transationOrderNo", saleChange.getTransationOrderNo());
                 logRecord.setOtherOpts(otherOpts);
@@ -429,15 +431,16 @@ public class ChangeServiceImpl implements IChangeService {
             }
             /*创建新增操作日志*/
             try {
+                String logstr ="用户"+ passengerChangeList.getAgent().getAccount()+"国际改签创建应收应付："+"["+passengerChangeList.getEntity().get(0).getSaleOrderNo()+"]";
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("国际改签创建应收应付");
-                logRecord.setDesc(JSON.toJSONString(passengerChangeList));
+                logRecord.setDesc(logstr);
                 logRecord.setOptLoginName(passengerChangeList.getAgent().getAccount());
                 logRecord.setRequestIp(passengerChangeList.getAgent().getIp());
-                logRecord.setBizCode("IFT-ChangeServiceImpl-verify");
-                logRecord.setBizNo(String.valueOf(passengerChangeList.getEntity()));
+                logRecord.setBizCode("IFT");
+                logRecord.setBizNo(String.valueOf(passengerChangeList.getEntity().get(0).getSaleOrderNo()));
                 logService.insert(logRecord);
             } catch (Exception e) {
                 log.error("添加(title=国际改签创建应收应付)操作日志异常===" + e);
@@ -690,15 +693,16 @@ public class ChangeServiceImpl implements IChangeService {
             log.info("回贴票号结束");
             /*创建新增操作日志*/
             try {
+                String logstr ="用户"+changeTicketRequest.getAgent().getAccount()+"国际改签处理："+"["+changeTicketRequest.getEntity().getBuyOrderDetailList().get(1).getBuyOrderNo()+"]";
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("国际改签处理");
-                logRecord.setDesc(JSON.toJSONString(changeTicketRequest));
+                logRecord.setDesc(logstr);
                 logRecord.setOptLoginName(changeTicketRequest.getAgent().getAccount());
                 logRecord.setRequestIp(changeTicketRequest.getAgent().getIp());
-                logRecord.setBizCode("IFT-ChangeServiceImpl-changeHandle");
-                logRecord.setBizNo(String.valueOf(changeTicketRequest.getEntity()));
+                logRecord.setBizCode("IFT");
+                logRecord.setBizNo(String.valueOf(changeTicketRequest.getEntity().getBuyOrderDetailList().get(1).getBuyOrderNo()));
                 logService.insert(logRecord);
             } catch (Exception e) {
                 log.error("添加(title=国际改签处理)操作日志异常===" + e);
@@ -775,6 +779,22 @@ public class ChangeServiceImpl implements IChangeService {
                         }
                     }
                 }
+            }
+            /* 创建操作日志 */
+            try {
+                String logstr ="用户"+changeExt.getModifier()+"订单改签支付："+"["+changeExt.getSaleChange().getSaleOrderNo()+"]"+"￥"+changeExt.getSaleChange().getActualAmount();
+                LogRecord logRecord = new LogRecord();
+                logRecord.setAppCode("UBP");
+                logRecord.setCreateTime(new Date());
+                logRecord.setTitle("订单改签支付");
+                logRecord.setDesc(logstr);
+                logRecord.setOptLoginName(changeExt.getModifier());
+                logRecord.setRequestIp(agent.getIp());
+                logRecord.setBizCode("IFT");
+                logRecord.setBizNo(String.valueOf(changeExt.getSaleChange().getSaleOrderNo()));
+                logService.insert(logRecord);
+            } catch (Exception e) {
+                log.error("添加操作日志异常===" + e);
             }
 
         } catch (Exception e) {
@@ -860,15 +880,16 @@ public class ChangeServiceImpl implements IChangeService {
             }
             /*创建新增操作日志*/
             try {
+                String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"国际改签单审核："+"["+requestWithActor.getEntity().getSaleOrderNo()+"]";
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("国际改签单审核");
-                logRecord.setDesc(JSON.toJSONString(requestWithActor));
+                logRecord.setDesc(logstr);
                 logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
                 logRecord.setRequestIp(requestWithActor.getAgent().getIp());
-                logRecord.setBizCode("IFT-ChangeServiceImpl-changeAudit");
-                logRecord.setBizNo(String.valueOf(requestWithActor.getEntity().getSaleChangeNo()));
+                logRecord.setBizCode("IFT");
+                logRecord.setBizNo(String.valueOf(requestWithActor.getEntity().getSaleOrderNo()));
                 logService.insert(logRecord);
             } catch (Exception e) {
                 log.error("添加(title=国际改签单审核)操作日志异常===" , e);
@@ -1014,15 +1035,16 @@ public class ChangeServiceImpl implements IChangeService {
             flag = true;
             /*创建新增操作日志*/
             try {
+                String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"国际创建审核改签单："+"["+requestWithActor.getEntity().getSaleOrderNo()+"]";
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("国际创建审核改签单");
-                logRecord.setDesc(JSON.toJSONString(requestWithActor));
+                logRecord.setDesc(logstr);
                 logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
                 logRecord.setRequestIp(requestWithActor.getAgent().getIp());
-                logRecord.setBizCode("IFT-ChangeServiceImpl-handle");
-                logRecord.setBizNo(String.valueOf(requestWithActor.getEntity()));
+                logRecord.setBizCode("IFT");
+                logRecord.setBizNo(String.valueOf(requestWithActor.getEntity().getSaleOrderNo()));
                 logService.insert(logRecord);
             } catch (Exception e) {
                 log.error("添加(title=国际创建审核改签单)操作日志异常===" + e);
@@ -1117,15 +1139,16 @@ public class ChangeServiceImpl implements IChangeService {
         }
         /*创建新增操作日志*/
         try {
+            String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"取消改签："+"["+saleChange.getSaleOrderNo()+"]";
             LogRecord logRecord = new LogRecord();
             logRecord.setAppCode("UBP");
             logRecord.setCreateTime(new Date());
             logRecord.setTitle("国际改签单取消");
-            logRecord.setDesc(JSON.toJSONString(requestWithActor));
+            logRecord.setDesc(logstr);
             logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
             logRecord.setRequestIp(requestWithActor.getAgent().getIp());
-            logRecord.setBizCode("IFT-ChangeServiceImpl-cancel");
-            logRecord.setBizNo(String.valueOf(requestWithActor.getEntity()));
+            logRecord.setBizCode("IFT");
+            logRecord.setBizNo(String.valueOf(saleChange.getSaleOrderNo()));
             logService.insert(logRecord);
         } catch (Exception e) {
             log.error("添加(title=国际改签单取消)操作日志异常===" + e);
@@ -1257,15 +1280,16 @@ public class ChangeServiceImpl implements IChangeService {
             log.info("拒单结束");
             /*创建新增操作日志*/
             try {
+                String logstr ="用户"+ saleChangeNo.getAgent().getAccount()+"国际改签单拒单："+"["+changeExt.getSaleChange().getSaleOrderNo()+"]";
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("国际改签单拒单");
-                logRecord.setDesc(JSON.toJSONString(saleChangeNo));
+                logRecord.setDesc(logstr);
                 logRecord.setOptLoginName(saleChangeNo.getAgent().getAccount());
                 logRecord.setRequestIp(saleChangeNo.getAgent().getIp());
-                logRecord.setBizCode("IFT-ChangeServiceImpl-refuse");
-                logRecord.setBizNo(String.valueOf(saleChangeNo.getEntity()));
+                logRecord.setBizCode("IFT");
+                logRecord.setBizNo(String.valueOf(changeExt.getSaleChange().getSaleOrderNo()));
                 logService.insert(logRecord);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1464,15 +1488,16 @@ public class ChangeServiceImpl implements IChangeService {
             log.info("锁住订单结束");
             /*创建新增操作日志*/
             try {
+                String logstr ="用户"+ saleChange.getAgent().getAccount()+"国际改签单锁定："+"["+changeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()+"]";
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("国际改签单锁定");
-                logRecord.setDesc(JSON.toJSONString(saleChange));
+                logRecord.setDesc(logstr);
                 logRecord.setOptLoginName(saleChange.getAgent().getAccount());
                 logRecord.setRequestIp(saleChange.getAgent().getIp());
-                logRecord.setBizCode("IFT-ChangeServiceImpl-locker");
-                logRecord.setBizNo(String.valueOf(saleChange.getEntity().getSaleChangeNo()));
+                logRecord.setBizCode("IFT");
+                logRecord.setBizNo(String.valueOf(changeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()));
                 logService.insert(logRecord);
             } catch (Exception e) {
                 log.error("添加(title=国际改签单锁定)操作日志异常===", e);
@@ -1537,15 +1562,17 @@ public class ChangeServiceImpl implements IChangeService {
             
             /*创建新增操作日志*/
             try {
+                SaleChange change = saleChangeService.getSaleChangeByNo(requestWithActor.getAgent(), saleChangeNo);
+                String logstr ="用户"+requestWithActor.getAgent().getAccount()+"国际改签单出单确认："+"["+change.getSaleOrderNo()+"]";
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("GSS");
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("国际改签单出单确认");
-                logRecord.setDesc(JSON.toJSONString(requestWithActor));
+                logRecord.setDesc(logstr);
                 logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
                 logRecord.setRequestIp(requestWithActor.getAgent().getIp());
-                logRecord.setBizCode("IFT-ChangeServiceImpl-changeConfirm");
-                logRecord.setBizNo(String.valueOf(requestWithActor.getEntity().getSaleChangeNo()));
+                logRecord.setBizCode("IFT");
+                logRecord.setBizNo(String.valueOf(change.getSaleOrderNo()));
                 logService.insert(logRecord);
             } catch (Exception e) {
                 log.error("添加(title=国际改签单出单确认)操作日志异常===" + e);
@@ -1608,6 +1635,7 @@ public class ChangeServiceImpl implements IChangeService {
             }
             /*创建新增操作日志*/
             try {
+                String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"创建国际改签采购单："+"["+requestWithActor.getEntity().getBuyOrderNo()+"]";
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
@@ -1615,7 +1643,7 @@ public class ChangeServiceImpl implements IChangeService {
                 logRecord.setDesc(JSON.toJSONString(requestWithActor));
                 logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
                 logRecord.setRequestIp(requestWithActor.getAgent().getIp());
-                logRecord.setBizCode("IFT-ChangeServiceImpl-createBuyOrder");
+                logRecord.setBizCode("IFT");
                 logRecord.setBizNo(String.valueOf(requestWithActor.getEntity().getBuyOrderNo()));
                 logService.insert(logRecord);
             } catch (Exception e) {
