@@ -416,7 +416,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
  	 					criatira.and("brandInfo.resBrandName").in(hotelSearchReq.getSearchCondition().getBrandList());
  	 				}
  				}
- 				criatira.and("resCommonPrice").ne(999999);
+ 				//criatira.and("resCommonPrice").ne(999999);
  				log.info("酒店查询条件："+JsonUtil.toJson(criatira));
  				res = mongoTemplate1.find(query.addCriteria(criatira), ResBaseInfo.class);
  	        }else{
@@ -838,7 +838,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	}
 
 	@Override
-	public ResProBaseInfo queryInventPrice(Agent agent, String productUniqueId, String startTime, String endTime) throws GSSException{
+	public ResProBaseInfo queryInventPrice(Agent agent, Long resId, String productUniqueId, String startTime, String endTime) throws GSSException{
 		if (StringUtil.isNullOrEmpty(agent)) {
             log.error("agent对象为空");
             throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
@@ -864,44 +864,54 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         }catch(ParseException e){
         	e.printStackTrace();
         }
-		ProInfoDetail proInfoDetail=queryListByProductUniqueId(productUniqueId, ProInfoDetail.class);
-		TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
-		try {
-			if(StringUtil.isNotNullOrEmpty(proInfoDetail) && StringUtil.isNotNullOrEmpty(proInfoDetail.getProSaleInfoDetails())){
-				for (Map.Entry<String, ProSaleInfoDetail> entry : proInfoDetail.getProSaleInfoDetails().entrySet()) {
-					int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(startTime);
-					int endCompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(endTime);
-						if(begincompare >= 0 && endCompare < 0){
-							mapPro.put(DateUtil.stringToSimpleString(entry.getKey()), entry.getValue());
-							Integer price= entry.getValue().getDistributionSalePrice();
-							BigDecimal bigPrice = new BigDecimal(price);
-							BigDecimal profitPrice = holProfitService.computeTcProfitPrice(agent, price, agent.getType());
-							if(StringUtil.isNotNullOrEmpty(profitPrice)){
-								BigDecimal profit = bigPrice.multiply(profitPrice);
-								totalProfitPrice = totalProfitPrice.add(profit);
-							}
-							sumPrice += price;
-						}
-						/*if(endCompare >= 0){
-							break;
-						}*/
-					}
-					if(StringUtil.isNotNullOrEmpty(mapPro)){
-						resProBaseInfo.setProSaleInfoDetailsTarget(mapPro);
-						if(StringUtil.isNotNullOrEmpty(mapPro.get(startTime))){
-							resProBaseInfo.setFirPrice(mapPro.get(startTime).getDistributionSalePrice());
-						}
-					}
-					resProBaseInfo.setConPrice(sumPrice/(days));
-					resProBaseInfo.setUserDays(days);
-					resProBaseInfo.setUserSumPrice(sumPrice);
-					resProBaseInfo.setTotalRebateRateProfit(totalProfitPrice);
-					//sumPrice =0;
-				}
-		} catch (Exception e) {
-			log.error("获取某一房型信息出错：",e);
-			throw new GSSException("获取某一房型信息出错", "0140", "获取某一房型信息出错");
-		}
+		//ProInfoDetail proInfoDetail=queryListByProductUniqueId(productUniqueId, ProInfoDetail.class);
+        AssignDateHotel assignDateHotel = queryDetailById(resId, AssignDateHotel.class);
+        if(StringUtil.isNotNullOrEmpty(assignDateHotel)) {
+        	List<ProInfoDetail> proInfoDetailList = assignDateHotel.getProInfoDetailList();
+        	if(StringUtil.isNotNullOrEmpty(proInfoDetailList)) {
+        		for(ProInfoDetail proInfoDetail : proInfoDetailList) {
+        			if(proInfoDetail.getProductUniqueId().equals(productUniqueId)) {
+        				TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
+        				try {
+        					if(StringUtil.isNotNullOrEmpty(proInfoDetail) && StringUtil.isNotNullOrEmpty(proInfoDetail.getProSaleInfoDetails())){
+        						for (Map.Entry<String, ProSaleInfoDetail> entry : proInfoDetail.getProSaleInfoDetails().entrySet()) {
+        							int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(startTime);
+        							int endCompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(endTime);
+        								if(begincompare >= 0 && endCompare < 0){
+        									mapPro.put(DateUtil.stringToSimpleString(entry.getKey()), entry.getValue());
+        									Integer price= entry.getValue().getDistributionSalePrice();
+        									BigDecimal bigPrice = new BigDecimal(price);
+        									BigDecimal profitPrice = holProfitService.computeTcProfitPrice(agent, price, agent.getType());
+        									if(StringUtil.isNotNullOrEmpty(profitPrice)){
+        										BigDecimal profit = bigPrice.multiply(profitPrice);
+        										totalProfitPrice = totalProfitPrice.add(profit);
+        									}
+        									sumPrice += price;
+        								}
+        								/*if(endCompare >= 0){
+        									break;
+        								}*/
+        							}
+        							if(StringUtil.isNotNullOrEmpty(mapPro)){
+        								resProBaseInfo.setProSaleInfoDetailsTarget(mapPro);
+        								if(StringUtil.isNotNullOrEmpty(mapPro.get(startTime))){
+        									resProBaseInfo.setFirPrice(mapPro.get(startTime).getDistributionSalePrice());
+        								}
+        							}
+        							resProBaseInfo.setConPrice(sumPrice/(days));
+        							resProBaseInfo.setUserDays(days);
+        							resProBaseInfo.setUserSumPrice(sumPrice);
+        							resProBaseInfo.setTotalRebateRateProfit(totalProfitPrice);
+        							//sumPrice =0;
+        						}
+        				} catch (Exception e) {
+        					log.error("获取某一房型信息出错：",e);
+        					throw new GSSException("获取某一房型信息出错", "0140", "获取某一房型信息出错");
+        				}
+        			}
+        		}
+        	}
+        }
 		return resProBaseInfo;
 	}
 	
@@ -1127,7 +1137,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			ResBaseInfo resBaseInfo = null;
 			if(StringUtil.isNotNullOrEmpty(resBaseInfos)) {
 				resBaseInfo = resBaseInfos.get(0);
-				Integer minPrice = new Random().nextInt(1000);
+				Integer minPrice = new Random().nextInt(800) + 100;
 				resBaseInfo.setMinPrice(minPrice);
 				resBaseInfo.setResCommonPrice(minPrice);
 				resBaseInfo.setSaleStatus(1);
