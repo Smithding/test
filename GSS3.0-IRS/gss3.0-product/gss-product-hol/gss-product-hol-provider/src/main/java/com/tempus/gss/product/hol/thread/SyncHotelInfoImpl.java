@@ -27,6 +27,7 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
+import com.tempus.gss.product.hol.api.entity.request.tc.SingleHotelDetailReq;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.entity.response.tc.AssignDateHotel;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
@@ -37,11 +38,13 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ProSaleInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfos;
+import com.tempus.gss.product.hol.api.entity.response.tc.TCHotelDetailResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelId;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
 import com.tempus.gss.product.hol.api.service.IHolProfitService;
 import com.tempus.gss.product.hol.api.syn.ISyncHotelInfo;
+import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
 import com.tempus.gss.product.hol.api.util.DateUtil;
 import com.tempus.gss.product.hol.service.TCHotelSupplierServiceImpl;
@@ -64,6 +67,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	
 	@Reference
 	IHolProfitService holProfitService;
+	
+	@Reference
+	ITCHotelInterService hotelInterService;
 	
 	@Value("${bqy.count}")
 	private int PAGE_SIZE;			//查询id数量
@@ -211,14 +217,18 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					String key="";
 					
 					for(ResProBaseInfo proList: resProBaseInfoList){
-						key= proList.getResProName();
-						if(!proMap.containsKey(key)){
-							List<ResProBaseInfo> proBedList=new ArrayList<ResProBaseInfo>();
-							proBedList.add(proList);
-							proMap.put(key, proBedList);
-						}else{
-							List<ResProBaseInfo> proBedList = proMap.get(key);
-							proBedList.add(proList);
+						for(ProInfoDetail de : assignDateHotel.getProInfoDetailList()) {
+							if(proList.getProductUniqueId().equals(de.getProductUniqueId())) {
+								key= proList.getResProName();
+								if(!proMap.containsKey(key)){
+									List<ResProBaseInfo> proBedList=new ArrayList<ResProBaseInfo>();
+									proBedList.add(proList);
+									proMap.put(key, proBedList);
+								}else{
+									List<ResProBaseInfo> proBedList = proMap.get(key);
+									proBedList.add(proList);
+								}
+							}
 						}
 					}
 					List<ProDetails> ProInfoDetaisList=new ArrayList<ProDetails>();
@@ -292,7 +302,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		         	    	        						if(!entry.getValue().getInventoryStats().equals(4)) {
 		         	    	        							int startDate = DateUtil.stringToSimpleString(entry.getValue().getStartDate()).compareTo(startTime);
 		         	    	        							int endDate = DateUtil.stringToSimpleString(entry.getValue().getEndDate()).compareTo(endTime);
-		         	    	        							if(startDate > 0 && endDate < 0) {
+		         	    	        							if(startDate > 0 || endDate < 0) {
 		         	    	        								pro.setBookStatus(0);
 		         	    	        							}
 		         	    	        						}
@@ -335,10 +345,11 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	                   			 				pro.setBookStatus(0);
 	                   			 				pro.setFirPrice(firstPrice);
 	                   			 			}
-	                   			 		}else {
+	                   			 		}
+	                   			 		/*else {
 	                   			 			pro.setBookStatus(0);
 	                   			 			pro.setFirPrice(firstPrice);
-	                   			 		}
+	                   			 		}*/
 	                   			 	}
      		            		}
          					}
@@ -376,7 +387,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		}
 		return null;
 	}
-	
+
 	
 	
 }	
