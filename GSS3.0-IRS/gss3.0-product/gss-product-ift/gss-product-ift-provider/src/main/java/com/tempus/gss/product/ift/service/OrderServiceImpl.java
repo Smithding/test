@@ -221,7 +221,7 @@ public class OrderServiceImpl implements IOrderService {
             return;
         }
         log.info("第二步：查询在线采购退票员...");
-        List<TicketSender> senders = getOnlineTicketSender("'buysman-refund'"); //采购退票人员
+        List<TicketSender> senders = getOnlineTicketSender("buysman-refund"); //采购退票人员
         log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
             Agent agent = new Agent(Integer.valueOf(owner));
@@ -276,7 +276,7 @@ public class OrderServiceImpl implements IOrderService {
             return;
         }
         log.info("第二步：查询在线采购废票员...");
-        List<TicketSender> senders = getOnlineTicketSender("'buysman-waste'"); //采购废票人员
+        List<TicketSender> senders = getOnlineTicketSender("buysman-waste"); //采购废票人员
         log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
             Agent agent = new Agent(Integer.valueOf(owner));
@@ -331,7 +331,7 @@ public class OrderServiceImpl implements IOrderService {
             return;
         }
         log.info("第二步：查询在线采购改签员...");
-        List<TicketSender> senders = getOnlineTicketSender("'buysman-change'");  //采购改签员
+        List<TicketSender> senders = getOnlineTicketSender("buysman-change");  //采购改签员
         log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
             Agent agent = new Agent(Integer.valueOf(owner));
@@ -1880,7 +1880,7 @@ public class OrderServiceImpl implements IOrderService {
             return;
         }
         log.info("第二步：查询在线采购出票员...");
-        List<TicketSender> senders = getOnlineTicketSender("'buysman-ticketSender'"); //采购出票员
+        List<TicketSender> senders = getOnlineTicketSender("buysman-ticketSender"); //采购出票员
         log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
             Agent agent = new Agent(Integer.valueOf(owner));
