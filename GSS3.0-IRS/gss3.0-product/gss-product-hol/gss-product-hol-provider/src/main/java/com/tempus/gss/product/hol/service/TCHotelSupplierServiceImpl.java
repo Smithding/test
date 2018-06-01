@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -97,6 +98,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResGPSInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResInfoList;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfos;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResTrafficInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.TCHotelDetailResult;
 import com.tempus.gss.product.hol.api.service.FutureResult;
@@ -163,6 +165,15 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		
 		return t;
 	}
+	
+	
+	@Override
+	public <T> T queryDetailById(Long id, Class<T> clazz) {
+		T t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
+		
+		return t;
+	}
+	
 	@Override
 	public <T> T queryListByProductUniqueId(String id, Class<T> clazz) {
 		
@@ -1108,13 +1119,17 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			SingleHotelDetailReq singleHotelDetailReq=new SingleHotelDetailReq();
 			singleHotelDetailReq.setResId(String.valueOf(resId));
 			singleHotelDetailReq.setSourceForm("-1");
-			singleHotelDetailReq.setRequestContent("res,rimg");
+			singleHotelDetailReq.setRequestContent("res,respro,rimg");
 			TCHotelDetailResult hotelDetail=hotel.queryTCHotelDetail(singleHotelDetailReq);
 			List<ResBaseInfo> resBaseInfos = hotelDetail.getResBaseInfos();
 			List<ImgInfo> resImages = hotelDetail.getResImages();
+			List<ResProBaseInfo> resProBaseInfos = hotelDetail.getResProBaseInfos();
 			ResBaseInfo resBaseInfo = null;
 			if(StringUtil.isNotNullOrEmpty(resBaseInfos)) {
 				resBaseInfo = resBaseInfos.get(0);
+				Integer minPrice = new Random().nextInt(1000);
+				resBaseInfo.setMinPrice(minPrice);
+				resBaseInfo.setResCommonPrice(minPrice);
 				resBaseInfo.setSaleStatus(1);
 				resBaseInfo.setId(resId);
 				resBaseInfo.setSupplierNo("411709261204150108");
@@ -1134,6 +1149,14 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 				mongoTemplate1.save(imgInfoSum, "imgInfoSum");
 				mongoTemplate1.save(resBaseInfo, "resBaseInfo");
 			}
+			
+			if(StringUtil.isNotNullOrEmpty(resProBaseInfos)) {
+				ResProBaseInfos resProBase =new ResProBaseInfos();
+				resProBase.setId(resId);
+				resProBase.setResProBaseInfos(resProBaseInfos);
+				mongoTemplate1.save(resProBase, "resProBaseInfos");
+			}
+			
 			
 			
 		} catch (Exception e) {

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.logging.log4j.LogManager;
@@ -355,6 +356,25 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			// TODO: handle exception
 		}
 		return tcResBaseInfo;
+	}
+
+	@Override
+	public <T> T queryDetailById(Long id, Class<T> clazz) throws GSSException {
+		Future<T> imgInfoSumFuture = tcHotelSupplierService.queryListById(id, clazz);
+		T t = null;
+		while(true) {
+			if(imgInfoSumFuture.isDone()) {
+				break;
+			}
+		}
+		try {
+			t = imgInfoSumFuture.get();
+			return t;
+			
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	

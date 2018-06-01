@@ -50,6 +50,13 @@ public interface ITCHotelSupplierService {
 	 * @param clazz
 	 * @return
 	 */
+	public <T> T queryDetailById(Long id, Class<T> clazz);
+	/**
+	 * 多线程根据id查找
+	 * @param id
+	 * @param clazz
+	 * @return
+	 */
 	public <T> Future<T> queryListById(Long id, Class<T> clazz);
 	
 	/**
