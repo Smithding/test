@@ -307,6 +307,7 @@ public class RefundServiceImpl implements IRefundService {
 			saleChangeExt.setCustomerRemark(requestWithActor.getEntity().getCustomerRemark());//用户备注
 			saleChangeExt.setCustomerNo(agent.getNum());
 			saleChangeExt.setCustomerTypeNo(agent.getType());
+			log.info("申请退费单时保存的退费单信息:{}",saleChangeExt.toString());
 			saleChangeExtDao.insertSelective(saleChangeExt);
 			/*//销售退废分单操作
 			Integer refundType = requestWithActor.getEntity().getRefundType();
