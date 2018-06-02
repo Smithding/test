@@ -357,6 +357,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	         					ppp.setSaleStatus(0);
 	         				}
          				}
+					tcResBaseInfo.setImgInfoList(list2);
 					tcResBaseInfo.setProDetails(ProInfoDetaisList);
 				}
 			}else {
