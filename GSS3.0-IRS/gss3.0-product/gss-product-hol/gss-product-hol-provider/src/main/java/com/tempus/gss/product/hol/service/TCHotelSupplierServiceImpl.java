@@ -865,7 +865,16 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         	e.printStackTrace();
         }
 		//ProInfoDetail proInfoDetail=queryListByProductUniqueId(productUniqueId, ProInfoDetail.class);
-        AssignDateHotel assignDateHotel = queryDetailById(resId, AssignDateHotel.class);
+       // AssignDateHotel assignDateHotel = queryDetailById(resId, AssignDateHotel.class);
+        
+        AssignDateHotelReq assignDateHotelReq=new AssignDateHotelReq();
+		assignDateHotelReq.setResId(resId);
+		assignDateHotelReq.setProductUniqueId(productUniqueId);
+		assignDateHotelReq.setSourceFrom("-1");
+		assignDateHotelReq.setStartTime(startTime);
+		assignDateHotelReq.setEndTime(endTime);
+		AssignDateHotel assignDateHotel=  hotel.queryAssignDateHotel(assignDateHotelReq);
+		
         if(StringUtil.isNotNullOrEmpty(assignDateHotel)) {
         	List<ProInfoDetail> proInfoDetailList = assignDateHotel.getProInfoDetailList();
         	if(StringUtil.isNotNullOrEmpty(proInfoDetailList)) {
