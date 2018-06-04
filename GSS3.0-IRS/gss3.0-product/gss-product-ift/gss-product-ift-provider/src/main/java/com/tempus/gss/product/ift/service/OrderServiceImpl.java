@@ -618,7 +618,24 @@ public class OrderServiceImpl implements IOrderService {
             
             /* 创建操作日志 */
             try {
-                String logstr ="用户"+agent.getAccount()+"创建国际销售单："+"["+saleOrderNo+"]";
+                String logstr=null;
+                if (requestWithActor.getEntity().getSaleOrderExt().getCreateType()==7){
+                    logstr ="用户"+requestWithActor.getAgent().getAccount()+"创建冲单单："+"["+requestWithActor.getEntity().getSaleOrderExt().getSaleOrder().getSaleOrderNo()+"]"+"冲减金额￥"+requestWithActor.getEntity().getSaleOrderExt().getSaleOrder().getReceivable();
+                }else if(requestWithActor.getEntity().getSaleOrderExt().getCreateType()==8){
+                    logstr ="用户"+requestWithActor.getAgent().getAccount()+"创建补单："+"["+requestWithActor.getEntity().getSaleOrderExt().getSaleOrder().getSaleOrderNo()+"]"+"补交金额￥"+requestWithActor.getEntity().getSaleOrderExt().getSaleOrder().getReceivable();
+
+                }else if(requestWithActor.getEntity().getSaleOrderExt().getCreateType()==9 ||requestWithActor.getEntity().getSaleOrderExt().getCreateType()==10){
+                    logstr ="用户"+requestWithActor.getAgent().getAccount()+"创建调整单："+"["+requestWithActor.getEntity().getSaleOrderExt().getSaleOrder().getSaleOrderNo()+"]";
+
+                }else if(requestWithActor.getEntity().getSaleOrderExt().getCreateType()==11){
+                    logstr ="用户"+requestWithActor.getAgent().getAccount()+"创建ADM单："+"["+requestWithActor.getEntity().getSaleOrderExt().getSaleOrder().getSaleOrderNo()+"]";
+
+                }else if(requestWithActor.getEntity().getSaleOrderExt().getCreateType()==12){
+                    logstr ="用户"+requestWithActor.getAgent().getAccount()+"创建ACM单："+"["+requestWithActor.getEntity().getSaleOrderExt().getSaleOrder().getSaleOrderNo()+"]";
+
+                }else{
+                    logstr ="用户"+agent.getAccount()+"创建国际销售单："+"["+saleOrderNo+"]";
+                }
                 LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
@@ -1327,7 +1344,52 @@ public class OrderServiceImpl implements IOrderService {
         
         /* 创建操作日志 */
         try {
-            String logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际订单拒单："+"["+saleOrderNo+"]";
+            String logstr=null;
+            if (saleOrderDetailList !=null && saleOrderDetailList.get(0).getSaleOrderExt() !=null &&
+                    saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder() !=null){
+                if (saleOrderDetailList.get(0).getSaleOrderExt().getCreateType()==7){
+                    if (saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==14){
+                        logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际冲单拒单："+"["+saleOrderNo+"]";
+
+                    }else if(saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==5) {
+                        logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际冲单取消："+"["+saleOrderNo+"]";
+                    }
+                }else if (saleOrderDetailList.get(0).getSaleOrderExt().getCreateType()==8){
+                    if (saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==14){
+                        logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际补单拒单："+"["+saleOrderNo+"]";
+
+                    }else if(saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==5) {
+                        logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际补单取消："+"["+saleOrderNo+"]";
+                    }
+                }else if (saleOrderDetailList.get(0).getSaleOrderExt().getCreateType()==9 ||
+                        saleOrderDetailList.get(0).getSaleOrderExt().getCreateType()==10){
+                    if (saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==14){
+                        logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际调整单拒单："+"["+saleOrderNo+"]";
+
+                    }else if(saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==5) {
+                        logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际调整单取消："+"["+saleOrderNo+"]";
+                    }
+                }else if (saleOrderDetailList.get(0).getSaleOrderExt().getCreateType()==11){
+                    if (saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==14){
+                        logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际ADM单拒单："+"["+saleOrderNo+"]";
+
+                    }else if(saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==5) {
+                        logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际ADM单取消："+"["+saleOrderNo+"]";
+                    }
+
+                }else if (saleOrderDetailList.get(0).getSaleOrderExt().getCreateType()==12){
+                    if (saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==14){
+                        logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际ACM单拒单："+"["+saleOrderNo+"]";
+
+                    }else if(saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==5) {
+                        logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际ACM单取消："+"["+saleOrderNo+"]";
+                    }
+                }else{
+                    logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际订单拒单："+"["+saleOrderNo+"]";
+                }
+            }else {
+             logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际订单拒单："+"["+saleOrderNo+"]";
+            }
             LogRecord logRecord = new LogRecord();
             logRecord.setAppCode("UBP");
             logRecord.setCreateTime(new Date());
