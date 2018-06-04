@@ -858,4 +858,54 @@
 		</if>
   	 </trim>    
   </select>  
+    <!-- 根据保单号查询订单,B2B订单模块支付使用 -->
+  <select id="selectByOrder" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ins.api.entity.SaleOrderExt" >
+  	 select 
+		  oe.SALE_ORDER_NO,
+		  oe.ID,
+		  oe.OWNER,
+		  oe.BUY_ORDER_NO,
+		  oe.INSURANCE_NO,
+		  oe.PROPOSAL_NO,
+		  oe.ORDER_NO,
+		  oe.ORDER_TYPE,
+		  oe.POLICY_URL,
+		  oe.POLICY_NO,
+		  oe.TRANSACTION_ID,
+		  oe.PRODUCT_KEY,
+		  oe.DESTINATION,
+		  oe.EFFECT_DATE,
+		  oe.EXPIRE_DATE,
+		  oe.ISSUE_DATE,
+		  oe.HOLDER_TYPE,
+		  oe.HOLDER_NAME,
+		  oe.HOLDER_CERTI_TYPE,
+		  oe.HOLDER_CERTI_NO,
+		  oe.HOLDER_SEX,
+		  oe.HOLDER_BIRTHDAY,
+		  oe.HOLDER_EMAIL,
+		  oe.HOLDER_PHONE,
+		  oe.CUSTOMER_TYPE_NO,
+		  oe.SALE_PRICE,
+		  oe.BUY_PRICE,
+		  oe.TOTAL_PREMIUM,
+		  oe.TRAVEL_DAY,
+		  oe.INSURED_COUNT,
+		  oe.REMARK,
+		  oe.IS_TEAM,
+		  oe.EXTENDED_FIELDS_JSON,
+		  oe.PNR,
+		  oe.CREATE_TIME,
+		  oe.MODIFY_TIME,
+		  oe.CREATOR,
+		  oe.MODIFIER,
+		  oe.VALID
+     FROM  INS_SALE_ORDER_EXT oe
+     where  VALID=1
+ 	 <trim suffixOverrides="AND" >
+		<if test="_parameter != null and _parameter != ''" >
+			AND oe.TRANSACTION_ID = #{transactionNo,jdbcType=VARCHAR}
+		</if>
+  	 </trim>    
+  </select>  
 </mapper>

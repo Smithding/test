@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.entity.response.tc;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import com.alibaba.fastjson.annotation.JSONField;
@@ -28,6 +29,8 @@ public class AssignDateHotel implements Serializable{
 	@JSONField(name = "ProInfoDetailList")
 	private List<ProInfoDetail> proInfoDetailList;
 	
+	private String latestUpdateTime;
+	
 	public Long getResId() {
 		return resId;
 	}
@@ -46,4 +49,12 @@ public class AssignDateHotel implements Serializable{
 	public void setId(Long id) {
 		this.id = id;
 	}
+	public String getLatestUpdateTime() {
+		return latestUpdateTime;
+	}
+	public void setLatestUpdateTime(String latestUpdateTime) {
+		this.latestUpdateTime = latestUpdateTime;
+	}
+	
+	
 }

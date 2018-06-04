@@ -90,6 +90,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.BusinessSection;
 import com.tempus.gss.product.hol.api.entity.response.tc.CityAreaScenic;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfoSum;
+import com.tempus.gss.product.hol.api.entity.response.tc.PaymentWay;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProDetails;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProSaleInfoDetail;
@@ -736,6 +737,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
              		throw new GSSException("查询某一酒店详情出错", "0130", "酒店信息为空");
              	}
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.error("查询某一酒店详情出错"+e);
             throw new GSSException("查询某一酒店详情出错", "0130", "查询某一酒店详情出错");
 		}
@@ -1350,6 +1352,12 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			throw new GSSException("查询酒店图片", "0220", "查询酒店图片异常, "+e.getMessage());
 		}
 		return imgInfoSum;
+	}
+
+	@Override
+	public List<PaymentWay> queryPaymentWay() {
+		List<PaymentWay> list = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)),PaymentWay.class);
+		return list;
 	}
 
 	

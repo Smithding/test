@@ -28,4 +28,10 @@ public interface OrderServiceDao extends InsBaseDao<SaleOrderExt, SaleOrderExtVo
 	 * @return
 	 */
 	List<SaleOrderExtVo> selectBySaleOrderExtVo(SaleOrderExtVo saleOrderExtVo);
+	/**
+	 * 通过交易单号获取订单 B2B保险订单管理支付计算价格使用
+	 * @param policyNo
+	 * @return
+	 */
+	List<SaleOrderExt> selectByOrder(String transactionNo);
 }
