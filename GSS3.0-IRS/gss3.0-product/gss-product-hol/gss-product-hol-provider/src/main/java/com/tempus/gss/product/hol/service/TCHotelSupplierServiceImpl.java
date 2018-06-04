@@ -736,6 +736,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
              		throw new GSSException("查询某一酒店详情出错", "0130", "酒店信息为空");
              	}
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.error("查询某一酒店详情出错"+e);
             throw new GSSException("查询某一酒店详情出错", "0130", "查询某一酒店详情出错");
 		}
