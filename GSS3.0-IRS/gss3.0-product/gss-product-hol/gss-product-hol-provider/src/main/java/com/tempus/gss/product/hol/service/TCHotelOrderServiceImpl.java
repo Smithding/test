@@ -693,12 +693,18 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				//System.out.println("11:  "+sim.format(da.getTime()));
 				isBookOrderReq.setEarliestArrivalTime(sim.format(da.getTime()));
 			}
-			if(StringUtils.isEmpty(isBookOrderReq.getLatestArrivalTime())) {
-				da.add(Calendar.HOUR, 11);
+			if(sim.format(new Date()).compareTo(isBookOrderReq.getComeTime()) > 0) {
+				da.add(Calendar.HOUR,2);
 				da.set(Calendar.MINUTE, 0);
 				da.set(Calendar.SECOND, 0);
+				isBookOrderReq.setComeTime(sim.format(da.getTime()));
+			}
+			if(StringUtils.isEmpty(isBookOrderReq.getLatestArrivalTime())) {
+				/*da.add(Calendar.HOUR, 11);
+				da.set(Calendar.MINUTE, 0);
+				da.set(Calendar.SECOND, 0);*/
 				//System.out.println("22:  "+sim.format(da.getTime()));
-				isBookOrderReq.setLatestArrivalTime(sim.format(da.getTime()));
+				isBookOrderReq.setLatestArrivalTime(isBookOrderReq.getComeTime());
 			}
 			logger.info("酒店订单进行可定检查,入参:" + JSONObject.toJSONString(isBookOrderReq));
 			//System.out.println("EarliestArrivalTime: "+isBookOrderReq.getEarliestArrivalTime());
