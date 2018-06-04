@@ -3028,7 +3028,6 @@ public class OrderServiceImpl implements IOrderService {
 		return saleOrderExts;
 	}
 
-
 	@Override
 	public boolean refundForB2BPersonDetail(SaleOrderExt saleOrderExt, SaleOrderDetail saleOrderDetail, Agent agent) {
 		//更改状态为退款审核中的状态
@@ -3415,5 +3414,31 @@ public class OrderServiceImpl implements IOrderService {
 		 * 需要根据list的长度去执行获取数据的次数,此操作可能会存在性能问题
 		 */
 		return saleOrderExtList;
+	}
+	/**
+	 * b2b保险订单管理 支付计算价格
+	 * @param requestWithActor
+	 * @return
+	 */
+
+	@Override
+	public List<SaleOrderExt> queryInsuranceSaleOrderForTranSaction(RequestWithActor<Long> requestWithActor) {
+		log.info("查询保单开始==============");
+		if (requestWithActor.getAgent() == null) {
+			log.error("当前操作用户不能为空");
+			throw new GSSException("当前操作用户不能为空", "1010", "当前操作用户不能为空");
+		}
+		if (requestWithActor.getEntity() == null) {
+			log.error("保单号为空");
+			throw new GSSException("保单号为空", "1010", "查询保单失败");
+		}
+		List<SaleOrderExt> saleOrderExts = orderServiceDao.selectByOrder(requestWithActor.getEntity()+"");
+		/**
+		 * 关联取出销售单的数据
+		 */
+		/*SaleOrder saleOrder = saleOrderService.getSOrderByNo(requestWithActor.getAgent(), requestWithActor.getEntity().longValue());*/
+		/*saleOrderExt.setSaleOrder(saleOrder);*/
+		log.info("查询保单结束==============");
+		return saleOrderExts;
 	}
 }

@@ -170,7 +170,12 @@ public interface IOrderService {
 	 * @return
 	 */
 	public List<SaleOrderExt> querySaleOrderListIntransactionNo(RequestWithActor<SaleOrderExtVo> pageRequest) ;
-   
+	/**
+	 * 通过交易单号查询保险订单 b2b保险订单支付使用
+	 * @param pageRequest
+	 * @return
+	 */
+	public List<SaleOrderExt> queryInsuranceSaleOrderForTranSaction(RequestWithActor<Long> requestWithActor) ;
 	/**
 	 * 通过条件查询报表数据
 	 * @param pageRequest
