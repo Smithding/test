@@ -305,6 +305,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		         	    	        							if(startDate > 0 || endDate < 0) {
 		         	    	        								pro.setBookStatus(0);
 		         	    	        							}
+		         	    	        						}else {
+		         	    	        							pro.setBookStatus(0);
 		         	    	        						}
 	         	    	        							if(sdf.format(new Date()).equals(startTime)) {
 	         	    	        								Date startTime1 = DateUtil.stringToSimpleDate(entry.getValue().getStartTime());
