@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.entity.response.tc;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import com.alibaba.fastjson.annotation.JSONField;
@@ -18,6 +19,8 @@ public class ResProBaseInfos implements Serializable{
 	 */
 	@JSONField(name = "ResProBaseInfos")
 	private List<ResProBaseInfo> resProBaseInfos;
+	
+	private Date updateTime;
 
 	public Long getId() {
 		return id;
@@ -34,5 +37,14 @@ public class ResProBaseInfos implements Serializable{
 	public void setResProBaseInfos(List<ResProBaseInfo> resProBaseInfos) {
 		this.resProBaseInfos = resProBaseInfos;
 	}
+
+	public Date getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(Date updateTime) {
+		this.updateTime = updateTime;
+	}
+	
 	
 }
