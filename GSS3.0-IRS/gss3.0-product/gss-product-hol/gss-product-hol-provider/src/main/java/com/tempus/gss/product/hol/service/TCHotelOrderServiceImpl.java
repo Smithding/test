@@ -574,6 +574,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				
 		}
     	catch(Exception e){
+    		e.printStackTrace();
     		logger.error("创建酒店订单请求出错",e);
             throw new GSSException(hotelOrder.getHotelName(), String.valueOf(saleOrderNo), e.getMessage());
     	}
