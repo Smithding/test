@@ -17,7 +17,7 @@ public class ImgInfoSum implements Serializable{
 	
 	private List<ImgInfo> imgInfoList;
 	
-	private Date updateTime;
+	private String latestUpdateTime;
 
 	public Long getId() {
 		return id;
@@ -35,13 +35,15 @@ public class ImgInfoSum implements Serializable{
 		this.imgInfoList = imgInfoList;
 	}
 
-	public Date getUpdateTime() {
-		return updateTime;
+	public String getLatestUpdateTime() {
+		return latestUpdateTime;
 	}
 
-	public void setUpdateTime(Date updateTime) {
-		this.updateTime = updateTime;
+	public void setLatestUpdateTime(String latestUpdateTime) {
+		this.latestUpdateTime = latestUpdateTime;
 	}
+
+	
 	
 	
 	
