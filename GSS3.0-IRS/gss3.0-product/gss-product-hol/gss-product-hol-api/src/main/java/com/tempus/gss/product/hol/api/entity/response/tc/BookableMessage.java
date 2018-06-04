@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.alibaba.fastjson.annotation.JSONField;
 /**
  * 可订检查接口返回的数据
@@ -47,19 +49,19 @@ public class BookableMessage implements Serializable{
 	/**
 	 * 最早到店时间
 	 */
-	@JSONField(name = "LastArraiveDateTime")
-	private Date lastArraiveDateTime;
+	@JSONField(name = "LastArraiveDateTime"/*, format="yyyy-MM-dd HH:mm:ss"*/)
+	private String lastArraiveDateTime;
 	
 	/**
 	 * 最早到店限制时间（东八区北京时间）
 	 */
-	@JSONField(name = "LimitEarliestArrivalTime")
-	private Date limitEarliestArrivalTime;
+	@JSONField(name = "LimitEarliestArrivalTime"/*, format="yyyy-MM-dd HH:mm:ss"*/)
+	private String limitEarliestArrivalTime;
 	/**
 	 * 最晚到店时间限制（东八区北京时间）
 	 */
-	@JSONField(name = "LimitLatestArrivalTime")
-	private Date limitLatestArrivalTime;
+	@JSONField(name = "LimitLatestArrivalTime"/*, format="yyyy-MM-dd HH:mm:ss"*/)
+	private String limitLatestArrivalTime;
 	/**
 	 * 特殊备注列表
 	 */
@@ -83,29 +85,53 @@ public class BookableMessage implements Serializable{
 	public void setReceiveTextRemark(Boolean receiveTextRemark) {
 		this.receiveTextRemark = receiveTextRemark;
 	}
-	public Date getLastArraiveDateTime() {
-		return lastArraiveDateTime;
-	}
-	public void setLastArraiveDateTime(Date lastArraiveDateTime) {
-		this.lastArraiveDateTime = lastArraiveDateTime;
-	}
-	public Date getLimitEarliestArrivalTime() {
-		return limitEarliestArrivalTime;
-	}
-	public void setLimitEarliestArrivalTime(Date limitEarliestArrivalTime) {
-		this.limitEarliestArrivalTime = limitEarliestArrivalTime;
-	}
-	public Date getLimitLatestArrivalTime() {
-		return limitLatestArrivalTime;
-	}
-	public void setLimitLatestArrivalTime(Date limitLatestArrivalTime) {
-		this.limitLatestArrivalTime = limitLatestArrivalTime;
-	}
 	public List<SpecialRequestOptions> getSpecialRequestOptions() {
 		return specialRequestOptions;
 	}
 	public void setSpecialRequestOptions(List<SpecialRequestOptions> specialRequestOptions) {
 		this.specialRequestOptions = specialRequestOptions;
+	}
+	public String[] getAmountArr() {
+		return amountArr;
+	}
+	public void setAmountArr(String[] amountArr) {
+		this.amountArr = amountArr;
+	}
+	public String[] getAmountArrOther() {
+		return amountArrOther;
+	}
+	public void setAmountArrOther(String[] amountArrOther) {
+		this.amountArrOther = amountArrOther;
+	}
+	public String getLastArraiveDateTime() {
+		return lastArraiveDateTime;
+	}
+	public void setLastArraiveDateTime(String lastArraiveDateTime) {
+		if(StringUtils.isNotEmpty(lastArraiveDateTime)) {
+			lastArraiveDateTime = lastArraiveDateTime.replace("T", " ").substring(0, 19);
+		}
+		this.lastArraiveDateTime = lastArraiveDateTime;
+	}
+	public String getLimitEarliestArrivalTime() {
+		return limitEarliestArrivalTime;
+	}
+	public void setLimitEarliestArrivalTime(String limitEarliestArrivalTime) {
+		if(StringUtils.isNotEmpty(limitEarliestArrivalTime)) {
+			limitEarliestArrivalTime = limitEarliestArrivalTime.replace("T", " ").substring(0, 19);
+		}
+		this.limitEarliestArrivalTime = limitEarliestArrivalTime;
+	}
+	public String getLimitLatestArrivalTime() {
+		return limitLatestArrivalTime;
+	}
+	public void setLimitLatestArrivalTime(String limitLatestArrivalTime) {
+		if(StringUtils.isNotEmpty(limitLatestArrivalTime)) {
+			limitLatestArrivalTime = limitLatestArrivalTime.replace("T", " ").substring(0, 19);
+		}
+		this.limitLatestArrivalTime = limitLatestArrivalTime;
 	}	
+	
+	
+	
 	
 }
