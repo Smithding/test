@@ -47,6 +47,11 @@ public class OrderCreateReq implements Serializable{
 	 */
     @JSONField(serialize = false)
 	private String resName;
+    /**
+	 * 城市名
+	 */
+    @JSONField(serialize = false)
+	private String cityName;
 	/**
      * 订单类型 1:内 2:国际
      */
@@ -557,6 +562,12 @@ public class OrderCreateReq implements Serializable{
 	}
 	public void setTotalRebateRateProfit(BigDecimal totalRebateRateProfit) {
 		this.totalRebateRateProfit = totalRebateRateProfit;
+	}
+	public String getCityName() {
+		return cityName;
+	}
+	public void setCityName(String cityName) {
+		this.cityName = cityName;
 	}
 	
 }
