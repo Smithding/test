@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.alibaba.fastjson.annotation.JSONField;
 /**
  * 可订检查接口返回的担保数据
@@ -60,12 +62,12 @@ public class CtripGuaranteeInfo implements Serializable{
 	 * 最迟的取消时间，在这个时间前取消不需要扣除罚金
 	 */
 	@JSONField(name = "CancelPenaltyStart")
-	private Date cancelPenaltyStart;
+	private String cancelPenaltyStart;
 	/**
 	 * 结束时间，表示在这个时间段取消是需要扣除罚金
 	 */
 	@JSONField(name = "CancelPenaltyEnd")
-	private Date cancelPenaltyEnd;
+	private String cancelPenaltyEnd;
 	public String[] getCgCode() {
 		return cgCode;
 	}
@@ -108,17 +110,24 @@ public class CtripGuaranteeInfo implements Serializable{
 	public void setCancelPenaltyAmountCurrencyCode(String cancelPenaltyAmountCurrencyCode) {
 		this.cancelPenaltyAmountCurrencyCode = cancelPenaltyAmountCurrencyCode;
 	}
-	public Date getCancelPenaltyStart() {
+	public String getCancelPenaltyStart() {
 		return cancelPenaltyStart;
 	}
-	public void setCancelPenaltyStart(Date cancelPenaltyStart) {
+	public void setCancelPenaltyStart(String cancelPenaltyStart) {
+		if(StringUtils.isNotEmpty(cancelPenaltyStart)) {
+			cancelPenaltyStart = cancelPenaltyStart.replace("T", " ").substring(0, 19);
+		}
 		this.cancelPenaltyStart = cancelPenaltyStart;
 	}
-	public Date getCancelPenaltyEnd() {
+	public String getCancelPenaltyEnd() {
 		return cancelPenaltyEnd;
 	}
-	public void setCancelPenaltyEnd(Date cancelPenaltyEnd) {
+	public void setCancelPenaltyEnd(String cancelPenaltyEnd) {
+		if(StringUtils.isNotEmpty(cancelPenaltyEnd)) {
+			cancelPenaltyEnd = cancelPenaltyEnd.replace("T", " ").substring(0, 19);
+		}
 		this.cancelPenaltyEnd = cancelPenaltyEnd;
 	}
+	
 	
 }
