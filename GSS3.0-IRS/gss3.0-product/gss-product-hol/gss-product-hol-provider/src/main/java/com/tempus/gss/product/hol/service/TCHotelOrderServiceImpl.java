@@ -673,7 +673,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 
 	@Override
 	public IsBookOrder isBookOrder(Agent agent,IsBookOrderReq isBookOrderReq) throws GSSException{
-		logger.info("酒店订单进行可定检查,入参:" + JSONObject.toJSONString(isBookOrderReq));
 		if (StringUtil.isNullOrEmpty(agent)) {
 			logger.error("agent对象为空");
             throw new GSSException("订单是否可定信息", "0102", "agent对象为空");
@@ -686,21 +685,25 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		try {
 			//IsBookOrder isBookOrderCheck=new IsBookOrder();
 			SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			Date comeTime = sim.parse(isBookOrderReq.getComeTime());
 			Calendar da = Calendar.getInstance();
-			da.setTime(comeTime);
 			if(StringUtils.isEmpty(isBookOrderReq.getEarliestArrivalTime())) {
-				da.add(Calendar.HOUR_OF_DAY, -3);
+				da.add(Calendar.HOUR,1);
+				da.set(Calendar.MINUTE, 0);
+				da.set(Calendar.SECOND, 0);
+				//System.out.println("11:  "+sim.format(da.getTime()));
 				isBookOrderReq.setEarliestArrivalTime(sim.format(da.getTime()));
 			}
 			if(StringUtils.isEmpty(isBookOrderReq.getLatestArrivalTime())) {
-				da.add(Calendar.HOUR_OF_DAY, 6);
+				da.add(Calendar.HOUR, 11);
+				da.set(Calendar.MINUTE, 0);
+				da.set(Calendar.SECOND, 0);
+				//System.out.println("22:  "+sim.format(da.getTime()));
 				isBookOrderReq.setLatestArrivalTime(sim.format(da.getTime()));
 			}
+			logger.info("酒店订单进行可定检查,入参:" + JSONObject.toJSONString(isBookOrderReq));
 			//System.out.println("EarliestArrivalTime: "+isBookOrderReq.getEarliestArrivalTime());
 			//System.out.println("LatestArrivalTime: "+isBookOrderReq.getLatestArrivalTime());
 			//System.out.println("ComeTime: "+isBookOrderReq.getComeTime());
-			//hotelSearchReq.setBegin(sdf.format(date.getTime()));
 			
 			String reqJson = JSONObject.toJSONString(isBookOrderReq);
 			String resultJson= httpClientUtil.doTCJsonPost(CARD_SUPP_URL, reqJson);
@@ -709,10 +712,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				isBookOrderBase= JsonUtil.toBean(resultJson, new TypeReference<ResultTc<IsBookOrder>>(){});
 				if(StringUtil.isNotNullOrEmpty(isBookOrderBase)){
 					if(isBookOrderBase.getResult().getCanBooking().equals(1)){
-						List<PaymentWay> list = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)),PaymentWay.class);
+						//List<PaymentWay> list = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)),PaymentWay.class);
 						BookableMessage jobj=JSON.parseObject(isBookOrderBase.getResult().getBookableMessage(), BookableMessage.class);  
 						isBookOrderBase.getResult().setBookableMessageTarget(jobj);
-						isBookOrderBase.getResult().setPaymentWayList(list);
+						//isBookOrderBase.getResult().setPaymentWayList(list);
 						if(isBookOrderBase.getResult().getBookableMessageTarget() != null ){
 							/*String cancelPenaltyStart = isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo().getCancelPenaltyStart();
 							System.out.println("aaa: "+cancelPenaltyStart);*/
