@@ -684,7 +684,24 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
         }
 		ResultTc<IsBookOrder> isBookOrderBase = null;
 		try {
-			IsBookOrder isBookOrderCheck=new IsBookOrder();
+			//IsBookOrder isBookOrderCheck=new IsBookOrder();
+			SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			Date comeTime = sim.parse(isBookOrderReq.getComeTime());
+			Calendar da = Calendar.getInstance();
+			da.setTime(comeTime);
+			if(StringUtils.isEmpty(isBookOrderReq.getEarliestArrivalTime())) {
+				da.add(Calendar.HOUR_OF_DAY, -3);
+				isBookOrderReq.setEarliestArrivalTime(sim.format(da.getTime()));
+			}
+			if(StringUtils.isEmpty(isBookOrderReq.getLatestArrivalTime())) {
+				da.add(Calendar.HOUR_OF_DAY, 6);
+				isBookOrderReq.setLatestArrivalTime(sim.format(da.getTime()));
+			}
+			//System.out.println("EarliestArrivalTime: "+isBookOrderReq.getEarliestArrivalTime());
+			//System.out.println("LatestArrivalTime: "+isBookOrderReq.getLatestArrivalTime());
+			//System.out.println("ComeTime: "+isBookOrderReq.getComeTime());
+			//hotelSearchReq.setBegin(sdf.format(date.getTime()));
+			
 			String reqJson = JSONObject.toJSONString(isBookOrderReq);
 			String resultJson= httpClientUtil.doTCJsonPost(CARD_SUPP_URL, reqJson);
 			logger.info("可定检查请求返回:" + resultJson);
@@ -697,28 +714,25 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						isBookOrderBase.getResult().setBookableMessageTarget(jobj);
 						isBookOrderBase.getResult().setPaymentWayList(list);
 						if(isBookOrderBase.getResult().getBookableMessageTarget() != null ){
-							if(isBookOrderBase.getResult().getBookableMessageTarget().getLimitLatestArrivalTime() != null){
-								SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-								try {
-									Date inputComeDate = sim.parse(isBookOrderReq.getComeTime());
-									Date returnDate = isBookOrderBase.getResult().getBookableMessageTarget().getLimitLatestArrivalTime();
-									if(inputComeDate.before(returnDate) || inputComeDate.equals(returnDate)){
-										isBookOrderBase.getResult().setLastestArriveTimeConfirm(true);
-									}else{
-										isBookOrderBase.getResult().setLastestArriveTimeConfirm(false);
-										isBookOrderCheck =  isBookOrderBase.getResult();
-										//sortPayList(isBookOrderCheck);
-										return isBookOrderCheck;
-									}
-								} catch (ParseException e) {
-									e.printStackTrace();
+							/*String cancelPenaltyStart = isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo().getCancelPenaltyStart();
+							System.out.println("aaa: "+cancelPenaltyStart);*/
+							/*if(isBookOrderBase.getResult().getBookableMessageTarget().getLimitLatestArrivalTime() != null){
+								//Date inputComeDate = sim.parse(isBookOrderReq.getComeTime());
+								String inputComeDate = isBookOrderReq.getComeTime();
+								String returnDate = isBookOrderBase.getResult().getBookableMessageTarget().getLimitLatestArrivalTime();
+								if(inputComeDate.compareTo(returnDate) > 0 || inputComeDate.equals(returnDate)){
+									isBookOrderBase.getResult().setLastestArriveTimeConfirm(true);
+								}else{
+									isBookOrderBase.getResult().setLastestArriveTimeConfirm(false);
+									isBookOrderCheck =  isBookOrderBase.getResult();
+									return isBookOrderCheck;
 								}
-							}
-							if(isBookOrderBase.getResult().getBookableMessageTarget().getExcessRooms() < isBookOrderReq.getBookingCount()){
+							}*/
+							/*if(isBookOrderBase.getResult().getBookableMessageTarget().getExcessRooms() < isBookOrderReq.getBookingCount()){
 								isBookOrderCheck.setCanBooking(0);
 								isBookOrderCheck.setSelfMessage("可选房间数量不足, 请重新选择");
 								return isBookOrderCheck;
-							}
+							}*/
 							String[] newstr =new String[1];
 							BigDecimal totalPrice = new BigDecimal(Double.toString(0));
 							if(isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo() != null){
@@ -798,6 +812,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            throw new GSSException("订单是否可定信息", "0101", "查询请求返回空值");
 			}
 		} catch (Exception e) {
+			e.printStackTrace();
 			logger.error("订单可定检查请求异常"+e);
 			 throw new GSSException("订单是否可定信息", "0101", e.getMessage());
 		}
