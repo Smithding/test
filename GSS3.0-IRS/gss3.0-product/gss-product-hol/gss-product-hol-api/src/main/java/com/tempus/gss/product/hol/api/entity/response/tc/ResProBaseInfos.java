@@ -20,7 +20,7 @@ public class ResProBaseInfos implements Serializable{
 	@JSONField(name = "ResProBaseInfos")
 	private List<ResProBaseInfo> resProBaseInfos;
 	
-	private Date updateTime;
+	private String latestUpdateTime;
 
 	public Long getId() {
 		return id;
@@ -38,13 +38,15 @@ public class ResProBaseInfos implements Serializable{
 		this.resProBaseInfos = resProBaseInfos;
 	}
 
-	public Date getUpdateTime() {
-		return updateTime;
+	public String getLatestUpdateTime() {
+		return latestUpdateTime;
 	}
 
-	public void setUpdateTime(Date updateTime) {
-		this.updateTime = updateTime;
+	public void setLatestUpdateTime(String latestUpdateTime) {
+		this.latestUpdateTime = latestUpdateTime;
 	}
+
+	
 	
 	
 }
