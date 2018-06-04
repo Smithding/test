@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.shiro.SecurityUtils;
@@ -89,6 +90,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ProInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProSaleInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfos;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResourceModel;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResultTc;
 import com.tempus.gss.product.hol.api.entity.response.tc.SupportCardInfo;
@@ -290,22 +292,20 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 					}
 					totalPrice = totalPrice.multiply(new BigDecimal(orderCreateReq.getBookCount()));
 					hotelOrder.setEachNightPrice(eachNightPrice);
-					ResBaseInfo resInfomation =mongoTemplate1.findOne(new Query(Criteria.where("_id").is(orderCreateReq.getResId())),ResBaseInfo.class);
-	
+					//ResBaseInfo resInfomation =mongoTemplate1.findOne(new Query(Criteria.where("_id").is(orderCreateReq.getResId())),ResBaseInfo.class);
+					ResProBaseInfos resInfomation =mongoTemplate1.findOne(new Query(Criteria.where("_id").is(orderCreateReq.getResId())),ResProBaseInfos.class);
 					if(resInfomation != null){
-						hotelName =  resInfomation.getResName();
-						cityName =  resInfomation.getCityName();
-						for(ProDetails detail : resInfomation.getProDetails()){
-							for(ResProBaseInfo resPro : detail.getResProBaseInfoList()){
-								if(resPro.getProductUniqueId().equals(orderCreateReq.getProductUniqueId())){
-									if(StringUtils.isNotEmpty(resPro.getSupPriceName())){
-										hotelOrder.setSupPriceName(resPro.getSupPriceName());
+						hotelName = StringEscapeUtils.unescapeHtml(orderCreateReq.getResName().trim());
+						cityName =  orderCreateReq.getCityName();
+						for(ResProBaseInfo detail : resInfomation.getResProBaseInfos()){
+								if(detail.getProductUniqueId().equals(orderCreateReq.getProductUniqueId())){
+									if(StringUtils.isNotEmpty(detail.getSupPriceName())){
+										hotelOrder.setSupPriceName(detail.getSupPriceName());
 									}
-									if(StringUtils.isNotEmpty(resPro.getBedTypeName())){
-										hotelOrder.setBedTypeName(resPro.getBedTypeName());
+									if(StringUtils.isNotEmpty(detail.getBedTypeName())){
+										hotelOrder.setBedTypeName(detail.getBedTypeName());
 									}
 								}
-							}
 							
 						}
 						
@@ -524,7 +524,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            	hotelOrder.setCardMobile(orderCreateReq.getMobile());
 	            }
 	            hotelOrder.setArriveHotelTime(orderCreateReq.getArriveHotelTime());
-	            hotelOrder.setHotelAddress(cityName+"市"+orderCreateReq.getHotelAddress());
+	            hotelOrder.setHotelAddress(cityName+orderCreateReq.getHotelAddress());
 	            hotelOrder.setHotelPhone(orderCreateReq.getHotelPhone());
 	            hotelOrder.setProName(orderCreateReq.getProName());
 	            hotelOrder.setProId(orderCreateReq.getProId());
@@ -700,11 +700,14 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				isBookOrderReq.setComeTime(sim.format(da.getTime()));
 			}
 			if(StringUtils.isEmpty(isBookOrderReq.getLatestArrivalTime())) {
-				/*da.add(Calendar.HOUR, 11);
-				da.set(Calendar.MINUTE, 0);
-				da.set(Calendar.SECOND, 0);*/
-				//System.out.println("22:  "+sim.format(da.getTime()));
-				isBookOrderReq.setLatestArrivalTime(isBookOrderReq.getComeTime());
+				if(isBookOrderReq.getComeTime().equals(isBookOrderReq.getEarliestArrivalTime())) {
+					da.add(Calendar.HOUR,11);
+					da.set(Calendar.MINUTE, 0);
+					da.set(Calendar.SECOND, 0);
+					isBookOrderReq.setLatestArrivalTime(sim.format(da.getTime()));
+				}else {
+					isBookOrderReq.setLatestArrivalTime(isBookOrderReq.getComeTime());
+				}
 			}
 			logger.info("酒店订单进行可定检查,入参:" + JSONObject.toJSONString(isBookOrderReq));
 			//System.out.println("EarliestArrivalTime: "+isBookOrderReq.getEarliestArrivalTime());
