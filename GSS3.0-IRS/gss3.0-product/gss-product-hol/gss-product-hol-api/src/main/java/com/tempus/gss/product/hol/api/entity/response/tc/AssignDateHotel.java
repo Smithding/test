@@ -29,7 +29,7 @@ public class AssignDateHotel implements Serializable{
 	@JSONField(name = "ProInfoDetailList")
 	private List<ProInfoDetail> proInfoDetailList;
 	
-	private Date updateTime;
+	private String latestUpdateTime;
 	
 	public Long getResId() {
 		return resId;
@@ -49,11 +49,12 @@ public class AssignDateHotel implements Serializable{
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public Date getUpdateTime() {
-		return updateTime;
+	public String getLatestUpdateTime() {
+		return latestUpdateTime;
 	}
-	public void setUpdateTime(Date updateTime) {
-		this.updateTime = updateTime;
+	public void setLatestUpdateTime(String latestUpdateTime) {
+		this.latestUpdateTime = latestUpdateTime;
 	}
+	
 	
 }
