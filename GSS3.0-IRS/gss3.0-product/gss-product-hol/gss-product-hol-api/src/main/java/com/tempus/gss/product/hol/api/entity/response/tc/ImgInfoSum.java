@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.entity.response.tc;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 
@@ -15,6 +16,8 @@ public class ImgInfoSum implements Serializable{
 	private Long id;
 	
 	private List<ImgInfo> imgInfoList;
+	
+	private Date updateTime;
 
 	public Long getId() {
 		return id;
@@ -30,6 +33,14 @@ public class ImgInfoSum implements Serializable{
 
 	public void setImgInfoList(List<ImgInfo> imgInfoList) {
 		this.imgInfoList = imgInfoList;
+	}
+
+	public Date getUpdateTime() {
+		return updateTime;
+	}
+
+	public void setUpdateTime(Date updateTime) {
+		this.updateTime = updateTime;
 	}
 	
 	
