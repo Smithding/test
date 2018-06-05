@@ -89,6 +89,10 @@ public class SaleOrderDetailServiceimpl implements ISaleOrderDetailService{
 	public int updateSaleOrderDetailStatusByNo(Long saleOrderNo) {
 		return detailDao.updateSaleOrderDetailStatusByNo(saleOrderNo);
 	}
+	@Override
+	public int updateSaleOrderDetailStatusByNo(Long saleOrderNo,int status) {
+		return detailDao.updateSaleOrderDetailStatusByNoAndStatus(saleOrderNo,status);
+	}
 
 	public int updateBySaleOrderNo(RequestWithActor<SaleOrderDetail> saleOrderDetail){
 		int flag = detailDao.updateByOrderNo(saleOrderDetail.getEntity());

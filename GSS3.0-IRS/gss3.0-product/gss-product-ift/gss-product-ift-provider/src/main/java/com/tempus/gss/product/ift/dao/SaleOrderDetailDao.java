@@ -2,6 +2,7 @@ package com.tempus.gss.product.ift.dao;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import com.tempus.gss.product.ift.api.entity.SaleOrderDetail;
@@ -48,4 +49,6 @@ public interface SaleOrderDetailDao extends BaseDao<SaleOrderDetail, SaleOrderDe
     int updateSaleOrderDetailStatusByNo(Long saleOrderNo);
 
 	List<SaleOrderDetail> selectByPassengerAndSaleOrder(SaleOrderDetail saleOrderDetail);
+
+    int updateSaleOrderDetailStatusByNoAndStatus(@Param("saleOrderNo") Long saleOrderNo, @Param("status")int status);
 }
