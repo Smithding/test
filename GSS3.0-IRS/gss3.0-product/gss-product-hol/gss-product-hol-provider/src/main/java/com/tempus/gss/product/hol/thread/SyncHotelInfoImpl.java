@@ -301,7 +301,11 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		         	    	        						pppRice.add(price);
 		         	    	        						if(!entry.getValue().getInventoryStats().equals(4)) {
 		         	    	        							int startDate = DateUtil.stringToSimpleString(entry.getValue().getStartDate()).compareTo(startTime);
-		         	    	        							int endDate = DateUtil.stringToSimpleString(entry.getValue().getEndDate()).compareTo(endTime);
+		         	    	        							Calendar calEndTime = Calendar.getInstance(); 
+		         	    	        							calEndTime.setTime(sdf.parse(endTime));
+		         	    	        							calEndTime.add(Calendar.DAY_OF_MONTH, -1);
+		         	    	        							String format = sdf.format(calEndTime.getTime());
+		         	    	        							int endDate = DateUtil.stringToSimpleString(entry.getValue().getEndDate()).compareTo(format);
 		         	    	        							if(startDate > 0 || endDate < 0) {
 		         	    	        								pro.setBookStatus(0);
 		         	    	        							}
