@@ -300,19 +300,17 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		         	    	        						Integer price= entry.getValue().getDistributionSalePrice();
 		         	    	        						pppRice.add(price);
 		         	    	        						if(!entry.getValue().getInventoryStats().equals(4)) {
-		         	    	        							int startDate = DateUtil.stringToSimpleString(entry.getValue().getStartDate()).compareTo(startTime);
-		         	    	        							Calendar calEndTime = Calendar.getInstance(); 
-		         	    	        							calEndTime.setTime(sdf.parse(endTime));
-		         	    	        							calEndTime.add(Calendar.DAY_OF_MONTH, -1);
-		         	    	        							String format = sdf.format(calEndTime.getTime());
-		         	    	        							int endDate = DateUtil.stringToSimpleString(entry.getValue().getEndDate()).compareTo(format);
+		         	    	        							SimpleDateFormat newsdf=new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+		         	    	        							String nowTime = newsdf.format(new Date());
+		         	    	        							int startDate = entry.getValue().getStartDate().compareTo(nowTime);
+		         	    	        							int endDate = entry.getValue().getEndDate().compareTo(nowTime);
 		         	    	        							if(startDate > 0 || endDate < 0) {
 		         	    	        								pro.setBookStatus(0);
 		         	    	        							}
 		         	    	        						}else {
 		         	    	        							pro.setBookStatus(0);
 		         	    	        						}
-	         	    	        							if(days.equals(1) && sdf.format(new Date()).equals(startTime)) {
+	         	    	        							if(days.equals(1) && (sdf.format(new Date()).equals(startTime))) {
 	         	    	        								Date startTime1 = DateUtil.stringToSimpleDate(entry.getValue().getStartTime());
 		         	    	        							Date endTime1 = DateUtil.stringToSimpleDate(entry.getValue().getEndTime());
 		         	    	        							Date nowDate = new Date();
