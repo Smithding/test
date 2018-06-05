@@ -2,16 +2,13 @@ package com.tempus.gss.product.ift.service;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
-import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.tempus.gss.cps.entity.Customer;
 import com.tempus.gss.cps.entity.Supplier;
 import com.tempus.gss.cps.service.ICustomerService;
 import com.tempus.gss.cps.service.ISupplierService;
-import com.tempus.gss.dps.refund.entity.vo.RefundMessage;
 import com.tempus.gss.exception.GSSException;
-import com.tempus.gss.log.entity.LogRecord;
 import com.tempus.gss.log.service.ILogService;
 import com.tempus.gss.mq.MqSender;
 import com.tempus.gss.order.entity.*;
@@ -23,12 +20,12 @@ import com.tempus.gss.product.ift.api.entity.vo.*;
 import com.tempus.gss.product.ift.api.service.*;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.*;
+import com.tempus.gss.product.ift.help.IftLogHelper;
 import com.tempus.gss.product.ift.mq.IftTicketMqSender;
 import com.tempus.gss.system.service.IMaxNoService;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 import org.apache.commons.beanutils.PropertyUtils;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +35,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @org.springframework.stereotype.Service
@@ -376,6 +376,7 @@ public class RefundServiceImpl implements IRefundService {
 			/*创建新增操作日志*/
 			try {
 				String logstr= null;
+				String title="创建国际退/废销售单";
 				if (requestWithActor.getEntity().getRefundType()==1){
 					logstr ="用户"+ agent.getAccount()+"创建国际废销售单："+"["+requestWithActor.getEntity().getSaleOrderNo()+"]";
 
@@ -385,7 +386,8 @@ public class RefundServiceImpl implements IRefundService {
 				}else{
 					logstr ="用户"+ agent.getAccount()+"创建国际退/废销售单："+"["+requestWithActor.getEntity().getSaleOrderNo()+"]";
 				}
-				LogRecord logRecord = new LogRecord();
+				IftLogHelper.logger(agent,saleChange.getTransationOrderNo(),requestWithActor.getEntity().getSaleOrderNo(),title,logstr);
+				/*LogRecord logRecord = new LogRecord();
 				logRecord.setAppCode("UBP");
 				logRecord.setCreateTime(new Date());
 				logRecord.setTitle("创建国际退/废销售单");
@@ -397,7 +399,7 @@ public class RefundServiceImpl implements IRefundService {
 				Map<String, Object> otherOpts = new HashMap<String, Object>();
 				otherOpts.put("transationOrderNo", saleChange.getTransationOrderNo());
 				logRecord.setOtherOpts(otherOpts);
-				logService.insert(logRecord);
+				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加(title=创建国际退/废销售单)操作日志异常===" + e);
 			}
@@ -523,7 +525,9 @@ public class RefundServiceImpl implements IRefundService {
 			/*创建操作日志*/
 			try {
 				String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"国际废/退锁定："+"["+saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()+"]";
-				LogRecord logRecord = new LogRecord();
+				String title = "国际废/退锁定";
+				IftLogHelper.logger(requestWithActor.getAgent(),saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo(),title,logstr);
+				/*LogRecord logRecord = new LogRecord();
 				logRecord.setAppCode("UBP");
 				logRecord.setCreateTime(new Date());
 				logRecord.setTitle("国际废/退锁定");
@@ -532,7 +536,7 @@ public class RefundServiceImpl implements IRefundService {
 				logRecord.setRequestIp(requestWithActor.getAgent().getIp());
 				logRecord.setBizCode("IFT");
 				logRecord.setBizNo(String.valueOf(saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()));
-				logService.insert(logRecord);
+				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加（title=国际废/退锁定）操作日志异常===" + e);
 			}
@@ -564,7 +568,9 @@ public class RefundServiceImpl implements IRefundService {
 			/*创建操作日志*/
 			try {
 				String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"国际废/退解锁："+"["+saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()+"]";
-				LogRecord logRecord = new LogRecord();
+                String title = "国际废/解退锁";
+                IftLogHelper.logger(requestWithActor.getAgent(),saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo(),title,logstr);
+				/*LogRecord logRecord = new LogRecord();
 				logRecord.setAppCode("UBP");
 				logRecord.setCreateTime(new Date());
 				logRecord.setTitle("国际废/退解锁");
@@ -573,7 +579,7 @@ public class RefundServiceImpl implements IRefundService {
 				logRecord.setRequestIp(requestWithActor.getAgent().getIp());
 				logRecord.setBizCode("IFT");
 				logRecord.setBizNo(String.valueOf(saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()));
-				logService.insert(logRecord);
+				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加（title=国际废/退解锁）操作日志异常===" + e);
 			}
@@ -790,7 +796,9 @@ public class RefundServiceImpl implements IRefundService {
 			/*创建操作日志*/
 			try {
 				String logstr ="用户"+ saleChangeNo.getAgent().getAccount()+"国际废票处理："+"["+saleChangeExt.getSaleChange().getSaleOrderNo()+"]";
-				LogRecord logRecord = new LogRecord();
+				String title="国际废票处理";
+				IftLogHelper.logger(saleChangeNo.getAgent(),saleChangeExt.getSaleChange().getSaleOrderNo(),title,logstr);
+			/*	LogRecord logRecord = new LogRecord();
 				logRecord.setAppCode("UBP");
 				logRecord.setCreateTime(new Date());
 				logRecord.setTitle("国际废票处理");
@@ -799,7 +807,7 @@ public class RefundServiceImpl implements IRefundService {
 				logRecord.setRequestIp(saleChangeNo.getAgent().getIp());
 				logRecord.setBizCode("IFT");
 				logRecord.setBizNo(String.valueOf(saleChangeExt.getSaleChange().getSaleOrderNo()));
-				logService.insert(logRecord);
+				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加（title=国际废票处理）操作日志异常===" + e);
 			}
@@ -838,7 +846,10 @@ public class RefundServiceImpl implements IRefundService {
 			/*创建操作日志*/
 			try {
 				String logstr ="用户"+ saleChangeNo.getAgent().getAccount()+"国际退票处理："+"["+saleChangeExt.getSaleChange().getSaleOrderNo()+"]";
-				LogRecord logRecord = new LogRecord();
+				String title = "国际退票处理";
+                IftLogHelper.logger(saleChangeNo.getAgent(),saleChangeExt.getSaleChange().getSaleOrderNo(),title,logstr);
+
+				/*LogRecord logRecord = new LogRecord();
 				logRecord.setAppCode("UBP");
 				logRecord.setCreateTime(new Date());
 				logRecord.setTitle("国际退票处理");
@@ -847,7 +858,7 @@ public class RefundServiceImpl implements IRefundService {
 				logRecord.setRequestIp(saleChangeNo.getAgent().getIp());
 				logRecord.setBizCode("IFT");
 				logRecord.setBizNo(String.valueOf(saleChangeExt.getSaleChange().getSaleOrderNo()));
-				logService.insert(logRecord);
+				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加（title=国际退票处理）操作日志异常===" + e);
 			}
@@ -938,7 +949,9 @@ public class RefundServiceImpl implements IRefundService {
 ;                   logstr ="用户"+requestWithActor.getAgent().getAccount()+"取消国际退/废销售单："+"["+saleChange.getSaleOrderNo()+"]";
 
 				}
-				LogRecord logRecord = new LogRecord();
+                String title ="取消国际退/废销售单";
+                IftLogHelper.logger(agent,saleChange.getSaleOrderNo(),title,logstr);
+				/*LogRecord logRecord = new LogRecord();
 				logRecord.setAppCode("UBP");
 				logRecord.setCreateTime(new Date());
 				logRecord.setTitle("取消国际退/废销售单");
@@ -947,7 +960,7 @@ public class RefundServiceImpl implements IRefundService {
 				logRecord.setRequestIp(requestWithActor.getAgent().getIp());
 				logRecord.setBizCode("IFT");
 				logRecord.setBizNo(String.valueOf(saleChange.getSaleOrderNo()));
-				logService.insert(logRecord);
+				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加（title=取消国际退/废销售单）操作日志异常===" + e);
 			}
@@ -993,7 +1006,9 @@ public class RefundServiceImpl implements IRefundService {
                } else {
 			       logstr ="用户"+saleChangeNo.getAgent().getAccount()+"国际拒绝退/废："+"["+saleChange.getSaleOrderNo()+"]";
                }
-				LogRecord logRecord = new LogRecord();
+                String title ="国际拒绝退/废";
+                IftLogHelper.logger(saleChangeNo.getAgent(),saleChange.getSaleOrderNo(),title,logstr);
+				/*LogRecord logRecord = new LogRecord();
 				logRecord.setAppCode("UBP");
 				logRecord.setCreateTime(new Date());
 				logRecord.setTitle("国际拒绝退/废");
@@ -1002,7 +1017,7 @@ public class RefundServiceImpl implements IRefundService {
 				logRecord.setRequestIp(saleChangeNo.getAgent().getIp());
 				logRecord.setBizCode("IFT");
 				logRecord.setBizNo(String.valueOf(saleChange.getSaleOrderNo()));
-				logService.insert(logRecord);
+				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加（title=国际拒绝退/废）操作日志异常===" + e);
 			}
@@ -1255,35 +1270,46 @@ public class RefundServiceImpl implements IRefundService {
 			/*创建操作日志*/
 			try {
 				String logstr=null;
+                String title=null;
 				if(saleOrderChangeExt.getEntity()!=null && saleOrderChangeExt.getEntity().getSaleChange() !=null ){
 					if(saleOrderChangeExt.getEntity().getSaleChange().getOrderChangeType()==2){
 					    if(saleOrderChangeExt.getEntity().getAirlineStatus() !=null && saleOrderChangeExt.getEntity().getAirlineStatus()==1){
-
-						logstr ="用户"+saleOrderChangeExt.getAgent().getAccount()+"审核国际退票销售单："+"["+saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo()+"]";
+                            title ="审核国际退票销售单";
+						    logstr ="用户"+saleOrderChangeExt.getAgent().getAccount()+"审核国际退票销售单："+"["+saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo()+"]";
                         }
 						if (saleOrderChangeExt.getEntity().getAirlineStatus() !=null && saleOrderChangeExt.getEntity().getAirlineStatus()==4){
+                            title ="国际退票销售单拒单";
 							logstr ="用户"+saleOrderChangeExt.getAgent().getAccount()+"国际退票销售单拒单："+"["+saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo()+"]";
 
 						}
 						if (saleOrderChangeExt.getEntity().getSaleChange().getChildStatus()==10){
+                            title ="退票退费";
 							logstr ="用户"+saleOrderChangeExt.getAgent().getAccount()+"退票退费："+"["+saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo()+"]";
 
 						}
 					}else if(saleOrderChangeExt.getEntity().getSaleChange().getOrderChangeType()==1){
-						logstr ="用户"+saleOrderChangeExt.getAgent().getAccount()+"审核国际废票销售单："+"["+saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo()+"]";
+                        if(saleOrderChangeExt.getEntity().getAirlineStatus() !=null && saleOrderChangeExt.getEntity().getAirlineStatus()==1) {
+                            title ="审核国际废票销售单";
+                            logstr = "用户" + saleOrderChangeExt.getAgent().getAccount() + "审核国际废票销售单：" + "[" + saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo() + "]";
+                        }
 						if (saleOrderChangeExt.getEntity().getAirlineStatus() !=null && saleOrderChangeExt.getEntity().getAirlineStatus()==4){
-							logstr ="用户"+saleOrderChangeExt.getAgent().getAccount()+"国际废票销售单拒单："+"["+saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo()+"]";
+                            title ="国际废票销售单拒单";
+						    logstr ="用户"+saleOrderChangeExt.getAgent().getAccount()+"国际废票销售单拒单："+"["+saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo()+"]";
 
 						}
 						if (saleOrderChangeExt.getEntity().getSaleChange().getChildStatus()==10){
+                            title ="废票退费";
 							logstr ="用户"+saleOrderChangeExt.getAgent().getAccount()+"废票退费："+"["+saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo()+"]";
 
 						}
 					}
 				}else {
-				logstr ="用户"+saleOrderChangeExt.getAgent().getAccount()+"修改国际退/废销售单："+"["+saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo()+"]";
+                    title ="修改国际退/废销售单";
+				    logstr ="用户"+saleOrderChangeExt.getAgent().getAccount()+"修改国际退/废销售单："+"["+saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo()+"]";
 				}
-				LogRecord logRecord = new LogRecord();
+
+                IftLogHelper.logger(saleOrderChangeExt.getAgent(),saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo(),title,logstr);
+				/*LogRecord logRecord = new LogRecord();
 				logRecord.setAppCode("UBP");
 				logRecord.setCreateTime(new Date());
 				logRecord.setTitle("修改国际退/废销售单");
@@ -1292,7 +1318,7 @@ public class RefundServiceImpl implements IRefundService {
 				logRecord.setRequestIp(saleOrderChangeExt.getAgent().getIp());
 				logRecord.setBizCode("IFT");
 				logRecord.setBizNo(String.valueOf(saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo()));
-				logService.insert(logRecord);
+				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加（title=修改国际退/废销售单）操作日志异常===" + e);
 			}

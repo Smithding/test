@@ -17,6 +17,7 @@ import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
 import com.tempus.gss.product.ift.api.service.*;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.*;
+import com.tempus.gss.product.ift.help.IftLogHelper;
 import com.tempus.gss.system.entity.User;
 import com.tempus.gss.system.service.IUserService;
 import com.tempus.gss.websocket.SocketDO;
@@ -27,6 +28,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.jfree.chart.title.Title;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -619,24 +621,32 @@ public class OrderServiceImpl implements IOrderService {
             /* 创建操作日志 */
             try {
                 String logstr=null;
+                String title = null;
                 if (requestWithActor.getEntity().getSaleOrderExt().getCreateType()==7){
+                    title = "创建冲单单";
                     logstr ="用户"+requestWithActor.getAgent().getAccount()+"创建冲单单："+"["+requestWithActor.getEntity().getSaleOrderExt().getSaleOrder().getSaleOrderNo()+"]"+"冲减金额￥"+requestWithActor.getEntity().getSaleOrderExt().getSaleOrder().getReceivable();
                 }else if(requestWithActor.getEntity().getSaleOrderExt().getCreateType()==8){
+                    title = "创建补单";
                     logstr ="用户"+requestWithActor.getAgent().getAccount()+"创建补单："+"["+requestWithActor.getEntity().getSaleOrderExt().getSaleOrder().getSaleOrderNo()+"]"+"补交金额￥"+requestWithActor.getEntity().getSaleOrderExt().getSaleOrder().getReceivable();
 
                 }else if(requestWithActor.getEntity().getSaleOrderExt().getCreateType()==9 ||requestWithActor.getEntity().getSaleOrderExt().getCreateType()==10){
+                    title = "创建调整单";
                     logstr ="用户"+requestWithActor.getAgent().getAccount()+"创建调整单："+"["+requestWithActor.getEntity().getSaleOrderExt().getSaleOrder().getSaleOrderNo()+"]";
 
                 }else if(requestWithActor.getEntity().getSaleOrderExt().getCreateType()==11){
+                    title = "创建ADM单";
                     logstr ="用户"+requestWithActor.getAgent().getAccount()+"创建ADM单："+"["+requestWithActor.getEntity().getSaleOrderExt().getSaleOrder().getSaleOrderNo()+"]";
 
                 }else if(requestWithActor.getEntity().getSaleOrderExt().getCreateType()==12){
+                    title = "创建ACM单";
                     logstr ="用户"+requestWithActor.getAgent().getAccount()+"创建ACM单："+"["+requestWithActor.getEntity().getSaleOrderExt().getSaleOrder().getSaleOrderNo()+"]";
 
                 }else{
+                    title = "创建国际销售单";
                     logstr ="用户"+agent.getAccount()+"创建国际销售单："+"["+saleOrderNo+"]";
                 }
-                LogRecord logRecord = new LogRecord();
+                IftLogHelper.logger(agent,saleOrder.getTransationOrderNo(),saleOrderNo,title,logstr);
+               /* LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("创建国际销售单");
@@ -648,7 +658,7 @@ public class OrderServiceImpl implements IOrderService {
                 Map<String, Object> otherOpts = new HashMap<String, Object>();
                 otherOpts.put("transationOrderNo", saleOrder.getTransationOrderNo());
                 logRecord.setOtherOpts(otherOpts);
-                logService.insert(logRecord);
+                logService.insert(logRecord);*/
             } catch (Exception e) {
                 log.error("添加操作日志异常===" + e);
             }
@@ -705,16 +715,21 @@ public class OrderServiceImpl implements IOrderService {
         /* 创建操作日志 */
         try {
             String logstr=null;
+            String  title = null;
             if (saleOrderExt.getEntity().getSaleOrderDetailList() !=null && saleOrderExt.getEntity().getSaleOrderDetailList().get(0).getStatus().equals("1")){
+                title = "锁定国际销售单";
                 logstr ="用户"+ saleOrderExt.getAgent().getAccount()+"锁定国际销售单："+"["+saleOrderExt.getEntity().getSaleOrderNo()+"]";
 
             }else if(saleOrderExt.getEntity().getSaleOrderDetailList() !=null && saleOrderExt.getEntity().getSaleOrderDetailList().get(0).getStatus().equals("15")){
+                title = "打回订单";
                 logstr ="用户"+ saleOrderExt.getAgent().getAccount()+"打回订单："+"["+saleOrderExt.getEntity().getSaleOrderNo()+"]";
 
             }else {
+                title="修改国际销售单";
              logstr ="用户"+ saleOrderExt.getAgent().getAccount()+"修改国际销售单："+"["+saleOrderExt.getEntity().getSaleOrderNo()+"]";
             }
-            LogRecord logRecord = new LogRecord();
+            IftLogHelper.logger(saleOrderExt.getAgent(),saleOrderExt.getEntity().getSaleOrderNo(),title,logstr);
+            /*LogRecord logRecord = new LogRecord();
             logRecord.setAppCode("UBP");
             logRecord.setCreateTime(new Date());
             logRecord.setTitle("修改国际销售单");
@@ -723,7 +738,7 @@ public class OrderServiceImpl implements IOrderService {
             logRecord.setRequestIp(saleOrderExt.getAgent().getIp());
             logRecord.setBizCode("IFT");
             logRecord.setBizNo(String.valueOf(saleOrderExt.getEntity().getSaleOrderNo()));
-            logService.insert(logRecord);
+            logService.insert(logRecord);*/
         } catch (Exception e) {
             log.error("添加操作日志异常===", e);
         }
@@ -767,7 +782,10 @@ public class OrderServiceImpl implements IOrderService {
             /* 创建操作日志 */
             try {
                 String logstr ="用户"+agent.getAccount()+"国际订单核价："+"["+orderExt.getSaleOrderNo()+"]成功";
-                LogRecord logRecord = new LogRecord();
+                String title = "国际订单核价";
+                IftLogHelper.logger(agent,orderExt.getSaleOrderNo(),title,logstr);
+
+               /* LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("国际订单核价");
@@ -776,7 +794,7 @@ public class OrderServiceImpl implements IOrderService {
                 logRecord.setRequestIp(saleOrderExt.getAgent().getIp());
                 logRecord.setBizCode("IFT");
                 logRecord.setBizNo(String.valueOf(orderExt.getSaleOrderNo()));
-                logService.insert(logRecord);
+                logService.insert(logRecord);*/
             } catch (Exception e) {
                 log.error("添加操作日志异常===" + e);
             }
@@ -878,7 +896,10 @@ public class OrderServiceImpl implements IOrderService {
             /* 创建操作日志 */
             try {
                 String logstr ="用户"+saleOrder.getModifier()+"成功支付："+"["+saleOrderNo+"]"+"￥"+saleOrder.getReceived();
-                LogRecord logRecord = new LogRecord();
+                String title = "订单支付";
+                IftLogHelper.logger(agent,saleOrderNo,title,logstr);
+
+               /* LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("订单支付");
@@ -887,7 +908,7 @@ public class OrderServiceImpl implements IOrderService {
                 logRecord.setRequestIp(agent.getIp());
                 logRecord.setBizCode("IFT");
                 logRecord.setBizNo(String.valueOf(saleOrderNo));
-                logService.insert(logRecord);
+                logService.insert(logRecord);*/
             } catch (Exception e) {
                 log.error("添加操作日志异常===" + e);
             }
@@ -1024,7 +1045,9 @@ public class OrderServiceImpl implements IOrderService {
             /* 创建操作日志 */
             try {
                 String logstr ="用户"+agent.getAccount()+"国际订单取消："+"["+saleOrderNo+"]";
-                LogRecord logRecord = new LogRecord();
+                String title = "国际订单取消";
+                IftLogHelper.logger(agent,saleOrderNo,title,logstr);
+               /* LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());
                 logRecord.setTitle("国际订单取消");
@@ -1033,7 +1056,7 @@ public class OrderServiceImpl implements IOrderService {
                 logRecord.setRequestIp(agent.getIp());
                 logRecord.setBizCode("IFT");
                 logRecord.setBizNo(String.valueOf(saleOrderNo));
-                logService.insert(logRecord);
+                logService.insert(logRecord);*/
             } catch (Exception e) {
                 log.error("添加操作日志异常===" + e);
             }
@@ -1218,7 +1241,9 @@ public class OrderServiceImpl implements IOrderService {
             // 配送管理出票队列
             sendTicketInfoByMq(agent, transationOrderNo);
             /* 创建操作日志 */
-            saveLog(agent, saleOrderNo, logstr, transationOrderNo);
+            //saveLog(agent, saleOrderNo, logstr, transationOrderNo);
+            String title = "国际订单出票";
+            IftLogHelper.logger(agent,transationOrderNo, saleOrderNo,title, logstr);
             log.info("出单操作成功");
             //销售员订单数量减一
             subSaleOrderNum(agent, preLocker);
@@ -1345,52 +1370,65 @@ public class OrderServiceImpl implements IOrderService {
         /* 创建操作日志 */
         try {
             String logstr=null;
+            String title = null;
             if (saleOrderDetailList !=null && saleOrderDetailList.get(0).getSaleOrderExt() !=null &&
                     saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder() !=null){
                 if (saleOrderDetailList.get(0).getSaleOrderExt().getCreateType()==7){
                     if (saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==14){
+                        title = "国际冲单拒单";
                         logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际冲单拒单："+"["+saleOrderNo+"]";
 
                     }else if(saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==5) {
+                        title = "国际冲单取消";
                         logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际冲单取消："+"["+saleOrderNo+"]";
                     }
                 }else if (saleOrderDetailList.get(0).getSaleOrderExt().getCreateType()==8){
                     if (saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==14){
+                        title = "国际补单拒单";
                         logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际补单拒单："+"["+saleOrderNo+"]";
 
                     }else if(saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==5) {
+                        title = "国际补单取消";
                         logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际补单取消："+"["+saleOrderNo+"]";
                     }
                 }else if (saleOrderDetailList.get(0).getSaleOrderExt().getCreateType()==9 ||
                         saleOrderDetailList.get(0).getSaleOrderExt().getCreateType()==10){
                     if (saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==14){
+                        title = "国际调整单拒单";
                         logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际调整单拒单："+"["+saleOrderNo+"]";
 
                     }else if(saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==5) {
+                        title = "国际调整单取消";
                         logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际调整单取消："+"["+saleOrderNo+"]";
                     }
                 }else if (saleOrderDetailList.get(0).getSaleOrderExt().getCreateType()==11){
                     if (saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==14){
+                        title = "国际ADM单拒单";
                         logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际ADM单拒单："+"["+saleOrderNo+"]";
 
                     }else if(saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==5) {
+                        title = "国际ADM单取消";
                         logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际ADM单取消："+"["+saleOrderNo+"]";
                     }
 
                 }else if (saleOrderDetailList.get(0).getSaleOrderExt().getCreateType()==12){
                     if (saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==14){
+                        title = "国际ACM单拒单";
                         logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际ACM单拒单："+"["+saleOrderNo+"]";
 
                     }else if(saleOrderDetailList.get(0).getSaleOrderExt().getSaleOrder().getOrderChildStatus()==5) {
+                        title = "国际ACM单取消";
                         logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际ACM单取消："+"["+saleOrderNo+"]";
                     }
                 }else{
                     logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际订单拒单："+"["+saleOrderNo+"]";
                 }
             }else {
+                title = "国际订单拒单";
              logstr ="用户"+refuseRequest.getAgent().getAccount()+"国际订单拒单："+"["+saleOrderNo+"]";
             }
-            LogRecord logRecord = new LogRecord();
+            IftLogHelper.logger(refuseRequest.getAgent(),saleOrder.getTransationOrderNo(),saleOrderNo, title,logstr);
+           /* LogRecord logRecord = new LogRecord();
             logRecord.setAppCode("UBP");
             logRecord.setCreateTime(new Date());
             logRecord.setTitle("国际订单拒单");
@@ -1402,7 +1440,7 @@ public class OrderServiceImpl implements IOrderService {
             Map<String, Object> otherOpts = new HashMap<String, Object>();
             otherOpts.put("transationOrderNo", saleOrder.getTransationOrderNo());
             logRecord.setOtherOpts(otherOpts);
-            logService.insert(logRecord);
+            logService.insert(logRecord);*/
         } catch (Exception e) {
             log.error("添加操作日志异常===" + e);
         }
@@ -2297,19 +2335,21 @@ public class OrderServiceImpl implements IOrderService {
                 /* 创建操作日志 */
                 try {
                     String logstr ="用户"+agent1.getAccount()+"创建国际销售单："+"["+saleOrderNo1+"]";
-                    LogRecord logRecord = new LogRecord();
+                    String title = "创建国际销售单";
+                    IftLogHelper.logger(agent1,saleOrderNo1,title,logstr);
+                  /*  LogRecord logRecord = new LogRecord();
                     logRecord.setAppCode("UBP");
                     logRecord.setCreateTime(new Date());
                     logRecord.setTitle("创建国际销售单");
                     logRecord.setDesc(logstr);
                     logRecord.setOptLoginName(agent1.getAccount());
                     logRecord.setRequestIp(agent1.getIp());
-                    logRecord.setBizCode("IFT-OrderServiceImpl-createOrder");
+                    logRecord.setBizCode("IFT");
                     logRecord.setBizNo(String.valueOf(saleOrderNo1));
                     Map<String, Object> otherOpts = new HashMap<String, Object>();
                     otherOpts.put("transationOrderNo", saleOrder1.getTransationOrderNo());
                     logRecord.setOtherOpts(otherOpts);
-                    logService.insert(logRecord);
+                    logService.insert(logRecord);*/
                 } catch (Exception e) {
                     log.error("添加操作日志异常===" + e);
                 }
@@ -2951,7 +2991,7 @@ public class OrderServiceImpl implements IOrderService {
         return ticketSenderList;
     }
     
-    private void saveLog(Agent agent, Long saleOrderNo, String logstr, Long transactionOrderNo) {
+   /* private void saveLog(Agent agent, Long saleOrderNo, String logstr, Long transactionOrderNo) {
         try {
             LogRecord logRecord = new LogRecord();
             logRecord.setAppCode("UBP");
@@ -2969,7 +3009,7 @@ public class OrderServiceImpl implements IOrderService {
         } catch (Exception e) {
             log.error("国际机票添加操作日志异常===", e);
         }
-    }
+    }*/
     
     private void sendTicketInfoByMq(Agent agent, Long transationOrderNo) throws RuntimeException {
         /*SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleOrderNo);
