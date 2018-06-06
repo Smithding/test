@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.tempus.gss.product.hol.api.entity.response.tc.ResGPSInfo;
 
 /**
  * 酒店列表搜索入参
@@ -92,6 +93,8 @@ public class HotelListSearchReq implements Serializable {
     private Integer saleStatus;
     
     private String bookRes;
+    
+    private ResGPSInfo resGPSInfo;
     
     public SearchCondition getSearchCondition() {
         return searchCondition;
@@ -229,4 +232,13 @@ public class HotelListSearchReq implements Serializable {
 	public void setBookRes(String bookRes) {
 		this.bookRes = bookRes;
 	}
+
+	public ResGPSInfo getResGPSInfo() {
+		return resGPSInfo;
+	}
+
+	public void setResGPSInfo(ResGPSInfo resGPSInfo) {
+		this.resGPSInfo = resGPSInfo;
+	}
+	
 }
