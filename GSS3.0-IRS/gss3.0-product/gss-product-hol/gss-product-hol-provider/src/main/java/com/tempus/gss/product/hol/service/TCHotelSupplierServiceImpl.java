@@ -292,10 +292,6 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
             	throw new GSSException("获取酒店列表", "0102", "agentType为空");
             }
         }
-        if (StringUtil.isNullOrEmpty(hotelSearchReq.getCityCode())) {
-            log.error("城市编号为空");
-            throw new GSSException("获取酒店列表", "0103", "城市编号为空");
-        }
         if (StringUtil.isNullOrEmpty(hotelSearchReq.getPageCount())) {
             log.error("页码为空");
             throw new GSSException("获取酒店列表", "0107", "页码为空");
@@ -325,8 +321,8 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         	datetomm.add(Calendar.DAY_OF_MONTH, 1);
         	hotelSearchReq.setEnd(sdf.format(datetomm.getTime()));
         }
-        Integer sumPrice=0;
-        Integer days=0;
+       // Integer sumPrice=0;
+       // Integer days=0;
         int skip= (hotelSearchReq.getPageCount()-1)* (hotelSearchReq.getRowCount());
   		query.skip(skip);
   		query.limit(hotelSearchReq.getRowCount());
@@ -357,15 +353,38 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
   			}
   		}
         try {
- 			days= DateUtil.daysBetween(hotelSearchReq.getBegin(), hotelSearchReq.getEnd());
+ 			//days= DateUtil.daysBetween(hotelSearchReq.getBegin(), hotelSearchReq.getEnd());
  			int beginResult= hotelSearchReq.getBegin().compareTo(sdf.format(date.getTime()));
  			int endResult= hotelSearchReq.getEnd().compareTo(sdf.format(dateAdd.getTime()));
  			if(beginResult >= 0 && endResult <= 0){
+ 				if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getResGPSInfo())) {
+ 					hotelSearchReq.setCityCode("");
+ 					Criteria latlon = new Criteria();
+ 					if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getResGPSInfo().getType())) {
+ 						latlon.and("type").is(hotelSearchReq.getResGPSInfo().getType());
+ 					}else {
+ 						throw new GSSException("获取酒店列表", "0103", "查询经纬度类型为空");
+ 					}
+ 					if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getResGPSInfo().getLon())) {
+ 						latlon.and("lon").regex("^.*"+hotelSearchReq.getResGPSInfo().getLon()+".*$");
+ 					}else {
+ 						throw new GSSException("获取酒店列表", "0103", "查询经度条件为空");
+ 					}
+ 					if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getResGPSInfo().getLat())) {
+ 						latlon.and("lat").regex("^.*"+hotelSearchReq.getResGPSInfo().getLat()+".*$");
+ 					}else {
+ 						throw new GSSException("获取酒店列表", "0103", "查询纬度条件为空");
+ 					}
+	 				criatira.and("resGPS").elemMatch(latlon);
+ 				}else if (StringUtil.isNullOrEmpty(hotelSearchReq.getCityCode()) && StringUtil.isNullOrEmpty(hotelSearchReq.getResGPSInfo())) {
+ 		        	hotelSearchReq.setCityCode("北京");
+ 		        }
  				if(StringUtils.isNotEmpty(hotelSearchReq.getCityCode())){
  					criatira.and("cityName").regex("^.*"+hotelSearchReq.getCityCode()+".*$");
  					//criatira.and("cityName").is(hotelSearchReq.getCityCode());
  					//criatira.orOperator(Criteria.where("cityName").is(hotelSearchReq.getCityCode()), Criteria.where("sectionName").regex(".*?\\" +hotelSearchReq.getCityCode()+ ".*"));
  				}
+ 				
  				if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getSaleStatus())){
  					criatira.and("saleStatus").is(hotelSearchReq.getSaleStatus());
  				}
@@ -1371,7 +1390,5 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		List<PaymentWay> list = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)),PaymentWay.class);
 		return list;
 	}
-
-	
 
 }
