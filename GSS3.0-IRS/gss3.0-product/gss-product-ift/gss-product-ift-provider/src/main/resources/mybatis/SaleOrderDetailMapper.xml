@@ -554,6 +554,12 @@ SET ISOE.STATUS=1  WHERE ISOE.STATUS=2 AND OS.PAY_STATUS=1
          UPDATE  OS_SALEORDER OS
         SET   OS.ORDER_CHILD_STATUS=1  WHERE OS.SALE_ORDER_NO=#{saleOrderNo}
     </update>
+    <update id="updateSaleOrderDetailStatusByNoAndStatus" >
+        UPDATE IFT_SALE_ORDER_DETAIL ISOE
+        SET ISOE.STATUS=#{status}   WHERE ISOE.SALE_ORDER_NO=#{saleOrderNo};
+         UPDATE  OS_SALEORDER OS
+        SET   OS.ORDER_CHILD_STATUS=#{status}  WHERE OS.SALE_ORDER_NO=#{saleOrderNo}
+    </update>
     <select id="selectByPassengerAndSaleOrder" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderDetail">
         select <include refid="Base_Column_List"/> from IFT_SALE_ORDER_DETAIL where  PASSENGER_NO = #{passengerNo} and SALE_ORDER_NO = #{saleOrderNo}
     </select>
