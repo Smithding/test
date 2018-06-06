@@ -409,8 +409,21 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
  	 				}
  					if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getSearchCondition().getHotelLevelList())){
  						List<String> hlevle = hotelSearchReq.getSearchCondition().getHotelLevelList(); 
- 	 	 				if(!(hlevle.isEmpty()) && !(hlevle.get(0).isEmpty())){ 	 					
- 	 	 					criatira.and("resGradeId").in(Arrays.asList(hlevle.get(0).split(",")));
+ 	 	 				if(!(hlevle.isEmpty()) && !(hlevle.get(0).isEmpty())){ 	
+ 	 	 					String sss = hlevle.get(0);
+ 	 	 					if(sss.contains("27")) {
+ 	 	 						sss = sss + ",32,34";
+ 	 	 					}
+ 	 	 					if(sss.contains("26")) {
+ 	 	 						sss = sss + ",31";
+ 	 	 					}
+ 	 	 					if(sss.contains("24")) {
+ 	 	 						sss = sss + ",30";
+ 	 	 					}
+ 	 	 					if(sss.contains("23")) {
+ 	 	 						sss = sss + ",28";
+ 	 	 					}
+ 	 	 					criatira.and("resGradeId").in(Arrays.asList(sss.split(",")));
  	 	 				}
  					}
  	 				if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getSearchCondition().getBrandList())){
@@ -1130,6 +1143,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			
 			if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())) {
 				assignDateHotel.setId(resId);
+				assignDateHotel.setLatestUpdateTime(sdfupdate.format(new Date()));
 				mongoTemplate1.save(assignDateHotel, "assignDateHotel");
 				
 				ResIdList resIdList =new ResIdList();
@@ -1175,11 +1189,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 				ResProBaseInfos resProBase =new ResProBaseInfos();
 				resProBase.setId(resId);
 				resProBase.setResProBaseInfos(resProBaseInfos);
+				resProBase.setLatestUpdateTime(sdfupdate.format(new Date()));
 				mongoTemplate1.save(resProBase, "resProBaseInfos");
 			}
-			
-			
-			
 		} catch (Exception e) {
 			LogRecordHol logRecordHol=new LogRecordHol();
 			logRecordHol.setBizCode("HOL-resInfo");
