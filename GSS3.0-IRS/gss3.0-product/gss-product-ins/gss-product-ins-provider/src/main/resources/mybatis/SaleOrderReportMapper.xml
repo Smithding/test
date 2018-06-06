@@ -182,6 +182,9 @@
              ${lowerCustomers.customerNo}
            </foreach>
         </if>
+         <if test="customerName != null and customerName != ''" >
+			AND cc.NAME = #{customerName,jdbcType=VARCHAR} 
+		</if>
      	<if test="creator != null and creator != '' and isLowerLevel != true">
              AND isoe.CREATOR = #{creator,jdbcType=VARCHAR}
         </if>        
