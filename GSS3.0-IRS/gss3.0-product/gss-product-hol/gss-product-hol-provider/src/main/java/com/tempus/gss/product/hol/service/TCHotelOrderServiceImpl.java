@@ -268,7 +268,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
             logger.error("支付模式为空！");
             throw new GSSException("创建酒店订单", "0114", "早餐为空！");
         }
+       
+        Long saleOrderNo = maxNoService.generateBizNo("HOL_SALE_ORDER_NO", 13);
         HotelOrder hotelOrder = new HotelOrder();
+        try{
 		List<ResourceUseDateDetail> resourceUseDateDetail = orderCreateReq.getOrderUseDateDetails();
 		String startDate = resourceUseDateDetail.get(0).getUseDate();
 		String endDate = resourceUseDateDetail.get((resourceUseDateDetail.size()-1)).getUseDate();
@@ -278,7 +281,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		String eachNightPrice= null;
 		Date dateStartDate;
 		Date departureDate;
-    	try {
+    	//try {
 
 					for(ResourceUseDateDetail li : resourceUseDateDetail){
 						totalPrice = totalPrice.add(li.getCheckPrice());
@@ -317,14 +320,15 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			cal.setTime(departDate);
 			cal.add(Calendar.DAY_OF_MONTH, 1);
 			departureDate= cal.getTime();
-		} catch (Exception e) {
-			logger.error("入住日期/离店日期 格式错误,请重新输入！入住日期/离店日期的正确格式为(yyyy-MM-dd)",e);
-            throw new GSSException("创建酒店订单", "0129", "入住日期/离店日期 格式错误,请重新输入！入住日期/离店日期的正确格式为(yyyy-MM-dd)"+e.getMessage());
-		}
+		/*} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(e.getMessage());
+            throw new GSSException("创建酒店订单", "0129", e.getMessage());
+		}*/
     	//OrderCreateBase orderCreateBase;
     	ResultTc<OrderCreate> orderCreateBase = null;
-    	Long saleOrderNo = maxNoService.generateBizNo("HOL_SALE_ORDER_NO", 13);
-    	try{
+    	
+    	
     		Long businessSignNo = IdWorker.getId();
     		//Long saleOrderNo = IdWorker.getId();
     		BuyOrder buyOrder = orderCreateReq.getBuyOrder();
