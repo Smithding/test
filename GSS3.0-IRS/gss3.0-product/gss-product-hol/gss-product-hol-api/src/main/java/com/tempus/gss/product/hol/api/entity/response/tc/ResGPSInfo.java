@@ -12,7 +12,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 public class ResGPSInfo implements Serializable{
 	private static final long serialVersionUID = 1L;
 	/**
-	 * 坐标类型（1-百度坐标 2-图吧坐标 3-谷歌坐标）
+	 * 坐标类型（1-百度坐标 ）
 	 */
 	@JSONField(name = "Type")
 	private Integer type;
