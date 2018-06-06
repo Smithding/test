@@ -272,6 +272,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			AssignDateHotel assignDateHotel=  queryAssignDateHotel(assignDateHotelReq);
 			if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())) {
 				assignDateHotel.setId(resId);
+				assignDateHotel.setLatestUpdateTime(sdfupdate.format(new Date()));
 				mongoTemplate1.save(assignDateHotel, "assignDateHotel");
 				
 				ResIdList resIdList =new ResIdList();
@@ -322,6 +323,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 						break;
 					}
 				}
+				imgInfoSum.setLatestUpdateTime(sdfupdate.format(new Date()));
 				mongoTemplate1.save(imgInfoSum, "imgInfoSum");
 				mongoTemplate1.save(resBaseInfo, "resBaseInfo");
 			}
@@ -338,6 +340,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 					ResProBaseInfos resProBaseInfos=new ResProBaseInfos();
 					resProBaseInfos.setId(resId);
 					resProBaseInfos.setResProBaseInfos(resProBaseInfo);
+					resProBaseInfos.setLatestUpdateTime(sdfupdate.format(new Date()));
 					mongoTemplate1.save(resProBaseInfos, "resProBaseInfos");
 				}
 			}
@@ -497,6 +500,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 								proInfoDetailMongo.remove(position);
 								proInfoDetailMongo.add(position, newProInfoDetail);
 							}
+							assignMongo.setLatestUpdateTime(sdfupdate.format(new Date()));
 							mongoTemplate1.save(assignMongo, "assignDateHotel");
 						}
 					}
