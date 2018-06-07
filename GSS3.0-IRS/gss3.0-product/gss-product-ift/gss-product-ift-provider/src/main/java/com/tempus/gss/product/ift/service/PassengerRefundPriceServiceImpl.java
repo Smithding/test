@@ -76,7 +76,7 @@ public class PassengerRefundPriceServiceImpl  implements IPassengerRefundPriceSe
 		int flag=0;
 		try{
 			passengerRefundPrice.getEntity().setModifier(passengerRefundPrice.getAgent().getAccount());
-			passengerRefundPrice.getEntity().setModifyTime(simple.parse(simple.format(new Date())));
+			passengerRefundPrice.getEntity().setModifyTime(new Date());
 			logger.info("退票，修改乘客票价信息",passengerRefundPrice.getEntity().toString());
 			flag=passengerRefundPriceDao.updateByPrimaryKeySelective(passengerRefundPrice.getEntity());
 		}catch(Exception e ){

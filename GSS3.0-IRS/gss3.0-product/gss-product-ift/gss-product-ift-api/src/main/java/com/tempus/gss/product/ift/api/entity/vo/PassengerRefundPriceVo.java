@@ -70,6 +70,8 @@ public class PassengerRefundPriceVo implements Serializable {
     private String saleCurrency;
 	//汇率
 	private BigDecimal exchangeRate;
+	//订单来源
+	private String sourceChannelNo;
 
 	public List<PassengerRefundPrice> getPassengerRefundPriceList() {
 		return passengerRefundPriceList;
@@ -165,5 +167,13 @@ public class PassengerRefundPriceVo implements Serializable {
 
 	public void setSaleCurrency(String saleCurrency) {
 		this.saleCurrency = saleCurrency;
+	}
+
+	public String getSourceChannelNo() {
+		return sourceChannelNo;
+	}
+
+	public void setSourceChannelNo(String sourceChannelNo) {
+		this.sourceChannelNo = sourceChannelNo;
 	}
 }
