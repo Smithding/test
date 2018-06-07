@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -27,6 +28,7 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
+import com.tempus.gss.product.hol.api.entity.request.tc.AssignDateHotelReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.SingleHotelDetailReq;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.entity.response.tc.AssignDateHotel;
@@ -168,6 +170,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 
 	@Override
 	public ResBaseInfo queryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
+		// long start = System.currentTimeMillis();
 		if (StringUtil.isNullOrEmpty(agent)) {
             log.error("agent对象为空");
             throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
@@ -193,16 +196,29 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
         Integer days = 0;
 		try {
 			days= DateUtil.daysBetween(startTime, endTime);
-			Future<AssignDateHotel> assignDateHotelFuture = tcHotelSupplierService.queryListById(resId, AssignDateHotel.class);
+		//	Future<AssignDateHotel> assignDateHotelFuture = tcHotelSupplierService.queryListById(resId, AssignDateHotel.class);
 			Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryListById(resId, ResProBaseInfos.class);
 			Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryListById(resId, ResBaseInfo.class);
 			Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryListById(resId, ImgInfoSum.class);
+			
+			AssignDateHotelReq assignDateHotelReq=new AssignDateHotelReq();
+			assignDateHotelReq.setResId(resId);
+			assignDateHotelReq.setSourceFrom("-1");
+			assignDateHotelReq.setStartTime(startTime);
+			assignDateHotelReq.setEndTime(endTime);
+			AssignDateHotel assignDateHotel=  hotelInterService.queryAssignDateHotel(assignDateHotelReq);
 			while(true) {
-				if(assignDateHotelFuture.isDone() && resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && imgInfoSumFuture.isDone()) {
+				if( resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && imgInfoSumFuture.isDone()) {
 					break;
 				}
 			}
-			AssignDateHotel assignDateHotel = assignDateHotelFuture.get();
+			/*while(true) {
+				if( assignDateHotelFuture.isDone() && resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && imgInfoSumFuture.isDone()) {
+					break;
+				}
+			}
+			AssignDateHotel assignDateHotel = assignDateHotelFuture.get();*/
+			
 			tcResBaseInfo = resBaseInfoFuture.get();
 			ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
 			ImgInfoSum imgInfoSum = imgInfoSumFuture.get();
@@ -371,6 +387,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
+		//long end = System.currentTimeMillis();  
+	    //System.out.println("完成任务一，耗时：" + (end - start) + "毫秒"); 
 		return tcResBaseInfo;
 	}
 

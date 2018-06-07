@@ -692,11 +692,19 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Calendar da = Calendar.getInstance();
 			if(StringUtils.isEmpty(isBookOrderReq.getEarliestArrivalTime())) {
-				da.add(Calendar.HOUR,1);
-				da.set(Calendar.MINUTE, 0);
-				da.set(Calendar.SECOND, 0);
-				//System.out.println("11:  "+sim.format(da.getTime()));
-				isBookOrderReq.setEarliestArrivalTime(sim.format(da.getTime()));
+				String today = simple.format(da.getTime());
+				if(today.compareTo(isBookOrderReq.getComeTime().substring(0, 10)) < 0) {
+					da.setTime(simple.parse(isBookOrderReq.getComeTime()));
+					da.set(Calendar.HOUR, 6);
+					da.set(Calendar.MINUTE, 0);
+					da.set(Calendar.SECOND, 0);
+					isBookOrderReq.setEarliestArrivalTime(sim.format(da.getTime()));
+				}else {
+					da.add(Calendar.HOUR,1);
+					da.set(Calendar.MINUTE, 0);
+					da.set(Calendar.SECOND, 0);
+					isBookOrderReq.setEarliestArrivalTime(sim.format(da.getTime()));
+				}
 			}
 			if(sim.format(new Date()).compareTo(isBookOrderReq.getComeTime()) > 0) {
 				da.add(Calendar.HOUR,2);
@@ -706,7 +714,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			}
 			if(StringUtils.isEmpty(isBookOrderReq.getLatestArrivalTime())) {
 				if(isBookOrderReq.getComeTime().equals(isBookOrderReq.getEarliestArrivalTime())) {
-					da.add(Calendar.HOUR,11);
+					da.setTime(simple.parse(isBookOrderReq.getComeTime()));
+					da.set(Calendar.HOUR,23);
 					da.set(Calendar.MINUTE, 0);
 					da.set(Calendar.SECOND, 0);
 					isBookOrderReq.setLatestArrivalTime(sim.format(da.getTime()));
