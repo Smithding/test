@@ -122,6 +122,10 @@ public class RefundServiceImpl implements IRefundService {
 	protected String owner;
 	@Reference
 	IIftMessageService	IIftMessageService;
+	@Reference
+	ISaleOrderDetailService detailService;
+	@Reference
+	ITicketSenderService ticketSenderService;
 
 	SimpleDateFormat simpleDate = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
 
@@ -902,7 +906,7 @@ public class RefundServiceImpl implements IRefundService {
 		}
 		try {
 			saleChangeService.updateStatus(agent, saleChange.getSaleChangeNo(),11);// 更具传入变更单号，修改子状态
-
+            Date modifyTime = new Date();
 			//修改销售单明细
 			SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(saleChange.getSaleChangeNo());
 			if (saleChangeExt != null) {
@@ -913,7 +917,7 @@ public class RefundServiceImpl implements IRefundService {
 						if (saleChangeDetail != null) {
 							saleOrderDetail.setStatus(String.valueOf(4));//将状态改为已出票
 							saleOrderDetail.setModifier(agent.getAccount());
-							saleOrderDetail.setModifyTime(new Date());
+							saleOrderDetail.setModifyTime(modifyTime);
 							saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 						}
 					}
@@ -929,7 +933,7 @@ public class RefundServiceImpl implements IRefundService {
 						if (buyChange.getBusinessSignNo().equals(saleChange.getBusinessSignNo())) {
 							buyChange.setChildStatus(11);//变更为已取消
 							buyChange.setModifier(agent.getAccount());
-							buyChange.setModifyTime(new Date());
+							buyChange.setModifyTime(modifyTime);
 							buyChangeService.update(agent, buyChange);
 						}
 					}
@@ -991,9 +995,22 @@ public class RefundServiceImpl implements IRefundService {
 			SaleChange saleChange = saleChangeService
 					.getSaleChangeByNo(saleChangeNo.getAgent(), saleChangeNo.getEntity().longValue());
 			saleChange.setChildStatus(4);// 设置废退状态 4为拒绝废退
-			saleChange.setModifier(saleChangeNo.getAgent().getAccount());
-			saleChange.setModifyTime(new Date());
+			Date modifyTime = new Date();
+			Agent agent = saleChangeNo.getAgent();
+			saleChange.setModifier(agent.getAccount());
+			saleChange.setModifyTime(modifyTime);
 			saleChangeService.update(saleChangeNo.getAgent(), saleChange);// 更具传入变更单号，修改子状态
+			SaleChangeExt saleChangeExt = this.getSaleChangeExtByNo(saleChangeNo);
+			if(saleChangeExt!=null){
+				Long locker = saleChangeExt.getLocker();
+				saleChangeExt.setLocker(0L);
+				saleChangeExt.setModifier(agent.getAccount());
+				saleChangeExt.setModifyTime(modifyTime);
+                saleChangeExtDao.updateLocker(saleChangeExt);
+                Long saleOrderNo = saleChangeExt.getSaleChange().getSaleOrderNo();
+				detailService.updateSaleOrderDetailStatusByNo(saleOrderNo,4);
+				ticketSenderService.updateByLockerId(agent,locker,"SALE_REFUSE_NUM");
+			}
 			/*创建操作日志*/
 			try {
 			    String logstr=null;
@@ -1200,7 +1217,7 @@ public class RefundServiceImpl implements IRefundService {
 				}
 				page.setRecords(saleChangeVoList);
 			}
-			log.info("查询废退改签单结束，获取费退改签单的数据为："+ JsonUtil.toJson(page));
+			//log.info("查询废退改签单结束，获取费退改签单的数据为："+ JsonUtil.toJson(page));
 		} catch (Exception e) {
 			log.error("查询废退改签单", e);
 		}

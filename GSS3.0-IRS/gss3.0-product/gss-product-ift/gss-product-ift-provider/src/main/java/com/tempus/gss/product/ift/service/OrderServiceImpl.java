@@ -497,8 +497,13 @@ public class OrderServiceImpl implements IOrderService {
                     log.error("获取客商编号为空");
                     throw new GSSException("获取客商编号为空", "0101", "创建订单失败");
                 }
+                if(requestWithActor.getEntity().getBuyOrderExt() != null && requestWithActor.getEntity().getBuyOrderExt().getSupplierNo() !=null){
+                    buyOrderExt.getBuyOrder().setSupplierNo(requestWithActor.getEntity().getBuyOrderExt().getSupplierNo());
+                    buyOrderExt.getBuyOrder().setSupplierTypeNo(requestWithActor.getEntity().getBuyOrderExt().getSupplierTypeNo());
+                }else{
                 buyOrderExt.getBuyOrder().setSupplierNo(supplierList.get(0).getSupplierNo());
                 buyOrderExt.getBuyOrder().setSupplierTypeNo(supplierList.get(0).getCustomerTypeNo());
+                }
             }
             
             buyOrderExt.getBuyOrder().setBuyChannelNo(agent.getDevice());

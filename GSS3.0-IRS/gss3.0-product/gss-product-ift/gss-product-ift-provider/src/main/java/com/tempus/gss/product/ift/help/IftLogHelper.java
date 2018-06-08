@@ -53,7 +53,7 @@ public class IftLogHelper {
         try{
             user = userService.findUserByLoginName(agent, agent.getAccount());
         }catch(Exception e){
-            logger.info(no + "记录操作日志取用户信息异常" + e);
+            logger.error(no + "记录操作日志取用户信息异常" , e);
         }
         LogRecord log = new LogRecord();
         log.setId(IdWorker.getId());
@@ -68,7 +68,7 @@ public class IftLogHelper {
         try {
             logService.insert(log);
         } catch (Exception e) {
-            logger.info(no + "记录操作日志异常");
+            logger.error("记录操作日志异常",e);
         }
     }
 
@@ -89,7 +89,7 @@ public class IftLogHelper {
         try {
             logService.insert(log);
         } catch (Exception e) {
-            logger.info(no + "记录操作日志异常");
+            logger.error("记录操作日志异常",e);
         }
     }
 
