@@ -231,17 +231,17 @@ public class OrderCreateReq implements Serializable{
 	 * 最迟取消时间这个时间前取消不需要扣罚金
 	 */
 	@JSONField(serialize = false)
-	private Date cancelPenalty;
+	private String cancelPenalty;
 	/**
 	 * 最早到店限制时间
 	 */
 	@JSONField(serialize = false)
-	private Date earlyArriveTime;
+	private String earlyArriveTime;
 	/**
 	 * 最晚到店时间限制
 	 */
 	@JSONField(serialize = false)
-	private Date latestArriveTime;
+	private String latestArriveTime;
 	/**
 	 * 供应商编号
 	 */
@@ -521,22 +521,22 @@ public class OrderCreateReq implements Serializable{
 	public void setDbCancelRule(String dbCancelRule) {
 		this.dbCancelRule = dbCancelRule;
 	}
-	public Date getCancelPenalty() {
+	public String getCancelPenalty() {
 		return cancelPenalty;
 	}
-	public void setCancelPenalty(Date cancelPenalty) {
+	public void setCancelPenalty(String cancelPenalty) {
 		this.cancelPenalty = cancelPenalty;
 	}
-	public Date getEarlyArriveTime() {
+	public String getEarlyArriveTime() {
 		return earlyArriveTime;
 	}
-	public void setEarlyArriveTime(Date earlyArriveTime) {
+	public void setEarlyArriveTime(String earlyArriveTime) {
 		this.earlyArriveTime = earlyArriveTime;
 	}
-	public Date getLatestArriveTime() {
+	public String getLatestArriveTime() {
 		return latestArriveTime;
 	}
-	public void setLatestArriveTime(Date latestArriveTime) {
+	public void setLatestArriveTime(String latestArriveTime) {
 		this.latestArriveTime = latestArriveTime;
 	}
 	public String getSupplierNo() {
