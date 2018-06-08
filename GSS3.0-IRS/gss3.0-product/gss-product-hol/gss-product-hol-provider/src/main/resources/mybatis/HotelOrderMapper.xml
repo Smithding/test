@@ -52,9 +52,9 @@
         <result column="DB_ORDER_TYPE" property="dbOrderType" jdbcType="VARCHAR"/>
         <result column="DB_ORDER_MONEY" property="dbOrderMoney" jdbcType="DECIMAL"/>
         <result column="DB_CANCEL_RULE" property="dbCancelRule" jdbcType="VARCHAR"/>
-        <result column="CANCEL_PENALTY" property="cancelPenalty" jdbcType="TIMESTAMP"/>
-        <result column="EARLY_ARRIVE_TIME" property="earlyArriveTime" jdbcType="TIMESTAMP"/>
-        <result column="LATEST_ARRIVE_TIME" property="latestArriveTime" jdbcType="TIMESTAMP"/>
+        <result column="CANCEL_PENALTY" property="cancelPenalty" jdbcType="VARCHAR"/>
+        <result column="EARLY_ARRIVE_TIME" property="earlyArriveTime" jdbcType="VARCHAR"/>
+        <result column="LATEST_ARRIVE_TIME" property="latestArriveTime" jdbcType="VARCHAR"/>
         <result column="CUSTOMER_NO" property="customerNo" jdbcType="BIGINT"/>
         <result column="SUPPLIER_NO" property="supplierNo" jdbcType="BIGINT"/>
         <result column="CARD_VALUE_CODE" property="cardValueCode" jdbcType="VARCHAR"/>
