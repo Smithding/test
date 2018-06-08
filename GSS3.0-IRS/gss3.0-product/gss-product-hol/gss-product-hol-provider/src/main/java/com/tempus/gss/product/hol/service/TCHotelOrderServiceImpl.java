@@ -556,9 +556,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						if(StringUtil.isNotNullOrEmpty(orderCreateBase)){
 							if(orderCreateBase.getRet_code().equals("200")){
 								hotelOrder.setHotelOrderNo(orderCreateBase.getResult().getOrderId());
-								hotelOrder.setMsg(orderCreateBase.getResult().getMsg().trim());
-								hotelOrder.setIsAffirm(orderCreateBase.getResult().getIsAffirm());
-								hotelOrder.setResultCode(orderCreateBase.getResult().getResultCode());
+								//hotelOrder.setMsg(orderCreateBase.getResult().getMsg().trim());
+								//hotelOrder.setIsAffirm(orderCreateBase.getResult().getIsAffirm());
+								//hotelOrder.setResultCode(orderCreateBase.getResult().getResultCode());
 								hotelOrder.setTcOrderStatus(TcOrderStatus.WAIT_TC_CONFIRM.getKey());
 								hotelOrderMapper.updateById(hotelOrder);
 							}else{
@@ -1276,8 +1276,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 												throw new GSSException("更新状态信息异常", "0110", "获取订单详情列表为空");
 											}
 											OrderInfoModel orderInfoModel = orderInfomationDetail.getOrderInfos().get(0);
-											Date stringToSimpleDate = DateUtil.stringToSimpleDate(orderInfoModel.getLasestCancelTime());
-											hotelOrder.setCancelPenalty(stringToSimpleDate);
+											//Date stringToSimpleDate = DateUtil.stringToSimpleDate(orderInfoModel.getLasestCancelTime());
+											//hotelOrder.setCancelPenalty(stringToSimpleDate);
 											if(StringUtil.isNotNullOrEmpty(orderInfoModel.getResources())){
 												for(ResourceModel resource : orderInfoModel.getResources()){
 													if(StringUtils.isNotEmpty(resource.getSupplierConfirmNumber())){
@@ -1610,8 +1610,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							throw new GSSException("更新状态信息异常", "0110", "获取订单详情列表为空");
 						}
 						OrderInfoModel orderInfoModel = orderInfomationDetail.getOrderInfos().get(0);
-						Date stringToSimpleDate = DateUtil.stringToSimpleDate(orderInfoModel.getLasestCancelTime());
-						hotelOrder.setCancelPenalty(stringToSimpleDate);
+						//Date stringToSimpleDate = DateUtil.stringToSimpleDate(orderInfoModel.getLasestCancelTime());
+						//hotelOrder.setCancelPenalty(stringToSimpleDate);
 						if(StringUtil.isNotNullOrEmpty(orderInfoModel.getResources())){
 							for(ResourceModel resource : orderInfoModel.getResources()){
 								if(StringUtils.isNotEmpty(resource.getSupplierConfirmNumber())){
