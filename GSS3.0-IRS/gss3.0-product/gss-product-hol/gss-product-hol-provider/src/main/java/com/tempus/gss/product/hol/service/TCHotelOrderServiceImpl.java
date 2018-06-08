@@ -523,6 +523,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            }
 	            if(StringUtil.isNotNullOrEmpty(orderCreateReq.getCredentialNumber())){
 	            	hotelOrder.setCredentialNumber(orderCreateReq.getCredentialNumber());
+	            	orderCreateReq.setIsPay(true);
 	            }
 	            if(StringUtil.isNotNullOrEmpty(orderCreateReq.getMobile())){
 	            	hotelOrder.setCardMobile(orderCreateReq.getMobile());
