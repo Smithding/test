@@ -267,7 +267,7 @@ public class RefundServiceImpl implements IRefundService {
 						saleChangeDetail.setSaleOrderDetailNo(saleOrderDetail.getSaleOrderDetailNo());
 						saleChangeDetail.setOwner(agent.getOwner());
 						saleChangeDetail.setCreateTime(new Date());
-						saleChangeDetail.setCreator(String.valueOf(agent.getId()));
+						saleChangeDetail.setCreator(String.valueOf(agent.getAccount()));
 						saleChangeDetail.setValid((byte) 1);
 						saleChangeDetailDao.insertSelective(saleChangeDetail);
 					}
@@ -300,7 +300,7 @@ public class RefundServiceImpl implements IRefundService {
 			saleChangeExt.setRefundWay(requestWithActor.getEntity().getRefundWay());
 			saleChangeExt.setOwner(agent.getOwner());
 			saleChangeExt.setCreateTime(new Date());
-			saleChangeExt.setCreator(String.valueOf(agent.getId()));
+			saleChangeExt.setCreator(String.valueOf(agent.getAccount()));
 			saleChangeExt.setChangeType(requestWithActor.getEntity().getRefundType());
 			saleChangeExt.setContactName(requestWithActor.getEntity().getContactName());
 			saleChangeExt.setContactMobile(requestWithActor.getEntity().getContactPhone());
