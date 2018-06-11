@@ -75,7 +75,7 @@ public class QueryServiceImpl implements IQueryService {
     ISubControlRuleService subControlRuleService;
 
     /*多程单独计算*/
-    @Reference(version = "lizhi")
+    @Reference
     IMultipassMappingService multipassMappingService;
     @Autowired
     ProfitDao profitDao;
