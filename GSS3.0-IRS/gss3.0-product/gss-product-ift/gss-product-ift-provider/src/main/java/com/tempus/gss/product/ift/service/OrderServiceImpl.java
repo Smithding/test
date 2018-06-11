@@ -107,7 +107,8 @@ public class OrderServiceImpl implements IOrderService {
     SaleOrderDetailDao saleOrderDetailDao;
     @Reference
     IGetPnrService getPnrService;
-    
+    @Reference
+    IConfigsService configsService;
     /* 销售单 */
     @Reference
     ISaleOrderService saleOrderService;
@@ -194,8 +195,6 @@ public class OrderServiceImpl implements IOrderService {
     IDifferenceOrderService differenceOrderService;
     @Autowired
     MqSender mqSender;
-    @Reference
-    IConfigsService configsService;
     @Reference
     IUserService userService;
     @Autowired
@@ -611,6 +610,14 @@ public class OrderServiceImpl implements IOrderService {
             saleOrderExt.setCreateTime(today);
             saleOrderExt.setValid((byte) 1);
             saleOrderExt.setLocker(0L);// 解锁状态
+            IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
+            Map<String, Object> map = configs.getConfigsMap();
+            Object object = map.get("exChangeRate");
+            if (object !=null&& ""!=object){
+                String exChangeRateStr = object.toString();
+                BigDecimal exChangeRate = new  BigDecimal(exChangeRateStr);
+                saleOrderExt.setExchangeRate(exChangeRate);
+            }
             saleOrderExtDao.insertSelective(saleOrderExt);
             
             /* 创建采购单 */
