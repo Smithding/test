@@ -47,6 +47,12 @@ import java.util.regex.Pattern;
 @EnableAutoConfiguration
 public class QueryServiceImpl implements IQueryService {
     protected final transient Logger log = LoggerFactory.getLogger(getClass());
+    private static final ThreadLocal<SimpleDateFormat> dateFormat = new ThreadLocal<SimpleDateFormat>(){
+        @Override
+        protected SimpleDateFormat initialValue() {
+            return  new SimpleDateFormat("yyyy-MM-dd");
+        }
+    };
     /*航司总则服务*/
     @Autowired
     private IPriceSpecService priceSpecService;
@@ -69,7 +75,7 @@ public class QueryServiceImpl implements IQueryService {
     ISubControlRuleService subControlRuleService;
 
     /*多程单独计算*/
-    @Autowired
+    @Reference
     IMultipassMappingService multipassMappingService;
     @Autowired
     ProfitDao profitDao;
@@ -138,9 +144,6 @@ public class QueryServiceImpl implements IQueryService {
         shoppingInput.setPsger(psger);
         List<ShoppingSeg> segs = new ArrayList<ShoppingSeg>();
 		ShoppingSeg shoppingSeg = new ShoppingSeg(flightQuery.getDepDate(),flightQuery.getDepAirport(),flightQuery.getArrAirport());
-        /*shoppingSeg.setDepartureDate(flightQuery.getDepDate());
-        shoppingSeg.setDestinationLocation(flightQuery.getArrAirport());
-        shoppingSeg.setOriginLocation(flightQuery.getDepAirport());*/
         if (null != flightQuery.getTransfers() && flightQuery.getTransfers().size() > 0) {
             List<ConnectionLocation> connectionLocations = new ArrayList<ConnectionLocation>();
             for (String transfer : flightQuery.getTransfers()) {
@@ -150,12 +153,11 @@ public class QueryServiceImpl implements IQueryService {
         }
         segs.add(shoppingSeg);
         if (null != flightQuery.getLegType() && 2 == flightQuery.getLegType()) {
-            shoppingSeg = new ShoppingSeg(flightQuery.getReturnDate(), flightQuery.getDepAirport(), flightQuery.getArrAirport());
+            shoppingSeg = new ShoppingSeg(flightQuery.getReturnDate(), flightQuery.getArrAirport(), flightQuery.getDepAirport());
             segs.add(shoppingSeg);
         }
         shoppingInput.setSegs(segs);
-        log.info("开始调用shopping接口");
-        log.info(JsonUtil.toJson(shoppingInput));
+        log.info("开始调用shopping接口,入参:{}",JsonUtil.toJson(shoppingInput));
         ShoppingOutPut shoppingOutPut = shoppingService.shoppingI(shoppingInput);
         log.info("完成调用shopping接口"+shoppingOutPut.getShortText());
         List<AvailableJourney> availableJourneys = shoppingOutPut.getAvailableJourneys();
@@ -1887,12 +1889,15 @@ public class QueryServiceImpl implements IQueryService {
      */
     private void insertBatchVoyages(QueryIBEDetail queryIBEDetail, String type) {
         VoyageLowestPriceVo voyageLowestPrice = new VoyageLowestPriceVo();
-        SimpleDateFormat fl = new SimpleDateFormat("yyyy-MM-dd");
+        //SimpleDateFormat fl = new SimpleDateFormat("yyyy-MM-dd");
         voyageLowestPrice.setDepart(queryIBEDetail.getGoDepAirport());
         voyageLowestPrice.setArrive(queryIBEDetail.getGoArrAirport());
-        voyageLowestPrice.setDepartDate(fl.format(queryIBEDetail.getGoDepTime()));
+        String departDate = dateFormat.get().format(queryIBEDetail.getGoDepTime());
+        String backDate = dateFormat.get().format(queryIBEDetail.getBackDepTime());
+        //voyageLowestPrice.setDepartDate(fl.format(queryIBEDetail.getGoDepTime()));
+        voyageLowestPrice.setDepartDate(departDate);
         if (2 == queryIBEDetail.getLegType().intValue()) {
-            voyageLowestPrice.setDepartDate(fl.format(queryIBEDetail.getGoDepTime()) + "/" + fl.format(queryIBEDetail.getBackDepTime()));
+            voyageLowestPrice.setDepartDate(departDate+ "/" + backDate);
         }
         voyageLowestPrice.setSource(type);
         voyageLowestPrice.setType(2);
