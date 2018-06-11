@@ -75,7 +75,7 @@ public class QueryServiceImpl implements IQueryService {
     ISubControlRuleService subControlRuleService;
 
     /*多程单独计算*/
-    @Reference
+    @Reference(version = "lizhi")
     IMultipassMappingService multipassMappingService;
     @Autowired
     ProfitDao profitDao;
@@ -1893,10 +1893,10 @@ public class QueryServiceImpl implements IQueryService {
         voyageLowestPrice.setDepart(queryIBEDetail.getGoDepAirport());
         voyageLowestPrice.setArrive(queryIBEDetail.getGoArrAirport());
         String departDate = dateFormat.get().format(queryIBEDetail.getGoDepTime());
-        String backDate = dateFormat.get().format(queryIBEDetail.getBackDepTime());
         //voyageLowestPrice.setDepartDate(fl.format(queryIBEDetail.getGoDepTime()));
         voyageLowestPrice.setDepartDate(departDate);
         if (2 == queryIBEDetail.getLegType().intValue()) {
+            String backDate = dateFormat.get().format(queryIBEDetail.getBackDepTime());
             voyageLowestPrice.setDepartDate(departDate+ "/" + backDate);
         }
         voyageLowestPrice.setSource(type);
