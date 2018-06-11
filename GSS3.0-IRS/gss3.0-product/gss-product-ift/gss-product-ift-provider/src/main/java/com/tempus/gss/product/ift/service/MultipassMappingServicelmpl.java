@@ -135,10 +135,10 @@ public class MultipassMappingServicelmpl implements IMultipassMappingService {
         shoppingSeg.setOriginLocation(flightQuery.getTransfers().get(1));
         segs.add(shoppingSeg);
         shoppingInput.setSegs(segs);
-        log.info("开始调用shopping接口");
-        log.info(JsonUtil.toJson(shoppingInput));
+        log.info("开始调用shopping接口,入参:{}",JsonUtil.toJson(shoppingInput));
+        //log.info(JsonUtil.toJson(shoppingInput));
         ShoppingOutPut shoppingOutPut = shoppingService.shoppingI(shoppingInput);
-        log.info("完成调用shopping接口" + shoppingOutPut.getShortText());
+        log.info("完成调用shopping接口返回结果:{}", shoppingOutPut.getShortText());
         List<AvailableJourney> availableJourneys = shoppingOutPut.getAvailableJourneys();
         if (null == availableJourneys || availableJourneys.size() < 1) {
             return null;
@@ -174,8 +174,7 @@ public class MultipassMappingServicelmpl implements IMultipassMappingService {
         }
         log.info("开始组装数据");
         queryIBEDetailList = combineQueryIBEDetails(queryIBEDetailList, flightQueryRequest.getAgent().getDevice(),flightQueryRequest.getAgent());
-        log.info("完成组装数据");
-        log.info(JsonUtil.toJson(queryIBEDetailList));
+        log.info("完成组装数据,结果:{}",JsonUtil.toJson(queryIBEDetailList));
         pages.setRecords(queryIBEDetailList);
         return pages;
     }
