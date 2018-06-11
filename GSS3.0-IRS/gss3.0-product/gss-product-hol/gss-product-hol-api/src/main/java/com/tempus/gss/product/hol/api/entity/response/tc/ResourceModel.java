@@ -16,7 +16,7 @@ public class ResourceModel implements Serializable{
 	 * 酒店 ID
 	 */
 	@JSONField(name = "ResourceId")
-	private Integer resourceId;
+	private Long resourceId;
 	/**
 	 * 酒店名称
 	 */
@@ -76,11 +76,11 @@ public class ResourceModel implements Serializable{
 	@JSONField(name = "SupplierConfirmNumber")
 	private String supplierConfirmNumber;
 
-	public Integer getResourceId() {
+	public Long getResourceId() {
 		return resourceId;
 	}
 
-	public void setResourceId(Integer resourceId) {
+	public void setResourceId(Long resourceId) {
 		this.resourceId = resourceId;
 	}
 
