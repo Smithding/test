@@ -8,5 +8,7 @@ import com.tempus.gss.product.ift.api.entity.BuyChangeExt;
 public interface BuyChangeExtDao extends BaseDao<BuyChangeExt, Object> {
 
     BuyChangeExt selectBySaleChangeNo(Long saleChangeNo);
+
+    BuyChangeExt selectBySaleChangeNoFindOne(Long saleChangeNo);
 }
 
