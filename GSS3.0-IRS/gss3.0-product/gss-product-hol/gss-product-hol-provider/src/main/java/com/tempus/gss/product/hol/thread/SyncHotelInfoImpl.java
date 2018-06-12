@@ -301,10 +301,12 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	                   			 				if(proSaleInfoDetails.containsKey(DateUtil.stringToLonString(startTime))) {
 		                   			 				Integer firProPrice = proSaleInfoDetails.get(DateUtil.stringToLonString(startTime)).getDistributionSalePrice();
 		                   			 				if(StringUtil.isNotNullOrEmpty(firProPrice)) {
-			                   			 				BigDecimal profitPrice = holProfitService.computeTcProfitPrice(agent, firProPrice, agent.getType());
-			         	                				if(StringUtil.isNotNullOrEmpty(profitPrice)){
-			         	                					pro.setRebateRateProfit(profitPrice);
-			         	                				}
+		                   			 					if(!agent.getNum().equals(401803070321014723L)) {
+			                   			 					BigDecimal profitPrice = holProfitService.computeTcProfitPrice(agent, firProPrice, agent.getType());
+				         	                				if(StringUtil.isNotNullOrEmpty(profitPrice)){
+				         	                					pro.setRebateRateProfit(profitPrice);
+				         	                				}
+		                   			 					}
 		                   			 				}
 	                   			 				}
 		                   			 			int kk = 0;
