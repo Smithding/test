@@ -1597,6 +1597,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				HotelOrder hotelOrder = hotelOrderMapper.getOrderByNo(tcPushOrderInfo.getOrderId());
 				LogRecord LogRecord=new LogRecord();
 				String des= "";
+				Integer flag = 0;
 				String orderId = hotelOrder.getHotelOrderNo();
 				if(StringUtil.isNotNullOrEmpty(orderId)){
 					LogRecord.setBizCode("HOL-Order");
@@ -1606,6 +1607,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 					hotelOrder.setModifyTime(new Date());
 					if(tcPushOrderInfo.getOperateType().equals(StatusType.ORDER_CONFIRM.getKey())){
 						if(!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.ALREADY_CONRIRM.getKey())) {
+							flag =1;
 							des = "订单号"+orderId +",订单状态由"+ OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus()).getValue()+"变成:"+ OwnerOrderStatus.ALREADY_CONRIRM.getValue();
 							//更新销售单和采购单状态
 							updateSaleAndBuyOrderStatus(agent, hotelOrder.getSaleOrderNo(), hotelOrder.getBuyOrderNo(), OrderStatusUtils.getStatus(OwnerOrderStatus.ALREADY_CONRIRM));
@@ -1662,6 +1664,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						}
 					}else if(tcPushOrderInfo.getOperateType().equals(StatusType.CANCEL_ORDER_CONFIRM.getKey())){
 						if(!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.CANCEL_OK.getKey())) {
+							flag =1;
 							des = "订单号"+orderId +",订单状态由"+OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus()).getValue()+"变成:"+ OwnerOrderStatus.CANCEL_OK.getValue();
 							//更新销售单和采购单状态
 							updateSaleAndBuyOrderStatus(agent, hotelOrder.getSaleOrderNo(), hotelOrder.getBuyOrderNo(), OrderStatusUtils.getStatus(OwnerOrderStatus.CANCEL_OK));
@@ -1673,6 +1676,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 					}else if(tcPushOrderInfo.getOperateType().equals(StatusType.CHECK_RESIDE.getKey())){
 						if( (!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.NO_RESIDE.getKey())) || (!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.BEFORE_RESIDE.getKey()))
 							|| 	(!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.AFTER_RESIDE.getKey())) || (!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.RESIDE_OK.getKey()))) {
+							flag =1;
 							OrderDetailInfoReq orderDetailInfoReq =new OrderDetailInfoReq();
 							orderDetailInfoReq.setOrderId(tcPushOrderInfo.getOrderId());
 							OrderInfomationDetail orderInfomationDetail = orderDetailInfo(agent, orderDetailInfoReq);
@@ -1775,325 +1779,331 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						}
 						
 					}else if(tcPushOrderInfo.getOperateType().equals(StatusType.REORDER.getKey())){
-						if(StringUtils.isNotEmpty(tcPushOrderInfo.getNewOrderId())){
-							HotelOrder newHotelOrder = new HotelOrder();
-							LogRecord oldLogRecord=new LogRecord();
-							oldLogRecord.setBizCode("HOL-Order");
-							oldLogRecord.setTitle("酒店订单状态");
-							oldLogRecord.setBizNo(tcPushOrderInfo.getOrderId());
-							try {
-			                	BeanUtils.copyProperties(hotelOrder, newHotelOrder);
-			                } catch (Exception e) {
-			                    logger.error("对象属性复制错误");
-			                }
-							
-							newHotelOrder.setRelateOrderNo(tcPushOrderInfo.getOrderId());
-							des = "补单信息, 老订单号: "+tcPushOrderInfo.getOrderId()+", 新订单号: "+tcPushOrderInfo.getNewOrderId();
-							LogRecord.setBizNo(tcPushOrderInfo.getNewOrderId());
-							String oldSupplierNo = "";
-							if(StringUtils.isNotEmpty(hotelOrder.getSupplierNumber())){
-								oldSupplierNo = hotelOrder.getSupplierNumber();
-							}
-							String newSupplierNo = "";
-							newHotelOrder.setHotelOrderNo(tcPushOrderInfo.getNewOrderId());
-							//locker为1, 表示是补单订单，此状态后台可以看到但是前台看不到
-							newHotelOrder.setLocker(1L);
-							newHotelOrder.setLockTime(new Date());
-							OrderDetailInfoReq orderDetailInfoReq =new OrderDetailInfoReq();
-							orderDetailInfoReq.setOrderId(tcPushOrderInfo.getNewOrderId());
-							OrderInfomationDetail orderInfomationDetail = orderDetailInfo(agent, orderDetailInfoReq);
-							if(StringUtil.isNullOrEmpty(orderInfomationDetail.getOrderInfos())){
-								throw new GSSException("更新状态信息异常", "0110", "获取订单详情列表为空");
-							}
-							OrderInfoModel orderInfoModel = orderInfomationDetail.getOrderInfos().get(0);
-							Integer priceFraction = 0;
-							if(StringUtil.isNotNullOrEmpty(orderInfoModel.getResources())){
-								ResourceModel resourceModel = orderInfoModel.getResources().get(0);
-								priceFraction = resourceModel.getPriceFraction();
-								String newRemark = resourceModel.getRemark();
-								newHotelOrder.setRemark(newRemark);
-								String productUniqueId = resourceModel.getProductUniqueId();
-								newHotelOrder.setProductUniqueId(productUniqueId);
-								if(StringUtils.isNotEmpty(resourceModel.getSupplierConfirmNumber())){
-									newSupplierNo = resourceModel.getSupplierConfirmNumber();
-									newHotelOrder.setSupplierNumber(newSupplierNo);
+						HotelOrder newhotelOrder = hotelOrderMapper.getOrderByNo(tcPushOrderInfo.getNewOrderId());
+						if(StringUtil.isNullOrEmpty(newhotelOrder)) {
+							flag =1;
+							if(StringUtils.isNotEmpty(tcPushOrderInfo.getNewOrderId())){
+								HotelOrder newHotelOrder = new HotelOrder();
+								LogRecord oldLogRecord=new LogRecord();
+								oldLogRecord.setBizCode("HOL-Order");
+								oldLogRecord.setTitle("酒店订单状态");
+								oldLogRecord.setBizNo(tcPushOrderInfo.getOrderId());
+								try {
+				                	BeanUtils.copyProperties(hotelOrder, newHotelOrder);
+				                } catch (Exception e) {
+				                    logger.error("对象属性复制错误");
+				                }
+								
+								newHotelOrder.setRelateOrderNo(tcPushOrderInfo.getOrderId());
+								des = "补单信息, 老订单号: "+tcPushOrderInfo.getOrderId()+", 新订单号: "+tcPushOrderInfo.getNewOrderId();
+								LogRecord.setBizNo(tcPushOrderInfo.getNewOrderId());
+								String oldSupplierNo = "";
+								if(StringUtils.isNotEmpty(hotelOrder.getSupplierNumber())){
+									oldSupplierNo = hotelOrder.getSupplierNumber();
 								}
-								newHotelOrder.setProName(resourceModel.getProductName());
-								if(StringUtil.isNotNullOrEmpty(resourceModel.getArrivalTime())){
-									String atime = "";
-									if(resourceModel.getArrivalTime().compareTo(24) <= 0){
-										atime = orderInfoModel.getStartTime()+" "+resourceModel.getArrivalTime()+":00:00";
-									}else{
-										 Calendar da = Calendar.getInstance(); 
-										 da.setTime(simple.parse(orderInfoModel.getStartTime()));
-										 da.add(Calendar.DAY_OF_MONTH, 1);
-										 String arriveTomorow = simple.format(da.getTime());
-										 atime = arriveTomorow+" "+(resourceModel.getArrivalTime().intValue() - 24)+":00:00";
+								String newSupplierNo = "";
+								newHotelOrder.setHotelOrderNo(tcPushOrderInfo.getNewOrderId());
+								//locker为1, 表示是补单订单，此状态后台可以看到但是前台看不到
+								newHotelOrder.setLocker(1L);
+								newHotelOrder.setLockTime(new Date());
+								OrderDetailInfoReq orderDetailInfoReq =new OrderDetailInfoReq();
+								orderDetailInfoReq.setOrderId(tcPushOrderInfo.getNewOrderId());
+								OrderInfomationDetail orderInfomationDetail = orderDetailInfo(agent, orderDetailInfoReq);
+								if(StringUtil.isNullOrEmpty(orderInfomationDetail.getOrderInfos())){
+									throw new GSSException("更新状态信息异常", "0110", "获取订单详情列表为空");
+								}
+								OrderInfoModel orderInfoModel = orderInfomationDetail.getOrderInfos().get(0);
+								Integer priceFraction = 0;
+								if(StringUtil.isNotNullOrEmpty(orderInfoModel.getResources())){
+									ResourceModel resourceModel = orderInfoModel.getResources().get(0);
+									priceFraction = resourceModel.getPriceFraction();
+									String newRemark = resourceModel.getRemark();
+									newHotelOrder.setRemark(newRemark);
+									String productUniqueId = resourceModel.getProductUniqueId();
+									newHotelOrder.setProductUniqueId(productUniqueId);
+									if(StringUtils.isNotEmpty(resourceModel.getSupplierConfirmNumber())){
+										newSupplierNo = resourceModel.getSupplierConfirmNumber();
+										newHotelOrder.setSupplierNumber(newSupplierNo);
 									}
-									newHotelOrder.setArriveHotelTime(atime);
+									newHotelOrder.setProName(resourceModel.getProductName());
+									if(StringUtil.isNotNullOrEmpty(resourceModel.getArrivalTime())){
+										String atime = "";
+										if(resourceModel.getArrivalTime().compareTo(24) <= 0){
+											atime = orderInfoModel.getStartTime()+" "+resourceModel.getArrivalTime()+":00:00";
+										}else{
+											 Calendar da = Calendar.getInstance(); 
+											 da.setTime(simple.parse(orderInfoModel.getStartTime()));
+											 da.add(Calendar.DAY_OF_MONTH, 1);
+											 String arriveTomorow = simple.format(da.getTime());
+											 atime = arriveTomorow+" "+(resourceModel.getArrivalTime().intValue() - 24)+":00:00";
+										}
+										newHotelOrder.setArriveHotelTime(atime);
+									}
+									if(orderInfoModel.getResources().size() > 1){
+										for(ResourceModel resource : orderInfoModel.getResources()){
+											/*if (newRemark == null || "".equals(newRemark)) {
+												newRemark = resource.getRemark().trim();
+							                } else {
+							                    if (resource.getRemark() != null && !"".equals(resource.getRemark())) {
+							                    	newRemark = newRemark + "," + resource.getRemark().trim();
+							                    }
+							                }*/
+											if(resource.getPriceFraction().compareTo(priceFraction) > 0){
+												priceFraction = resource.getPriceFraction();
+											}
+										}
+									}
+									newHotelOrder.setBookCount(priceFraction);
 								}
-								if(orderInfoModel.getResources().size() > 1){
-									for(ResourceModel resource : orderInfoModel.getResources()){
-										/*if (newRemark == null || "".equals(newRemark)) {
-											newRemark = resource.getRemark().trim();
-						                } else {
-						                    if (resource.getRemark() != null && !"".equals(resource.getRemark())) {
-						                    	newRemark = newRemark + "," + resource.getRemark().trim();
-						                    }
-						                }*/
-										if(resource.getPriceFraction().compareTo(priceFraction) > 0){
-											priceFraction = resource.getPriceFraction();
+								
+								Date arrivalDate = simple.parse(orderInfoModel.getStartTime());
+								Date departureDate = simple.parse(orderInfoModel.getEndTime());
+								String guestName = "";
+								List<PassengerModel> passengers = orderInfoModel.getPassengers();
+								for(PassengerModel guest : passengers){
+									if (guestName == null || "".equals(guestName)) {
+					                    guestName = guest.getName();
+					                } else {
+					                    if (guest.getName() != null && !"".equals(guest.getName())) {
+					                        guestName = guestName + "," + guest.getName();
+					                    }
+					                }
+								}
+								newHotelOrder.setGuestName(guestName);
+								newHotelOrder.setArrivalDate(arrivalDate);
+								newHotelOrder.setDepartureDate(departureDate);
+								Integer factNight = 0;
+								try{
+									factNight = DateUtil.daysBetween(orderInfoModel.getStartTime(), orderInfoModel.getEndTime());
+						        }catch(ParseException e){
+						        	e.printStackTrace();
+						        	throw new GSSException("更新状态信息异常", "0192", "根据消费日期计算天数异常");
+						        }
+								//Integer roomCount = orderInfoModel.getCounts().getRoomCount();
+								
+								newHotelOrder.setTotalPrice(orderInfoModel.getOrigin());
+								BigDecimal multiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
+								newHotelOrder.setTotalRefund(multiply);
+								newHotelOrder.setNightCount(factNight);
+								String eachNightPrice = null;
+								String breakfastNum = null;
+								//ProInfoDetail proInfoDetail=tCHotelSupplierService.queryListByProductUniqueId(newHotelOrder.getProductUniqueId(), ProInfoDetail.class);
+								ProInfoDetail proInfoDetail=null;
+								//ProInfoDetail proInfoDetail=tCHotelSupplierService.queryListByProductUniqueId(hotelOrder.getProductUniqueId(), ProInfoDetail.class);
+								 AssignDateHotel assignDateHotel = tCHotelSupplierService.queryDetailById(Long.valueOf(hotelOrder.getHotelCode()), AssignDateHotel.class);
+								if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())) {
+									for(ProInfoDetail pinfo : assignDateHotel.getProInfoDetailList()) {
+										if(pinfo.getProductUniqueId().equals(hotelOrder.getProductUniqueId())) {
+											proInfoDetail = pinfo;
+											break;
 										}
 									}
 								}
-								newHotelOrder.setBookCount(priceFraction);
-							}
-							
-							Date arrivalDate = simple.parse(orderInfoModel.getStartTime());
-							Date departureDate = simple.parse(orderInfoModel.getEndTime());
-							String guestName = "";
-							List<PassengerModel> passengers = orderInfoModel.getPassengers();
-							for(PassengerModel guest : passengers){
-								if (guestName == null || "".equals(guestName)) {
-				                    guestName = guest.getName();
-				                } else {
-				                    if (guest.getName() != null && !"".equals(guest.getName())) {
-				                        guestName = guestName + "," + guest.getName();
-				                    }
-				                }
-							}
-							newHotelOrder.setGuestName(guestName);
-							newHotelOrder.setArrivalDate(arrivalDate);
-							newHotelOrder.setDepartureDate(departureDate);
-							Integer factNight = 0;
-							try{
-								factNight = DateUtil.daysBetween(orderInfoModel.getStartTime(), orderInfoModel.getEndTime());
-					        }catch(ParseException e){
-					        	e.printStackTrace();
-					        	throw new GSSException("更新状态信息异常", "0192", "根据消费日期计算天数异常");
-					        }
-							//Integer roomCount = orderInfoModel.getCounts().getRoomCount();
-							
-							newHotelOrder.setTotalPrice(orderInfoModel.getOrigin());
-							BigDecimal multiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
-							newHotelOrder.setTotalRefund(multiply);
-							newHotelOrder.setNightCount(factNight);
-							String eachNightPrice = null;
-							String breakfastNum = null;
-							//ProInfoDetail proInfoDetail=tCHotelSupplierService.queryListByProductUniqueId(newHotelOrder.getProductUniqueId(), ProInfoDetail.class);
-							ProInfoDetail proInfoDetail=null;
-							//ProInfoDetail proInfoDetail=tCHotelSupplierService.queryListByProductUniqueId(hotelOrder.getProductUniqueId(), ProInfoDetail.class);
-							 AssignDateHotel assignDateHotel = tCHotelSupplierService.queryDetailById(Long.valueOf(hotelOrder.getHotelCode()), AssignDateHotel.class);
-							if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())) {
-								for(ProInfoDetail pinfo : assignDateHotel.getProInfoDetailList()) {
-									if(pinfo.getProductUniqueId().equals(hotelOrder.getProductUniqueId())) {
-										proInfoDetail = pinfo;
-										break;
-									}
+								if(StringUtil.isNotNullOrEmpty(proInfoDetail)){
+									for (Map.Entry<String, ProSaleInfoDetail> entry : proInfoDetail.getProSaleInfoDetails().entrySet()) {
+	        	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(orderInfoModel.getStartTime());
+	        	        				int endCompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(orderInfoModel.getEndTime());
+	        	        				if(begincompare >= 0 && endCompare < 0){
+	    	        						Integer price= entry.getValue().getDistributionSalePrice();
+	    	        						Integer breakNum = entry.getValue().getBreakfastNum();
+	    	        						if(StringUtil.isNotNullOrEmpty(price)){
+	    	        							if(eachNightPrice == null || "".equals(eachNightPrice)){
+	        	        							eachNightPrice = price.toString();
+	        	        			            }else {
+	        	        			                eachNightPrice = eachNightPrice + "," + price.toString();
+	        	        			            }
+	    	        						}
+	    	        						if(StringUtil.isNotNullOrEmpty(breakNum)){
+	    	        							if(breakfastNum == null || "".equals(breakfastNum)){
+	        	        							breakfastNum = breakNum.toString();
+	        	        			            }else {
+	        	        			                breakfastNum = breakfastNum + "," + breakNum.toString();
+	        	        			            }
+	    	        						}
+	                					}
+	                				}
+									newHotelOrder.setEachNightPrice(eachNightPrice);
+									newHotelOrder.setBreakfastCount(breakfastNum);
+									
+								}else{
+									logger.error("补单订单推送，拉取每日价格异常");
 								}
-							}
-							if(StringUtil.isNotNullOrEmpty(proInfoDetail)){
-								for (Map.Entry<String, ProSaleInfoDetail> entry : proInfoDetail.getProSaleInfoDetails().entrySet()) {
-        	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(orderInfoModel.getStartTime());
-        	        				int endCompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(orderInfoModel.getEndTime());
-        	        				if(begincompare >= 0 && endCompare < 0){
-    	        						Integer price= entry.getValue().getDistributionSalePrice();
-    	        						Integer breakNum = entry.getValue().getBreakfastNum();
-    	        						if(StringUtil.isNotNullOrEmpty(price)){
-    	        							if(eachNightPrice == null || "".equals(eachNightPrice)){
-        	        							eachNightPrice = price.toString();
-        	        			            }else {
-        	        			                eachNightPrice = eachNightPrice + "," + price.toString();
-        	        			            }
-    	        						}
-    	        						if(StringUtil.isNotNullOrEmpty(breakNum)){
-    	        							if(breakfastNum == null || "".equals(breakfastNum)){
-        	        							breakfastNum = breakNum.toString();
-        	        			            }else {
-        	        			                breakfastNum = breakfastNum + "," + breakNum.toString();
-        	        			            }
-    	        						}
-                					}
-                				}
-								newHotelOrder.setEachNightPrice(eachNightPrice);
-								newHotelOrder.setBreakfastCount(breakfastNum);
 								
-							}else{
-								logger.error("补单订单推送，拉取每日价格异常");
-							}
-							
-							if(StringUtils.isNotEmpty(hotelOrder.getSupplierNumber())){
-								String desAdd = ", 老携程订单号: "+oldSupplierNo+", 新携程订单号: "+newSupplierNo;
-								des = des + desAdd;
-							}
-							newHotelOrder.setModifier("供应商");
-							newHotelOrder.setModifyTime(new Date());
-							
-							Long businessSignNo = IdWorker.getId();
-				    		Long saleOrderNo = maxNoService.generateBizNo("HOL_SALE_ORDER_NO", 13);
-				    		
-				            /*if (StringUtil.isNotNullOrEmpty(newHotelOrder.getSupplierNo())) {
-				            	Long supplierNo = newHotelOrder.getSupplierNo();
-				            	buyOrder.setSupplierNo(supplierNo);
-				                //从客商系统查询供应商信息
-				                Supplier supplier = supplierService.getSupplierByNo(agent, supplierNo);
-				                if(StringUtil.isNotNullOrEmpty(supplier)){
-				                	 buyOrder.setSupplierTypeNo(supplier.getCustomerTypeNo());
-				                }else{
-				                	throw new GSSException("创建酒店订单", "0130", "根据编号查询供应商信息为空！");
-				                }
-				            } else {
-				                logger.error("供应商信息不存在！");
-				                throw new GSSException("创建酒店订单", "0130", "供应商信息不存在！");
-				            }*/
-							/*创建销售订单*/
-				    		SaleOrder sOrder = saleOrderService.getSOrderByNo(agent, hotelOrder.getSaleOrderNo());
-				            SaleOrder saleOrder = new SaleOrder();
-				            saleOrder.setSaleOrderNo(saleOrderNo);
-				            saleOrder.setOwner(sOrder.getOwner());
-				            saleOrder.setSourceChannelNo(sOrder.getSourceChannelNo());
-				            saleOrder.setCustomerTypeNo(sOrder.getCustomerTypeNo());
-				            saleOrder.setCustomerNo(sOrder.getCustomerNo());
-				            saleOrder.setOrderingLoginName(sOrder.getOrderingLoginName());
-				            saleOrder.setGoodsType(GoodsBigType.GROGSHOP.getKey());//
-				            saleOrder.setGoodsSubType(GoodsBigType.GROGSHOP.getKey());//
-				            saleOrder.setOrderingTime(hotelOrder.getCreateOrderTime());//下单时间
-				            saleOrder.setModifyTime(new Date());
-				            saleOrder.setPayStatus(1);//待支付
-				            saleOrder.setValid(1);//有效
-				            saleOrder.setBusinessSignNo(businessSignNo);
-				            saleOrder.setBsignType(1);//1销采 2换票 3废和退 4改签
-				            saleOrder.setTransationOrderNo(newHotelOrder.getTransationOrderNo());
-				            saleOrder.setOrderType(1);
-				            saleOrder.setGoodsName(newHotelOrder.getHotelName());
+								if(StringUtils.isNotEmpty(hotelOrder.getSupplierNumber())){
+									String desAdd = ", 老携程订单号: "+oldSupplierNo+", 新携程订单号: "+newSupplierNo;
+									des = des + desAdd;
+								}
+								newHotelOrder.setModifier("供应商");
+								newHotelOrder.setModifyTime(new Date());
+								
+								Long businessSignNo = IdWorker.getId();
+					    		Long saleOrderNo = maxNoService.generateBizNo("HOL_SALE_ORDER_NO", 13);
+					    		
+					            /*if (StringUtil.isNotNullOrEmpty(newHotelOrder.getSupplierNo())) {
+					            	Long supplierNo = newHotelOrder.getSupplierNo();
+					            	buyOrder.setSupplierNo(supplierNo);
+					                //从客商系统查询供应商信息
+					                Supplier supplier = supplierService.getSupplierByNo(agent, supplierNo);
+					                if(StringUtil.isNotNullOrEmpty(supplier)){
+					                	 buyOrder.setSupplierTypeNo(supplier.getCustomerTypeNo());
+					                }else{
+					                	throw new GSSException("创建酒店订单", "0130", "根据编号查询供应商信息为空！");
+					                }
+					            } else {
+					                logger.error("供应商信息不存在！");
+					                throw new GSSException("创建酒店订单", "0130", "供应商信息不存在！");
+					            }*/
+								/*创建销售订单*/
+					    		SaleOrder sOrder = saleOrderService.getSOrderByNo(agent, hotelOrder.getSaleOrderNo());
+					            SaleOrder saleOrder = new SaleOrder();
+					            saleOrder.setSaleOrderNo(saleOrderNo);
+					            saleOrder.setOwner(sOrder.getOwner());
+					            saleOrder.setSourceChannelNo(sOrder.getSourceChannelNo());
+					            saleOrder.setCustomerTypeNo(sOrder.getCustomerTypeNo());
+					            saleOrder.setCustomerNo(sOrder.getCustomerNo());
+					            saleOrder.setOrderingLoginName(sOrder.getOrderingLoginName());
+					            saleOrder.setGoodsType(GoodsBigType.GROGSHOP.getKey());//
+					            saleOrder.setGoodsSubType(GoodsBigType.GROGSHOP.getKey());//
+					            saleOrder.setOrderingTime(hotelOrder.getCreateOrderTime());//下单时间
+					            saleOrder.setModifyTime(new Date());
+					            saleOrder.setPayStatus(1);//待支付
+					            saleOrder.setValid(1);//有效
+					            saleOrder.setBusinessSignNo(businessSignNo);
+					            saleOrder.setBsignType(1);//1销采 2换票 3废和退 4改签
+					            saleOrder.setTransationOrderNo(newHotelOrder.getTransationOrderNo());
+					            saleOrder.setOrderType(1);
+					            saleOrder.setGoodsName(newHotelOrder.getHotelName());
 
-				            /*创建采购单*/
-				            BuyOrder buyOrder = new BuyOrder();
-				    		buyOrder.setSupplierNo(newHotelOrder.getSupplierNo());
-						    Long buyOrderNo = maxNoService.generateBizNo("HOL_BUY_ORDER_NO", 14);
-				            buyOrder.setOwner(agent.getOwner());
-				            buyOrder.setBuyOrderNo(buyOrderNo);
-				            buyOrder.setSaleOrderNo(saleOrderNo);
-				            buyOrder.setGoodsType(GoodsBigType.GROGSHOP.getKey());
-				            buyOrder.setGoodsSubType(GoodsBigType.GROGSHOP.getKey());
-				            buyOrder.setGoodsName(newHotelOrder.getHotelName());
-				            buyOrder.setBuyChannelNo("HOTEL");
-				            buyOrder.setBusinessSignNo(businessSignNo);
-				            buyOrder.setBsignType(1);//1销采 2换票 3废和退 4改签
-				            
-				            newHotelOrder.setSaleOrderNo(saleOrderNo);
-				            newHotelOrder.setBuyOrderNo(buyOrderNo);
-				            
-							if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.WAIT_TC_CONFIRM.getKey())){
-								newHotelOrder.setOrderStatus(OwnerOrderStatus.ORDER_ONGOING.getKey());
-								newHotelOrder.setTcOrderStatus(TcOrderStatus.WAIT_TC_CONFIRM.getKey());
-								saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.ORDER_ONGOING));
-								buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.ORDER_ONGOING));
-								saleOrderService.create(agent, saleOrder);
-								 buyOrderService.create(agent, buyOrder);
-								 hotelOrderMapper.insertSelective(newHotelOrder);
-							}else if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.ALREADY_TC_CONFIRM.getKey())){
-								newHotelOrder.setOrderStatus(OwnerOrderStatus.ALREADY_CONRIRM.getKey());
-								newHotelOrder.setTcOrderStatus(TcOrderStatus.ALREADY_TC_CONFIRM.getKey());
-								saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.ALREADY_CONRIRM));
-								buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.ALREADY_CONRIRM));
-								saleOrderService.create(agent, saleOrder);
-								 buyOrderService.create(agent, buyOrder);
-								 hotelOrderMapper.insertSelective(newHotelOrder);
-							}else if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.ALREADY_CANCEL.getKey())){
-								newHotelOrder.setOrderStatus(OwnerOrderStatus.CANCEL_OK.getKey());
-								newHotelOrder.setTcOrderStatus(TcOrderStatus.ALREADY_CANCEL.getKey());
-								saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.CANCEL_OK));
-								buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.CANCEL_OK));
-								saleOrderService.create(agent, saleOrder);
-								 buyOrderService.create(agent, buyOrder);
-								 hotelOrderMapper.insertSelective(newHotelOrder);
-							}else if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_NOT_TO_ROOM.getKey())){
-								newHotelOrder.setFactTotalRefund(new BigDecimal(0));
-								newHotelOrder.setOrderStatus(OwnerOrderStatus.NO_RESIDE.getKey());
-								newHotelOrder.setTcOrderStatus(TcOrderStatus.CONFIRM_NOT_TO_ROOM.getKey());
-								saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.NO_RESIDE));
-								buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.NO_RESIDE));
-								saleOrderService.create(agent, saleOrder);
-								 buyOrderService.create(agent, buyOrder);
-								 hotelOrderMapper.insertSelective(newHotelOrder);
-							}
-							else if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_TO_ROOM.getKey())  || orderInfoModel.getOrderStatus().equals(TcOrderStatus.ORDER_FINISH.getKey())){
-								int startTime = simple.format(newHotelOrder.getArrivalDate()).compareTo(orderInfoModel.getStartTime());
-								int endTime   = simple.format(newHotelOrder.getDepartureDate()).compareTo(orderInfoModel.getEndTime());
-								if(endTime > 0){
-									saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.BEFORE_RESIDE));
-									buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.BEFORE_RESIDE));
-									//更新mysql酒店订单状态
-									newHotelOrder.setOrderStatus(OwnerOrderStatus.BEFORE_RESIDE.getKey());
-									newHotelOrder.setTcOrderStatus(TcOrderStatus.CONFIRM_TO_ROOM.getKey());
-								}else if(endTime < 0){
-									saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.AFTER_RESIDE));
-									buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.AFTER_RESIDE));
-									//更新mysql酒店订单状态
-									newHotelOrder.setOrderStatus(OwnerOrderStatus.AFTER_RESIDE.getKey());
-									newHotelOrder.setTcOrderStatus(TcOrderStatus.CONFIRM_TO_ROOM.getKey());
-								}else if(startTime == 0 && endTime == 0){
-									int rooms = orderInfoModel.getCounts().getRoomCount().compareTo(newHotelOrder.getNightCount()*newHotelOrder.getBookCount());
-									if(rooms < 0){
+					            /*创建采购单*/
+					            BuyOrder buyOrder = new BuyOrder();
+					    		buyOrder.setSupplierNo(newHotelOrder.getSupplierNo());
+							    Long buyOrderNo = maxNoService.generateBizNo("HOL_BUY_ORDER_NO", 14);
+					            buyOrder.setOwner(agent.getOwner());
+					            buyOrder.setBuyOrderNo(buyOrderNo);
+					            buyOrder.setSaleOrderNo(saleOrderNo);
+					            buyOrder.setGoodsType(GoodsBigType.GROGSHOP.getKey());
+					            buyOrder.setGoodsSubType(GoodsBigType.GROGSHOP.getKey());
+					            buyOrder.setGoodsName(newHotelOrder.getHotelName());
+					            buyOrder.setBuyChannelNo("HOTEL");
+					            buyOrder.setBusinessSignNo(businessSignNo);
+					            buyOrder.setBsignType(1);//1销采 2换票 3废和退 4改签
+					            
+					            newHotelOrder.setSaleOrderNo(saleOrderNo);
+					            newHotelOrder.setBuyOrderNo(buyOrderNo);
+					            
+								if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.WAIT_TC_CONFIRM.getKey())){
+									newHotelOrder.setOrderStatus(OwnerOrderStatus.ORDER_ONGOING.getKey());
+									newHotelOrder.setTcOrderStatus(TcOrderStatus.WAIT_TC_CONFIRM.getKey());
+									saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.ORDER_ONGOING));
+									buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.ORDER_ONGOING));
+									saleOrderService.create(agent, saleOrder);
+									 buyOrderService.create(agent, buyOrder);
+									 hotelOrderMapper.insertSelective(newHotelOrder);
+								}else if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.ALREADY_TC_CONFIRM.getKey())){
+									newHotelOrder.setOrderStatus(OwnerOrderStatus.ALREADY_CONRIRM.getKey());
+									newHotelOrder.setTcOrderStatus(TcOrderStatus.ALREADY_TC_CONFIRM.getKey());
+									saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.ALREADY_CONRIRM));
+									buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.ALREADY_CONRIRM));
+									saleOrderService.create(agent, saleOrder);
+									 buyOrderService.create(agent, buyOrder);
+									 hotelOrderMapper.insertSelective(newHotelOrder);
+								}else if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.ALREADY_CANCEL.getKey())){
+									newHotelOrder.setOrderStatus(OwnerOrderStatus.CANCEL_OK.getKey());
+									newHotelOrder.setTcOrderStatus(TcOrderStatus.ALREADY_CANCEL.getKey());
+									saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.CANCEL_OK));
+									buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.CANCEL_OK));
+									saleOrderService.create(agent, saleOrder);
+									 buyOrderService.create(agent, buyOrder);
+									 hotelOrderMapper.insertSelective(newHotelOrder);
+								}else if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_NOT_TO_ROOM.getKey())){
+									newHotelOrder.setFactTotalRefund(new BigDecimal(0));
+									newHotelOrder.setOrderStatus(OwnerOrderStatus.NO_RESIDE.getKey());
+									newHotelOrder.setTcOrderStatus(TcOrderStatus.CONFIRM_NOT_TO_ROOM.getKey());
+									saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.NO_RESIDE));
+									buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.NO_RESIDE));
+									saleOrderService.create(agent, saleOrder);
+									 buyOrderService.create(agent, buyOrder);
+									 hotelOrderMapper.insertSelective(newHotelOrder);
+								}
+								else if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_TO_ROOM.getKey())  || orderInfoModel.getOrderStatus().equals(TcOrderStatus.ORDER_FINISH.getKey())){
+									int startTime = simple.format(newHotelOrder.getArrivalDate()).compareTo(orderInfoModel.getStartTime());
+									int endTime   = simple.format(newHotelOrder.getDepartureDate()).compareTo(orderInfoModel.getEndTime());
+									if(endTime > 0){
 										saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.BEFORE_RESIDE));
 										buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.BEFORE_RESIDE));
 										//更新mysql酒店订单状态
 										newHotelOrder.setOrderStatus(OwnerOrderStatus.BEFORE_RESIDE.getKey());
 										newHotelOrder.setTcOrderStatus(TcOrderStatus.CONFIRM_TO_ROOM.getKey());
-									}
-									if(rooms == 0){
-										saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.RESIDE_OK));
-										buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.RESIDE_OK));
+									}else if(endTime < 0){
+										saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.AFTER_RESIDE));
+										buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.AFTER_RESIDE));
 										//更新mysql酒店订单状态
-										newHotelOrder.setOrderStatus(OwnerOrderStatus.RESIDE_OK.getKey());
+										newHotelOrder.setOrderStatus(OwnerOrderStatus.AFTER_RESIDE.getKey());
 										newHotelOrder.setTcOrderStatus(TcOrderStatus.CONFIRM_TO_ROOM.getKey());
+									}else if(startTime == 0 && endTime == 0){
+										int rooms = orderInfoModel.getCounts().getRoomCount().compareTo(newHotelOrder.getNightCount()*newHotelOrder.getBookCount());
+										if(rooms < 0){
+											saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.BEFORE_RESIDE));
+											buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.BEFORE_RESIDE));
+											//更新mysql酒店订单状态
+											newHotelOrder.setOrderStatus(OwnerOrderStatus.BEFORE_RESIDE.getKey());
+											newHotelOrder.setTcOrderStatus(TcOrderStatus.CONFIRM_TO_ROOM.getKey());
+										}
+										if(rooms == 0){
+											saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.RESIDE_OK));
+											buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.RESIDE_OK));
+											//更新mysql酒店订单状态
+											newHotelOrder.setOrderStatus(OwnerOrderStatus.RESIDE_OK.getKey());
+											newHotelOrder.setTcOrderStatus(TcOrderStatus.CONFIRM_TO_ROOM.getKey());
+										}
 									}
+									String factName = null;
+									for(PassengerModel pm : orderInfoModel.getPassengers()){
+										if (factName == null || "".equals(factName)) {
+											factName = pm.getName();
+						                } else {
+						                    if (pm.getName() != null && !"".equals(pm.getName())) {
+						                    	factName = factName + "," + pm.getName();
+						                    }
+						                }
+									}
+									newHotelOrder.setFactGuestName(factName);
+									newHotelOrder.setFactArriveTime(simple.parse(orderInfoModel.getStartTime()));
+									newHotelOrder.setFactLeaveTime(simple.parse(orderInfoModel.getEndTime()));
+									
+									newHotelOrder.setFactNightCount(factNight);
+									newHotelOrder.setFactProCount(priceFraction);
+									
+									/*BigDecimal hoteelDivide = hotelOrder.getTotalPrice().divide(new BigDecimal(hotelOrder.getNightCount()*hotelOrder.getBookCount()), 2, BigDecimal.ROUND_HALF_UP);
+									BigDecimal tcInfoDivide = (orderInfoModel.getOrigin()).divide(new BigDecimal(roomCount),2, BigDecimal.ROUND_HALF_UP);
+									int compareToPrice = hoteelDivide.compareTo(tcInfoDivide);*/
+									//if(compareToPrice == 0){
+										BigDecimal factmultiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
+										newHotelOrder.setFactTotalRefund(factmultiply);
+									//}
+									newHotelOrder.setFactTotalPrice(orderInfoModel.getOrigin());
+									
+									saleOrderService.create(agent, saleOrder);
+									buyOrderService.create(agent, buyOrder);
+									hotelOrderMapper.insertSelective(newHotelOrder);
 								}
-								String factName = null;
-								for(PassengerModel pm : orderInfoModel.getPassengers()){
-									if (factName == null || "".equals(factName)) {
-										factName = pm.getName();
-					                } else {
-					                    if (pm.getName() != null && !"".equals(pm.getName())) {
-					                    	factName = factName + "," + pm.getName();
-					                    }
-					                }
-								}
-								newHotelOrder.setFactGuestName(factName);
-								newHotelOrder.setFactArriveTime(simple.parse(orderInfoModel.getStartTime()));
-								newHotelOrder.setFactLeaveTime(simple.parse(orderInfoModel.getEndTime()));
-								
-								newHotelOrder.setFactNightCount(factNight);
-								newHotelOrder.setFactProCount(priceFraction);
-								
-								/*BigDecimal hoteelDivide = hotelOrder.getTotalPrice().divide(new BigDecimal(hotelOrder.getNightCount()*hotelOrder.getBookCount()), 2, BigDecimal.ROUND_HALF_UP);
-								BigDecimal tcInfoDivide = (orderInfoModel.getOrigin()).divide(new BigDecimal(roomCount),2, BigDecimal.ROUND_HALF_UP);
-								int compareToPrice = hoteelDivide.compareTo(tcInfoDivide);*/
-								//if(compareToPrice == 0){
-									BigDecimal factmultiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
-									newHotelOrder.setFactTotalRefund(factmultiply);
-								//}
-								newHotelOrder.setFactTotalPrice(orderInfoModel.getOrigin());
-								
-								saleOrderService.create(agent, saleOrder);
-								buyOrderService.create(agent, buyOrder);
-								hotelOrderMapper.insertSelective(newHotelOrder);
+								hotelOrder.setRelateOrderNo(tcPushOrderInfo.getNewOrderId());
+								hotelOrderMapper.updateById(hotelOrder);
+								oldLogRecord.setCreateTime(new Date());
+								oldLogRecord.setDesc(des);
+								oldLogRecord.setOptName("供应商");
+								iLogService.insert(oldLogRecord);
+							}else{
+								throw new GSSException("更新状态信息异常", "0191", "新订单号为空");
 							}
-							hotelOrder.setRelateOrderNo(tcPushOrderInfo.getNewOrderId());
-							hotelOrderMapper.updateById(hotelOrder);
-							oldLogRecord.setCreateTime(new Date());
-							oldLogRecord.setDesc(des);
-							oldLogRecord.setOptName("供应商");
-							iLogService.insert(oldLogRecord);
-						}else{
-							throw new GSSException("更新状态信息异常", "0191", "新订单号为空");
 						}
 					}
-					LogRecord.setCreateTime(new Date());
-					LogRecord.setDesc(des);
-					LogRecord.setOptName("供应商");
-					iLogService.insert(LogRecord);
+					if(flag.equals(1)) {
+						LogRecord.setCreateTime(new Date());
+						LogRecord.setDesc(des);
+						LogRecord.setOptName("供应商");
+						iLogService.insert(LogRecord);
+					}
 				}else{
 					throw new GSSException("更新状态信息异常", "0191", "查询订单号为空");
 				}
