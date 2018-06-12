@@ -688,6 +688,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
             throw new GSSException("订单是否可定信息", "0101", "isBookOrderReq查询条件为空");
         }
 		ResultTc<IsBookOrder> isBookOrderBase = null;
+		IsBookOrder resBase =null;
 		try {
 			//IsBookOrder isBookOrderCheck=new IsBookOrder();
 			SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -735,94 +736,101 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			if(StringUtil.isNotNullOrEmpty(resultJson)){
 				isBookOrderBase= JsonUtil.toBean(resultJson, new TypeReference<ResultTc<IsBookOrder>>(){});
 				if(StringUtil.isNotNullOrEmpty(isBookOrderBase)){
-					if(isBookOrderBase.getResult().getCanBooking().equals(1)){
-						//List<PaymentWay> list = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)),PaymentWay.class);
-						BookableMessage jobj=JSON.parseObject(isBookOrderBase.getResult().getBookableMessage(), BookableMessage.class);  
-						isBookOrderBase.getResult().setBookableMessageTarget(jobj);
-						//isBookOrderBase.getResult().setPaymentWayList(list);
-						if(isBookOrderBase.getResult().getBookableMessageTarget() != null ){
-							/*String cancelPenaltyStart = isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo().getCancelPenaltyStart();
-							System.out.println("aaa: "+cancelPenaltyStart);*/
-							/*if(isBookOrderBase.getResult().getBookableMessageTarget().getLimitLatestArrivalTime() != null){
-								//Date inputComeDate = sim.parse(isBookOrderReq.getComeTime());
-								String inputComeDate = isBookOrderReq.getComeTime();
-								String returnDate = isBookOrderBase.getResult().getBookableMessageTarget().getLimitLatestArrivalTime();
-								if(inputComeDate.compareTo(returnDate) > 0 || inputComeDate.equals(returnDate)){
-									isBookOrderBase.getResult().setLastestArriveTimeConfirm(true);
-								}else{
-									isBookOrderBase.getResult().setLastestArriveTimeConfirm(false);
-									isBookOrderCheck =  isBookOrderBase.getResult();
-									return isBookOrderCheck;
-								}
-							}*/
-							/*if(isBookOrderBase.getResult().getBookableMessageTarget().getExcessRooms() < isBookOrderReq.getBookingCount()){
-								isBookOrderCheck.setCanBooking(0);
-								isBookOrderCheck.setSelfMessage("可选房间数量不足, 请重新选择");
-								return isBookOrderCheck;
-							}*/
-							String[] newstr =new String[1];
-							BigDecimal totalPrice = new BigDecimal(Double.toString(0));
-							if(isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo() != null){
-								if(StringUtil.isNotNullOrEmpty(isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo().getCgCode())){
-									String[] strs = isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo().getCgCode();
-								//	BigDecimal[] big = isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo().getAmountPercent();
-									if(strs != null && strs.length >=2){
-										if(Arrays.asList(strs).contains(GuaranteeTypeIsBook.FOUR.getKey())){
-											newstr[0] = GuaranteeTypeIsBook.FOUR.getKey();
-										}else if(Arrays.asList(strs).contains(GuaranteeTypeIsBook.TWO.getKey())){
-											newstr[0] = GuaranteeTypeIsBook.TWO.getKey();
-										}else if(Arrays.asList(strs).contains(GuaranteeTypeIsBook.ONE.getKey())){
-											newstr[0] = GuaranteeTypeIsBook.ONE.getKey();
-										}else if(Arrays.asList(strs).contains(GuaranteeTypeIsBook.THREE.getKey())){
-											newstr[0] = GuaranteeTypeIsBook.THREE.getKey();
-										}else if(Arrays.asList(strs).contains(GuaranteeTypeIsBook.FIVE.getKey())){
-											newstr[0] = GuaranteeTypeIsBook.FIVE.getKey();
+					resBase = isBookOrderBase.getResult();
+					if(StringUtil.isNotNullOrEmpty(resBase)) {
+						if(StringUtil.isNotNullOrEmpty(resBase.getCanBooking())) {
+							if(resBase.getCanBooking().equals(1)){
+								BookableMessage jobj=JSON.parseObject(resBase.getBookableMessage(), BookableMessage.class);  
+								resBase.setBookableMessageTarget(jobj);
+								if(resBase.getBookableMessageTarget() != null ){
+									/*String cancelPenaltyStart = resBase.getBookableMessageTarget().getCtripGuaranteeInfo().getCancelPenaltyStart();
+									System.out.println("aaa: "+cancelPenaltyStart);*/
+									/*if(resBase.getBookableMessageTarget().getLimitLatestArrivalTime() != null){
+										//Date inputComeDate = sim.parse(isBookOrderReq.getComeTime());
+										String inputComeDate = isBookOrderReq.getComeTime();
+										String returnDate = resBase.getBookableMessageTarget().getLimitLatestArrivalTime();
+										if(inputComeDate.compareTo(returnDate) > 0 || inputComeDate.equals(returnDate)){
+											resBase.setLastestArriveTimeConfirm(true);
+										}else{
+											resBase.setLastestArriveTimeConfirm(false);
+											isBookOrderCheck =  resBase;
+											return isBookOrderCheck;
 										}
-										isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo().setCgCode(newstr);
-									}
-									
-									if(isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo().getCgCode()[0].equals(GuaranteeTypeIsBook.THREE.getKey())){
-										ProInfoDetail proInfoDetail = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(isBookOrderReq.getProductUniqueId())),ProInfoDetail.class);
-										int comres = 0;
-										for (Map.Entry<String, ProSaleInfoDetail> entry : proInfoDetail.getProSaleInfoDetails().entrySet()) {
-		 	    	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(isBookOrderReq.getComeDate());
-			 	    	        				if(begincompare == 0){
-			 	    	        					comres = 1;
-			 	    	        					String substring = isBookOrderReq.getComeTime().substring(11,16);
-			 	    	        						
-			 	    	        					int compareTo = (entry.getValue().getGuaranteeHoldTime().replace(":0:",":00:").substring(0,5)).compareTo(substring);
-			 	    	        					if(compareTo > 0){
-			 	    	        						newstr[0] = "5";
-			 	    	        						isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo().setCgCode(newstr);
-			 	    	        					}
-			 	    	        				}
-			 	    	        				if(comres == 1){
-			 	    	        					break;
-			 	    	        				}
-		 	            					}
-									}
-									int daysBetween = 0;
-									try {
-										daysBetween = DateUtil.daysBetween(isBookOrderReq.getComeDate(), isBookOrderReq.getLeaveDate());
-									} catch (ParseException e) {
-										e.printStackTrace();
-									}
-									if(daysBetween > 1){
-										if(isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo().getCgCode()[0].equals(GuaranteeTypeIsBook.TWO.getKey())){
-											BigDecimal[] big = isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo().getAmountPercent();
-											if(big != null && big.length >= 2){
-												for(BigDecimal b : big){
-													totalPrice = totalPrice.add(b);
+									}*/
+									/*if(resBase.getBookableMessageTarget().getExcessRooms() < isBookOrderReq.getBookingCount()){
+										isBookOrderCheck.setCanBooking(0);
+										isBookOrderCheck.setSelfMessage("可选房间数量不足, 请重新选择");
+										return isBookOrderCheck;
+									}*/
+									String bookCode = "0";
+									//BigDecimal totalPrice = new BigDecimal(Double.toString(0));
+									if(resBase.getBookableMessageTarget().getCtripGuaranteeInfo() != null){
+										if(StringUtil.isNotNullOrEmpty(resBase.getBookableMessageTarget().getCtripGuaranteeInfo().getCgCode())){
+											String[] strs = resBase.getBookableMessageTarget().getCtripGuaranteeInfo().getCgCode();
+											if(strs != null) {
+												if(strs.length ==1 ) {
+													bookCode = strs[0];
+												}else if(strs.length >=2){
+													if(Arrays.asList(strs).contains(GuaranteeTypeIsBook.FOUR.getKey())){
+														bookCode = GuaranteeTypeIsBook.FOUR.getKey();
+													}else if(Arrays.asList(strs).contains(GuaranteeTypeIsBook.TWO.getKey())){
+														bookCode = GuaranteeTypeIsBook.TWO.getKey();
+													}else if(Arrays.asList(strs).contains(GuaranteeTypeIsBook.ONE.getKey())){
+														bookCode = GuaranteeTypeIsBook.ONE.getKey();
+													}else if(Arrays.asList(strs).contains(GuaranteeTypeIsBook.THREE.getKey())){
+														bookCode = GuaranteeTypeIsBook.THREE.getKey();
+													}else if(Arrays.asList(strs).contains(GuaranteeTypeIsBook.FIVE.getKey())){
+														bookCode = GuaranteeTypeIsBook.FIVE.getKey();
+													}
 												}
-												big[0] = totalPrice;
-												isBookOrderBase.getResult().getBookableMessageTarget().getCtripGuaranteeInfo().setAmountPercent(big);
 											}
+											
+											/*if(resBase.getBookableMessageTarget().getCtripGuaranteeInfo().getCgCode()[0].equals(GuaranteeTypeIsBook.THREE.getKey())){
+												ProInfoDetail proInfoDetail = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(isBookOrderReq.getProductUniqueId())),ProInfoDetail.class);
+												int comres = 0;
+												for (Map.Entry<String, ProSaleInfoDetail> entry : proInfoDetail.getProSaleInfoDetails().entrySet()) {
+				 	    	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(isBookOrderReq.getComeDate());
+					 	    	        				if(begincompare == 0){
+					 	    	        					comres = 1;
+					 	    	        					String substring = isBookOrderReq.getComeTime().substring(11,16);
+					 	    	        						
+					 	    	        					int compareTo = (entry.getValue().getGuaranteeHoldTime().replace(":0:",":00:").substring(0,5)).compareTo(substring);
+					 	    	        					if(compareTo > 0){
+					 	    	        						newstr[0] = "5";
+					 	    	        						resBase.getBookableMessageTarget().getCtripGuaranteeInfo().setCgCode(newstr);
+					 	    	        					}
+					 	    	        				}
+					 	    	        				if(comres == 1){
+					 	    	        					break;
+					 	    	        				}
+				 	            					}
+											}*/
+											/*int daysBetween = 0;
+											try {
+												daysBetween = DateUtil.daysBetween(isBookOrderReq.getComeDate(), isBookOrderReq.getLeaveDate());
+											} catch (ParseException e) {
+												e.printStackTrace();
+											}
+											if(daysBetween > 1){
+												if(resBase.getBookableMessageTarget().getCtripGuaranteeInfo().getCgCode()[0].equals(GuaranteeTypeIsBook.TWO.getKey())){
+													BigDecimal[] big = resBase.getBookableMessageTarget().getCtripGuaranteeInfo().getAmountPercent();
+													if(big != null && big.length >= 2){
+														for(BigDecimal b : big){
+															totalPrice = totalPrice.add(b);
+														}
+														big[0] = totalPrice;
+														resBase.getBookableMessageTarget().getCtripGuaranteeInfo().setAmountPercent(big);
+													}
+												}
+											}*/
 										}
+										resBase.setBookCode(bookCode);
 									}
 								}
 							}
 						}
-					} 
+					}
+					 
 				}else{
 		            throw new GSSException("订单是否可定信息", "0101", "解析数据异常");
 				}
@@ -833,7 +841,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 					isBookOrderCheck.setSelfMessage("可选房间数量不足, 请重新选择");
 					return isBookOrderCheck;
 				}*/
-				//sortPayList(isBookOrderBase.getResult());
+				//sortPayList(resBase);
 				
 			}else{
 	            throw new GSSException("订单是否可定信息", "0101", "查询请求返回空值");
@@ -843,7 +851,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			logger.error("订单可定检查请求异常"+e);
 			 throw new GSSException("订单是否可定信息", "0101", e.getMessage());
 		}
-		return isBookOrderBase.getResult();
+		return resBase;
 		
 	}
 
