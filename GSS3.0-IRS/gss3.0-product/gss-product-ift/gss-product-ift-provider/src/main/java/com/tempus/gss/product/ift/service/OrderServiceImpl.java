@@ -1054,14 +1054,65 @@ public class OrderServiceImpl implements IOrderService {
             }
 
             SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(saleOrderNo);
+            List<BuyOrderExt> buyOrderExtList = buyOrderExtDao.selectBuyOrderBySaleOrderNo(saleOrderNo);
             if(saleOrderExt!=null){
-                saleOrderService.updateStatus(agent, requestWithActor.getEntity(), 5);// 改为已取消状态
-                //判断是否已支付  若已支付则退款
+                /**
+                 * 1、修改订单域子状态
+                 * 2、修改国际机票订单状态
+                 */
+                saleOrderService.updateStatus(agent, requestWithActor.getEntity(), 11);// 改为已取消状态
+                SaleOrderDetail saleOrderDetail = new SaleOrderDetail();
+                saleOrderDetail.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
+                saleOrderDetail.setStatus("11");
+                saleOrderDetailDao.updateByOrderNo(saleOrderDetail);
+
+
                 List<Passenger> passengers = saleOrderExt.getPassengerList();
                 RequestWithActor<List<Passenger>> param = new RequestWithActor<>();
                 param.setEntity(passengers);
                 param.setAgent(agent);
                 this.verify(param);
+                //判断是否已支付  若已支付则退款
+                if(saleOrderExt.getSaleOrder()!=null&&(saleOrderExt.getSaleOrder().getPayStatus()==3||saleOrderExt.getSaleOrder().getPayStatus()==4)){
+                    CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
+                    certificateCreateVO.setIncomeExpenseType(2); //收支类型 1 收，2 为支
+                    certificateCreateVO.setReason("销售退款单信息"); //补充说明
+                    certificateCreateVO.setSubBusinessType(1); //业务小类 1.销采 2.补收退 3.废退 4.变更 5.错误修改
+                    certificateCreateVO.setServiceLine("2");
+                    certificateCreateVO.setCustomerNo(saleOrderExt.getSaleOrder().getCustomerNo());
+                    certificateCreateVO.setCustomerTypeNo(saleOrderExt.getSaleOrder().getCustomerTypeNo());
+
+                    /**销售退款*/
+                    List<BusinessOrderInfo> orderInfoList = new ArrayList<>(); //支付订单
+                    BusinessOrderInfo businessOrderInfo = new BusinessOrderInfo();
+                    businessOrderInfo.setActualAmount(saleOrderExt.getSaleOrder().getReceived());
+                    businessOrderInfo.setBusinessType(2);//1.交易单，2.销售单，3.采购单，4.销售变更单，5.采购变更单
+                    businessOrderInfo.setRecordNo(saleOrderExt.getSaleOrderNo());
+                    orderInfoList.add(businessOrderInfo);
+                    certificateCreateVO.setOrderInfoList(orderInfoList);
+                    BigDecimal saleRefundPrice = certificateService.saleRefundCert(agent,certificateCreateVO);
+                    log.info("销售退款金额："+saleRefundPrice);
+
+
+                    /**
+                     * 采购退款
+                     * 目前采购只做了记账，所以不用采购退款
+                     */
+                    /*if(CollectionUtils.isNotEmpty(buyOrderExtList)){
+                        BuyOrderExt buyOrderExt = buyOrderExtList.get(0);
+                        certificateCreateVO.setIncomeExpenseType(1); //收支类型 1 收，2 为支
+                        certificateCreateVO.setReason("采购退款单信息"); //补充说明
+                        orderInfoList = new ArrayList<>(); //支付订单
+                        businessOrderInfo = new BusinessOrderInfo();
+                        //businessOrderInfo.setActualAmount(saleOrderExt.getSaleOrder().getReceived());
+                        businessOrderInfo.setBusinessType(3);//1.交易单，2.销售单，3.采购单，4.销售变更单，5.采购变更单
+                        businessOrderInfo.setRecordNo(buyOrderExt.getBuyOrderNo());
+                        orderInfoList.add(businessOrderInfo);
+                        certificateCreateVO.setOrderInfoList(orderInfoList);
+                        BigDecimal buyRefundPrice = certificateService.buyRefundCert(agent,certificateCreateVO);
+                        log.info("采购退款金额："+buyRefundPrice);
+                    }*/
+                }
             }
 
             
