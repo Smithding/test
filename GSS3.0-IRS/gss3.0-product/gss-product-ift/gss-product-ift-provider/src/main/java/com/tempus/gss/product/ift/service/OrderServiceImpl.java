@@ -1060,10 +1060,10 @@ public class OrderServiceImpl implements IOrderService {
                  * 1、修改订单域子状态
                  * 2、修改国际机票订单状态
                  */
-                saleOrderService.updateStatus(agent, requestWithActor.getEntity(), 11);// 改为已取消状态
+                saleOrderService.updateStatus(agent, requestWithActor.getEntity(), 5);// 改为已取消状态
                 SaleOrderDetail saleOrderDetail = new SaleOrderDetail();
                 saleOrderDetail.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
-                saleOrderDetail.setStatus("11");
+                saleOrderDetail.setStatus("5");
                 saleOrderDetailDao.updateByOrderNo(saleOrderDetail);
 
 
