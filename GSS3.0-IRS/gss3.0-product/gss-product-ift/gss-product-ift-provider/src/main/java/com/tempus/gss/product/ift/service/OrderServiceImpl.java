@@ -1052,7 +1052,17 @@ public class OrderServiceImpl implements IOrderService {
                 log.error("saleOrderNo入参为空==");
                 throw new GSSException("saleOrderNo入参为空==", "1001", "取消订单失败");
             }
-            saleOrderService.updateStatus(agent, requestWithActor.getEntity(), 5);// 改为已取消状态
+
+            SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(saleOrderNo);
+            if(saleOrderExt!=null){
+                saleOrderService.updateStatus(agent, requestWithActor.getEntity(), 5);// 改为已取消状态
+                List<Passenger> passengers = saleOrderExt.getPassengerList();
+                RequestWithActor<List<Passenger>> param = new RequestWithActor<>();
+                param.setEntity(passengers);
+                param.setAgent(agent);
+                this.verify(param);
+            }
+
             
             /* 创建操作日志 */
             try {
