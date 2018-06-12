@@ -23,7 +23,10 @@ public class IsBookOrder implements Serializable{
 	 */
 	@JSONField(name = "AmountPercent")
 	private BigDecimal amountPercent;
-	
+	/**
+	 * 担保状态
+	 */
+	private String bookCode;
 	/**
 	 * 可订检查错误消息
 	 */
@@ -122,6 +125,12 @@ public class IsBookOrder implements Serializable{
 	}
 	public void setAmountPercent(BigDecimal amountPercent) {
 		this.amountPercent = amountPercent;
+	}
+	public String getBookCode() {
+		return bookCode;
+	}
+	public void setBookCode(String bookCode) {
+		this.bookCode = bookCode;
 	}
 	
 }
