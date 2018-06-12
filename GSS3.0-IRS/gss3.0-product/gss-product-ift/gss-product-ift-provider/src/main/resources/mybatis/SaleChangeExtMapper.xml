@@ -651,7 +651,8 @@
         left join IFT_BUY_ORDER_EXT a on a.BUY_ORDER_NO = k.BUY_ORDER_NO
         left join CPS_CUSTOMER CC ON CC.CUSTOMER_NO = w.CUSTOMER_NO
         left join SM_USER su on su.ID = i.LOCKER
-        WHERE i.VALID = 1
+        WHERE i.VALID = 1 AND
+        o.BUSINESS_SIGN_NO = m.BUSINESS_SIGN_NO
         <trim suffixOverrides="AND">
             <if test="saleChangeNo != null and saleChangeNo !=''">
                 AND i.SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
