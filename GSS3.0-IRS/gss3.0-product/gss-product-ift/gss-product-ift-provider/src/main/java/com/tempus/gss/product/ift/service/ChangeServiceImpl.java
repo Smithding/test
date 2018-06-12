@@ -884,7 +884,8 @@ public class ChangeServiceImpl implements IChangeService {
                 log.info("修改采购状态" + saleChangeNo);
                 saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 1);
                 log.info("修改采购支付状态" + saleChangeNo);*/
-            BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(saleChangeNo);
+           // BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(saleChangeNo);
+            BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
             if(buyChangeExt != null){
                 log.info("修改审核备注" + buyChangeExt.getBuyChangeNo());
                 buyChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
@@ -1284,13 +1285,15 @@ public class ChangeServiceImpl implements IChangeService {
             for (SaleOrderDetail saleOrderDetail : saleOrderDetailList) {
                 if(!saleOrderDetail.getIsChange()){
                     saleOrderDetail.setStatus("4");
+                } else{
+                    saleOrderDetail.setStatus("11");
+                }
                     saleOrderDetail.setModifier(saleChangeNo.getAgent().getAccount());
                     saleOrderDetail.setModifyTime(new Date());
                     RequestWithActor<SaleOrderDetail> saleOrderDetailRequestWithActor = new RequestWithActor<>();
                     saleOrderDetailRequestWithActor.setAgent(saleChangeNo.getAgent());
                     saleOrderDetailRequestWithActor.setEntity(saleOrderDetail);
                     saleOrderDetailService.upateSaleOrder(saleOrderDetailRequestWithActor);
-                }
             }
             saleOrderService.updateStatus(saleChangeNo.getAgent(),saleOrderExt.getSaleOrderNo(),4);
 
@@ -1746,6 +1749,7 @@ public class ChangeServiceImpl implements IChangeService {
 
     @Override
     public BuyChangeExt getBuyChangeExtBySaleChangeNo(Long saleChangeNo) {
-        return buyChangeExtDao.selectBySaleChangeNo(saleChangeNo);
+        //return buyChangeExtDao.selectBySaleChangeNo(saleChangeNo);
+        return buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
     }
 }
