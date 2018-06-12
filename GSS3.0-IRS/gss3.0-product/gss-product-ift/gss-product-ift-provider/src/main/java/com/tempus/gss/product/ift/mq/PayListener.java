@@ -50,9 +50,11 @@ public class PayListener {
 			if (payNoticeVO.getGoodsType() == 2) {
 				Agent agent = new Agent(payNoticeVO.getOwner(), "sys");
 				if (payNoticeVO.getBusinessType() == 2 && payNoticeVO.getChangeType() == 0) {
-					boolean flag = iftOrderService.updateBuyOrderStatus(new RequestWithActor<>(agent, payNoticeVO.getBusinessNo()));
-					logger.info("修改采购单操作是否成功,销售单号:" + payNoticeVO.getBusinessNo() + "->" + flag);
-
+					if(payNoticeVO.getIncomeExpenseType()==1) {
+						//销售、退款 不监听,销售、收款  才能进此方法
+						boolean flag = iftOrderService.updateBuyOrderStatus(new RequestWithActor<>(agent, payNoticeVO.getBusinessNo()));
+						logger.info("修改采购单操作是否成功,销售单号:" + payNoticeVO.getBusinessNo() + "->" + flag);
+					}
 				}
 				if (payNoticeVO.getBusinessType() == 4 && payNoticeVO.getChangeType() == 3) {
 					boolean flag = changeService
