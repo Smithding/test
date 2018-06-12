@@ -265,8 +265,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
             throw new GSSException("创建酒店订单", "0114", "支付模式为空！");
         }
         if (StringUtil.isNullOrEmpty(orderCreateReq.getBreakfastCount())) {
-            logger.error("支付模式为空！");
-            throw new GSSException("创建酒店订单", "0114", "早餐为空！");
+            logger.error("早餐为空！");
+            throw new GSSException("创建酒店订单", "0115", "早餐为空！");
         }
        
         Long saleOrderNo = maxNoService.generateBizNo("HOL_SALE_ORDER_NO", 13);
@@ -281,38 +281,35 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		String eachNightPrice= null;
 		Date dateStartDate;
 		Date departureDate;
-    	//try {
-
-					for(ResourceUseDateDetail li : resourceUseDateDetail){
-						totalPrice = totalPrice.add(li.getCheckPrice());
-						if(eachNightPrice == null || "".equals(eachNightPrice)){
-							eachNightPrice = li.getCheckPrice().toString();
-			            }else {
-			                if (li.getCheckPrice().toString() != null && !"".equals(li.getCheckPrice().toString())) {
-			                	eachNightPrice = eachNightPrice + "," + li.getCheckPrice().toString();
-			                }
-			            }
-					}
-					totalPrice = totalPrice.multiply(new BigDecimal(orderCreateReq.getBookCount()));
-					hotelOrder.setEachNightPrice(eachNightPrice);
-					//ResBaseInfo resInfomation =mongoTemplate1.findOne(new Query(Criteria.where("_id").is(orderCreateReq.getResId())),ResBaseInfo.class);
-					ResProBaseInfos resInfomation =mongoTemplate1.findOne(new Query(Criteria.where("_id").is(orderCreateReq.getResId())),ResProBaseInfos.class);
-					if(resInfomation != null){
-						hotelName = StringEscapeUtils.unescapeHtml(orderCreateReq.getResName().trim());
-						cityName =  orderCreateReq.getCityName();
-						for(ResProBaseInfo detail : resInfomation.getResProBaseInfos()){
-								if(detail.getProductUniqueId().equals(orderCreateReq.getProductUniqueId())){
-									if(StringUtils.isNotEmpty(detail.getSupPriceName())){
-										hotelOrder.setSupPriceName(detail.getSupPriceName());
-									}
-									if(StringUtils.isNotEmpty(detail.getBedTypeName())){
-										hotelOrder.setBedTypeName(detail.getBedTypeName());
-									}
-								}
-							
+			for(ResourceUseDateDetail li : resourceUseDateDetail){
+				totalPrice = totalPrice.add(li.getCheckPrice());
+				if(eachNightPrice == null || "".equals(eachNightPrice)){
+					eachNightPrice = li.getCheckPrice().toString();
+	            }else {
+	                if (li.getCheckPrice().toString() != null && !"".equals(li.getCheckPrice().toString())) {
+	                	eachNightPrice = eachNightPrice + "," + li.getCheckPrice().toString();
+	                }
+	            }
+			}
+			totalPrice = totalPrice.multiply(new BigDecimal(orderCreateReq.getBookCount()));
+			hotelOrder.setEachNightPrice(eachNightPrice);
+			ResProBaseInfos resInfomation =mongoTemplate1.findOne(new Query(Criteria.where("_id").is(orderCreateReq.getResId())),ResProBaseInfos.class);
+			if(resInfomation != null){
+				hotelName = StringEscapeUtils.unescapeHtml(orderCreateReq.getResName().trim());
+				cityName =  orderCreateReq.getCityName();
+				for(ResProBaseInfo detail : resInfomation.getResProBaseInfos()){
+						if(detail.getProductUniqueId().equals(orderCreateReq.getProductUniqueId())){
+							if(StringUtils.isNotEmpty(detail.getSupPriceName())){
+								hotelOrder.setSupPriceName(detail.getSupPriceName());
+							}
+							if(StringUtils.isNotEmpty(detail.getBedTypeName())){
+								hotelOrder.setBedTypeName(detail.getBedTypeName());
+							}
 						}
-						
-					}
+					
+				}
+				
+			}
 
 			dateStartDate = simple.parse(startDate);
 			Date departDate = simple.parse(endDate);
@@ -320,27 +317,18 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			cal.setTime(departDate);
 			cal.add(Calendar.DAY_OF_MONTH, 1);
 			departureDate= cal.getTime();
-		/*} catch (Exception e) {
-			e.printStackTrace();
-			logger.error(e.getMessage());
-            throw new GSSException("创建酒店订单", "0129", e.getMessage());
-		}*/
-    	//OrderCreateBase orderCreateBase;
-    	ResultTc<OrderCreate> orderCreateBase = null;
+			ResultTc<OrderCreate> orderCreateBase = null;
     	
     	
     		Long businessSignNo = IdWorker.getId();
-    		//Long saleOrderNo = IdWorker.getId();
     		BuyOrder buyOrder = orderCreateReq.getBuyOrder();
             if (buyOrder == null) {
                 buyOrder = new BuyOrder();
             }
-           // HolSupplier holSupplier = supplierMapper.queryBySupplierCode(orderCreateReq.getSupplierCode());
             if (StringUtil.isNotNullOrEmpty(orderCreateReq.getSupplierNo())) {
             	Long supplierNo = Long.valueOf(orderCreateReq.getSupplierNo());
             	hotelOrder.setSupplierNo(supplierNo);
             	buyOrder.setSupplierNo(supplierNo);
-               // Long supplierNo = holSupplier.getSupplierNo();
                 //从客商系统查询供应商信息
                 Supplier supplier = supplierService.getSupplierByNo(agent, supplierNo);
                 if(StringUtil.isNotNullOrEmpty(supplier)){
@@ -359,9 +347,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			assignDateHotelReq.setSourceFrom("-1");
 			assignDateHotelReq.setProId(orderCreateReq.getProId());
 			assignDateHotelReq.setProductUniqueId(orderCreateReq.getProductUniqueId());
-			//Integer newInventoryRemainder = 0;
-			//Integer newInventoryStats = 0;
-			//Boolean newOpenSale=false;
 			assignDateHotelReq.setStartTime(startDate);
 			assignDateHotelReq.setEndTime(endDate);
 			
@@ -372,15 +357,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				List<ProInfoDetail> proInfoDetailList= assignDateHotel.getProInfoDetailList();
 				if(proInfoDetailList != null && proInfoDetailList.get(0).getProSaleInfoDetails() != null){
 					for(Map.Entry<String, ProSaleInfoDetail> entry : proInfoDetailList.get(0).getProSaleInfoDetails().entrySet()){
-						//newInventoryRemainder = entry.getValue().getInventoryRemainder();
-						//newInventoryStats = entry.getValue().getInventoryStats();
-						//newOpenSale = entry.getValue().getOpeningSale();
 						newCheckPrice.add(new BigDecimal(Double.toString(entry.getValue().getDistributionSalePrice())));
 						newTotalPrice += entry.getValue().getDistributionSalePrice();
-						/*if(newOpenSale==false && newInventoryRemainder == 0 || newInventoryStats ==4){
-							logger.error("此状态不能下单");
-	                        throw new GSSException("下单失败", "0133", "无可用库存，不能下单");
-						}*/
 					}
 				}
 				newTotalPrice = newTotalPrice * orderCreateReq.getBookCount();
@@ -460,7 +438,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	                    }
 	                }
 	            }
-	            if(orderCreateReq.getSpecialRequestOption() != null){
+	           /* if(orderCreateReq.getSpecialRequestOption() != null){
 	            	for(SpecialRequest request : orderCreateReq.getSpecialRequestOption()){
 		            	if (requestCode == null || "".equals(requestCode)) {
 		            		requestCode = request.getRequestCode();
@@ -487,7 +465,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            	hotelOrder.setRequestCode(requestCode);
 		            hotelOrder.setRequestText(requestText);
 		            hotelOrder.setRequestName(requestName);
-	            }
+	            }*/
 	            hotelOrder.setGuestName(guestName);
 	            hotelOrder.setGuestMobile(orderCreateReq.getOrderPassengerDetails().get(0).getMobile());
 	            if(StringUtil.isNotNullOrEmpty(orderCreateReq.getOrderRemark())){
