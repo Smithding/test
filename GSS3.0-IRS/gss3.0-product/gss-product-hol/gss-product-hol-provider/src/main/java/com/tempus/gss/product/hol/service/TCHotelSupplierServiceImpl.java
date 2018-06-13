@@ -1022,6 +1022,69 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         
 		return new AsyncResult<TCResponse<ResBaseInfo>>(response);
 	}
+	
+	@Override
+	public TCResponse<ResBaseInfo> queryHolListForBackNo(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException{
+		log.info("查询酒店列表开始");
+        if (StringUtil.isNullOrEmpty(hotelSearchReq)) {
+            log.error("hotelSearchReq查询条件为空");
+            throw new GSSException("获取酒店列表", "0101", "hotelSearchReq查询条件为空");
+        }
+        if (StringUtil.isNullOrEmpty(agent)) {
+            log.error("agent对象为空");
+            throw new GSSException("获取酒店列表", "0102", "agent对象为空");
+        } 
+        if (StringUtil.isNullOrEmpty(hotelSearchReq.getResId()) && StringUtil.isNullOrEmpty(hotelSearchReq.getCityCode()) && StringUtil.isNullOrEmpty(hotelSearchReq.getResGradeId()) && StringUtil.isNullOrEmpty(hotelSearchReq.getKeyword())) {
+        	hotelSearchReq.setCityCode("北京");
+        }
+        TCResponse<ResBaseInfo> response = new TCResponse<ResBaseInfo>();
+        List<ResBaseInfo> res=null;
+        Query query=new Query();
+        Criteria criatira = new Criteria();
+        try {
+        	int skip= (hotelSearchReq.getPageCount()-1)* (hotelSearchReq.getRowCount());
+      		query.skip(skip);
+      		query.limit(hotelSearchReq.getRowCount());
+      		
+      		if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getCityCode())){
+    				criatira.and("cityName").is(hotelSearchReq.getCityCode());
+    			}
+    		if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getKeyword())){
+    			String keyword = hotelSearchReq.getKeyword().trim();
+					String escapeHtml = StringEscapeUtils.unescapeHtml(keyword);
+					String[] fbsArr = { "(", ")" };  // "\\", "$", "(", ")", "*", "+", ".", "[", "]", "?", "^", "{", "}", "|" 
+			        	 for (String key : fbsArr) { 
+			        		 if(escapeHtml.contains(key)){
+			        			escapeHtml = escapeHtml.replace(key, "\\" + key);
+			        		 }
+			        	 }
+					criatira.and("resName").regex("^.*"+escapeHtml+".*$");//"^.*"+hotelName+".*$"
+    		}
+    		if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getResId())){
+    			criatira.and("_id").is(Long.valueOf(hotelSearchReq.getResId()));
+    		}
+    		if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getResGradeId())){
+    			criatira.and("resGradeId").is(hotelSearchReq.getResGradeId());
+    		}
+    		res = mongoTemplate1.find(query.addCriteria(criatira), ResBaseInfo.class);
+    		//总条数
+      		int count= (int)mongoTemplate1.count(query, ResBaseInfo.class);
+      		//总页数
+      		int totalPage= (int)(count/hotelSearchReq.getRowCount()+1);
+      		response.setTotalPatge(Integer.valueOf(totalPage));
+      		response.setTotalCount(Integer.valueOf(count));
+    		
+      		if(StringUtil.isNotNullOrEmpty(res)){
+      			response.setResponseResult(res);
+    			//System.out.println("1111111111111"+JsonUtil.toJson(res));
+    		}
+		} catch (Exception e) {
+			log.error("获取酒店列表出错"+e);
+            throw new GSSException("获取酒店列表出错", "0109", "获取酒店列表出错");
+		}
+        
+		return response;
+	}
 
 	@Override
 	public List<String> getCityNames(Agent agent, String keyword,String city) {
