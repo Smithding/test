@@ -83,10 +83,10 @@
         from IFT_SALE_ORDER_DETAIL
         where SALE_ORDER_DETAIL_NO = #{saleOrderDetailNo,jdbcType=BIGINT} and VALID=1
     </select>
-    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    <!--<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from IFT_SALE_ORDER_DETAIL
         where SALE_ORDER_DETAIL_NO = #{saleOrderDetailNo,jdbcType=BIGINT}
-    </delete>
+    </delete>-->
     <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderDetail">
         insert into IFT_SALE_ORDER_DETAIL (SALE_ORDER_DETAIL_NO, ID, OWNER,
         SALE_ORDER_NO, PASSENGER_NO,TICKET_NO,
@@ -395,14 +395,14 @@
         from IFT_SALE_ORDER_DETAIL
         where TICKET_NO = #{param1}
     </select>
-    <select id="selectByChangeNo"  resultMap="BaseResultMap"  parameterType="java.lang.Long">
+    <!--<select id="selectByChangeNo"  resultMap="BaseResultMap"  parameterType="java.lang.Long">
         select
         <include refid="Base_Column_List"/>
         from IFT_SALE_ORDER_DETAIL
         where SALE_ORDER_DETAIL_NO IN (
         SELECT cd.SALE_ORDER_DETAIL_NO FROM IFT_SALE_CHANGE_DETAIL cd
         WHERE cd.SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT} )
-    </select>
+    </select>-->
     <update id="batchUpdate" parameterType="java.util.List">  
         <foreach close="" collection="list" index="index" item="item" open="" separator=";">  
             update IFT_SALE_ORDER_DETAIL set STATUS=#{item.status,jdbcType=VARCHAR},REJECT_REASON = #{item.rejectreason,jdbcType=VARCHAR} 

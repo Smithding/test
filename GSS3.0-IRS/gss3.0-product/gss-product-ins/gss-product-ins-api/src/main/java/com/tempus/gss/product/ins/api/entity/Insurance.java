@@ -41,7 +41,7 @@ public class Insurance implements Serializable {
 	private String code;
 
 	/**
-	 * 结算方式
+	 * 结算方式 1:月结  2:现结
 	 */
 	private Integer payModel;
 
@@ -56,17 +56,17 @@ public class Insurance implements Serializable {
 	private String companyName;
 
 	/**
-	 * 是否限制人数
+	 * 是否限制人数 1:为限制 2:为不限制
 	 */
 	private Integer isCheckNum;
 
 	/**
-	 * 是否限制年龄
+	 * 是否限制年龄  1:为限制 2:为不限制
 	 */
 	private Integer isCheckAge;
 
 	/**
-	 * 是否限制份数
+	 * 是否限制份数  1:为限制 2:为不限制
 	 */
 	private Integer isCheckCount;
 
@@ -111,7 +111,7 @@ public class Insurance implements Serializable {
 	private Integer endDays;
     
 	/**
-	 * 二级控润价格/后台呼叫中心的为采购价 别问我为什么  我也只不知道 之前做保险模块的人写的数据就很不正常    By lingliang
+	 * 二级控润价格/后台呼叫中心的为采购价
 	 */
 	private BigDecimal buyPrice;
 	
