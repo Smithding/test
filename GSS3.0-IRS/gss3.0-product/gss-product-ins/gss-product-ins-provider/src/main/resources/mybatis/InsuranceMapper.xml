@@ -514,6 +514,7 @@
 			AND BUY_WAY = #{buyWay,jdbcType=INTEGER}
 		</if>
   	 </trim>
+  	 ORDER BY CREATE_TIME DESC
   </select>
 
 <select id="selectInsuranceByNo" resultMap="BaseResultMap" >
