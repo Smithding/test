@@ -225,9 +225,10 @@ public class QueryServiceImpl implements IQueryService {
         queryIBEDetail.setPriceSpecNo(priceSpec.getPriceSpecNo());
 
         Map<String, String> passengerTypeMap = new HashMap<String, String>();
-        for (Flight flight : queryIBEDetail.getFlights()) {//判断航段有没有奖励
+        for (Flight flight : queryIBEDetail.getFlights()) {
+            //判断航段有没有奖励
             for (FlightCabinPriceVo flightCabinPriceVo : flight.getFlightCabinPriceVos()) {
-                if (flightCabinPriceVo.getPassengerType().equals(priceSpec.getNoAwardType())) {
+                if (StringUtils.equals(flightCabinPriceVo.getPassengerType(),priceSpec.getNoAwardType())) {
                     flightCabinPriceVo.setAward(false);
                 } else {
                     flightCabinPriceVo.setAward(true);
