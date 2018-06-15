@@ -485,7 +485,6 @@
 			AND INTERNAT_ORCIVIL = #{internatOrcivil,jdbcType=VARCHAR}
 		</if>
   	 </trim>
-  	 ORDER BY CREATE_TIME DESC
   </select>
  <select id="queryAllObjByKey" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ins.api.entity.Insurance" >
   	 select 
