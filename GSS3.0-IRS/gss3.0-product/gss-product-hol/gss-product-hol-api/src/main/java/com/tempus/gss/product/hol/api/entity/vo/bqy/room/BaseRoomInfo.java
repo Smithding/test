@@ -15,8 +15,8 @@ public class BaseRoomInfo implements Serializable {
 	@JSONField(name="SmokeInfo")
 	private SmokeInfo smokeInfo;				//抽烟房型
 	
-	@JSONField(name="RoomTypeId")
-	private List<BedTypeInfoItem> bedTypeInfo;	//床型集合
+	@JSONField(name="bedTypeInfo")
+	private List<BedTypeInfo> bedTypeInfo;	//床型集合
 	
 	@JSONField(name="RoomTypeID")
 	private String roomTypeID;					//房型ID
@@ -49,12 +49,12 @@ public class BaseRoomInfo implements Serializable {
 	public void setSmokeInfo(SmokeInfo smokeInfo) {
 		this.smokeInfo = smokeInfo;
 	}
-
-	public List<BedTypeInfoItem> getBedTypeInfo() {
+	
+	public List<BedTypeInfo> getBedTypeInfo() {
 		return bedTypeInfo;
 	}
 
-	public void setBedTypeInfo(List<BedTypeInfoItem> bedTypeInfo) {
+	public void setBedTypeInfo(List<BedTypeInfo> bedTypeInfo) {
 		this.bedTypeInfo = bedTypeInfo;
 	}
 

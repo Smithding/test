@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.service;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityInfo;
@@ -11,12 +12,16 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelInfoListEntity;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelRoomFacility;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.ImageList;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomImageList;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.request.BookOrderParam;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.request.CreateOrderReq;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryCityInfoParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelIdParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelInfoParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelListParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.response.BookOrderResponse;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelLocationEntity;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
 
 /**
  * 同城酒店
@@ -81,12 +86,34 @@ public interface IBQYHotelInterService{
 	 */
 	List<RoomImageList> queryHotelRoomImage(QueryHotelParam query);
 	
+	
+	/**
+	 * 酒店图片异步查询
+	 * @param query
+	 * @return
+	 */
+	Future<List<ImageList>> asyncHotelImage(QueryHotelParam query);
+	
+	/**
+	 * 酒店明细异步查询
+	 * @param query 酒店详细信息参数查询
+	 * @return
+	 */
+	Future<HotelEntity> asyncHotelDetail(QueryHotelParam query);
+	
 	/**
 	 * 根据酒店ID查询酒店信息
 	 * @param query
 	 * @return
 	 */
 	HotelInfo queryHotelInfo(QueryHotelInfoParam query);
+	
+	/**
+	 * 酒店房间价格
+	 * @param query
+	 * @return
+	 */
+	List<RoomPriceItem> queryHotelRoomPrice(QueryHotelParam query);
 	
 	/**
 	 * 拉取酒店信息
@@ -118,4 +145,17 @@ public interface IBQYHotelInterService{
 	 * @param hotelInfo
 	 */
 	void saveMidHol(HotelId hotelId, HotelInfo hotelInfo);
+	
+	/**
+	 * 酒店试预订
+	 * @return
+	 */
+	BookOrderResponse isBookOrder(BookOrderParam query);
+	
+	/**
+	 * 酒店订单创建
+	 * @param createOrderReq
+	 * @return
+	 */
+	String createOrder(CreateOrderReq createOrderReq);
 }

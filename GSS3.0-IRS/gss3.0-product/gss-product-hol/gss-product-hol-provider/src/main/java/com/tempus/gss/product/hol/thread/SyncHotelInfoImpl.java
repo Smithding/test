@@ -1,7 +1,6 @@
 package com.tempus.gss.product.hol.thread;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -20,8 +18,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
@@ -29,7 +28,6 @@ import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.AssignDateHotelReq;
-import com.tempus.gss.product.hol.api.entity.request.tc.SingleHotelDetailReq;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.entity.response.tc.AssignDateHotel;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
@@ -40,7 +38,6 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ProSaleInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfos;
-import com.tempus.gss.product.hol.api.entity.response.tc.TCHotelDetailResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelId;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
@@ -63,6 +60,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	
 	@Autowired
 	private IBQYHotelInterService bqyHotelService;
+	
+	@Autowired
+	private ITCHotelInterService tcHotelInterService;
 	
 	@Autowired
 	private MongoTemplate mongoTemplate1;
@@ -413,6 +413,27 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		return null;
 	}
 
-	
+	@Override
+	@Async
+	public Future<ResBaseInfo> queryBQYHotelListForAsync(Agent agent, Long bqyHotelId, String checkinDate,
+			String checkoutDate) throws Exception {
+		ResBaseInfo hotelDetail = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyHotelId), checkinDate, checkoutDate);
+		return new AsyncResult<ResBaseInfo>(hotelDetail);
+	}
+
+	@Override
+	@Async
+	public Future<ResBaseInfo> queryTCHelListForAsync(Agent agent, Long tcHotelId, String checkinDate,
+			String checkoutDate) {
+		ResBaseInfo hotelDetail = tcHotelSupplierService.queryHotelDetail(agent, tcHotelId, checkinDate, checkoutDate);
+		return new AsyncResult<ResBaseInfo>(hotelDetail);
+	}
+
+	@Override
+	@Async
+	public Future<ResBaseInfo> queryTCHolForAsyncBack(Agent agent, Long tcHotelId) {
+		ResBaseInfo hotelDetail = tcHotelInterService.updateSingleResDetail(agent, String.valueOf(tcHotelId));
+		return new AsyncResult<ResBaseInfo>(hotelDetail);
+	}
 	
 }	

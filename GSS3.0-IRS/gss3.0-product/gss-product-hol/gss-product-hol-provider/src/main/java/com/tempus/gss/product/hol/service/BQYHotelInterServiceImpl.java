@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Future;
 
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
@@ -22,12 +23,14 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityInfo;
@@ -44,12 +47,16 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.InfoShowlist;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.Information;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.ResponseResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomImageList;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.request.BookOrderParam;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.request.CreateOrderReq;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryCityInfoParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelIdParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelInfoParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelListParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.response.BookOrderResponse;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelLocationEntity;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.util.DocumentUtil;
 import com.tempus.gss.util.JsonUtil;
@@ -89,6 +96,15 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	
 	@Value("${bqy.hotel.room.image.url}")
 	private String BQY_HOTEL_ROOM_IMAGE_URL;	//酒店房型图片URL
+	
+	@Value("${bqy.hotel.room.price.url}")
+	private String BQY_HOTEL_ROOM_PRICE_URL;		//酒店房间价格
+	
+	@Value("${bqy.hotel.book.order.url}")
+	private String BQY_HOTEL_BOOK_ORDER_URL;		//酒店房间试预订
+	
+	@Value("${bqy.hotel.create.order.url}")
+	private String BQY_HOTEL_CREATE_ORDER_URL;		//创建订单
 	
 	private String TOKEN;
 	
@@ -181,11 +197,11 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		HotelEntity hotelEntity = null;
 		String paramJson = JsonUtil.toJson(query);
 		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_DETAIL_URL, paramJson);
+		System.out.println(result);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			// 将返回数据转换成json对象
 			ResponseResult<HotelEntity> responseResult = JsonUtil.toBean(result,
-					new TypeReference<ResponseResult<HotelEntity>>() {
-					});
+					new TypeReference<ResponseResult<HotelEntity>>() {});
 			if (responseResult != null) {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
 					hotelEntity = responseResult.getResult();
@@ -291,6 +307,30 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	}
 	
 	@Override
+	public List<RoomPriceItem> queryHotelRoomPrice(QueryHotelParam query) {
+		// BQY_HOTEL_HOTEL_PRICE
+		logger.info("BQY酒店房间获取开始...");
+		query.setAgentId(Long.parseLong(BQY_AGENTID));
+		query.setToken(md5Encryption());
+		List<RoomPriceItem> roomPriceList = null;
+		String paramJson = JsonUtil.toJson(query);
+		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_ROOM_PRICE_URL, paramJson);
+		if (StringUtils.isNoneBlank(result.trim())) {
+			ResponseResult<List<RoomPriceItem>> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<List<RoomPriceItem>>>(){});
+			if (responseResult != null) {
+				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
+					roomPriceList = responseResult.getResult();
+				} 
+			}
+		}else {
+			throw new GSSException("获取BQY酒店房型图片失败!", "0111", "BQY酒店房型图片返回空值");
+		}
+		logger.info("BQY酒店房型图片获取成功!");
+		return roomPriceList;
+	}
+	
+	
+	@Override
 	public HotelLocationEntity queryCityInfo2(QueryHotelIdParam query) {
 		logger.info("BQY城市信息获取开始...");
 		query.setAgentId(Long.parseLong(BQY_AGENTID));
@@ -310,6 +350,55 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		}
 		logger.info("BQY城市信息获取成功!");
 		return cityInfo;
+	}
+	
+	@Override
+	public BookOrderResponse isBookOrder(BookOrderParam query) {
+		logger.info("BQY酒店试预定开始...");
+		query.setAgentId(Long.parseLong(BQY_AGENTID));
+		query.setToken(md5Encryption());
+		BookOrderResponse bookOrderResponse = null;
+		String paramJson = JsonUtil.toJson(query);
+		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_BOOK_ORDER_URL, paramJson);
+		if (StringUtils.isNoneBlank(result.trim())) {
+			ResponseResult<BookOrderResponse> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<BookOrderResponse>>(){});
+			if (responseResult != null) {
+				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
+					bookOrderResponse = responseResult.getResult();
+				}
+			}
+		}else {
+			throw new GSSException("酒店试预定失败!", "0111", "酒店试预定返回空值");
+		}
+		logger.info("BQY酒店试预定结束!");
+		return bookOrderResponse;
+	}
+	
+	@Override
+	public String createOrder(CreateOrderReq createOrderReq) {
+		//BQY_HOTEL_CREATE_ORDER_URL
+		logger.info("BQY酒店订单创建开始...");
+		createOrderReq.setAgentId(Long.parseLong(BQY_AGENTID));
+		createOrderReq.setBookingUserId(BQY_AGENTID);
+		createOrderReq.setToken(md5Encryption());
+		String orderNo = null;
+		String paramJson = JsonUtil.toJson(createOrderReq);
+		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_CREATE_ORDER_URL, paramJson);
+		if (StringUtils.isNoneBlank(result.trim())) {
+			ResponseResult<String> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<String>>(){});
+			if (responseResult != null) {
+				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
+					orderNo = responseResult.getResult();
+				}else {
+					logger.error("BQY酒店订单创建失败!");
+					throw new GSSException("酒店订单创建失败!", "0111", "酒店订单创建返回空值");
+				}
+			}
+		}else {
+			throw new GSSException("酒店订单创建失败!", "0111", "酒店订单创建返回空值");
+		}
+		logger.info("BQY酒店订单创建结束!");
+		return orderNo;
 	}
 	
 	/**
@@ -429,11 +518,11 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	@Override
 	public void deleteMongoDBData() {
 		mongoTemplate1.remove(new Query(), HotelInfo.class);
-		mongoTemplate1.remove(new Query(), CityDetail.class);
+		//mongoTemplate1.remove(new Query(), CityDetail.class);
 		//mongoTemplate1.remove(new Query(), HotelId.class);
 		//TODO 需要修改中间表的清空
-		//mongoTemplate1.remove(new Query(), HolMidBaseInfo.class);
-		mongoTemplate1.remove(new Query(Criteria.where("supplierNo").is("411805040103290132")), HolMidBaseInfo.class);
+		mongoTemplate1.remove(new Query(), HolMidBaseInfo.class);
+		//mongoTemplate1.remove(new Query(Criteria.where("supplierNo").is("411805040103290132")), HolMidBaseInfo.class);
 	}
 	
 	@Override
@@ -741,7 +830,21 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		}
 		return re_md5;
 	}
-	
+
+	@Override
+	@Async
+	public Future<List<ImageList>> asyncHotelImage(QueryHotelParam query) {
+		List<ImageList> imageList = queryHotelImage(query);
+		return new AsyncResult<List<ImageList>>(imageList);
+	}
+
+	@Override
+	@Async
+	public Future<HotelEntity> asyncHotelDetail(QueryHotelParam query) {
+		HotelEntity hotelEntity = queryHotelDetail(query);
+		return new AsyncResult<HotelEntity>(hotelEntity);
+	}
+
 }
 
  
