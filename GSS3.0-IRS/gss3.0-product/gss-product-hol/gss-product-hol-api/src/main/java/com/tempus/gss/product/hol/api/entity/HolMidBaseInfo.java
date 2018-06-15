@@ -138,6 +138,12 @@ public class HolMidBaseInfo implements Serializable{
 	
 	private List<Object> bookItems;
 	
+	private Double[] resPosition;
+	/**
+	 * 1: TC, 2: BQY, 3: TY
+	 */
+	private Integer resType;
+	
 	public Long getId() {
 		return id;
 	}
@@ -361,6 +367,21 @@ public class HolMidBaseInfo implements Serializable{
 	public void setBookItems(List<Object> bookItems) {
 		this.bookItems = bookItems;
 	}
-	
+
+	public Double[] getResPosition() {
+		return resPosition;
+	}
+
+	public void setResPosition(Double[] resPosition) {
+		this.resPosition = resPosition;
+	}
+
+	public Integer getResType() {
+		return resType;
+	}
+
+	public void setResType(Integer resType) {
+		this.resType = resType;
+	}
 	
 }
