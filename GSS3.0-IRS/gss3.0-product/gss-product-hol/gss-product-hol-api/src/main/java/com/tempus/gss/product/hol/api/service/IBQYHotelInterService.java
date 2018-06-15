@@ -14,6 +14,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.ImageList;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomImageList;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.BookOrderParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.CreateOrderReq;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.request.OrderPayReq;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryCityInfoParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelIdParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelInfoParam;
@@ -21,6 +22,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelListParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.BookOrderResponse;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelLocationEntity;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderPayResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
 
 /**
@@ -158,4 +160,11 @@ public interface IBQYHotelInterService{
 	 * @return
 	 */
 	String createOrder(CreateOrderReq createOrderReq);
+	
+	/**
+	 * 订单支付
+	 * @param createOrderReq
+	 * @return
+	 */
+	OrderPayResult orderPay(OrderPayReq orderPayReq);
 }

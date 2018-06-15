@@ -30,7 +30,6 @@ import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
-import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityInfo;
@@ -49,6 +48,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.ResponseResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomImageList;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.BookOrderParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.CreateOrderReq;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.request.OrderPayReq;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryCityInfoParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelIdParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelInfoParam;
@@ -56,6 +56,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelListParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.BookOrderResponse;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelLocationEntity;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderPayResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.util.DocumentUtil;
@@ -105,6 +106,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	
 	@Value("${bqy.hotel.create.order.url}")
 	private String BQY_HOTEL_CREATE_ORDER_URL;		//创建订单
+	
+	@Value("${bqy.hotel.order.pay.url}")
+	private String BQY_HOTEL_ORDER_PAY_URL;			//订单支付
 	
 	private String TOKEN;
 	
@@ -399,6 +403,32 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		}
 		logger.info("BQY酒店订单创建结束!");
 		return orderNo;
+	}
+	
+	@Override
+	public OrderPayResult orderPay(OrderPayReq orderPayReq) {
+		//BQY_HOTEL_ORDER_PAY_URL
+		logger.info("BQY酒店订单创建开始...");
+		orderPayReq.setAgentId(Long.parseLong(BQY_AGENTID));
+		orderPayReq.setToken(md5Encryption());
+		OrderPayResult orderPayResult = null;
+		String paramJson = JsonUtil.toJson(orderPayReq);
+		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_ORDER_PAY_URL, paramJson);
+		if (StringUtils.isNoneBlank(result.trim())) {
+			ResponseResult<OrderPayResult> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<OrderPayResult>>(){});
+			if (responseResult != null) {
+				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
+					orderPayResult = responseResult.getResult();
+				}else {
+					logger.error("BQY酒店订单创建失败!");
+					throw new GSSException("酒店订单创建失败!", "0111", "酒店订单创建返回空值");
+				}
+			}
+		}else {
+			throw new GSSException("酒店订单创建失败!", "0111", "酒店订单创建返回空值");
+		}
+		logger.info("BQY酒店订单创建结束!");
+		return orderPayResult;
 	}
 	
 	/**
