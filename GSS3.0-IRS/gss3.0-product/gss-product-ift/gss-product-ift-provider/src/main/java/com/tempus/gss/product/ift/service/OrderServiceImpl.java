@@ -203,6 +203,8 @@ public class OrderServiceImpl implements IOrderService {
     protected ITicketSenderService ticketSenderService;
     @Autowired
     IftMessageServiceImpl iftMessageServiceImpl;
+    @Reference
+    IRefundService refundService;
     
     @Value("${dpsconfig.job.owner}")
     protected String owner;
@@ -316,7 +318,7 @@ public class OrderServiceImpl implements IOrderService {
         }
 
     }
-    
+
     /**
      * 采购改签订单分单
      */
@@ -1031,7 +1033,7 @@ public class OrderServiceImpl implements IOrderService {
         return flag;
         
     }
-    
+
     /**
      * 取消订单.
      *
