@@ -1,11 +1,16 @@
 package com.tempus.gss.product.hol.api.service;
 
+import java.util.List;
 import java.util.concurrent.Future;
 
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
+import com.tempus.gss.product.hol.api.entity.request.tc.IsBookOrderReq;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
+import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelInfo;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.response.BookOrderResponse;
 import com.tempus.gss.vo.Agent;
 
 /**
@@ -41,5 +46,37 @@ public interface IBQYHotelSupplierService {
 	 * @param hotelId
 	 * @return
 	 */
-	ResBaseInfo singleHotelDetail(String hotelId);
+	ResBaseInfo singleHotelDetail(String hotelId, String checkinDate, String checkoutDate) throws Exception;
+	
+	/**
+	 * 查询城市信息
+	 * @param agent
+	 * @param cityCode
+	 * @return
+	 */
+	CityDetail getCityDetailByCityCode(Agent agent, String cityName);
+	
+	/**
+	 * 查询酒店
+	 * @param agent
+	 * @param bqyHolId
+	 * @return
+	 */
+	ResBaseInfo getById(Agent agent, Long bqyHolId);
+	
+	/**
+	 * 酒店试预订
+	 * @param agent
+	 * @param isBookOrderReq
+	 * @return
+	 */
+	BookOrderResponse isBookOrder(Agent agent, IsBookOrderReq isBookOrderReq);
+	
+	/**
+	 * 查询酒店图片返回与TC图片字段一致
+	 * @param agent
+	 * @param hotelId
+	 * @return
+	 */
+	List<ImgInfo> listImgByHotelId(Agent agent, long hotelId);
 }

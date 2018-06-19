@@ -162,6 +162,18 @@ public class InsuranceVo implements Serializable {
     * @return
     */
 	private Integer buyWay;
+	/**
+	 * 是否为公务员保险 0为非  1为是
+	 */
+	private Integer isCivilServant;
+	public Integer getIsCivilServant() {
+		return isCivilServant;
+	}
+
+	public void setIsCivilServant(Integer isCivilServant) {
+		this.isCivilServant = isCivilServant;
+	}
+
 	public Integer getInternatOrcivil() {
 		return internatOrcivil;
 	}

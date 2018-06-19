@@ -203,6 +203,8 @@ public class OrderServiceImpl implements IOrderService {
     protected ITicketSenderService ticketSenderService;
     @Autowired
     IftMessageServiceImpl iftMessageServiceImpl;
+    @Reference
+    IRefundService refundService;
     
     @Value("${dpsconfig.job.owner}")
     protected String owner;
@@ -316,7 +318,7 @@ public class OrderServiceImpl implements IOrderService {
         }
 
     }
-    
+
     /**
      * 采购改签订单分单
      */
@@ -1031,7 +1033,7 @@ public class OrderServiceImpl implements IOrderService {
         return flag;
         
     }
-    
+
     /**
      * 取消订单.
      *
@@ -1060,10 +1062,10 @@ public class OrderServiceImpl implements IOrderService {
                  * 1、修改订单域子状态
                  * 2、修改国际机票订单状态
                  */
-                saleOrderService.updateStatus(agent, requestWithActor.getEntity(), 5);// 改为已取消状态
+                saleOrderService.updateStatus(agent, requestWithActor.getEntity(), 11);// 改为已取消状态
                 SaleOrderDetail saleOrderDetail = new SaleOrderDetail();
                 saleOrderDetail.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
-                saleOrderDetail.setStatus("5");
+                saleOrderDetail.setStatus("11");
                 saleOrderDetailDao.updateByOrderNo(saleOrderDetail);
 
 
@@ -2893,7 +2895,7 @@ public class OrderServiceImpl implements IOrderService {
         log.info("审核订单" + saleOrderNo + "已超过下单时间30分钟,订单被拒：" + saleOrderDetail.toString());
         saleOrderDetailDao.updateByOrderNo(saleOrderDetail);
         //更新销售订单
-        saleOrderService.updateStatus(agent, saleOrderNo, 4);
+        saleOrderService.updateStatus(agent, saleOrderNo, 11);
     }
     
     /**

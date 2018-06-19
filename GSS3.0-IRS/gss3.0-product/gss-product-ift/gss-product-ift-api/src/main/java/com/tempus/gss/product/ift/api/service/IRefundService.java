@@ -2,8 +2,10 @@ package com.tempus.gss.product.ift.api.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.exception.GSSException;
+import com.tempus.gss.order.entity.SaleChange;
 import com.tempus.gss.product.ift.api.entity.PassengerRefundPrice;
 import com.tempus.gss.product.ift.api.entity.SaleChangeExt;
+import com.tempus.gss.product.ift.api.entity.SaleOrderExt;
 import com.tempus.gss.product.ift.api.entity.vo.*;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.vo.Agent;
@@ -125,9 +127,10 @@ public interface IRefundService {
 	 * 拒绝废退.
 	 *
 	 * @param saleOrderNo
+	 * @param reason
 	 * @return
 	 */
-	boolean refuse(RequestWithActor<Long> saleOrderNo);
+	boolean refuse(RequestWithActor<Long> saleOrderNo, String reason);
 
 	/**
 	 * 通过条件VO查询废退改签单
@@ -155,4 +158,13 @@ public interface IRefundService {
 	 * @return
 	 */
 	int orderRefundInform(OrderInformVo orderInformVo);
+
+	/**
+	 * 申请杂费单时创建的销售变更单
+	 * @return
+	 * @param saleOrderExt
+	 */
+	public SaleChange createAjustSaleOrder(RequestWithActor<SaleOrderExt> saleOrderExt, Integer IncomeExpenseType);
+
+
 }

@@ -161,7 +161,36 @@ public class RefundServiceImpl implements IRefundService {
 		}).start();
 		return flag;
 	}
-	
+
+	@Override
+	public SaleChange createAjustSaleOrder(RequestWithActor<SaleOrderExt> saleOrderExt, Integer IncomeExpenseType){
+		log.info("创建杂费单的销售改签单开始===========");
+		/* 创建销售废退拓展单 */
+		SaleChange saleChange = new SaleChange();
+		Agent agent = saleOrderExt.getAgent();
+		SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleOrderExt.getEntity().getOriginalOrderNo());
+		Long businessSignNo = IdWorker.getId();
+		Long saleChangeNo = maxNoService.generateBizNo("IFT_SALE_CHANGE_EXT_NO", 38);
+		saleChange.setSaleChangeNo(saleChangeNo);
+		saleChange.setOrderChangeType(3);//3为改签
+		saleChange.setSaleOrderNo(saleOrderExt.getEntity().getOriginalOrderNo());
+		saleChange.setBusinessSignNo(businessSignNo);
+		saleChange.setBsignType(5);
+		saleChange.setOwner(agent.getOwner());
+		saleChange.setCreateTime(new Date());
+		saleChange.setChildStatus(1);//1.待审核 2.已审核 3.退票中 废票中 改签中 10.已完成  11.已取消
+		saleChange.setGoodsType(2);//商品大类 2=国际机票
+		saleChange.setGoodsSubType(13);//销改
+		saleChange.setGoodsName("");//TODO
+		saleChange.setTransationOrderNo(saleOrder.getTransationOrderNo());//交易号
+		saleChange.setIncomeExpenseType(IncomeExpenseType); //根据杂费单填金额的正负设置支或者收
+		saleChangeService.create(agent,saleChange);
+		return saleChange;
+	}
+
+
+
+
 	@Override
 	public SaleChangeExt createRefundExt(RequestWithActor<RefundCreateVo> requestWithActor) {
 		log.info("创建废退单申请开始===========");
@@ -979,11 +1008,12 @@ public class RefundServiceImpl implements IRefundService {
 	 * 拒绝废退.
 	 *
 	 * @param saleChangeNo
+	 * @param reason
 	 * @return
 	 */
 	@Override
 	@Transactional
-	public boolean refuse(RequestWithActor<Long> saleChangeNo) {
+	public boolean refuse(RequestWithActor<Long> saleChangeNo, String reason) {
 
 		log.info("拒绝废退开始=========");
 		try {
@@ -1008,7 +1038,18 @@ public class RefundServiceImpl implements IRefundService {
 				saleChangeExt.setModifyTime(modifyTime);
                 saleChangeExtDao.updateLocker(saleChangeExt);
                 Long saleOrderNo = saleChangeExt.getSaleChange().getSaleOrderNo();
-				detailService.updateSaleOrderDetailStatusByNo(saleOrderNo,4);
+                //只修改被拒单的航段+乘机人detail的状态，不能全部修改为4
+				List<SaleChangeDetail> saleChangeDetailList = saleChangeExt.getSaleChangeDetailList();
+				List<SaleOrderDetail> detailList = new ArrayList<>();
+				for (SaleChangeDetail saleChangeDetail : saleChangeDetailList) {
+					SaleOrderDetail saleOrderDetail = new SaleOrderDetail();
+					saleOrderDetail.setSaleOrderDetailNo(saleChangeDetail.getSaleOrderDetailNo());
+					saleOrderDetail.setStatus("4");
+					saleOrderDetail.setRefuseReason(reason);
+					detailList.add(saleOrderDetail);
+				}
+				detailService.batchUpdate(detailList);
+				//detailService.updateSaleOrderDetailStatusByNo(saleOrderNo,4);
 				ticketSenderService.updateByLockerId(agent,locker,"SALE_REFUSE_NUM");
 			}
 			/*创建操作日志*/
