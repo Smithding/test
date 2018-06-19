@@ -57,6 +57,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.BasicQuery;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -359,6 +360,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
  			if(beginResult >= 0 && endResult <= 0){
  				if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getResGPSInfo())) {
  					hotelSearchReq.setCityCode("");
+ 					//Point point =new Point(Double.valueOf(hotelSearchReq.getResGPSInfo().getLon()), Double.valueOf(hotelSearchReq.getResGPSInfo().getLat()));
+ 					//criatira.and("resGpsLocation").near(point).maxDistance(1D);//100000/6378137
+ 					
  					Criteria latlon = new Criteria();
  					if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getResGPSInfo().getType())) {
  						latlon.and("type").is(hotelSearchReq.getResGPSInfo().getType());
@@ -1035,7 +1039,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
             throw new GSSException("获取酒店列表", "0102", "agent对象为空");
         } 
         if (StringUtil.isNullOrEmpty(hotelSearchReq.getResId()) && StringUtil.isNullOrEmpty(hotelSearchReq.getCityCode()) && StringUtil.isNullOrEmpty(hotelSearchReq.getResGradeId()) && StringUtil.isNullOrEmpty(hotelSearchReq.getKeyword())) {
-        	hotelSearchReq.setCityCode("北京");
+        	hotelSearchReq.setCityCode("北京市");
         }
         TCResponse<ResBaseInfo> response = new TCResponse<ResBaseInfo>();
         List<ResBaseInfo> res=null;
@@ -1047,7 +1051,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
       		query.limit(hotelSearchReq.getRowCount());
       		
       		if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getCityCode())){
-    				criatira.and("cityName").is(hotelSearchReq.getCityCode());
+    				criatira.and("cityName").regex("^.*"+hotelSearchReq.getCityCode()+".*$");
     			}
     		if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getKeyword())){
     			String keyword = hotelSearchReq.getKeyword().trim();
