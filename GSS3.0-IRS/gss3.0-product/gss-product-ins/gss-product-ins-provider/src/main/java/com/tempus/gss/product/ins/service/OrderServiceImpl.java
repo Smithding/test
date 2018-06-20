@@ -726,6 +726,8 @@ public class OrderServiceImpl implements IOrderService {
 					log.info("投保响应成功");
 					// 更新采购单状态为2(已投保)
 					saleOrderService.updateStatus(requestWithActor.getAgent(), requestWithActor.getEntity(), 2);
+					saleOrderDetail.setInsureTime(new Date());
+					saleOrderExt.setTotalInsureTime(new Date());
 				} else {
 					saleOrderDetail.setErrorMessage(response.getMsg());
 					saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
@@ -1062,6 +1064,9 @@ public class OrderServiceImpl implements IOrderService {
 					log.info("投保响应成功");
 					// 设置子订单状态为2(已投保)
 					saleOrderDetail.setStatus(2);
+					//设置投保时间
+					saleOrderDetail.setInsureTime(new Date());
+					saleOrderExt.setTotalInsureTime(new Date());
 					boolean panDuan = false;
 					// 更新销售单和采购单状态为2(已投保)
 					for(SaleOrderDetail saleOrderDetailForStatus:saleOrderDetailList){
@@ -1208,6 +1213,8 @@ public class OrderServiceImpl implements IOrderService {
 					log.info("投保响应成功");
 					// 设置子订单状态为2(已投保)
 					saleOrderDetail.setStatus(2);
+					saleOrderDetail.setInsureTime(new Date());
+					saleOrderExt.setTotalInsureTime(new Date());
 					// 更新销售单和采购单状态为2(已投保)
 					if (StringUtils.isNotBlank(saleOrderExtVo.getPolicyNo())) {
 						log.error("获取保险保单成功--------》"+saleOrderExtVo.getPolicyNo());

@@ -538,7 +538,7 @@
   	 select 
   	 <include refid="Base_Column_List" />
      FROM INS_INSURANCE 
-     where  VAL ID=1 AND DEL = 0
+     where  VALID=1 AND DEL = 0
  	 <trim suffixOverrides="AND" >
 		<if test="insuranceNo != null and insuranceNo != ''">
 			AND INSURANCE_NO = #{insuranceNo} 

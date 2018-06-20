@@ -336,11 +336,11 @@ public class SaleOrderExtVo implements Serializable {
 	 */
 	private String endEffectTime;
 	/**
-	 * 投保开始时间
+	 * 创建开始时间
 	 */
 	private String startInsureTime;
 	/**
-	 * 投保结束时间
+	 * 创建结束时间
 	 */
 	private String endInsureTime;
 	/**
@@ -351,6 +351,32 @@ public class SaleOrderExtVo implements Serializable {
 	 * 客户类型
 	 */
 	private String customerType;
+	/**
+	 * 投保开始时间（真）
+	 * @return
+	 */
+	private String insureTimeStart;
+	/**
+	 * 投保结束时间（真）
+	 * @return
+	 */
+	private String insureTimeEnd;
+	public String getInsureTimeStart() {
+		return insureTimeStart;
+	}
+
+	public void setInsureTimeStart(String insureTimeStart) {
+		this.insureTimeStart = insureTimeStart;
+	}
+
+	public String getInsureTimeEnd() {
+		return insureTimeEnd;
+	}
+
+	public void setInsureTimeEnd(String insureTimeEnd) {
+		this.insureTimeEnd = insureTimeEnd;
+	}
+
 	public String getCustomerName() {
 		return customerName;
 	}
