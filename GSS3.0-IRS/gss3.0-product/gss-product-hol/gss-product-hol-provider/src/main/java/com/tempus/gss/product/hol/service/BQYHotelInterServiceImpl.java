@@ -447,8 +447,6 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			hotelInfo.setId(hotelId.getHotelId());
 			//酒店图片
 			QueryHotelParam queryHotelParam = new QueryHotelParam();
-			//queryHotelParam.setHotelId(hotelId.getHotelId());
-			//TODO 酒店ID需要改
 			queryHotelParam.setHotelId(hotelInfo.getHotelId());
 			//List<ImageList> hotelImageList = queryHotelImage(queryHotelParam);
 			//hotelInfo.setHotelImageList(hotelImageList);
@@ -456,7 +454,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			hotelInfo.setLatestUpdateTime(sdf.format(new Date()));
 			hotelInfo.setSaleStatus(1);
 			//TODO 随机最低价格
-			hotelInfo.setLowPrice(new BigDecimal((int)((Math.random() + 1) * 100)));
+			//hotelInfo.setLowPrice(new BigDecimal((int)((Math.random() + 1) * 100)));
 			//保存酒店信息
 			mongoTemplate1.save(hotelInfo);
 			//保存中间表
@@ -524,6 +522,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			holMidBaseInfo.setLat(hotelInfo.getLatitude().toString());
 			holMidBaseInfo.setLon(hotelInfo.getLongitude().toString());
 			
+			
+			holMidBaseInfo.setResPosition(new Double[]{hotelInfo.getLongitude().doubleValue(), hotelInfo.getLatitude().doubleValue()});
+			
 			//holMidBaseInfo.setCountryName("中国");
 			//一句话介绍...酒店描述
 			//holMidBaseInfo.setShortIntro(hotelInfo.getDescription());
@@ -547,11 +548,11 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	 */
 	@Override
 	public void deleteMongoDBData() {
-		mongoTemplate1.remove(new Query(), HotelInfo.class);
+		//mongoTemplate1.remove(new Query(), HotelInfo.class);
 		//mongoTemplate1.remove(new Query(), CityDetail.class);
 		//mongoTemplate1.remove(new Query(), HotelId.class);
 		//TODO 需要修改中间表的清空
-		mongoTemplate1.remove(new Query(), HolMidBaseInfo.class);
+		//mongoTemplate1.remove(new Query(), HolMidBaseInfo.class);
 		//mongoTemplate1.remove(new Query(Criteria.where("supplierNo").is("411805040103290132")), HolMidBaseInfo.class);
 	}
 	

@@ -13,27 +13,30 @@
 
 package com.tempus.gss.product.hol.mq;
 
+import org.springframework.amqp.core.ExchangeTypes;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.tempus.gss.bbp.util.StringUtil;
-import com.tempus.gss.order.entity.CreatePlanAmountVO;
-import com.tempus.gss.order.entity.GoodsBigType;
 import com.tempus.gss.order.entity.PayNoticeVO;
 import com.tempus.gss.order.service.IPlanAmountRecordService;
 import com.tempus.gss.product.hol.api.entity.response.HotelOrder;
-import com.tempus.gss.product.hol.api.entity.response.HotelOrderDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.OwnerOrderStatus;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.request.OrderPayReq;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderPayResult;
+import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelOrderService;
 import com.tempus.gss.product.hol.dao.HotelOrderMapper;
-import com.tempus.gss.vo.Agent;
-import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
+import com.tempus.gss.system.service.GSSException;
 
 /**
  * ClassName:HolPayNoticeListener
@@ -54,6 +57,9 @@ public class HolPayNoticeListener {
 
     @Reference
     IPlanAmountRecordService planAmountRecordService;
+    
+    @Autowired
+    private IBQYHotelInterService bqyHotelInterService;
 
     @RabbitHandler
     public void onMessage(PayNoticeVO payNoticeVO) {
@@ -66,6 +72,15 @@ public class HolPayNoticeListener {
                     long businessNo = payNoticeVO.getBusinessNo();
                     Long saleOrderNo = Long.valueOf(businessNo);
                     //调用酒店支付接口
+                    /*OrderPayReq orderPayReq = new OrderPayReq();
+                    orderPayReq.setOrderNumber(saleOrderNo);
+                    OrderPayResult orderPay = bqyHotelInterService.orderPay(orderPayReq);
+                    if (!orderPay.getIsChangePrice()) {
+                    	throw new GSSException("bqy酒店订单支付", "10009", "bqy酒店订单支付失败:酒店价格变动!" + orderPay.getMsg());
+                    }
+                    if (!orderPay.getReseult()) {
+                    	throw new GSSException("bqy酒店订单支付", "10010", "bqy酒店订单支付失败:" + orderPay.getMsg());
+                    }*/
                    
                     //更新酒店订单
                     HotelOrder hotelOrder = new HotelOrder();

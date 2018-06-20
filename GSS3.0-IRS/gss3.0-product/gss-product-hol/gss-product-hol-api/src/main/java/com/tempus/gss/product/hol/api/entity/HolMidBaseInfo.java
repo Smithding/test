@@ -3,6 +3,8 @@ package com.tempus.gss.product.hol.api.entity;
 import java.io.Serializable;
 import java.util.List;
 
+import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
+
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
@@ -138,9 +140,13 @@ public class HolMidBaseInfo implements Serializable{
 	
 	private List<Object> bookItems;
 	
+	/**
+	 * 第一个经度lon, 第二个纬度lat
+	 */
+	@GeoSpatialIndexed
 	private Double[] resPosition;
 	/**
-	 * 1: TC, 2: BQY, 3: TY
+	 * 1: TC, 2: BQY, 3: TY, 0: All, 
 	 */
 	private Integer resType;
 	

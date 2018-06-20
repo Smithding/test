@@ -9,22 +9,22 @@ public class OrderPayResult implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@JSONField(name="Reseult")
-	private String reseult;			//String	操作结果
+	private boolean reseult;			//String	操作结果
 	
 	@JSONField(name="Msg")
 	private String msg;				//String	消息
 	
 	@JSONField(name="IsChangePrice")
-	private String isChangePrice;	//bool	是否变价
+	private boolean isChangePrice;	//bool	是否变价
 	
 	@JSONField(name="PayPrice")
 	private String payPrice;		//decimal	支付金额
 
-	public String getReseult() {
+	public boolean getReseult() {
 		return reseult;
 	}
 
-	public void setReseult(String reseult) {
+	public void setReseult(boolean reseult) {
 		this.reseult = reseult;
 	}
 
@@ -36,11 +36,11 @@ public class OrderPayResult implements Serializable {
 		this.msg = msg;
 	}
 
-	public String getIsChangePrice() {
+	public boolean getIsChangePrice() {
 		return isChangePrice;
 	}
 
-	public void setIsChangePrice(String isChangePrice) {
+	public void setIsChangePrice(boolean isChangePrice) {
 		this.isChangePrice = isChangePrice;
 	}
 
