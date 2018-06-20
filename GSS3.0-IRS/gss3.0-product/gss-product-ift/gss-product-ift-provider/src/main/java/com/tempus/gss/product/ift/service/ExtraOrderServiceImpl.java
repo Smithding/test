@@ -189,7 +189,7 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
         logger.info("主管审核的杂费单信息:"+extraOrder.toString());
         Integer status = extraOrder.getAuditStatus();
         if(StringUtils.equals("-1",String.valueOf(status)) && StringUtils.isEmpty(extraOrder.getActorDesc())){
-            throw new RuntimeException("杂费单审核不通过是，备注信息不能为空");
+            throw new RuntimeException("杂费单审核不通过时，备注信息不能为空");
         }
         Agent agent = requestWithActor.getAgent();
         differenceOrderService.update(agent,extraOrder);
