@@ -68,17 +68,18 @@
     <result column="VALID" property="valid" jdbcType="BIT" />
        <!--删除标志 0 无效 已删除 1 有效-->
     <result column="AMOUNT" property="amount" jdbcType="BIGINT" />
+    <!--是否为公务员保险 0非公务员保险 1公务员保险-->
+    <result column="IS_CIVIL_SERVANT" property="isCivilServant" jdbcType="INTEGER" />
     <!--一对多关联控润列表-->
     <collection property="profitControlList" ofType="com.tempus.gss.product.ins.api.entity.ProfitControl"
                 column="INSURANCE_NO"
                 select="com.tempus.gss.product.ins.dao.ProfitControlDao.selectByInsuranceNo"/>
-
   </resultMap>
   <sql id="Base_Column_List" >
     INSURANCE_NO, ID, OWNER, PRODUCT_KEY, NAME, CODE, PAY_MODEL, INSURE_TYPE, COMPANY_NAME,
     IS_CHECK_NUM, IS_CHECK_AGE, IS_CHECK_COUNT, TOP_NUM, BOTTOM_NUM, TOP_COUNT, BOTTOM_COUNT,
     TOP_AGE, BOTTOM_AGE, BEGIN_DAYS, END_DAYS, BUY_PRICE, BRIEF, BUY_WAY, IS_DEFAULT, SUPPLIER_NO, CREATE_TIME, MODIFY_TIME,
-    CREATOR, MODIFIER,INTERNAT_ORCIVIL,FACE_PRICE,VALID,AMOUNT
+    CREATOR, MODIFIER,INTERNAT_ORCIVIL,FACE_PRICE,VALID,AMOUNT,IS_CIVIL_SERVANT
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select
@@ -215,6 +216,9 @@
         <if test="amount != null" >
         AMOUNT,
       </if>
+      <if test="isCivilServant != null" >
+        IS_CIVIL_SERVANT,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="insuranceNo != null" >
@@ -316,6 +320,9 @@
       </if>
       <if test="amount != null" >
         #{amount,jdbcType=BIGINT},
+      </if>
+       <if test="isCivilServant != null">
+        #{isCivilServant,jdbcType=INTEGER},
       </if>
     </trim>
   </insert>
@@ -421,6 +428,12 @@
       <if test="internatOrcivil != null" >
         INTERNAT_ORCIVIL = #{internatOrcivil,jdbcType=INTEGER},
       </if>
+      <if test="internatOrcivil != null" >
+        INTERNAT_ORCIVIL = #{internatOrcivil,jdbcType=INTEGER},
+      </if>
+      <if test="isCivilServant != null" >
+        IS_CIVIL_SERVANT = #{isCivilServant,jdbcType=INTEGER},
+      </if>
     </set>
     where INSURANCE_NO = #{insuranceNo,jdbcType=BIGINT}
   </update>
@@ -484,8 +497,11 @@
 		<if test="internatOrcivil != null and internatOrcivil != ''" >
 			AND INTERNAT_ORCIVIL = #{internatOrcivil,jdbcType=VARCHAR}
 		</if>
+		<if test="isCivilServant != null and isCivilServant != ''" >
+			AND IS_CIVIL_SERVANT = #{isCivilServant,jdbcType=INTEGER}
+		</if>
   	 </trim>
-  	 ORDER BY CREATE_TIME DESC
+  	 ORDER BY CREATE_TIME ASC
   </select>
  <select id="queryAllObjByKey" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ins.api.entity.Insurance" >
   	 select 
@@ -522,7 +538,7 @@
   	 select 
   	 <include refid="Base_Column_List" />
      FROM INS_INSURANCE 
-     where  VALID=1 AND DEL = 0
+     where  VAL ID=1 AND DEL = 0
  	 <trim suffixOverrides="AND" >
 		<if test="insuranceNo != null and insuranceNo != ''">
 			AND INSURANCE_NO = #{insuranceNo} 

@@ -1,9 +1,9 @@
 package com.tempus.gss.product.hol.api.entity.response.tc;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
+
+import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.tempus.gss.product.hol.api.util.DateUtil;
@@ -147,6 +147,9 @@ public class ResBaseInfo implements Serializable{
 	 */
 	@JSONField(name = "ResGPS")
 	private List<ResGPSInfo> resGPS;
+	
+	@GeoSpatialIndexed
+	private Double[] resGpsLocation;
 	/**
 	 * 酒店设施
 	 */
@@ -638,6 +641,12 @@ public class ResBaseInfo implements Serializable{
 	}
 	public void setImgUrl(String imgUrl) {
 		this.imgUrl = imgUrl;
+	}
+	public Double[] getResGpsLocation() {
+		return resGpsLocation;
+	}
+	public void setResGpsLocation(Double[] resGpsLocation) {
+		this.resGpsLocation = resGpsLocation;
 	}
 	
 }

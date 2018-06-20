@@ -863,7 +863,10 @@ public class ChangeServiceImpl implements IChangeService {
             List<ChangePriceVo> chdList = requestWithActor.getEntity().getSaleChdPriceList();
             List<ChangePriceVo> infList = requestWithActor.getEntity().getSaleInfPriceList();
             List<Leg> legList = requestWithActor.getEntity().getLegList();
-            log.info("保存变更价格数据" + adtList.size());
+            if(adtList != null){
+                 //可以儿童一个人改签所有成人列表可能为空
+                log.info("保存变更价格数据" + adtList.size());
+            }
             handle(requestWithActor, adtList);
             handle(requestWithActor, chdList);
             handle(requestWithActor, infList);
@@ -1281,8 +1284,23 @@ public class ChangeServiceImpl implements IChangeService {
             //原单状态恢复 TODO
             SaleOrderExt saleOrderExt = saleOrderExtService.
                     selectBySaleOrderNo(saleChangeNo.getAgent(), saleChange.getSaleOrderNo());
-            List<SaleOrderDetail> saleOrderDetailList = saleOrderExt.getSaleOrderDetailList();
-            for (SaleOrderDetail saleOrderDetail : saleOrderDetailList) {
+           // List<SaleOrderDetail> saleOrderDetailList = saleOrderExt.getSaleOrderDetailList();
+            List<SaleChangeDetail> saleChangeDetailList = changeExt.getSaleChangeDetailList();
+            for (SaleChangeDetail saleChangeDetail : saleChangeDetailList) {
+                SaleOrderDetail saleOrderDetail = saleChangeDetail.getSaleOrderDetail();
+                if(!saleOrderDetail.getIsChange()){
+                    saleOrderDetail.setStatus("4");
+                } else{
+                    saleOrderDetail.setStatus("11");
+                }
+                saleOrderDetail.setModifier(saleChangeNo.getAgent().getAccount());
+                saleOrderDetail.setModifyTime(new Date());
+                RequestWithActor<SaleOrderDetail> saleOrderDetailRequestWithActor = new RequestWithActor<>();
+                saleOrderDetailRequestWithActor.setAgent(saleChangeNo.getAgent());
+                saleOrderDetailRequestWithActor.setEntity(saleOrderDetail);
+                saleOrderDetailService.upateSaleOrder(saleOrderDetailRequestWithActor);
+            }
+           /* for (SaleOrderDetail saleOrderDetail : saleOrderDetailList) {
                 if(!saleOrderDetail.getIsChange()){
                     saleOrderDetail.setStatus("4");
                 } else{
@@ -1294,7 +1312,8 @@ public class ChangeServiceImpl implements IChangeService {
                     saleOrderDetailRequestWithActor.setAgent(saleChangeNo.getAgent());
                     saleOrderDetailRequestWithActor.setEntity(saleOrderDetail);
                     saleOrderDetailService.upateSaleOrder(saleOrderDetailRequestWithActor);
-            }
+            }*/
+
             saleOrderService.updateStatus(saleChangeNo.getAgent(),saleOrderExt.getSaleOrderNo(),4);
 
             try {

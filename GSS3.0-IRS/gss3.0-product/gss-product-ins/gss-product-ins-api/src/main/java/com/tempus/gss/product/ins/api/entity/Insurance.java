@@ -178,7 +178,18 @@ public class Insurance implements Serializable {
      * @return
      */
     private Long amount;
-    private int del;
+	private int del;
+	/**
+	 * 是否是公务员保险  0为不是  1为是
+	 */
+	private int isCivilServant;
+    public int getIsCivilServant() {
+		return isCivilServant;
+	}
+
+	public void setIsCivilServant(int isCivilServant) {
+		this.isCivilServant = isCivilServant;
+	}
 	public Long getAmount() {
 		return amount;
 	}

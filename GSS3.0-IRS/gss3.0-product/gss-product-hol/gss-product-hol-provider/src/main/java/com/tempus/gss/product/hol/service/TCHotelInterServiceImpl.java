@@ -54,6 +54,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ProDetails;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProSaleInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ResGPSInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResInfoList;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfos;
@@ -110,6 +111,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 	private String ORDER_LOG_URL;
 	
 	SimpleDateFormat sdfupdate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 	
 	public List<ResInfoList> queryTCHotelList(AllHotelListReq allHotelListReq) throws GSSException{
 		//log.info("查询酒店列表开始");
@@ -360,28 +362,143 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 	@Override
 	public ResBaseInfo updateSingleResDetail(Agent agent, String resId) {
 		ResBaseInfo resBaseInfo = null;
+		Integer minPrice = new Random().nextInt(200) + 100;
+		Integer flag = 0;
 		try {
-			SingleHotelDetailReq singleHotelDetailReq=new SingleHotelDetailReq();
-			singleHotelDetailReq.setResId(String.valueOf(resId));
-			singleHotelDetailReq.setSourceForm("-1");
-			singleHotelDetailReq.setRequestContent("res");
-			TCHotelDetailResult hotelDetail=queryTCHotelDetail(singleHotelDetailReq);
-			List<ResBaseInfo> resBaseInfos = hotelDetail.getResBaseInfos();
-			if(StringUtil.isNotNullOrEmpty(resBaseInfos)) {
-				resBaseInfo = resBaseInfos.get(0);
-				Integer minPrice = new Random().nextInt(800) + 100;
-				ResBaseInfo resBaseInfoMongo = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(resId)),ResBaseInfo.class);
-				if(StringUtil.isNotNullOrEmpty(resBaseInfoMongo)) {
-					minPrice = resBaseInfoMongo.getMinPrice();
+			Calendar cal = Calendar.getInstance();  
+			Calendar calAdd = Calendar.getInstance();
+			String calStartTime= sdf.format(cal.getTime());
+			
+			calAdd.add(Calendar.MONTH, 2);
+			calAdd.add(Calendar.DAY_OF_MONTH, -1);
+			String calAddTime= sdf.format(calAdd.getTime());
+			
+			AssignDateHotelReq assignDateHotelReq=new AssignDateHotelReq();
+			assignDateHotelReq.setResId(Long.valueOf(resId));
+			assignDateHotelReq.setSourceFrom("-1");
+			assignDateHotelReq.setStartTime(calStartTime);
+			assignDateHotelReq.setEndTime(calAddTime);
+			AssignDateHotel assignDateHotel=  queryAssignDateHotel(assignDateHotelReq);
+			
+			if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())){
+				List<Integer> minProPrice=new ArrayList<Integer>();
+				List<ProInfoDetail> proInfoDetailList = assignDateHotel.getProInfoDetailList();
+				for(ProInfoDetail proInfoDetail : proInfoDetailList){
+					if(proInfoDetail.getProSaleInfoDetails()!= null && proInfoDetail.getProSaleInfoDetails().size() > 0){ 
+						TreeMap<String, ProSaleInfoDetail> map= proInfoDetail.getProSaleInfoDetails();
+						if(StringUtil.isNotNullOrEmpty(map)){
+							for (Map.Entry<String, ProSaleInfoDetail> entry : map.entrySet()) {
+								minProPrice.add(entry.getValue().getDistributionSalePrice());
+								if(minProPrice.size() >= 1) {
+									break;
+								}
+							}
+						}
+					}
 				}
-				resBaseInfo.setMinPrice(minPrice);
-				resBaseInfo.setResCommonPrice(minPrice);
-				resBaseInfo.setSaleStatus(1);
-				resBaseInfo.setId(Long.valueOf(resId));
-				resBaseInfo.setSupplierNo("411709261204150108");
-				resBaseInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
-				mongoTemplate1.save(resBaseInfo, "resBaseInfo");
+				if(StringUtil.isNotNullOrEmpty(minProPrice)){
+					flag = 1;
+					if(minProPrice.size() >= 2){
+						minPrice= Collections.min(minProPrice);
+					}else if(minProPrice.size() == 1){
+						minPrice= minProPrice.get(0);
+					}
+				}
+				
+				SingleHotelDetailReq singleHotelDetailReq=new SingleHotelDetailReq();
+				singleHotelDetailReq.setResId(String.valueOf(resId));
+				singleHotelDetailReq.setSourceForm("-1");
+				singleHotelDetailReq.setRequestContent("res,respro,rimg");
+				TCHotelDetailResult hotelDetail=queryTCHotelDetail(singleHotelDetailReq);
+				if(StringUtil.isNotNullOrEmpty(hotelDetail)) {
+					List<ResBaseInfo> resBaseInfos = hotelDetail.getResBaseInfos();
+					List<ResProBaseInfo> resProBaseInfoList= hotelDetail.getResProBaseInfos();
+					List<ImgInfo> imgInfoList=  hotelDetail.getResImages();
+					
+					if(StringUtil.isNotNullOrEmpty(resBaseInfos) && StringUtil.isNotNullOrEmpty(resProBaseInfoList) && StringUtil.isNotNullOrEmpty(imgInfoList)) {
+						resBaseInfo = resBaseInfos.get(0);
+						
+						if(StringUtil.isNotNullOrEmpty(resBaseInfo.getResGPS())) {
+							Double[] resGpsLocation = new Double[2];
+							for(ResGPSInfo gps : resBaseInfo.getResGPS()) {
+								if(gps.getType().equals(1)) {
+									resGpsLocation[0] = Double.valueOf(gps.getLon());
+				 					resGpsLocation[1] = Double.valueOf(gps.getLat());
+				 					resBaseInfo.setResGpsLocation(resGpsLocation);
+				 					break;
+								}
+							}
+						}
+						resBaseInfo.setMinPrice(minPrice);
+						resBaseInfo.setResCommonPrice(minPrice);
+						Map<String, List<ResProBaseInfo>> proMap=new HashMap<String, List<ResProBaseInfo>>();
+						String key="";
+						
+						for(ResProBaseInfo proList: resProBaseInfoList){
+							for(ProInfoDetail de : assignDateHotel.getProInfoDetailList()) {
+								if(proList.getProductUniqueId().equals(de.getProductUniqueId())) {
+									key= proList.getResProName();
+									if(!proMap.containsKey(key)){
+										List<ResProBaseInfo> proBedList=new ArrayList<ResProBaseInfo>();
+										proBedList.add(proList);
+										proMap.put(key, proBedList);
+									}else{
+										List<ResProBaseInfo> proBedList = proMap.get(key);
+										proBedList.add(proList);
+									}
+								}
+							}
+						}
+						
+						List<ProDetails> ProInfoDetaisList=new ArrayList<ProDetails>();
+						if(StringUtil.isNotNullOrEmpty(proMap)){
+							for (Map.Entry<String, List<ResProBaseInfo>> baseList : proMap.entrySet()) {
+								ProDetails proInfoDetai=new ProDetails();
+								proInfoDetai.setProId(proMap.get(baseList.getKey()).get(0).getProId());
+								proInfoDetai.setResProName(baseList.getKey());
+								proInfoDetai.setRoomSize(proMap.get(baseList.getKey()).get(0).getRoomSize());
+								proInfoDetai.setRoomFloor(proMap.get(baseList.getKey()).get(0).getRoomFloor());
+								proInfoDetai.setRoomFacilities(proMap.get(baseList.getKey()).get(0).getRoomFacilities());
+								proInfoDetai.setResProBaseInfoList(baseList.getValue());
+								ProInfoDetaisList.add(proInfoDetai);
+							}
+						}
+						List<ImgInfo> list2=new ArrayList<ImgInfo>();
+						Map<String, ImgInfo> mm = new HashMap<String, ImgInfo>();
+						if(imgInfoList!=null && imgInfoList.size() > 0) {
+							for(ImgInfo img : imgInfoList) {
+								if(img.getIsResProDefault().equals(1)){
+									mm.put(img.getResProId(), img);
+								}
+							}
+							for (Map.Entry<String, ImgInfo> entry : mm.entrySet()) {
+								list2.add(entry.getValue());
+							}
+						}
+						
+						resBaseInfo.setImgInfoList(list2);
+						resBaseInfo.setProDetails(ProInfoDetaisList);
+						
+						if(flag.equals(0)) {
+							resBaseInfo.setSaleStatus(0);
+						}else {
+							resBaseInfo.setSaleStatus(1);
+						}
+						resBaseInfo.setId(Long.valueOf(resId));
+						resBaseInfo.setSupplierNo("411709261204150108");
+						resBaseInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
+					}
+					
+					for(ImgInfo img : imgInfoList) {
+						if(img.getIsResDefault().equals(1)) {
+							resBaseInfo.setImgUrl(img.getImageUrl());
+							break;
+						}
+					}
+					mongoTemplate1.save(resBaseInfo, "resBaseInfo");
+				}
 			}
+			
 		} catch (Exception e) {
 			LogRecordHol logRecordHol=new LogRecordHol();
 			logRecordHol.setBizCode("HOL-resInfo");
@@ -421,13 +538,13 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 			assignDateHotelReq.setStartTime(calStartTime);
 			assignDateHotelReq.setEndTime(calEndTime);
 			AssignDateHotel assignDateHotel=  queryAssignDateHotel(assignDateHotelReq);
-			ProInfoDetail proinfo = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(productUniqueId)),ProInfoDetail.class);
-			
-			if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(proinfo)){
+			//ProInfoDetail proinfo = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(productUniqueId)),ProInfoDetail.class);
+			//System.out.println(JsonUtil.toJson(assignDateHotel));
+			if(StringUtil.isNotNullOrEmpty(assignDateHotel)){
 				List<ProInfoDetail> proInfoDetailList= assignDateHotel.getProInfoDetailList();
 				if(proInfoDetailList != null && proInfoDetailList.size() >0){
 					TreeMap<String, ProSaleInfoDetail> proSaleInfoDetails = proInfoDetailList.get(0).getProSaleInfoDetails();
-					TreeMap<String, ProSaleInfoDetail> proinfomap = proinfo.getProSaleInfoDetails();
+					//TreeMap<String, ProSaleInfoDetail> proinfomap = proinfo.getProSaleInfoDetails();
 					
 						 for (int i = 0; i <= days; i++) {
 							 	Calendar calender = Calendar.getInstance();
@@ -436,16 +553,35 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 							 	fd.setDay(sdf.format(calender.getTime()));
 							 	if(proSaleInfoDetails != null && proSaleInfoDetails.size() >0){
 							 		for (Map.Entry<String, ProSaleInfoDetail> entry : proSaleInfoDetails.entrySet()) {
-								 		if(fd.getDay().compareTo(DateUtil.stringToSimpleString(entry.getKey())) == 0){
+							 			if(fd.getDay().compareTo(DateUtil.stringToSimpleString(entry.getKey())) == 0){
+							 				fd.setPrice(entry.getValue().getDistributionSalePrice());
+							 				fd.setPrice2(entry.getValue().getDistributionSalePrice());
+								 			if(!entry.getValue().getInventoryStats().equals(4)) {
+		    	        							SimpleDateFormat newsdf=new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+		    	        							String nowTime = newsdf.format(new Date());
+		    	        							int startDate = entry.getValue().getStartDate().compareTo(nowTime);
+		    	        							int endDate = entry.getValue().getEndDate().compareTo(nowTime);
+		    	        							if(startDate > 0 || endDate < 0) {
+		    	        								fd.setPrice2(0);
+		    	        							}
+		    	        						}else {
+		    	        							fd.setPrice2(0);
+		    	        						}
+							 			}
+							 			
+							 			
+							 			
+							 			
+								 		/*if(fd.getDay().compareTo(DateUtil.stringToSimpleString(entry.getKey())) == 0){
 								 			if(entry.getValue().getInventoryStats().equals(4) || (entry.getValue().getOpeningSale().equals(false) && entry.getValue().getInventoryRemainder().equals(0))) {
 								 				fd.setPrice(0);
 								 			}else {
 								 				fd.setPrice(entry.getValue().getDistributionSalePrice());
 								 			}
-								 		}
+								 		}*/
 								 	}
 							 	}
-							 	if(proinfomap != null){
+							 	/*if(proinfomap != null){
 							 		for(Map.Entry<String, ProSaleInfoDetail> entry : proinfomap.entrySet()) {
 								 		if(fd.getDay().compareTo(DateUtil.stringToSimpleString(entry.getKey())) == 0){
 								 			if(entry.getValue().getInventoryStats().equals(4) || (entry.getValue().getOpeningSale().equals(false) && entry.getValue().getInventoryRemainder().equals(0))) {
@@ -455,7 +591,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 								 			}
 								 		}
 								 	}
-							 	}
+							 	}*/
 							 	fdList.add(fd);
 						}
 				}
