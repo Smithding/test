@@ -52,13 +52,15 @@
     <result column="MODIFIER" property="modifier" jdbcType="VARCHAR" />
     <!--删除标志 0 无效 已删除 1 有效-->
     <result column="VALID" property="valid" jdbcType="BIT" />
+    <!-- 投保时间  -->
+    <result column="INSURE_TIME" property="insureTime" jdbcType="TIMESTAMP" />
     <result column="ERROR_MESSAGE" property="errorMessage" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
     INSURED_NO, ID, OWNER, SALE_ORDER_NO, INSURED_NAME, INSURED_CERTI_TYPE, INSURED_CERTI_NO, 
     POLICY_NO, ELE_URL, INSURED_BIRTHDAY, INSURED_SEX, INSURED_PHONE, INSURED_EMAIL, PREMIUM, 
     BENEFICIARY_TYPE, CUSTOMER_RELATIONS, INSURANCE_NUM, STATUS, CREATE_TIME, MODIFY_TIME, CREATOR, 
-    MODIFIER, VALID,ERROR_MESSAGE
+    MODIFIER, VALID,ERROR_MESSAGE,INSURE_TIME
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
@@ -77,7 +79,7 @@
          isod.INSURED_NO, isod.ID, isod.OWNER, isod.SALE_ORDER_NO, isod.INSURED_NAME, isod.INSURED_CERTI_TYPE, isod.INSURED_CERTI_NO, 
     isod.POLICY_NO, isod.ELE_URL, isod.INSURED_BIRTHDAY, isod.INSURED_SEX, isod.INSURED_PHONE, isod.INSURED_EMAIL,isod.PREMIUM, 
     isod.BENEFICIARY_TYPE, isod.CUSTOMER_RELATIONS, isod.INSURANCE_NUM, isod.STATUS, isod.CREATE_TIME, isod.MODIFY_TIME, isod.CREATOR, 
-    isod.MODIFIER, isod.VALID,dsi.TICKET_NO,dsi.PNR
+    isod.MODIFIER, isod.VALID,dsi.TICKET_NO,dsi.PNR,isod.INSURE_TIME
         FROM INS_SALE_ORDER_DETAIL isod
         LEFT JOIN INS_SALE_ORDER_EXT isoe ON isod.SALE_ORDER_NO=isoe.SALE_ORDER_NO
         LEFT JOIN DPS_SALE ds ON ds.TRADE_NO=isoe.TRANSACTION_ID
@@ -184,6 +186,9 @@
        <if test="errorMessage != null" >
         ERROR_MESSAGE,
       </if>
+      <if test="insureTime != null" >
+        INSURE_TIME,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="insuredNo != null" >
@@ -261,6 +266,9 @@
        <if test="errorMessage != null" >
         #{errorMessage,jdbcType=VARCHAR},
       </if>
+       <if test="insureTime != null" >
+        #{insureTime,jdbcType=TIMESTAMP},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ins.api.entity.SaleOrderDetail" >
@@ -334,6 +342,9 @@
       </if>
        <if test="errorMessage != null" >
         ERROR_MESSAGE = #{errorMessage,jdbcType=VARCHAR},
+      </if>
+      <if test="insureTime != null" >
+        INSURE_TIME = #{insureTime,jdbcType=VARCHAR},
       </if>
     </set>
     where INSURED_NO = #{insuredNo,jdbcType=BIGINT}

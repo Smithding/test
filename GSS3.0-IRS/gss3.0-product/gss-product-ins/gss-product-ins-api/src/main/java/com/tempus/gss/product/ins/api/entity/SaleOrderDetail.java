@@ -191,7 +191,16 @@ public class SaleOrderDetail implements Serializable,Cloneable {
 	 * pnr(保险报表使用)
 	 */
 	private String pnr;
-    public String getIsReport() {
+	private Date insureTime;
+    public Date getInsureTime() {
+		return insureTime;
+	}
+
+	public void setInsureTime(Date insureTime) {
+		this.insureTime = insureTime;
+	}
+
+	public String getIsReport() {
 		return isReport;
 	}
 

@@ -269,6 +269,12 @@
          </if>
          <if test="endInsureTime != null and endInsureTime != ''">
             AND date(isod.CREATE_TIME) &lt;= date(#{endInsureTime,jdbcType=DATE})
+         </if>
+         <if test="insureTimeStart != null and insureTimeStart != ''">
+            AND date(isod.INSURE_TIME) &gt;= date(#{insureTimeStart,jdbcType=DATE})
+         </if>
+         <if test="insureTimeEnd != null and insureTimeEnd != ''">
+            AND date(isod.INSURE_TIME) &lt;= date(#{insureTimeEnd,jdbcType=DATE})
          </if>	
 <!--         <if test="startInsureTime != null and startInsureTime != '' and endInsureTime != null and endInsureTime != ''">
             AND ((date(isoe.ISSUE_DATE) &gt;= date(#{startInsureTime,jdbcType=DATE})) AND (date(isoe.ISSUE_DATE) &lt;= date(#{endInsureTime,jdbcType=DATE})))

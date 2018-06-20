@@ -329,8 +329,20 @@ public class SaleOrderExt implements Serializable {
 	 */
 	private BigDecimal facePrice;
 	private static final long serialVersionUID = 1L;
-	public String getPnr() {
+	/**
+	 * 投保总时间
+	 * @return
+	 */
+	private Date totalInsureTime;
+	public Date getTotalInsureTime() {
+		return totalInsureTime;
+	}
 
+	public void setTotalInsureTime(Date totalInsureTime) {
+		this.totalInsureTime = totalInsureTime;
+	}
+
+	public String getPnr() {
 		return pnr;
 	}
 	public int getInsuranceSource() {

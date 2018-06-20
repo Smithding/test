@@ -1,11 +1,5 @@
 package com.tempus.gss.product.ift.api.entity;
 
-import com.baomidou.mybatisplus.annotations.IdType;
-import com.baomidou.mybatisplus.annotations.TableField;
-import com.baomidou.mybatisplus.annotations.TableId;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.tempus.gss.order.DeSerializer;
 import com.tempus.gss.order.entity.*;
 
 import java.io.Serializable;
@@ -203,7 +197,7 @@ public class IftExtraOrder implements Serializable{
 
     public String getDifferenceTypeName() {
         if (null != differenceType) {
-            return EDifferenceType.format(differenceType).getValue();
+            return EIncidentalType.format(differenceType).getValue();
         } else {
             return differenceTypeName;
         }
