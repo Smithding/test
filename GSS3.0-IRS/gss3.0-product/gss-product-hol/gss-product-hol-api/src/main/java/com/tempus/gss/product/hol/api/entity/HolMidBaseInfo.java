@@ -4,11 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
-
-import com.alibaba.fastjson.annotation.JSONField;
-import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
-import com.tempus.gss.product.hol.api.entity.response.tc.ResGPSInfo;
 
 public class HolMidBaseInfo implements Serializable{
 	private static final long serialVersionUID = 1L;
@@ -17,24 +13,16 @@ public class HolMidBaseInfo implements Serializable{
 	 */
 	private Long id;
 	/**
-	 * TC酒店id
+	 * 酒店id
 	 */
-	private Long tcResId;
+	private Long resId;
 	
 	/**
-	 * BQY酒店id
+	 * 酒店名称
 	 */
-	private Long bqyResId;
+	private String resName;
 	
-	/**
-	 * TC酒店名称
-	 */
-	private String tcResName;
-	
-	/**
-	 * BQY酒店名称
-	 */
-	private String bqyResName;
+	private List<ResNameSum> resNameSum;
 	
 	/**
 	 * 省份名称
@@ -82,23 +70,17 @@ public class HolMidBaseInfo implements Serializable{
 	 * 坐标类型（1-百度坐标 2-图吧坐标 3-谷歌坐标）
 	 */
 	private Integer latLonType;
+
 	/**
-	 * 经度
+	 * 第一个经度lon, 第二个纬度lat
 	 */
-	private String lon;
-	/**
-	 * 纬度
-	 */
-	private String lat;
+	@GeoSpatialIndexed
+	private Double[] resPosition;
 	
 	/**
 	 * 国家名称（默认为中国）
 	 */
 	private String countryName;
-	/**
-	 * 一句话介绍
-	 */
-	private String shortIntro;
 	
 	/**
 	 * 酒店头图
@@ -138,18 +120,11 @@ public class HolMidBaseInfo implements Serializable{
 	 */
 	private String bookInfo;
 	
-	private List<Object> bookItems;
-	
-	/**
-	 * 第一个经度lon, 第二个纬度lat
-	 */
-	@GeoSpatialIndexed
-	private Double[] resPosition;
 	/**
 	 * 1: TC, 2: BQY, 3: TY, 0: All, 
 	 */
 	private Integer resType;
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -158,36 +133,28 @@ public class HolMidBaseInfo implements Serializable{
 		this.id = id;
 	}
 
-	public Long getTcResId() {
-		return tcResId;
+	public Long getResId() {
+		return resId;
 	}
 
-	public void setTcResId(Long tcResId) {
-		this.tcResId = tcResId;
+	public void setResId(Long resId) {
+		this.resId = resId;
 	}
 
-	public Long getBqyResId() {
-		return bqyResId;
+	public String getResName() {
+		return resName;
 	}
 
-	public void setBqyResId(Long bqyResId) {
-		this.bqyResId = bqyResId;
+	public void setResName(String resName) {
+		this.resName = resName;
+	}
+	
+	public List<ResNameSum> getResNameSum() {
+		return resNameSum;
 	}
 
-	public String getTcResName() {
-		return tcResName;
-	}
-
-	public void setTcResName(String tcResName) {
-		this.tcResName = tcResName;
-	}
-
-	public String getBqyResName() {
-		return bqyResName;
-	}
-
-	public void setBqyResName(String bqyResName) {
-		this.bqyResName = bqyResName;
+	public void setResNameSum(List<ResNameSum> resNameSum) {
+		this.resNameSum = resNameSum;
 	}
 
 	public String getProvName() {
@@ -270,20 +237,12 @@ public class HolMidBaseInfo implements Serializable{
 		this.latLonType = latLonType;
 	}
 
-	public String getLon() {
-		return lon;
+	public Double[] getResPosition() {
+		return resPosition;
 	}
 
-	public void setLon(String lon) {
-		this.lon = lon;
-	}
-
-	public String getLat() {
-		return lat;
-	}
-
-	public void setLat(String lat) {
-		this.lat = lat;
+	public void setResPosition(Double[] resPosition) {
+		this.resPosition = resPosition;
 	}
 
 	public String getCountryName() {
@@ -292,14 +251,6 @@ public class HolMidBaseInfo implements Serializable{
 
 	public void setCountryName(String countryName) {
 		this.countryName = countryName;
-	}
-
-	public String getShortIntro() {
-		return shortIntro;
-	}
-
-	public void setShortIntro(String shortIntro) {
-		this.shortIntro = shortIntro;
 	}
 
 	public String getTitleImg() {
@@ -366,22 +317,6 @@ public class HolMidBaseInfo implements Serializable{
 		this.bookInfo = bookInfo;
 	}
 
-	public List<Object> getBookItems() {
-		return bookItems;
-	}
-
-	public void setBookItems(List<Object> bookItems) {
-		this.bookItems = bookItems;
-	}
-
-	public Double[] getResPosition() {
-		return resPosition;
-	}
-
-	public void setResPosition(Double[] resPosition) {
-		this.resPosition = resPosition;
-	}
-
 	public Integer getResType() {
 		return resType;
 	}
@@ -389,5 +324,6 @@ public class HolMidBaseInfo implements Serializable{
 	public void setResType(Integer resType) {
 		this.resType = resType;
 	}
+	
 	
 }
