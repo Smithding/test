@@ -56,6 +56,14 @@ public enum OwnerOrderStatus implements Serializable {
 	 */
 	WAIT_CHECK("650", "待审核"),
 	/**
+	 * 支付成功
+	 */
+	PAY_OK("666", "支付成功"),
+	/**
+	 * 支付失败
+	 */
+	PAY_BAD("999","支付失败"),
+	/**
 	 * 在入住
 	 */
 	RESIDE_ONGOING("700", "在入住"),
