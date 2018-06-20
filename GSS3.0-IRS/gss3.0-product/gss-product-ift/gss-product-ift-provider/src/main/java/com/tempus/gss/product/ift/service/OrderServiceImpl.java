@@ -836,7 +836,7 @@ public class OrderServiceImpl implements IOrderService {
                 saleOrderQueryRequest.getEntity().setCustomerNo(saleOrderQueryRequest.getAgent().getNum().toString());
             }
             
-            long startTime = System.currentTimeMillis();
+           // long startTime = System.currentTimeMillis();
             log.info("查询订单接口开始=====");
             Boolean isNeedCustomer = saleOrderQueryRequest.getEntity().getCustomerCount();
             List<SaleOrderExt> saleOrderExtList = null;
@@ -852,7 +852,7 @@ public class OrderServiceImpl implements IOrderService {
             }
             saleOrderExtList = saleOrderExtDao.queryFromSaleQueryOrderVo(page, saleOrderQueryRequest.getEntity());
             
-            long endTime = System.currentTimeMillis();
+            //long endTime = System.currentTimeMillis();
             //log.info("查询订单接口结束=====" + (endTime - startTime));
           /*  List<SaleOrderExt> tempList = new ArrayList<>();
             if (null != saleOrderExtList) {
