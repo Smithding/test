@@ -3,30 +3,49 @@ package com.tempus.gss.product.ift.service;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.tempus.gss.bbp.util.StringUtil;
+import com.tempus.gss.controller.PageVO;
+import com.tempus.gss.controller.Result;
+import com.tempus.gss.cps.entity.Customer;
+import com.tempus.gss.cps.entity.Supplier;
+import com.tempus.gss.cps.service.ICustomerService;
+import com.tempus.gss.cps.service.ISupplierService;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.log.entity.LogRecord;
 import com.tempus.gss.log.service.ILogService;
+import com.tempus.gss.ops.util.ValidateUtils;
+import com.tempus.gss.order.entity.DifferenceOrder;
+import com.tempus.gss.order.entity.EDifferenceType;
 import com.tempus.gss.order.entity.SaleOrder;
 import com.tempus.gss.order.entity.TransationOrder;
+import com.tempus.gss.order.service.IDifferenceOrderService;
 import com.tempus.gss.order.service.ISaleOrderService;
 import com.tempus.gss.order.service.ITransationOrderService;
+import com.tempus.gss.pay.service.IPayWayService;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.*;
+import com.tempus.gss.product.ift.api.entity.vo.ExtraOrderQueryVo;
 import com.tempus.gss.product.ift.api.entity.vo.OrderCreateVo;
 import com.tempus.gss.product.ift.api.service.IExtraOrderService;
 import com.tempus.gss.product.ift.api.service.IOrderService;
 import com.tempus.gss.product.ift.dao.*;
+import com.tempus.gss.security.AgentUtil;
+import com.tempus.gss.system.entity.User;
 import com.tempus.gss.system.service.IMaxNoService;
+import com.tempus.gss.system.service.IUserService;
 import com.tempus.gss.vo.Agent;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -50,6 +69,16 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
     ISaleOrderService saleOrderService;
     @Reference
     ILogService logerService;
+    @Reference
+    IPayWayService payWayService;
+    @Reference
+    ICustomerService customerService;
+    @Reference
+    IDifferenceOrderService differenceOrderService;
+    @Reference
+    IUserService userService;
+    @Reference
+    ISupplierService supplierService;
     @Autowired
     LegDao legdao;
     @Autowired
@@ -65,132 +94,138 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
     
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void createExtraOrder(Agent agent, RequestWithActor<OrderCreateVo> requestWithActor) {
-        validateParam(requestWithActor);
+    public Result createExtraOrder(RequestWithActor<DifferenceOrder> requestWithActor) {
         logger.info("开始国际机票预订,预订参数:" + JSONObject.toJSONString(requestWithActor));
-        SaleOrderExt saleOrderExt = requestWithActor.getEntity().getSaleOrderExt();
-        Long transactionId = IdWorker.getId();
-        logger.info("国际机票白屏预订交易单号:{}", transactionId);
-        //saleOrderExt.setSaleOrder(getSaleOrder(agent,transactionId));
-        String contact = saleOrderExt.getContactName();//联系人
-        String mobile = saleOrderExt.getContactMobile();
-        Date createTime = new Date();
-        //保存交易单信息
-        saveTransactionOrder(agent, contact, mobile, transactionId, createTime);
-        List<Passenger> passengers = saleOrderExt.getPassengerList();
-        BigDecimal receivable = this.getRecivable(passengers);
-        SaleOrder saleOrder = getSaleOrder(agent, transactionId);
-        saleOrder.setReceivable(receivable);
-        saleOrderExt.setSaleOrder(saleOrder);
-        List<SaleOrderDetail> oldSDList = saleOrderExt.getSaleOrderDetailList();
-        Map<String, String> passengerTicketMap = new HashMap<>(200);
-        for (SaleOrderDetail oldSD : oldSDList) {
-            if (null != oldSD.getPassenger()) {
-                if (StringUtil.isNotNullOrEmpty(oldSD.getPassenger().getName()) && StringUtil.isNotNullOrEmpty(oldSD.getPassenger().getSurname())) {
-                    String key = oldSD.getPassenger().getSurname() + oldSD.getPassenger().getName();
-                    if (!passengerTicketMap.containsKey(key)) {
-                        passengerTicketMap.put(key, oldSD.getTicketNo());
-                    }
-                }
-            }
-        }
-        requestWithActor.getEntity().setSaleOrderExt(saleOrderExt);
+        Result result = new Result();
         try {
-            //调用国际订单创建接口
-            SaleOrderExt createResult = orderService.createOrder(requestWithActor);
-            if (null != createResult) {
-                //用legNo来对应修改票号
-                List<SaleOrderDetail> detaiList = createResult.getSaleOrderDetailList();
-                for (SaleOrderDetail saleOrderDetail : detaiList) {
-                    /* 设置票号*/
-                    if (null != saleOrderDetail.getPassenger()) {
-                        String newKey = saleOrderDetail.getPassenger().getSurname() + saleOrderDetail.getPassenger().getName();
-                        saleOrderDetail.setTicketNo(passengerTicketMap.get(newKey));
-                        int u = saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
-                        logger.info("更新：{}----{}", saleOrderDetail.getSaleOrderDetailNo(), u >= 1);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            logger.error("国际机票白屏预订有误", e);
-            throw new RuntimeException(e);
+        DifferenceOrder differenceOrderInput = requestWithActor.getEntity();
+        result = validateParam(differenceOrderInput, result);
+        if(StringUtils.equals(result.getCode(),"0")){
+            return result;
         }
-    }
-    
-    @Override
-    public void updateExtraOrderStatus() {
-        Integer[] createTypeArray = {7, 8, 9, 10, 11, 12};
-        List<SaleOrderExt> saleOrderExts = orderService.getAssignedOrders(createTypeArray);
-        if (saleOrderExts != null && saleOrderExts.size() > 0) {
-            logger.info("更新杂费单订单数量：" + saleOrderExts.size());
-            Date date = new Date();
-            for (SaleOrderExt orderExt : saleOrderExts) {
-                Long saleOrderNo = orderExt.getSaleOrderNo();
-                Agent agent = new Agent(Integer.valueOf(owner));
+        Agent agent =requestWithActor.getAgent();
+        Integer deptCode = 0;
+        String goodsName = "";
+        Integer goodsSubType = 0;
+        Long businessSignNo = null;
+        Integer goodsType = differenceOrderInput.getGoodsType();
+        //Integer businessType = differenceOrderInput.getBusinessType();
+        Long businessOrderNo = differenceOrderInput.getBusinessOrderNo();
+        Long customerNo = differenceOrderInput.getCustomerNo();
+        SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, differenceOrderInput.getBusinessOrderNo());
+        RequestWithActor<Long> param = new RequestWithActor<>();
+        if (null != saleOrder && null != saleOrder.getSaleOrderNo()) {
+            param.setEntity(saleOrder.getSaleOrderNo());
+            SaleOrderExt saleOrderExt = orderService.getOrder(param);
+            if (null != saleOrderExt && saleOrderExt.getSaleOrder() != null) {
                 try {
-                    saleOrderService.updateStatus(agent, saleOrderNo, 4);
-                    saveLog(saleOrderNo, date);
+                    if (null != saleOrderExt.getSaleOrder().getGoodsType()) {
+                        goodsSubType = saleOrderExt.getSaleOrder().getGoodsType();
+                    }
+                    String creator = saleOrderExt.getSaleOrder().getOrderingLoginName();
+                    User user = userService.findUserByLoginName(agent, creator);
+                    deptCode = user.getDeptId();
+                    if (null == deptCode) {
+                        deptCode = 0;
+                    }
+                    if (null != saleOrder.getBusinessSignNo()) {
+                        businessSignNo = saleOrder.getBusinessSignNo();
+                    }
+
                 } catch (Exception e) {
-                    logger.error("杂费单状态修改异常：", e);
+                    logger.error(e.getMessage());
+                    logger.error("国际查询PNR失败！");
                 }
             }
-            logger.info("本次更新杂费单状态结束");
-        } else {
-            logger.info("本次更新杂费单状态数量为0");
+
         }
-    }
-    
-    //保存日志
-    private void saveLog(Long orderNo, Date date) {
-        try {
-            LogRecord logRecord = new LogRecord();
-            logRecord.setAppCode("IFT");
-            logRecord.setCreateTime(date);
-            logRecord.setTitle("国际杂费单");
-            logRecord.setDesc("定时更新已支付杂费单状态");
-            logRecord.setOptLoginName("sys");
-            logRecord.setRequestIp("127.0.0.1");
-            logRecord.setBizCode("IFT-ExtraOrderServiceImpl-updateExtraOrderStatus");
-            logRecord.setBizNo(String.valueOf(orderNo));
-            logerService.insert(logRecord);
-        } catch (Exception e) {
-            logger.error("定时更新杂费单状态时保存日志异常", e);
+        DifferenceOrder differenceOrder = new DifferenceOrder();
+        differenceOrder.setOwner(agent.getOwner());
+        if (customerNo != null) {
+            differenceOrder.setCustomerNo(customerNo);
+            Customer customer = customerService.getCustomerByNo(agent, customerNo);
+            if (null != customer && customer.getCustomerTypeNo() != null) {
+                differenceOrder.setCustomerTypeNo(customer.getCustomerTypeNo().intValue());
+            } else {
+                differenceOrder.setCustomerNo(customerNo);
+                Supplier supplier = supplierService.getSupplierByNo(agent, customerNo);
+                if (null != supplier && supplier.getCustomerTypeNo() != null) {
+                    differenceOrder.setCustomerTypeNo(supplier.getCustomerTypeNo().intValue());
+                }
+            }
         }
+        differenceOrder.setTraNo(differenceOrderInput.getTraNo());
+        differenceOrder.setBusinessOrderNo(businessOrderNo);
+        differenceOrder.setBusinessType(differenceOrderInput.getBusinessType());
+        differenceOrder.setReceivable(differenceOrderInput.getReceivable());
+        differenceOrder.setDifferenceDesc(differenceOrderInput.getDifferenceDesc());
+        differenceOrder.setDifferenceType(differenceOrderInput.getDifferenceType());
+        differenceOrder.setIncomeExpenseType(differenceOrderInput.getIncomeExpenseType());
+        differenceOrder.setPnr(differenceOrderInput.getPnr());
+        differenceOrder.setTicketNos(differenceOrderInput.getTicketNos());
+
+        Calendar calendar = Calendar.getInstance();
+        differenceOrder.setOrderingTime(calendar.getTime());
+
+        differenceOrder.setActorTime(calendar.getTime());
+        differenceOrder.setActorUser(agent.getAccount());
+        differenceOrder.setActorDesc("创建");
+
+        differenceOrder.setDeptCode(deptCode.toString());
+        differenceOrder.setGoodsName(goodsName);
+        differenceOrder.setGoodsSubType(goodsSubType);
+        differenceOrder.setGoodsType(goodsType);
+        differenceOrder.setPayStatus(1);
+        differenceOrder.setSettlementStatus(1);
+        differenceOrder.setBusinessSignNo(businessSignNo);
+        differenceOrder.setIncidentalType(differenceOrderInput.getDifferenceType());
+        differenceOrder.setLog(this.filterNull(differenceOrder.getLog()) + "$EOF$" + differenceOrder.getActorTime() + "$BREAK$" + differenceOrder.getActorUser() + "$BREAK$" + differenceOrder.getActorDesc());
+        differenceOrderService.create(agent, differenceOrder);
+        result.setCode("1");
+        result.setMessage("创建成功");
+        }catch (Exception e){
+            logger.error("保存杂费单时异常",e);
+            result.setCode("0");
+            result.setMessage("保存杂费单时异常");
+        }
+        return result;
     }
+
+    @Override
+    public void updateExtraOrderStatus(RequestWithActor<DifferenceOrder> requestWithActor) throws Exception {
+        DifferenceOrder extraOrder = requestWithActor.getEntity();
+        if(extraOrder ==null || extraOrder.getDifferenceOrderNo() ==null || extraOrder.getAuditStatus()==null){
+            throw new RuntimeException("审核的杂费单信息参数异常");
+        }
+        logger.info("主管审核的杂费单信息:"+extraOrder.toString());
+        Integer status = extraOrder.getAuditStatus();
+        if(StringUtils.equals("-1",String.valueOf(status)) && StringUtils.isEmpty(extraOrder.getActorDesc())){
+            throw new RuntimeException("杂费单审核不通过是，备注信息不能为空");
+        }
+        Agent agent = requestWithActor.getAgent();
+        differenceOrderService.update(agent,extraOrder);
+    }
+
     
     /** 获取已支付的杂费订单 */
-    private void validateParam(RequestWithActor<OrderCreateVo> requestWithActor) {
-        /* 校验登录用户 */
-        if (requestWithActor.getAgent() == null) {
-            throw new GSSException("登录用户为空", "0101", "创建订单失败");
+    private Result validateParam(DifferenceOrder differenceOrderInput,Result result) {
+        if (null == differenceOrderInput) {
+            result.setMessage("空,创建差异单失败!");
+            result.setCode("0");
+        } else if (differenceOrderInput.getBusinessOrderNo() == null) {
+            result.setMessage("单号为空,创建差异单失败!");
+            result.setCode("0");
+        } else if (differenceOrderInput.getDifferenceType() == 0) {
+            result.setMessage("差异单类型为空,创建差异单失败!");
+            result.setCode("0");
+        } else if ("".equals(differenceOrderInput.getDifferenceDesc()) || differenceOrderInput.getDifferenceDesc() == null) {
+            result.setMessage("差异单说明为空,创建差异单失败!");
+            result.setCode("0");
+        } else if (differenceOrderInput.getIncomeExpenseType() == null) {
+            result.setMessage("差异单收支类型为空,创建差异单失败!");
+            result.setCode("0");
         }
-        
-        /* 校验条件 */
-        if (requestWithActor.getEntity() == null) {
-            throw new GSSException("销售单为空", "0101", "创建订单失败");
-        }
-        
-        SaleOrderExt saleOrderExt = requestWithActor.getEntity().getSaleOrderExt();
-        
-        if (saleOrderExt.getLegList() == null && saleOrderExt.getPassengerList() == null) {
-            throw new GSSException("航程或乘客为空", "0102", "创建订单失败");
-        }
-        if (saleOrderExt.getSaleOrder() == null) {
-            logger.error("销售单信息为空");
-            throw new GSSException("销售单信息为空", "0102", "创建订单失败");
-        }
-        if (saleOrderExt.getSaleOrder().getCustomerNo() == null || saleOrderExt.getSaleOrder().getCustomerNo() == 0) {
-            logger.error("销售单的客户编号为空(CustomerNo)");
-            throw new GSSException("销售单的客户编号为空(CustomerNo)", "0102", "创建订单失败");
-        }
-        if (saleOrderExt.getSaleOrder().getCustomerTypeNo() == null || saleOrderExt.getSaleOrder().getCustomerTypeNo() == 0) {
-            logger.error("销售单的客户类型为空(CustomerTypeNo)");
-            throw new GSSException("销售单的客户类型为空(CustomerTypeNo)", "0102", "创建订单失败");
-        }
-        if (saleOrderExt.getSaleOrder().getOrderingLoginName() == null) {
-            logger.error("销售单的用户登录名为空(OrderingLoginName)");
-            throw new GSSException("销售单的用户登录名为空(OrderingLoginName)", "0102", "创建订单失败");
-        }
+        return result;
     }
     
     //获取交易单
@@ -246,5 +281,20 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
         }
         return sum;
     }
-    
+
+    public final String datetime2Str(Date date) {
+        if (date != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            return sdf.format(date);
+        }
+        return "";
+    }
+
+    private String filterNull(String str) {
+        if (str == null) {
+            return "";
+        } else {
+            return str;
+        }
+    }
 }
