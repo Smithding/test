@@ -83,6 +83,16 @@
         from IFT_SALE_ORDER_DETAIL
         where SALE_ORDER_DETAIL_NO = #{saleOrderDetailNo,jdbcType=BIGINT} and VALID=1
     </select>
+    <select id="selectBySaleChangeNoList" resultMap="BaseResultMap" >
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_SALE_ORDER_DETAIL
+        where SALE_ORDER_NO in
+        <foreach collection="saleChangeNoList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and VALID=1
+    </select>
     <!--<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from IFT_SALE_ORDER_DETAIL
         where SALE_ORDER_DETAIL_NO = #{saleOrderDetailNo,jdbcType=BIGINT}

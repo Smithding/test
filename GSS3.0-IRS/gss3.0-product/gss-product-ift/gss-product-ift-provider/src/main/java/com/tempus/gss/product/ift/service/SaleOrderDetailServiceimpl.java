@@ -36,6 +36,15 @@ public class SaleOrderDetailServiceimpl implements ISaleOrderDetailService{
 	}
 
 	@Override
+	public List<SaleOrderDetail> selectBySaleChangeNoList(List<Long> saleChangeNoList) {
+		if(saleChangeNoList == null){
+			log.info("没有销售变更单号，查询结束。");
+			return null;
+		}
+		return detailDao.selectBySaleChangeNoList(saleChangeNoList);
+	}
+
+	@Override
 	public List<SaleOrderDetail> selectByPassengerAndSaleOrder(Long passengerNo, Long saleOrderNo) {
 		SaleOrderDetail saleOrderDetail = new SaleOrderDetail();
 		saleOrderDetail.setPassengerNo(passengerNo);

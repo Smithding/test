@@ -147,6 +147,22 @@ public class ChangeServiceImpl implements IChangeService {
             Long saleChangeNo = maxNoService.generateBizNo("IFT_SALE_CHANGE_EXT_NO", 38);
             Long buyChangeNo = maxNoService.generateBizNo("IFT_BUY_CHANGE_NO", 47);
             List<SaleOrderDetail> saleOrderDetailList = saleOrderExt.getSaleOrderDetailList();
+
+            //查询出所有的销售变更单对应的生成的saleOrderDetail全部添加到saleOrderDetailList中
+            List<SaleChange> saleChangeList = saleChangeService.getSaleChangesBySONo(requestWithActor.getAgent(), saleOrderExt.getSaleOrderNo());
+            List<Long> saleChangeNoList = new ArrayList<>();
+            for (SaleChange saleChange : saleChangeList) {
+                if(saleChange.getOrderChangeType() == 3){
+                    saleChangeNoList.add(saleChange.getSaleChangeNo());
+                }
+            }
+            if(saleChangeNoList != null&& saleChangeNoList.size()>0 ){
+                List<SaleOrderDetail> saleOrderDetails = saleOrderDetailService.selectBySaleChangeNoList(saleChangeNoList);
+                if(saleOrderDetails!=null && saleOrderDetails.size()>0){
+                    saleOrderDetailList.addAll(saleOrderDetails);
+                }
+            }
+
             /*修改需要改签的人+航段信息*/
             for (SaleOrderDetail saleOrderDetail : saleOrderDetailList) {
                 for (Long oldPassengerNo : requestWithActor.getEntity().getOldPassengerNoList()) {
@@ -215,7 +231,8 @@ public class ChangeServiceImpl implements IChangeService {
                 for (Leg leg : requestWithActor.getEntity().getLegList()) {
                     SaleOrderDetail saleOrderDetail = new SaleOrderDetail();
                     saleOrderDetail.setSaleOrderDetailNo(maxNoService.generateBizNo("IFT_SALE_ORDER_DETAIL_NO", 36));
-                    saleOrderDetail.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
+                    //saleOrderDetail.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
+                    saleOrderDetail.setSaleOrderNo(saleChangeNo);
                     saleOrderDetail.setPassengerNo(passengerNo);
                     saleOrderDetail.setLegNo(leg.getLegNo());
                     saleOrderDetail.setOwner(agent.getOwner());
@@ -1288,7 +1305,12 @@ public class ChangeServiceImpl implements IChangeService {
             List<SaleChangeDetail> saleChangeDetailList = changeExt.getSaleChangeDetailList();
             for (SaleChangeDetail saleChangeDetail : saleChangeDetailList) {
                 SaleOrderDetail saleOrderDetail = saleChangeDetail.getSaleOrderDetail();
-                if(!saleOrderDetail.getIsChange()){
+                /*if(!saleOrderDetail.getIsChange()){
+                    saleOrderDetail.setStatus("4");
+                } else{
+                    saleOrderDetail.setStatus("11");
+                }*/
+                if(saleChangeDetail.getOrderDetailType() == 1){
                     saleOrderDetail.setStatus("4");
                 } else{
                     saleOrderDetail.setStatus("11");
@@ -1535,9 +1557,14 @@ public class ChangeServiceImpl implements IChangeService {
             log.info("锁住订单结束");
             /*创建新增操作日志*/
             try {
-                String logstr ="用户"+ saleChange.getAgent().getAccount()+"国际改签单锁定："+"["+changeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()+"]";
+               /* String logstr ="用户"+ saleChange.getAgent().getAccount()+"国际改签单锁定："+"["+changeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()+"]";
                 String title = "国际改签单锁定";
-                IftLogHelper.logger(saleChange.getAgent(),changeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo(),title,logstr);
+                IftLogHelper.logger(saleChange.getAgent(),changeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo(),title,logstr);*/
+                SaleOrder saleOrder = saleOrderService.getSOrderByNo(saleChange.getAgent(), changeVo.getSaleChangeNo());
+                Long saleOrderNo = saleOrder.getSaleOrderNo();
+                String logstr ="用户"+ saleChange.getAgent().getAccount()+"国际改签单锁定："+"["+saleOrderNo+"]";
+                String title = "国际改签单锁定";
+                IftLogHelper.logger(saleChange.getAgent(),saleOrderNo,title,logstr);
               /*  LogRecord logRecord = new LogRecord();
                 logRecord.setAppCode("UBP");
                 logRecord.setCreateTime(new Date());

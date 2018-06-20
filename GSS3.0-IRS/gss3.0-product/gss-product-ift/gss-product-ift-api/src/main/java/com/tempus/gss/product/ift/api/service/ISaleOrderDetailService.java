@@ -13,6 +13,13 @@ public interface ISaleOrderDetailService {
 	public List<SaleOrderDetail> selectBySaleOrderNo(Long saleOrderNo);
 
 	/**
+	 * 更具saleChangeNoList查询明细
+	 * @param saleOrderNo
+	 * @return
+	 */
+	public List<SaleOrderDetail> selectBySaleChangeNoList(List<Long> saleChangeNoList);
+
+	/**
 	 * 根据乘客编号，销售单编号详情信息
 	 * @param passengerNo
 	 * @param saleOrderNo
