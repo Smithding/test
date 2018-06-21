@@ -275,11 +275,11 @@ public class Tool {
 		Set<String> phoneList = new HashSet<String>();
 		Pattern pattern=Pattern.compile("\\d{7,}");
 		Matcher m=pattern.matcher(phone);
-		int i = 0;
+		//int i = 0;
         while (m.find()) {
-            System.out.println(m.group());
+           // System.out.println(m.group());
             phoneList.add(m.group());
-            i++;
+         //   i++;
         }
 	    return phoneList;
 	}
