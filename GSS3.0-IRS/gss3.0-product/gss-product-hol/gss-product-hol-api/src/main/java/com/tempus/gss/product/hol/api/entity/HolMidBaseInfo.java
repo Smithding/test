@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
+
+import com.alibaba.fastjson.annotation.JSONField;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
 
 public class HolMidBaseInfo implements Serializable{
@@ -13,15 +15,18 @@ public class HolMidBaseInfo implements Serializable{
 	 */
 	private String id;
 	/**
-	 * 酒店id
+	 * 酒店id,同主键id
 	 */
-	private Long resId;
+	private String resId;
 	
 	/**
 	 * 酒店名称
 	 */
 	private String resName;
-	
+	/**
+	 * 酒店属性集合
+	 */
+	@JSONField(serialize = false)
 	private List<ResNameSum> resNameSum;
 	
 	/**
@@ -128,11 +133,11 @@ public class HolMidBaseInfo implements Serializable{
 		this.id = id;
 	}
 
-	public Long getResId() {
+	public String getResId() {
 		return resId;
 	}
 
-	public void setResId(Long resId) {
+	public void setResId(String resId) {
 		this.resId = resId;
 	}
 
