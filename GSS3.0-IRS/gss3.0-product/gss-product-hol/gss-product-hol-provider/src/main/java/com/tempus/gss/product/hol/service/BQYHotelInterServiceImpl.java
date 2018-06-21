@@ -28,9 +28,12 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
+import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
+import com.tempus.gss.product.hol.api.entity.ResNameSum;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ResGPSInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelBrand;
@@ -481,8 +484,18 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			if (holMidList.size() == 1) {
 				//合并酒店
 				HolMidBaseInfo holMid = holMidList.get(0);
-				holMid.setBqyResId(hotelInfo.getHotelId());
-				holMid.setBqyResName(hotelInfo.getHotelName());
+				
+				List<ResNameSum> listHol = holMid.getResNameSum();
+				if(StringUtil.isNotNullOrEmpty(listHol)) {
+					ResNameSum resNameSum=new ResNameSum();
+					resNameSum.setResId(hotelInfo.getHotelId());
+					resNameSum.setResName(hotelInfo.getHotelName());
+					resNameSum.setSupplierNo(hotelInfo.getSupplierNo());
+					listHol.add(resNameSum);
+				}
+				
+				holMid.setResId(hotelInfo.getHotelId());
+				holMid.setResName(hotelInfo.getHotelName());
 				int lowPrice = hotelInfo.getLowPrice().intValue();
 				if (holMid.getMinPrice() > lowPrice) {
 					holMid.setMinPrice(lowPrice);
@@ -499,8 +512,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			HolMidBaseInfo holMidBaseInfo = new HolMidBaseInfo();
 			//holMidBaseInfo.setId(BQYIDPRE + hotelId.getHotelId());
 			holMidBaseInfo.setId(IdWorker.getId());
-			holMidBaseInfo.setBqyResId(hotelId.getHotelId());
-			holMidBaseInfo.setBqyResName(hotelInfo.getHotelName());
+			holMidBaseInfo.setResId(hotelId.getHotelId());
+			holMidBaseInfo.setResName(hotelInfo.getHotelName());
 			holMidBaseInfo.setProvName(hotelInfo.getProvinceName());
 			//holMidBaseInfo.setCityId(Integer.parseInt(hotelInfo.getCityCode()));
 			holMidBaseInfo.setCityName(hotelInfo.getCityName());
@@ -519,9 +532,12 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			
 			//酒店坐标
 			holMidBaseInfo.setLatLonType(hotelInfo.getCoordinatesType());
-			holMidBaseInfo.setLat(hotelInfo.getLatitude().toString());
-			holMidBaseInfo.setLon(hotelInfo.getLongitude().toString());
-			
+			//holMidBaseInfo.setLat(hotelInfo.getLatitude().toString());
+			//holMidBaseInfo.setLon(hotelInfo.getLongitude().toString());
+			Double[] resGpsLocation = new Double[2];
+			resGpsLocation[0] = Double.valueOf(hotelInfo.getLongitude().toString());
+			resGpsLocation[1] = Double.valueOf(hotelInfo.getLatitude().toString());
+			holMidBaseInfo.setResPosition(resGpsLocation);
 			
 			holMidBaseInfo.setResPosition(new Double[]{hotelInfo.getLongitude().doubleValue(), hotelInfo.getLatitude().doubleValue()});
 			
