@@ -8,7 +8,11 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -17,6 +21,7 @@ import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.IvParameterSpec;
 
 import com.tempus.gss.product.hol.api.entity.response.tc.CreditCardsTcType;
+import com.tempus.gss.util.JsonUtil;
 
 public class Tool {
 
@@ -260,4 +265,22 @@ public class Tool {
 		return t;
 	}
 
+	/**
+	 * 将多个电话号码字符串分隔
+	 * @param phone
+	 * @return
+	 */
+	public static Set<String> splitStr(String phone) {
+		//String regex = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+		Set<String> phoneList = new HashSet<String>();
+		Pattern pattern=Pattern.compile("\\d{7,}");
+		Matcher m=pattern.matcher(phone);
+		int i = 0;
+        while (m.find()) {
+            System.out.println(m.group());
+            phoneList.add(m.group());
+            i++;
+        }
+	    return phoneList;
+	}
 }

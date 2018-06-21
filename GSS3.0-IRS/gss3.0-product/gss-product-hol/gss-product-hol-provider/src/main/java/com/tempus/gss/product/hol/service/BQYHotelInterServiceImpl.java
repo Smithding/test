@@ -63,6 +63,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderPayResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.util.DocumentUtil;
+import com.tempus.gss.product.hol.api.util.Tool;
 import com.tempus.gss.util.JsonUtil;
 
 @Service
@@ -600,56 +601,11 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			longitude = lon.substring(0, lon.indexOf(".") + 2);
 		}
 		String mobile = null;
-		List<String> phoneList = new ArrayList<>();
+		//List<String> phoneList = new ArrayList<>();
 		if (StringUtils.isNotBlank(phone) && phone.length() >= 7) {
-			if (phone.contains("、")) {
-				String[] phoneArr = phone.split("、");
-				for (String p : phoneArr) {
-					if (p.length() >= 7) {
-						if (p.contains("-")) {
-							String[] holPhoneArr = p.split("-");
-							for (String holPhone : holPhoneArr) {
-								if (holPhone.length() >= 7) {
-									phoneList.add(holPhone);
-								}
-							}
-						}else {
-							if (p.contains("(")) {
-								p = p.substring(0, phone.indexOf("("));
-								phoneList.add(p);
-							}else {
-								phoneList.add(p);
-							}
-						}
-					}
-				}
-			}else if (phone.contains("-")) {
-				String[] holPhoneArr = phone.split("-");
-				for (String holPhone : holPhoneArr) {
-					if (holPhone.length() >= 7) {
-						if (holPhone.contains("/")) {
-							String[] phoneArr = holPhone.split("/");
-							for (String p : phoneArr) {
-								phoneList.add(p);
-							}
-						}else if (holPhone.contains("\\")) {
-							String[] phoneArr = holPhone.split("\\");
-							for (String p : phoneArr) {
-								phoneList.add(p);
-							}
-						}else {
-							phoneList.add(holPhone);
-							}
-						}
-					}
-				}else if (phone.contains("(")) {
-					phone = phone.substring(0, phone.indexOf("("));
-					phoneList.add(phone);
-				}else {
-					phoneList.add(phone);
-				}
+			Set<String> phoneList = Tool.splitStr(phone);
 			if (phoneList.size() == 1) {
-				holMidList = searchHol(latitude, longitude, phoneList.get(0));
+				holMidList = searchHol(latitude, longitude, phoneList.iterator().next());
 			}else if (phoneList.size() > 1) {
 				Criteria criteria = new Criteria();
 				List<Criteria> criteriaList = new ArrayList<>();
@@ -668,6 +624,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 				}else {
 					criteria.orOperator(criteriaList.get(0), criteriaList.get(1), criteriaList.get(2));
 				}
+				
 				holMidList = mongoTemplate1.find(new Query(criteria), HolMidBaseInfo.class);
 			}
 		}else {

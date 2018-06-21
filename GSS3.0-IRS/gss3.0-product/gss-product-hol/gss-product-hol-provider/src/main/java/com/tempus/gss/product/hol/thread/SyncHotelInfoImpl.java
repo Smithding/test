@@ -59,22 +59,13 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	private IBQYHotelSupplierService bqyHotelSupplierService;
 	
 	@Autowired
-	private IBQYHotelInterService bqyHotelService;
-	
-	@Autowired
 	private ITCHotelInterService tcHotelInterService;
-	
-	@Autowired
-	private MongoTemplate mongoTemplate1;
 	
 	@Reference
 	IHolProfitService holProfitService;
 	
 	@Reference
 	ITCHotelInterService hotelInterService;
-	
-	@Value("${bqy.count}")
-	private int PAGE_SIZE;			//查询id数量
 	
 	SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 
@@ -139,34 +130,6 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		return tcResponse;
 	}
 
-	@Override
-	public void pullBQYHotelInfo() {
-		//将MongoDB中数据清空
-		//bqyHotelService.deleteMongoDBData();
-		//拉取城市信息
-		//bqyHotelService.pullCityDetail();
-		//拉取酒店ID并存储MongoDB
-		//获取BQY酒店ID
-		//List<HotelId> hotelIdList = bqyHotelService.queryHotelIdList();
-		//将获取的酒店ID保存到mongoDB中
-		//mongoTemplate1.insert(hotelIdList, HotelId.class);
-		List<HotelId> hotelIdList = null;
-		//获取ID数量
-		//long totalHotelIdNum = hotelIdList.size();
-		long totalHotelIdNum = mongoTemplate1.count(new Query(), HotelId.class);
-		long count = 1;
-		if ((totalHotelIdNum / PAGE_SIZE) > 1) {
-			count = totalHotelIdNum % PAGE_SIZE == 0 ? totalHotelIdNum / PAGE_SIZE : totalHotelIdNum / PAGE_SIZE + 1;
-		}
-		for (int i = 0; i < count; i++) {
-			int start = i * PAGE_SIZE;
-			//long lastIndex = (start + PAGE_SIZE) > totalHotelIdNum ? totalHotelIdNum : start + PAGE_SIZE;
-			Query query = new Query().skip(start).limit(PAGE_SIZE);
-			hotelIdList = mongoTemplate1.find(query, HotelId.class);
-			//开启线程拉去酒店数量
-			bqyHotelService.pullHotelInfoByIdList(hotelIdList);
-		}
-	}
 
 	@Override
 	public ResBaseInfo queryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
