@@ -120,12 +120,6 @@ public class HolMidBaseInfo implements Serializable{
 	 */
 	private String bookInfo;
 	
-	/**
-	 * 1: TC, 2: BQY, 3: TY, 0: All, 
-	 */
-	private Integer resType;
-
-
 	public String getId() {
 		return id;
 	}
@@ -317,14 +311,5 @@ public class HolMidBaseInfo implements Serializable{
 	public void setBookInfo(String bookInfo) {
 		this.bookInfo = bookInfo;
 	}
-
-	public Integer getResType() {
-		return resType;
-	}
-
-	public void setResType(Integer resType) {
-		this.resType = resType;
-	}
-	
 	
 }

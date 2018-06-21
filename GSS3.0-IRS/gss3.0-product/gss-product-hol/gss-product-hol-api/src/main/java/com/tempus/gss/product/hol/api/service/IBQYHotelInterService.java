@@ -146,7 +146,7 @@ public interface IBQYHotelInterService{
 	 * @param hotelId
 	 * @param hotelInfo
 	 */
-	void saveMidHol(HotelId hotelId, HotelInfo hotelInfo);
+	void saveMidHol(HotelInfo hotelInfo);
 	
 	/**
 	 * 酒店试预订

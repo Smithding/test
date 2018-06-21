@@ -461,13 +461,13 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			//保存酒店信息
 			mongoTemplate1.save(hotelInfo);
 			//保存中间表
-			saveMidHol(hotelId, hotelInfo);
+			saveMidHol(hotelInfo);
 		}
 		logger.info(Thread.currentThread().getName() + "线程完成拉取数据...");
 	}
 
 	@Override
-	public void saveMidHol(HotelId hotelId, HotelInfo hotelInfo) {
+	public void saveMidHol(HotelInfo hotelInfo) {
 		/**
 		 * 判断中间表中是否有相同的酒店
 		 * 通过酒店经纬度和酒店电话匹配是否为同一家酒店
@@ -487,11 +487,28 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 				
 				List<ResNameSum> listHol = holMid.getResNameSum();
 				if(StringUtil.isNotNullOrEmpty(listHol)) {
-					ResNameSum resNameSum=new ResNameSum();
-					resNameSum.setResId(hotelInfo.getHotelId());
-					resNameSum.setResName(hotelInfo.getHotelName());
-					resNameSum.setSupplierNo(hotelInfo.getSupplierNo());
-					listHol.add(resNameSum);
+					boolean isBQYHotel = true;
+					//判断是否存在bqy酒店id
+					for (ResNameSum resNameSum : listHol) {
+						if ((2 - resNameSum.getResType()) == 0) {
+							isBQYHotel = false;
+							resNameSum.setResId(hotelInfo.getHotelId());
+							resNameSum.setResName(hotelInfo.getHotelName());
+							resNameSum.setSupplierNo(hotelInfo.getSupplierNo());
+							//1: TC, 2: BQY, 3: TY, 0: All
+							resNameSum.setResType(2);
+							break;
+						}
+					}
+					if (isBQYHotel) {
+						ResNameSum resNameSum=new ResNameSum();
+						resNameSum.setResId(hotelInfo.getHotelId());
+						resNameSum.setResName(hotelInfo.getHotelName());
+						resNameSum.setSupplierNo(hotelInfo.getSupplierNo());
+						//1: TC, 2: BQY, 3: TY, 0: All
+						resNameSum.setResType(2);
+						listHol.add(resNameSum);
+					}
 				}
 				
 				holMid.setResId(hotelInfo.getHotelId());
@@ -501,7 +518,6 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 					holMid.setMinPrice(lowPrice);
 				}
 				mongoTemplate1.save(holMid);
-				System.out.println(JsonUtil.toJson(holMid));
 			}else if (holMidList.size() > 1) {
 				throw new GSSException("bqy拉取酒店信息", "0111", "酒店纬度:" + latitude +"经度:" + longitude + "电话:" + mobile + "在中间表中有" + holMidList.size() + "个");
 			}
@@ -510,12 +526,19 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			 * 保存中间表
 			 */
 			HolMidBaseInfo holMidBaseInfo = new HolMidBaseInfo();
-			//holMidBaseInfo.setId(BQYIDPRE + hotelId.getHotelId());
+			List<ResNameSum> listHol = new ArrayList<>();
+			ResNameSum resNameSum=new ResNameSum();
+			resNameSum.setResId(hotelInfo.getHotelId());
+			resNameSum.setResName(hotelInfo.getHotelName());
+			resNameSum.setSupplierNo(hotelInfo.getSupplierNo());
+			//1: TC, 2: BQY, 3: TY, 0: All
+			resNameSum.setResType(2);
+			listHol.add(resNameSum);
+			holMidBaseInfo.setResNameSum(listHol);
 			holMidBaseInfo.setId(String.valueOf(IdWorker.getId()));
-			holMidBaseInfo.setResId(hotelId.getHotelId());
+			holMidBaseInfo.setResId(hotelInfo.getHotelId());
 			holMidBaseInfo.setResName(hotelInfo.getHotelName());
 			holMidBaseInfo.setProvName(hotelInfo.getProvinceName());
-			//holMidBaseInfo.setCityId(Integer.parseInt(hotelInfo.getCityCode()));
 			holMidBaseInfo.setCityName(hotelInfo.getCityName());
 			holMidBaseInfo.setIsInter(1);
 			//酒店品牌
@@ -539,7 +562,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			resGpsLocation[1] = Double.valueOf(hotelInfo.getLatitude().toString());
 			holMidBaseInfo.setResPosition(resGpsLocation);
 			
-			holMidBaseInfo.setResPosition(new Double[]{hotelInfo.getLongitude().doubleValue(), hotelInfo.getLatitude().doubleValue()});
+			//holMidBaseInfo.setResPosition(new Double[]{hotelInfo.getLongitude().doubleValue(), hotelInfo.getLatitude().doubleValue()});
 			
 			//holMidBaseInfo.setCountryName("中国");
 			//一句话介绍...酒店描述
