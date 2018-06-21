@@ -428,9 +428,6 @@
       <if test="internatOrcivil != null" >
         INTERNAT_ORCIVIL = #{internatOrcivil,jdbcType=INTEGER},
       </if>
-      <if test="internatOrcivil != null" >
-        INTERNAT_ORCIVIL = #{internatOrcivil,jdbcType=INTEGER},
-      </if>
       <if test="isCivilServant != null" >
         IS_CIVIL_SERVANT = #{isCivilServant,jdbcType=INTEGER},
       </if>
