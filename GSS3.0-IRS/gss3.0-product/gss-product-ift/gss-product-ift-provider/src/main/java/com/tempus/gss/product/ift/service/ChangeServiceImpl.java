@@ -1798,4 +1798,17 @@ public class ChangeServiceImpl implements IChangeService {
         //return buyChangeExtDao.selectBySaleChangeNo(saleChangeNo);
         return buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
     }
+
+    @Override
+    public void clearLockerAndUpdateOldLocker(RequestWithActor<Long> requestWithActor,String type) {
+        //查询出之前的saleOrderExt保存之前的oldLocker
+        SaleChangeExt changeExt = changeExtService.getSaleChange(requestWithActor);
+        Long oldLocker = changeExt.getLocker();
+        //赋值locker为0更新saleOrderExt
+        changeExt.setLocker(0l);
+        changeExt.setLockTime(new Date());
+        int updateLocker = saleChangeExtDao.updateLocker(changeExt);
+        //更新之前保存的oldLocker的数量
+        ticketSenderService.updateByLockerId(requestWithActor.getAgent(),oldLocker,type);
+    }
 }
