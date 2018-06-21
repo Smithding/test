@@ -228,13 +228,13 @@ public class HolMidServiceImpl implements IHolMidService {
 	public ResBaseInfo hotelDetail(Agent agent, Long holMidId, String checkinDate, String checkoutDate) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
 		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
 	
-		Long bqyResId = holMid.getBqyResId();
-		Long tcResId = holMid.getTcResId();
+		//Long bqyResId = holMid.getBqyResId();
+		//Long tcResId = holMid.getTcResId();
 		ResBaseInfo bqyHotel = null;
 		ResBaseInfo tcHotel = null;
 		
 		//tc和bqy酒店ID都不为空则开启异步查询,否则执行同步
-		if (null != bqyResId && null != tcResId) {
+		/*if (null != bqyResId && null != tcResId) {
 			try {
 				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate);
 				Future<ResBaseInfo> tcResponse = syncHotelInfo.queryTCHelListForAsync(agent, bqyResId, checkinDate, checkoutDate);
@@ -317,7 +317,7 @@ public class HolMidServiceImpl implements IHolMidService {
 				Update update = Update.update("minPrice", minPrice);
 				mongoTemplate1.upsert(query, update, HolMidBaseInfo.class);
 			}
-		}
+		}*/
 		return bqyHotel;
 	}
 
@@ -325,13 +325,13 @@ public class HolMidServiceImpl implements IHolMidService {
 	public ResBaseInfo hotelDetailForBack(Agent agent, Long holMidId, String checkinDate, String checkoutDate)
 			throws Exception {
 		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
-		Long bqyResId = holMid.getBqyResId();
-		Long tcResId = holMid.getTcResId();
+		//Long bqyResId = holMid.getBqyResId();
+		//Long tcResId = holMid.getTcResId();
 		ResBaseInfo bqyHotel = null;
 		ResBaseInfo tcHotel = null;
 		
 		//tc和bqy酒店ID都不为空则开启异步查询
-		if (null != bqyResId && null != tcResId) {
+		/*if (null != bqyResId && null != tcResId) {
 			try {
 				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate);
 				Future<ResBaseInfo> tcResponse = syncHotelInfo.queryTCHolForAsyncBack(agent, bqyResId);
@@ -416,7 +416,7 @@ public class HolMidServiceImpl implements IHolMidService {
 				Update update = Update.update("minPrice", minPrice);
 				mongoTemplate1.upsert(query, update, HolMidBaseInfo.class);
 			}
-		}
+		}*/
 		return bqyHotel;
 	}
 	
@@ -424,12 +424,12 @@ public class HolMidServiceImpl implements IHolMidService {
 	public List<ImgInfo> listImgByHotelId(Agent agent, long holMidId) {
 		List<ImgInfo> imgList = null;
 		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
-		Long bqyResId = holMid.getBqyResId();
-		if (null != bqyResId && bqyResId != 0) {
+		//Long bqyResId = holMid.getBqyResId();
+		/*if (null != bqyResId && bqyResId != 0) {
 			imgList = bqyHotelSupplierService.listImgByHotelId(agent, bqyResId);
 		}else {
 			//TODO TC酒店图片查询
-		}
+		}*/
 		return imgList;
 	}
 
