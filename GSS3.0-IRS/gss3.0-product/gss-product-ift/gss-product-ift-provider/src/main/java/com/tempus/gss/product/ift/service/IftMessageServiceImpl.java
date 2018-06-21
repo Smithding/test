@@ -178,7 +178,19 @@ public class IftMessageServiceImpl implements IIftMessageService {
             }
             int saleNum = Integer.valueOf(saleOrderNum);
             for (TicketSender temp : ticketSenders) {
-                if (temp.getSaleOrderNum() < saleNum) {
+                if (temp.getSaleOrderNum() < saleNum && type.equals("salesman-auditor")) {
+                    ticketSender = temp;
+                    break;
+                }
+                if (temp.getSaleChangeNum() < saleNum && type.equals("salesman-change")) {
+                    ticketSender = temp;
+                    break;
+                }
+                if (temp.getSaleRefuseNum() < saleNum && type.equals("salesman-refund")) {
+                    ticketSender = temp;
+                    break;
+                }
+                if (temp.getSaleRefuseNum() < saleNum && type.equals("salesman-waste")) {
                     ticketSender = temp;
                     break;
                 }

@@ -626,7 +626,7 @@
             i.TICKET_CHANGE_TYPE
         FROM IFT_SALE_CHANGE_EXT i
             LEFT JOIN OS_SALECHANGE s ON s.SALE_CHANGE_NO = i.SALE_CHANGE_NO
-        WHERE s.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} and i.LOCKER = 0
+        WHERE s.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} and i.LOCKER = 0 and s.CHILD_STATUS = 1
     </select>
     <select id="queryObjByKey" resultMap="BaseResultMap"
             parameterType="com.tempus.gss.product.ift.api.entity.vo.SaleChangeExtVo">
