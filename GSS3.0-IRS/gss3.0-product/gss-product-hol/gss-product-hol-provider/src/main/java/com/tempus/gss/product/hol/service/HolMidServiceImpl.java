@@ -390,9 +390,9 @@ public class HolMidServiceImpl implements IHolMidService {
 						}
 						
 						//String reg = "[\u4e00-\u9fa5]";
-						//判断酒店房型面积和酒店楼层
+						//TODO 判断酒店房型面积和酒店楼层
 						//面积
-						String bqyRoomSize = bqyProDetail.getRoomSize();
+						/*String bqyRoomSize = bqyProDetail.getRoomSize();
 						String tcRoomSize = tcProDetail.getRoomSize();
 						//楼层
 						String bqyRoomFloor = bqyProDetail.getRoomFloor();
@@ -401,7 +401,7 @@ public class HolMidServiceImpl implements IHolMidService {
 						if (bqyRoomSize.equals(tcRoomSize) && bqyRoomFloor.equals(tcRoomFloor)) {
 							bqyProDetail.getResProBaseInfoList().addAll(tcProDetail.getResProBaseInfoList());
 							continue;
-						}
+						}*/
 					}
 				}
 			} catch (Exception e) {
