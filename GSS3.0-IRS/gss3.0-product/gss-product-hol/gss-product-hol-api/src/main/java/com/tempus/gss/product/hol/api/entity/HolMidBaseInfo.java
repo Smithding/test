@@ -11,7 +11,7 @@ public class HolMidBaseInfo implements Serializable{
 	/**
 	 * 主键ID
 	 */
-	private Long id;
+	private String id;
 	/**
 	 * 酒店id
 	 */
@@ -125,11 +125,12 @@ public class HolMidBaseInfo implements Serializable{
 	 */
 	private Integer resType;
 
-	public Long getId() {
+
+	public String getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(String id) {
 		this.id = id;
 	}
 
