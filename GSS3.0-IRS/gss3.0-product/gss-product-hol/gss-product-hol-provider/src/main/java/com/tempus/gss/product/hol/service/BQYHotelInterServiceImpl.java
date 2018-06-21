@@ -511,7 +511,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			 */
 			HolMidBaseInfo holMidBaseInfo = new HolMidBaseInfo();
 			//holMidBaseInfo.setId(BQYIDPRE + hotelId.getHotelId());
-			holMidBaseInfo.setId(IdWorker.getId());
+			holMidBaseInfo.setId(String.valueOf(IdWorker.getId()));
 			holMidBaseInfo.setResId(hotelId.getHotelId());
 			holMidBaseInfo.setResName(hotelInfo.getHotelName());
 			holMidBaseInfo.setProvName(hotelInfo.getProvinceName());
