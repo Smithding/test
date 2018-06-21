@@ -204,7 +204,6 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		HotelEntity hotelEntity = null;
 		String paramJson = JsonUtil.toJson(query);
 		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_DETAIL_URL, paramJson);
-		System.out.println(result);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			// 将返回数据转换成json对象
 			ResponseResult<HotelEntity> responseResult = JsonUtil.toBean(result,
@@ -248,7 +247,6 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 
 	@Override
 	public List<HotelRoomFacility> queryHotelRoomFacility(QueryHotelParam query) {
-		logger.info("BQY酒店房间设施信息获取开始...");
 		query.setAgentId(Long.parseLong(BQY_AGENTID));
 		query.setToken(md5Encryption());
 		List<HotelRoomFacility> roomFacilityList = null;
@@ -264,13 +262,11 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		}else {
 			throw new GSSException("获取BQY酒店房间设施信息失败!", "0111", "BQY酒店房间设施信息返回空值");
 		}
-		logger.info("BQY酒店房间设施信息获取成功!");
 		return roomFacilityList;
 	}
 
 	@Override
 	public List<ImageList> queryHotelImage(QueryHotelParam query) {
-		logger.info("BQY酒店图片获取开始...");
 		query.setAgentId(Long.parseLong(BQY_AGENTID));
 		query.setToken(md5Encryption());
 		List<ImageList> imageList = null;
@@ -286,14 +282,12 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		}else {
 			throw new GSSException("获取BQY酒店图片失败!", "0111", "BQY酒店图片返回空值");
 		}
-		logger.info("BQY酒店图片获取成功!");
 		return imageList;
 	}
 	
 
 	@Override
 	public List<RoomImageList> queryHotelRoomImage(QueryHotelParam query) {
-		logger.info("BQY酒店房型图片获取开始...");
 		query.setAgentId(Long.parseLong(BQY_AGENTID));
 		query.setToken(md5Encryption());
 		List<RoomImageList> imageList = null;
@@ -309,14 +303,12 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		}else {
 			throw new GSSException("获取BQY酒店房型图片失败!", "0111", "BQY酒店房型图片返回空值");
 		}
-		logger.info("BQY酒店房型图片获取成功!");
 		return imageList;
 	}
 	
 	@Override
 	public List<RoomPriceItem> queryHotelRoomPrice(QueryHotelParam query) {
 		// BQY_HOTEL_HOTEL_PRICE
-		logger.info("BQY酒店房间获取开始...");
 		query.setAgentId(Long.parseLong(BQY_AGENTID));
 		query.setToken(md5Encryption());
 		List<RoomPriceItem> roomPriceList = null;
@@ -332,14 +324,12 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		}else {
 			throw new GSSException("获取BQY酒店房型图片失败!", "0111", "BQY酒店房型图片返回空值");
 		}
-		logger.info("BQY酒店房型图片获取成功!");
 		return roomPriceList;
 	}
 	
 	
 	@Override
 	public HotelLocationEntity queryCityInfo2(QueryHotelIdParam query) {
-		logger.info("BQY城市信息获取开始...");
 		query.setAgentId(Long.parseLong(BQY_AGENTID));
 		query.setToken(md5Encryption());
 		HotelLocationEntity cityInfo = null;
@@ -355,7 +345,6 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		}else {
 			throw new GSSException("获取BQY城市信息失败!", "0111", "BQY城市信息返回空值");
 		}
-		logger.info("BQY城市信息获取成功!");
 		return cityInfo;
 	}
 	
@@ -411,7 +400,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	@Override
 	public OrderPayResult orderPay(OrderPayReq orderPayReq) {
 		//BQY_HOTEL_ORDER_PAY_URL
-		logger.info("BQY酒店订单创建开始...");
+		logger.info("BQY酒店订单支付开始...");
 		orderPayReq.setAgentId(Long.parseLong(BQY_AGENTID));
 		orderPayReq.setToken(md5Encryption());
 		OrderPayResult orderPayResult = null;
@@ -423,14 +412,14 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
 					orderPayResult = responseResult.getResult();
 				}else {
-					logger.error("BQY酒店订单创建失败!");
-					throw new GSSException("酒店订单创建失败!", "0111", "酒店订单创建返回空值");
+					logger.error("BQY酒店订单支付失败!");
+					throw new GSSException("酒店订单支付失败!", "0111", "酒店订单支付返回空值");
 				}
 			}
 		}else {
-			throw new GSSException("酒店订单创建失败!", "0111", "酒店订单创建返回空值");
+			throw new GSSException("酒店订单支付失败!", "0111", "酒店订单支付返回空值");
 		}
-		logger.info("BQY酒店订单创建结束!");
+		logger.info("BQY酒店订单支付结束!");
 		return orderPayResult;
 	}
 	
@@ -456,8 +445,6 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			hotelInfo.setSupplierNo("411805040103290132");
 			hotelInfo.setLatestUpdateTime(sdf.format(new Date()));
 			hotelInfo.setSaleStatus(1);
-			//TODO 随机最低价格
-			//hotelInfo.setLowPrice(new BigDecimal((int)((Math.random() + 1) * 100)));
 			//保存酒店信息
 			mongoTemplate1.save(hotelInfo);
 			//保存中间表
@@ -511,8 +498,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 					}
 				}
 				
-				holMid.setResId(hotelInfo.getHotelId());
-				holMid.setResName(hotelInfo.getHotelName());
+				/*holMid.setResId(hotelInfo.getHotelId());
+				holMid.setResName(hotelInfo.getHotelName());*/
 				int lowPrice = hotelInfo.getLowPrice().intValue();
 				if (holMid.getMinPrice() > lowPrice) {
 					holMid.setMinPrice(lowPrice);
@@ -536,8 +523,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			listHol.add(resNameSum);
 			holMidBaseInfo.setResNameSum(listHol);
 			holMidBaseInfo.setId(String.valueOf(IdWorker.getId()));
-			holMidBaseInfo.setResId(hotelInfo.getHotelId());
-			holMidBaseInfo.setResName(hotelInfo.getHotelName());
+			/*holMidBaseInfo.setResId(hotelInfo.getHotelId());
+			holMidBaseInfo.setResName(hotelInfo.getHotelName());*/
 			holMidBaseInfo.setProvName(hotelInfo.getProvinceName());
 			holMidBaseInfo.setCityName(hotelInfo.getCityName());
 			holMidBaseInfo.setIsInter(1);
