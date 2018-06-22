@@ -164,6 +164,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
         boolean isinf = true;
         boolean iscnn = true;
         for (PnrAirTraveler pnrAirTraveler : pnrAirTravelers) {
+            pnrAirTraveler.setPassengerTypeCode(PassengerTypeEnum.getValue(pnrAirTraveler.getPassengerTypeCode()));
             PnrPassenger pnrPassenger = new PnrPassenger();
             if ("ADT".equals(pnrAirTraveler.getPassengerTypeCode()) && isinf) {
                 PassengerTypePricesTotal passengerTypePricesTotal = new PassengerTypePricesTotal();
