@@ -543,8 +543,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			
 			//酒店坐标
 			holMidBaseInfo.setLatLonType(hotelInfo.getCoordinatesType());
-			//holMidBaseInfo.setLat(hotelInfo.getLatitude().toString());
-			//holMidBaseInfo.setLon(hotelInfo.getLongitude().toString());
+			holMidBaseInfo.setLat(hotelInfo.getLatitude().toString());
+			holMidBaseInfo.setLon(hotelInfo.getLongitude().toString());
 			Double[] resGpsLocation = new Double[2];
 			resGpsLocation[0] = Double.valueOf(hotelInfo.getLongitude().toString());
 			resGpsLocation[1] = Double.valueOf(hotelInfo.getLatitude().toString());
