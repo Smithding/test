@@ -1106,11 +1106,9 @@ public class RefundServiceImpl implements IRefundService {
 				SaleChangeVo saleChangeVo = new SaleChangeVo();
 				SaleChange saleChange = saleChangeService
 						.getSaleChangeByNo(requestWithActor.getAgent(), saleChangeExt.getSaleChangeNo());
-				saleChangeVo.setChangeReson(saleChange.getChangeReason());
-				saleChangeVo.setCustomerRemark(saleChangeExt.getCustomerRemark());
 				if (saleChange != null && saleChange.getSaleOrderNo() != 0) {
-					saleChangeVo.setTransationOrderNo(saleChange.getTransationOrderNo());
-					saleChangeVo.setSaleOrderNo(saleChange.getSaleOrderNo());//销售单编号
+
+					//saleChangeVo.setSaleOrderNo(saleChange.getSaleOrderNo());//销售单编号
 					SaleOrderExt saleOrderExt = saleOrderExtService
 							.selectBySaleOrderNo(requestWithActor.getAgent(), saleChange.getSaleOrderNo());
 					if (saleOrderExt != null && saleOrderExt.getSaleOrderNo() != null) {
@@ -1120,10 +1118,6 @@ public class RefundServiceImpl implements IRefundService {
 							if(buyOrder.getBusinessSignNo().equals(saleOrderExt.getSaleOrder().getBusinessSignNo())){
 								Supplier supplier=supplierService.getSupplierByNo(requestWithActor.getAgent(),buyOrder.getSupplierNo());
 								saleChangeVo.setTicketType(supplier.getShortName());//票证类型获取供应商
-								/*if(supplier.getCustomerTypeNo()==101){
-									BuyOrderExt buyOrderExt=buyOrderExtService.selectByBuyOrderNo(requestWithActor.getAgent(),buyOrder.getBuyOrderNo());
-									saleChangeVo.setTicketType(supplier.getShortName() +"  "+buyOrderExt.getTicketType());
-								}*/
 							}
 							List<BuyChange> buyChangeList=buyChangeService.getBuyChangesByBONo(requestWithActor.getAgent(), buyOrder.getBuyOrderNo());
 							for(BuyChange buyChange:buyChangeList){
@@ -1132,55 +1126,12 @@ public class RefundServiceImpl implements IRefundService {
 								}
 							}
 						}
-						if (buyOrderList != null && buyOrderList.size() != 0) {
+
 							String fight = null;
 							String name = null;
 							String ticketNo = null;
 							String fightNo = null;
-							int brokerage = 0;
-							if (saleOrderExt.getLegList() != null && saleOrderExt.getLegList().size() > 0) {
-								for (Leg leg : saleOrderExt.getLegList()) {
-									//拼装航程
-									//depAirport起飞机场   arrAirport到达机场进行null判断  为null值空字符串
-									if (leg.getDepAirport() == null) {
-										leg.setDepAirport("");
-									}
-									if (leg.getArrAirport() == null) {
-										leg.setAirline("");
-									}
-									if (fight == null || fight.equals("")) {
-										if (leg.getDepAirport() != null && leg.getArrAirport() != null) {
-											fight = leg.getDepAirport() + "-" + leg.getArrAirport();
-										} else if (leg.getDepAirport() == null) {
-											fight = leg.getArrAirport();
-										} else if (leg.getArrAirport() == null) {
-											fight = leg.getDepAirport();
-										}
-									} else {
-										if (leg.getDepAirport() != null && leg.getArrAirport() != null) {
-											fight = fight + "," + leg.getDepAirport() + "-" + leg.getArrAirport();
-										} else if (leg.getDepAirport() == null) {
-											fight = fight + "," + leg.getArrAirport();
-										} else if (leg.getArrAirport() == null) {
-											fight = fight + "," + leg.getDepAirport();
-										}
-									}
-									//航班号
-									if (leg.getFlightNo() == null) {
-										leg.setFlightNo("");
-									}
-									if (fightNo == null || ("").equals(fightNo)) {
-										fightNo = leg.getFlightNo();
-									} else {
-										fightNo = fightNo + "-" + leg.getFlightNo();
-									}
-									/*if (saleChangeVo.getStartTime() == null || ("").equals(saleChangeVo.getStartTime())) {
-										saleChangeVo.setStartTime(simpleDate.format(leg.getDepTime()));
-									} else {
-										saleChangeVo.setStartTime(saleChangeVo.getStartTime() + "," + leg.getDepTime());//起飞时间
-									}*/
-								}
-							}
+
 							//乘机人
 							if (saleOrderExt.getPassengerList() != null) {
 								for (Passenger passenger : saleOrderExt.getPassengerList()) {
@@ -1195,8 +1146,10 @@ public class RefundServiceImpl implements IRefundService {
 									}
 								}
 							}
-							if (saleOrderExt.getSaleOrderDetailList() != null) {
-								for (SaleOrderDetail saleOrderDetail : saleOrderExt.getSaleOrderDetailList()) {
+						 List<SaleOrderDetail> saleOrderDetails = saleOrderExt.getSaleOrderDetailList();
+
+							if ( saleOrderDetails != null) {
+								for (SaleOrderDetail saleOrderDetail : saleOrderDetails) {
 									//票号
 									if (saleOrderDetail.getTicketNo() == null) {
 										saleOrderDetail.setTicketNo("");
@@ -1206,24 +1159,19 @@ public class RefundServiceImpl implements IRefundService {
 									} else if(!ticketNo.contains(saleOrderDetail.getTicketNo())){
 										ticketNo = ticketNo + "," + saleOrderDetail.getTicketNo();
 									}
-									//客户手续费
-									if (saleOrderDetail.getBrokerage() != null) {
-										brokerage += saleOrderDetail.getBrokerage().intValue();
-									}
+
 								}
 							}
-							saleChangeVo.setCustomerPrice(String.valueOf(brokerage));//客户手续费
 
 							saleChangeVo.setTicketNo(ticketNo);//票号
-							//pnr
-							if(saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderExt().getImportPnr()!=null){
-								saleChangeVo.setPnr(saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderExt().getImportPnr().getPnr());
-							}
-							
 							saleChangeVo.setLeg(fight);//航程
 							saleChangeVo.setAlineNo(fightNo);
 							saleChangeVo.setPassenger(name);//乘机人
-						}
+
+							//pnr
+							if(saleOrderExt.getImportPnr()!=null){
+								saleChangeVo.setPnr(saleOrderExt.getImportPnr().getPnr());
+							}
 						//订单来源
 						if (saleOrderExt.getSaleOrder() != null) {
 							if (saleOrderExt.getSaleOrder().getSourceChannelNo() == null) {
@@ -1247,9 +1195,6 @@ public class RefundServiceImpl implements IRefundService {
 						saleChangeVo.setCost(saleChangeExt.getPassengerRefundPriceList().get(0).getSaleCount());//设置废退费用
 					}
 					saleChangeVo.setSaleChangeNo(saleChangeExt.getSaleChangeNo());//
-					saleChangeVo.setAlineStatus(saleChangeExt.getAirlineStatus());//航司状态
-					saleChangeVo.setReviewName(saleChangeExt.getAuditPerson());//审核人员
-					saleChangeVo.setReviewTime(saleChangeExt.getAuditTime());//审核时间
 					saleChangeVo.setAgentId(requestWithActor.getAgent().getId());
 					saleChangeVo.setLocker(saleChangeExt.getLocker());
 					//设置操作人

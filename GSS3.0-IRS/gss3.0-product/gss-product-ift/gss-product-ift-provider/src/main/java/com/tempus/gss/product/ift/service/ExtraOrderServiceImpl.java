@@ -145,7 +145,14 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
         }
         differenceOrder.setTraNo(differenceOrderInput.getTraNo());
         differenceOrder.setBusinessOrderNo(businessOrderNo);
-        differenceOrder.setBusinessType(differenceOrderInput.getBusinessType());
+        if(differenceOrderInput.getBusinessType()!=null){
+            differenceOrder.setBaseOrderType(differenceOrderInput.getBusinessType());
+            String businessType=String.valueOf(differenceOrderInput.getBusinessType());
+            String type = businessType.substring(0,1);
+            Integer bizType = Integer.parseInt(type);
+            differenceOrder.setBusinessType(bizType);
+            differenceOrder.setBaseOrderType(differenceOrderInput.getBusinessType());
+        }
         differenceOrder.setReceivable(differenceOrderInput.getReceivable());
         differenceOrder.setDifferenceDesc(differenceOrderInput.getDifferenceDesc());
         differenceOrder.setDifferenceType(differenceOrderInput.getDifferenceType());
