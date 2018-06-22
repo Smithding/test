@@ -154,6 +154,7 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
             differenceOrder.setBaseOrderType(differenceOrderInput.getBusinessType());
         }
         differenceOrder.setReceivable(differenceOrderInput.getReceivable());
+        differenceOrder.setShoppingAmount(differenceOrderInput.getShoppingAmount());
         differenceOrder.setDifferenceDesc(differenceOrderInput.getDifferenceDesc());
         differenceOrder.setDifferenceType(differenceOrderInput.getDifferenceType());
         differenceOrder.setIncomeExpenseType(differenceOrderInput.getIncomeExpenseType());

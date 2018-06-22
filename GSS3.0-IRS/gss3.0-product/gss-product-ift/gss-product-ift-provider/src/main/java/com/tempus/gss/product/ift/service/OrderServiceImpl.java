@@ -1226,8 +1226,6 @@ public class OrderServiceImpl implements IOrderService {
             log.error("当前用户为空");
             throw new GSSException("当前用户为空", "0101", "拒单操作失败!");
         }
-        StringBuffer ticketNoArray = new StringBuffer();
-        Date date = new Date();
         try {
             PassengerListVo listVo = requestWithActor.getEntity();
             
@@ -1236,8 +1234,16 @@ public class OrderServiceImpl implements IOrderService {
             if (account == null) {
                 throw new GSSException("创建采购付款单失败", "0102", "资金帐号未能查出相应数据!account为空！accountNo=" + listVo.getAccountNo());
             }
-            
             Long saleOrderNo = listVo.getpVoList().get(0).getSaleOrderNo();
+            Supplier supplier = supplierService.getSupplierByNo(agent, listVo.getSupplierNo());
+            List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(agent, saleOrderNo);
+            BuyOrder buyOrder = null;
+            if (buyOrderList != null && buyOrderList.size() != 0) {
+                buyOrder = buyOrderList.get(0);
+                this.createBuyCertificate(agent, buyOrder.getBuyOrderNo(), buyOrder.getPayable().doubleValue(), account.getAccountNo(), supplier.getSupplierNo(), supplier.getCustomerTypeNo(), 2, account.getType(), "BUY", listVo.getDealNo());
+            }
+            //StringBuffer ticketNoArray = new StringBuffer();
+            Date date = new Date();
             String office = listVo.getOffice();
             SaleOrderExt saleOrderExt = null;
             saleOrderExt = saleOrderExtDao.selectByPrimaryKey(saleOrderNo);
@@ -1284,10 +1290,10 @@ public class OrderServiceImpl implements IOrderService {
                             saleOrderDetailDao.updateByPrimaryKeySelective(detail);
                             Leg leg = detail.getLeg();
                             String legValue = leg.getDepAirport() + leg.getStopAirport() + leg.getArrAirport() + "/";
-                            ticketNoArray.append(detailVo.getTicketNo());
+                            /*ticketNoArray.append(detailVo.getTicketNo());
                             if (index != detailList.size() - 1) {
                                 ticketNoArray.append(",");
-                            }
+                            }*/
                             log.info("乘客[" + passengerNo + "]的票号写入成功,对应航程为:" + legValue);
                         }
                         index++;
@@ -1300,7 +1306,7 @@ public class OrderServiceImpl implements IOrderService {
             saleOrderExt.setLocker(0L);
             // 修改采购单信息
             //TODO
-            updateBuyOrder(agent, saleOrderNo, payable, listVo, ticketNoArray.toString());
+            updateBuyOrder(agent, buyOrder, payable, listVo, supplier);
             // 更改主订单状态
             int result = 0;
             saleOrderService.updateStatus(agent, saleOrderNo, 4);// 将状态改为已出票
@@ -1357,7 +1363,7 @@ public class OrderServiceImpl implements IOrderService {
      * @param thirdPayNo
      *         第三方业务编号 多个以","隔开
      */
-    public void createBuyCertificate(Agent agent, long buyOrderNo, double payAmount, long payAccount, long customerNo, long customerTypeNo, int payType, int payWay, String channel, String thirdBusNo, String thirdPayNo) {
+    public void createBuyCertificate(Agent agent, long buyOrderNo, double payAmount, long payAccount, long customerNo, long customerTypeNo, int payType, int payWay, String channel, String thirdPayNo) {
         
         CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
         certificateCreateVO.setAccoutNo(payAccount + ""); // 支付账号
@@ -1371,7 +1377,7 @@ public class OrderServiceImpl implements IOrderService {
         certificateCreateVO.setServiceLine("1"); // 业务线
         certificateCreateVO.setSubBusinessType(1); // 业务小类 1.销采 2.补收退 3.废退 4.变更
         // 5.错误修改
-        certificateCreateVO.setThirdBusNo(thirdBusNo); // 第三方业务编号 多个以","隔开
+        //certificateCreateVO.setThirdBusNo(thirdBusNo); // 第三方业务编号 多个以","隔开
         // (销售不用传)
         certificateCreateVO.setThirdPayNo(thirdPayNo); // 第三方支付流水 多个以","隔开
         // (销售不用传)
@@ -3100,11 +3106,11 @@ public class OrderServiceImpl implements IOrderService {
         iftTicketMqSender.send(IftTicketMqSender.TICKETED_KEY, iftTicketMessage);
     }
     
-    private void updateBuyOrder(Agent agent, Long saleOrderNo, BigDecimal payable, PassengerListVo listVo, String tickets) throws RuntimeException {
-        Supplier supplier = supplierService.getSupplierByNo(agent, listVo.getSupplierNo());
-        List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(agent, saleOrderNo);
-        if (buyOrderList != null && buyOrderList.size() != 0) {
-            BuyOrder buyOrder = buyOrderList.get(0);
+    private void updateBuyOrder(Agent agent, BuyOrder buyOrder, BigDecimal payable, PassengerListVo listVo,Supplier supplier) throws RuntimeException {
+        //Supplier supplier = supplierService.getSupplierByNo(agent, listVo.getSupplierNo());
+        //List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(agent, saleOrderNo);
+        //if (buyOrderList != null && buyOrderList.size() != 0) {
+         //   BuyOrder buyOrder = buyOrderList.get(0);
             BuyOrder newBuyOrder = new BuyOrder();
             newBuyOrder.setSupplierNo(supplier.getSupplierNo());
             newBuyOrder.setSupplierTypeNo(supplier.getCustomerTypeNo());
@@ -3113,13 +3119,13 @@ public class OrderServiceImpl implements IOrderService {
             newBuyOrder.setGoodsType(buyOrder.getGoodsType());
             newBuyOrder.setPayable(payable);
             buyOrderService.update(agent, newBuyOrder);
-            Account account = accountService.getAccountByAccountNo(agent, listVo.getAccountNo());
-            if (account != null) {
+            //Account account = accountService.getAccountByAccountNo(agent, listVo.getAccountNo());
+          /*  if (account != null) {
                 this.createBuyCertificate(agent, buyOrder.getBuyOrderNo(), buyOrder.getPayable().doubleValue(), account.getAccountNo(), supplier.getSupplierNo(), supplier.getCustomerTypeNo(), 2, account.getType(), "BUY", tickets, listVo.getDealNo());
                 log.info("调用订单创建采购付款单成功，BuyOrderNo=" + buyOrder.getBuyOrderNo() + ",account = " + account);
             } else {
                 throw new GSSException("创建采购付款单失败", "0102", "资金帐号未能查出相应数据!account为空！accountNo=" + listVo.getAccountNo());
-            }
+            }*/
             // 修改出票类型
             BuyOrderExt buyOrderExt = buyOrderExtDao.selectByPrimaryKey(buyOrder.getBuyOrderNo());
             if (buyOrderExt != null) {
@@ -3127,7 +3133,7 @@ public class OrderServiceImpl implements IOrderService {
                 buyOrderExt.setBuyRemarke(listVo.getBuyRemarke());
             }
             buyOrderExtDao.updateByPrimaryKeySelective(buyOrderExt);
-        }
+        //}
     }
     
     private Long savePnr(Long pnrNo, PassengerListVo listVo, Long saleOrderNo, Agent agent, Date date) throws RuntimeException {
