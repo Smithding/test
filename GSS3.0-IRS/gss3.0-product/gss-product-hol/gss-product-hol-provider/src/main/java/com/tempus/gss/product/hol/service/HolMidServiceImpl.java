@@ -27,6 +27,7 @@ import com.tempus.gss.product.hol.api.entity.ResNameSum;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfoSum;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProDetails;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
@@ -465,7 +466,10 @@ public class HolMidServiceImpl implements IHolMidService {
 		if (null != bqyResId && bqyResId != 0) {
 			imgList = bqyHotelSupplierService.listImgByHotelId(agent, bqyResId);
 		}else {
-			//TODO TC酒店图片查询
+			ImgInfoSum imgInfoSum = tcHotelSupplierService.queryImgInfoSum(agent, tcResId);
+			if (null != imgInfoSum) {
+				imgList = imgInfoSum.getImgInfoList();
+			}
 		}
 		return imgList;
 	}
