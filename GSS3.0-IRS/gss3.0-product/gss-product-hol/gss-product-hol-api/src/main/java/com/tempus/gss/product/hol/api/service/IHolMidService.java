@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.service;
 
 import java.util.List;
+import java.util.Set;
 
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
@@ -62,4 +63,6 @@ public interface IHolMidService {
 	 * @return
 	 */
 	int saleStatusUpdate(Agent agent, Long holMidId, Integer saleStatus);
+	
+	public List<HolMidBaseInfo> queryAlikeHol(String lon, String lat, Set<String> phoneList);
 }
