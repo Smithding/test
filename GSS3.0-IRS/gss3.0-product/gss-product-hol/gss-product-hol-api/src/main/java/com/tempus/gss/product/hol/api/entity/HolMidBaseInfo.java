@@ -75,11 +75,20 @@ public class HolMidBaseInfo implements Serializable{
 	 * 坐标类型（1-百度坐标 2-图吧坐标 3-谷歌坐标）
 	 */
 	private Integer latLonType;
+	/**
+	 * 经度
+	 */
+	private String lon;
+	/**
+	 * 纬度
+	 */
+	private String lat;
 
 	/**
 	 * 第一个经度lon, 第二个纬度lat
 	 */
 	@GeoSpatialIndexed
+	@JSONField(serialize = false)
 	private Double[] resPosition;
 	
 	/**
@@ -315,6 +324,22 @@ public class HolMidBaseInfo implements Serializable{
 
 	public void setBookInfo(String bookInfo) {
 		this.bookInfo = bookInfo;
+	}
+
+	public String getLon() {
+		return lon;
+	}
+
+	public void setLon(String lon) {
+		this.lon = lon;
+	}
+
+	public String getLat() {
+		return lat;
+	}
+
+	public void setLat(String lat) {
+		this.lat = lat;
 	}
 	
 }
