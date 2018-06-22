@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -490,6 +492,44 @@ public class HolMidServiceImpl implements IHolMidService {
 			throw new GSSException("修改可售状态", "0118", "修改可售状态失败");
 		}
 		return 1;
+	}
+
+	@Override
+	public List<HolMidBaseInfo> queryAlikeHol(String lon, String lat, Set<String> phoneList) {
+		
+		List<HolMidBaseInfo> res = null;
+		Query query =new Query();
+		Criteria cr =new Criteria();
+		query.skip(0);
+		query.limit(3);
+		/*if(StringUtil.isNotNullOrEmpty(lon) && StringUtil.isNotNullOrEmpty(lat)) {
+			Point point =new Point(Double.valueOf(lon), Double.valueOf(lat));
+			cr.and("resGpsLocation").near(point).maxDistance(1D);//100000/6378137
+		}*/
+		if(StringUtil.isNotBlank(lon)) {
+			cr.and("lon").regex("^" + lon + ".*$");
+		}else {
+			throw new GSSException("参数经度为空", "0401", "匹配中间表失败,参数经度为空");
+		}
+		if(StringUtil.isNotBlank(lat)) {
+			cr.and("lat").regex("^" + lat + ".*$");
+		}else {
+			throw new GSSException("参数纬度", "0118", "匹配中间表失败,参数纬度为空");
+		}
+		if(StringUtil.isNotNullOrEmpty(phoneList)) {
+			List<Criteria> list = new ArrayList<Criteria>();
+			for(String sss : phoneList) {
+				Criteria c1 =new Criteria();
+				c1 = Criteria.where("resPhone").regex("^.*"+sss+".*$");
+				list.add(c1);
+			}
+			Criteria[] array = list.toArray(new Criteria[list.size()]);
+			cr.orOperator(array);
+		}
+		query.addCriteria(cr);
+		res = mongoTemplate1.find(query, HolMidBaseInfo.class);
+		
+		return res;
 	}
 
 }
