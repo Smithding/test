@@ -139,7 +139,7 @@ public interface IBQYHotelInterService{
 	 * @param phone		酒店电话
 	 * @return
 	 */
-	List<HolMidBaseInfo> SearchHoltel(String lat, String lon, String phone);
+	List<HolMidBaseInfo> searchHoltel(String lat, String lon, String phone);
 	
 	/**
 	 * 保存中间表

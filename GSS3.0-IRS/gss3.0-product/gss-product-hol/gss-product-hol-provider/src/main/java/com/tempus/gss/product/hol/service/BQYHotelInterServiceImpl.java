@@ -467,7 +467,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		//电话
 		String mobile = hotelInfo.getMobile();
 		
-		List<HolMidBaseInfo> holMidList = SearchHoltel(latitude, longitude, mobile);
+		List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
 		if (null != holMidList && holMidList.size() > 0) {
 			if (holMidList.size() == 1) {
 				//合并酒店
@@ -584,7 +584,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	}
 	
 	@Override
-	public List<HolMidBaseInfo> SearchHoltel(String lat, String lon, String phone) {
+	public List<HolMidBaseInfo> searchHoltel(String lat, String lon, String phone) {
 		List<HolMidBaseInfo> holMidList = null;
 		int latSubLen = lat.substring(lat.indexOf(".")).length();
 		int lonSubLen = lon.substring(lon.indexOf(".")).length();
