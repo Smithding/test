@@ -21,6 +21,7 @@ import com.tempus.gss.product.ift.api.service.*;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.*;
 import com.tempus.gss.product.ift.help.IftLogHelper;
+import com.tempus.gss.system.entity.User;
 import com.tempus.gss.system.service.IMaxNoService;
 import com.tempus.gss.system.service.IUserService;
 import com.tempus.gss.vo.Agent;
@@ -871,6 +872,8 @@ public class ChangeServiceImpl implements IChangeService {
             SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(requestWithActor.getEntity().getSaleChangeNo());
             saleChangeExt.setTicketChangeType(requestWithActor.getEntity().getTicketChangeType());
             saleChangeExt.setLocker(0L);
+            saleChangeExt.setModifier(requestWithActor.getAgent().getAccount());
+            saleChangeExt.setModifyTime(new Date());
             saleChangeExt.setCurrency(requestWithActor.getEntity().getCurrency());
             saleChangeExt.setExchangeRate(requestWithActor.getEntity().getExchangeRate());
             saleChangeExt.setSaleCurrency(requestWithActor.getEntity().getSaleCurrency());
@@ -1804,8 +1807,9 @@ public class ChangeServiceImpl implements IChangeService {
         //查询出之前的saleOrderExt保存之前的oldLocker
         SaleChangeExt changeExt = changeExtService.getSaleChange(requestWithActor);
         Long oldLocker = changeExt.getLocker();
-        //赋值locker为0更新saleOrderExt
-        changeExt.setLocker(0l);
+        //赋值locker为之前销售审核id更新saleOrderExt
+        User user = userService.findUserByLoginName(requestWithActor.getAgent(), changeExt.getModifier());
+        changeExt.setLocker(user.getId());
         changeExt.setLockTime(new Date());
         int updateLocker = saleChangeExtDao.updateLocker(changeExt);
         //更新之前保存的oldLocker的数量

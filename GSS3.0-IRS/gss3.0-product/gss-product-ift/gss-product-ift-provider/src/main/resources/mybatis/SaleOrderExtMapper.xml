@@ -716,10 +716,20 @@
 
     <update id="updateLocker" parameterType="com.tempus.gss.product.ift.api.entity.SaleChangeExt">
         UPDATE IFT_SALE_ORDER_EXT
-        SET LOCKER      = #{locker,jdbcType=BIGINT},
-            LOCK_TIME   = #{lockTime,jdbcType=TIMESTAMP},
-            MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
-            MODIFIER    = #{modifier,jdbcType=VARCHAR}
+        <set>
+            <if test="locker != null">
+                LOCKER = #{locker,jdbcType=BIGINT},
+            </if>
+            <if test="lockTime != null">
+                LOCK_TIME   = #{lockTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifier != null">
+                MODIFIER    = #{modifier,jdbcType=VARCHAR},
+            </if>
+        </set>
         WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
     </update>
 
