@@ -194,12 +194,21 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
         if(extraOrder ==null || extraOrder.getDifferenceOrderNo() ==null || extraOrder.getAuditStatus()==null){
             throw new RuntimeException("审核的杂费单信息参数异常");
         }
-        logger.info("主管审核的杂费单信息:"+extraOrder.toString());
+        logger.info("主管审核的审核意见:"+extraOrder.getAuditStatus());
         Integer status = extraOrder.getAuditStatus();
         if(StringUtils.equals("-1",String.valueOf(status)) && StringUtils.isEmpty(extraOrder.getActorDesc())){
             throw new RuntimeException("杂费单审核不通过时，备注信息不能为空");
         }
         Agent agent = requestWithActor.getAgent();
+        extraOrder.setActorUser(agent.getAccount());
+        String result = (extraOrder.getAuditStatus()==1?"通过":"不通过");
+        if(StringUtils.isNotBlank(extraOrder.getActorDesc())){
+            result = result + "(备注信息:" + extraOrder.getActorDesc()+")";
+        }
+        Calendar calendar = Calendar.getInstance();
+        extraOrder.setActorTime(calendar.getTime());
+        String desc = "$EOF$" +  calendar.getTime() + "$BREAK$" + agent.getAccount() + "$BREAK$" + "审核"+ result;
+        extraOrder.setActorDesc(desc);
         differenceOrderService.update(agent,extraOrder);
     }
 

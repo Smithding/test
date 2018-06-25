@@ -14,6 +14,7 @@ import java.util.Date;
  **/
 public class IftExtraOrder implements Serializable{
 
+    private static final long serialVersionUID = 3954970859500224133L;
     /**
      * 差异单号
      */
@@ -187,24 +188,16 @@ public class IftExtraOrder implements Serializable{
      */
     private String payNo;
 
+    private BigDecimal shoppingAmount;
+
+    private String customerName;
+
     public Long getTraNo() {
         return traNo;
     }
 
     public String getActorTimeStr() {
         return actorTimeStr;
-    }
-
-    public String getDifferenceTypeName() {
-        if (null != differenceType) {
-            return EIncidentalType.format(differenceType).getValue();
-        } else {
-            return differenceTypeName;
-        }
-    }
-
-    public void setDifferenceTypeName(String differenceTypeName) {
-        this.differenceTypeName = differenceTypeName;
     }
 
     public void setActorTimeStr(String actorTimeStr) {
@@ -485,5 +478,29 @@ public class IftExtraOrder implements Serializable{
 
     public void setPnr(String pnr) {
         this.pnr = pnr;
+    }
+
+    public BigDecimal getShoppingAmount() {
+        return shoppingAmount;
+    }
+
+    public void setShoppingAmount(BigDecimal shoppingAmount) {
+        this.shoppingAmount = shoppingAmount;
+    }
+
+    public String getDifferenceTypeName() {
+        return differenceTypeName;
+    }
+
+    public void setDifferenceTypeName(String differenceTypeName) {
+        this.differenceTypeName = differenceTypeName;
+    }
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
 }
