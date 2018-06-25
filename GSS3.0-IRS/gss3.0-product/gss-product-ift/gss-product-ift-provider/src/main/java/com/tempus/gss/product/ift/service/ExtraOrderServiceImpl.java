@@ -203,11 +203,11 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
         extraOrder.setActorUser(agent.getAccount());
         String result = (extraOrder.getAuditStatus()==1?"通过":"不通过");
         if(StringUtils.isNotBlank(extraOrder.getActorDesc())){
-            result = result + extraOrder.getActorDesc();
+            result = result + "(备注信息:" + extraOrder.getActorDesc()+")";
         }
         Calendar calendar = Calendar.getInstance();
         extraOrder.setActorTime(calendar.getTime());
-        String desc = "$EOF$" +  calendar.getTime() + "$BREAK$" + agent.getAccount() + "$BREAK$" + "审核" + "$BREAK$" + result;
+        String desc = "$EOF$" +  calendar.getTime() + "$BREAK$" + agent.getAccount() + "$BREAK$" + "审核"+ result;
         extraOrder.setActorDesc(desc);
         differenceOrderService.update(agent,extraOrder);
     }

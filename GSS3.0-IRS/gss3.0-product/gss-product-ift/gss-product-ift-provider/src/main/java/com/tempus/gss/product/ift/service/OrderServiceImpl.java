@@ -296,18 +296,13 @@ public class OrderServiceImpl implements IOrderService {
                     if (peopleInfo.getBuyRefuseNum() >= maxOrderNum) {
                         continue;
                     } else {
-                        log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
-                        /***修改订单明细表*/
-                        //updateSaleOrderDetail(order, peopleInfo, updateTime);
                         /**锁单*/
-                        log.info("2.锁单,锁单人是被分配人...");
+                        log.info("第四步:满足条件的分配明细...1.锁单,锁单人是被分配人...");
                         assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
                         /***增加出票人订单数*/
-                        log.info("3.增加出票人的未处理采购废票单数量...");
+                        log.info("2.增加出票人的未处理采购废票单数量...");
+                        peopleInfo.setUpdatetime(updateTime);
                         increaseBuyRefuseNum(agent, peopleInfo);
-                        /***发送消息至消息队列 通知出票员*/
-                        //sendInfo(peopleInfo.getUserid(), order.getSaleOrderNo(),String.valueOf(order.getSaleOrder().getOrderStatus()));
-                        //log.info("4.发信息通知出票员出票,订单" + order.getSaleChangeNo() + "将分给出票员结束");
                         break;
                     }
                 }
