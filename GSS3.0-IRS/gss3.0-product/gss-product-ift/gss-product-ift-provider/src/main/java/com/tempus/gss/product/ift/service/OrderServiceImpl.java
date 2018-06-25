@@ -292,7 +292,7 @@ public class OrderServiceImpl implements IOrderService {
             log.info("第三步：判断出票员手头出票订单数量...");
             for (SaleChangeExt order : saleChangeExts) {
                 for (TicketSender peopleInfo : senders) {
-                    log.info(peopleInfo.getName() + "未处理采购退票单数量：" + peopleInfo.getBuyRefuseNum());
+                    log.info(peopleInfo.getName() + "未处理采购废票单数量：" + peopleInfo.getBuyRefuseNum());
                     if (peopleInfo.getBuyRefuseNum() >= maxOrderNum) {
                         continue;
                     } else {
@@ -303,7 +303,7 @@ public class OrderServiceImpl implements IOrderService {
                         log.info("2.锁单,锁单人是被分配人...");
                         assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
                         /***增加出票人订单数*/
-                        log.info("3.增加出票人的未处理采购退票单数量...");
+                        log.info("3.增加出票人的未处理采购废票单数量...");
                         increaseBuyRefuseNum(agent, peopleInfo);
                         /***发送消息至消息队列 通知出票员*/
                         //sendInfo(peopleInfo.getUserid(), order.getSaleOrderNo(),String.valueOf(order.getSaleOrder().getOrderStatus()));
@@ -1688,9 +1688,9 @@ public class OrderServiceImpl implements IOrderService {
                     //saleOrderExt.setModifyTime(new Date());
                 } else {
                     saleOrderExt.setLocker(0L);
-                    saleOrderExt.setModifier(saleOrderNo.getAgent().getAccount());
+                    //saleOrderExt.setModifier(saleOrderNo.getAgent().getAccount());
                     saleOrderExt.setLockTime(new Date());
-                    saleOrderExt.setModifyTime(new Date());
+                  //  saleOrderExt.setModifyTime(new Date());
                 }
                 int updateLocker = saleOrderExtDao.updateLocker(saleOrderExt);
                 if (updateLocker == 1) {
@@ -2978,18 +2978,18 @@ public class OrderServiceImpl implements IOrderService {
     private void assingLockOrder(SaleOrderExt order, TicketSender sender, Date date, Agent agent) {
         User user = userService.findUserByLoginName(agent, sender.getUserid());
         order.setLocker(user.getId());
-        order.setModifier(sender.getUserid() + "");
+        //order.setModifier(sender.getUserid() + "");
         order.setLockTime(date);
-        order.setModifyTime(date);
+        //order.setModifyTime(date);
         saleOrderExtDao.updateLocker(order);
     }
     
     private void assingLockSaleChangeExt(SaleChangeExt order, TicketSender sender, Date date, Agent agent) {
         User user = userService.findUserByLoginName(agent, sender.getUserid());
         order.setLocker(user.getId());
-        order.setModifier(sender.getUserid() + "");
+      //  order.setModifier(sender.getUserid() + "");
         order.setLockTime(date);
-        order.setModifyTime(date);
+     //   order.setModifyTime(date);
         saleChangeExtDao.updateLocker(order);
     }
     
@@ -3011,12 +3011,12 @@ public class OrderServiceImpl implements IOrderService {
         
         //查询该种类型单被该业务员锁住的数量赋值给BuyRefuseNum字段
         User user = userService.findUserByLoginName(agent, sender.getUserid());
-        int lockCount = saleChangeExtDao.queryRefundCountBylocker(owner, user.getId());
+        int lockCount = saleChangeExtDao.queryBuyRefundAndDelCountBylocker(owner, user.getId());
         sender.setBuyRefuseNum(lockCount);
         sender.setIds(sender.getId() + "");
         iTicketSenderService.update(sender);
     }
-    
+
     private void subSaleOrderNum(Agent agent, Long locker) {
         try {
             User user = userService.selectById(agent, locker);

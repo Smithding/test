@@ -170,7 +170,7 @@ public interface IChangeService {
 	BuyChangeExt getBuyChangeExtBySaleChangeNo(Long saleChangeNo);
 
 	/**
-	 * 拒回的销售变更单locker设置0然后更新之前locker的数量
+	 * 拒回的销售变更单locker设置之前销售审核然后更新之前locker的数量
 	 * @param requestWithActor
 	 */
     void clearLockerAndUpdateOldLocker(RequestWithActor<Long> requestWithActor,String type);
