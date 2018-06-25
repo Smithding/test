@@ -313,6 +313,17 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 				resBaseInfo.setId(resId);
 				resBaseInfo.setSupplierNo("411709261204150108");
 				resBaseInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
+				if(StringUtil.isNotNullOrEmpty(resBaseInfo.getResGPS())) {
+					Double[] resGpsLocation = new Double[2];
+					for(ResGPSInfo gps : resBaseInfo.getResGPS()) {
+						if(gps.getType().equals(1)) {
+							resGpsLocation[0] = Double.valueOf(gps.getLon());
+		 					resGpsLocation[1] = Double.valueOf(gps.getLat());
+		 					resBaseInfo.setResGpsLocation(resGpsLocation);
+		 					break;
+						}
+					}
+				}
 			}
 			
 			if(StringUtil.isNotNullOrEmpty(resImages)) {
