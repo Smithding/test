@@ -359,11 +359,14 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
  			int endResult= hotelSearchReq.getEnd().compareTo(sdf.format(dateAdd.getTime()));
  			if(beginResult >= 0 && endResult <= 0){
  				if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getResGPSInfo())) {
- 					hotelSearchReq.setCityCode("");
- 					//Point point =new Point(Double.valueOf(hotelSearchReq.getResGPSInfo().getLon()), Double.valueOf(hotelSearchReq.getResGPSInfo().getLat()));
- 					//criatira.and("resGpsLocation").near(point).maxDistance(1D);//100000/6378137
- 					
- 					Criteria latlon = new Criteria();
+ 					if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getResGPSInfo().getLon()) && StringUtil.isNotNullOrEmpty(hotelSearchReq.getResGPSInfo().getLat())) {
+ 						hotelSearchReq.setCityCode("");
+ 	 					Point point =new Point(Double.valueOf(hotelSearchReq.getResGPSInfo().getLon()), Double.valueOf(hotelSearchReq.getResGPSInfo().getLat()));
+ 	 					criatira.and("resGpsLocation").near(point).maxDistance(0.2D);//100000/6378137
+ 					}else {
+ 						throw new GSSException("获取酒店列表", "0625", "按照坐标查询出错, 请同时输入经纬度");
+ 					}
+ 					/*Criteria latlon = new Criteria();
  					if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getResGPSInfo().getType())) {
  						latlon.and("type").is(hotelSearchReq.getResGPSInfo().getType());
  					}else {
@@ -379,7 +382,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
  					}else {
  						throw new GSSException("获取酒店列表", "0103", "查询纬度条件为空");
  					}
-	 				criatira.and("resGPS").elemMatch(latlon);
+	 				criatira.and("resGPS").elemMatch(latlon);*/
  				}else if (StringUtil.isNullOrEmpty(hotelSearchReq.getCityCode()) && StringUtil.isNullOrEmpty(hotelSearchReq.getResGPSInfo())) {
  		        	hotelSearchReq.setCityCode("北京");
  		        }
@@ -1149,8 +1152,29 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	}
 
 	@Override
-	public List<ResBaseInfo> findNearHotel(Agent agent, String city,String sectionName, double lat, double lon, double distance,int top) {
-		List<ResBaseInfo> result = Lists.newArrayList();
+	public List<ResBaseInfo> findNearHotel(Agent agent, double lat, double lon) {
+		Query query=new Query();
+        Criteria criatira = new Criteria();
+        query.skip(0);
+  		query.limit(9);
+  		Point point =new Point(lon, lat);
+		criatira.and("resGpsLocation").near(point).maxDistance(0.2D);//100000/6378137
+		
+		List<ResBaseInfo> result = mongoTemplate1.find(query.addCriteria(criatira), ResBaseInfo.class);
+		if(StringUtil.isNotNullOrEmpty(result)) {
+			if(result.size() > 1) {
+				result.remove(0);
+				for (ResBaseInfo resBaseInfo : result) {
+					if(StringUtil.isNotNullOrEmpty(resBaseInfo.getResGpsLocation())) {
+						Double myDistance = GPSUtil.getDistance(lat, lon, resBaseInfo.getResGpsLocation()[1], resBaseInfo.getResGpsLocation()[0]); 
+		   				//用于距离展示，不作他用
+		   				resBaseInfo.setShortIntro(String.valueOf(myDistance));
+					}
+				}
+			}
+		}
+		return result;
+		/*List<ResBaseInfo> result = Lists.newArrayList();
 		DBObject dbObject = new BasicDBObject();  
         dbObject.put("sectionName",sectionName);            
         dbObject.put("cityName",city);
@@ -1177,7 +1201,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		}
 		log.info("耗时："+(e-b));
 	   	System.out.println("<<<耗时："+(e-b));
-		return result;
+		return result;*/
 	}
 
 	@Override
@@ -1211,13 +1235,15 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	public Boolean insertNewRes(Agent agent, Long resId) {
 		log.info("手动添加酒店开始, 入参："+resId);
 		SimpleDateFormat sdfupdate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Integer minPrice = new Random().nextInt(200) + 100;
+		Integer flag = 0;
 		try {
 			Calendar cal = Calendar.getInstance();  
 			Calendar calAdd = Calendar.getInstance();
 			String calStartTime= sdf.format(cal.getTime());
 			
-			calAdd.add(Calendar.MONTH, 2);
-			calAdd.add(Calendar.DAY_OF_MONTH, -1);
+			calAdd.add(Calendar.MONTH, 1);
+			//calAdd.add(Calendar.DAY_OF_MONTH, -1);
 			String calAddTime= sdf.format(calAdd.getTime());
 			
 			AssignDateHotelReq assignDateHotelReq=new AssignDateHotelReq();
@@ -1227,14 +1253,30 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			assignDateHotelReq.setEndTime(calAddTime);
 			AssignDateHotel assignDateHotel=  hotel.queryAssignDateHotel(assignDateHotelReq);
 			
-			if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())) {
-				assignDateHotel.setId(resId);
-				assignDateHotel.setLatestUpdateTime(sdfupdate.format(new Date()));
-				mongoTemplate1.save(assignDateHotel, "assignDateHotel");
-				
-				ResIdList resIdList =new ResIdList();
-				resIdList.setId(resId);
-				mongoTemplate1.save(resIdList, "resIdList");
+			if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())){
+				List<Integer> minProPrice=new ArrayList<Integer>();
+				List<ProInfoDetail> proInfoDetailList = assignDateHotel.getProInfoDetailList();
+				for(ProInfoDetail proInfoDetail : proInfoDetailList){
+					if(proInfoDetail.getProSaleInfoDetails()!= null && proInfoDetail.getProSaleInfoDetails().size() > 0){ 
+						TreeMap<String, ProSaleInfoDetail> map= proInfoDetail.getProSaleInfoDetails();
+						if(StringUtil.isNotNullOrEmpty(map)){
+							for (Map.Entry<String, ProSaleInfoDetail> entry : map.entrySet()) {
+								minProPrice.add(entry.getValue().getDistributionSalePrice());
+								if(minProPrice.size() >= 1) {
+									break;
+								}
+							}
+						}
+					}
+				}
+				if(minProPrice != null){
+					flag = 1;
+					if(minProPrice.size() >= 2){
+						minPrice= Collections.min(minProPrice);
+					}else if(minProPrice.size() == 1){
+						minPrice= minProPrice.get(0);
+					}
+				}
 			}
 			
 			SingleHotelDetailReq singleHotelDetailReq=new SingleHotelDetailReq();
@@ -1248,13 +1290,27 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 			ResBaseInfo resBaseInfo = null;
 			if(StringUtil.isNotNullOrEmpty(resBaseInfos)) {
 				resBaseInfo = resBaseInfos.get(0);
-				Integer minPrice = new Random().nextInt(800) + 100;
 				resBaseInfo.setMinPrice(minPrice);
 				resBaseInfo.setResCommonPrice(minPrice);
-				resBaseInfo.setSaleStatus(1);
+				if(flag.equals(1)) {
+					resBaseInfo.setSaleStatus(1);
+				}else {
+					resBaseInfo.setSaleStatus(0);
+				}
 				resBaseInfo.setId(resId);
 				resBaseInfo.setSupplierNo("411709261204150108");
 				resBaseInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
+				if(StringUtil.isNotNullOrEmpty(resBaseInfo.getResGPS())) {
+					Double[] resGpsLocation = new Double[2];
+					for(ResGPSInfo gps : resBaseInfo.getResGPS()) {
+						if(gps.getType().equals(1)) {
+							resGpsLocation[0] = Double.valueOf(gps.getLon());
+		 					resGpsLocation[1] = Double.valueOf(gps.getLat());
+		 					resBaseInfo.setResGpsLocation(resGpsLocation);
+		 					break;
+						}
+					}
+				}
 			}
 			
 			if(StringUtil.isNotNullOrEmpty(resImages)) {
@@ -1277,6 +1333,10 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 				resProBase.setResProBaseInfos(resProBaseInfos);
 				resProBase.setLatestUpdateTime(sdfupdate.format(new Date()));
 				mongoTemplate1.save(resProBase, "resProBaseInfos");
+				
+				ResIdList resIdList =new ResIdList();
+				resIdList.setId(resId);
+				mongoTemplate1.save(resIdList, "resIdList");
 			}
 		} catch (Exception e) {
 			LogRecordHol logRecordHol=new LogRecordHol();
