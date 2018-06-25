@@ -165,7 +165,7 @@ public interface ITCHotelSupplierService {
 	 * @param distance
 	 * @return
 	 */
-	public List<ResBaseInfo> findNearHotel(Agent agent,String city,String sectionName,double lat,double lon,double distance,int top);
+	public List<ResBaseInfo> findNearHotel(Agent agent,double lat,double lon);
 	
 	/**
 	 * 根据酒店名字模糊匹配下拉信息
