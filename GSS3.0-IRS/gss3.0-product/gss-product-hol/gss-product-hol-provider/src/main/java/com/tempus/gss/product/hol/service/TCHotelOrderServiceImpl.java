@@ -47,6 +47,7 @@ import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.log.entity.LogRecord;
 import com.tempus.gss.log.service.ILogService;
 import com.tempus.gss.mq.MqSender;
+import com.tempus.gss.mss.service.IMssReserveService;
 import com.tempus.gss.order.entity.BuyOrder;
 import com.tempus.gss.order.entity.GoodsBigType;
 import com.tempus.gss.order.entity.SaleOrder;
@@ -157,6 +158,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	
 	@Reference
 	private ISmsTemplateDetailService smsTemplateDetailService;
+	
+	@Reference
+	private IMssReserveService mssReserveService;
 	
 	@Autowired
 	MqSender mqSender;
@@ -1636,7 +1640,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								logRecord.setCreateTime(new Date());
 								logRecord.setOptName("腾邦国际");
 								iLogService.insert(logRecord); 
-						    	
+								
+								Agent ag = new Agent(8755, 301L, hotelOrder.getCustomerNo());
+								mssReserveService.interHotelStatus(ag, hotelOrder.getSaleOrderNo(), OwnerOrderStatus.ALREADY_CONRIRM.getKey(), "酒店订单"+hotelOrder.getSaleOrderNo()+"下单确认成功");
+								
 						    	//smsUtil.sendMsgForUpdateBill(agent, hotelOrder.getContactNumber(), messageReplace);
 							//}
 						}
@@ -1650,6 +1657,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							hotelOrder.setOrderStatus(OwnerOrderStatus.CANCEL_OK.getKey());
 							hotelOrder.setTcOrderStatus(TcOrderStatus.ALREADY_CANCEL.getKey());
 							hotelOrderMapper.updateById(hotelOrder);
+							
+							Agent ag = new Agent(8755, 301L, hotelOrder.getCustomerNo());
+							mssReserveService.interHotelStatus(ag, hotelOrder.getSaleOrderNo(), OwnerOrderStatus.CANCEL_OK.getKey(), "酒店订单"+hotelOrder.getSaleOrderNo()+"已取消");
 						}
 					}else if(tcPushOrderInfo.getOperateType().equals(StatusType.CHECK_RESIDE.getKey())){
 						if( (!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.NO_RESIDE.getKey())) || (!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.BEFORE_RESIDE.getKey()))
@@ -1671,6 +1681,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								hotelOrder.setOrderStatus(OwnerOrderStatus.NO_RESIDE.getKey());
 								hotelOrder.setTcOrderStatus(TcOrderStatus.CONFIRM_NOT_TO_ROOM.getKey());
 								hotelOrderMapper.updateById(hotelOrder);
+								
+								Agent ag = new Agent(8755, 301L, hotelOrder.getCustomerNo());
+								mssReserveService.interHotelStatus(ag, hotelOrder.getSaleOrderNo(), OwnerOrderStatus.NO_RESIDE.getKey(), "酒店订单"+hotelOrder.getSaleOrderNo()+"确认未入住");
+								
 							}else if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_TO_ROOM.getKey())){
 								int startTime = simple.format(hotelOrder.getArrivalDate()).compareTo(orderInfoModel.getStartTime());
 								int endTime   = simple.format(hotelOrder.getDepartureDate()).compareTo(orderInfoModel.getEndTime());
@@ -1681,6 +1695,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 									//更新mysql酒店订单状态
 									hotelOrder.setOrderStatus(OwnerOrderStatus.BEFORE_RESIDE.getKey());
 									hotelOrder.setTcOrderStatus(TcOrderStatus.CONFIRM_TO_ROOM.getKey());
+									
+									Agent ag = new Agent(8755, 301L, hotelOrder.getCustomerNo());
+									mssReserveService.interHotelStatus(ag, hotelOrder.getSaleOrderNo(), OwnerOrderStatus.BEFORE_RESIDE.getKey(), "酒店订单"+hotelOrder.getSaleOrderNo()+"确认提前离店");
+									
 								}else if(endTime < 0){
 									des = "订单号"+orderId +",订单状态由"+OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus()).getValue()+"变成:"+ OwnerOrderStatus.AFTER_RESIDE.getValue();
 									//更新销售单和采购单状态
@@ -1688,6 +1706,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 									//更新mysql酒店订单状态
 									hotelOrder.setOrderStatus(OwnerOrderStatus.AFTER_RESIDE.getKey());
 									hotelOrder.setTcOrderStatus(TcOrderStatus.CONFIRM_TO_ROOM.getKey());
+									
+									Agent ag = new Agent(8755, 301L, hotelOrder.getCustomerNo());
+									mssReserveService.interHotelStatus(ag, hotelOrder.getSaleOrderNo(), OwnerOrderStatus.AFTER_RESIDE.getKey(), "酒店订单"+hotelOrder.getSaleOrderNo()+"确认延后离店");
+									
 								}else if(startTime == 0 && endTime == 0){
 									int rooms = orderInfoModel.getCounts().getRoomCount().compareTo(hotelOrder.getNightCount()*hotelOrder.getBookCount());
 									if(rooms < 0){
@@ -1697,6 +1719,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 										//更新mysql酒店订单状态
 										hotelOrder.setOrderStatus(OwnerOrderStatus.BEFORE_RESIDE.getKey());
 										hotelOrder.setTcOrderStatus(TcOrderStatus.CONFIRM_TO_ROOM.getKey());
+										
+										Agent ag = new Agent(8755, 301L, hotelOrder.getCustomerNo());
+										mssReserveService.interHotelStatus(ag, hotelOrder.getSaleOrderNo(), OwnerOrderStatus.BEFORE_RESIDE.getKey(), "酒店订单"+hotelOrder.getSaleOrderNo()+"确认间夜数小于预订");
 									}
 									if(rooms == 0){
 										des = "订单号"+orderId +",订单状态由"+OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus()).getValue()+"变成:"+ OwnerOrderStatus.RESIDE_OK.getValue();
@@ -1705,6 +1730,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 										//更新mysql酒店订单状态
 										hotelOrder.setOrderStatus(OwnerOrderStatus.RESIDE_OK.getKey());
 										hotelOrder.setTcOrderStatus(TcOrderStatus.CONFIRM_TO_ROOM.getKey());
+										
+										Agent ag = new Agent(8755, 301L, hotelOrder.getCustomerNo());
+										mssReserveService.interHotelStatus(ag, hotelOrder.getSaleOrderNo(), OwnerOrderStatus.RESIDE_OK.getKey(), "酒店订单"+hotelOrder.getSaleOrderNo()+"确认入住正常");
 									}
 								}
 								String factName = null;
