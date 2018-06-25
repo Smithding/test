@@ -149,6 +149,7 @@ public class ResBaseInfo implements Serializable{
 	private List<ResGPSInfo> resGPS;
 	
 	@GeoSpatialIndexed
+	@JSONField(serialize = false)
 	private Double[] resGpsLocation;
 	/**
 	 * 酒店设施
@@ -232,8 +233,8 @@ public class ResBaseInfo implements Serializable{
 	 * 2^4：大莱 
 	 * 2^5 JCB 卡
 	 */
-	/*@JSONField(name = "CreditCards")
-	private Long creditCards;*/
+	@JSONField(name = "CreditCards")
+	private Long creditCards;
 	/**
 	 * 具体的支持的银行卡的名称
 	 */
@@ -252,8 +253,8 @@ public class ResBaseInfo implements Serializable{
 	/**
 	 * 交通信息
 	 */
-	/*@JSONField(name = "HotelTrafficInfo")
-	private List<ResTrafficInfo> hotelTrafficInfo;*/
+	@JSONField(name = "HotelTrafficInfo")
+	private List<ResTrafficInfo> hotelTrafficInfo;
 	/**
 	 * 房型列表
 	 */
@@ -534,12 +535,12 @@ public class ResBaseInfo implements Serializable{
 	public void setChildDescription(String childDescription) {
 		this.childDescription = childDescription;
 	}
-	/*public Long getCreditCards() {
+	public Long getCreditCards() {
 		return creditCards;
 	}
 	public void setCreditCards(Long creditCards) {
 		this.creditCards = creditCards;
-	}*/
+	}
 	public String getLocation() {
 		return location;
 	}
@@ -552,12 +553,12 @@ public class ResBaseInfo implements Serializable{
 	public void setHotelThemeRelationInfo(List<ResThemeRelation> hotelThemeRelationInfo) {
 		this.hotelThemeRelationInfo = hotelThemeRelationInfo;
 	}
-	/*public List<ResTrafficInfo> getHotelTrafficInfo() {
+	public List<ResTrafficInfo> getHotelTrafficInfo() {
 		return hotelTrafficInfo;
 	}
 	public void setHotelTrafficInfo(List<ResTrafficInfo> hotelTrafficInfo) {
 		this.hotelTrafficInfo = hotelTrafficInfo;
-	}*/
+	}
 	/*public Date getEstablishmentDateFormat() {
 		return DateUtil.stringToDateFormat(this.establishmentDate);
 	}
