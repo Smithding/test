@@ -2,12 +2,7 @@ package com.tempus.gss.product.ift.service;
 
 import java.math.BigDecimal;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.tempus.gss.mq.MqSender;
 import com.tempus.gss.order.entity.*;
@@ -28,7 +23,6 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.jfree.chart.title.Title;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -43,7 +37,6 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.tempus.gss.bbp.util.DateUtil;
-import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.cps.entity.Account;
 import com.tempus.gss.cps.entity.Customer;
 import com.tempus.gss.cps.entity.Supplier;
@@ -52,10 +45,8 @@ import com.tempus.gss.cps.service.ICustomerService;
 import com.tempus.gss.cps.service.ICustomerTypeService;
 import com.tempus.gss.cps.service.ISupplierService;
 import com.tempus.gss.exception.GSSException;
-import com.tempus.gss.log.entity.LogRecord;
 import com.tempus.gss.log.service.ILogService;
 import com.tempus.gss.mss.service.IMssReserveService;
-import com.tempus.gss.pay.entity.vo.CapitalAccount;
 import com.tempus.gss.pay.service.facade.IPayRestService;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.vo.BlackOrderExtVo;
@@ -73,7 +64,6 @@ import com.tempus.gss.product.ift.api.entity.vo.SaleOrderDetailVo;
 import com.tempus.gss.product.ift.api.entity.vo.SaleOrderExtVo;
 import com.tempus.gss.product.ift.api.entity.vo.SaleQueryOrderVo;
 import com.tempus.gss.product.ift.api.entity.vo.TicketRequest;
-import com.tempus.gss.product.ift.api.entity.vo.TicketSenderVo;
 import com.tempus.gss.product.ift.api.entity.vo.WarnOrderRequest;
 import com.tempus.gss.product.ift.api.entity.webservice.InairlinesVo;
 import com.tempus.gss.product.ift.api.entity.webservice.InpayVo;
@@ -85,11 +75,9 @@ import com.tempus.gss.product.ift.api.entity.webservice.settt.ReturnSettInfo;
 import com.tempus.gss.product.ift.mq.IftTicketMqSender;
 import com.tempus.gss.security.AgentUtil;
 import com.tempus.gss.system.service.IMaxNoService;
-import com.tempus.gss.system.service.IParamService;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 import com.tempus.tbe.entity.PnrOutPut;
-import com.tempus.gss.product.ift.dao.setting.ConfigsDao;
 
 @Service
 @org.springframework.stereotype.Service("iftOrderService")
@@ -138,18 +126,15 @@ public class OrderServiceImpl implements IOrderService {
     
     @Reference
     ICertificateService certificateService;
+
+    @Reference
+    IAccountService accountService;
     
     @Reference
-    ILogService logService;
-    
+    IPayRestService payRestService;
+
     @Reference
-    private IAccountService accountService;
-    
-    @Reference
-    private IPayRestService payRestService;
-    
-    @Reference
-    private ICustomerTypeService customerTypeService;
+    ICustomerTypeService customerTypeService;
     
     @Reference
     IMssReserveService mssReserveService;
@@ -158,28 +143,25 @@ public class OrderServiceImpl implements IOrderService {
     ICustomerService customerService;
     
     @Reference
-    private IOrderService orderService;
+    IOrderService orderService;
     
     @Reference
-    private IPassengerService passengerService;
+    IPassengerService passengerService;
     
     @Reference
-    private ITicketSenderService iTicketSenderService;
+    ITicketSenderService iTicketSenderService;
     
     @Reference
-    private ITransationOrderService transationOrderService;
+    ITransationOrderService transationOrderService;
     
     @Reference
-    private IWarnOrderService warnOrderService;
+    IWarnOrderService warnOrderService;
     
     @Reference
     protected IPlanAmountRecordService needPayService;
     
     @Autowired
     IftPlaneTicketService planeTicketService;
-    
-    @Reference
-    IParamService paramService;
     
     @Autowired
     GssMainDao gssMainDao;
@@ -190,9 +172,7 @@ public class OrderServiceImpl implements IOrderService {
     @Autowired
     IftTicketMqSender iftTicketMqSender;
     @Reference
-    private IAirportService airportService;
-    @Reference
-    IDifferenceOrderService differenceOrderService;
+    IAirportService airportService;
     @Autowired
     MqSender mqSender;
     @Reference
@@ -203,171 +183,9 @@ public class OrderServiceImpl implements IOrderService {
     protected ITicketSenderService ticketSenderService;
     @Autowired
     IftMessageServiceImpl iftMessageServiceImpl;
-    @Reference
-    IRefundService refundService;
     
     @Value("${dpsconfig.job.owner}")
     protected String owner;
-    
-    /**
-     * 采购退票分单任务
-     */
-    @Override
-    public void assignBuyRefund() {
-        
-        log.info("第一步：查询符合条件采购退票的订单...");
-        List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryRefundBylocker(owner, 0l);
-        if (saleChangeExts != null && saleChangeExts.size() > 0) {
-            log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
-        } else {
-            log.info("未查询到可以分配的采购退票订单,结束此次任务...");
-            return;
-        }
-        log.info("第二步：查询在线采购退票员...");
-        List<TicketSender> senders = getOnlineTicketSender("buysman-refund"); //采购退票人员
-        log.info("是否有在线出票员:" + (senders != null));
-        if (senders != null && senders.size() > 0) {
-            Agent agent = new Agent(Integer.valueOf(owner));
-            IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
-            Map config = configs.getConfig();
-            String str_maxOrderNum = (String) config.get("maxOrderNum");
-            log.info("有在线出票员人数:" + (senders.size()) + "获得配置最大分单数：" + str_maxOrderNum);
-            Long maxOrderNum = Long.valueOf(str_maxOrderNum);
-            Date updateTime = new Date();
-            log.info("第三步：判断出票员手头出票订单数量...");
-            for (SaleChangeExt order : saleChangeExts) {
-                for (TicketSender peopleInfo : senders) {
-                    log.info(peopleInfo.getName() + "未处理采购退票单数量：" + peopleInfo.getBuyRefuseNum());
-                    if (peopleInfo.getBuyRefuseNum() >= maxOrderNum) {
-                        continue;
-                    } else {
-                        log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
-                        /***修改订单明细表*/
-                        //updateSaleOrderDetail(order, peopleInfo, updateTime);
-                        /**锁单*/
-                        log.info("2.锁单,锁单人是被分配人...");
-                        assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
-                        /***增加出票人订单数*/
-                        log.info("3.增加出票人的未处理采购退票单数量...");
-                        increaseBuyRefuseNum(agent, peopleInfo);
-                        /***发送消息至消息队列 通知出票员*/
-                        //sendInfo(peopleInfo.getUserid(), order.getSaleOrderNo(),String.valueOf(order.getSaleOrder().getOrderStatus()));
-                        //log.info("4.发信息通知出票员出票,订单" + order.getSaleChangeNo() + "将分给出票员结束");
-                        break;
-                    }
-                }
-            }
-            log.info("此次分单结束...");
-        } else {
-            log.info("未查询在线出票员...");
-        }
-        
-    }
-
-    /**
-     * 采购废票分单任务
-     */
-    @Override
-    public void assignBuyWaste() {
-
-        log.info("第一步：查询符合条件采购废票分单的订单...");
-        List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryBuyWasteBylocker(owner, 0l);
-        if (saleChangeExts != null && saleChangeExts.size() > 0) {
-            log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
-        } else {
-            log.info("未查询到可以分配的采购废票订单,结束此次任务...");
-            return;
-        }
-        log.info("第二步：查询在线采购废票员...");
-        List<TicketSender> senders = getOnlineTicketSender("buysman-waste"); //采购废票人员
-        log.info("是否有在线出票员:" + (senders != null));
-        if (senders != null && senders.size() > 0) {
-            Agent agent = new Agent(Integer.valueOf(owner));
-            IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
-            Map config = configs.getConfig();
-            String str_maxOrderNum = (String) config.get("maxOrderNum");
-            log.info("有在线出票员人数:" + (senders.size()) + "获得配置最大分单数：" + str_maxOrderNum);
-            Long maxOrderNum = Long.valueOf(str_maxOrderNum);
-            Date updateTime = new Date();
-            log.info("第三步：判断出票员手头出票订单数量...");
-            for (SaleChangeExt order : saleChangeExts) {
-                for (TicketSender peopleInfo : senders) {
-                    log.info(peopleInfo.getName() + "未处理采购废票单数量：" + peopleInfo.getBuyRefuseNum());
-                    if (peopleInfo.getBuyRefuseNum() >= maxOrderNum) {
-                        continue;
-                    } else {
-                        /**锁单*/
-                        log.info("第四步:满足条件的分配明细...1.锁单,锁单人是被分配人...");
-                        assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
-                        /***增加出票人订单数*/
-                        log.info("2.增加出票人的未处理采购废票单数量...");
-                        peopleInfo.setUpdatetime(updateTime);
-                        increaseBuyRefuseNum(agent, peopleInfo);
-                        break;
-                    }
-                }
-            }
-            log.info("此次分单结束...");
-        } else {
-            log.info("未查询在线出票员...");
-        }
-
-    }
-
-    /**
-     * 采购改签订单分单
-     */
-    @Override
-    public void assignChange() {
-        
-        log.info("第一步：查询符合条件的采购改签订单...");
-        List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryChangeBylocker(owner, 0l);
-        if (saleChangeExts != null && saleChangeExts.size() > 0) {
-            log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
-        } else {
-            log.info("未查询到可以分配的采购改签订单,结束此次任务...");
-            return;
-        }
-        log.info("第二步：查询在线采购改签员...");
-        List<TicketSender> senders = getOnlineTicketSender("buysman-change");  //采购改签员
-        log.info("是否有在线出票员:" + (senders != null));
-        if (senders != null && senders.size() > 0) {
-            Agent agent = new Agent(Integer.valueOf(owner));
-            IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
-            Map config = configs.getConfig();
-            String str_maxOrderNum = (String) config.get("maxOrderNum");
-            log.info("有在线出票员人数:" + (senders.size()) + "获得配置最大分单数：" + str_maxOrderNum);
-            Long maxOrderNum = Long.valueOf(str_maxOrderNum);
-            Date updateTime = new Date();
-            log.info("第三步：判断出票员手头出票订单数量...");
-            for (SaleChangeExt order : saleChangeExts) {
-                for (TicketSender peopleInfo : senders) {
-                    log.info(peopleInfo.getName() + "未处理采购改签单数量：" + peopleInfo.getBuyChangeNum());
-                    if (peopleInfo.getBuyChangeNum() >= maxOrderNum) {
-                        continue;
-                    } else {
-                        log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
-                        /***修改订单明细表*/
-                        //updateSaleOrderDetail(order, peopleInfo, updateTime);
-                        /**锁单*/
-                        log.info("2.锁单,锁单人是被分配人...");
-                        assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
-                        /***增加出票人订单数*/
-                        log.info("3.增加出票人的未处理采购改签单数量...");
-                        increaseBuyChangeNum(agent, peopleInfo);
-                        /***发送消息至消息队列 通知出票员*/
-                        //sendInfo(peopleInfo.getUserid(), order.getSaleOrderNo(),String.valueOf(order.getSaleOrder().getOrderStatus()));
-                        //log.info("4.发信息通知出票员出票,订单" + order.getSaleChangeNo() + "将分给出票员结束");
-                        break;
-                    }
-                }
-            }
-            log.info("此次分单结束...");
-        } else {
-            log.info("未查询在线出票员...");
-        }
-        
-    }
     
     /**
      * 创建订单. 通过白屏查询、Pnr、需求单、手工方式创建订单.
@@ -1353,8 +1171,6 @@ public class OrderServiceImpl implements IOrderService {
      *         支付方式
      * @param payWay
      *         支付类型
-     * @param thirdBusNo
-     *         第三方支付流水 多个以","隔开
      * @param thirdPayNo
      *         第三方业务编号 多个以","隔开
      */
@@ -2046,10 +1862,20 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     @Deprecated
-    public void assign() {
+    public void assign(Long saleOrderNo) {
         log.info("第一步：查询符合条件的出票订单...");
         Integer[] createTypeStatusArray = {1, 2, 3, 4, 6};
         List<SaleOrderExt> saleOrderExtList = getNoHandleOrders(createTypeStatusArray);
+        if(saleOrderNo != null){
+            //如果有销售单号，把其他的订单都移出只分改销售单号对应的单
+            Iterator<SaleOrderExt> iterator = saleOrderExtList.iterator();
+            while(iterator.hasNext()){
+                SaleOrderExt orderExt = iterator.next();
+                if(!orderExt.getSaleOrderNo().equals(saleOrderNo)){
+                     iterator.remove();
+                }
+            }
+        }
         if (saleOrderExtList != null && saleOrderExtList.size() > 0) {
             log.info("查询到" + saleOrderExtList.size() + "条可分配订单...");
         } else {
@@ -2057,7 +1883,7 @@ public class OrderServiceImpl implements IOrderService {
             return;
         }
         log.info("第二步：查询在线采购出票员...");
-        List<TicketSender> senders = getOnlineTicketSender("buysman-ticketSender"); //采购出票员
+        List<TicketSender> senders = ticketSenderService.getSpecTypeOnLineTicketSender("buysman-ticketSender"); //采购出票员
         log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
             Agent agent = new Agent(Integer.valueOf(owner));
@@ -2956,10 +2782,6 @@ public class OrderServiceImpl implements IOrderService {
         return page;
     }
 
-   /* @Override
-    public void sendWebSocketInfoByMq(String msg) {
-
-    }*/
     
     private void updateSaleOrderDetail(SaleOrderExt order, TicketSender peopleInfo, Date date) {
         SaleOrderDetail saleOrderDetail = new SaleOrderDetail();
@@ -2973,41 +2795,12 @@ public class OrderServiceImpl implements IOrderService {
     private void assingLockOrder(SaleOrderExt order, TicketSender sender, Date date, Agent agent) {
         User user = userService.findUserByLoginName(agent, sender.getUserid());
         order.setLocker(user.getId());
-        //order.setModifier(sender.getUserid() + "");
         order.setLockTime(date);
-        //order.setModifyTime(date);
         saleOrderExtDao.updateLocker(order);
-    }
-    
-    private void assingLockSaleChangeExt(SaleChangeExt order, TicketSender sender, Date date, Agent agent) {
-        User user = userService.findUserByLoginName(agent, sender.getUserid());
-        order.setLocker(user.getId());
-      //  order.setModifier(sender.getUserid() + "");
-        order.setLockTime(date);
-     //   order.setModifyTime(date);
-        saleChangeExtDao.updateLocker(order);
     }
     
     private void increaseOrderCount(TicketSender sender) {
         sender.setOrdercount(sender.getOrdercount() + 1);
-        sender.setIds(sender.getId() + "");
-        iTicketSenderService.update(sender);
-    }
-    
-    private void increaseBuyChangeNum(Agent agent, TicketSender sender) {
-        User user = userService.findUserByLoginName(agent, sender.getUserid());
-        int lockCount = saleChangeExtDao.queryChangeCountBylocker(owner, user.getId());
-        sender.setBuyChangeNum(lockCount);
-        sender.setIds(sender.getId() + "");
-        iTicketSenderService.update(sender);
-    }
-    
-    private void increaseBuyRefuseNum(Agent agent, TicketSender sender) {
-        
-        //查询该种类型单被该业务员锁住的数量赋值给BuyRefuseNum字段
-        User user = userService.findUserByLoginName(agent, sender.getUserid());
-        int lockCount = saleChangeExtDao.queryBuyRefundAndDelCountBylocker(owner, user.getId());
-        sender.setBuyRefuseNum(lockCount);
         sender.setIds(sender.getId() + "");
         iTicketSenderService.update(sender);
     }
@@ -3060,33 +2853,6 @@ public class OrderServiceImpl implements IOrderService {
         return saleOrderExtList;
     }
 
-    private List<TicketSender> getOnlineTicketSender(String type) {
-        TicketSenderVo ticketSenderVo = new TicketSenderVo();
-        ticketSenderVo.setStatus(3);//只给在线用户分单
-        ticketSenderVo.setTypes(type);//只给出票员分单   只分在线即可
-        List<TicketSender> ticketSenderList = iTicketSenderService.queryByBean(ticketSenderVo);
-        return ticketSenderList;
-    }
-    
-   /* private void saveLog(Agent agent, Long saleOrderNo, String logstr, Long transactionOrderNo) {
-        try {
-            LogRecord logRecord = new LogRecord();
-            logRecord.setAppCode("UBP");
-            logRecord.setCreateTime(new Date());
-            logRecord.setTitle("国际订单出票");
-            logRecord.setDesc(logstr);
-            logRecord.setOptLoginName(agent.getAccount());
-            logRecord.setRequestIp(agent.getIp());
-            logRecord.setBizCode("IFT");
-            logRecord.setBizNo(String.valueOf(saleOrderNo));
-            Map<String, Object> otherOpts = new HashMap<String, Object>();
-            otherOpts.put("transationOrderNo", transactionOrderNo);
-            logRecord.setOtherOpts(otherOpts);
-            logService.insert(logRecord);
-        } catch (Exception e) {
-            log.error("国际机票添加操作日志异常===", e);
-        }
-    }*/
     
     private void sendTicketInfoByMq(Agent agent, Long transationOrderNo) throws RuntimeException {
         /*SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleOrderNo);

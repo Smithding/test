@@ -215,4 +215,19 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
         return ticketSenderDao.queryTicketNameAndLockerId();
     }
 
+    /**
+     * 获取指定类型的在线业务人员
+     * @param type
+     * @return
+     */
+    @Override
+    public List<TicketSender> getSpecTypeOnLineTicketSender(String type) {
+        List<TicketSender> ticketSenders = null;
+        TicketSenderVo senderVo = new TicketSenderVo();
+        senderVo.setTypes(type);
+        senderVo.setStatus(3);
+        ticketSenders = ticketSenderDao.queryObjByKey(senderVo);
+        return  ticketSenders;
+    }
+
 }

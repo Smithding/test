@@ -68,4 +68,11 @@ public interface ITicketSenderService {
      * @return
      */
     List<Map<String,Object>> queryTicketNameAndLockerId();
+
+    /**
+     * 获取指定类型的在线业务人员
+     * @param type
+     * @return
+     */
+    List<TicketSender> getSpecTypeOnLineTicketSender(String type);
 }

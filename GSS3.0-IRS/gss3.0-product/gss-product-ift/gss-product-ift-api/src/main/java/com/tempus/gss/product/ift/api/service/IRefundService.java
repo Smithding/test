@@ -166,5 +166,14 @@ public interface IRefundService {
 	 */
 	public SaleChange createAjustSaleOrder(RequestWithActor<SaleOrderExt> saleOrderExt, Integer IncomeExpenseType);
 
+	/**
+	 * 采购废票分单
+	 */
+	void assignBuyWaste(RequestWithActor<Long> requestWithActor);
+
+	/**
+	 * 采购退票分单
+	 */
+	void assignBuyRefund(RequestWithActor<Long> requestWithActor);
 
 }
