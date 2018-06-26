@@ -458,7 +458,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		//获取ID数量
 		//long totalHotelIdNum = hotelIdList.size();
 		long totalHotelIdNum = mongoTemplate1.count(new Query(), HotelId.class);
-		long count = 3;
+		long count = 10;
 		/*if ((totalHotelIdNum / PAGE_SIZE) > 1) {
 			count = totalHotelIdNum % PAGE_SIZE == 0 ? totalHotelIdNum / PAGE_SIZE : totalHotelIdNum / PAGE_SIZE + 1;
 		}*/

@@ -65,6 +65,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelLocationEntity
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderPayResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
+import com.tempus.gss.product.hol.api.service.IHolMidService;
 import com.tempus.gss.product.hol.api.util.DocumentUtil;
 import com.tempus.gss.product.hol.api.util.Tool;
 import com.tempus.gss.util.JsonUtil;
@@ -127,6 +128,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	
 	@Autowired
 	private MongoTemplate mongoTemplate1;
+	
+	/*@Autowired
+	private IHolMidService holMidService;*/
 	
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	
@@ -505,10 +509,10 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			HotelInfo hotelInfo = queryHotelInfo(hotelInfoParam);
 			
 			if (null == hotelInfo || hotelInfo.getHotelId() == 0) {
+				System.out.println("酒店id:" + hotelId.getHotelId() + "为空!");
 				continue;
 			}
 			
-			hotelInfoParam.setHotelId(hotelId.getHotelId());
 			hotelInfo.setId(hotelId.getHotelId());
 			//酒店图片
 			QueryHotelParam queryHotelParam = new QueryHotelParam();
@@ -539,7 +543,12 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		//电话
 		String mobile = hotelInfo.getMobile();
 		
-		List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
+		//查询中间表是否有纬度相同酒店
+		//List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
+		//List<HolMidBaseInfo> holMidList = holMidService.queryAlikeHol(longitude, latitude, Tool.splitStr(mobile));
+		
+		List<HolMidBaseInfo> holMidList = null;
+		
 		if (null != holMidList && holMidList.size() > 0) {
 			if (holMidList.size() == 1) {
 				//合并酒店
@@ -600,7 +609,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			listHol.add(resNameSum);
 			holMidBaseInfo.setResNameSum(listHol);
 			holMidBaseInfo.setId(String.valueOf(IdWorker.getId()));
-			/*holMidBaseInfo.setResId(hotelInfo.getHotelId());*/
+			holMidBaseInfo.setResId(String.valueOf(hotelInfo.getHotelId()));
 			holMidBaseInfo.setResName(hotelInfo.getHotelName());
 			holMidBaseInfo.setProvName(hotelInfo.getProvinceName());
 			holMidBaseInfo.setCityName(hotelInfo.getCityName());
@@ -668,16 +677,15 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		int lonSubLen = lon.substring(lon.indexOf(".")).length();
 		String latitude = null;
 		String longitude = null;
-		if (latSubLen >= 4) {
-			latitude = lat.substring(0, lat.indexOf(".") + 4);
-		}else {
-			latitude = lat.substring(0, lat.indexOf(".") + 2);
+		
+		if (latSubLen > 5) {
+			latSubLen = 5;
 		}
-		if (lonSubLen >= 4) {
-			longitude = lon.substring(0, lon.indexOf(".") + 4);
-		}else {
-			longitude = lon.substring(0, lon.indexOf(".") + 2);
+		if (lonSubLen > 5) {
+			lonSubLen = 5;
 		}
+		latitude = lat.substring(0, lat.indexOf(".") + latSubLen);
+		longitude = lon.substring(0, lon.indexOf(".") + lonSubLen);
 		String mobile = null;
 		//List<String> phoneList = new ArrayList<>();
 		if (StringUtils.isNotBlank(phone) && phone.length() >= 7) {

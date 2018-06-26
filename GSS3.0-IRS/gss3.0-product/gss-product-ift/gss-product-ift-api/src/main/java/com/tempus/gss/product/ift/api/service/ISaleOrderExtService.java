@@ -15,4 +15,5 @@ public interface ISaleOrderExtService{
 	 */
 	SaleOrderExt selectBySaleOrderNo(Agent agent,Long saleOrderNo) throws Exception;
 
+	int updateByPrimaryKeySelective(SaleOrderExt saleOrderExt);
 }

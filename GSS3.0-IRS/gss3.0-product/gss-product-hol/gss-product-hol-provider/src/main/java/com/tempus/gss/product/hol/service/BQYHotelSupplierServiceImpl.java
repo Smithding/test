@@ -666,7 +666,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 	public List<ImgInfo> listImgByHotelId(Agent agent, long hotelId) {
 		QueryHotelParam query = new QueryHotelParam();
 		query.setHotelId(hotelId);
-		query.setHotelId(705260L);
+		//query.setHotelId(705260L);
 		List<ImageList> hotelImageList = bqyHotelInterService.queryHotelImage(query);
 		List<ImgInfo> imgList = convertTCImg(hotelImageList);
 		return imgList;
