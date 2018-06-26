@@ -1638,6 +1638,7 @@ public class ChangeServiceImpl implements IChangeService {
      * 采购改签订单分单
      */
     @Override
+    @Transactional
     public void assignChange(RequestWithActor<Long> requestWithActor) {
         Long changeOrderNo = requestWithActor.getEntity();
         List<SaleChangeExt> saleChangeExts = null;

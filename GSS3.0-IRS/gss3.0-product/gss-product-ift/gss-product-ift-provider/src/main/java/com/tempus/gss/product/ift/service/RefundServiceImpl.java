@@ -1286,6 +1286,7 @@ public class RefundServiceImpl implements IRefundService {
 	 * 采购废票分单任务
 	 */
 	@Override
+	@Transactional
 	public void assignBuyWaste(RequestWithActor<Long> requestWithActor) {
         Long wasteOrderNo = requestWithActor.getEntity();
 		List<SaleChangeExt> saleChangeExts = null;
@@ -1346,6 +1347,7 @@ public class RefundServiceImpl implements IRefundService {
 	 * 采购退票分单任务
 	 */
 	@Override
+	@Transactional
 	public void assignBuyRefund(RequestWithActor<Long> requestWithActor) {
 		Long refundOrderNo = requestWithActor.getEntity();
 		List<SaleChangeExt> saleChangeExts = null;
@@ -1360,7 +1362,7 @@ public class RefundServiceImpl implements IRefundService {
 				return;
 			}
 		} else {
-			log.info("直接将采购退票单分给在线业务员员，单号:{}", refundOrderNo);
+			log.info("直接将采购退票单分给在线业务员，单号:{}", refundOrderNo);
 			saleChangeExt = this.getSaleChangeExtByNo(requestWithActor);
 		}
 		log.info("第二步：查询在线采购退票员...");
