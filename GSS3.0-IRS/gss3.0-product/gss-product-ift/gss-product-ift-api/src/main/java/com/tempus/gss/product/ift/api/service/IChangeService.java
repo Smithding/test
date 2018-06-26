@@ -175,4 +175,9 @@ public interface IChangeService {
 	 */
     void clearLockerAndUpdateOldLocker(RequestWithActor<Long> requestWithActor,String type);
 
+	/**
+	 * 采购改签分单任务
+	 */
+	void assignChange(RequestWithActor<Long> requestWithActor);
+
 }

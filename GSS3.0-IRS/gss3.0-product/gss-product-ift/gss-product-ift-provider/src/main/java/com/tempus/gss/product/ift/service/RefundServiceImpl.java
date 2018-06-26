@@ -22,7 +22,9 @@ import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.*;
 import com.tempus.gss.product.ift.help.IftLogHelper;
 import com.tempus.gss.product.ift.mq.IftTicketMqSender;
+import com.tempus.gss.system.entity.User;
 import com.tempus.gss.system.service.IMaxNoService;
+import com.tempus.gss.system.service.IUserService;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 import org.apache.commons.beanutils.PropertyUtils;
@@ -117,7 +119,7 @@ public class RefundServiceImpl implements IRefundService {
 	@Autowired
 	MqSender mqSender;
 	@Reference
-	private ITicketSenderService iTicketSenderService;
+	ITicketSenderService iTicketSenderService;
 	@Value("${dpsconfig.job.owner}")
 	protected String owner;
 	@Reference
@@ -126,6 +128,8 @@ public class RefundServiceImpl implements IRefundService {
 	ISaleOrderDetailService detailService;
 	@Reference
 	ITicketSenderService ticketSenderService;
+	@Reference
+	IUserService userService;
 
 	SimpleDateFormat simpleDate = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
 
@@ -1363,48 +1367,142 @@ public class RefundServiceImpl implements IRefundService {
 		return 0;
 	}
 
-	public void assign() {
-		try {
-			Page page = new Page<>(1, 10);
-			SaleChangeExtVo vo = new SaleChangeExtVo();
-			vo.setLocker(0L);
-			vo.setOwner(Integer.valueOf(owner));
-			vo.setValid((byte) 1);
-			vo.setStatus("");
-			Integer[] payStatus = {};
-			vo.setPayStatus(payStatus);
-			List<SaleChangeExt> list = saleChangeExtDao.queryObjByKey(page, vo);
-			if (list != null) {
-				log.info("此次分单数量:" + list.size());
-				List<TicketSender> senders = iTicketSenderService.getOnlineTicketSender(3);  //没用
-				log.info("是否有在线出票员:" + (senders != null));
-				if (senders != null && senders.size() > 0) {
-					Agent agent = new Agent(Integer.valueOf(owner));
-					IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
-					Map config = configs.getConfig();
-					String str_maxOrderNum = (String) config.get("maxOrderNum");
-					log.info("有在线出票员人数:{},获得配置最大分单数：{}" ,senders.size(),str_maxOrderNum);
-					Long maxOrderNum = Long.valueOf(str_maxOrderNum);
-					Date updateTime = new Date();
-					log.info("第三步：判断出票员手头出票订单数量...");
-					for (SaleChangeExt ext : list) {
-						for (TicketSender peopleInfo : senders) {
-							log.info(peopleInfo.getName() + "订单数量：" + peopleInfo.getOrdercount());
-							if (peopleInfo.getOrdercount() >= maxOrderNum) {
-								continue;
-							} else {
-								saleChangeExtDao.updateLocker(ext);
-							}
-						}
-					}
+	/**
+	 * 采购废票分单任务
+	 */
+	@Override
+	public void assignBuyWaste(RequestWithActor<Long> requestWithActor) {
+        Long wasteOrderNo = requestWithActor.getEntity();
+		List<SaleChangeExt> saleChangeExts = null;
+		SaleChangeExt saleChangeExt = null;
+        if(wasteOrderNo==0L||wasteOrderNo==null){
+			log.info("定时任务分采购废票单开始,第一步：查询符合条件的采购改签订单...");
+			saleChangeExts = saleChangeExtDao.queryBuyWasteBylocker(owner, 0l);
+			if (saleChangeExts != null && saleChangeExts.size() > 0) {
+				log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
+			} else {
+				log.info("未查询到可以分配的采购改签订单,结束此次任务...");
+				return;
+			}
+		}else {
+			log.info("直接将采购改签单分给在线业务员员，单号:{}", wasteOrderNo);
+			saleChangeExt = this.getSaleChangeExtByNo(requestWithActor);
+		}
 
+		if (saleChangeExts != null && saleChangeExts.size() > 0) {
+			log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
+		} else {
+			log.info("未查询到可以分配的采购废票订单,结束此次任务...");
+			return;
+		}
+		log.info("第二步：查询在线采购废票员...");
+		List<TicketSender> senders = ticketSenderService.getSpecTypeOnLineTicketSender("buysman-waste"); //采购废票人员
+		log.info("是否有在线出票员:" + (senders != null));
+		if (senders != null && senders.size() > 0) {
+			Agent agent = new Agent(Integer.valueOf(owner));
+			IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
+			Map config = configs.getConfig();
+			String str_maxOrderNum = (String) config.get("maxOrderNum");
+			log.info("有在线出票员人数:" + (senders.size()) + "获得配置最大分单数：" + str_maxOrderNum);
+			Long maxOrderNum = Long.valueOf(str_maxOrderNum);
+			Date updateTime = new Date();
+			log.info("第三步：判断出票员手头出票订单数量...");
+			for (SaleChangeExt order : saleChangeExts) {
+				for (TicketSender peopleInfo : senders) {
+					log.info(peopleInfo.getName() + "未处理采购废票单数量：" + peopleInfo.getBuyRefuseNum());
+					if (peopleInfo.getBuyRefuseNum() >= maxOrderNum) {
+						continue;
+					} else {
+						/**锁单*/
+						log.info("第四步:满足条件的分配明细...1.锁单,锁单人是被分配人...");
+						assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
+						/***增加出票人订单数*/
+						log.info("2.增加出票人的未处理采购废票单数量...");
+						peopleInfo.setUpdatetime(updateTime);
+						increaseBuyRefuseNum(agent, peopleInfo);
+						break;
+					}
 				}
 			}
-
-		} catch (Exception e) {
-			log.error("退费单分单", e);
+			log.info("此次分单结束...");
+		} else {
+			log.info("未查询在线出票员...");
 		}
-		log.info("退费单分单结束");
+
+	}
+
+
+	private void increaseBuyRefuseNum(Agent agent, TicketSender sender) {
+
+		//查询该种类型单被该业务员锁住的数量赋值给BuyRefuseNum字段
+		User user = userService.findUserByLoginName(agent, sender.getUserid());
+		int lockCount = saleChangeExtDao.queryBuyRefundAndDelCountBylocker(owner, user.getId());
+		sender.setBuyRefuseNum(lockCount);
+		sender.setIds(sender.getId() + "");
+		iTicketSenderService.update(sender);
+	}
+
+	private void assingLockSaleChangeExt(SaleChangeExt order, TicketSender sender, Date date, Agent agent) {
+		User user = userService.findUserByLoginName(agent, sender.getUserid());
+		order.setLocker(user.getId());
+		order.setLockTime(date);
+		saleChangeExtDao.updateLocker(order);
+	}
+
+
+	/**
+	 * 采购退票分单任务
+	 */
+	@Override
+	public void assignBuyRefund(RequestWithActor<Long> requestWithActor) {
+
+		log.info("第一步：查询符合条件采购退票的订单...");
+		List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryRefundBylocker(owner, 0l);
+		if (saleChangeExts != null && saleChangeExts.size() > 0) {
+			log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
+		} else {
+			log.info("未查询到可以分配的采购退票订单,结束此次任务...");
+			return;
+		}
+		log.info("第二步：查询在线采购退票员...");
+		List<TicketSender> senders = ticketSenderService.getSpecTypeOnLineTicketSender("buysman-refund"); //采购退票人员
+		log.info("是否有在线出票员:" + (senders != null));
+		if (senders != null && senders.size() > 0) {
+			Agent agent = new Agent(Integer.valueOf(owner));
+			IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
+			Map config = configs.getConfig();
+			String str_maxOrderNum = (String) config.get("maxOrderNum");
+			log.info("有在线出票员人数:" + (senders.size()) + "获得配置最大分单数：" + str_maxOrderNum);
+			Long maxOrderNum = Long.valueOf(str_maxOrderNum);
+			Date updateTime = new Date();
+			log.info("第三步：判断出票员手头出票订单数量...");
+			for (SaleChangeExt order : saleChangeExts) {
+				for (TicketSender peopleInfo : senders) {
+					log.info(peopleInfo.getName() + "未处理采购退票单数量：" + peopleInfo.getBuyRefuseNum());
+					if (peopleInfo.getBuyRefuseNum() >= maxOrderNum) {
+						continue;
+					} else {
+						log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
+						/***修改订单明细表*/
+						//updateSaleOrderDetail(order, peopleInfo, updateTime);
+						/**锁单*/
+						log.info("2.锁单,锁单人是被分配人...");
+						assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
+						/***增加出票人订单数*/
+						log.info("3.增加出票人的未处理采购退票单数量...");
+						increaseBuyRefuseNum(agent, peopleInfo);
+						/***发送消息至消息队列 通知出票员*/
+						//sendInfo(peopleInfo.getUserid(), order.getSaleOrderNo(),String.valueOf(order.getSaleOrder().getOrderStatus()));
+						//log.info("4.发信息通知出票员出票,订单" + order.getSaleChangeNo() + "将分给出票员结束");
+						break;
+					}
+				}
+			}
+			log.info("此次分单结束...");
+		} else {
+			log.info("未查询在线出票员...");
+		}
+
 	}
 
 }

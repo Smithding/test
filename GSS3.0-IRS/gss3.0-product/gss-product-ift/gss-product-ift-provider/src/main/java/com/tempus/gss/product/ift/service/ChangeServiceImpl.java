@@ -25,9 +25,11 @@ import com.tempus.gss.system.entity.User;
 import com.tempus.gss.system.service.IMaxNoService;
 import com.tempus.gss.system.service.IUserService;
 import com.tempus.gss.vo.Agent;
+import io.swagger.models.auth.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,8 +96,6 @@ public class ChangeServiceImpl implements IChangeService {
     SaleChangeDetailDao saleChangeDetailDao;
     @Reference
     IMssReserveService mssReserveService;
-    @Reference
-    IDifferenceOrderService differenceOrderService;
     @Autowired
     TicketSenderDao ticketSenderDao;
     @Reference
@@ -104,6 +104,11 @@ public class ChangeServiceImpl implements IChangeService {
     ICertificateService certificateService;
     @Reference
     IIftMessageService iftMessageService;
+    @Reference
+    ITicketSenderService iTicketSenderService;
+    @Value("${dpsconfig.job.owner}")
+    protected String owner;
+
     @Override
     @Transactional
     public SaleChangeExt apiCreateChange(RequestWithActor<ChangeCreateVo> requestWithActor) {
@@ -451,16 +456,6 @@ public class ChangeServiceImpl implements IChangeService {
                 String logstr ="用户"+ passengerChangeList.getAgent().getAccount()+"国际改签创建应收应付："+"["+passengerChangeList.getEntity().get(0).getSaleOrderNo()+"]";
                 String title = "国际改签创建应收应付";
                 IftLogHelper.logger(agent,passengerChangeList.getEntity().get(0).getSaleOrderNo(),title,logstr);
-               /* LogRecord logRecord = new LogRecord();
-                logRecord.setAppCode("UBP");
-                logRecord.setCreateTime(new Date());
-                logRecord.setTitle("国际改签创建应收应付");
-                logRecord.setDesc(logstr);
-                logRecord.setOptLoginName(passengerChangeList.getAgent().getAccount());
-                logRecord.setRequestIp(passengerChangeList.getAgent().getIp());
-                logRecord.setBizCode("IFT");
-                logRecord.setBizNo(String.valueOf(passengerChangeList.getEntity().get(0).getSaleOrderNo()));
-                logService.insert(logRecord);*/
             } catch (Exception e) {
                 log.error("添加(title=国际改签创建应收应付)操作日志异常===" + e);
             }
@@ -657,7 +652,7 @@ public class ChangeServiceImpl implements IChangeService {
             }
             log.info("获取销售单结束============");
         } catch (Exception e) {
-            log.info("------------", e);
+            log.error("废退单编号获取销售废退单", e);
         }
 
         return saleChangeExt;
@@ -715,16 +710,6 @@ public class ChangeServiceImpl implements IChangeService {
                 String logstr ="用户"+changeTicketRequest.getAgent().getAccount()+"国际改签处理："+"["+changeTicketRequest.getEntity().getBuyOrderDetailList().get(1).getBuyOrderNo()+"]";
                 String title ="国际改签处理";
                 IftLogHelper.logger(changeTicketRequest.getAgent(),changeTicketRequest.getEntity().getBuyOrderDetailList().get(1).getBuyOrderNo(),title,logstr);
-                /*LogRecord logRecord = new LogRecord();
-                logRecord.setAppCode("UBP");
-                logRecord.setCreateTime(new Date());
-                logRecord.setTitle("国际改签处理");
-                logRecord.setDesc(logstr);
-                logRecord.setOptLoginName(changeTicketRequest.getAgent().getAccount());
-                logRecord.setRequestIp(changeTicketRequest.getAgent().getIp());
-                logRecord.setBizCode("IFT");
-                logRecord.setBizNo(String.valueOf(changeTicketRequest.getEntity().getBuyOrderDetailList().get(1).getBuyOrderNo()));
-                logService.insert(logRecord);*/
             } catch (Exception e) {
                 log.error("添加(title=国际改签处理)操作日志异常===" + e);
             }
@@ -818,16 +803,6 @@ public class ChangeServiceImpl implements IChangeService {
                 }
 
                 IftLogHelper.logger(agent,changeExt.getSaleChange().getSaleOrderNo(),title,logstr);
-                /*LogRecord logRecord = new LogRecord();
-                logRecord.setAppCode("UBP");
-                logRecord.setCreateTime(new Date());
-                logRecord.setTitle("订单改签支付/退费");
-                logRecord.setDesc(logstr);
-                logRecord.setOptLoginName(changeExt.getModifier());
-                logRecord.setRequestIp(agent.getIp());
-                logRecord.setBizCode("IFT");
-                logRecord.setBizNo(String.valueOf(changeExt.getSaleChange().getSaleOrderNo()));
-                logService.insert(logRecord);*/
             } catch (Exception e) {
                 log.error("添加操作日志异常===" + e);
             }
@@ -924,16 +899,6 @@ public class ChangeServiceImpl implements IChangeService {
                 String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"国际改签单审核："+"["+requestWithActor.getEntity().getSaleOrderNo()+"]";
                 String title = "国际改签单审核";
                 IftLogHelper.logger(requestWithActor.getAgent(),requestWithActor.getEntity().getSaleOrderNo(),title,logstr);
-               /* LogRecord logRecord = new LogRecord();
-                logRecord.setAppCode("UBP");
-                logRecord.setCreateTime(new Date());
-                logRecord.setTitle("国际改签单审核");
-                logRecord.setDesc(logstr);
-                logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
-                logRecord.setRequestIp(requestWithActor.getAgent().getIp());
-                logRecord.setBizCode("IFT");
-                logRecord.setBizNo(String.valueOf(requestWithActor.getEntity().getSaleOrderNo()));
-                logService.insert(logRecord);*/
             } catch (Exception e) {
                 log.error("添加(title=国际改签单审核)操作日志异常===" , e);
             }
@@ -1081,16 +1046,6 @@ public class ChangeServiceImpl implements IChangeService {
                 String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"国际创建审核改签单："+"["+requestWithActor.getEntity().getSaleOrderNo()+"]";
                 String title ="国际创建审核改签单";
                 IftLogHelper.logger(requestWithActor.getAgent(),requestWithActor.getEntity().getSaleOrderNo(),title,logstr);
-                /*LogRecord logRecord = new LogRecord();
-                logRecord.setAppCode("UBP");
-                logRecord.setCreateTime(new Date());
-                logRecord.setTitle("国际创建审核改签单");
-                logRecord.setDesc(logstr);
-                logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
-                logRecord.setRequestIp(requestWithActor.getAgent().getIp());
-                logRecord.setBizCode("IFT");ft
-                logRecord.setBizNo(String.valueOf(requestWithActor.getEntity().getSaleOrderNo()));
-                logService.insert(logRecord);*/
             } catch (Exception e) {
                 log.error("添加(title=国际创建审核改签单)操作日志异常===" + e);
             }
@@ -1187,16 +1142,6 @@ public class ChangeServiceImpl implements IChangeService {
             String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"取消改签："+"["+saleChange.getSaleOrderNo()+"]";
             String title ="国际改签单取消";
             IftLogHelper.logger(requestWithActor.getAgent(),saleChange.getSaleOrderNo(),title,logstr);
-           /* LogRecord logRecord = new LogRecord();
-            logRecord.setAppCode("UBP");
-            logRecord.setCreateTime(new Date());
-            logRecord.setTitle("国际改签单取消");
-            logRecord.setDesc(logstr);
-            logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
-            logRecord.setRequestIp(requestWithActor.getAgent().getIp());
-            logRecord.setBizCode("IFT");
-            logRecord.setBizNo(String.valueOf(saleChange.getSaleOrderNo()));
-            logService.insert(logRecord);*/
         } catch (Exception e) {
             log.error("添加(title=国际改签单取消)操作日志异常===" + e);
         }
@@ -1212,60 +1157,6 @@ public class ChangeServiceImpl implements IChangeService {
     @Override
     @Transactional
     public boolean refuse(RequestWithActor<Long> saleChangeNo, String reason) {
-       /* log.info("拒单开始");
-        try {
-            if (saleChangeNo.getAgent() == null) {
-                throw new GSSException("当前用户不能为空", "0101", "当前操作用户为空");
-            }
-            if (saleChangeNo == null || saleChangeNo.getEntity() == null) {
-                throw new GSSException("改签确认失败", "0102", "改签确认发生异常,请检查");
-            }
-            Long changeNo = saleChangeNo.getEntity().longValue();
-            SaleChangeExt changeExt = saleChangeExtDao.selectByPrimaryKey(changeNo);
-            changeExt.setRefuseReason(reason);
-            changeExt.setAirlineStatus(4);
-            saleChangeExtDao.updateByPrimaryKey(changeExt);
-            //主订单状态改成 11=拒单
-            saleChangeService.updateStatus(saleChangeNo.getAgent(), changeNo, 11);
-            //修改采购单的状态为11
-            List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(saleChangeNo.getAgent(), changeExt.getSaleChange().getSaleOrderNo());
-            if (buyOrderList != null && buyOrderList.size() > 0) {
-                for (BuyOrder buyOrder : buyOrderList) {
-                    if (buyOrder.getBsignType() == 4) {
-                        List<BuyChange> buyChangeList = buyChangeService.getBuyChangesByBONo(saleChangeNo.getAgent(), buyOrder.getBuyOrderNo());
-                        for (BuyChange buyChange : buyChangeList) {
-                            buyChangeService.updateStatus(saleChangeNo.getAgent(), buyChange.getBuyChangeNo(), 11);
-                        }
-                    }
-                }
-            }
-
-            try {
-                mssReserveService.changeInform(saleChangeNo.getAgent(), changeNo, "2");
-            } catch (Exception e) {
-                log.error("改签出票回调mss接口出错==========e=" + e);
-            }
-
-            log.info("拒单结束");
-            *//*创建新增操作日志*//*
-            try {
-                LogRecord logRecord = new LogRecord();
-                logRecord.setAppCode("UBP");
-                logRecord.setCreateTime(new Date());
-                logRecord.setTitle("国际改签单拒单");
-                logRecord.setDesc(JSON.toJSONString(saleChangeNo));
-                logRecord.setOptLoginName(saleChangeNo.getAgent().getAccount());
-                logRecord.setRequestIp(saleChangeNo.getAgent().getIp());
-                logRecord.setBizCode("IFT-ChangeServiceImpl-refuse");
-                logRecord.setBizNo(String.valueOf(saleChangeNo.getEntity()));
-                logService.insert(logRecord);
-            } catch (Exception e) {
-                log.error("添加(title=国际改签单拒单)操作日志异常===" + e);
-            }
-        } catch (Exception e) {
-            log.error("改签拒单异常！！！" + e);
-        }
-        return true;*/
         log.info("拒单开始");
         try {
             if (saleChangeNo.getAgent() == null) {
@@ -1308,11 +1199,6 @@ public class ChangeServiceImpl implements IChangeService {
             List<SaleChangeDetail> saleChangeDetailList = changeExt.getSaleChangeDetailList();
             for (SaleChangeDetail saleChangeDetail : saleChangeDetailList) {
                 SaleOrderDetail saleOrderDetail = saleChangeDetail.getSaleOrderDetail();
-                /*if(!saleOrderDetail.getIsChange()){
-                    saleOrderDetail.setStatus("4");
-                } else{
-                    saleOrderDetail.setStatus("11");
-                }*/
                 if(saleChangeDetail.getOrderDetailType() == 1){
                     saleOrderDetail.setStatus("4");
                 } else{
@@ -1325,19 +1211,6 @@ public class ChangeServiceImpl implements IChangeService {
                 saleOrderDetailRequestWithActor.setEntity(saleOrderDetail);
                 saleOrderDetailService.upateSaleOrder(saleOrderDetailRequestWithActor);
             }
-           /* for (SaleOrderDetail saleOrderDetail : saleOrderDetailList) {
-                if(!saleOrderDetail.getIsChange()){
-                    saleOrderDetail.setStatus("4");
-                } else{
-                    saleOrderDetail.setStatus("11");
-                }
-                    saleOrderDetail.setModifier(saleChangeNo.getAgent().getAccount());
-                    saleOrderDetail.setModifyTime(new Date());
-                    RequestWithActor<SaleOrderDetail> saleOrderDetailRequestWithActor = new RequestWithActor<>();
-                    saleOrderDetailRequestWithActor.setAgent(saleChangeNo.getAgent());
-                    saleOrderDetailRequestWithActor.setEntity(saleOrderDetail);
-                    saleOrderDetailService.upateSaleOrder(saleOrderDetailRequestWithActor);
-            }*/
 
             saleOrderService.updateStatus(saleChangeNo.getAgent(),saleOrderExt.getSaleOrderNo(),4);
 
@@ -1353,16 +1226,6 @@ public class ChangeServiceImpl implements IChangeService {
                 String logstr ="用户"+ saleChangeNo.getAgent().getAccount()+"国际改签单拒单："+"["+changeExt.getSaleChange().getSaleOrderNo()+"]";
                 String title ="国际改签单拒单";
                 IftLogHelper.logger(saleChangeNo.getAgent(),changeExt.getSaleChange().getSaleOrderNo(),title,logstr);
-              /*  LogRecord logRecord = new LogRecord();
-                logRecord.setAppCode("UBP");
-                logRecord.setCreateTime(new Date());
-                logRecord.setTitle("国际改签单拒单");
-                logRecord.setDesc(logstr);
-                logRecord.setOptLoginName(saleChangeNo.getAgent().getAccount());
-                logRecord.setRequestIp(saleChangeNo.getAgent().getIp());
-                logRecord.setBizCode("IFT");
-                logRecord.setBizNo(String.valueOf(changeExt.getSaleChange().getSaleOrderNo()));
-                logService.insert(logRecord);*/
             } catch (Exception e) {
                 e.printStackTrace();
                 log.error("添加(title=国际改签单拒单)操作日志异常===" + e);
@@ -1528,18 +1391,6 @@ public class ChangeServiceImpl implements IChangeService {
                     changeExt.setLockTime(new Date());
                     changeExt.setModifyTime(new Date());
 
-                   /* if (lock != null && !lock.equals(orilocker)) {
-                        Agent agent = saleChange.getAgent();
-                        List<TicketSender> ticketSenders = ticketSenderDao.queryByLoginId(saleChange.getAgent().getAccount());
-                        User user = userService.findUserByLoginName(agent, saleChange.getAgent().getAccount());
-                        int lockcount = saleChangeExtDao.queryCountByLockerAndType(user.getId(), 3);
-                        if (ticketSenders != null && ticketSenders.size() > 0) {
-                            TicketSender ticketSender = ticketSenders.get(0);
-                            ticketSender.setSaleChangeNum(lockcount + 1);
-                            ticketSenderDao.updateByPrimaryKey(ticketSender);
-                        }
-                    }*/
-
                 } else {
                     changeExt.setLocker(0L);
                     changeExt.setModifier(saleChange.getAgent().getAccount());
@@ -1560,24 +1411,11 @@ public class ChangeServiceImpl implements IChangeService {
             log.info("锁住订单结束");
             /*创建新增操作日志*/
             try {
-               /* String logstr ="用户"+ saleChange.getAgent().getAccount()+"国际改签单锁定："+"["+changeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()+"]";
-                String title = "国际改签单锁定";
-                IftLogHelper.logger(saleChange.getAgent(),changeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo(),title,logstr);*/
                 SaleOrder saleOrder = saleOrderService.getSOrderByNo(saleChange.getAgent(), changeVo.getSaleChangeNo());
                 Long saleOrderNo = saleOrder.getSaleOrderNo();
                 String logstr ="用户"+ saleChange.getAgent().getAccount()+"国际改签单锁定："+"["+saleOrderNo+"]";
                 String title = "国际改签单锁定";
                 IftLogHelper.logger(saleChange.getAgent(),saleOrderNo,title,logstr);
-              /*  LogRecord logRecord = new LogRecord();
-                logRecord.setAppCode("UBP");
-                logRecord.setCreateTime(new Date());
-                logRecord.setTitle("国际改签单锁定");
-                logRecord.setDesc(logstr);
-                logRecord.setOptLoginName(saleChange.getAgent().getAccount());
-                logRecord.setRequestIp(saleChange.getAgent().getIp());
-                logRecord.setBizCode("IFT");
-                logRecord.setBizNo(String.valueOf(changeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()));
-                logService.insert(logRecord)*/;
             } catch (Exception e) {
                 log.error("添加(title=国际改签单锁定)操作日志异常===", e);
             }
@@ -1645,16 +1483,6 @@ public class ChangeServiceImpl implements IChangeService {
                 String logstr ="用户"+requestWithActor.getAgent().getAccount()+"国际改签单出单确认："+"["+change.getSaleOrderNo()+"]";
                 String title = "国际改签单出单确认";
                 IftLogHelper.logger(requestWithActor.getAgent(),change.getSaleOrderNo(),title,logstr);
-                /*LogRecord logRecord = new LogRecord();
-                logRecord.setAppCode("GSS");
-                logRecord.setCreateTime(new Date());
-                logRecord.setTitle("国际改签单出单确认");
-                logRecord.setDesc(logstr);
-                logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
-                logRecord.setRequestIp(requestWithActor.getAgent().getIp());
-                logRecord.setBizCode("IFT");
-                logRecord.setBizNo(String.valueOf(change.getSaleOrderNo()));
-                logService.insert(logRecord);*/
 
             } catch (Exception e) {
                 log.error("添加(title=国际改签单出单确认)操作日志异常===" + e);
@@ -1676,7 +1504,7 @@ public class ChangeServiceImpl implements IChangeService {
                 log.error("采购单编号为空");
                 throw new GSSException("采购单编号为空", "0001", "创建采购单失败");
             }
-            StringBuffer ticketNoArray = new StringBuffer();
+            //StringBuffer ticketNoArray = new StringBuffer();
             if (requestWithActor.getEntity().getBuyOrder() != null) {
                 Long buyOrderNo = maxNoService.generateBizNo("IFT_BUY_ORDER_NO", 24);
                 //创建采购单
@@ -1720,16 +1548,6 @@ public class ChangeServiceImpl implements IChangeService {
                 String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"创建国际改签采购单："+"["+requestWithActor.getEntity().getBuyOrderNo()+"]";
                 String title = "创建国际改签采购单";
                 IftLogHelper.logger(requestWithActor.getAgent(),requestWithActor.getEntity().getBuyOrderNo(),title,logstr);
-              /*  LogRecord logRecord = new LogRecord();
-                logRecord.setAppCode("UBP");
-                logRecord.setCreateTime(new Date());
-                logRecord.setTitle("创建国际改签采购单");
-                logRecord.setDesc(JSON.toJSONString(requestWithActor));
-                logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
-                logRecord.setRequestIp(requestWithActor.getAgent().getIp());
-                logRecord.setBizCode("IFT");
-                logRecord.setBizNo(String.valueOf(requestWithActor.getEntity().getBuyOrderNo()));
-                logService.insert(logRecord);*/
             } catch (Exception e) {
                 log.error("添加(title=创建国际改签采购单)操作日志异常===" + e);
             }
@@ -1811,8 +1629,124 @@ public class ChangeServiceImpl implements IChangeService {
         User user = userService.findUserByLoginName(requestWithActor.getAgent(), changeExt.getModifier());
         changeExt.setLocker(user.getId());
         changeExt.setLockTime(new Date());
-        int updateLocker = saleChangeExtDao.updateLocker(changeExt);
+        saleChangeExtDao.updateLocker(changeExt);
         //更新之前保存的oldLocker的数量
         ticketSenderService.updateByLockerId(requestWithActor.getAgent(),oldLocker,type);
+    }
+
+    /**
+     * 采购改签订单分单
+     */
+    @Override
+    public void assignChange(RequestWithActor<Long> requestWithActor) {
+        Long changeOrderNo = requestWithActor.getEntity();
+        List<SaleChangeExt> saleChangeExts = null;
+        SaleChangeExt saleChangeExt = null;
+        if (changeOrderNo == 0L|| changeOrderNo==null) {
+            log.info("定时任务分采购改签单开始,第一步：查询符合条件的采购改签订单...");
+            saleChangeExts = saleChangeExtDao.queryChangeBylocker(owner, 0l);
+            if (saleChangeExts != null && saleChangeExts.size() > 0) {
+                log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
+            } else {
+                log.info("未查询到可以分配的采购改签订单,结束此次任务...");
+                return;
+            }
+        } else {
+            log.info("直接将采购改签单分给在线业务员员，单号:{}", changeOrderNo);
+            saleChangeExt = this.getSaleChangeExtByNo(requestWithActor);
+        }
+        log.info("第二步：查询在线采购改签员...");
+        List<TicketSender> senders = ticketSenderService.getSpecTypeOnLineTicketSender("buysman-change");  //采购改签员
+        log.info("是否有在线出票员:" + (senders != null));
+        if (senders != null && senders.size() > 0) {
+            Agent agent = new Agent(Integer.valueOf(owner));
+            IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
+            Map config = configs.getConfig();
+            String str_maxOrderNum = (String) config.get("maxOrderNum");
+            log.info("获得配置最大分单数：" + str_maxOrderNum);
+            Long maxOrderNum = Long.valueOf(str_maxOrderNum);
+            Date updateTime = new Date();
+            if (changeOrderNo == null && saleChangeExts != null) {
+                taskAssign(saleChangeExts, senders, maxOrderNum, agent, updateTime);
+            } else {
+                derectAssign(saleChangeExt, senders, maxOrderNum, agent, updateTime);
+            }
+            log.info("此次分单结束...");
+        } else {
+            log.info("未查询在线出票员...");
+        }
+
+    }
+
+    private void increaseBuyChangeNum(Agent agent, TicketSender sender) {
+        User user = userService.findUserByLoginName(agent, sender.getUserid());
+        int lockCount = saleChangeExtDao.queryChangeCountBylocker(owner, user.getId());
+        sender.setBuyChangeNum(lockCount);
+        sender.setIds(sender.getId() + "");
+        iTicketSenderService.update(sender);
+    }
+
+
+    private void assingLockSaleChangeExt(SaleChangeExt order, TicketSender sender, Date date, Agent agent) {
+        User user = userService.findUserByLoginName(agent, sender.getUserid());
+        order.setLocker(user.getId());
+        order.setLockTime(date);
+        saleChangeExtDao.updateLocker(order);
+    }
+
+    /**
+     * 定时任务将单分给在线业务员
+     * @param saleChangeExts
+     * @param senders
+     * @param maxOrderNum
+     * @param agent
+     * @param updateTime
+     */
+    private void taskAssign(List<SaleChangeExt> saleChangeExts, List<TicketSender> senders, Long maxOrderNum,Agent agent,Date updateTime){
+        log.info("第三步：判断出票员手头出票订单数量...");
+        for (SaleChangeExt order : saleChangeExts) {
+            for (TicketSender peopleInfo : senders) {
+                log.info(peopleInfo.getName() + "未处理采购改签单数量：" + peopleInfo.getBuyChangeNum());
+                if (peopleInfo.getBuyChangeNum() >= maxOrderNum) {
+                    continue;
+                } else {
+                    log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
+                    /**锁单*/
+                    log.info("2.锁单,锁单人是被分配人...");
+                    assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
+                    /***增加出票人订单数*/
+                    log.info("3.增加出票人的未处理采购改签单数量...");
+                    increaseBuyChangeNum(agent, peopleInfo);
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * 直接将改签单分给在线业务员
+     * @param saleChangeExt
+     * @param senders
+     * @param maxOrderNum
+     * @param agent
+     * @param updateTime
+     */
+    private void derectAssign(SaleChangeExt saleChangeExt,List<TicketSender> senders, Long maxOrderNum,Agent agent,Date updateTime){
+        log.info("第三步：判断出票员手头出票订单数量...");
+        for (TicketSender peopleInfo : senders) {
+            log.info(peopleInfo.getName() + "未处理采购改签单数量：" + peopleInfo.getBuyChangeNum());
+            if (peopleInfo.getBuyChangeNum() >= maxOrderNum) {
+                continue;
+            } else {
+                log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
+                /**锁单*/
+                log.info("2.锁单,锁单人是被分配人...");
+                assingLockSaleChangeExt(saleChangeExt, peopleInfo, updateTime, agent);
+                /***增加出票人订单数*/
+                log.info("3.增加出票人的未处理采购改签单数量...");
+                increaseBuyChangeNum(agent, peopleInfo);
+                break;
+            }
+        }
     }
 }

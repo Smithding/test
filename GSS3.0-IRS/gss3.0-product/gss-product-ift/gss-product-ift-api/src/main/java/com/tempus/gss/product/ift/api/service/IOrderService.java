@@ -35,16 +35,6 @@ public interface IOrderService {
 	//<editor-fold desc="创建订单">
 
 	/**
-	 * 采购退票分单任务
-	 */
-	void assignBuyRefund();
-
-	/**
-	 * 采购改签分单任务
-	 */
-	void assignChange();
-
-	/**
 	 * 创建订单.
 	 * 通过白屏查询、Pnr、需求单、手工方式创建订单.
 	 *
@@ -302,5 +292,4 @@ public interface IOrderService {
 
 	public List<SaleOrderExt> getAssignedOrders(Integer[] createTypeArray);
 
-	void assignBuyWaste();
 }
