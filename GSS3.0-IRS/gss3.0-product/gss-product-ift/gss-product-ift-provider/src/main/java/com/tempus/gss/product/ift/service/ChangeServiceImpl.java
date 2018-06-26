@@ -1675,7 +1675,6 @@ public class ChangeServiceImpl implements IChangeService {
         } else {
             log.info("未查询在线出票员...");
         }
-
     }
 
     private void increaseBuyChangeNum(Agent agent, TicketSender sender) {

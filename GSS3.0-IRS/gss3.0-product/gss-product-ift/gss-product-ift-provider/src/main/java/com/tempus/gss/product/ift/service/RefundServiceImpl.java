@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
+import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.cps.entity.Customer;
 import com.tempus.gss.cps.entity.Supplier;
 import com.tempus.gss.cps.service.ICustomerService;
@@ -28,6 +29,7 @@ import com.tempus.gss.system.service.IUserService;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -191,9 +193,6 @@ public class RefundServiceImpl implements IRefundService {
 		saleChangeService.create(agent,saleChange);
 		return saleChange;
 	}
-
-
-
 
 	@Override
 	public SaleChangeExt createRefundExt(RequestWithActor<RefundCreateVo> requestWithActor) {
@@ -424,19 +423,6 @@ public class RefundServiceImpl implements IRefundService {
 					logstr ="用户"+ agent.getAccount()+"创建国际退/废销售单："+"["+requestWithActor.getEntity().getSaleOrderNo()+"]";
 				}
 				IftLogHelper.logger(agent,saleChange.getTransationOrderNo(),requestWithActor.getEntity().getSaleOrderNo(),title,logstr);
-				/*LogRecord logRecord = new LogRecord();
-				logRecord.setAppCode("UBP");
-				logRecord.setCreateTime(new Date());
-				logRecord.setTitle("创建国际退/废销售单");
-				logRecord.setDesc(logstr);
-				logRecord.setOptLoginName(agent.getAccount());
-				logRecord.setRequestIp(agent.getIp());
-				logRecord.setBizCode("IFT");
-				logRecord.setBizNo(String.valueOf(requestWithActor.getEntity().getSaleOrderNo()));
-				Map<String, Object> otherOpts = new HashMap<String, Object>();
-				otherOpts.put("transationOrderNo", saleChange.getTransationOrderNo());
-				logRecord.setOtherOpts(otherOpts);
-				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加(title=创建国际退/废销售单)操作日志异常===" + e);
 			}
@@ -564,16 +550,6 @@ public class RefundServiceImpl implements IRefundService {
 				String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"国际废/退锁定："+"["+saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()+"]";
 				String title = "国际废/退锁定";
 				IftLogHelper.logger(requestWithActor.getAgent(),saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo(),title,logstr);
-				/*LogRecord logRecord = new LogRecord();
-				logRecord.setAppCode("UBP");
-				logRecord.setCreateTime(new Date());
-				logRecord.setTitle("国际废/退锁定");
-				logRecord.setDesc(logstr);
-				logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
-				logRecord.setRequestIp(requestWithActor.getAgent().getIp());
-				logRecord.setBizCode("IFT");
-				logRecord.setBizNo(String.valueOf(saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()));
-				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加（title=国际废/退锁定）操作日志异常===" + e);
 			}
@@ -607,16 +583,6 @@ public class RefundServiceImpl implements IRefundService {
 				String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"国际废/退解锁："+"["+saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()+"]";
                 String title = "国际废/解退锁";
                 IftLogHelper.logger(requestWithActor.getAgent(),saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo(),title,logstr);
-				/*LogRecord logRecord = new LogRecord();
-				logRecord.setAppCode("UBP");
-				logRecord.setCreateTime(new Date());
-				logRecord.setTitle("国际废/退解锁");
-				logRecord.setDesc(logstr);
-				logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
-				logRecord.setRequestIp(requestWithActor.getAgent().getIp());
-				logRecord.setBizCode("IFT");
-				logRecord.setBizNo(String.valueOf(saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()));
-				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加（title=国际废/退解锁）操作日志异常===" + e);
 			}
@@ -835,16 +801,6 @@ public class RefundServiceImpl implements IRefundService {
 				String logstr ="用户"+ saleChangeNo.getAgent().getAccount()+"国际废票处理："+"["+saleChangeExt.getSaleChange().getSaleOrderNo()+"]";
 				String title="国际废票处理";
 				IftLogHelper.logger(saleChangeNo.getAgent(),saleChangeExt.getSaleChange().getSaleOrderNo(),title,logstr);
-			/*	LogRecord logRecord = new LogRecord();
-				logRecord.setAppCode("UBP");
-				logRecord.setCreateTime(new Date());
-				logRecord.setTitle("国际废票处理");
-				logRecord.setDesc(logstr);
-				logRecord.setOptLoginName(saleChangeNo.getAgent().getAccount());
-				logRecord.setRequestIp(saleChangeNo.getAgent().getIp());
-				logRecord.setBizCode("IFT");
-				logRecord.setBizNo(String.valueOf(saleChangeExt.getSaleChange().getSaleOrderNo()));
-				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加（title=国际废票处理）操作日志异常===" + e);
 			}
@@ -885,17 +841,6 @@ public class RefundServiceImpl implements IRefundService {
 				String logstr ="用户"+ saleChangeNo.getAgent().getAccount()+"国际退票处理："+"["+saleChangeExt.getSaleChange().getSaleOrderNo()+"]";
 				String title = "国际退票处理";
                 IftLogHelper.logger(saleChangeNo.getAgent(),saleChangeExt.getSaleChange().getSaleOrderNo(),title,logstr);
-
-				/*LogRecord logRecord = new LogRecord();
-				logRecord.setAppCode("UBP");
-				logRecord.setCreateTime(new Date());
-				logRecord.setTitle("国际退票处理");
-				logRecord.setDesc(JSON.toJSONString(saleChangeNo));
-				logRecord.setOptLoginName(saleChangeNo.getAgent().getAccount());
-				logRecord.setRequestIp(saleChangeNo.getAgent().getIp());
-				logRecord.setBizCode("IFT");
-				logRecord.setBizNo(String.valueOf(saleChangeExt.getSaleChange().getSaleOrderNo()));
-				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加（title=国际退票处理）操作日志异常===" + e);
 			}
@@ -988,16 +933,6 @@ public class RefundServiceImpl implements IRefundService {
 				}
                 String title ="取消国际退/废销售单";
                 IftLogHelper.logger(agent,saleChange.getSaleOrderNo(),title,logstr);
-				/*LogRecord logRecord = new LogRecord();
-				logRecord.setAppCode("UBP");
-				logRecord.setCreateTime(new Date());
-				logRecord.setTitle("取消国际退/废销售单");
-				logRecord.setDesc(logstr);
-				logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
-				logRecord.setRequestIp(requestWithActor.getAgent().getIp());
-				logRecord.setBizCode("IFT");
-				logRecord.setBizNo(String.valueOf(saleChange.getSaleOrderNo()));
-				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加（title=取消国际退/废销售单）操作日志异常===" + e);
 			}
@@ -1070,16 +1005,6 @@ public class RefundServiceImpl implements IRefundService {
                }
                 String title ="国际拒绝退/废";
                 IftLogHelper.logger(saleChangeNo.getAgent(),saleChange.getSaleOrderNo(),title,logstr);
-				/*LogRecord logRecord = new LogRecord();
-				logRecord.setAppCode("UBP");
-				logRecord.setCreateTime(new Date());
-				logRecord.setTitle("国际拒绝退/废");
-				logRecord.setDesc(logstr);
-				logRecord.setOptLoginName(saleChangeNo.getAgent().getAccount());
-				logRecord.setRequestIp(saleChangeNo.getAgent().getIp());
-				logRecord.setBizCode("IFT");
-				logRecord.setBizNo(String.valueOf(saleChange.getSaleOrderNo()));
-				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加（title=国际拒绝退/废）操作日志异常===" + e);
 			}
@@ -1316,16 +1241,6 @@ public class RefundServiceImpl implements IRefundService {
 				}
 
                 IftLogHelper.logger(saleOrderChangeExt.getAgent(),saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo(),title,logstr);
-				/*LogRecord logRecord = new LogRecord();
-				logRecord.setAppCode("UBP");
-				logRecord.setCreateTime(new Date());
-				logRecord.setTitle("修改国际退/废销售单");
-				logRecord.setDesc(logstr);
-				logRecord.setOptLoginName(saleOrderChangeExt.getAgent().getAccount());
-				logRecord.setRequestIp(saleOrderChangeExt.getAgent().getIp());
-				logRecord.setBizCode("IFT");
-				logRecord.setBizNo(String.valueOf(saleOrderChangeExt.getEntity().getSaleChange().getSaleOrderNo()));
-				logService.insert(logRecord);*/
 			} catch (Exception e) {
 				log.error("添加（title=修改国际退/废销售单）操作日志异常===" + e);
 			}
@@ -1376,53 +1291,30 @@ public class RefundServiceImpl implements IRefundService {
 		List<SaleChangeExt> saleChangeExts = null;
 		SaleChangeExt saleChangeExt = null;
         if(wasteOrderNo==0L||wasteOrderNo==null){
-			log.info("定时任务分采购废票单开始,第一步：查询符合条件的采购改签订单...");
+			log.info("定时任务分采购废票单开始,第一步：查询符合条件的采购废票订单...");
 			saleChangeExts = saleChangeExtDao.queryBuyWasteBylocker(owner, 0l);
 			if (saleChangeExts != null && saleChangeExts.size() > 0) {
 				log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
 			} else {
-				log.info("未查询到可以分配的采购改签订单,结束此次任务...");
+				log.info("未查询到可以分配的采购废票订单,结束此次任务...");
 				return;
 			}
 		}else {
-			log.info("直接将采购改签单分给在线业务员员，单号:{}", wasteOrderNo);
+			log.info("直接将采购废票单分给在线业务员员，单号:{}", wasteOrderNo);
 			saleChangeExt = this.getSaleChangeExtByNo(requestWithActor);
-		}
-
-		if (saleChangeExts != null && saleChangeExts.size() > 0) {
-			log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
-		} else {
-			log.info("未查询到可以分配的采购废票订单,结束此次任务...");
-			return;
 		}
 		log.info("第二步：查询在线采购废票员...");
 		List<TicketSender> senders = ticketSenderService.getSpecTypeOnLineTicketSender("buysman-waste"); //采购废票人员
 		log.info("是否有在线出票员:" + (senders != null));
 		if (senders != null && senders.size() > 0) {
 			Agent agent = new Agent(Integer.valueOf(owner));
-			IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
-			Map config = configs.getConfig();
-			String str_maxOrderNum = (String) config.get("maxOrderNum");
-			log.info("有在线出票员人数:" + (senders.size()) + "获得配置最大分单数：" + str_maxOrderNum);
-			Long maxOrderNum = Long.valueOf(str_maxOrderNum);
+			Long maxOrderNum = getMaxAbleAssignNum(agent);
+			log.info("在线出票员人数:" + (senders.size()) + "获得配置最大分单数：" + maxOrderNum);
 			Date updateTime = new Date();
-			log.info("第三步：判断出票员手头出票订单数量...");
-			for (SaleChangeExt order : saleChangeExts) {
-				for (TicketSender peopleInfo : senders) {
-					log.info(peopleInfo.getName() + "未处理采购废票单数量：" + peopleInfo.getBuyRefuseNum());
-					if (peopleInfo.getBuyRefuseNum() >= maxOrderNum) {
-						continue;
-					} else {
-						/**锁单*/
-						log.info("第四步:满足条件的分配明细...1.锁单,锁单人是被分配人...");
-						assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
-						/***增加出票人订单数*/
-						log.info("2.增加出票人的未处理采购废票单数量...");
-						peopleInfo.setUpdatetime(updateTime);
-						increaseBuyRefuseNum(agent, peopleInfo);
-						break;
-					}
-				}
+			if (wasteOrderNo == null && saleChangeExts != null) {
+				taskAssign(saleChangeExts, senders, maxOrderNum, agent, updateTime);
+			}else{
+				derectAssign(saleChangeExt, senders, maxOrderNum, agent, updateTime);
 			}
 			log.info("此次分单结束...");
 		} else {
@@ -1455,54 +1347,107 @@ public class RefundServiceImpl implements IRefundService {
 	 */
 	@Override
 	public void assignBuyRefund(RequestWithActor<Long> requestWithActor) {
-
-		log.info("第一步：查询符合条件采购退票的订单...");
-		List<SaleChangeExt> saleChangeExts = saleChangeExtDao.queryRefundBylocker(owner, 0l);
-		if (saleChangeExts != null && saleChangeExts.size() > 0) {
-			log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
+		Long refundOrderNo = requestWithActor.getEntity();
+		List<SaleChangeExt> saleChangeExts = null;
+		SaleChangeExt saleChangeExt = null;
+		if (refundOrderNo == 0L|| refundOrderNo==null) {
+			log.info("定时任务分采购退票单开始,第一步：查询符合条件的采购退票订单...");
+			saleChangeExts = saleChangeExtDao.queryChangeBylocker(owner, 0l);
+			if (saleChangeExts != null && saleChangeExts.size() > 0) {
+				log.info("查询到" + saleChangeExts.size() + "条可分配订单...");
+			} else {
+				log.info("未查询到可以分配的采购退票订单,结束此次任务...");
+				return;
+			}
 		} else {
-			log.info("未查询到可以分配的采购退票订单,结束此次任务...");
-			return;
+			log.info("直接将采购退票单分给在线业务员员，单号:{}", refundOrderNo);
+			saleChangeExt = this.getSaleChangeExtByNo(requestWithActor);
 		}
 		log.info("第二步：查询在线采购退票员...");
 		List<TicketSender> senders = ticketSenderService.getSpecTypeOnLineTicketSender("buysman-refund"); //采购退票人员
 		log.info("是否有在线出票员:" + (senders != null));
 		if (senders != null && senders.size() > 0) {
 			Agent agent = new Agent(Integer.valueOf(owner));
-			IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
-			Map config = configs.getConfig();
-			String str_maxOrderNum = (String) config.get("maxOrderNum");
-			log.info("有在线出票员人数:" + (senders.size()) + "获得配置最大分单数：" + str_maxOrderNum);
-			Long maxOrderNum = Long.valueOf(str_maxOrderNum);
+			Long maxOrderNum = getMaxAbleAssignNum(agent);
+			log.info("有在线出业务员人数:" + (senders.size()) + "获得配置最大分单数：" + maxOrderNum);
 			Date updateTime = new Date();
-			log.info("第三步：判断出票员手头出票订单数量...");
-			for (SaleChangeExt order : saleChangeExts) {
-				for (TicketSender peopleInfo : senders) {
-					log.info(peopleInfo.getName() + "未处理采购退票单数量：" + peopleInfo.getBuyRefuseNum());
-					if (peopleInfo.getBuyRefuseNum() >= maxOrderNum) {
-						continue;
-					} else {
-						log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
-						/***修改订单明细表*/
-						//updateSaleOrderDetail(order, peopleInfo, updateTime);
-						/**锁单*/
-						log.info("2.锁单,锁单人是被分配人...");
-						assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
-						/***增加出票人订单数*/
-						log.info("3.增加出票人的未处理采购退票单数量...");
-						increaseBuyRefuseNum(agent, peopleInfo);
-						/***发送消息至消息队列 通知出票员*/
-						//sendInfo(peopleInfo.getUserid(), order.getSaleOrderNo(),String.valueOf(order.getSaleOrder().getOrderStatus()));
-						//log.info("4.发信息通知出票员出票,订单" + order.getSaleChangeNo() + "将分给出票员结束");
-						break;
-					}
-				}
+			if (refundOrderNo == null && saleChangeExts != null) {
+				taskAssign(saleChangeExts, senders, maxOrderNum, agent, updateTime);
+			}else{
+				derectAssign(saleChangeExt, senders, maxOrderNum, agent, updateTime);
 			}
 			log.info("此次分单结束...");
 		} else {
 			log.info("未查询在线出票员...");
 		}
 
+	}
+
+	/**
+	 * 定时任务将单分给在线业务员
+	 * @param saleChangeExts
+	 * @param senders
+	 * @param maxOrderNum
+	 * @param agent
+	 * @param updateTime
+	 */
+	private void taskAssign(List<SaleChangeExt> saleChangeExts, List<TicketSender> senders, Long maxOrderNum,Agent agent,Date updateTime){
+		log.info("第三步：判断出票员手头出票订单数量...");
+		for (SaleChangeExt order : saleChangeExts) {
+			for (TicketSender peopleInfo : senders) {
+				log.info(peopleInfo.getName() + "未处理采购废票单数量：" + peopleInfo.getBuyRefuseNum());
+				if (peopleInfo.getBuyRefuseNum() >= maxOrderNum) {
+					continue;
+				} else {
+					/**锁单*/
+					log.info("第四步:满足条件的分配明细...1.锁单,锁单人是被分配人...");
+					assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
+					/***增加出票人订单数*/
+					log.info("2.增加出票人的未处理采购废票单数量...");
+					peopleInfo.setUpdatetime(updateTime);
+					increaseBuyRefuseNum(agent, peopleInfo);
+					break;
+				}
+			}
+		}
+	}
+
+	/**
+	 * 直接将单分给在线业务员
+	 * @param saleChangeExt
+	 * @param senders
+	 * @param maxOrderNum
+	 * @param agent
+	 * @param updateTime
+	 */
+	private void derectAssign(SaleChangeExt saleChangeExt,List<TicketSender> senders, Long maxOrderNum,Agent agent,Date updateTime){
+		log.info("第三步：判断出票员手头出票订单数量...");
+		for (TicketSender peopleInfo : senders) {
+			log.info(peopleInfo.getName() + "未处理采购单数量：" + peopleInfo.getBuyChangeNum());
+			if (peopleInfo.getBuyChangeNum() >= maxOrderNum) {
+				continue;
+			} else {
+				log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
+				/**锁单*/
+				log.info("2.锁单,锁单人是被分配人...");
+				assingLockSaleChangeExt(saleChangeExt, peopleInfo, updateTime, agent);
+				/***增加出票人订单数*/
+				log.info("3.增加出票人的未处理采购单数量...");
+				increaseBuyRefuseNum(agent, peopleInfo);
+				break;
+			}
+		}
+	}
+
+	private Long getMaxAbleAssignNum(Agent agent){
+		Long maxOrderNum = 0L;
+		IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
+		Map config = configs.getConfig();
+		String str_maxOrderNum = (String) config.get("maxOrderNum");
+		if(StringUtils.isNotBlank(str_maxOrderNum)){
+			maxOrderNum = Long.valueOf(str_maxOrderNum);
+		}
+		return  maxOrderNum;
 	}
 
 }

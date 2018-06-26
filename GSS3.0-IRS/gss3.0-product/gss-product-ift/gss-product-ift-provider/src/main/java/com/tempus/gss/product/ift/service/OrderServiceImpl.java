@@ -80,7 +80,6 @@ import com.tempus.gss.product.ift.api.entity.webservice.settt.ReturnSettInfo;
 import com.tempus.gss.product.ift.mq.IftTicketMqSender;
 import com.tempus.gss.security.AgentUtil;
 import com.tempus.gss.system.service.IMaxNoService;
-import com.tempus.gss.system.service.IParamService;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 import com.tempus.tbe.entity.PnrOutPut;
@@ -179,8 +178,6 @@ public class OrderServiceImpl implements IOrderService {
     IftTicketMqSender iftTicketMqSender;
     @Reference
     IAirportService airportService;
-    @Reference
-    IDifferenceOrderService differenceOrderService;
     @Autowired
     MqSender mqSender;
     @Reference
