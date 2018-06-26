@@ -508,7 +508,7 @@ public class HolMidServiceImpl implements IHolMidService {
 		query.limit(3);
 		/*if(StringUtil.isNotNullOrEmpty(lon) && StringUtil.isNotNullOrEmpty(lat)) {
 			Point point =new Point(Double.valueOf(lon), Double.valueOf(lat));
-			cr.and("resGpsLocation").near(point).maxDistance(1D);//100000/6378137
+			cr.and("resPosition").near(point).maxDistance((double)200/6378137);//100000/6378137
 		}*/
 		if(StringUtil.isNotBlank(lon)) {
 			cr.and("lon").regex("^" + lon + ".*$");
