@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
@@ -30,15 +31,25 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
  */
 public interface IBQYHotelInterService{
 	
+	/**
+	 * 获取酒店id的总数
+	 * @param param
+	 * @return
+	 */
+	long queryHotelIdCount(Map<String, Object> param);
 
 	/**
 	 * 获取所有酒店id
 	 * @param query
 	 * @return
 	 */
-	List<HotelId> queryHotelIdList();
+	List<HotelId> queryHotelIdList(Map<String, Object> param);
 	
-
+	/**
+	 * 城市ID获取酒店ID
+	 */
+	List<HotelId> queryHotelIdListByCityCode(QueryHotelIdParam query);
+	
 	/**
 	 * 酒店列表查询
 	 * @param query 酒店列表查询参数
@@ -118,7 +129,7 @@ public interface IBQYHotelInterService{
 	List<RoomPriceItem> queryHotelRoomPrice(QueryHotelParam query);
 	
 	/**
-	 * 拉取酒店信息
+	 * 根据酒店ID拉取酒店信息
 	 */
 	void pullHotelInfoByIdList(List<HotelId> hotelIdList);
 	
@@ -131,6 +142,11 @@ public interface IBQYHotelInterService{
 	 * 删除MongoDB数据
 	 */
 	void deleteMongoDBData();
+	
+	/**
+	 * 城市ID获取酒店ID
+	 */
+	void pullHotelIdByCityCode();
 
 	/**
 	 * 根据纬度、经度、酒店电话查询中间表中的酒店
@@ -167,4 +183,5 @@ public interface IBQYHotelInterService{
 	 * @return
 	 */
 	OrderPayResult orderPay(OrderPayReq orderPayReq);
+	
 }

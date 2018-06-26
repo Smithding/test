@@ -49,4 +49,9 @@ public interface ISyncHotelInfo {
 	 * @throws GSSException
 	 */
 	Future<ResBaseInfo> queryTCHolForAsyncBack(Agent agent, Long tcHotelId);
+	
+	/**
+	 * 拉取bqy城市酒店信息
+	 */
+	void pullBQYHotelInfo();
 }

@@ -1,17 +1,20 @@
 package com.tempus.gss.product.hol.service;
 
-import java.math.BigDecimal;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -26,6 +29,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.tempus.gss.bbp.util.StringUtil;
@@ -33,7 +37,6 @@ import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
 import com.tempus.gss.product.hol.api.entity.ResNameSum;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
-import com.tempus.gss.product.hol.api.entity.response.tc.ResGPSInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelBrand;
@@ -75,6 +78,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	@Value("bqy.key")
 	private String BQY_KEY;			
 	
+	private String TOKEN;
+	
 	@Value("${bqy.hotelId.list.url}")
 	private String BQY_HOTELID_LIST_URL;		//酒店Id集合URL
 	
@@ -114,7 +119,11 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	@Value("${bqy.hotel.order.pay.url}")
 	private String BQY_HOTEL_ORDER_PAY_URL;			//订单支付
 	
-	private String TOKEN;
+	@Value("${bqy.hotelId.by.cityCode}")
+	private String BQY_HOTELID_BY_CITYCODE;			//城市ID获取酒店
+	
+	@Value("${bqy.count}")
+	private int PAGE_SIZE;							//查询id数量
 	
 	@Autowired
 	private MongoTemplate mongoTemplate1;
@@ -122,11 +131,39 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 	
 	SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	
+	@Override
+	public long queryHotelIdCount(Map<String, Object> param) {
+		param.put("AgentId", Long.parseLong(BQY_AGENTID));
+		param.put("Token", md5Encryption());
+		param.put("PageSize", 1);
+		param.put("PageNo", 1);
+		String paramJson = JsonUtil.toJson(param);
+		String result = HttpClientUtil.doJsonPost(BQY_HOTELID_LIST_URL,paramJson);
+		long totalItemCount = 0; 
+		if (StringUtils.isNoneBlank(result.trim())) {
+//			result = result.replace("\\", "");
+			ResponseResult<String> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<String>>(){});
+			if (responseResult != null) {
+				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
+					String resultStr = responseResult.getResult();
+					JSONObject jsonObject = JsonUtil.toBean(resultStr);
+					totalItemCount = jsonObject.getLong("TotalItemCount");
+				}
+			}
+		}else {
+			throw new GSSException("获取BQY酒店ID数量", "0111", "获取BQY所有酒店ID数量失败...");
+		}
+		return totalItemCount;
+	}
 
 	@Override
-	public List<HotelId> queryHotelIdList() {
-		logger.info("获取所有酒店ID开始...");
-		String result = HttpClientUtil.doJsonPost(BQY_HOTELID_LIST_URL);
+	public List<HotelId> queryHotelIdList(Map<String, Object> param) {
+		param.put("AgentId", Long.parseLong(BQY_AGENTID));
+		param.put("Token", md5Encryption());
+		String paramJson = JsonUtil.toJson(param);
+		System.out.println("酒店id查询入参为:" + paramJson);
+		String result = HttpClientUtil.doJsonPost(BQY_HOTELID_LIST_URL,paramJson);
 		List<HotelId> hotelIdList = null; 
 		if (StringUtils.isNoneBlank(result.trim())) {
 //			result = result.replace("\\", "");
@@ -134,7 +171,35 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			if (responseResult != null) {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
 					String resultStr = responseResult.getResult();
-					hotelIdList = JsonUtil.toBean(resultStr, new TypeReference<List<HotelId>>(){});
+					JSONObject jsonObject = JsonUtil.toBean(resultStr);
+					String hotelIdJson = jsonObject.getString("Items");
+					hotelIdList = JsonUtil.toList(hotelIdJson, HotelId.class);
+				}
+			}
+		}else {
+			throw new GSSException("获取BQY酒店ID", "0111", "获取BQY所有酒店ID失败...");
+		}
+		return hotelIdList;
+	}
+	
+	@Override
+	public List<HotelId> queryHotelIdListByCityCode(QueryHotelIdParam query) {
+		logger.info("获取所有酒店ID开始...");
+		query.setAgentId(Long.parseLong(BQY_AGENTID));
+		query.setToken(md5Encryption());
+		String paramJson = JsonUtil.toJson(query);
+		String result = HttpClientUtil.doJsonPost(BQY_HOTELID_BY_CITYCODE, paramJson);
+		List<HotelId> hotelIdList = null; 
+		if (StringUtils.isNoneBlank(result.trim())) {
+			ResponseResult<String> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<String>>(){});
+			if (responseResult != null) {
+				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
+					String resultStr = responseResult.getResult();
+					JSONObject jsonObject = JsonUtil.toBean(resultStr);
+					String hotelIdJson = jsonObject.getString("Items");
+					hotelIdList = JsonUtil.toList(hotelIdJson, HotelId.class);
+					System.out.println(hotelIdJson);
+					//hotelIdList = JsonUtil.toBean(resultStr, new TypeReference<List<HotelId>>(){});
 				}
 			}
 		}else {
@@ -152,12 +217,15 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		String paramJson = JsonUtil.toJson(query);
 		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_INFO_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
-			ResponseResult<HotelInfo> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<HotelInfo>>(){});
-			if (responseResult != null) {
+			JSONObject jsonObject = JsonUtil.toBean(result);
+			String resultJson = jsonObject.getString("Result");
+			//ResponseResult<HotelInfo> responseResult = JsonUtil.toBean(resultJson, new TypeReference<ResponseResult<HotelInfo>>(){});
+			/*if (responseResult != null) {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
 					hotelInfo = responseResult.getResult();
 				}
-			}
+			}*/
+			hotelInfo = JsonUtil.toBean(resultJson, HotelInfo.class);
 		}else {
 			throw new GSSException("获取BQY酒店信息失败!", "0111", "BQY酒店信息返回空值");
 		}
@@ -436,6 +504,10 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			hotelInfoParam.setHotelId(hotelId.getHotelId());
 			HotelInfo hotelInfo = queryHotelInfo(hotelInfoParam);
 			
+			if (null == hotelInfo || hotelInfo.getHotelId() == 0) {
+				continue;
+			}
+			
 			hotelInfoParam.setHotelId(hotelId.getHotelId());
 			hotelInfo.setId(hotelId.getHotelId());
 			//酒店图片
@@ -472,7 +544,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			if (holMidList.size() == 1) {
 				//合并酒店
 				HolMidBaseInfo holMid = holMidList.get(0);
-				
+				logger.info("有一个相同的酒店要插入的酒店id为:"+hotelInfo.getHotelId()+">>>酒店名称为:" + hotelInfo.getHotelName());
+				logger.info("中间表酒店名称为:" + holMid.getResName() + ">>>酒店id为:"+ holMid.getResNameSum().get(0).getResId() +  ">>>中间表id为"+holMid.getId());
 				List<ResNameSum> listHol = holMid.getResNameSum();
 				if(StringUtil.isNotNullOrEmpty(listHol)) {
 					boolean isBQYHotel = true;
@@ -499,12 +572,15 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 					}
 				}
 				
-				/*holMid.setResId(hotelInfo.getHotelId());
-				holMid.setResName(hotelInfo.getHotelName());*/
-				int lowPrice = hotelInfo.getLowPrice().intValue();
-				if (holMid.getMinPrice() > lowPrice) {
-					holMid.setMinPrice(lowPrice);
-				}
+				//holMid.setResId(hotelInfo.getHotelId());
+				holMid.setResName(hotelInfo.getHotelName());
+ 				if (null != hotelInfo.getLowPrice()) {
+ 					int lowPrice = hotelInfo.getLowPrice().intValue();
+ 					if (holMid.getMinPrice() > lowPrice) {
+ 						holMid.setMinPrice(lowPrice);
+ 					}
+ 				}
+				
 				mongoTemplate1.save(holMid);
 			}else if (holMidList.size() > 1) {
 				throw new GSSException("bqy拉取酒店信息", "0111", "酒店纬度:" + latitude +"经度:" + longitude + "电话:" + mobile + "在中间表中有" + holMidList.size() + "个");
@@ -524,8 +600,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			listHol.add(resNameSum);
 			holMidBaseInfo.setResNameSum(listHol);
 			holMidBaseInfo.setId(String.valueOf(IdWorker.getId()));
-			/*holMidBaseInfo.setResId(hotelInfo.getHotelId());
-			holMidBaseInfo.setResName(hotelInfo.getHotelName());*/
+			/*holMidBaseInfo.setResId(hotelInfo.getHotelId());*/
+			holMidBaseInfo.setResName(hotelInfo.getHotelName());
 			holMidBaseInfo.setProvName(hotelInfo.getProvinceName());
 			holMidBaseInfo.setCityName(hotelInfo.getCityName());
 			holMidBaseInfo.setIsInter(1);
@@ -560,7 +636,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			holMidBaseInfo.setTitleImg(hotelInfo.getTitleImgUrl());
 			
 			holMidBaseInfo.setBookRemark(hotelInfo.getRoadCross());
-			holMidBaseInfo.setMinPrice(hotelInfo.getLowPrice().intValue());
+			if (null != hotelInfo.getLowPrice()) {
+				holMidBaseInfo.setMinPrice(hotelInfo.getLowPrice().intValue());
+			}
 			holMidBaseInfo.setSupplierNo(hotelInfo.getSupplierNo());
 			holMidBaseInfo.setLatestUpdateTime(hotelInfo.getLatestUpdateTime());
 			holMidBaseInfo.setSaleStatus(1);
@@ -575,11 +653,11 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	 */
 	@Override
 	public void deleteMongoDBData() {
-		//mongoTemplate1.remove(new Query(), HotelInfo.class);
+		mongoTemplate1.remove(new Query(), HotelInfo.class);
 		//mongoTemplate1.remove(new Query(), CityDetail.class);
 		//mongoTemplate1.remove(new Query(), HotelId.class);
 		//TODO 需要修改中间表的清空
-		//mongoTemplate1.remove(new Query(), HolMidBaseInfo.class);
+		mongoTemplate1.remove(new Query(), HolMidBaseInfo.class);
 		//mongoTemplate1.remove(new Query(Criteria.where("supplierNo").is("411805040103290132")), HolMidBaseInfo.class);
 	}
 	
@@ -778,6 +856,48 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			}
 		}
 	}
+
+	@Override
+	public void pullHotelIdByCityCode() {
+		//城市xml文件
+		Document document = DocumentUtil.getDocumentByFileName2("city.xml");
+		Element root = document.getRootElement();
+		//省份元素迭代器
+		Iterator provinces = root.elementIterator();
+		
+		QueryHotelIdParam cityInfoParam = new QueryHotelIdParam();
+		while (provinces.hasNext()) {
+			//省份元素
+			Element province = (Element) provinces.next();
+			//市级元素迭代器
+			Iterator citys = province.element("citys").elementIterator();
+			//查询酒店id参数封装类
+			
+			while (citys.hasNext()) {
+				Element city = (Element) citys.next();
+				//城市编号
+				String cityCode = city.elementText("id");
+				cityInfoParam.setCityId(cityCode);
+				listHotelIdByCityCode(cityInfoParam);
+			}
+		}
+	}
+	
+	private void listHotelIdByCityCode(QueryHotelIdParam cityInfoParam) {
+		int i = 0;
+		while (true) {
+			i++;
+			cityInfoParam.setPageSize(i);
+			cityInfoParam.setPageSize(PAGE_SIZE);
+			List<HotelId> hotelIdList = queryHotelIdListByCityCode(cityInfoParam);
+			if (CollectionUtils.isNotEmpty(hotelIdList)) {
+				mongoTemplate1.save(hotelIdList);
+				if (hotelIdList.size() != PAGE_SIZE) {
+					break;
+				}
+			}
+		}
+	}
 	
 	/**
 	 * bqy酒店等级转tc
@@ -802,6 +922,20 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		return "27";
 	}
 	
+	@Override
+	@Async
+	public Future<List<ImageList>> asyncHotelImage(QueryHotelParam query) {
+		List<ImageList> imageList = queryHotelImage(query);
+		return new AsyncResult<List<ImageList>>(imageList);
+	}
+
+	@Override
+	@Async
+	public Future<HotelEntity> asyncHotelDetail(QueryHotelParam query) {
+		HotelEntity hotelEntity = queryHotelDetail(query);
+		return new AsyncResult<HotelEntity>(hotelEntity);
+	}
+
 	/**
 	 * 加密代理人id
 	 * @return
@@ -818,7 +952,36 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	 * @param encryption
 	 * @return
 	 */
-	public String md5Encryption(String encryption) {
+	private static String md5Encryption(String encryption) {     
+        MessageDigest messageDigest = null;    
+        try    
+        {    
+            messageDigest = MessageDigest.getInstance("MD5");    
+            messageDigest.reset();    
+            messageDigest.update(encryption.getBytes("UTF-8"));    
+        } catch (NoSuchAlgorithmException e)    
+        {    
+            System.out.println("NoSuchAlgorithmException caught!");    
+            System.exit(-1);    
+        } catch (UnsupportedEncodingException e)    
+        {    
+            e.printStackTrace();    
+        }    
+    
+        byte[] byteArray = messageDigest.digest();    
+    
+        StringBuffer md5StrBuff = new StringBuffer();    
+    
+        for (int i = 0; i < byteArray.length; i++)    
+        {    
+            if (Integer.toHexString(0xFF & byteArray[i]).length() == 1)    
+                md5StrBuff.append("0").append(Integer.toHexString(0xFF & byteArray[i]));    
+            else    
+                md5StrBuff.append(Integer.toHexString(0xFF & byteArray[i]));    
+        }    
+        return md5StrBuff.toString();    
+    } 
+	/*public String md5Encryption(String encryption) {
 		String re_md5 = new String();
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
@@ -843,22 +1006,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			e.printStackTrace();
 		}
 		return re_md5;
-	}
-
-	@Override
-	@Async
-	public Future<List<ImageList>> asyncHotelImage(QueryHotelParam query) {
-		List<ImageList> imageList = queryHotelImage(query);
-		return new AsyncResult<List<ImageList>>(imageList);
-	}
-
-	@Override
-	@Async
-	public Future<HotelEntity> asyncHotelDetail(QueryHotelParam query) {
-		HotelEntity hotelEntity = queryHotelDetail(query);
-		return new AsyncResult<HotelEntity>(hotelEntity);
-	}
-
+	}*/
 }
 
  
