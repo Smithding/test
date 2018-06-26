@@ -75,6 +75,13 @@ public interface ITCHotelSupplierService {
 	 * @return
 	 */
 	public <T> T queryListByProId(String id, Class<T> clazz);
+	/**
+	 * 根据酒店名字查询
+	 * @param resName
+	 * @param clazz
+	 * @return
+	 */
+	public <T> T queryHolByResName(String resName, Class<T> clazz);
 	
 	/**
 	 * 查询不为空的所有数据
