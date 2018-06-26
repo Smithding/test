@@ -231,7 +231,7 @@ public interface IOrderService {
 	boolean createPnr(Agent agent,Pnr pnr,SaleOrderExt saleOrderExt);
 
 	/**订单分配*/
-	void assign();
+	void assign(Long saleOrderNo);
 	
 	/**
 	 * 销售单新增婴儿乘机人

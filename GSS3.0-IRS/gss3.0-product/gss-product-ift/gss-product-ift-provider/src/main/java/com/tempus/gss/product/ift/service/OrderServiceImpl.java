@@ -2,12 +2,7 @@ package com.tempus.gss.product.ift.service;
 
 import java.math.BigDecimal;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.tempus.gss.mq.MqSender;
 import com.tempus.gss.order.entity.*;
@@ -1867,10 +1862,20 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     @Deprecated
-    public void assign() {
+    public void assign(Long saleOrderNo) {
         log.info("第一步：查询符合条件的出票订单...");
         Integer[] createTypeStatusArray = {1, 2, 3, 4, 6};
         List<SaleOrderExt> saleOrderExtList = getNoHandleOrders(createTypeStatusArray);
+        if(saleOrderNo != null){
+            //如果有销售单号，把其他的订单都移出只分改销售单号对应的单
+            Iterator<SaleOrderExt> iterator = saleOrderExtList.iterator();
+            while(iterator.hasNext()){
+                SaleOrderExt orderExt = iterator.next();
+                if(!orderExt.getSaleOrderNo().equals(saleOrderNo)){
+                     iterator.remove();
+                }
+            }
+        }
         if (saleOrderExtList != null && saleOrderExtList.size() > 0) {
             log.info("查询到" + saleOrderExtList.size() + "条可分配订单...");
         } else {
