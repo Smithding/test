@@ -1250,7 +1250,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	public Boolean insertNewRes(Agent agent, Long resId) {
 		log.info("手动添加酒店开始, 入参："+resId);
 		SimpleDateFormat sdfupdate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Integer minPrice = new Random().nextInt(200) + 100;
+		Integer minPrice = new Random().nextInt(300) + 100;
 		Integer flag = 0;
 		try {
 			Calendar cal = Calendar.getInstance();  
