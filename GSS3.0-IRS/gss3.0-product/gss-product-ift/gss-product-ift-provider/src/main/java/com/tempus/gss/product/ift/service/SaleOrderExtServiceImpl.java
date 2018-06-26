@@ -43,4 +43,12 @@ public class SaleOrderExtServiceImpl implements ISaleOrderExtService {
 		log.info("获取销售单拓展结束==");
 		return saleOrderExt;
 	}
+
+	@Override
+	public int updateByPrimaryKeySelective(SaleOrderExt saleOrderExt) {
+		if(saleOrderExt == null){
+			return 0;
+		}
+		return saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
+	}
 }
