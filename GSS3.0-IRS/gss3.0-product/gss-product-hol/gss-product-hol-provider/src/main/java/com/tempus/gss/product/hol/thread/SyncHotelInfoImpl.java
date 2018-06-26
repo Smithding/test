@@ -13,6 +13,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,21 +52,30 @@ import com.tempus.gss.vo.Agent;
 
 @Service
 public class SyncHotelInfoImpl implements ISyncHotelInfo {
-	protected final transient Logger log = LogManager.getLogger(TCHotelSupplierServiceImpl.class);
+	protected final transient Logger logger = LogManager.getLogger(TCHotelSupplierServiceImpl.class);
 	@Autowired
 	private ITCHotelSupplierService tcHotelSupplierService;
+	
+	@Autowired
+	private ITCHotelInterService tcHotelInterService;
 	
 	@Autowired
 	private IBQYHotelSupplierService bqyHotelSupplierService;
 	
 	@Autowired
-	private ITCHotelInterService tcHotelInterService;
+	private IBQYHotelInterService bqyHotelInterService;
+	
+	@Autowired
+	private MongoTemplate mongoTemplate1;
 	
 	@Reference
 	IHolProfitService holProfitService;
 	
 	@Reference
 	ITCHotelInterService hotelInterService;
+	
+	@Value("${bqy.count}")
+	private int PAGE_SIZE;			//查询id数量
 	
 	SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 
@@ -135,7 +145,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	public ResBaseInfo queryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
 		// long start = System.currentTimeMillis();
 		if (StringUtil.isNullOrEmpty(agent)) {
-            log.error("agent对象为空");
+            logger.error("agent对象为空");
             throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
         }else{
         	if(StringUtil.isNullOrEmpty(agent.getType())){
@@ -143,15 +153,15 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
         	}
         }
 		if (StringUtil.isNullOrEmpty(resId)) {
-            log.error("酒店id为空");
+            logger.error("酒店id为空");
             throw new GSSException("获取某一酒店详细信息", "0100", "酒店id为空");
         }
 		if (StringUtil.isNullOrEmpty(startTime)) {
-			log.error("开始日期为空");
+			logger.error("开始日期为空");
             throw new GSSException("获取某一酒店详细信息", "0105", "开始日期为空");
         }
         if (StringUtil.isNullOrEmpty(endTime)) {
-            log.error("结束日期为空");
+            logger.error("结束日期为空");
             throw new GSSException("获取某一酒店详细信息", "0105", "结束日期为空");
         }
         ResBaseInfo tcResBaseInfo = null;
@@ -399,4 +409,85 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		return new AsyncResult<ResBaseInfo>(hotelDetail);
 	}
 	
+	
+	/*public void pullBQYHotelInfo() {
+		logger.info("BQY酒店信息拉取开始...");
+		//将MongoDB中数据清空
+		//bqyHotelInterService.deleteMongoDBData();
+		
+		bqyHotelInterService.pullHotelIdByCityCode();
+		
+		//拉取城市信息
+		bqyHotelInterService.pullCityDetail();
+		//拉取酒店ID并存储MongoDB
+		//获取BQY酒店ID
+		//List<HotelId> hotelIdList = bqyHotelInterService.queryHotelIdList();
+		//将获取的酒店ID保存到mongoDB中
+		//mongoTemplate1.insert(hotelIdList, HotelId.class);
+		List<HotelId> hotelIdList = null;
+		//获取ID数量
+		//long totalHotelIdNum = hotelIdList.size();
+		long totalHotelIdNum = mongoTemplate1.count(new Query(), HotelId.class);
+		long count = 1;
+		if ((totalHotelIdNum / PAGE_SIZE) > 1) {
+			count = totalHotelIdNum % PAGE_SIZE == 0 ? totalHotelIdNum / PAGE_SIZE : totalHotelIdNum / PAGE_SIZE + 1;
+		}
+		for (int i = 0; i < count; i++) {
+			int start = i * PAGE_SIZE;
+			//long lastIndex = (start + PAGE_SIZE) > totalHotelIdNum ? totalHotelIdNum : start + PAGE_SIZE;
+			Query query = new Query().skip(start).limit(PAGE_SIZE);
+			hotelIdList = mongoTemplate1.find(query, HotelId.class);
+			//开启线程拉去酒店数量
+			bqyHotelInterService.pullHotelInfoByIdList(hotelIdList);
+		}
+		logger.info("BQY酒店信息拉取结束...");
+	}*/
+	@Override
+	public void pullBQYHotelInfo() {
+		//将MongoDB中数据清空
+		bqyHotelInterService.deleteMongoDBData();
+		//拉取城市信息
+		//bqyHotelInterService.pullCityDetail();
+		//拉取酒店ID并存储MongoDB
+		//获取BQY酒店ID
+		//listHotelId();
+		
+		//将获取的酒店ID保存到mongoDB中
+		//mongoTemplate1.insert(hotelIdList, HotelId.class);
+		List<HotelId> hotelIdList = null;
+		//获取ID数量
+		//long totalHotelIdNum = hotelIdList.size();
+		long totalHotelIdNum = mongoTemplate1.count(new Query(), HotelId.class);
+		long count = 3;
+		/*if ((totalHotelIdNum / PAGE_SIZE) > 1) {
+			count = totalHotelIdNum % PAGE_SIZE == 0 ? totalHotelIdNum / PAGE_SIZE : totalHotelIdNum / PAGE_SIZE + 1;
+		}*/
+		for (int i = 0; i < count; i++) {
+			int start = i * PAGE_SIZE;
+			//long lastIndex = (start + PAGE_SIZE) > totalHotelIdNum ? totalHotelIdNum : start + PAGE_SIZE;
+			Query query = new Query().skip(start).limit(PAGE_SIZE);
+			hotelIdList = mongoTemplate1.find(query, HotelId.class);
+			//开启线程拉去酒店数量
+			bqyHotelInterService.pullHotelInfoByIdList(hotelIdList);
+		}
+	}
+	
+	private void listHotelId() {
+		int i = 1;
+		Map<String, Object> map = new HashMap<>();
+		//long totalCount = bqyHotelInterService.queryHotelIdCount(map);
+		//long pageNo = totalCount % PAGE_SIZE == 0 ? totalCount/PAGE_SIZE : (totalCount/PAGE_SIZE)+1;
+		map.put("PageSize", PAGE_SIZE);
+		while (true) {
+			map.put("PageNo", i);
+			List<HotelId> hotelIdList = bqyHotelInterService.queryHotelIdList(map);
+			if (null != hotelIdList && hotelIdList.size() > 0) {
+				i++;
+				mongoTemplate1.insert(hotelIdList, HotelId.class);
+				continue;
+			}
+			System.out.println("i最后的值为:" + i);
+			break;
+		}
+	}
 }	
