@@ -1571,6 +1571,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		return replace;
 	}
 
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
 	@Override
 	public Boolean tcPushOrderInfo(Agent agent, TcPushOrderInfo tcPushOrderInfo) throws GSSException{
 		logger.info("推送更新订单状态:{}",JSON.toJSONString(tcPushOrderInfo));
@@ -1662,8 +1663,11 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							mssReserveService.interHotelStatus(ag, hotelOrder.getSaleOrderNo(), OwnerOrderStatus.CANCEL_OK.getKey(), "酒店订单"+hotelOrder.getSaleOrderNo()+"已取消");
 						}
 					}else if(tcPushOrderInfo.getOperateType().equals(StatusType.CHECK_RESIDE.getKey())){
-						if( (!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.NO_RESIDE.getKey())) || (!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.BEFORE_RESIDE.getKey()))
-							|| 	(!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.AFTER_RESIDE.getKey())) || (!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.RESIDE_OK.getKey()))) {
+						if( !hotelOrder.getOrderStatus().equals(OwnerOrderStatus.RESIDE_OK.getKey()) || 
+							!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.NO_RESIDE.getKey()) || 
+							!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.BEFORE_RESIDE.getKey()) || 
+							!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.AFTER_RESIDE.getKey())
+							) {
 							flag =1;
 							OrderDetailInfoReq orderDetailInfoReq =new OrderDetailInfoReq();
 							orderDetailInfoReq.setOrderId(tcPushOrderInfo.getOrderId());
