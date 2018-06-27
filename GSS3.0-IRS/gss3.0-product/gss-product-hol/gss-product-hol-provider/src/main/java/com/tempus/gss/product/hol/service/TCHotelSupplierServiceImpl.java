@@ -168,6 +168,21 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		return t;
 	}
 	
+	@Override
+	public <T> T queryHolByResName(String resName, Class<T> clazz) {
+		
+			String escapeHtml = StringEscapeUtils.unescapeHtml(resName.trim());
+			String[] fbsArr = { "(", ")" };  //  "\\", "$", "(", ")", "*", "+", ".", "[", "]", "?", "^", "{", "}", "|" 
+	        	 for (String key : fbsArr) { 
+	        		 if(escapeHtml.contains(key)){
+	        			escapeHtml = escapeHtml.replace(key, "\\" + key);
+	        		 }
+	        	 }
+		T t= mongoTemplate1.findOne(new Query(Criteria.where("resName").is(escapeHtml)),clazz);
+		
+		return t;
+	}
+	
 	
 	@Override
 	public <T> T queryDetailById(Long id, Class<T> clazz) {
@@ -1235,15 +1250,15 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	public Boolean insertNewRes(Agent agent, Long resId) {
 		log.info("手动添加酒店开始, 入参："+resId);
 		SimpleDateFormat sdfupdate=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Integer minPrice = new Random().nextInt(200) + 100;
+		Integer minPrice = new Random().nextInt(300) + 100;
 		Integer flag = 0;
 		try {
 			Calendar cal = Calendar.getInstance();  
 			Calendar calAdd = Calendar.getInstance();
 			String calStartTime= sdf.format(cal.getTime());
 			
-			calAdd.add(Calendar.MONTH, 1);
-			//calAdd.add(Calendar.DAY_OF_MONTH, -1);
+			calAdd.add(Calendar.MONTH, 2);
+			calAdd.add(Calendar.DAY_OF_MONTH, -1);
 			String calAddTime= sdf.format(calAdd.getTime());
 			
 			AssignDateHotelReq assignDateHotelReq=new AssignDateHotelReq();
@@ -1277,6 +1292,8 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 						minPrice= minProPrice.get(0);
 					}
 				}
+			}else {
+				return false;
 			}
 			
 			SingleHotelDetailReq singleHotelDetailReq=new SingleHotelDetailReq();

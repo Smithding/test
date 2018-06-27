@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -1335,7 +1336,8 @@ public class RefundServiceImpl implements IRefundService {
 		iTicketSenderService.update(sender);
 	}
 
-	private void assingLockSaleChangeExt(SaleChangeExt order, TicketSender sender, Date date, Agent agent) {
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void assingLockSaleChangeExt(SaleChangeExt order, TicketSender sender, Date date, Agent agent) {
 		User user = userService.findUserByLoginName(agent, sender.getUserid());
 		order.setLocker(user.getId());
 		order.setLockTime(date);
