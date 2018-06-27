@@ -14,6 +14,22 @@ public class ResNameSum implements Serializable{
 	 * 酒店名称
 	 */
 	private String resName;
+	/**
+	 * 酒店地址
+	 */
+	private String resAdress;
+	/**
+	 * 酒店电话号码
+	 */
+	private String resPhone;
+	/**
+	 * 酒店经度
+	 */
+	private String lon;
+	/**
+	 * 酒店纬度
+	 */
+	private String lat;
 	
 	/**
 	 * 供应商编号
@@ -64,6 +80,46 @@ public class ResNameSum implements Serializable{
 
 	public void setResType(Integer resType) {
 		this.resType = resType;
+	}
+
+
+	public String getResAdress() {
+		return resAdress;
+	}
+
+
+	public void setResAdress(String resAdress) {
+		this.resAdress = resAdress;
+	}
+
+
+	public String getResPhone() {
+		return resPhone;
+	}
+
+
+	public void setResPhone(String resPhone) {
+		this.resPhone = resPhone;
+	}
+
+
+	public String getLon() {
+		return lon;
+	}
+
+
+	public void setLon(String lon) {
+		this.lon = lon;
+	}
+
+
+	public String getLat() {
+		return lat;
+	}
+
+
+	public void setLat(String lat) {
+		this.lat = lat;
 	}
 	
 }
