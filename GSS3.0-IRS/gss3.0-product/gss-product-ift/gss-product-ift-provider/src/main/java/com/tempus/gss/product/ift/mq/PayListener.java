@@ -27,45 +27,41 @@ import com.tempus.gss.vo.Agent;
  * 支付状态监听类
  */
 @Component("iftPayListener")
-@RabbitListener(bindings = @QueueBinding(
-		value = @Queue(value = "ift.payNoticeQue", durable = "true")
-		, exchange = @Exchange(value = "gss-pay-exchange", type = ExchangeTypes.FANOUT, ignoreDeclarationExceptions = "true", durable = "true")
-		, key = "pay"
-)
-)
+@RabbitListener(bindings = @QueueBinding(value = @Queue(value = "ift.payNoticeQue", durable = "true"),
+                                         exchange = @Exchange(value = "gss-pay-exchange", type = ExchangeTypes.FANOUT, ignoreDeclarationExceptions = "true", durable = "true"),
+                                         key = "pay"))
 public class PayListener {
-
-	protected static final Logger logger = LoggerFactory.getLogger(PayListener.class);
-	@Reference
-	IOrderService iftOrderService;
-	@Autowired
-	IChangeService changeService;
-
-	@RabbitHandler
-	public void processLogRecord(PayNoticeVO payNoticeVO) {
-
-		try {
-			logger.info("监听到支付消息队列" + JSON.toJSONString(payNoticeVO));
-			// 商品类型 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
-			if (payNoticeVO.getGoodsType() == 2) {
-				Agent agent = new Agent(payNoticeVO.getOwner(), "sys");
-				if (payNoticeVO.getBusinessType() == 2 && payNoticeVO.getChangeType() == 0) {
-					if(payNoticeVO.getIncomeExpenseType()==1) {
-						//销售、退款 不监听,销售、收款  才能进此方法
-						boolean flag = iftOrderService.updateBuyOrderStatus(new RequestWithActor<>(agent, payNoticeVO.getBusinessNo()));
-						logger.info("修改采购单操作是否成功,销售单号:" + payNoticeVO.getBusinessNo() + "->" + flag);
-					}
-				}
-				if (payNoticeVO.getBusinessType() == 4 && payNoticeVO.getChangeType() == 3) {
-					boolean flag = changeService
-							.updateBuyChangeStatus(new RequestWithActor<>(agent, payNoticeVO.getBusinessNo()));
-					logger.info("修改采购变更单操作是否成功,销售变更单号:" + payNoticeVO.getBusinessNo() + "->" + flag);
-				}
-			}
-
-		} catch (Exception ex) {
-			logger.error("消费队列异常 ：", ex);
-		}
-	}
-
+    
+    protected static final Logger logger = LoggerFactory.getLogger(PayListener.class);
+    @Reference
+    IOrderService iftOrderService;
+    @Autowired
+    IChangeService changeService;
+    
+    @RabbitHandler
+    public void processLogRecord(PayNoticeVO payNoticeVO) {
+        
+        try {
+            logger.info("监听到支付消息队列" + JSON.toJSONString(payNoticeVO));
+            // 商品类型 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
+            if (payNoticeVO.getGoodsType() == 2) {
+                Agent agent = payNoticeVO.getAgent();
+                if (payNoticeVO.getBusinessType() == 2 && payNoticeVO.getChangeType() == 0) {
+                    if (payNoticeVO.getIncomeExpenseType() == 1) {
+                        //销售、退款 不监听,销售、收款  才能进此方法
+                        boolean flag = iftOrderService.updateBuyOrderStatus(new RequestWithActor<>(agent, payNoticeVO.getBusinessNo()));
+                        logger.info("修改采购单操作是否成功,销售单号:" + payNoticeVO.getBusinessNo() + "->" + flag);
+                    }
+                }
+                if (payNoticeVO.getBusinessType() == 4 && payNoticeVO.getChangeType() == 3) {
+                    boolean flag = changeService.updateBuyChangeStatus(new RequestWithActor<>(agent, payNoticeVO.getBusinessNo()));
+                    logger.info("修改采购变更单操作是否成功,销售变更单号:" + payNoticeVO.getBusinessNo() + "->" + flag);
+                }
+            }
+            
+        } catch (Exception ex) {
+            logger.error("消费队列异常 ：", ex);
+        }
+    }
+    
 }
