@@ -122,6 +122,7 @@ public class HolMidBaseInfo implements Serializable{
 	/**
 	 * 酒店预定次数
 	 */
+	@JSONField(serialize = false)
 	private Long bookTimes;
 	
 	/**
