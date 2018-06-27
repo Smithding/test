@@ -871,6 +871,15 @@ public class ChangeServiceImpl implements IChangeService {
             if(isNoFee(requestWithActor.getEntity().getSaleAdtPriceList(),requestWithActor.getEntity().getSaleChdPriceList(),requestWithActor.getEntity().getSaleInfPriceList())){
                 saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 3);
                 log.info("修改采购状态" + saleChangeNo);
+                try{
+                    //直接将单分配给销售改签员
+                    RequestWithActor<Long> saleChangeRequest = new RequestWithActor<>();
+                    saleChangeRequest.setAgent(requestWithActor.getAgent());
+                    saleChangeRequest.setEntity(requestWithActor.getEntity().getSaleChangeNo());
+                    changeExtService.assignChange(saleChangeRequest);
+                }catch (Exception e){
+                    log.error("直接将改签单分给采购人员异常",e);
+                }
                /* saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 3);
                 log.info("修改采购支付状态" + saleChangeNo);*/
             } else{
@@ -1398,7 +1407,7 @@ public class ChangeServiceImpl implements IChangeService {
                     changeExt.setLockTime(new Date());
                     changeExt.setModifyTime(new Date());
                 }
-                int updateLocker = saleChangeExtDao.updateLocker(changeExt);
+                int updateLocker = changeExtService.updateLocker(changeExt);
                 //更新锁定前出票员
                 ticketSenderService.updateByLockerId(saleChange.getAgent(),originLocker,"SALE_CHANGE_NUM");
                 ticketSenderService.updateByLockerId(saleChange.getAgent(),originLocker,"BUY_CHANGE_NUM");
@@ -1425,6 +1434,12 @@ public class ChangeServiceImpl implements IChangeService {
             throw new GSSException("锁住销售改签单异常", "0202", "锁住销售改签单异常");
         }
         return flag;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public int updateLocker(SaleChangeExt changeExt) {
+        return saleChangeExtDao.updateLocker(changeExt);
     }
 
     /**
@@ -1668,7 +1683,7 @@ public class ChangeServiceImpl implements IChangeService {
             log.info("获得配置最大分单数：" + str_maxOrderNum);
             Long maxOrderNum = Long.valueOf(str_maxOrderNum);
             Date updateTime = new Date();
-            if (changeOrderNo == null && saleChangeExts != null) {
+            if ((changeOrderNo == null || changeOrderNo == 0L) && saleChangeExts != null) {
                 taskAssign(saleChangeExts, senders, maxOrderNum, agent, updateTime);
             } else {
                 derectAssign(saleChangeExt, senders, maxOrderNum, agent, updateTime);
