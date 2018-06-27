@@ -133,6 +133,11 @@ public class HolMidBaseInfo implements Serializable{
 	 * 预定信息(预留字段)
 	 */
 	private String bookInfo;
+	/**
+	 * 酒店合并的次数, 默认为1,  如果有合并则+1
+	 */
+	@JSONField(serialize = false)
+	private Integer resNums = 1;
 	
 	public String getId() {
 		return id;
@@ -340,6 +345,14 @@ public class HolMidBaseInfo implements Serializable{
 
 	public void setLat(String lat) {
 		this.lat = lat;
+	}
+
+	public Integer getResNums() {
+		return resNums;
+	}
+
+	public void setResNums(Integer resNums) {
+		this.resNums = resNums;
 	}
 	
 }
