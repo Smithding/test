@@ -523,9 +523,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			hotelInfo.setLatestUpdateTime(sdf.format(new Date()));
 			hotelInfo.setSaleStatus(1);
 			//保存酒店信息
-			//mongoTemplate1.save(hotelInfo);
+			mongoTemplate1.save(hotelInfo);
 			//保存中间表
-			//saveMidHol(hotelInfo);
+			saveMidHol(hotelInfo);
 		}
 		logger.info(Thread.currentThread().getName() + "线程完成拉取数据...");
 	}
@@ -565,6 +565,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 							resNameSum.setResId(hotelInfo.getHotelId());
 							resNameSum.setResName(hotelInfo.getHotelName());
 							resNameSum.setSupplierNo(hotelInfo.getSupplierNo());
+							resNameSum.setResAdress(hotelInfo.getAddress());
+							resNameSum.setResPhone(hotelInfo.getMobile());
 							//1: TC, 2: BQY, 3: TY, 0: All
 							resNameSum.setResType(2);
 							break;
@@ -575,9 +577,12 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 						resNameSum.setResId(hotelInfo.getHotelId());
 						resNameSum.setResName(hotelInfo.getHotelName());
 						resNameSum.setSupplierNo(hotelInfo.getSupplierNo());
+						resNameSum.setResAdress(hotelInfo.getAddress());
+						resNameSum.setResPhone(hotelInfo.getMobile());
 						//1: TC, 2: BQY, 3: TY, 0: All
 						resNameSum.setResType(2);
 						listHol.add(resNameSum);
+						holMid.setResNums(holMid.getResNums() + 1);
 					}
 				}
 				
@@ -604,6 +609,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			resNameSum.setResId(hotelInfo.getHotelId());
 			resNameSum.setResName(hotelInfo.getHotelName());
 			resNameSum.setSupplierNo(hotelInfo.getSupplierNo());
+			resNameSum.setResAdress(hotelInfo.getAddress());
+			resNameSum.setResPhone(hotelInfo.getMobile());
 			//1: TC, 2: BQY, 3: TY, 0: All
 			resNameSum.setResType(2);
 			listHol.add(resNameSum);
@@ -652,6 +659,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			holMidBaseInfo.setLatestUpdateTime(hotelInfo.getLatestUpdateTime());
 			holMidBaseInfo.setSaleStatus(1);
 			holMidBaseInfo.setBookTimes(1L);
+			holMidBaseInfo.setResNums(1);
 			mongoTemplate1.save(holMidBaseInfo);
 		}
 	}
