@@ -553,10 +553,12 @@ public class RefundServiceImpl implements IRefundService {
 			if(originLocker != 0l){
 				//对应locker出票员的num-1
 				iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),originLocker,"SALE_REFUSE_NUM");
+				iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),originLocker,"BUY_REFUSE_NUM");
 			}
 			if (updateFlag == 1) {
 				flag = true;
 				iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),requestWithActor.getAgent().getId(),"SALE_REFUSE_NUM");
+				iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),requestWithActor.getAgent().getId(),"BUY_REFUSE_NUM");
 			}
 			/*创建操作日志*/
 			try {
@@ -591,6 +593,7 @@ public class RefundServiceImpl implements IRefundService {
 			refundService.updateLocker(saleChangeExt);
 			//对应出票员num-1
 			iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),locker,"SALE_REFUSE_NUM");
+			iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),locker,"BUY_REFUSE_NUM");
 			/*创建操作日志*/
 			try {
 				String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"国际废/退解锁："+"["+saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()+"]";
