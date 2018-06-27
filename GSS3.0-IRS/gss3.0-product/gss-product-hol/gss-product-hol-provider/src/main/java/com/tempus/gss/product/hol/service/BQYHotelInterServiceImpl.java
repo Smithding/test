@@ -523,9 +523,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			hotelInfo.setLatestUpdateTime(sdf.format(new Date()));
 			hotelInfo.setSaleStatus(1);
 			//保存酒店信息
-			mongoTemplate1.save(hotelInfo);
+			//mongoTemplate1.save(hotelInfo);
 			//保存中间表
-			saveMidHol(hotelInfo);
+			//saveMidHol(hotelInfo);
 		}
 		logger.info(Thread.currentThread().getName() + "线程完成拉取数据...");
 	}
@@ -544,10 +544,10 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		String mobile = hotelInfo.getMobile();
 		
 		//查询中间表是否有纬度相同酒店
-		//List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
+		List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
 		//List<HolMidBaseInfo> holMidList = holMidService.queryAlikeHol(longitude, latitude, Tool.splitStr(mobile));
 		
-		List<HolMidBaseInfo> holMidList = null;
+		//List<HolMidBaseInfo> holMidList = null;
 		
 		if (null != holMidList && holMidList.size() > 0) {
 			if (holMidList.size() == 1) {
