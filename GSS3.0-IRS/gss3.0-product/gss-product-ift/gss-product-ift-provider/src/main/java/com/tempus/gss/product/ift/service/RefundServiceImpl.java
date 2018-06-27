@@ -343,8 +343,17 @@ public class RefundServiceImpl implements IRefundService {
 			saleChangeExt.setRefundFileUrl(requestWithActor.getEntity().getRefundFileUrl());
 			saleChangeExt.setAirlineStatus(1);//航司状态设置为1，待审核
 			saleChangeExt.setCustomerRemark(requestWithActor.getEntity().getCustomerRemark());//用户备注
-			saleChangeExt.setCustomerNo(agent.getNum());
-			saleChangeExt.setCustomerTypeNo(agent.getType());
+			Long customerNo = agent.getNum();
+			Long customerTypeNo = agent.getType();
+			SaleOrder saleOrder = saleOrderExt.getSaleOrder();
+			if(customerNo==null){
+				customerNo = saleOrder.getCustomerNo();
+			}
+			if(customerTypeNo == null){
+				customerTypeNo = saleOrder.getCustomerTypeNo();
+			}
+			saleChangeExt.setCustomerNo(customerNo);
+			saleChangeExt.setCustomerTypeNo(customerTypeNo);
 			log.info("申请退费单时保存的退费单信息:{}",saleChangeExt.toString());
 			saleChangeExtDao.insertSelective(saleChangeExt);
 			/*//销售退废分单操作

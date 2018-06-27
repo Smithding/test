@@ -1679,7 +1679,8 @@ public class ChangeServiceImpl implements IChangeService {
         }
     }
 
-    private void increaseBuyChangeNum(Agent agent, TicketSender sender) {
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public void increaseBuyChangeNum(Agent agent, TicketSender sender) {
         User user = userService.findUserByLoginName(agent, sender.getUserid());
         int lockCount = saleChangeExtDao.queryChangeCountBylocker(owner, user.getId());
         sender.setBuyChangeNum(lockCount);
