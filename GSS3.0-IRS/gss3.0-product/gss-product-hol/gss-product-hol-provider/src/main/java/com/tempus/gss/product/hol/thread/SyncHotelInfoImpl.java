@@ -13,7 +13,6 @@ import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,7 +77,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	private int PAGE_SIZE;			//查询id数量
 	
 	SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
-
+	
 	@Override
 	public TCResponse<ResBaseInfo> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException {
 		//Future<TCResponse<ResBaseInfo>> queryHotelList = tcHotelSupplierService.queryHotelList(agent, hotelSearchReq);
