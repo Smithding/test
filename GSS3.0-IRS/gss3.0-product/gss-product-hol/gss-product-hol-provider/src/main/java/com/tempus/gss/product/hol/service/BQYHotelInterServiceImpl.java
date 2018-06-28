@@ -652,16 +652,15 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			
 			holMidBaseInfo.setBookRemark(hotelInfo.getRoadCross());
 			
+			int saleStatus = 0;
 			if (null != hotelInfo.getLowPrice()) {
 				BigDecimal lowPrice = hotelInfo.getLowPrice();
-				if (lowPrice.compareTo(BigDecimal.ZERO) == 0) {
-					holMidBaseInfo.setSaleStatus(0);
-				}else {
+				if (lowPrice.compareTo(BigDecimal.ZERO) == 1) {
 					holMidBaseInfo.setMinPrice(lowPrice.intValue());
+					saleStatus = 1;
 				}
-			}else {
-				holMidBaseInfo.setSaleStatus(0);
 			}
+			holMidBaseInfo.setSaleStatus(saleStatus);
 			holMidBaseInfo.setSupplierNo(hotelInfo.getSupplierNo());
 			holMidBaseInfo.setLatestUpdateTime(hotelInfo.getLatestUpdateTime());
 			holMidBaseInfo.setBookTimes(1L);
