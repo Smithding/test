@@ -499,8 +499,9 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     @Transactional
     public int updateSaleOrderExt(RequestWithActor<SaleOrderExt> saleOrderExt) {
-        
-        int flag = saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt.getEntity());
+        SaleOrderExt saleOrderExt1 = saleOrderExt.getEntity();
+        log.info("updateSaleOrderExt 更新扩展表信息"+ saleOrderExt1.toString());
+        int flag = saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt1);
         if (flag == 0) {
             throw new GSSException("修改订单模块", "0301", "修改订单失败");
         }
