@@ -1745,7 +1745,7 @@ public class OrderServiceImpl implements IOrderService {
                 saleOrderExt1.setModifyTime(new Date());
                 saleOrderExt1.setSaleRemark(blackOrderExtVo.getSaleOrderExtVo().getSaleRemark());
                 saleOrderExt1.setLocker(0L);
-                saleOrderExt1.setModifier(AgentUtil.getAgent().getAccount());
+                //saleOrderExt1.setModifier(AgentUtil.getAgent().getAccount());
                 orderService.auditOrder(new RequestWithActor<>(AgentUtil.getAgent(), saleOrderExt1), blackOrderExtVo.getSupplierNo(), blackOrderExtVo.getAirLine(), blackOrderExtVo.getSaleOrderExtVo().getTicketType());
                 log.info("核价结束========");
             }
