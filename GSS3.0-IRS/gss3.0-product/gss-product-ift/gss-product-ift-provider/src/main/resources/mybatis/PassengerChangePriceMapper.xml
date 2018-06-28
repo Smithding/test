@@ -495,4 +495,67 @@
         </set>
         WHERE SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
     </update>
+    <update id="updateByPassengerNo" parameterType="com.tempus.gss.product.ift.api.entity.PassengerChangePrice">
+        UPDATE IFT_PASSENGER_CHANGE_PRICE
+        <set>
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="salePrice != null">
+                SALE_PRICE = #{salePrice,jdbcType=DECIMAL},
+            </if>
+            <if test="saleTax != null">
+                SALE_TAX = #{saleTax,jdbcType=DECIMAL},
+            </if>
+            <if test="saleBrokerage != null">
+                SALE_BROKERAGE = #{saleBrokerage,jdbcType=DECIMAL},
+            </if>
+            <if test="saleRest != null">
+                SALE_REST = #{saleRest,jdbcType=DECIMAL},
+            </if>
+            <if test="buyPrice != null">
+                BUY_PRICE = #{buyPrice,jdbcType=DECIMAL},
+            </if>
+            <if test="buyTax != null">
+                BUY_TAX = #{buyTax,jdbcType=DECIMAL},
+            </if>
+            <if test="buyBrokerage != null">
+                BUY_BROKERAGE = #{buyBrokerage,jdbcType=DECIMAL},
+            </if>
+            <if test="buyRest != null">
+                BUY_REST = #{buyRest,jdbcType=DECIMAL},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="status != null">
+                STATUS = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="creator != null">
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifier != null">
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="buyAgencyFee != null">
+                BUY_AGENCY_FEE= #{buyAgencyFee,jdbcType=DECIMAL},
+            </if>
+            <if test="buyRebate != null">
+                BUY_REBATE= #{buyRebate,jdbcType=DECIMAL},
+            </if>
+            <if test="saleAgencyFee != null">
+                SALE_AGENCY_FEE= #{saleAgencyFee,jdbcType=DECIMAL},
+            </if>
+            <if test="saleRebate != null">
+                SALE_REBATE= #{saleRebate,jdbcType=DECIMAL},
+            </if>
+        </set>
+        WHERE PASSENGER_NO = #{passengerNo,jdbcType=BIGINT}
+    </update>
 </mapper>

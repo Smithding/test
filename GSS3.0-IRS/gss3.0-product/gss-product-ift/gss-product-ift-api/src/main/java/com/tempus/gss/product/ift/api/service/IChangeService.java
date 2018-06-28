@@ -80,6 +80,13 @@ public interface IChangeService {
 	 * @return
 	 */
 	boolean changeAudit(RequestWithActor<ChangePriceRequest> requestWithActor);
+
+	/**
+	 * 审核改签采购打回单.
+	 * @param requestWithActor
+	 * @return
+	 */
+	boolean changeReAudit(RequestWithActor<ChangePriceRequest> requestWithActor);
 	/**
 	 * 改签处理.
 	 *
@@ -180,4 +187,5 @@ public interface IChangeService {
 	 */
 	void assignChange(RequestWithActor<Long> requestWithActor);
 
+	public int updateLocker(SaleChangeExt changeExt);
 }

@@ -24,4 +24,10 @@ public interface PassengerChangePriceDao extends BaseDao<PassengerChangePrice,Pa
 	 * @return
 	 */
 	int updateByChangeOrderNo(PassengerChangePrice passengerChangePrice);
+
+	/***
+	 * 根据乘客号修改数据
+	 * @return
+	 */
+	int updateByPassengerNo(PassengerChangePrice passengerChangePrice);
 }

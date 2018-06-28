@@ -1,12 +1,12 @@
 package com.tempus.gss.product.hol.service;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -65,7 +65,6 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelLocationEntity
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderPayResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
-import com.tempus.gss.product.hol.api.service.IHolMidService;
 import com.tempus.gss.product.hol.api.util.DocumentUtil;
 import com.tempus.gss.product.hol.api.util.Tool;
 import com.tempus.gss.util.JsonUtil;
@@ -544,10 +543,10 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		String mobile = hotelInfo.getMobile();
 		
 		//查询中间表是否有纬度相同酒店
-		//List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
+		List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
 		//List<HolMidBaseInfo> holMidList = holMidService.queryAlikeHol(longitude, latitude, Tool.splitStr(mobile));
 		
-		List<HolMidBaseInfo> holMidList = null;
+		//List<HolMidBaseInfo> holMidList = null;
 		
 		if (null != holMidList && holMidList.size() > 0) {
 			if (holMidList.size() == 1) {
@@ -565,6 +564,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 							resNameSum.setResId(hotelInfo.getHotelId());
 							resNameSum.setResName(hotelInfo.getHotelName());
 							resNameSum.setSupplierNo(hotelInfo.getSupplierNo());
+							resNameSum.setResAdress(hotelInfo.getAddress());
+							resNameSum.setResPhone(hotelInfo.getMobile());
 							//1: TC, 2: BQY, 3: TY, 0: All
 							resNameSum.setResType(2);
 							break;
@@ -575,9 +576,12 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 						resNameSum.setResId(hotelInfo.getHotelId());
 						resNameSum.setResName(hotelInfo.getHotelName());
 						resNameSum.setSupplierNo(hotelInfo.getSupplierNo());
+						resNameSum.setResAdress(hotelInfo.getAddress());
+						resNameSum.setResPhone(hotelInfo.getMobile());
 						//1: TC, 2: BQY, 3: TY, 0: All
 						resNameSum.setResType(2);
 						listHol.add(resNameSum);
+						holMid.setResNums(holMid.getResNums() + 1);
 					}
 				}
 				
@@ -604,6 +608,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			resNameSum.setResId(hotelInfo.getHotelId());
 			resNameSum.setResName(hotelInfo.getHotelName());
 			resNameSum.setSupplierNo(hotelInfo.getSupplierNo());
+			resNameSum.setResAdress(hotelInfo.getAddress());
+			resNameSum.setResPhone(hotelInfo.getMobile());
 			//1: TC, 2: BQY, 3: TY, 0: All
 			resNameSum.setResType(2);
 			listHol.add(resNameSum);
@@ -645,13 +651,21 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			holMidBaseInfo.setTitleImg(hotelInfo.getTitleImgUrl());
 			
 			holMidBaseInfo.setBookRemark(hotelInfo.getRoadCross());
+			
 			if (null != hotelInfo.getLowPrice()) {
-				holMidBaseInfo.setMinPrice(hotelInfo.getLowPrice().intValue());
+				BigDecimal lowPrice = hotelInfo.getLowPrice();
+				if (lowPrice.compareTo(BigDecimal.ZERO) == 0) {
+					holMidBaseInfo.setSaleStatus(0);
+				}else {
+					holMidBaseInfo.setMinPrice(lowPrice.intValue());
+				}
+			}else {
+				holMidBaseInfo.setSaleStatus(0);
 			}
 			holMidBaseInfo.setSupplierNo(hotelInfo.getSupplierNo());
 			holMidBaseInfo.setLatestUpdateTime(hotelInfo.getLatestUpdateTime());
-			holMidBaseInfo.setSaleStatus(1);
 			holMidBaseInfo.setBookTimes(1L);
+			holMidBaseInfo.setResNums(1);
 			mongoTemplate1.save(holMidBaseInfo);
 		}
 	}
