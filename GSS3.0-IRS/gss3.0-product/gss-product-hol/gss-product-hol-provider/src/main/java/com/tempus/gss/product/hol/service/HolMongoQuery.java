@@ -1,9 +1,11 @@
 package com.tempus.gss.product.hol.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +17,11 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.toolkit.CollectionUtil;
+import com.tempus.gss.bbp.util.StringUtil;
+import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.contant.OperateEnum;
 import com.tempus.gss.product.hol.api.contant.QueryProperty;
+import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.syn.IHolMongoQuery;
 
@@ -259,7 +264,43 @@ public class HolMongoQuery implements IHolMongoQuery {
 			return criteria;
 		}
 		
-		
+		@Override
+		public List<HolMidBaseInfo> queryAlikeHol(String lon, String lat, Set<String> phoneList) {
+			
+			List<HolMidBaseInfo> res = null;
+			Query query =new Query();
+			Criteria cr =new Criteria();
+			query.skip(0);
+			query.limit(3);
+			/*if(StringUtil.isNotNullOrEmpty(lon) && StringUtil.isNotNullOrEmpty(lat)) {
+				Point point =new Point(Double.valueOf(lon), Double.valueOf(lat));
+				cr.and("resPosition").near(point).maxDistance((double)200/6378137);//100000/6378137
+			}*/
+			if(StringUtil.isNotBlank(lon)) {
+				cr.and("lon").regex("^" + lon + ".*$");
+			}else {
+				throw new GSSException("参数经度为空", "0401", "匹配中间表失败,参数经度为空");
+			}
+			if(StringUtil.isNotBlank(lat)) {
+				cr.and("lat").regex("^" + lat + ".*$");
+			}else {
+				throw new GSSException("参数纬度", "0118", "匹配中间表失败,参数纬度为空");
+			}
+			if(StringUtil.isNotNullOrEmpty(phoneList)) {
+				List<Criteria> list = new ArrayList<Criteria>();
+				for(String sss : phoneList) {
+					Criteria c1 =new Criteria();
+					c1 = Criteria.where("resPhone").regex("^.*"+sss+".*$");
+					list.add(c1);
+				}
+				Criteria[] array = list.toArray(new Criteria[list.size()]);
+				cr.orOperator(array);
+			}
+			query.addCriteria(cr);
+			res = mongoTemplate1.find(query, HolMidBaseInfo.class);
+			
+			return res;
+		}
 	
 
 }

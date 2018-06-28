@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.entity;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 public class ResToMinPrice implements Serializable {
 
@@ -14,7 +15,9 @@ public class ResToMinPrice implements Serializable {
 	
 	private Long tyId;
 	
-	private Integer minPrice;
+	private BigDecimal minPrice;
+	
+	private String noPriceStatus;	//无最低价(1.TC; 2.BQY; 3.TY; 多个酒店无价格组合,例如:同程和八千翼都无最低价值为:12;)
 	
 	private String updateTime;
 
@@ -50,11 +53,11 @@ public class ResToMinPrice implements Serializable {
 		this.tyId = tyId;
 	}
 
-	public Integer getMinPrice() {
+	public BigDecimal getMinPrice() {
 		return minPrice;
 	}
 
-	public void setMinPrice(Integer minPrice) {
+	public void setMinPrice(BigDecimal minPrice) {
 		this.minPrice = minPrice;
 	}
 
@@ -64,6 +67,14 @@ public class ResToMinPrice implements Serializable {
 
 	public void setUpdateTime(String updateTime) {
 		this.updateTime = updateTime;
+	}
+
+	public String getNoPriceStatus() {
+		return noPriceStatus;
+	}
+
+	public void setNoPriceStatus(String noPriceStatus) {
+		this.noPriceStatus = noPriceStatus;
 	}
 	
 	

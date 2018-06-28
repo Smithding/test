@@ -64,5 +64,4 @@ public interface IHolMidService {
 	 */
 	int saleStatusUpdate(Agent agent, Long holMidId, Integer saleStatus);
 	
-	public List<HolMidBaseInfo> queryAlikeHol(String lon, String lat, Set<String> phoneList);
 }

@@ -36,6 +36,7 @@ import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
 import com.tempus.gss.product.hol.api.entity.ResNameSum;
+import com.tempus.gss.product.hol.api.entity.ResToMinPrice;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityInfo;
@@ -65,6 +66,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelLocationEntity
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderPayResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
+import com.tempus.gss.product.hol.api.syn.IHolMongoQuery;
 import com.tempus.gss.product.hol.api.util.DocumentUtil;
 import com.tempus.gss.product.hol.api.util.Tool;
 import com.tempus.gss.util.JsonUtil;
@@ -127,6 +129,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	
 	@Autowired
 	private MongoTemplate mongoTemplate1;
+	
+	@Autowired
+	private IHolMongoQuery holMongoQuery;
 	
 	/*@Autowired
 	private IHolMidService holMidService;*/
@@ -543,8 +548,10 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		String mobile = hotelInfo.getMobile();
 		
 		//查询中间表是否有纬度相同酒店
-		List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
-		//List<HolMidBaseInfo> holMidList = holMidService.queryAlikeHol(longitude, latitude, Tool.splitStr(mobile));
+		//List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
+		
+		222
+		List<HolMidBaseInfo> holMidList = holMongoQuery.queryAlikeHol(longitude, latitude, Tool.splitStr(mobile));
 		
 		//List<HolMidBaseInfo> holMidList = null;
 		
@@ -584,25 +591,50 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 						holMid.setResNums(holMid.getResNums() + 1);
 					}
 				}
-				
-				//holMid.setResId(hotelInfo.getHotelId());
+				//查询价格
+				ResToMinPrice resToMinPrice = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(holMid.getId())), ResToMinPrice.class);
+				resToMinPrice.setBqyId(hotelInfo.getHotelId());
+				holMid.setResId(String.valueOf(hotelInfo.getHotelId()));
 				holMid.setResName(hotelInfo.getHotelName());
  				if (null != hotelInfo.getLowPrice()) {
- 					int lowPrice = hotelInfo.getLowPrice().intValue();
- 					if (holMid.getMinPrice() > lowPrice) {
- 						holMid.setMinPrice(lowPrice);
+ 					//比较酒店中间表最低价
+ 					BigDecimal lowPrice = hotelInfo.getLowPrice();
+ 					if (lowPrice != null && lowPrice.compareTo(BigDecimal.ZERO) == 1) {
+ 						BigDecimal holMidLowPrice = new BigDecimal(holMid.getMinPrice());
+ 						if (lowPrice.compareTo(holMidLowPrice) == -1) {
+ 							holMid.setMinPrice(lowPrice.intValue());
+ 						}
+ 						/**
+ 						 * 比较酒店数据表最低价
+ 						 */
+ 	 					BigDecimal resMinPrice = resToMinPrice.getMinPrice();
+ 	 					if (null != resToMinPrice && resMinPrice.compareTo(BigDecimal.ZERO) == 1){
+ 	 						if (lowPrice.compareTo(resMinPrice) == -1) {
+ 	 	 						resToMinPrice.setMinPrice(lowPrice);
+ 	 						}
+ 	 					}else {
+ 	 						resToMinPrice.setMinPrice(lowPrice);
+ 	 					}
  					}
  				}
-				
-				mongoTemplate1.save(holMid);
+ 				mongoTemplate1.save(holMid);
+ 				//更新价格表
+ 				mongoTemplate1.save(resToMinPrice);
+			
 			}else if (holMidList.size() > 1) {
+				logger.info("有一个相同的酒店要插入的酒店id为:"+hotelInfo.getHotelId()+">>>酒店名称为:" + hotelInfo.getHotelName());
 				throw new GSSException("bqy拉取酒店信息", "0111", "酒店纬度:" + latitude +"经度:" + longitude + "电话:" + mobile + "在中间表中有" + holMidList.size() + "个");
 			}
 		}else {
 			/**
 			 * 保存中间表
 			 */
+			//酒店中间表类
 			HolMidBaseInfo holMidBaseInfo = new HolMidBaseInfo();
+			
+			//价格表
+			ResToMinPrice resPrice = new ResToMinPrice();
+			
 			List<ResNameSum> listHol = new ArrayList<>();
 			ResNameSum resNameSum=new ResNameSum();
 			resNameSum.setResId(hotelInfo.getHotelId());
@@ -614,8 +646,14 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			resNameSum.setResType(2);
 			listHol.add(resNameSum);
 			holMidBaseInfo.setResNameSum(listHol);
-			holMidBaseInfo.setId(String.valueOf(IdWorker.getId()));
+			//中间表id
+			String workerId = String.valueOf(IdWorker.getId());
+			holMidBaseInfo.setId(workerId);
+			resPrice.setId(workerId);
+			
 			holMidBaseInfo.setResId(String.valueOf(hotelInfo.getHotelId()));
+			resPrice.setBqyId(hotelInfo.getHotelId());
+			
 			holMidBaseInfo.setResName(hotelInfo.getHotelName());
 			holMidBaseInfo.setProvName(hotelInfo.getProvinceName());
 			holMidBaseInfo.setCityName(hotelInfo.getCityName());
@@ -657,6 +695,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 				BigDecimal lowPrice = hotelInfo.getLowPrice();
 				if (lowPrice.compareTo(BigDecimal.ZERO) == 1) {
 					holMidBaseInfo.setMinPrice(lowPrice.intValue());
+					resPrice.setMinPrice(lowPrice);
 					saleStatus = 1;
 				}
 			}
@@ -666,6 +705,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			holMidBaseInfo.setBookTimes(1L);
 			holMidBaseInfo.setResNums(1);
 			mongoTemplate1.save(holMidBaseInfo);
+			
+			//保存价格数据
+			mongoTemplate1.save(resPrice);
 		}
 	}
 	
