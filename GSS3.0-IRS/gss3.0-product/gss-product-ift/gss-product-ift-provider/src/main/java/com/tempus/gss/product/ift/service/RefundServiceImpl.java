@@ -1097,7 +1097,12 @@ public class RefundServiceImpl implements IRefundService {
 									}
 								}
 							}
-						 List<SaleOrderDetail> saleOrderDetails = saleOrderExt.getSaleOrderDetailList();
+						// List<SaleOrderDetail> saleOrderDetails = saleOrderExt.getSaleOrderDetailList();
+							List<SaleChangeDetail> saleChangeDetailList = saleChangeExt.getSaleChangeDetailList();
+							List<SaleOrderDetail> saleOrderDetails = new ArrayList<>();
+							for (SaleChangeDetail saleChangeDetail : saleChangeDetailList) {
+								saleOrderDetails.add(saleChangeDetail.getSaleOrderDetail());
+							}
 
 							if ( saleOrderDetails != null) {
 								for (SaleOrderDetail saleOrderDetail : saleOrderDetails) {
