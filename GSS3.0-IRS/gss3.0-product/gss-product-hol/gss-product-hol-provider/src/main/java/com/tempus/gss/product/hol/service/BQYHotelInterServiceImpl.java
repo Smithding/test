@@ -544,10 +544,10 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		String mobile = hotelInfo.getMobile();
 		
 		//查询中间表是否有纬度相同酒店
-		//List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
+		List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
 		//List<HolMidBaseInfo> holMidList = holMidService.queryAlikeHol(longitude, latitude, Tool.splitStr(mobile));
 		
-		List<HolMidBaseInfo> holMidList = null;
+		//List<HolMidBaseInfo> holMidList = null;
 		
 		if (null != holMidList && holMidList.size() > 0) {
 			if (holMidList.size() == 1) {
@@ -565,6 +565,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 							resNameSum.setResId(hotelInfo.getHotelId());
 							resNameSum.setResName(hotelInfo.getHotelName());
 							resNameSum.setSupplierNo(hotelInfo.getSupplierNo());
+							resNameSum.setResAdress(hotelInfo.getAddress());
+							resNameSum.setResPhone(hotelInfo.getMobile());
 							//1: TC, 2: BQY, 3: TY, 0: All
 							resNameSum.setResType(2);
 							break;
@@ -575,9 +577,12 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 						resNameSum.setResId(hotelInfo.getHotelId());
 						resNameSum.setResName(hotelInfo.getHotelName());
 						resNameSum.setSupplierNo(hotelInfo.getSupplierNo());
+						resNameSum.setResAdress(hotelInfo.getAddress());
+						resNameSum.setResPhone(hotelInfo.getMobile());
 						//1: TC, 2: BQY, 3: TY, 0: All
 						resNameSum.setResType(2);
 						listHol.add(resNameSum);
+						holMid.setResNums(holMid.getResNums() + 1);
 					}
 				}
 				
@@ -604,6 +609,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			resNameSum.setResId(hotelInfo.getHotelId());
 			resNameSum.setResName(hotelInfo.getHotelName());
 			resNameSum.setSupplierNo(hotelInfo.getSupplierNo());
+			resNameSum.setResAdress(hotelInfo.getAddress());
+			resNameSum.setResPhone(hotelInfo.getMobile());
 			//1: TC, 2: BQY, 3: TY, 0: All
 			resNameSum.setResType(2);
 			listHol.add(resNameSum);
@@ -652,6 +659,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			holMidBaseInfo.setLatestUpdateTime(hotelInfo.getLatestUpdateTime());
 			holMidBaseInfo.setSaleStatus(1);
 			holMidBaseInfo.setBookTimes(1L);
+			holMidBaseInfo.setResNums(1);
 			mongoTemplate1.save(holMidBaseInfo);
 		}
 	}
