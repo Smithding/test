@@ -871,6 +871,15 @@ public class ChangeServiceImpl implements IChangeService {
             if(isNoFee(requestWithActor.getEntity().getSaleAdtPriceList(),requestWithActor.getEntity().getSaleChdPriceList(),requestWithActor.getEntity().getSaleInfPriceList())){
                 saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 3);
                 log.info("修改采购状态" + saleChangeNo);
+                try{
+                    //直接将单分配给销售改签员
+                    RequestWithActor<Long> saleChangeRequest = new RequestWithActor<>();
+                    saleChangeRequest.setAgent(requestWithActor.getAgent());
+                    saleChangeRequest.setEntity(requestWithActor.getEntity().getSaleChangeNo());
+                    changeExtService.assignChange(saleChangeRequest);
+                }catch (Exception e){
+                    log.error("直接将改签单分给采购人员异常",e);
+                }
                /* saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 3);
                 log.info("修改采购支付状态" + saleChangeNo);*/
             } else{
@@ -906,6 +915,81 @@ public class ChangeServiceImpl implements IChangeService {
         } catch (Exception e) {
             log.error("改签审核失败" , e);
             throw new GSSException("改签审核失败", "0103", "改签确认异常,请检查");
+        }
+        return true;
+    }
+
+    /**
+     * 改签打回单审核
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean changeReAudit(RequestWithActor<ChangePriceRequest> requestWithActor) {
+        if (requestWithActor.getAgent() == null) {
+            throw new GSSException("当前用户不能为空", "0101", "当前操作用户为空");
+        }
+        if (requestWithActor == null || requestWithActor.getEntity() == null) {
+            throw new GSSException("改签重新审核失败", "0102", "改签重新审核发生异常,请检查");
+        }
+        try {
+            //修改改签类型
+            SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(requestWithActor.getEntity().getSaleChangeNo());
+            saleChangeExt.setTicketChangeType(requestWithActor.getEntity().getTicketChangeType());
+            saleChangeExt.setLocker(0L);
+            saleChangeExt.setModifier(requestWithActor.getAgent().getAccount());
+            saleChangeExt.setModifyTime(new Date());
+            saleChangeExt.setCurrency(requestWithActor.getEntity().getCurrency());
+            saleChangeExt.setExchangeRate(requestWithActor.getEntity().getExchangeRate());
+            saleChangeExt.setSaleCurrency(requestWithActor.getEntity().getSaleCurrency());
+            log.info("保存采购数据" + saleChangeExt.toString());
+            saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
+            List<ChangePriceVo> adtList = requestWithActor.getEntity().getSaleAdtPriceList();
+            List<ChangePriceVo> chdList = requestWithActor.getEntity().getSaleChdPriceList();
+            List<ChangePriceVo> infList = requestWithActor.getEntity().getSaleInfPriceList();
+            List<Leg> legList = requestWithActor.getEntity().getLegList();
+            if(adtList != null){
+                //可以儿童一个人改签所有成人列表可能为空
+                log.info("保存变更价格数据" + adtList.size());
+            }
+            reHandle(requestWithActor, adtList);
+            reHandle(requestWithActor, chdList);
+            reHandle(requestWithActor, infList);
+            Long saleChangeNo = requestWithActor.getEntity().getSaleChangeNo();
+
+            saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 3);
+            log.info("修改采购状态" + saleChangeNo);
+            try{
+                //直接将单分配给销售改签员
+                RequestWithActor<Long> saleChangeRequest = new RequestWithActor<>();
+                saleChangeRequest.setAgent(requestWithActor.getAgent());
+                saleChangeRequest.setEntity(requestWithActor.getEntity().getSaleChangeNo());
+                changeExtService.assignChange(saleChangeRequest);
+            }catch (Exception e){
+                log.error("直接将改签单分给采购人员异常",e);
+            }
+
+            BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
+            if(buyChangeExt != null){
+                log.info("修改审核备注" + buyChangeExt.getBuyChangeNo());
+                buyChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
+                buyChangeExtDao.updateByPrimaryKey(buyChangeExt);
+            }
+            if (legList != null && legList.size() > 0) {
+                for (Leg leg : legList) {
+                    legDao.updateByPrimaryKeySelective(leg);
+                }
+            }
+            /*创建新增操作日志*/
+            try {
+                String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"国际重新改签单审核："+"["+requestWithActor.getEntity().getSaleOrderNo()+"]";
+                String title = "国际重新改签单审核";
+                IftLogHelper.logger(requestWithActor.getAgent(),requestWithActor.getEntity().getSaleOrderNo(),title,logstr);
+            } catch (Exception e) {
+                log.error("添加(title=国际重新改签单审核)操作日志异常===" , e);
+            }
+        } catch (Exception e) {
+            log.error("改签重新审核失败" , e);
+            throw new GSSException("改签重新审核失败", "0103", "改签确认异常,请检查");
         }
         return true;
     }
@@ -1054,6 +1138,56 @@ public class ChangeServiceImpl implements IChangeService {
 
         return flag;
     }
+    public boolean reHandle(RequestWithActor<ChangePriceRequest> requestWithActor, List<ChangePriceVo> voList) {
+
+        //查询出所有的changePrice然后更新
+        Long saleChangeNo = requestWithActor.getEntity().getSaleChangeNo();
+        List<PassengerChangePrice> priceList = passengerChangePriceDao.selectPricerByChangeNo(saleChangeNo);
+        boolean flag = false;
+        if (voList == null) {
+            return false;
+        }
+        ChangePriceVo priceVo = voList.get(0);
+        for (PassengerChangePrice passengerChangePrice : priceList) {
+            if (passengerChangePrice.getPassenger().getPassengerType().equals(priceVo.getPassengerType())) {
+                //如果类型相同覆盖之前的值
+                passengerChangePrice.setSaleCountPrice(priceVo.getCountPrice());
+                passengerChangePrice.setSalePrice(priceVo.getSalePrice());
+                passengerChangePrice.setSaleAgencyFee(priceVo.getSaleAgencyFee());
+                passengerChangePrice.setSaleRebate(priceVo.getSaleRebate());
+                passengerChangePrice.setSaleRest(priceVo.getSaleRest());
+                passengerChangePrice.setSaleTax(priceVo.getSaleTax());
+                passengerChangePrice.setSaleBrokerage(priceVo.getSaleBrokerage());
+                passengerChangePrice.setBuyCountPrice(priceVo.getBuyCountPrice());
+                passengerChangePrice.setBuyPrice(priceVo.getBuyPrice());
+                passengerChangePrice.setBuyRest(priceVo.getBuyRest());
+                passengerChangePrice.setBuyTax(priceVo.getBuyTax());
+                passengerChangePrice.setBuyAgencyFee(priceVo.getBuyAgencyFee());
+                passengerChangePrice.setBuyRebate(priceVo.getBuyRebate());
+                passengerChangePrice.setBuyBrokerage(priceVo.getBuyBrokerage());
+                passengerChangePrice.setModifyTime(new Date());
+                passengerChangePrice.setOwner(requestWithActor.getAgent().getOwner());
+                passengerChangePrice.setStatus("1");
+                passengerChangePrice.setModifier(requestWithActor.getAgent().getAccount());
+                int result = passengerChangePriceDao.updateByPassengerNo(passengerChangePrice);
+                if (result == 0) {
+                    flag = false;
+                    throw new GSSException("改签重新审核创建失败", "0101", "创建发生异常,请检查");
+                }
+                flag = true;
+                /*创建新增操作日志*/
+                try {
+                    String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"国际重新审核改签单："+"["+requestWithActor.getEntity().getSaleOrderNo()+"]";
+                    String title ="国际重新审核改签单";
+                    IftLogHelper.logger(requestWithActor.getAgent(),requestWithActor.getEntity().getSaleOrderNo(),title,logstr);
+                } catch (Exception e) {
+                    log.error("添加(title=国际重新审核改签单)操作日志异常===" + e);
+                }
+            }
+
+        }
+        return flag;
+    }
 
     /**
      * 取消改签.
@@ -1082,10 +1216,10 @@ public class ChangeServiceImpl implements IChangeService {
             log.error("saleChangeNo=" + saleChangeNo + ",该改签单不存在");
             throw new GSSException("saleChangeNo=" + saleChangeNo + ",该该签单不存在", "0101", "取消该签单失败");
         }
-        if (saleChange.getPayStatus() == 3 || saleChange.getPayStatus() == 4) {
+       /* if (saleChange.getPayStatus() == 3 || saleChange.getPayStatus() == 4) {
             log.error("saleChangeNo=" + saleChangeNo + ",该单状态已支付，无法取消");
             throw new GSSException("saleChangeNo=" + saleChangeNo + ",该单状态已支付，无法取消", "0101", "取消该签单失败");
-        }
+        }*/
         saleChange.setChildStatus(11);
         saleChange.setModifyTime(new Date());
         saleChange.setModifier(agent.getAccount());
@@ -1175,12 +1309,12 @@ public class ChangeServiceImpl implements IChangeService {
 
             List<PassengerChangePrice> priceList = pgerChangePriceService.getChangePriceList(saleChangeNo);
             int chaildStatus = 15;//打回
-            if (priceListIsNoFee(priceList)) {
+            /*if (priceListIsNoFee(priceList)) {
                 chaildStatus = 11; //取消
-            }
-            //主订单状态改成 11=拒单
+            }*/
+            //主订单状态改成 15=拒单
             saleChangeService.updateStatus(saleChangeNo.getAgent(), changeNo, chaildStatus);
-            //修改采购单的状态为11
+            //修改采购单的状态为15
             List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(saleChangeNo.getAgent(), saleChange.getSaleOrderNo());
             if (buyOrderList != null && buyOrderList.size() > 0) {
                 for (BuyOrder buyOrder : buyOrderList) {
@@ -1194,7 +1328,7 @@ public class ChangeServiceImpl implements IChangeService {
             }
 
             //原单状态恢复 TODO
-            SaleOrderExt saleOrderExt = saleOrderExtService.
+            /*SaleOrderExt saleOrderExt = saleOrderExtService.
                     selectBySaleOrderNo(saleChangeNo.getAgent(), saleChange.getSaleOrderNo());
            // List<SaleOrderDetail> saleOrderDetailList = saleOrderExt.getSaleOrderDetailList();
             List<SaleChangeDetail> saleChangeDetailList = changeExt.getSaleChangeDetailList();
@@ -1213,7 +1347,7 @@ public class ChangeServiceImpl implements IChangeService {
                 saleOrderDetailService.upateSaleOrder(saleOrderDetailRequestWithActor);
             }
 
-            saleOrderService.updateStatus(saleChangeNo.getAgent(),saleOrderExt.getSaleOrderNo(),4);
+            saleOrderService.updateStatus(saleChangeNo.getAgent(),saleOrderExt.getSaleOrderNo(),4);*/
 
             try {
                 mssReserveService.changeInform(saleChangeNo.getAgent(), changeNo, "2");
@@ -1398,7 +1532,7 @@ public class ChangeServiceImpl implements IChangeService {
                     changeExt.setLockTime(new Date());
                     changeExt.setModifyTime(new Date());
                 }
-                int updateLocker = saleChangeExtDao.updateLocker(changeExt);
+                int updateLocker = changeExtService.updateLocker(changeExt);
                 //更新锁定前出票员
                 ticketSenderService.updateByLockerId(saleChange.getAgent(),originLocker,"SALE_CHANGE_NUM");
                 ticketSenderService.updateByLockerId(saleChange.getAgent(),originLocker,"BUY_CHANGE_NUM");
@@ -1425,6 +1559,12 @@ public class ChangeServiceImpl implements IChangeService {
             throw new GSSException("锁住销售改签单异常", "0202", "锁住销售改签单异常");
         }
         return flag;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public int updateLocker(SaleChangeExt changeExt) {
+        return saleChangeExtDao.updateLocker(changeExt);
     }
 
     /**
@@ -1668,7 +1808,7 @@ public class ChangeServiceImpl implements IChangeService {
             log.info("获得配置最大分单数：" + str_maxOrderNum);
             Long maxOrderNum = Long.valueOf(str_maxOrderNum);
             Date updateTime = new Date();
-            if (changeOrderNo == null && saleChangeExts != null) {
+            if ((changeOrderNo == null || changeOrderNo == 0L) && saleChangeExts != null) {
                 taskAssign(saleChangeExts, senders, maxOrderNum, agent, updateTime);
             } else {
                 derectAssign(saleChangeExt, senders, maxOrderNum, agent, updateTime);
@@ -1679,7 +1819,8 @@ public class ChangeServiceImpl implements IChangeService {
         }
     }
 
-    private void increaseBuyChangeNum(Agent agent, TicketSender sender) {
+    @Transactional(propagation=Propagation.REQUIRES_NEW)
+    public void increaseBuyChangeNum(Agent agent, TicketSender sender) {
         User user = userService.findUserByLoginName(agent, sender.getUserid());
         int lockCount = saleChangeExtDao.queryChangeCountBylocker(owner, user.getId());
         sender.setBuyChangeNum(lockCount);
@@ -1711,12 +1852,12 @@ public class ChangeServiceImpl implements IChangeService {
                 if (peopleInfo.getBuyChangeNum() >= maxOrderNum) {
                     continue;
                 } else {
-                    log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
+                    log.info("第四步:分单...");
                     /**锁单*/
-                    log.info("2.锁单,锁单人是被分配人...");
+                    log.info("1.锁单,锁单人是被分配人...");
                     assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
                     /***增加出票人订单数*/
-                    log.info("3.增加出票人的未处理采购改签单数量...");
+                    log.info("2.增加出票人的未处理采购改签单数量...");
                     increaseBuyChangeNum(agent, peopleInfo);
                     break;
                 }
@@ -1739,12 +1880,12 @@ public class ChangeServiceImpl implements IChangeService {
             if (peopleInfo.getBuyChangeNum() >= maxOrderNum) {
                 continue;
             } else {
-                log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
+                log.info("第四步:分单...");
                 /**锁单*/
-                log.info("2.锁单,锁单人是被分配人...");
+                log.info("1.锁单,锁单人是被分配人...");
                 assingLockSaleChangeExt(saleChangeExt, peopleInfo, updateTime, agent);
                 /***增加出票人订单数*/
-                log.info("3.增加出票人的未处理采购改签单数量...");
+                log.info("2.增加出票人的未处理采购改签单数量...");
                 increaseBuyChangeNum(agent, peopleInfo);
                 break;
             }

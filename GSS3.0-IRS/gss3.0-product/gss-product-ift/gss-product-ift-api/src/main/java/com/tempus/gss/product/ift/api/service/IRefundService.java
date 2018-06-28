@@ -71,6 +71,8 @@ public interface IRefundService {
 	* */
 	boolean unLock(RequestWithActor<Long> requestWithActor);
 
+	public int updateLocker(SaleChangeExt saleChangeExt);
+
 	/**
 	 * 废退单审核
 	 * 填入乘客退废税费
