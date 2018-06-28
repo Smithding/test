@@ -550,7 +550,6 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		//查询中间表是否有纬度相同酒店
 		//List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
 		
-		222
 		List<HolMidBaseInfo> holMidList = holMongoQuery.queryAlikeHol(longitude, latitude, Tool.splitStr(mobile));
 		
 		//List<HolMidBaseInfo> holMidList = null;
