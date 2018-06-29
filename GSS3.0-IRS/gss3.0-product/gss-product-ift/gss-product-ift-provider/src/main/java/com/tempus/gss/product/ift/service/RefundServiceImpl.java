@@ -1083,8 +1083,21 @@ public class RefundServiceImpl implements IRefundService {
 							String ticketNo = null;
 							String fightNo = null;
 
-							//乘机人
-							if (saleOrderExt.getPassengerList() != null) {
+							//乘机人只显示退废的
+						List<PassengerRefundPrice> passengerRefundPriceList = saleChangeExt.getPassengerRefundPriceList();
+						for (PassengerRefundPrice passengerRefundPrice : passengerRefundPriceList) {
+							Passenger passenger = passengerRefundPrice.getPassenger();
+							if (passenger.getName() == null)
+								passenger.setName("");
+							if (passenger.getSurname() == null)
+								passenger.setSurname("");
+							if (name == null || name.equals("")) {
+								name = passenger.getSurname() + passenger.getName();
+							} else {
+								name = name + "," + passenger.getSurname() + passenger.getName();
+							}
+						}
+						/*if (saleOrderExt.getPassengerList() != null) {
 								for (Passenger passenger : saleOrderExt.getPassengerList()) {
 									if (passenger.getName() == null)
 										passenger.setName("");
@@ -1096,8 +1109,13 @@ public class RefundServiceImpl implements IRefundService {
 										name = name + "," + passenger.getSurname() + passenger.getName();
 									}
 								}
+							}*/
+						// List<SaleOrderDetail> saleOrderDetails = saleOrderExt.getSaleOrderDetailList();
+							List<SaleChangeDetail> saleChangeDetailList = saleChangeExt.getSaleChangeDetailList();
+							List<SaleOrderDetail> saleOrderDetails = new ArrayList<>();
+							for (SaleChangeDetail saleChangeDetail : saleChangeDetailList) {
+								saleOrderDetails.add(saleChangeDetail.getSaleOrderDetail());
 							}
-						 List<SaleOrderDetail> saleOrderDetails = saleOrderExt.getSaleOrderDetailList();
 
 							if ( saleOrderDetails != null) {
 								for (SaleOrderDetail saleOrderDetail : saleOrderDetails) {
