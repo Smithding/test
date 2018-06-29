@@ -65,6 +65,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.TcOrderCancelReasonList
 import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
 import com.tempus.gss.product.hol.api.util.DateUtil;
+import com.tempus.gss.product.hol.api.util.HttpClientUtil;
 import com.tempus.gss.product.hol.api.util.Tool;
 import com.tempus.gss.product.hol.dao.HotelOrderMapper;
 import com.tempus.gss.util.JsonUtil;

@@ -101,6 +101,7 @@ import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelOrderService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
 import com.tempus.gss.product.hol.api.util.DateUtil;
+import com.tempus.gss.product.hol.api.util.HttpClientUtil;
 import com.tempus.gss.product.hol.api.util.OrderStatusUtils;
 import com.tempus.gss.product.hol.dao.HolSupplierMapper;
 import com.tempus.gss.product.hol.dao.HotelErrorOrderMapper;

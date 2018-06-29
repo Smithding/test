@@ -446,15 +446,15 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		//将MongoDB中数据清空
 		bqyHotelInterService.deleteMongoDBData();
 		//拉取城市信息
-		//bqyHotelInterService.pullCityDetail();
+		bqyHotelInterService.pullCityDetail();
 		//拉取酒店ID并存储MongoDB
-		//listHotelId();
+		listHotelId();
 		
 		List<HotelId> hotelIdList = null;
 		//获取ID数量
 		//long totalHotelIdNum = hotelIdList.size();
 		long totalHotelIdNum = mongoTemplate1.count(new Query(), HotelId.class);
-		long count = 10;
+		long count = 1;
 		if ((totalHotelIdNum / PAGE_SIZE) > 1) {
 			count = totalHotelIdNum % PAGE_SIZE == 0 ? totalHotelIdNum / PAGE_SIZE : totalHotelIdNum / PAGE_SIZE + 1;
 		}
