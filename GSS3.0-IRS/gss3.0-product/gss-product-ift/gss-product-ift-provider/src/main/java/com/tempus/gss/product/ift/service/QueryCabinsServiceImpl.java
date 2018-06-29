@@ -2,8 +2,11 @@ package com.tempus.gss.product.ift.service;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
+
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.plugins.Page;
+
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.CabinsPricesTotals;
 import com.tempus.gss.product.ift.api.entity.Flight;
@@ -53,7 +56,7 @@ public class QueryCabinsServiceImpl implements IQueryCabinsService {
     private IShoppingService shoppingService;
     
     protected final transient Logger log = LoggerFactory.getLogger(getClass());
-    
+
     @Override
     public List<QueryIBEDetail> query(RequestWithActor<FlightQueryRequest> flightQueryRequest) {
         Page<QueryIBEDetail> pages = new Page<QueryIBEDetail>();
@@ -76,20 +79,32 @@ public class QueryCabinsServiceImpl implements IQueryCabinsService {
         if (null != flightQuery.getInfantCount() && flightQuery.getInfantCount() > 0) {
             psger.add(new PassengerTypeQuantity("INF", flightQuery.getInfantCount()));
         }
-        
+
+        AvailableJourney availableJourney1= JSONObject.parseObject(flightQuery.getJson(), AvailableJourney.class);
+        List<ShoppingFlight> flight1 = availableJourney1.getOdOption().get(0).getFlight();
+        String departureAirport= flight1.get(0).getDepartureAirport();
+        String airrAirport =null;
+        if (flight1.size()==1){
+            airrAirport=flight1.get(0).getArrivalAirport();
+        }else {
+            airrAirport=flight1.get(flight1.size()-1).getArrivalAirport();
+        }
         shoppingOneInput.setPsgers(psger);
         List<ShoppingSeg> segs = new ArrayList<ShoppingSeg>();
         ShoppingSeg shoppingSeg = new ShoppingSeg();
-        shoppingSeg.setDepartureDate(flightQuery.getDepDate());
+       /* shoppingSeg.setDepartureDate(flightQuery.getDepDate());
         shoppingSeg.setDestinationLocation(flightQuery.getArrAirport());
-        shoppingSeg.setOriginLocation(flightQuery.getDepAirport());
-        Airport depAirport = airportService.queryAirportByCode(flightQuery.getDepAirport(), "I");
+        shoppingSeg.setOriginLocation(flightQuery.getDepAirport());*/
+        shoppingSeg.setDepartureDate( flight1.get(0).getDepartureDate());
+        shoppingSeg.setDestinationLocation(airrAirport);
+        shoppingSeg.setOriginLocation(departureAirport);
+        Airport depAirport = airportService.queryAirportByCode(departureAirport, "I");
         if (null == depAirport) {
-            depAirport = airportService.queryAirportByCode(flightQuery.getDepAirport(), "D");
+            depAirport = airportService.queryAirportByCode(departureAirport, "D");
         }
-        Airport arrAirport = airportService.queryAirportByCode(flightQuery.getArrAirport(), "I");
+        Airport arrAirport = airportService.queryAirportByCode(airrAirport, "I");
         if (null == arrAirport) {
-            arrAirport = airportService.queryAirportByCode(flightQuery.getArrAirport(), "D");
+            arrAirport = airportService.queryAirportByCode(airrAirport, "D");
         }
         if(depAirport.getCountryCode().equals(arrAirport.getCountryCode())) {
             return null;
@@ -167,7 +182,7 @@ public class QueryCabinsServiceImpl implements IQueryCabinsService {
         }
         return queryIBEDetails;
     }
-    
+
     /**
      * 查询更多舱位  匹配政策  选择要显示的信息
      *
