@@ -1,4 +1,4 @@
-package com.tempus.gss.product.hol.api.util;
+package com.tempus.gss.product.hol.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,6 +30,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -47,6 +48,7 @@ import com.thoughtworks.xstream.XStream;
 public class HttpClientUtil {
 	
 	@Autowired
+	@Qualifier("client")
     private CloseableHttpClient client;
 	
 	@Autowired

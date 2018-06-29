@@ -446,9 +446,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		//将MongoDB中数据清空
 		bqyHotelInterService.deleteMongoDBData();
 		//拉取城市信息
-		bqyHotelInterService.pullCityDetail();
+		//bqyHotelInterService.pullCityDetail();
 		//拉取酒店ID并存储MongoDB
-		listHotelId();
+		//listHotelId();
 		
 		List<HotelId> hotelIdList = null;
 		//获取ID数量
