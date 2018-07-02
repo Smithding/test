@@ -1689,7 +1689,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								Agent ag = new Agent(8755, 301L, hotelOrder.getCustomerNo());
 								mssReserveService.interHotelStatus(ag, hotelOrder.getSaleOrderNo(), OwnerOrderStatus.NO_RESIDE.getKey(), "酒店订单"+hotelOrder.getSaleOrderNo()+"确认未入住");
 								
-							}else if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_TO_ROOM.getKey())){
+							}else if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_TO_ROOM.getKey()) || orderInfoModel.getOrderStatus().equals(TcOrderStatus.ORDER_FINISH.getKey())){
 								int startTime = simple.format(hotelOrder.getArrivalDate()).compareTo(orderInfoModel.getStartTime());
 								int endTime   = simple.format(hotelOrder.getDepartureDate()).compareTo(orderInfoModel.getEndTime());
 								if(endTime > 0){
@@ -2256,7 +2256,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						}
 					}
 					
-					if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_TO_ROOM.getKey())){
+					if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_TO_ROOM.getKey()) || orderInfoModel.getOrderStatus().equals(TcOrderStatus.ORDER_FINISH.getKey())){
 						Integer factNight = 0;
 						try{
 							factNight = DateUtil.daysBetween(orderInfoModel.getStartTime(), orderInfoModel.getEndTime());
