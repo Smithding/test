@@ -69,6 +69,7 @@ import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.syn.IHolMongoQuery;
 import com.tempus.gss.product.hol.api.util.DocumentUtil;
 import com.tempus.gss.product.hol.api.util.Tool;
+import com.tempus.gss.product.hol.utils.HttpClientUtil;
 import com.tempus.gss.util.JsonUtil;
 
 @Service
@@ -133,6 +134,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	@Autowired
 	private IHolMongoQuery holMongoQuery;
 	
+	@Autowired
+	private HttpClientUtil httpClientUtil;
+	
 	/*@Autowired
 	private IHolMidService holMidService;*/
 	
@@ -147,7 +151,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		param.put("PageSize", 1);
 		param.put("PageNo", 1);
 		String paramJson = JsonUtil.toJson(param);
-		String result = HttpClientUtil.doJsonPost(BQY_HOTELID_LIST_URL,paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_HOTELID_LIST_URL,paramJson);
 		long totalItemCount = 0; 
 		if (StringUtils.isNoneBlank(result.trim())) {
 //			result = result.replace("\\", "");
@@ -171,7 +175,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		param.put("Token", md5Encryption());
 		String paramJson = JsonUtil.toJson(param);
 		System.out.println("酒店id查询入参为:" + paramJson);
-		String result = HttpClientUtil.doJsonPost(BQY_HOTELID_LIST_URL,paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_HOTELID_LIST_URL,paramJson);
 		List<HotelId> hotelIdList = null; 
 		if (StringUtils.isNoneBlank(result.trim())) {
 //			result = result.replace("\\", "");
@@ -196,7 +200,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		query.setAgentId(Long.parseLong(BQY_AGENTID));
 		query.setToken(md5Encryption());
 		String paramJson = JsonUtil.toJson(query);
-		String result = HttpClientUtil.doJsonPost(BQY_HOTELID_BY_CITYCODE, paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_HOTELID_BY_CITYCODE, paramJson);
 		List<HotelId> hotelIdList = null; 
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<String> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<String>>(){});
@@ -223,7 +227,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		query.setToken(md5Encryption());
 		HotelInfo hotelInfo = null;
 		String paramJson = JsonUtil.toJson(query);
-		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_INFO_URL, paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_HOTEL_INFO_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			JSONObject jsonObject = JsonUtil.toBean(result);
 			String resultJson = jsonObject.getString("Result");
@@ -249,7 +253,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		// 将请求参数转换为json格式
 		String paramJson = JsonUtil.toJson(query);
 		// 请求酒店列表
-		String result = HttpClientUtil.doJsonPost(BQY_ALL_HOTEL_LIST, paramJson);
+		//String result = HttpClientUtil.doJsonPost(BQY_ALL_HOTEL_LIST, paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_ALL_HOTEL_LIST, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			// 将返回数据转换成json对象
 			ResponseResult<HotelList> responseResult = JsonUtil.toBean(result,
@@ -280,7 +285,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		query.setToken(md5Encryption());
 		HotelEntity hotelEntity = null;
 		String paramJson = JsonUtil.toJson(query);
-		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_DETAIL_URL, paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_HOTEL_DETAIL_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			// 将返回数据转换成json对象
 			ResponseResult<HotelEntity> responseResult = JsonUtil.toBean(result,
@@ -302,7 +307,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		query.setToken(md5Encryption());
 		CityInfo cityInfo = null;
 		String paramJson = JsonUtil.toJson(query);
-		String result = HttpClientUtil.doJsonPost(BQY_CITY_INFO_URL, paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_CITY_INFO_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<CityInfo> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<CityInfo>>(){});
 			if (responseResult != null) {
@@ -328,7 +333,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		query.setToken(md5Encryption());
 		List<HotelRoomFacility> roomFacilityList = null;
 		String paramJson = JsonUtil.toJson(query);
-		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_FACILITY_URL, paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_HOTEL_FACILITY_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<List<HotelRoomFacility>> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<List<HotelRoomFacility>>>(){});
 			if (responseResult != null) {
@@ -348,7 +353,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		query.setToken(md5Encryption());
 		List<ImageList> imageList = null;
 		String paramJson = JsonUtil.toJson(query);
-		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_IMAGE_URL, paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_HOTEL_IMAGE_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<List<ImageList>> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<List<ImageList>>>(){});
 			if (responseResult != null) {
@@ -369,7 +374,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		query.setToken(md5Encryption());
 		List<RoomImageList> imageList = null;
 		String paramJson = JsonUtil.toJson(query);
-		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_ROOM_IMAGE_URL, paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_HOTEL_ROOM_IMAGE_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<List<RoomImageList>> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<List<RoomImageList>>>(){});
 			if (responseResult != null) {
@@ -390,7 +395,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		query.setToken(md5Encryption());
 		List<RoomPriceItem> roomPriceList = null;
 		String paramJson = JsonUtil.toJson(query);
-		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_ROOM_PRICE_URL, paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_HOTEL_ROOM_PRICE_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<List<RoomPriceItem>> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<List<RoomPriceItem>>>(){});
 			if (responseResult != null) {
@@ -411,7 +416,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		query.setToken(md5Encryption());
 		HotelLocationEntity cityInfo = null;
 		String paramJson = JsonUtil.toJson(query);
-		String result = HttpClientUtil.doJsonPost(BQY_CITY_INFO_URL_2, paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_CITY_INFO_URL_2, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<HotelLocationEntity> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<HotelLocationEntity>>(){});
 			if (responseResult != null) {
@@ -432,7 +437,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		query.setToken(md5Encryption());
 		BookOrderResponse bookOrderResponse = null;
 		String paramJson = JsonUtil.toJson(query);
-		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_BOOK_ORDER_URL, paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_HOTEL_BOOK_ORDER_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<BookOrderResponse> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<BookOrderResponse>>(){});
 			if (responseResult != null) {
@@ -456,7 +461,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		createOrderReq.setToken(md5Encryption());
 		String orderNo = null;
 		String paramJson = JsonUtil.toJson(createOrderReq);
-		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_CREATE_ORDER_URL, paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_HOTEL_CREATE_ORDER_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<String> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<String>>(){});
 			if (responseResult != null) {
@@ -482,7 +487,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		orderPayReq.setToken(md5Encryption());
 		OrderPayResult orderPayResult = null;
 		String paramJson = JsonUtil.toJson(orderPayReq);
-		String result = HttpClientUtil.doJsonPost(BQY_HOTEL_ORDER_PAY_URL, paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_HOTEL_ORDER_PAY_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<OrderPayResult> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<OrderPayResult>>(){});
 			if (responseResult != null) {
@@ -527,7 +532,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			hotelInfo.setLatestUpdateTime(sdf.format(new Date()));
 			hotelInfo.setSaleStatus(1);
 			//保存酒店信息
-			mongoTemplate1.save(hotelInfo);
+			//mongoTemplate1.save(hotelInfo);
 			//保存中间表
 			saveMidHol(hotelInfo);
 		}
@@ -547,12 +552,13 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		//电话
 		String mobile = hotelInfo.getMobile();
 		
-		//查询中间表是否有纬度相同酒店
-		//List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
-		
-		List<HolMidBaseInfo> holMidList = holMongoQuery.queryAlikeHol(longitude, latitude, Tool.splitStr(mobile));
-		
-		//List<HolMidBaseInfo> holMidList = null;
+		List<HolMidBaseInfo> holMidList = null;
+		/*if (-1 != Double.valueOf(latitude) && -1 != Double.valueOf(longitude)) {
+			//查询中间表是否有纬度相同酒店
+			//List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
+			//List<HolMidBaseInfo> holMidList = null;
+			holMidList = holMongoQuery.queryAlikeHol(longitude, latitude, Tool.splitStr(mobile));
+		}*/
 		
 		if (null != holMidList && holMidList.size() > 0) {
 			if (holMidList.size() == 1) {
@@ -614,6 +620,13 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
  	 					}else {
  	 						resToMinPrice.setMinPrice(lowPrice);
  	 					}
+ 					}
+ 				}else {
+ 					String noPriceStatus = resToMinPrice.getNoPriceStatus();
+ 					if (StringUtils.isBlank(noPriceStatus) || !noPriceStatus.contains("2")) {
+ 						resToMinPrice.setNoPriceStatus("2");
+ 					}else {
+ 						resToMinPrice.setNoPriceStatus(resToMinPrice.getNoPriceStatus() + noPriceStatus);
  					}
  				}
  				mongoTemplate1.save(holMid);
@@ -698,6 +711,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 					saleStatus = 1;
 				}
 			}
+			if (0 == saleStatus) {
+				resPrice.setNoPriceStatus("2");
+			}
 			holMidBaseInfo.setSaleStatus(saleStatus);
 			holMidBaseInfo.setSupplierNo(hotelInfo.getSupplierNo());
 			holMidBaseInfo.setLatestUpdateTime(hotelInfo.getLatestUpdateTime());
@@ -708,6 +724,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			//保存价格数据
 			mongoTemplate1.save(resPrice);
 		}
+		mongoTemplate1.save(hotelInfo);
 	}
 	
 
@@ -721,6 +738,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		//mongoTemplate1.remove(new Query(), HotelId.class);
 		//TODO 需要修改中间表的清空
 		mongoTemplate1.remove(new Query(), HolMidBaseInfo.class);
+		mongoTemplate1.remove(new Query(), ResToMinPrice.class);
 		//mongoTemplate1.remove(new Query(Criteria.where("supplierNo").is("411805040103290132")), HolMidBaseInfo.class);
 	}
 	

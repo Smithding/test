@@ -1,4 +1,4 @@
-package com.tempus.gss.product.hol.service;
+package com.tempus.gss.product.hol.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,12 +22,15 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +46,13 @@ import com.thoughtworks.xstream.XStream;
  */
 @Component
 public class HttpClientUtil {
+	
+	@Autowired
+	@Qualifier("client")
+    private CloseableHttpClient client;
+	
+	@Autowired
+	private RequestConfig requestConfig;
 	
 	/*@Autowired
 	static Environment env;*/
@@ -117,6 +127,7 @@ public class HttpClientUtil {
     public static <T> T doJsonPost(String url, String reqJsonStr, Class<T> c) {
         T t = null;
         HttpClient client = null;
+        HttpResponse res = null;
         try {
             if (url.startsWith("https")) {
                 client = new DefaultHttpClient();
@@ -130,7 +141,7 @@ public class HttpClientUtil {
             httpPost.setEntity(entity);
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Accept-Charset", "utf-8");
-            HttpResponse res = client.execute(httpPost);// 发送请求
+			res = client.execute(httpPost);// 发送请求
             if (res.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
                 String result = EntityUtils.toString(res.getEntity(),"UTF-8");
                 log.info("接口请求返回结果:"+result);
@@ -141,18 +152,22 @@ public class HttpClientUtil {
             log.info("doJsonPost请求异常");
             e.printStackTrace();
         }finally {
-            client.getConnectionManager().shutdown();// 关闭连接
+            //client.getConnectionManager().shutdown();// 关闭连接
+        	if(null != res.getEntity()){// 释放连接 
+                EntityUtils.consumeQuietly(res.getEntity());
+            } 
         }
         return t;
     }
     
-    public static String doJsonPost(String url, String reqJsonStr) {
-        HttpClient client = null;
+    public String doJsonPost(String url, String reqJsonStr) {
+        //HttpClient client = null;
         String result = "";
+        HttpResponse res = null;
         try {
             if (url.startsWith("https")) {
                 client = new DefaultHttpClient();
-                client = WebClientDevWrapper.wrapClient(client);
+                //client = WebClientDevWrapper.wrapClient(client);
             } else {
                 client = HttpClients.createDefault();
             }
@@ -162,16 +177,21 @@ public class HttpClientUtil {
             httpPost.setEntity(entity);
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Accept-Charset", "utf-8");
-            HttpResponse res = client.execute(httpPost);// 发送请求
+			res = client.execute(httpPost);// 发送请求
             if (res.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 				result = EntityUtils.toString(res.getEntity(),"UTF-8");
             }
 
         } catch (Exception e) {
             log.info("doJsonPost请求异常");
+            System.out.println("入参:" + reqJsonStr);
+            System.out.println("结果:" + result);
             e.printStackTrace();
         }finally {
-            client.getConnectionManager().shutdown();// 关闭连接
+            //client.getConnectionManager().shutdown();// 关闭连接
+        	if(null != res.getEntity()){// 释放连接 
+                EntityUtils.consumeQuietly(res.getEntity());
+            } 
         }
         return result;
     }
@@ -179,6 +199,7 @@ public class HttpClientUtil {
     
     public static String doJsonPost(String url) {
         HttpClient client = null;
+        HttpResponse res = null;
         String result = "";
         try {
             if (url.startsWith("https")) {
@@ -193,7 +214,7 @@ public class HttpClientUtil {
             httpPost.setEntity(entity);
             httpPost.setHeader("Accept", "application/json");
             httpPost.setHeader("Accept-Charset", "utf-8");
-            HttpResponse res = client.execute(httpPost);// 发送请求
+			res = client.execute(httpPost);// 发送请求
             if (res.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 				result = EntityUtils.toString(res.getEntity(),"UTF-8");
                 log.info("接口请求返回结果:"+result);
@@ -203,7 +224,10 @@ public class HttpClientUtil {
             log.info("doJsonPost请求异常");
             e.printStackTrace();
         }finally {
-            client.getConnectionManager().shutdown();// 关闭连接
+           // client.getConnectionManager().shutdown();// 关闭连接
+        	if(null != res.getEntity()){// 释放连接 
+                EntityUtils.consumeQuietly(res.getEntity());
+            } 
         }
         return result;
     }
@@ -373,7 +397,10 @@ public class HttpClientUtil {
 	            log.error("doJsonPost请求异常",e);
 	        }
         	finally {
-	            client.getConnectionManager().shutdown();// 关闭连接
+	            //client.getConnectionManager().shutdown();// 关闭连接
+        		if(null != res.getEntity()){// 释放连接 
+                    EntityUtils.consumeQuietly(res.getEntity());
+                } 
 	        }
 	        return null;
     }
