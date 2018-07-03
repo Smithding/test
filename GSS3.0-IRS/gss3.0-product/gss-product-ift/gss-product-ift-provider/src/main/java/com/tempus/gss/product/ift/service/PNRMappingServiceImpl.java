@@ -18,6 +18,7 @@ import com.tempus.tbe.NotSupportException;
 import com.tempus.tbe.entity.*;
 import com.tempus.tbe.service.IFareService;
 import com.tempus.tbe.service.IGetPnrService;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,7 +86,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
         QueryIBEDetail queryIBEDetail = null;
         try {
             PnrOutPut pnr = getPnrService.getInfoByPnrRawI(office, CommenUtil.decodeHtml(flightQuery));
-            log.info("国际机票PNR预定返回原始信息：" + JsonUtil.toJson(pnr));
+            log.info("国际机票PNR内容预定返回原始信息：" + JsonUtil.toJson(pnr));
             queryIBEDetail = getPnrByQueryIBEDetail(pnr);
             getFSI( queryIBEDetail);
         } catch (Exception e) {
@@ -199,7 +200,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
         cabinsPricesTotals.setPassengerTypePricesTotals(passengerTypePricesTotals);
         cabinsPricesTotalses.add(cabinsPricesTotals);
         for (PnrSeg pnrSeg : pnrSegs) {
-            if (!"ARRIVAL_UNKNOWN".equals(pnrSeg.getSegmentType())) {
+            if (!"ARRIVAL_UNKNOWN".equals(pnrSeg.getSegmentType())||(StringUtils.isNotBlank(pnrSeg.getArrivalAirport())&&StringUtils.isNotBlank(pnrSeg.getDepartureAirport()))) {
                 List<FlightCabinPriceVo> flightCabinPriceVos = new ArrayList<FlightCabinPriceVo>();
                 Flight flight = new Flight();
                 flight.setTicketType(pnrSeg.getTicket());
@@ -217,7 +218,6 @@ public class PNRMappingServiceImpl implements PNRMappingService {
                 }
                 if (null != pnrSeg.getDepartureDateTime()) {
                     flight.setDepTime(fl.parse(pnrSeg.getDepartureDateTime().replaceAll("[a-zA-Z]", " ")));
-
                 }
                 for (PassengerTypePricesTotal passengerTypePricesTotal : passengerTypePricesTotals) {
                     FlightCabinPriceVo flightCabinPriceVo = new FlightCabinPriceVo();
@@ -577,9 +577,12 @@ public class PNRMappingServiceImpl implements PNRMappingService {
                         StringBuffer fsi = new StringBuffer("S&nbsp;");
                         Calendar ca = Calendar.getInstance();
                         ca.setTime(flight.getDepTime());
-                        fsi = fsi.append(flight.getAirline()).append("&nbsp;").append(flight.getFlightNo()).append(flight.getFlightCabinPriceVos().get(0).getCabin()).append(ca.get(Calendar.DAY_OF_YEAR))
-                                .append(getmonthStrEnglish(flight.getDepTime())).append("&nbsp;").append(flight.getDepAirport())
-                                .append(ca.get(Calendar.HOUR_OF_DAY)>=10?""+ca.get(Calendar.HOUR_OF_DAY):"0"+ca.get(Calendar.HOUR_OF_DAY)).append(ca.get(Calendar.MILLISECOND)>=10?""+ca.get(Calendar.MILLISECOND):"0"+ca.get(Calendar.MILLISECOND)).append(timechange);
+                        String airLine = flight.getAirline();
+                        String flightNo = flight.getFlightNo();
+                        fsi.append(airLine).append("&nbsp;");
+                        fsi.append(flightNo).append(flight.getFlightCabinPriceVos().get(0).getCabin()).append(ca.get(Calendar.DAY_OF_YEAR));
+                        fsi.append(getmonthStrEnglish(flight.getDepTime())).append("&nbsp;");
+                        fsi =fsi.append(flight.getDepAirport()).append(ca.get(Calendar.HOUR_OF_DAY)>=10?""+ca.get(Calendar.HOUR_OF_DAY):"0"+ca.get(Calendar.HOUR_OF_DAY)).append(ca.get(Calendar.MILLISECOND)>=10?""+ca.get(Calendar.MILLISECOND):"0"+ca.get(Calendar.MILLISECOND)).append(timechange);
                         ca.setTime(flight.getArrTime());
                         fsi = fsi.append(ca.get(Calendar.HOUR_OF_DAY)>=10?""+ca.get(Calendar.HOUR_OF_DAY):"0"+ca.get(Calendar.HOUR_OF_DAY)).append(ca.get(Calendar.MILLISECOND)>=10?""+ca.get(Calendar.MILLISECOND):"0"+ca.get(Calendar.MILLISECOND)).append(flight.getArrAirport()).append("0").append("S");
                         flight.setFsi(fsi.toString());
@@ -599,9 +602,10 @@ public class PNRMappingServiceImpl implements PNRMappingService {
                         StringBuffer fsi = new StringBuffer("S&nbsp;");
                         Calendar ca = Calendar.getInstance();
                         ca.setTime(tempflight.getDepTime());
-                        fsi = fsi.append(tempflight.getAirline()).append("&nbsp;").append(tempflight.getFlightNo()).append(tempflight.getFlightCabinPriceVos().get(0).getCabin()).append(ca.get(Calendar.DAY_OF_YEAR))
-                                .append(getmonthStrEnglish(tempflight.getDepTime())).append("&nbsp;").append(tempflight.getDepAirport())
-                                .append(ca.get(Calendar.HOUR_OF_DAY)>=10?""+ca.get(Calendar.HOUR_OF_DAY):"0"+ca.get(Calendar.HOUR_OF_DAY)).append(ca.get(Calendar.MILLISECOND)>=10?""+ca.get(Calendar.MILLISECOND):"0"+ca.get(Calendar.MILLISECOND)).append(timechange);
+                        fsi.append(tempflight.getAirline()).append("&nbsp;");
+                        fsi.append(tempflight.getFlightNo()).append(tempflight.getFlightCabinPriceVos().get(0).getCabin());
+                        fsi.append(ca.get(Calendar.DAY_OF_YEAR)).append(getmonthStrEnglish(tempflight.getDepTime())).append("&nbsp;");
+                        fsi = fsi.append(tempflight.getDepAirport()).append(ca.get(Calendar.HOUR_OF_DAY)>=10?""+ca.get(Calendar.HOUR_OF_DAY):"0"+ca.get(Calendar.HOUR_OF_DAY)).append(ca.get(Calendar.MILLISECOND)>=10?""+ca.get(Calendar.MILLISECOND):"0"+ca.get(Calendar.MILLISECOND)).append(timechange);
                         ca.setTime(tempflight.getArrTime());
                         fsi = fsi.append(ca.get(Calendar.HOUR_OF_DAY)>=10?""+ca.get(Calendar.HOUR_OF_DAY):"0"+ca.get(Calendar.HOUR_OF_DAY)).append(ca.get(Calendar.MILLISECOND)>=10?""+ca.get(Calendar.MILLISECOND):"0"+ca.get(Calendar.MILLISECOND)).append(tempflight.getArrAirport()).append("0").append(stopOver);
                         tempflight.setFsi(fsi.toString());
@@ -629,9 +633,10 @@ public class PNRMappingServiceImpl implements PNRMappingService {
                             StringBuffer fsi = new StringBuffer("S&nbsp;");
                             Calendar ca = Calendar.getInstance();
                             ca.setTime(flight.getDepTime());
-                            fsi = fsi.append(flight.getAirline()).append("&nbsp;").append(flight.getFlightNo()).append(flight.getFlightCabinPriceVos().get(0).getCabin()).append(ca.get(Calendar.DAY_OF_YEAR))
-                                    .append(getmonthStrEnglish(flight.getDepTime())).append("&nbsp;").append(flight.getDepAirport())
-                                    .append(ca.get(Calendar.HOUR_OF_DAY)>=10?""+ca.get(Calendar.HOUR_OF_DAY):"0"+ca.get(Calendar.HOUR_OF_DAY)).append(ca.get(Calendar.MILLISECOND)>=10?""+ca.get(Calendar.MILLISECOND):"0"+ca.get(Calendar.MILLISECOND)).append(timechange);
+                            fsi.append(flight.getAirline()).append("&nbsp;");
+                            fsi.append(flight.getFlightNo()).append(flight.getFlightCabinPriceVos().get(0).getCabin()).append(ca.get(Calendar.DAY_OF_YEAR));
+                            fsi.append(getmonthStrEnglish(flight.getDepTime())).append("&nbsp;");
+                            fsi = fsi.append(flight.getDepAirport()).append(ca.get(Calendar.HOUR_OF_DAY)>=10?""+ca.get(Calendar.HOUR_OF_DAY):"0"+ca.get(Calendar.HOUR_OF_DAY)).append(ca.get(Calendar.MILLISECOND)>=10?""+ca.get(Calendar.MILLISECOND):"0"+ca.get(Calendar.MILLISECOND)).append(timechange);
                             ca.setTime(flight.getArrTime());
                             fsi = fsi.append(ca.get(Calendar.HOUR_OF_DAY)>=10?""+ca.get(Calendar.HOUR_OF_DAY):"0"+ca.get(Calendar.HOUR_OF_DAY)).append(ca.get(Calendar.MILLISECOND)>=10?""+ca.get(Calendar.MILLISECOND):"0"+ca.get(Calendar.MILLISECOND)).append(flight.getArrAirport()).append("0").append("S");
                             flight.setFsi(fsi.toString());

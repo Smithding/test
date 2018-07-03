@@ -1158,6 +1158,7 @@ public class RefundServiceImpl implements IRefundService {
 					saleChangeVo.setCreateTime(saleChangeExt.getCreateTime());
 					if (saleChange.getChildStatus() != null) {
 						saleChangeVo.setSaleStatus(saleChange.getChildStatus());//客户办理状态
+						saleChangeVo.setRefundStatus(saleChange.getChildStatus());
 					}
 					if (saleChangeExt.getPassengerRefundPriceList() != null
 							&& saleChangeExt.getPassengerRefundPriceList().size() > 0) {

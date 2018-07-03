@@ -10,4 +10,6 @@ import java.util.List;
 @Component
 public interface RefundReportDao extends AutoMapper<ReportVo>{
    List<ReportVo> getAll(RowBounds page,ReportVo reportIn);
+
+   List<ReportVo> queryReportRecords(ReportVo reportIn);
 }

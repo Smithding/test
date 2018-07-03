@@ -26,4 +26,12 @@ public class ReportServiceImpl implements ReportService {
         page.setRecords(list);
         return page;
     }
+
+    @Override
+    public List<ReportVo> queryReportRecords(ReportVo reportIn) {
+        List<ReportVo> result = refundReportDao.queryReportRecords(reportIn);
+        return result;
+    }
+
+
 }

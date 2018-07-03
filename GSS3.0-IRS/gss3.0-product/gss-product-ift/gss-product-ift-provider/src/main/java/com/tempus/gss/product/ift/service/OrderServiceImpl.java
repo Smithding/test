@@ -237,7 +237,8 @@ public class OrderServiceImpl implements IOrderService {
             String creator = String.valueOf(agent.getAccount());
             /* 新增航程航段 */
             StringBuffer goodsName = new StringBuffer();
-            for (int i = 0; i < requestWithActor.getEntity().getSaleOrderExt().getLegList().size(); i++) {
+            int legSize = requestWithActor.getEntity().getSaleOrderExt().getLegList().size();
+            for (int i = 0; i < legSize; i++) {
                 Leg leg = requestWithActor.getEntity().getSaleOrderExt().getLegList().get(i);
                 leg.setSaleOrderNo(saleOrderNo);
                 leg.setLegNo(maxNoService.generateBizNo("IFT_LEG_NO", 27));
@@ -253,7 +254,7 @@ public class OrderServiceImpl implements IOrderService {
                 legdao.insertSelective(leg);
                 goodsName.append(leg.getDepAirport());
                 goodsName.append("-");
-                if (i == requestWithActor.getEntity().getSaleOrderExt().getLegList().size() - 1) {
+                if (i == legSize - 1) {
                     goodsName.append(leg.getArrAirport());
                 }
                 
@@ -281,6 +282,8 @@ public class OrderServiceImpl implements IOrderService {
                 passenger.setStatus(String.valueOf(1));
                 passenger.setCreator(creator);
                 passenger.setCreateTime(today);
+                //todo 出票类型和政策有关目前先保存BSP
+                passenger.setTicketType("BSP");
                 passenger.setValid((byte) 1);
                 passengerDao.insertSelective(passenger);
             }
@@ -333,8 +336,9 @@ public class OrderServiceImpl implements IOrderService {
                 try {
                     PnrOutPut pnrOutPut = getPnrService.getPnr(StringUtils.defaultString(buyOrderExt.getAirline()), pnr.getPnr());
                     pnr.setPnrContent(pnrOutPut.getPnrInfo());
+                    pnr.setBigPnr(pnrOutPut.getIcsPnr());
                 } catch (Exception e) {
-                    log.info("获取pnr信息失败");
+                    log.info("获取pnr信息失败",e);
                 }
                 pnr.setCreateTime(new Date());
                 pnr.setCreator(String.valueOf(agent.getId()));
@@ -437,6 +441,8 @@ public class OrderServiceImpl implements IOrderService {
             saleOrderExtDao.insertSelective(saleOrderExt);
             
             /* 创建采购单 */
+            //todo 出票类型和政策有关目前先保存BSP
+            buyOrderExt.setTicketType("BSP");
             buyOrderExt.setBuyOrderNo(buyOrderNo);
             buyOrderExt.setOwner(agent.getOwner());
             buyOrderExt.setCreator(creator);
