@@ -342,6 +342,7 @@ public class ChangeServiceImpl implements IChangeService {
             buyChangeExt.setOwner(agent.getOwner());
             buyChangeExt.setCreateTime(new Date());
             buyChangeExt.setValid((byte) 1);
+            buyChangeExt.setTicketType("BSP");
             buyChangeExtDao.insertSelective(buyChangeExt);
 
             /*创建新增操作日志*/

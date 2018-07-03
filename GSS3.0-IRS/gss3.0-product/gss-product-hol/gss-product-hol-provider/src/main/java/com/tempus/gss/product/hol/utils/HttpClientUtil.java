@@ -19,6 +19,7 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -165,12 +167,13 @@ public class HttpClientUtil {
         String result = "";
         HttpResponse res = null;
         try {
-            if (url.startsWith("https")) {
+           /* if (url.startsWith("https")) {
                 client = new DefaultHttpClient();
                 //client = WebClientDevWrapper.wrapClient(client);
             } else {
-                client = HttpClients.createDefault();
-            }
+                
+            }*/
+            client = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(url);
             StringEntity entity = new StringEntity(reqJsonStr,
                     "application/json", "utf-8");// 指定请求头
@@ -185,7 +188,6 @@ public class HttpClientUtil {
         } catch (Exception e) {
             log.info("doJsonPost请求异常");
             System.out.println("入参:" + reqJsonStr);
-            System.out.println("结果:" + result);
             e.printStackTrace();
         }finally {
             //client.getConnectionManager().shutdown();// 关闭连接
@@ -289,37 +291,15 @@ public class HttpClientUtil {
     	Environment environment = pp.getEnvironment();
     	String property = environment.getProperty("tc.customHeader.access");
     	System.out.println("property: "+property);*/
-    	HttpClient client =null;
+    	//HttpClient client =null;
     	HttpPost httpPost = null;
-    	HttpResponse res = null;
-    	RequestConfig requestConfig = null;
-    	//CloseableHttpResponse response = null;
+    	CloseableHttpResponse res = null;
     	try {
-            if (url.startsWith("https")) {
-                client = new DefaultHttpClient();
-                client = WebClientDevWrapper.wrapClient(client);
-            } else {
-                client = HttpClients.createDefault();
-                requestConfig = RequestConfig.custom().setConnectTimeout(180000).setConnectionRequestTimeout(180000).setSocketTimeout(180000).build();
-            }
+             client = HttpClients.createDefault();
             
-            httpPost = new HttpPost(url);
-            httpPost.setConfig(requestConfig);
-            httpPost.setHeader("Content-type","application/x-www-form-urlencoded");
-            
-          /*  String accessId = "DZSSZSTBGJSYFWGFYXGSTDI";
-            String securityId = "a76ec9bf-ba68-40f5-8cf2-6fd90453001e";
-		    httpPost.setHeader("X-ACCESS-ID",accessId);*/
-		/*    
-		    String access = PropertyUtil.getProperty("tc.customHeader.access");
-		    String accessId = PropertyUtil.getProperty("tc.accessId");
-           
-            
-            String security = PropertyUtil.getProperty("tc.customHeader.security");
-            String securityId = PropertyUtil.getProperty("tc.securityId");*/
-            
-		   /* client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 120000);
-		    client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 120000);*/
+             httpPost = new HttpPost(url);
+             httpPost.setConfig(requestConfig);
+             httpPost.setHeader("Content-type","application/x-www-form-urlencoded");
              httpPost.setHeader(access,accessId);
 		     TreeMap<String, String> tmp = new TreeMap<String, String>(); 
 		     
@@ -354,45 +334,15 @@ public class HttpClientUtil {
 			    String stringPwd = MD5Util.MD5Encode(singPwdMing, "utf-8");
 			    //httpPost.setHeader(security,stringPwd);
 			    httpPost.setHeader(security,stringPwd);
-			    
 	            res = client.execute(httpPost);// 发送请求
-	           /*if(res!=null)
-	           {
-	        	   log.debug("请求同程酒店接口请求返回结果:"+res.getEntity());
-	           }*/
-	            
 	            
 	            if (res.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 	               String result = EntityUtils.toString(res.getEntity(),"UTF-8");
 	                //log.info("接口请求返回结果:"+result);
 	                return result;
-	            	/*HttpEntity entity = res.getEntity();
-	            	StringBuffer returnMessage = new StringBuffer();
-	            	if (entity != null) {
-	            		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(entity.getContent()));
-	            		String lineMessage;
-	            		while ((lineMessage = bufferedReader.readLine()) != null) {
-	            			returnMessage.append(lineMessage);
-	            		}
-	            		bufferedReader.close();
-	            	}
-	            	String result = returnMessage.toString();
-	            	log.info("接口请求返回结果:"+result);
-	            	return result;*/
 	            }
 	        }catch(ConnectionClosedException e){
-	        	 try {
-					res = client.execute(httpPost);  // 发送请求
-					if (res.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-			               String result = EntityUtils.toString(res.getEntity(),"UTF-8");
-			               // log.info("接口请求返回结果:"+result);
-			                return result;
-					}
-				} catch (ClientProtocolException e1) {
-					log.error("doJsonPost请求异常",e1);
-				} catch (IOException e1) {
-					log.error("doJsonPost请求异常",e1);
-				}
+	        	log.error("doJsonPost请求异常ConnectionClosedException",e);
 	        }catch (Exception e) {
 	            log.error("doJsonPost请求异常",e);
 	        }

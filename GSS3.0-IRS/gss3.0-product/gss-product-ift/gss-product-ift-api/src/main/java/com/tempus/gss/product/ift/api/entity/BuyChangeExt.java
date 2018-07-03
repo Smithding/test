@@ -45,7 +45,7 @@ public class BuyChangeExt implements Serializable {
 	/**
 	 * 出票类型
 	 */
-	private Integer ticketType;
+	private String ticketType;
 	/**
 	 * 拒单理由.
 	 */
@@ -142,12 +142,12 @@ public class BuyChangeExt implements Serializable {
 		this.office = office;
 	}
 
-	public Integer getTicketType() {
+	public String getTicketType() {
 
 		return ticketType;
 	}
 
-	public void setTicketType(Integer ticketType) {
+	public void setTicketType(String ticketType) {
 
 		this.ticketType = ticketType;
 	}

@@ -36,6 +36,8 @@ public class ResNameSum implements Serializable{
 	 */
 	private String supplierNo;
 	
+	private Integer saleStatus;			//是否可售
+	
 	
 	/**
 	 * 1: TC, 2: BQY, 3: TY, 0: All, 
@@ -120,6 +122,16 @@ public class ResNameSum implements Serializable{
 
 	public void setLat(String lat) {
 		this.lat = lat;
+	}
+
+
+	public Integer getSaleStatus() {
+		return saleStatus;
+	}
+
+
+	public void setSaleStatus(Integer saleStatus) {
+		this.saleStatus = saleStatus;
 	}
 	
 }
