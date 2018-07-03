@@ -68,6 +68,16 @@ public class ChangePriceRequest implements Serializable {
 	private BigDecimal exchangeRate;
 	//审核备注
 	private String changeRemark;
+	//pnrNo
+	private Long pnrNo;
+
+	public Long getPnrNo() {
+		return pnrNo;
+	}
+
+	public void setPnrNo(Long pnrNo) {
+		this.pnrNo = pnrNo;
+	}
 
 	public String getChangeRemark() {
 		return changeRemark;
