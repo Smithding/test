@@ -573,7 +573,8 @@
             AUDIT_TIME         = #{auditTime,jdbcType=VARCHAR},
             REFUND_FILE_URL    = #{refundFileUrl,jdbcType=VARCHAR},
             CUSTOMER_NO        = #{customerNo,jdbcType=BIGINT},
-            CUSTOMER_TYPE_NO   = #{customerTypeNo,jdbcType=BIGINT}
+            CUSTOMER_TYPE_NO   = #{customerTypeNo,jdbcType=BIGINT},
+            PNR_NO             = #{pnrNo,jdbcType=BIGINT}
         WHERE SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
     </update>
     <select id="queryBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
