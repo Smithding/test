@@ -553,12 +553,13 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		String mobile = hotelInfo.getMobile();
 		
 		List<HolMidBaseInfo> holMidList = null;
-		/*if (-1 != Double.valueOf(latitude) && -1 != Double.valueOf(longitude)) {
+		if (StringUtils.isNoneBlank(latitude) && StringUtils.isNoneBlank(longitude) && StringUtils.isNoneBlank(mobile) && 
+						-1 != Double.valueOf(latitude) && -1 != Double.valueOf(longitude)) {
 			//查询中间表是否有纬度相同酒店
 			//List<HolMidBaseInfo> holMidList = searchHoltel(latitude, longitude, mobile);
 			//List<HolMidBaseInfo> holMidList = null;
 			holMidList = holMongoQuery.queryAlikeHol(longitude, latitude, Tool.splitStr(mobile));
-		}*/
+		}
 		
 		if (null != holMidList && holMidList.size() > 0) {
 			if (holMidList.size() == 1) {
