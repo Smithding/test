@@ -288,13 +288,13 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
         return sum;
     }
 
-    public final String datetime2Str(Date date) {
+ /*   public final String datetime2Str(Date date) {
         if (date != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
             return sdf.format(date);
         }
         return "";
-    }
+    }*/
 
     private String filterNull(String str) {
         if (str == null) {

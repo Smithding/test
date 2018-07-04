@@ -66,7 +66,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
             PnrOutPut pnr = getPnrService.getPnr(office, flightQuery);
             log.info("国际机票PNR预定返回原始信息：" + JsonUtil.toJson(pnr));
             queryIBEDetail = getPnrByQueryIBEDetail(pnr);
-            getFSI( queryIBEDetail);
+            getFSI(queryIBEDetail);
             queryService.mappingPriceSpec(queryIBEDetail, customerType, agent);
         } catch (Exception e) {
             log.error("pnr匹配出错", e);

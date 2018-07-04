@@ -7,8 +7,9 @@ import java.math.BigDecimal;
  * Created by Administrator on 2017/3/9.
  */
 public class ReportVo implements Serializable {
-    
-    private static final long serialVersionUID = 1L;
+
+
+    private static final long serialVersionUID = -2506506835500761276L;
     /**
      * 供应商类型
      */
