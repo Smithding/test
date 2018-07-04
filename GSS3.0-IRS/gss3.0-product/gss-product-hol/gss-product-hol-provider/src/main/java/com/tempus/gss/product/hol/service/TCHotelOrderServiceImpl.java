@@ -663,8 +663,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		ResultTc<IsBookOrder> isBookOrderBase = null;
 		IsBookOrder resBase =null;
 		try {
-			//IsBookOrder isBookOrderCheck=new IsBookOrder();
-			SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			if(StringUtils.isEmpty(isBookOrderReq.getLatestArrivalTime())) {
+				isBookOrderReq.setLatestArrivalTime(isBookOrderReq.getComeTime());
+			}
+			/*SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Calendar da = Calendar.getInstance();
 			if(StringUtils.isEmpty(isBookOrderReq.getEarliestArrivalTime())) {
 				String today = simple.format(da.getTime());
@@ -697,7 +699,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				}else {
 					isBookOrderReq.setLatestArrivalTime(isBookOrderReq.getComeTime());
 				}
-			}
+			}*/
 			logger.info("酒店订单进行可定检查,入参:" + JSONObject.toJSONString(isBookOrderReq));
 			//System.out.println("EarliestArrivalTime: "+isBookOrderReq.getEarliestArrivalTime());
 			//System.out.println("LatestArrivalTime: "+isBookOrderReq.getLatestArrivalTime());

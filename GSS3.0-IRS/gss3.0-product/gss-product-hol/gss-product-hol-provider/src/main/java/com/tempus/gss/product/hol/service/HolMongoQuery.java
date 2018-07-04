@@ -11,6 +11,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -272,11 +273,11 @@ public class HolMongoQuery implements IHolMongoQuery {
 			Criteria cr =new Criteria();
 			query.skip(0);
 			query.limit(3);
-			/*if(StringUtil.isNotNullOrEmpty(lon) && StringUtil.isNotNullOrEmpty(lat)) {
+			if(StringUtil.isNotNullOrEmpty(lon) && StringUtil.isNotNullOrEmpty(lat)) {
 				Point point =new Point(Double.valueOf(lon), Double.valueOf(lat));
-				cr.and("resPosition").near(point).maxDistance((double)200/6378137);//100000/6378137
-			}*/
-			if(StringUtil.isNotBlank(lon)) {
+				cr.and("resPosition").near(point).maxDistance(0.0005D);//100000/6378137
+			}
+			/*if(StringUtil.isNotBlank(lon)) {
 				cr.and("lon").regex("^" + lon + ".*$");
 			}else {
 				throw new GSSException("参数经度为空", "0401", "匹配中间表失败,参数经度为空");
@@ -285,7 +286,7 @@ public class HolMongoQuery implements IHolMongoQuery {
 				cr.and("lat").regex("^" + lat + ".*$");
 			}else {
 				throw new GSSException("参数纬度", "0118", "匹配中间表失败,参数纬度为空");
-			}
+			}*/
 			if(StringUtil.isNotNullOrEmpty(phoneList)) {
 				List<Criteria> list = new ArrayList<Criteria>();
 				for(String sss : phoneList) {
