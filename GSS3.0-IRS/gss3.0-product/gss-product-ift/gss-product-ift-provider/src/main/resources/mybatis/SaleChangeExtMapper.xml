@@ -63,6 +63,8 @@
         <!--操作人名-->
         <result column="LOGIN_NAME" property="handlers" jdbcType="VARCHAR"/>
         <result column="OFFICE" property="office" jdbcType="VARCHAR"/>
+        <!--改签出票人-->
+        <result column="DRAWER_LOGIN_NAME" property="drawerLoginName" jdbcType="VARCHAR"/>
         <!--一对多关联销售单明细-->
         <collection property="saleChangeDetailList" ofType="com.tempus.gss.product.ift.api.entity.SaleChangeDetail"
                     column="SALE_CHANGE_NO"
@@ -80,7 +82,7 @@
         SALE_CHANGE_NO, ID, OWNER, REFUND_WAY,  MODIFIER, STATUS, MODIFY_TIME,
         VALID, CREATE_TIME, CREATOR, LOCKER, LOCK_TIME, CHANGE_TYPE, CONTACT_NAME, CONTACT_MOBILE,
         CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL,CUSTOMER_NO,
-    CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,CURRENCY,SALE_CURRENCY,EXCHANGE_RATE,OFFICE
+    CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,CURRENCY,SALE_CURRENCY,EXCHANGE_RATE,OFFICE,DRAWER_LOGIN_NAME
     </sql>
 
     <select id="queryRefundCountBylocker" resultType="java.lang.Integer">
@@ -273,7 +275,7 @@
         CREATE_TIME, CREATOR, LOCKER,
         LOCK_TIME, CHANGE_TYPE, CONTACT_NAME,
         CONTACT_MOBILE, CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL,
-      	CUSTOMER_NO, CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK
+      	CUSTOMER_NO, CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,DRAWER_LOGIN_NAME
         )
         values (#{saleChangeNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
         #{refundWay,jdbcType=INTEGER},  #{modifier,jdbcType=VARCHAR},
@@ -283,7 +285,7 @@
         #{contactMobile,jdbcType=VARCHAR}, #{customerRemark,jdbcType=VARCHAR}, #{refuseReason,jdbcType=VARCHAR},
         #{airlineStatus,jdbcType=INTEGER},#{auditPerson,jdbcType=VARCHAR},#{auditTime,jdbcType=VARCHAR},#{refundFileUrl,jdbcType=VARCHAR},
 	    #{customerNo,jdbcType=BIGINT}, #{customerTypeNo,jdbcType=BIGINT}, #{ticketChangeType,jdbcType=INTEGER}),
-	    #{pnrNo,jdbcType=BIGINT}), #{changeRemark,jdbcType=VARCHAR})
+	    #{pnrNo,jdbcType=BIGINT}), #{changeRemark,jdbcType=VARCHAR},#{drawerLoginName,jdbcType=VARCHAR})
         )
     </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.SaleChangeExt">
@@ -371,6 +373,9 @@
             <if test="office !=null">
                 OFFICE,
             </if>
+            <if test="drawerLoginName !=null">
+                DRAWER_LOGIN_NAME,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="saleChangeNo != null">
@@ -454,6 +459,9 @@
             </if>
             <if test="office !=null">
                 #{office,jdbcType=VARCHAR},
+            </if>
+            <if test="drawerLoginName !=null">
+                #{drawerLoginName,jdbcType=VARCHAR},
             </if>
         </trim>
     </insert>
@@ -545,6 +553,9 @@
             <if test="exchangeRate!=null">
                 EXCHANGE_RATE =#{exchangeRate,jdbcType=DECIMAL},
             </if>
+            <if test="drawerLoginName!=null">
+                DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR},
+            </if>
             SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
         </set>
         where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
@@ -574,7 +585,8 @@
             REFUND_FILE_URL    = #{refundFileUrl,jdbcType=VARCHAR},
             CUSTOMER_NO        = #{customerNo,jdbcType=BIGINT},
             CUSTOMER_TYPE_NO   = #{customerTypeNo,jdbcType=BIGINT},
-            PNR_NO             = #{pnrNo,jdbcType=BIGINT}
+            PNR_NO             = #{pnrNo,jdbcType=BIGINT},
+            DRAWER_LOGIN_NAME  = #{drawerLoginName,jdbcType=VARCHAR}
         WHERE SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
     </update>
     <select id="queryBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
@@ -600,7 +612,8 @@
             i.REFUND_FILE_URL,
             i.AUDIT_PERSON,
             i.AUDIT_TIME,
-            i.TICKET_CHANGE_TYPE
+            i.TICKET_CHANGE_TYPE,
+            i.DRAWER_LOGIN_NAME
         FROM IFT_SALE_CHANGE_EXT i
             LEFT JOIN OS_SALECHANGE s ON s.SALE_CHANGE_NO = i.SALE_CHANGE_NO
         WHERE s.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} and i.LOCKER = 0 and s.CHILD_STATUS = 1
@@ -611,7 +624,7 @@
         i.SALE_CHANGE_NO, i.ID, i.OWNER, i.REFUND_WAY, i.MODIFIER, i.STATUS, i.MODIFY_TIME,
         i.VALID, i.CREATE_TIME, i.CREATOR, i.LOCKER, i.LOCK_TIME, i.CHANGE_TYPE, i.CONTACT_NAME, i.CONTACT_MOBILE,
         i.CUSTOMER_REMARK, i.REFUSE_REASON,i.TICKET_CHANGE_TYPE
-        ,i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO,/*su.LOGIN_NAME,*/
+        ,i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO,/*su.LOGIN_NAME,*/i.DRAWER_LOGIN_NAME,
         (SELECT NAME FROM SM_USER where ID = i.LOCKER) as LOGIN_NAME
         FROM
         IFT_SALE_CHANGE_EXT i
@@ -873,6 +886,9 @@
             </if>
             <if test="changeRemark !=null">
                 c.CHANGE_REMARK= #{changeRemark,jdbcType=VARCHAR},
+            </if>
+            <if test="drawerLoginName !=null">
+                c.DRAWER_LOGIN_NAME= #{drawerLoginName,jdbcType=VARCHAR},
             </if>
         </set>
         WHERE c.SALE_CHANGE_NO IN (SELECT p.SALE_CHANGE_NO FROM IFT_PASSENGER_CHANGE_PRICE p WHERE p.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT})

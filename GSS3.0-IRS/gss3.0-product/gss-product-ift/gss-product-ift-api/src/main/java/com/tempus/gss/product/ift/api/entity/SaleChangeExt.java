@@ -188,7 +188,18 @@ public class SaleChangeExt implements Serializable {
 	 * office
 	 */
 	private String office;
-	
+
+	//改签出票员   DRAWER_LOGIN_NAME
+	private String drawerLoginName;
+
+	public String getDrawerLoginName() {
+		return drawerLoginName;
+	}
+
+	public void setDrawerLoginName(String drawerLoginName) {
+		this.drawerLoginName = drawerLoginName;
+	}
+
 	public String getOffice() {
 		return office;
 	}
