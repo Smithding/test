@@ -542,8 +542,8 @@
                 PNR_No=#{pnrNo,jdbcType=BIGINT},
             </if>
             <if test="changeRemark !=null">
-                CHANGE_REMARK= #{changeRemark,jdbcType=VARCHAR},
-            </if>
+            CHANGE_REMARK= #{changeRemark,jdbcType=VARCHAR},
+        </if>
             <if test="currency!=null and currency!=''">
                 CURRENCY=#{currency,jdbcType=VARCHAR},
             </if>
@@ -586,7 +586,10 @@
             CUSTOMER_NO        = #{customerNo,jdbcType=BIGINT},
             CUSTOMER_TYPE_NO   = #{customerTypeNo,jdbcType=BIGINT},
             PNR_NO             = #{pnrNo,jdbcType=BIGINT},
-            DRAWER_LOGIN_NAME  = #{drawerLoginName,jdbcType=VARCHAR}
+            DRAWER_LOGIN_NAME  = #{drawerLoginName,jdbcType=VARCHAR},
+            <if test="changeRemark !=null">
+                CHANGE_REMARK= #{changeRemark,jdbcType=VARCHAR}
+            </if>
         WHERE SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
     </update>
     <select id="queryBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
