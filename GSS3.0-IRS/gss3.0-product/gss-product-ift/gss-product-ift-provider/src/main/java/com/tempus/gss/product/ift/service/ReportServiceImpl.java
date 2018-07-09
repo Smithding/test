@@ -86,10 +86,12 @@ public class ReportServiceImpl implements ReportService {
                 //settlePrice   净结算价
                 reportRefundVo.setSettlePrice(reportRefundVo.getFactRefundAccount());
             }
-            //chargeProfit   冲抵营业毛利
-            reportRefundVo.setChargeProfit(passengerRefundPriceList.get(0).getChargeProfit());
-            //汇率
-            reportRefundVo.setExchange(passengerRefundPriceList.get(0).getExchangeRate());
+            if(passengerRefundPriceList != null && passengerRefundPriceList.size() > 0){
+                //chargeProfit   冲抵营业毛利
+                reportRefundVo.setChargeProfit(passengerRefundPriceList.get(0).getChargeProfit());
+                //汇率
+                reportRefundVo.setExchange(passengerRefundPriceList.get(0).getExchangeRate());
+            }
             //reportRefundVo.setDepGrossProfit(reportRefundVo.getFactRefundAccount().subtract(reportRefundVo.getBuyRefundAccount()));
             //reportRefundVo.setGrossProfit(reportRefundVo.getDepGrossProfit());
             reportRefundVo.setSaleChangeDetailList(null);
