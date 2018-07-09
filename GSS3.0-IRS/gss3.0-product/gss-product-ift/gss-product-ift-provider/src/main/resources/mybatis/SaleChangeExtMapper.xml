@@ -78,6 +78,7 @@
                     column="SALE_CHANGE_NO"
                     select="com.tempus.gss.product.ift.dao.PassengerRefundPriceDao.selectPassengerRefundPriceBySaleOrderNo"/>
     </resultMap>
+
     <sql id="Base_Column_List">
         SALE_CHANGE_NO, ID, OWNER, REFUND_WAY,  MODIFIER, STATUS, MODIFY_TIME,
         VALID, CREATE_TIME, CREATOR, LOCKER, LOCK_TIME, CHANGE_TYPE, CONTACT_NAME, CONTACT_MOBILE,
