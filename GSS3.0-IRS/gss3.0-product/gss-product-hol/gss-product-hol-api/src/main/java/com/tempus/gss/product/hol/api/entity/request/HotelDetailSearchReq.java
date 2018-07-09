@@ -17,6 +17,18 @@ public class HotelDetailSearchReq extends BaseRequest {
      */
     @JSONField(name = "HotelCode")
     private String hotelCode;
+    
+    /**
+	 * 房型 Id
+	 */
+	@JSONField(name = "ProId")
+	private String proId;
+    
+	/**
+	 * 销售策略 Id
+	 */
+	@JSONField(name = "ProductUniqueId")
+	private String productUniqueId;
     /**
      * 入住日期(yyyy-MM-dd)
      */
