@@ -356,6 +356,12 @@ public class RefundServiceImpl implements IRefundService {
 			}
 			saleChangeExt.setCustomerNo(customerNo);
 			saleChangeExt.setCustomerTypeNo(customerTypeNo);
+			if(StringUtils.isNotBlank(saleOrder.getSourceChannelNo()) && StringUtils.equals("OP",saleOrder.getSourceChannelNo())){
+				User user = userService.findUserByLoginName(agent,agent.getAccount());
+				if(user!=null) {
+					saleChangeExt.setLocker(agent.getId());
+				}
+			}
 			log.info("申请退费单时保存的退费单信息:{}",saleChangeExt.toString());
 			saleChangeExtDao.insertSelective(saleChangeExt);
 			/*//销售退废分单操作

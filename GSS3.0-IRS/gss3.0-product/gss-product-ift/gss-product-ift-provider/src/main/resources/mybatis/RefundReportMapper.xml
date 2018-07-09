@@ -31,6 +31,160 @@
         <result column="remark" property="remark" jdbcType="VARCHAR"/>
         <result column="refundType" property="refundType"/>
     </resultMap>
+   <resultMap id="reportVoResultMapWithList" type="com.tempus.gss.product.ift.api.entity.vo.ReportRefundVo" >
+       <result column="supplierName" property="supplierName" jdbcType="VARCHAR"/>
+       <result column="type" property="type" jdbcType="VARCHAR"/>
+       <result column="issueTime" property="issueTime" jdbcType="TIMESTAMP"/>
+       <result column="saleOrderNo" property="saleOrderNo" jdbcType="BIGINT"/>
+       <result column="saleChangeNo" property="saleChangeNo" jdbcType="BIGINT"/>
+       <result column="saler" property="saler" jdbcType="VARCHAR"/>
+       <result column="refunder" property="refunder" jdbcType="VARCHAR"/>
+       <result column="dep" property="dep" jdbcType="VARCHAR"/>
+       <result column="ticketDep" property="ticketDep" jdbcType="VARCHAR"/>
+       <result column="customerName" property="customerName" jdbcType="VARCHAR"/>
+       <result column="customerCompany" property="customerCompany" jdbcType="VARCHAR"/>
+       <result column="sourceChannel" property="sourceChannel" jdbcType="VARCHAR"/>
+       <result column="settleWay" property="settleWay" jdbcType="VARCHAR"/>
+       <result column="customerNo" property="customerNo" jdbcType="BIGINT"/>
+       <result column="settleStatus" property="settleStatus" jdbcType="VARCHAR"/>
+       <result column="reason" property="reason" jdbcType="VARCHAR"/>
+       <result column="remark" property="remark" jdbcType="VARCHAR"/>
+       <result column="refundType" property="refundType"/>
+       <result column="childStatus" property="childStatus"/>
+       <!--一对多关联销售单明细-->
+       <collection property="saleChangeDetailList" ofType="com.tempus.gss.product.ift.api.entity.SaleChangeDetail"
+                   column="saleChangeNo"
+                   select="com.tempus.gss.product.ift.dao.SaleChangeDetailDao.selectBySaleChangeNo"/>
+       <!--一对多乘客集合-->
+       <collection property="passengerRefundPriceList" ofType="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice"
+                   column="saleChangeNo"
+                   select="com.tempus.gss.product.ift.dao.PassengerRefundPriceDao.selectPassengerRefundPriceBySaleOrderNo"/>
+       <!--一对多航程集合-->
+       <collection property="legList" ofType="com.tempus.gss.product.ift.api.entity.Leg" column="saleOrderNo"
+                   select="com.tempus.gss.product.ift.dao.LegDao.selectLegBySaleOrderNo"/>
+   </resultMap>
+   <select id="getAllWithList" resultMap="reportVoResultMapWithList" parameterType="com.tempus.gss.product.ift.api.entity.vo.ReportVo">
+       SELECT
+        OC.CHILD_STATUS AS childStatus,
+        CSP.`NAME` AS supplierName,
+        ICE.CHANGE_TYPE AS type,
+        ISOE.ISSUE_TIME AS issueTime,
+        OSO.SALE_ORDER_NO AS saleOrderNo,
+        OC.SALE_CHANGE_NO AS saleChangeNo,
+        OSO.MODIFIER AS saler,
+        OC.MODIFIER AS refunder,
+        DEPT1. NAME AS dep,
+        DEPT2. NAME AS ticketDep,
+        CUS. NAME AS customerName,
+        CUS.BALANCE_CORPORATION AS customerCompany,
+        OSO.SOURCE_CHANNEL_NO AS sourceChannel,
+        CER.PAY_WAY AS settleWay,
+        OSO.CUSTOMER_NO AS customerNo,
+        (
+            CASE CER.SETTLEMENT_STATUS
+            WHEN 0 THEN
+                "未结算"
+            WHEN 1 THEN
+                "已结算"
+            WHEN 2 THEN
+                "已审核"
+            ELSE
+                "---"
+            END
+        ) AS settleStatus,
+        OC.CHANGE_REASON AS reason,
+        ICE.CHANGE_REMARK AS remark,
+       OC.CREATE_TIME AS orderTime,
+        CASE
+        WHEN ICE.CHANGE_TYPE = 1 THEN
+            '废票'
+        ELSE
+            '退票'
+        END AS refundType
+        FROM
+            OS_SALECHANGE AS OC
+        LEFT JOIN OS_SALEORDER AS OSO ON (
+            OSO.SALE_ORDER_NO = OC.SALE_ORDER_NO
+            AND OSO.VALID = 1
+        )
+        LEFT JOIN OS_SALECHANGE_EXTEND AS OCE ON (
+            OCE.SALE_CHANGE_NO = OC.SALE_CHANGE_NO
+        )
+        LEFT JOIN OS_SALEORDER_EXTEND AS OSOEX ON (
+            OSOEX.SALE_ORDER_NO = OSO.SALE_ORDER_NO
+        )
+        LEFT JOIN OS_BUYORDER AS OBO ON (
+            OBO.BUSINESS_SIGN_NO = OSO.BUSINESS_SIGN_NO
+            AND OBO.VALID = 1
+        )
+        LEFT JOIN OS_BUYORDER_EXTEND AS OBOE ON (
+            OBO.BUY_ORDER_NO = OBOE.BUY_ORDER_NO
+        )
+        LEFT JOIN OS_CERTIFICATE AS CER ON (
+            CER.CERTIFICATE_NO = OCE.CERTIFICATE_NO
+        )
+        LEFT JOIN IFT_SALE_CHANGE_EXT AS ICE ON (
+            ICE.SALE_CHANGE_NO = OC.SALE_CHANGE_NO
+        )
+        LEFT JOIN IFT_SALE_ORDER_EXT AS ISOE ON (
+            ISOE.SALE_ORDER_NO = OC.SALE_ORDER_NO
+        )
+        LEFT JOIN CPS_CUSTOMER AS CUS ON (
+            OSO.CUSTOMER_NO = CUS.CUSTOMER_NO
+        )
+        LEFT JOIN CPS_SUPPLIER AS CSP ON (
+            OBO.SUPPLIER_NO = CSP.SUPPLIER_NO
+        )
+        LEFT JOIN SM_USER AS U1 ON (OSO.MODIFIER = U1.LOGIN_NAME)
+        LEFT JOIN SM_DEPT AS DEPT1 ON (DEPT1.ID = U1.DEPT_ID)
+        LEFT JOIN SM_USER AS U2 ON (OC.MODIFIER = U2.LOGIN_NAME)
+        LEFT JOIN SM_DEPT AS DEPT2 ON (DEPT2.ID = U2.DEPT_ID)
+       WHERE  OC.GOODS_TYPE = 2 AND OC.ORDER_CHANGE_TYPE IN ('1','2')
+       <if test="exactlyQuery!=null and exactlyQuery!=''and exactlyQuery!='1'">
+           <if test="refunder!=null and refunder!=''">
+               AND OC.MODIFIER=#{refunder,jdbcType=VARCHAR}
+           </if>
+           <if test="saler!=null and saler!=''">
+               AND OSO.MODIFIER=#{saler,jdbcType=VARCHAR}
+           </if>
+       </if>
+       <if test="exactlyQuery!=null and exactlyQuery!=''and exactlyQuery!='0'">
+           <if test="refunder!=null and refunder!=''">
+               AND OC.MODIFIER LIKE CONCAT(CONCAT('%', #{refunder}), '%')
+           </if>
+           <if test="saler!=null and saler!=''">
+               AND OSO.MODIFIER LIKE CONCAT(CONCAT('%', #{saler}), '%')
+           </if>
+       </if>
+       <if test="exactlyQuery==null or exactlyQuery!=''">
+           <if test="refunder!=null and refunder!=''">
+               AND OC.MODIFIER LIKE CONCAT(CONCAT('%', #{refunder}), '%')
+           </if>
+           <if test="saler!=null and saler!=''">
+               AND OSO.MODIFIER LIKE CONCAT(CONCAT('%', #{saler}), '%')
+           </if>
+       </if>
+       <if test="depId!=null and depId!=''">
+           AND DEPT1.ID=#{depId,jdbcType=VARCHAR}
+       </if>
+       <if test="ticketDepId!=null and ticketDepId!=''">
+           AND DEPT2.ID=#{ticketDepId,jdbcType=VARCHAR}
+       </if>
+       <if test="sourceChannel!=null and sourceChannel!=''">
+           AND OSO.SOURCE_CHANNEL_NO=#{sourceChannel,jdbcType=VARCHAR}
+       </if>
+       <if test="startDate!=null and startDate!=''">
+           AND ISOE.ISSUE_TIME &gt;=#{startDate,jdbcType=TIMESTAMP}
+       </if>
+       <if test="endDate!=null and endDate!=''">
+           AND ISOE.ISSUE_TIME &lt;=#{endDate,jdbcType=TIMESTAMP}
+       </if>
+       <if test="refundType!=null and refundType!=''">
+           AND ICE.CHANGE_TYPE =#{refundType,jdbcType=VARCHAR}
+       </if>
+       ORDER BY orderTime DESC
+   </select>
+
     <select id="getAll" resultMap="reportVoResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.ReportVo">
         SELECT
         OBOE.SUPPLIER_NO_NAME AS supplierName,
@@ -234,5 +388,128 @@
              AND ICE.CHANGE_TYPE =#{refundType,jdbcType=VARCHAR}
          </if>
      </select>
+
+    <select id="getAllRefundRecords" resultMap="reportVoResultMapWithList" parameterType="com.tempus.gss.product.ift.api.entity.vo.ReportVo">
+        SELECT
+        OC.CHILD_STATUS AS childStatus,
+        CSP.`NAME` AS supplierName,
+        ICE.CHANGE_TYPE AS type,
+        ISOE.ISSUE_TIME AS issueTime,
+        OSO.SALE_ORDER_NO AS saleOrderNo,
+        OC.SALE_CHANGE_NO AS saleChangeNo,
+        OSO.MODIFIER AS saler,
+        OC.MODIFIER AS refunder,
+        DEPT1. NAME AS dep,
+        DEPT2. NAME AS ticketDep,
+        CUS. NAME AS customerName,
+        CUS.BALANCE_CORPORATION AS customerCompany,
+        OSO.SOURCE_CHANNEL_NO AS sourceChannel,
+        CER.PAY_WAY AS settleWay,
+        OSO.CUSTOMER_NO AS customerNo,
+        (
+        CASE CER.SETTLEMENT_STATUS
+        WHEN 0 THEN
+        "未结算"
+        WHEN 1 THEN
+        "已结算"
+        WHEN 2 THEN
+        "已审核"
+        ELSE
+        "---"
+        END
+        ) AS settleStatus,
+        OC.CHANGE_REASON AS reason,
+        ICE.CHANGE_REMARK AS remark,
+        OC.CREATE_TIME AS orderTime,
+        CASE
+        WHEN ICE.CHANGE_TYPE = 1 THEN
+        '废票'
+        ELSE
+        '退票'
+        END AS refundType
+        FROM
+        OS_SALECHANGE AS OC
+        LEFT JOIN OS_SALEORDER AS OSO ON (
+        OSO.SALE_ORDER_NO = OC.SALE_ORDER_NO
+        AND OSO.VALID = 1
+        )
+        LEFT JOIN OS_SALECHANGE_EXTEND AS OCE ON (
+        OCE.SALE_CHANGE_NO = OC.SALE_CHANGE_NO
+        )
+        LEFT JOIN OS_SALEORDER_EXTEND AS OSOEX ON (
+        OSOEX.SALE_ORDER_NO = OSO.SALE_ORDER_NO
+        )
+        LEFT JOIN OS_BUYORDER AS OBO ON (
+        OBO.BUSINESS_SIGN_NO = OSO.BUSINESS_SIGN_NO
+        AND OBO.VALID = 1
+        )
+        LEFT JOIN OS_BUYORDER_EXTEND AS OBOE ON (
+        OBO.BUY_ORDER_NO = OBOE.BUY_ORDER_NO
+        )
+        LEFT JOIN OS_CERTIFICATE AS CER ON (
+        CER.CERTIFICATE_NO = OCE.CERTIFICATE_NO
+        )
+        LEFT JOIN IFT_SALE_CHANGE_EXT AS ICE ON (
+        ICE.SALE_CHANGE_NO = OC.SALE_CHANGE_NO
+        )
+        LEFT JOIN IFT_SALE_ORDER_EXT AS ISOE ON (
+        ISOE.SALE_ORDER_NO = OC.SALE_ORDER_NO
+        )
+        LEFT JOIN CPS_CUSTOMER AS CUS ON (
+        OSO.CUSTOMER_NO = CUS.CUSTOMER_NO
+        )
+        LEFT JOIN CPS_SUPPLIER AS CSP ON (
+        OBO.SUPPLIER_NO = CSP.SUPPLIER_NO
+        )
+        LEFT JOIN SM_USER AS U1 ON (OSO.MODIFIER = U1.LOGIN_NAME)
+        LEFT JOIN SM_DEPT AS DEPT1 ON (DEPT1.ID = U1.DEPT_ID)
+        LEFT JOIN SM_USER AS U2 ON (OC.MODIFIER = U2.LOGIN_NAME)
+        LEFT JOIN SM_DEPT AS DEPT2 ON (DEPT2.ID = U2.DEPT_ID)
+        WHERE  OC.GOODS_TYPE = 2 AND OC.ORDER_CHANGE_TYPE IN ('1','2')
+        <if test="exactlyQuery!=null and exactlyQuery!=''and exactlyQuery!='1'">
+            <if test="refunder!=null and refunder!=''">
+                AND OC.MODIFIER=#{refunder,jdbcType=VARCHAR}
+            </if>
+            <if test="saler!=null and saler!=''">
+                AND OSO.MODIFIER=#{saler,jdbcType=VARCHAR}
+            </if>
+        </if>
+        <if test="exactlyQuery!=null and exactlyQuery!=''and exactlyQuery!='0'">
+            <if test="refunder!=null and refunder!=''">
+                AND OC.MODIFIER LIKE CONCAT(CONCAT('%', #{refunder}), '%')
+            </if>
+            <if test="saler!=null and saler!=''">
+                AND OSO.MODIFIER LIKE CONCAT(CONCAT('%', #{saler}), '%')
+            </if>
+        </if>
+        <if test="exactlyQuery==null or exactlyQuery!=''">
+            <if test="refunder!=null and refunder!=''">
+                AND OC.MODIFIER LIKE CONCAT(CONCAT('%', #{refunder}), '%')
+            </if>
+            <if test="saler!=null and saler!=''">
+                AND OSO.MODIFIER LIKE CONCAT(CONCAT('%', #{saler}), '%')
+            </if>
+        </if>
+        <if test="depId!=null and depId!=''">
+            AND DEPT1.ID=#{depId,jdbcType=VARCHAR}
+        </if>
+        <if test="ticketDepId!=null and ticketDepId!=''">
+            AND DEPT2.ID=#{ticketDepId,jdbcType=VARCHAR}
+        </if>
+        <if test="sourceChannel!=null and sourceChannel!=''">
+            AND OSO.SOURCE_CHANNEL_NO=#{sourceChannel,jdbcType=VARCHAR}
+        </if>
+        <if test="startDate!=null and startDate!=''">
+            AND ISOE.ISSUE_TIME &gt;=#{startDate,jdbcType=TIMESTAMP}
+        </if>
+        <if test="endDate!=null and endDate!=''">
+            AND ISOE.ISSUE_TIME &lt;=#{endDate,jdbcType=TIMESTAMP}
+        </if>
+        <if test="refundType!=null and refundType!=''">
+            AND ICE.CHANGE_TYPE =#{refundType,jdbcType=VARCHAR}
+        </if>
+        ORDER BY orderTime DESC
+    </select>
+
 
 </mapper>

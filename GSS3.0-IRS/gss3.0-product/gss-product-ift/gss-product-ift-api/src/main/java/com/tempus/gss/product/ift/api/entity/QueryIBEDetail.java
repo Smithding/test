@@ -93,6 +93,11 @@ public class QueryIBEDetail implements Serializable {
     private String backArrOD;
 
     private String pnr;
+
+    /**
+     * 退改签规则
+     */
+    private String fareRule;
     
     /**
      * 航线仓位价格总和.
@@ -120,6 +125,14 @@ public class QueryIBEDetail implements Serializable {
 
     /**各个乘客类型数量统计*/
     private Map<String,Integer> passengerTypeCount;
+
+    public String getFareRule() {
+        return fareRule;
+    }
+
+    public void setFareRule(String fareRule) {
+        this.fareRule = fareRule;
+    }
 
     public String getAvailableJourneyJson() {
         return availableJourneyJson;
