@@ -1,5 +1,6 @@
 package com.tempus.gss.product.ift.api.utils.reportExtends;
 
+import com.tempus.gss.product.ift.api.entity.vo.ReportRefundVo;
 import com.tempus.gss.product.ift.api.entity.vo.ReportVo;
 import com.tempus.gss.product.ift.api.utils.ExportReportUtil;
 import org.apache.poi.hssf.usermodel.HSSFCell;
@@ -12,7 +13,7 @@ import org.apache.poi.ss.usermodel.DataFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-public class RefundReport extends ExportReportUtil<ReportVo> {
+public class RefundReport extends ExportReportUtil<ReportRefundVo> {
     /**
      * 构造方法，传入要导出的数据,子类继承这个类，重写构造方法；
      *
@@ -20,16 +21,16 @@ public class RefundReport extends ExportReportUtil<ReportVo> {
      * @param rowName
      * @param dataList
      */
-    public RefundReport(String title, String[] rowName, List<ReportVo> dataList, int col) {
+    public RefundReport(String title, String[] rowName, List<ReportRefundVo> dataList, int col) {
         super(title, rowName, dataList, col);
     }
     
     @Override
-    public void setSheetValue(List<ReportVo> dataList, HSSFSheet sheet, HSSFCellStyle cellStyle, HSSFCellStyle style, DataFormat dataFormat) {
+    public void setSheetValue(List<ReportRefundVo> dataList, HSSFSheet sheet, HSSFCellStyle cellStyle, HSSFCellStyle style, DataFormat dataFormat) {
         SimpleDateFormat sf = new SimpleDateFormat("yyyy/MM/DD HH:mm");
         for (int i = 0; i < dataList.size(); i++) {
             //遍历每个对象
-            ReportVo obj = dataList.get(i);
+            ReportRefundVo obj = dataList.get(i);
             //创建所需的行数
             HSSFRow row = sheet.createRow(i + 3);
             //设置防止数字文本过长，导致单元格显示科学计数法
@@ -63,7 +64,7 @@ public class RefundReport extends ExportReportUtil<ReportVo> {
                     break;
                     case 3: {
                         //销售单号
-                        cell.setCellValue(obj.getSaleOrderNo());
+                        cell.setCellValue(obj.getSaleOrderNo().toString());
                         cell.setCellType(CellType.STRING);
                         cell.setCellStyle(cellStyle);
                         setOlderStyle = false;
@@ -92,8 +93,8 @@ public class RefundReport extends ExportReportUtil<ReportVo> {
                     case 7: {
                         //汇率
                         if (null != obj.getExchange()) {
-                            cell.setCellValue(obj.getExchange().toString());
-                            cell.setCellType(CellType.NUMERIC);
+                            cell.setCellValue(obj.getExchange().doubleValue());
+                            cell.setCellType(CellType.STRING);
                         } else {
                             cell.setCellValue("--");
                             cell.setCellType(CellType.STRING);
@@ -179,9 +180,9 @@ public class RefundReport extends ExportReportUtil<ReportVo> {
                     }
                     break;
                     case 15: {
-                        //营业部毛利
-                        if (null != obj.getDepGrossProfit()) {
-                            cell.setCellValue(obj.getDepGrossProfit().doubleValue());
+                        //冲抵营业毛利
+                        if (null != obj.getChargeProfit()) {
+                            cell.setCellValue(obj.getChargeProfit().doubleValue());
                             
                         } else {
                             cell.setCellValue(0);
@@ -189,7 +190,7 @@ public class RefundReport extends ExportReportUtil<ReportVo> {
                         cell.setCellType(CellType.NUMERIC);
                     }
                     break;
-                    case 16: {
+                    /*case 16: {
                         //毛利
                         if (null != obj.getGrossProfit()) {
                             cell.setCellValue(obj.getGrossProfit().doubleValue());
@@ -199,50 +200,50 @@ public class RefundReport extends ExportReportUtil<ReportVo> {
                         }
                         cell.setCellType(CellType.NUMERIC);
                     }
-                    break;
-                    case 17: {
+                    break;*/
+                    case 16: {
                         //出票员
                         cell.setCellValue(obj.getSaler());
                         cell.setCellType(CellType.STRING);
                     }
                     break;
-                    case 18: {
+                    case 17: {
                         //退票员
                         cell.setCellValue(obj.getRefunder());
                         cell.setCellType(CellType.STRING);
                     }
                     break;
-                    case 19: {
+                    case 18: {
                         //接单部门
                         cell.setCellValue(obj.getDep());
                         cell.setCellType(CellType.STRING);
                     }
                     break;
-                    case 20: {
+                    case 19: {
                         //退票部门
                         cell.setCellValue(obj.getTicketDep());
                         cell.setCellType(CellType.STRING);
                     }
                     break;
-                    case 21: {
+                    case 20: {
                         //客户名称
                         cell.setCellValue(obj.getCustomerName());
                         cell.setCellType(CellType.STRING);
                     }
                     break;
-                    case 22: {
+                    case 21: {
                         //所属公司
                         cell.setCellValue(obj.getCustomerCompany());
                         cell.setCellType(CellType.STRING);
                     }
                     break;
-                    case 23: {
+                    case 22: {
                         //结算方式
                         cell.setCellValue(obj.getSettleWay());
                         cell.setCellType(CellType.STRING);
                     }
                     break;
-                    case 24: {
+                    case 23: {
                         //会员号
                         cell.setCellValue(obj.getCustomerNo());
                         cell.setCellType(CellType.STRING);
@@ -250,19 +251,19 @@ public class RefundReport extends ExportReportUtil<ReportVo> {
                         setOlderStyle = false;
                     }
                     break;
-                    case 25: {
+                    case 24: {
                         //订单来源渠道
                         cell.setCellValue(obj.getSourceChannel());
                         cell.setCellType(CellType.STRING);
                     }
                     break;
-                    case 26: {
+                    case 25: {
                         //退票原因
                         cell.setCellValue(obj.getReason());
                         cell.setCellType(CellType.STRING);
                     }
                     break;
-                    case 27: {
+                    case 26: {
                         //退票备注
                         cell.setCellValue(obj.getRemark());
                         cell.setCellType(CellType.STRING);
@@ -304,7 +305,7 @@ public class RefundReport extends ExportReportUtil<ReportVo> {
         //结算净价
         row.createCell(13).setCellType(CellType.BLANK);
         row.createCell(13).setCellFormula("SUM(N4:N" + curRow + ")");
-        //营业部毛利
+        //冲抵营业毛利
         row.createCell(15).setCellType(CellType.BLANK);
         row.createCell(15).setCellFormula("SUM(P4:P" + curRow + ")");
         //公式
