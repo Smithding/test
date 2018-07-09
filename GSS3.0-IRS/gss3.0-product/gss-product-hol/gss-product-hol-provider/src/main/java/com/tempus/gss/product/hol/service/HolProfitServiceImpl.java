@@ -6,11 +6,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
@@ -633,6 +636,81 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 		}
 		return min;
 	}
+	
+	@Override
+	@Async
+	public Future<List<ProfitPrice>> computeProfitByAgentNum(Agent agent, Long customerTypeNo) {
+		return new AsyncResult<List<ProfitPrice>>(computeProfitByAgent(agent, customerTypeNo));
+	}
+	
+	
+	@Override
+	public List<ProfitPrice> computeProfitByAgent(Agent agent, Long customerTypeNo) {
+		log.info("酒店控润查询开始, 入参: customerTypeNo: "+customerTypeNo);
+		List<ProfitPrice> profitPriceList = null;
+		try {
+			if(agent == null || customerTypeNo==null){
+				throw new GSSException("根据customerTypeNo获取政策错误", "0302", "agent/传入参数为空");
+			}
+			QueryProfitPrice query=new QueryProfitPrice();
+			query.setCustomerTypeNo(customerTypeNo);
+			profitPriceList=profitPriceMapper.queryProfitPriceList(query);
+			if(StringUtil.isNullOrEmpty(profitPriceList)){
+				List<Channel> channelList=channelService.getTree(agent, customerTypeNo, 4);
+				if(StringUtil.isNotNullOrEmpty(channelList)){
+						for(Channel chanss : channelList){
+							if(chanss.getLevel().equals(4L)){
+								if(chanss.getChilds().size() > 0){
+									query.setCustomerTypeNo(chanss.getChilds().get(0).getThreeType());
+									profitPriceList=profitPriceMapper.queryProfitPriceList(query);
+									if(StringUtil.isNullOrEmpty(profitPriceList)){
+										query.setCustomerTypeNo(chanss.getChilds().get(0).getTwoType());
+										profitPriceList=profitPriceMapper.queryProfitPriceList(query);
+										if(StringUtil.isNullOrEmpty(profitPriceList)){
+											query.setCustomerTypeNo(chanss.getChilds().get(0).getOneType());
+											profitPriceList=profitPriceMapper.queryProfitPriceList(query);
+											if(StringUtil.isNullOrEmpty(profitPriceList)){
+												throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo无对应策略组 ");
+											}
+										}
+									}
+								}
+							}
+							if(chanss.getLevel().equals(3L)){
+								if(chanss.getChilds().size() > 0){
+									query.setCustomerTypeNo(chanss.getChilds().get(0).getTwoType());
+									profitPriceList=profitPriceMapper.queryProfitPriceList(query);
+									if(StringUtil.isNullOrEmpty(profitPriceList)){
+										query.setCustomerTypeNo(chanss.getChilds().get(0).getOneType());
+										profitPriceList=profitPriceMapper.queryProfitPriceList(query);
+										if(StringUtil.isNullOrEmpty(profitPriceList)){
+											throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo无对应策略组 ");
+										}
+									}
+								}
+							}
+							if(chanss.getLevel().equals(2L)){
+								if(chanss.getChilds().size() > 0){
+									query.setCustomerTypeNo(chanss.getChilds().get(0).getOneType());
+									profitPriceList=profitPriceMapper.queryProfitPriceList(query);
+									if(StringUtil.isNullOrEmpty(profitPriceList)){
+										throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo无对应策略组 ");
+									}
+								}
+							}
+							if(chanss.getLevel().equals(1L)){
+								throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo为最高组级无对应控润");
+							}
+						}
+				}
+			}
+		} catch (Exception e) {
+			throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,customerTypeNo无对应价格控润 "+e.getMessage());
+		}
+		return profitPriceList;
+	}
+	
+	
 
 	@Override
 	public int cancelByProfitNo(Agent agent, Long id) {
@@ -659,7 +737,7 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 		return flag;
 		
 	}
-	
+
 	
 	
 	
