@@ -352,6 +352,11 @@ public class ResBaseInfo implements Serializable{
 		return cityName;
 	}
 	public void setCityName(String cityName) {
+		if(cityName.endsWith("市")) {
+			cityName = cityName.replace("市", "");
+		}else if( cityName.endsWith("县")) {
+			cityName = cityName.replace("县", "");
+		}
 		this.cityName = cityName;
 	}
 	public Integer getSectionId() {
