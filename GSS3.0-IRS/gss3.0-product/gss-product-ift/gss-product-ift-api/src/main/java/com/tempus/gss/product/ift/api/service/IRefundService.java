@@ -178,4 +178,7 @@ public interface IRefundService {
 	 */
 	void assignBuyRefund(RequestWithActor<Long> requestWithActor);
 
+	//提交航司后 采购打回重审
+	void shoppingReAudit(RequestWithActor<Long> requestWithActor);
+
 }

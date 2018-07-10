@@ -356,12 +356,7 @@ public class RefundServiceImpl implements IRefundService {
 			}
 			saleChangeExt.setCustomerNo(customerNo);
 			saleChangeExt.setCustomerTypeNo(customerTypeNo);
-			if(StringUtils.isNotBlank(saleOrder.getSourceChannelNo()) && StringUtils.equals("OP",saleOrder.getSourceChannelNo())){
-				User user = userService.findUserByLoginName(agent,agent.getAccount());
-				if(user!=null) {
-					saleChangeExt.setLocker(agent.getId());
-				}
-			}
+			setExtLockerVal(saleOrder,agent,saleChangeExt);
 			log.info("申请退费单时保存的退费单信息:{}",saleChangeExt.toString());
 			saleChangeExtDao.insertSelective(saleChangeExt);
 			/*//销售退废分单操作
@@ -1175,6 +1170,7 @@ public class RefundServiceImpl implements IRefundService {
 					saleChangeVo.setLocker(saleChangeExt.getLocker());
 					//设置操作人
 					saleChangeVo.setHandlers(saleChangeExt.getHandlers());
+					saleChangeVo.setAirLineRefundStatus(saleChangeExt.getAirLineRefundStatus());
 					saleChangeVoList.add(saleChangeVo);
 				}
 				page.setRecords(saleChangeVoList);
@@ -1362,7 +1358,7 @@ public class RefundServiceImpl implements IRefundService {
 			if ((wasteOrderNo == null || wasteOrderNo == 0L) && saleChangeExts != null) {
 				taskAssign(saleChangeExts, senders, maxOrderNum, agent, updateTime);
 			}else{
-				derectAssign(saleChangeExt, senders, maxOrderNum, agent, updateTime);
+				directAssign(saleChangeExt, senders, maxOrderNum, agent, updateTime);
 			}
 			log.info("此次分单结束...");
 		} else {
@@ -1424,13 +1420,55 @@ public class RefundServiceImpl implements IRefundService {
 			if ((refundOrderNo == null || refundOrderNo == 0L) && saleChangeExts != null) {
 				taskAssign(saleChangeExts, senders, maxOrderNum, agent, updateTime);
 			}else{
-				derectAssign(saleChangeExt, senders, maxOrderNum, agent, updateTime);
+				directAssign(saleChangeExt, senders, maxOrderNum, agent, updateTime);
 			}
 			log.info("此次分单结束...");
 		} else {
-			log.info("未查询在线出票员...");
+			log.info("未查询到在线出票员...");
 		}
 
+	}
+
+	@Override
+	public void shoppingReAudit(RequestWithActor<Long> requestWithActor) {
+		if (requestWithActor.getEntity() == null && requestWithActor.getEntity() == 0L)
+			throw new GSSException("废退单查询参数空", "0001", "查询废退改签单失败");
+		SaleChangeExt saleChangeExt = refundService.getSaleChangeExtByNo(requestWithActor);
+		SaleChange saleChange = saleChangeExt.getSaleChange();
+		Long saleChangeNo = saleChange.getSaleChangeNo();
+		if (saleChangeExt == null || saleChangeNo == null || saleChangeNo == 0L)
+			throw new GSSException("废退单查询结果空", "0001", "查询废退改签单失败");
+		log.info("");
+		//修改销售单状态
+		Date modifyTime = new Date();
+		Agent agent = requestWithActor.getAgent();
+		saleChange.setModifier(agent.getAccount());
+		saleChange.setModifyTime(modifyTime);
+		saleChange.setChildStatus(2);//
+		saleChangeService.update(agent, saleChange);
+		//修改采购单状态
+		Long saleOrdernNo = saleChange.getSaleOrderNo();
+		String buyModifier = "";
+		List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(agent, saleOrdernNo);
+		for(BuyOrder buyOrder:buyOrderList){
+			List<BuyChange> buyChangeList = buyChangeService.getBuyChangesByBONo(agent, buyOrder.getBuyOrderNo());
+			for(BuyChange buyChange:buyChangeList){
+				buyModifier = buyChange.getModifier();
+				buyChange.setChildStatus(1);
+				buyChange.setModifier(agent.getAccount());
+				buyChange.setModifyTime(modifyTime);
+				log.info("修改采购变更单信息"+buyChange.toString());
+				buyChangeService.update(agent, buyChange);
+			}
+		}
+		//更新前一位采购人的订单处理数量
+		User user = userService.findUserByLoginName(agent,buyModifier);
+		saleChangeExt.setLocker(user.getId());
+		RequestWithActor<SaleChangeExt> saleOrderChange = new RequestWithActor<>();
+		saleOrderChange.setAgent(agent);
+		saleOrderChange.setEntity(saleChangeExt);
+		refundService.updateSaleChangeExt(saleOrderChange);
+		iTicketSenderService.updateByLockerId(agent, user.getId(), "BUY_REFUSE_NUM");
 	}
 
 	/**
@@ -1470,7 +1508,7 @@ public class RefundServiceImpl implements IRefundService {
 	 * @param agent
 	 * @param updateTime
 	 */
-	private void derectAssign(SaleChangeExt saleChangeExt,List<TicketSender> senders, Long maxOrderNum,Agent agent,Date updateTime){
+	private void directAssign(SaleChangeExt saleChangeExt,List<TicketSender> senders, Long maxOrderNum,Agent agent,Date updateTime){
 		log.info("第三步：判断出票员手头出票订单数量...");
 		for (TicketSender peopleInfo : senders) {
 			log.info(peopleInfo.getName() + "未处理采购单数量：" + peopleInfo.getBuyRefuseNum());
@@ -1489,6 +1527,7 @@ public class RefundServiceImpl implements IRefundService {
 		}
 	}
 
+	//获取最大分单数量
 	private Long getMaxAbleAssignNum(Agent agent){
 		Long maxOrderNum = 0L;
 		IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
@@ -1500,4 +1539,14 @@ public class RefundServiceImpl implements IRefundService {
 		return  maxOrderNum;
 	}
 
+	//设置退废单扩展表的locker值
+	private  SaleChangeExt setExtLockerVal(SaleOrder saleOrder,Agent agent,SaleChangeExt saleChangeExt){
+		if(StringUtils.isNotBlank(saleOrder.getSourceChannelNo()) && StringUtils.equals("OP",saleOrder.getSourceChannelNo())){
+			User user = userService.findUserByLoginName(agent,agent.getAccount());
+			if(user!=null) {
+				saleChangeExt.setLocker(agent.getId());
+			}
+		}
+		return  saleChangeExt;
+	}
 }

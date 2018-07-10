@@ -12,11 +12,8 @@ import java.util.Date;
  */
 public class SaleChangeVo implements Serializable{
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
+	private static final long serialVersionUID = 1373769717613405911L;
 	/**
 	 *  该签单编号
 	 */
@@ -148,6 +145,8 @@ public class SaleChangeVo implements Serializable{
 
 	//操作人
 	private String handlers;
+
+	private Integer airLineRefundStatus;
 
 	public String getHandlers() {
 		return handlers;
@@ -398,6 +397,12 @@ public class SaleChangeVo implements Serializable{
 	public void setRefundStatus(Integer refundStatus) {
 		this.refundStatus = refundStatus;
 	}
-	
-	
+
+	public Integer getAirLineRefundStatus() {
+		return airLineRefundStatus;
+	}
+
+	public void setAirLineRefundStatus(Integer airLineRefundStatus) {
+		this.airLineRefundStatus = airLineRefundStatus;
+	}
 }

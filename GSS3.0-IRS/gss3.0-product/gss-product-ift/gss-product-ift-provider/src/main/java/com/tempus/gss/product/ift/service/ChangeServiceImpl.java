@@ -26,6 +26,7 @@ import com.tempus.gss.system.service.IMaxNoService;
 import com.tempus.gss.system.service.IUserService;
 import com.tempus.gss.vo.Agent;
 import io.swagger.models.auth.In;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -312,6 +313,8 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeExt.setOwner(agent.getOwner());
             saleChangeExt.setCustomerNo(agent.getNum());
             saleChangeExt.setCustomerTypeNo(agent.getType());
+            setChangeOrderLocker(saleChangeExt,agent,saleOrder);
+            log.info("申请改签单时保存的改签单信息:{}",saleChangeExt.toString());
             saleChangeExtDao.insertSelective(saleChangeExt);
 
             //销售改签分单
@@ -1891,5 +1894,16 @@ public class ChangeServiceImpl implements IChangeService {
                 break;
             }
         }
+    }
+
+    //改签扩展表锁单员设置
+    private SaleChangeExt setChangeOrderLocker(SaleChangeExt saleChangeExt,Agent agent,SaleOrder saleOrder){
+        if(StringUtils.isNotBlank(saleOrder.getSourceChannelNo()) && StringUtils.equals("OP",saleOrder.getSourceChannelNo())){
+            User user = userService.findUserByLoginName(agent,agent.getAccount());
+            if(user!=null) {
+                saleChangeExt.setLocker(agent.getId());
+            }
+        }
+        return  saleChangeExt;
     }
 }

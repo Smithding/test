@@ -11,6 +11,8 @@ import java.util.List;
 
 public class BuyOrderExt implements Serializable {
 
+
+	private static final long serialVersionUID = -2447333037554441472L;
 	/**
 	 * 采购订单编号
 	 */
@@ -129,7 +131,7 @@ public class BuyOrderExt implements Serializable {
 	
 	private String  buyRemarke;
 
-	private static final long serialVersionUID = 1L;
+	private Integer airLineRefundStatus;
 
 	public Long getBuyOrderNo() {
 
@@ -345,5 +347,13 @@ public class BuyOrderExt implements Serializable {
 
 	public void setBuyRemarke(String buyRemarke) {
 		this.buyRemarke = buyRemarke;
+	}
+
+	public Integer getAirLineRefundStatus() {
+		return airLineRefundStatus;
+	}
+
+	public void setAirLineRefundStatus(Integer airLineRefundStatus) {
+		this.airLineRefundStatus = airLineRefundStatus;
 	}
 }
