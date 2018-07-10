@@ -1,10 +1,13 @@
 package com.tempus.gss.product.hol.api.service;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.concurrent.Future;
 
 import com.baomidou.framework.service.ISuperService;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.hol.api.entity.Profit;
+import com.tempus.gss.product.hol.api.entity.ProfitPrice;
 import com.tempus.gss.product.hol.api.entity.response.QTPrice;
 import com.tempus.gss.product.hol.api.entity.vo.ProfitVo;
 import com.tempus.gss.vo.Agent;
@@ -64,6 +67,12 @@ public interface IHolProfitService extends ISuperService<Profit> {
 	 * @return
 	 */
 	public BigDecimal computeTcProfitPrice(Agent agent, Integer price, Long customerTypeNo);
+	
+	public Future<List<ProfitPrice>> computeProfitByAgentNum(Agent agent, Long customerTypeNo);
+	
+	public List<ProfitPrice> computeProfitByAgent(Agent agent, Long customerTypeNo);
+	
+	
 	
 	public int cancelByProfitNo(Agent agent, Long id);
 	

@@ -663,8 +663,17 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		ResultTc<IsBookOrder> isBookOrderBase = null;
 		IsBookOrder resBase =null;
 		try {
+			Calendar da = Calendar.getInstance();
+			SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			if(StringUtils.isEmpty(isBookOrderReq.getLatestArrivalTime())) {
 				isBookOrderReq.setLatestArrivalTime(isBookOrderReq.getComeTime());
+			}
+			if(isBookOrderReq.getComeTime().substring(11, 13).compareTo("00") >= 0 && isBookOrderReq.getComeTime().substring(11, 13).compareTo("06") <= 0) {
+				da.setTime(simple.parse(isBookOrderReq.getComeDate()));
+				da.set(Calendar.HOUR, 23);
+				da.set(Calendar.MINUTE, 59);
+				da.set(Calendar.SECOND, 0);
+				isBookOrderReq.setEarliestArrivalTime(sim.format(da.getTime()));
 			}
 			/*SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Calendar da = Calendar.getInstance();

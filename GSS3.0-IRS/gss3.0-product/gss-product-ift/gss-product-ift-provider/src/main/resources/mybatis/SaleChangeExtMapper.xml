@@ -79,6 +79,7 @@
                     column="SALE_CHANGE_NO"
                     select="com.tempus.gss.product.ift.dao.PassengerRefundPriceDao.selectPassengerRefundPriceBySaleOrderNo"/>
     </resultMap>
+
     <sql id="Base_Column_List">
         SALE_CHANGE_NO, ID, OWNER, REFUND_WAY,  MODIFIER, STATUS, MODIFY_TIME,
         VALID, CREATE_TIME, CREATOR, LOCKER, LOCK_TIME, CHANGE_TYPE, CONTACT_NAME, CONTACT_MOBILE,
@@ -543,8 +544,8 @@
                 PNR_No=#{pnrNo,jdbcType=BIGINT},
             </if>
             <if test="changeRemark !=null">
-                CHANGE_REMARK= #{changeRemark,jdbcType=VARCHAR},
-            </if>
+            CHANGE_REMARK= #{changeRemark,jdbcType=VARCHAR},
+        </if>
             <if test="currency!=null and currency!=''">
                 CURRENCY=#{currency,jdbcType=VARCHAR},
             </if>
@@ -587,7 +588,10 @@
             CUSTOMER_NO        = #{customerNo,jdbcType=BIGINT},
             CUSTOMER_TYPE_NO   = #{customerTypeNo,jdbcType=BIGINT},
             PNR_NO             = #{pnrNo,jdbcType=BIGINT},
-            DRAWER_LOGIN_NAME  = #{drawerLoginName,jdbcType=VARCHAR}
+            DRAWER_LOGIN_NAME  = #{drawerLoginName,jdbcType=VARCHAR},
+            <if test="changeRemark !=null">
+                CHANGE_REMARK= #{changeRemark,jdbcType=VARCHAR}
+            </if>
         WHERE SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
     </update>
     <select id="queryBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">

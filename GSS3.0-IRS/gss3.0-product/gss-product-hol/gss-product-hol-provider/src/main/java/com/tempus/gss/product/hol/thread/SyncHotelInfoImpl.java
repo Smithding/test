@@ -9,9 +9,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,6 +28,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
+import com.tempus.gss.product.hol.api.entity.ProfitPrice;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.AssignDateHotelReq;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
@@ -47,6 +50,7 @@ import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
 import com.tempus.gss.product.hol.api.util.DateUtil;
 import com.tempus.gss.product.hol.service.TCHotelSupplierServiceImpl;
+import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 
 @Service
@@ -67,7 +71,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	@Autowired
 	private MongoTemplate mongoTemplate1;
 	
-	@Reference
+	@Autowired
 	IHolProfitService holProfitService;
 	
 	@Reference
@@ -142,7 +146,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 
 	@Override
 	public ResBaseInfo queryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
-		// long start = System.currentTimeMillis();
+		 long start = System.currentTimeMillis();
 		if (StringUtil.isNullOrEmpty(agent)) {
             logger.error("agent对象为空");
             throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
@@ -177,7 +181,10 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			assignDateHotelReq.setResId(resId);
 			assignDateHotelReq.setSourceFrom("-1");
 			assignDateHotelReq.setStartTime(startTime);
-			assignDateHotelReq.setEndTime(endTime);
+			Calendar calendar = Calendar.getInstance();
+	        calendar.setTime(sdf.parse(endTime));
+	        calendar.add(Calendar.DAY_OF_MONTH, -1);
+			assignDateHotelReq.setEndTime(sdf.format(calendar.getTime()));
 			AssignDateHotel assignDateHotel=  hotelInterService.queryAssignDateHotel(assignDateHotelReq);
 			while(true) {
 				if( resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && imgInfoSumFuture.isDone()) {
@@ -354,16 +361,422 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					tcResBaseInfo.setImgInfoList(list2);
 					tcResBaseInfo.setProDetails(ProInfoDetaisList);
 				}
-			}else {
-				return null;
 			}
 			
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
-		//long end = System.currentTimeMillis();  
-	    //System.out.println("完成任务一，耗时：" + (end - start) + "毫秒"); 
+		long end = System.currentTimeMillis();  
+	    System.out.println("完成任务queryHotelDetail，耗时：" + (end - start) + "毫秒"); 
 		return tcResBaseInfo;
+	}
+	
+	@Override
+	public ResBaseInfo newQueryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
+				long start = System.currentTimeMillis();
+				if (StringUtil.isNullOrEmpty(agent)) {
+		            logger.error("agent对象为空");
+		            throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
+		        }else{
+		        	if(StringUtil.isNullOrEmpty(agent.getType())){
+		        		throw new GSSException("获取某一酒店详细信息", "0102", "agentType为空");
+		        	}
+		        }
+				if (StringUtil.isNullOrEmpty(resId)) {
+		            logger.error("酒店id为空");
+		            throw new GSSException("获取某一酒店详细信息", "0100", "酒店id为空");
+		        }
+				if (StringUtil.isNullOrEmpty(startTime)) {
+					logger.error("开始日期为空");
+		            throw new GSSException("获取某一酒店详细信息", "0105", "开始日期为空");
+		        }
+		        if (StringUtil.isNullOrEmpty(endTime)) {
+		            logger.error("结束日期为空");
+		            throw new GSSException("获取某一酒店详细信息", "0105", "结束日期为空");
+		        }
+		        ResBaseInfo tcResBaseInfo = null;
+		        Integer sumPrice=0;
+		        Integer days = 0;
+				try {
+					days= DateUtil.daysBetween(startTime, endTime);
+				//	Future<AssignDateHotel> assignDateHotelFuture = tcHotelSupplierService.queryListById(resId, AssignDateHotel.class);
+					Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryListById(resId, ResProBaseInfos.class);
+					Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryListById(resId, ResBaseInfo.class);
+					Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryListById(resId, ImgInfoSum.class);
+					Future<List<ProfitPrice>> computeProfitByAgentFu = null;
+					if(!agent.getNum().equals(401803070321014723L)) {
+						computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+					}
+					AssignDateHotelReq assignDateHotelReq=new AssignDateHotelReq();
+					assignDateHotelReq.setResId(resId);
+					assignDateHotelReq.setSourceFrom("-1");
+					assignDateHotelReq.setStartTime(startTime);
+					Calendar calendar = Calendar.getInstance();
+			        calendar.setTime(sdf.parse(endTime));
+			        calendar.add(Calendar.DAY_OF_MONTH, -1);
+					assignDateHotelReq.setEndTime(sdf.format(calendar.getTime()));
+					AssignDateHotel assignDateHotel=  hotelInterService.queryAssignDateHotel(assignDateHotelReq);
+					while(true) {
+						if( resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && imgInfoSumFuture.isDone()) {
+							break;
+						}
+					}
+					
+					tcResBaseInfo = resBaseInfoFuture.get();
+					ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
+					ImgInfoSum imgInfoSum = imgInfoSumFuture.get();
+					
+					if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())) {
+						List<ProInfoDetail> proInfoDetailList= assignDateHotel.getProInfoDetailList();
+						List<ResProBaseInfo> resProBaseInfoListBeFore= resProBaseInfos.getResProBaseInfos();
+						List<ImgInfo> imgInfoList= imgInfoSum.getImgInfoList();
+						
+						if(StringUtil.isNotNullOrEmpty(tcResBaseInfo) && StringUtil.isNotNullOrEmpty(resProBaseInfoListBeFore)){
+							List<ImgInfo> list2=new ArrayList<ImgInfo>();
+							Map<String, ImgInfo> mm = new HashMap<String, ImgInfo>();
+							if(imgInfoList!=null && imgInfoList.size() > 0) {
+								mm = imgInfoList.stream().collect(Collectors.toMap(ImgInfo::getResProId, a -> a,(k1,k2)->k1));
+								list2 = mm.entrySet().stream().map(et ->et.getValue()).collect(Collectors.toList());
+							}
+							
+							List<ResProBaseInfo> resProBaseInfoList = new ArrayList<ResProBaseInfo>();
+							for(ProInfoDetail proSaleKey : proInfoDetailList) {
+								Integer firstPrice = 999999;
+								List<ResProBaseInfo> filterList = resProBaseInfoListBeFore.stream().filter(pro -> pro.getProductUniqueId().equals(proSaleKey.getProductUniqueId())).collect(Collectors.toList());
+								if(filterList != null && filterList.size() >0) {
+									ResProBaseInfo pro = filterList.get(0);
+									TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
+									List<Integer> pppRice = new ArrayList<Integer>();
+		 	            			Calendar da = Calendar.getInstance(); 
+		                   			 for (int i = 0; i < days; i++) {
+		                   				 ProSaleInfoDetail ProSaleInfoDetail=new ProSaleInfoDetail();
+		                   				 ProSaleInfoDetail.setDistributionSalePrice(0);
+		                   				 da.setTime(sdf.parse(startTime));
+		                   				 da.add(Calendar.DAY_OF_MONTH, i);
+		                   				 mapPro.put(sdf.format(da.getTime()), ProSaleInfoDetail);
+		                				}
+									TreeMap<String, ProSaleInfoDetail> proSaleInfoDetails = proSaleKey.getProSaleInfoDetails();
+		       			 			if(StringUtil.isNotNullOrEmpty(proSaleInfoDetails)) {
+		       			 				if(proSaleInfoDetails.containsKey(DateUtil.stringToLonString(startTime))) {
+		           			 				Integer firProPrice = proSaleInfoDetails.get(DateUtil.stringToLonString(startTime)).getDistributionSalePrice();
+		           			 				if(StringUtil.isNotNullOrEmpty(firProPrice)) {
+		           			 					if(computeProfitByAgentFu!=null) {
+		           			 						List<ProfitPrice> computeProfitByAgent = computeProfitByAgentFu.get();
+			           			 					if(computeProfitByAgent != null && computeProfitByAgent.size() > 0) {
+			               			 					for(ProfitPrice profit : computeProfitByAgent) {
+			               			 						BigDecimal lowerPrice = profit.getPriceFrom();
+			               			 						BigDecimal upPrice = profit.getPriceTo();
+			               			 						BigDecimal firPrice = new BigDecimal(firProPrice);
+			               			 						if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
+			               			 							BigDecimal rate = profit.getRate();
+			               			 							rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
+			               			 							pro.setRebateRateProfit(rate);
+			               			 						}
+			               			 					}
+			           			 					}
+		           			 					}
+		           			 				}
+		       			 				}
+		           			 			int kk = 0;
+		 	    	        			for (Map.Entry<String, ProSaleInfoDetail> entry : proSaleInfoDetails.entrySet()) {
+		 	    	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(startTime);
+		 	    	        				int endCompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(endTime);
+		 	    	        					if(begincompare >= 0 && endCompare < 0){
+		 	    	        						mapPro.put(DateUtil.stringToSimpleString(entry.getKey()), entry.getValue());
+		 	    	        						Integer price= entry.getValue().getDistributionSalePrice();
+		 	    	        						pppRice.add(price);
+		 	    	        						if(!entry.getValue().getInventoryStats().equals(4)) {
+		 	    	        							SimpleDateFormat newsdf=new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+		 	    	        							String nowTime = newsdf.format(new Date());
+		 	    	        							int startDate = entry.getValue().getStartDate().compareTo(nowTime);
+		 	    	        							int endDate = entry.getValue().getEndDate().compareTo(nowTime);
+		 	    	        							if(startDate > 0 || endDate < 0) {
+		 	    	        								pro.setBookStatus(0);
+		 	    	        							}
+		 	    	        						}else {
+		 	    	        							pro.setBookStatus(0);
+		 	    	        						}
+			    	        							if(days.equals(1) && (sdf.format(new Date()).equals(startTime))) {
+			    	        								Date startTime1 = DateUtil.stringToSimpleDate(entry.getValue().getStartTime());
+		 	    	        							Date endTime1 = DateUtil.stringToSimpleDate(entry.getValue().getEndTime());
+		 	    	        							Date nowDate = new Date();
+			 	    	        							if(nowDate.before(startTime1) || endTime1.before(nowDate)) {
+			 	    	        								pro.setBookStatus(0);
+			 	    	        							}
+			    	        							}
+		 	    	        						sumPrice += price;
+		 	    	        						kk += 1;
+		 	    	        						if(kk == 1) {
+		 	    	        							firstPrice = entry.getValue().getDistributionSalePrice();
+		 	    	        						}
+		 	    	        					}
+		 	    	        					if(kk == days.intValue()) {
+			    	        							break;
+			    	        						}
+		 	            					}
+			    	        					pro.setProSaleInfoDetailsTarget(mapPro);
+			    	        					pro.setFirPrice(firstPrice);
+			    	        					if(pppRice.size() == 1){
+			    	        						pro.setAdvancedLimitDays(pppRice.get(0));
+			    	        					}else if(pppRice.size() >= 2){
+			    	        						pro.setAdvancedLimitDays(Collections.min(pppRice));
+			    	        					}else {
+			    	        						pro.setBookStatus(0);
+			    	        					}
+			    	        					if(kk < days.intValue()) {
+			    	        						pro.setBookStatus(0);
+			    	        					}
+			    	        					if(kk != 0){
+			    	        					pro.setConPrice(sumPrice/kk);
+			    	        				}
+			    	        				kk = 0;
+			    	        				sumPrice =0;
+		       			 			}else {
+		       			 				pro.setBookStatus(0);
+		       			 				pro.setFirPrice(firstPrice);
+		       			 			}
+									resProBaseInfoList.add(pro);
+								}
+							}
+							Map<String, List<ResProBaseInfo>> proMap = resProBaseInfoList.stream().collect(Collectors.groupingBy(ResProBaseInfo::getProId));
+							
+							List<ProDetails> ProInfoDetaisList=new ArrayList<ProDetails>();
+							if(StringUtil.isNotNullOrEmpty(proMap)){
+								for (Map.Entry<String, List<ResProBaseInfo>> baseList : proMap.entrySet()) {
+									ProDetails proInfoDetai=new ProDetails();
+									proInfoDetai.setProId(baseList.getKey());
+									proInfoDetai.setResProName(proMap.get(baseList.getKey()).get(0).getResProName());
+									proInfoDetai.setRoomSize(proMap.get(baseList.getKey()).get(0).getRoomSize());
+									proInfoDetai.setRoomFloor(proMap.get(baseList.getKey()).get(0).getRoomFloor());
+									proInfoDetai.setRoomFacilities(proMap.get(baseList.getKey()).get(0).getRoomFacilities());
+									proInfoDetai.setBedSize(proMap.get(baseList.getKey()).get(0).getBedSize());
+									List<ResProBaseInfo> valueList = baseList.getValue();
+									if(valueList != null && valueList.size() > 0) {
+										int sum = valueList.stream().mapToInt(ResProBaseInfo :: getAdvancedLimitDays).sum();
+										int asInt = valueList.stream().mapToInt(ResProBaseInfo :: getFirPrice).min().getAsInt();
+										proInfoDetai.setMinPrice(asInt);
+										proInfoDetai.setProDetailConPrice(sum/valueList.size());
+									}else {
+										proInfoDetai.setSaleStatus(0);
+									}
+									if(mm.containsKey(baseList.getKey())) {
+										String imageUrl = mm.get(baseList.getKey()).getImageUrl();
+										proInfoDetai.setImgUrl(imageUrl);
+									}
+									
+									proInfoDetai.setResProBaseInfoList(valueList);
+									ProInfoDetaisList.add(proInfoDetai);
+								}
+							}
+							tcResBaseInfo.setImgInfoList(list2);
+							tcResBaseInfo.setProDetails(ProInfoDetaisList);
+						}
+					}
+					
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				long end = System.currentTimeMillis();  
+			    System.out.println("完成任务newQueryHotelDetail，耗时：" + (end - start) + "毫秒"); 
+				return tcResBaseInfo;
+	}
+	
+	@Override
+	public ResBaseInfo newQueryHolProDetail(Agent agent, Long resId, String uniProId, String startTime, String endTime) throws GSSException {
+		long start = System.currentTimeMillis();
+		if (StringUtil.isNullOrEmpty(agent)) {
+            logger.error("agent对象为空");
+            throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
+        }else{
+        	if(StringUtil.isNullOrEmpty(agent.getType())){
+        		throw new GSSException("获取某一酒店详细信息", "0102", "agentType为空");
+        	}
+        }
+		if (StringUtil.isNullOrEmpty(resId)) {
+            logger.error("酒店id为空");
+            throw new GSSException("获取某一酒店详细信息", "0100", "酒店id为空");
+        }
+		if (StringUtil.isNullOrEmpty(startTime)) {
+			logger.error("开始日期为空");
+            throw new GSSException("获取某一酒店详细信息", "0105", "开始日期为空");
+        }
+        if (StringUtil.isNullOrEmpty(endTime)) {
+            logger.error("结束日期为空");
+            throw new GSSException("获取某一酒店详细信息", "0105", "结束日期为空");
+        }
+        ResBaseInfo tcResBaseInfo = null;
+        Integer sumPrice=0;
+        Integer days = 0;
+		try {
+			days= DateUtil.daysBetween(startTime, endTime);
+		//	Future<AssignDateHotel> assignDateHotelFuture = tcHotelSupplierService.queryListById(resId, AssignDateHotel.class);
+			Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryListById(resId, ResProBaseInfos.class);
+			Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryListById(resId, ResBaseInfo.class);
+			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
+			if(!agent.getNum().equals(401803070321014723L)) {
+				computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+			}
+			AssignDateHotelReq assignDateHotelReq=new AssignDateHotelReq();
+			assignDateHotelReq.setResId(resId);
+			assignDateHotelReq.setProductUniqueId(uniProId);
+			assignDateHotelReq.setSourceFrom("-1");
+			assignDateHotelReq.setStartTime(startTime);
+			Calendar calendar = Calendar.getInstance();
+	        calendar.setTime(sdf.parse(endTime));
+	        calendar.add(Calendar.DAY_OF_MONTH, -1);
+			assignDateHotelReq.setEndTime(sdf.format(calendar.getTime()));
+			AssignDateHotel assignDateHotel=  hotelInterService.queryAssignDateHotel(assignDateHotelReq);
+			while(true) {
+				if( resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone()) {
+					break;
+				}
+			}
+			
+			tcResBaseInfo = resBaseInfoFuture.get();
+			ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
+			
+			if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())) {
+				Integer firstPrice = 999999;
+				List<ProInfoDetail> proInfoDetailList= assignDateHotel.getProInfoDetailList();
+				List<ResProBaseInfo> resProBaseInfoListBeFore= resProBaseInfos.getResProBaseInfos();
+				
+				if(StringUtil.isNotNullOrEmpty(tcResBaseInfo) && StringUtil.isNotNullOrEmpty(resProBaseInfoListBeFore)){
+					
+					List<ResProBaseInfo> resProBaseInfoList = new ArrayList<ResProBaseInfo>();
+					for(ProInfoDetail proSaleKey : proInfoDetailList) {
+						List<ResProBaseInfo> filterList = resProBaseInfoListBeFore.stream().filter(pro -> pro.getProductUniqueId().equals(proSaleKey.getProductUniqueId())).collect(Collectors.toList());
+						if(filterList != null && filterList.size() >0) {
+							ResProBaseInfo pro = filterList.get(0);
+							TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
+							List<Integer> pppRice = new ArrayList<Integer>();
+ 	            			Calendar da = Calendar.getInstance(); 
+                   			 for (int i = 0; i < days; i++) {
+                   				 ProSaleInfoDetail ProSaleInfoDetail=new ProSaleInfoDetail();
+                   				 ProSaleInfoDetail.setDistributionSalePrice(0);
+                   				 da.setTime(sdf.parse(startTime));
+                   				 da.add(Calendar.DAY_OF_MONTH, i);
+                   				 mapPro.put(sdf.format(da.getTime()), ProSaleInfoDetail);
+                				}
+							TreeMap<String, ProSaleInfoDetail> proSaleInfoDetails = proSaleKey.getProSaleInfoDetails();
+       			 			if(StringUtil.isNotNullOrEmpty(proSaleInfoDetails)) {
+       			 				if(proSaleInfoDetails.containsKey(DateUtil.stringToLonString(startTime))) {
+           			 				Integer firProPrice = proSaleInfoDetails.get(DateUtil.stringToLonString(startTime)).getDistributionSalePrice();
+           			 				if(StringUtil.isNotNullOrEmpty(firProPrice)) {
+           			 					if(computeProfitByAgentFu!=null) {
+           			 						List<ProfitPrice> computeProfitByAgent = computeProfitByAgentFu.get();
+	           			 					if(computeProfitByAgent != null && computeProfitByAgent.size() > 0) {
+	               			 					for(ProfitPrice profit : computeProfitByAgent) {
+	               			 						BigDecimal lowerPrice = profit.getPriceFrom();
+	               			 						BigDecimal upPrice = profit.getPriceTo();
+	               			 						BigDecimal firPrice = new BigDecimal(firProPrice);
+	               			 						if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
+	               			 							BigDecimal rate = profit.getRate();
+	               			 							rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
+	               			 							pro.setRebateRateProfit(rate);
+	               			 						}
+	               			 					}
+	           			 					}
+           			 					}
+           			 				}
+       			 				}
+           			 			int kk = 0;
+ 	    	        			for (Map.Entry<String, ProSaleInfoDetail> entry : proSaleInfoDetails.entrySet()) {
+ 	    	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(startTime);
+ 	    	        				int endCompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(endTime);
+ 	    	        					if(begincompare >= 0 && endCompare < 0){
+ 	    	        						mapPro.put(DateUtil.stringToSimpleString(entry.getKey()), entry.getValue());
+ 	    	        						Integer price= entry.getValue().getDistributionSalePrice();
+ 	    	        						pppRice.add(price);
+ 	    	        						if(!entry.getValue().getInventoryStats().equals(4)) {
+ 	    	        							SimpleDateFormat newsdf=new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+ 	    	        							String nowTime = newsdf.format(new Date());
+ 	    	        							int startDate = entry.getValue().getStartDate().compareTo(nowTime);
+ 	    	        							int endDate = entry.getValue().getEndDate().compareTo(nowTime);
+ 	    	        							if(startDate > 0 || endDate < 0) {
+ 	    	        								pro.setBookStatus(0);
+ 	    	        							}
+ 	    	        						}else {
+ 	    	        							pro.setBookStatus(0);
+ 	    	        						}
+	    	        							if(days.equals(1) && (sdf.format(new Date()).equals(startTime))) {
+	    	        								Date startTime1 = DateUtil.stringToSimpleDate(entry.getValue().getStartTime());
+ 	    	        							Date endTime1 = DateUtil.stringToSimpleDate(entry.getValue().getEndTime());
+ 	    	        							Date nowDate = new Date();
+ 	    	        							if(nowDate.before(startTime1) || endTime1.before(nowDate)) {
+ 	    	        								pro.setBookStatus(0);
+ 	    	        							}
+	    	        							}
+ 	    	        						sumPrice += price;
+ 	    	        						kk += 1;
+ 	    	        						if(kk == 1) {
+ 	    	        							firstPrice = entry.getValue().getDistributionSalePrice();
+ 	    	        						}
+ 	    	        					}
+ 	    	        					if(kk == days.intValue()) {
+	    	        							break;
+	    	        						}
+ 	            					}
+	    	        					pro.setProSaleInfoDetailsTarget(mapPro);
+	    	        					pro.setFirPrice(firstPrice);
+	    	        					if(pppRice.size() == 1){
+	    	        						pro.setAdvancedLimitDays(pppRice.get(0));
+	    	        					}else if(pppRice.size() >= 2){
+	    	        						pro.setAdvancedLimitDays(Collections.min(pppRice));
+	    	        					}else {
+	    	        						pro.setBookStatus(0);
+	    	        					}
+	    	        					if(kk < days.intValue()) {
+	    	        						pro.setBookStatus(0);
+	    	        					}
+	    	        					if(kk != 0){
+	    	        					pro.setConPrice(sumPrice/kk);
+	    	        				}
+	    	        				kk = 0;
+	    	        				sumPrice =0;
+       			 			}else {
+       			 				pro.setBookStatus(0);
+       			 				pro.setFirPrice(firstPrice);
+       			 			}
+							resProBaseInfoList.add(pro);
+						}
+					}
+					Map<String, List<ResProBaseInfo>> proMap = resProBaseInfoList.stream().collect(Collectors.groupingBy(ResProBaseInfo::getProId));
+					
+					List<ProDetails> ProInfoDetaisList=new ArrayList<ProDetails>();
+					if(StringUtil.isNotNullOrEmpty(proMap)){
+						for (Map.Entry<String, List<ResProBaseInfo>> baseList : proMap.entrySet()) {
+							ProDetails proInfoDetai=new ProDetails();
+							proInfoDetai.setProId(baseList.getKey());
+							proInfoDetai.setResProName(proMap.get(baseList.getKey()).get(0).getResProName());
+							proInfoDetai.setRoomSize(proMap.get(baseList.getKey()).get(0).getRoomSize());
+							proInfoDetai.setRoomFloor(proMap.get(baseList.getKey()).get(0).getRoomFloor());
+							proInfoDetai.setRoomFacilities(proMap.get(baseList.getKey()).get(0).getRoomFacilities());
+							proInfoDetai.setBedSize(proMap.get(baseList.getKey()).get(0).getBedSize());
+							List<ResProBaseInfo> valueList = baseList.getValue();
+							if(valueList != null && valueList.size() > 0) {
+								int sum = valueList.stream().mapToInt(ResProBaseInfo :: getAdvancedLimitDays).sum();
+								int asInt = valueList.stream().mapToInt(ResProBaseInfo :: getFirPrice).min().getAsInt();
+								proInfoDetai.setMinPrice(asInt);
+								proInfoDetai.setProDetailConPrice(sum/valueList.size());
+							}else {
+								proInfoDetai.setSaleStatus(0);
+							}
+							
+							proInfoDetai.setResProBaseInfoList(valueList);
+							ProInfoDetaisList.add(proInfoDetai);
+						}
+					}
+					tcResBaseInfo.setProDetails(ProInfoDetaisList);
+				}
+			}
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		long end = System.currentTimeMillis();  
+	    System.out.println("完成任务newQueryHotelDetail，耗时：" + (end - start) + "毫秒"); 
+		return tcResBaseInfo;
+		
 	}
 
 	@Override

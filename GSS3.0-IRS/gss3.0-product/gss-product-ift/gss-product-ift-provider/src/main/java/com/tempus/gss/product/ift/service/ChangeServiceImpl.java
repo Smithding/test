@@ -857,6 +857,7 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeExt.setCurrency(requestWithActor.getEntity().getCurrency());
             saleChangeExt.setExchangeRate(requestWithActor.getEntity().getExchangeRate());
             saleChangeExt.setSaleCurrency(requestWithActor.getEntity().getSaleCurrency());
+            saleChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
             log.info("保存采购数据" + saleChangeExt.toString());
             saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
             List<ChangePriceVo> adtList = requestWithActor.getEntity().getSaleAdtPriceList();
@@ -1551,7 +1552,7 @@ public class ChangeServiceImpl implements IChangeService {
             /*创建新增操作日志*/
             try {
                 SaleOrder saleOrder = saleOrderService.getSOrderByNo(saleChange.getAgent(), changeVo.getSaleChangeNo());
-                Long saleOrderNo = saleOrder.getSaleOrderNo();
+                Long saleOrderNo = changeVo.getSaleChangeNo();
                 String logstr ="用户"+ saleChange.getAgent().getAccount()+"国际改签单锁定："+"["+saleOrderNo+"]";
                 String title = "国际改签单锁定";
                 IftLogHelper.logger(saleChange.getAgent(),saleOrderNo,title,logstr);
