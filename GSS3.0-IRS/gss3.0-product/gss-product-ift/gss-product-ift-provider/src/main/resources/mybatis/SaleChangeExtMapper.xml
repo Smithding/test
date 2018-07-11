@@ -792,7 +792,7 @@
                 </foreach>
             </if>
             <if test="airLineRefundStatus!=null">
-               and h.`AIRLINE_REFUND_STATUS`=#{airLineRefundStatus}
+                AND (h.`AIRLINE_REFUND_STATUS`is null or `AIRLINE_REFUND_STATUS`=#{airLineRefundStatus})
             </if>
             <if test="longList!=null and longList.size>0">
                 AND CC.CUSTOMER_NO IN
@@ -803,12 +803,12 @@
             order by i.MODIFY_TIME desc
         </trim>
     </select>
-    <update id="updateAirlineStatus">
+  <!--  <update id="updateAirlineStatus">
         UPDATE IFT_SALE_CHANGE_EXT
         SET
             AIRLINE_STATUS = #{airlineStatus,jdbcType=INTEGER}
         WHERE SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
-    </update>
+    </update>-->
     <update id="updateLocker" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderExt">
         UPDATE IFT_SALE_CHANGE_EXT
         <set>

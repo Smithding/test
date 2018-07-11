@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
+import com.google.gson.Gson;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.cps.entity.Customer;
 import com.tempus.gss.cps.entity.Supplier;
@@ -1430,7 +1431,8 @@ public class RefundServiceImpl implements IRefundService {
 	}
 
 	@Override
-	public void shoppingReAudit(RequestWithActor<Long> requestWithActor) {
+	public void shoppingRefuse(RequestWithActor<Long> requestWithActor) {
+		log.info("----航司退款拒单开始----");
 		if (requestWithActor.getEntity() == null && requestWithActor.getEntity() == 0L)
 			throw new GSSException("废退单查询参数空", "0001", "查询废退改签单失败");
 		SaleChangeExt saleChangeExt = refundService.getSaleChangeExtByNo(requestWithActor);
@@ -1438,7 +1440,6 @@ public class RefundServiceImpl implements IRefundService {
 		Long saleChangeNo = saleChange.getSaleChangeNo();
 		if (saleChangeExt == null || saleChangeNo == null || saleChangeNo == 0L)
 			throw new GSSException("废退单查询结果空", "0001", "查询废退改签单失败");
-		log.info("");
 		//修改销售单状态
 		Date modifyTime = new Date();
 		Agent agent = requestWithActor.getAgent();
@@ -1448,12 +1449,12 @@ public class RefundServiceImpl implements IRefundService {
 		saleChangeService.update(agent, saleChange);
 		//修改采购单状态
 		Long saleOrdernNo = saleChange.getSaleOrderNo();
-		String buyModifier = "";
+		//String buyModifier = "";
 		List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(agent, saleOrdernNo);
 		for(BuyOrder buyOrder:buyOrderList){
 			List<BuyChange> buyChangeList = buyChangeService.getBuyChangesByBONo(agent, buyOrder.getBuyOrderNo());
 			for(BuyChange buyChange:buyChangeList){
-				buyModifier = buyChange.getModifier();
+				//buyModifier = buyChange.getModifier();
 				buyChange.setChildStatus(1);
 				buyChange.setModifier(agent.getAccount());
 				buyChange.setModifyTime(modifyTime);
@@ -1461,14 +1462,73 @@ public class RefundServiceImpl implements IRefundService {
 				buyChangeService.update(agent, buyChange);
 			}
 		}
+		log.info("---航司退款拒单结束---");
 		//更新前一位采购人的订单处理数量
-		User user = userService.findUserByLoginName(agent,buyModifier);
+		/*User user = userService.findUserByLoginName(agent,buyModifier);
 		saleChangeExt.setLocker(user.getId());
 		RequestWithActor<SaleChangeExt> saleOrderChange = new RequestWithActor<>();
 		saleOrderChange.setAgent(agent);
 		saleOrderChange.setEntity(saleChangeExt);
 		refundService.updateSaleChangeExt(saleOrderChange);
-		iTicketSenderService.updateByLockerId(agent, user.getId(), "BUY_REFUSE_NUM");
+		iTicketSenderService.updateByLockerId(agent, user.getId(), "BUY_REFUSE_NUM");*/
+	}
+
+	/**
+	 *航司退款审核通过
+	 * @param requestWithActor
+	 */
+	@Override
+	public void shoppingAuditPass(RequestWithActor<AirLineRefundRequest> requestWithActor) {
+		Agent agent = requestWithActor.getAgent();
+		Date modifyTime = new Date();
+		AirLineRefundRequest refundRequest = requestWithActor.getEntity();
+		log.info("提交航司信息:"+new Gson().toJson(refundRequest));
+		Long saleChangeNo = refundRequest.getAuditSaleChangeNo();
+		RequestWithActor<Long> parameter = new RequestWithActor<>();
+		parameter.setEntity(saleChangeNo);
+		parameter.setAgent(agent);
+		SaleChangeExt saleChangeExt = refundService.getSaleChangeExtByNo(parameter);
+		if(saleChangeExt!=null) {
+			Long lockerId = saleChangeExt.getLocker();
+			saleChangeExt.setLocker(0L);
+			saleChangeExt.setModifier(agent.getAccount());
+			saleChangeExt.setModifyTime(modifyTime);
+			RequestWithActor requestWithActor1 = new RequestWithActor();
+			requestWithActor1.setEntity(saleChangeExt);
+			requestWithActor.setAgent(agent);
+			log.info("航司审核更新变更单号信息:"+saleChangeExt.toString());
+			refundService.updateSaleChangeExt(requestWithActor1);
+			if(lockerId!=null) {
+				iTicketSenderService.updateByLockerId(agent, lockerId, "BUY_REFUSE_NUM");
+			}
+		}else{
+			throw new GSSException("变更单为空", "0001", "查询废退改签单失败");
+		}
+		CertificateCreateVO createVO = setCertificateVal(refundRequest);
+		SaleChange saleChange = saleChangeExt.getSaleChange();
+		BuyOrderExt buyOrderExt = null;
+		if(saleChange!=null) {
+			Long saleOrderNo = saleChangeExt.getSaleChange().getSaleOrderNo();
+			createVO.setSaleOrderNo(String.valueOf(saleOrderNo));
+			createVO.setTransationOrderNo(String.valueOf(saleChange.getTransationOrderNo()));
+			try {
+				buyOrderExt = buyOrderExtService.selectBySaleOrderNo(agent,saleOrderNo);
+				if(buyOrderExt!=null){
+					buyOrderExt.setAirLineRefundStatus(1);//1审核通过
+					String remark = buyOrderExt.getBuyRemarke();
+					remark = remark + refundRequest.getRemark();
+					buyOrderExt.setBuyRemarke(remark);
+				}
+			} catch (Exception e) {
+				log.error("获取国际采购扩展单异常",e);
+			}
+		}
+		//创建采购退款单
+		certificateService.buyRefundByList(agent,createVO);
+		//更新变更单审核状态
+		log.info("更新国际采购扩展单信息:"+buyOrderExt.toString());
+		buyOrderExtService.update(agent,buyOrderExt);
+		log.info("---航司退款审核结算---");
 	}
 
 	/**
@@ -1548,5 +1608,29 @@ public class RefundServiceImpl implements IRefundService {
 			}
 		}
 		return  saleChangeExt;
+	}
+
+	//设置采购退款单初始值
+	private CertificateCreateVO setCertificateVal(AirLineRefundRequest refundRequest){
+		CertificateCreateVO createVO = new CertificateCreateVO();
+		BigDecimal total = new BigDecimal(0);
+		List<AirLineRefundVo> vos = refundRequest.getRefundVoList();
+		for(AirLineRefundVo vo:vos){
+			total = total.add(vo.getPayment());
+		}
+		createVO.setAmount(total);
+		createVO.setAccoutNo(vos.get(0).getAccountNo());
+		createVO.setCustomerNo(refundRequest.getCustomerNo());
+		createVO.setCustomerTypeNo(refundRequest.getCustomerTypeNo());
+		createVO.setPayType(3);//3线下支付
+		createVO.setIncomeExpenseType(2);//2 支
+		createVO.setSubBusinessType(3);//3 变更
+		List<BusinessOrderInfo> businessOrderInfos = new ArrayList<>();
+		BusinessOrderInfo orderInfo = new BusinessOrderInfo();
+		orderInfo.setBusinessType(4);
+		orderInfo.setRecordNo(refundRequest.getAuditSaleChangeNo());
+		businessOrderInfos.add(orderInfo);
+		createVO.setOrderInfoList(businessOrderInfos);
+		return  createVO;
 	}
 }

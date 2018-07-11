@@ -133,6 +133,37 @@ public class BuyOrderExt implements Serializable {
 
 	private Integer airLineRefundStatus;
 
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer("BuyOrderExt{");
+		sb.append("buyOrderNo=").append(buyOrderNo);
+		sb.append(", buyOrder=").append(buyOrder);
+		sb.append(", id=").append(id);
+		sb.append(", owner=").append(owner);
+		sb.append(", airline='").append(airline).append('\'');
+		sb.append(", ticketType='").append(ticketType).append('\'');
+		sb.append(", creator='").append(creator).append('\'');
+		sb.append(", createTime=").append(createTime);
+		sb.append(", modifier='").append(modifier).append('\'');
+		sb.append(", modifyTime=").append(modifyTime);
+		sb.append(", valid=").append(valid);
+		sb.append(", status='").append(status).append('\'');
+		sb.append(", policyNo=").append(policyNo);
+		sb.append(", priceSpecNo=").append(priceSpecNo);
+		sb.append(", pnrNo=").append(pnrNo);
+		sb.append(", supplierNo=").append(supplierNo);
+		sb.append(", supplierTypeNo=").append(supplierTypeNo);
+		sb.append(", importPnr=").append(importPnr);
+		sb.append(", buyOrderDetailList=").append(buyOrderDetailList);
+		sb.append(", saleOrderNo=").append(saleOrderNo);
+		sb.append(", changeOrderNo=").append(changeOrderNo);
+		sb.append(", office='").append(office).append('\'');
+		sb.append(", buyRemarke='").append(buyRemarke).append('\'');
+		sb.append(", airLineRefundStatus=").append(airLineRefundStatus);
+		sb.append('}');
+		return sb.toString();
+	}
+
 	public Long getBuyOrderNo() {
 
 		return buyOrderNo;
