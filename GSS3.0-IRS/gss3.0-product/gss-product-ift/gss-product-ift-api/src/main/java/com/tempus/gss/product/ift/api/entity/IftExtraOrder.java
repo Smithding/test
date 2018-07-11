@@ -192,6 +192,26 @@ public class IftExtraOrder implements Serializable{
 
     private String customerName;
 
+    private Integer baseOrderType;
+
+    private Integer auditStatus;
+
+    public Integer getAuditStatus() {
+        return auditStatus;
+    }
+
+    public void setAuditStatus(Integer auditStatus) {
+        this.auditStatus = auditStatus;
+    }
+
+    public Integer getBaseOrderType() {
+        return baseOrderType;
+    }
+
+    public void setBaseOrderType(Integer baseOrderType) {
+        this.baseOrderType = baseOrderType;
+    }
+
     public Long getTraNo() {
         return traNo;
     }

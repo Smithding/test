@@ -212,7 +212,32 @@ public class ExtraOrderServiceImpl implements IExtraOrderService {
         differenceOrderService.update(agent,extraOrder);
     }
 
-    
+    @Override
+    public void updateExtraAuditStatus(Long originDifferenceOrderNo, Integer differenceType) throws Exception {
+        if(originDifferenceOrderNo == null || differenceType == null || differenceType != 501){
+            throw new RuntimeException("杂费冲单参数异常！");
+        }
+        DifferenceOrder byDifferenceOrderNo = differenceOrderService.getByDifferenceOrderNo(originDifferenceOrderNo);
+        if(byDifferenceOrderNo == null){
+            throw new RuntimeException("杂费单不存在！");
+        }
+        byDifferenceOrderNo.setAuditStatus(2);
+        boolean b = differenceOrderService.updateSelectiveById(byDifferenceOrderNo);
+    }
+
+    @Override
+    public DifferenceOrder getDifferenceOrderByDifferenceOrderNo(Long differenceOrderNo) throws Exception {
+        if(differenceOrderNo == null ){
+            throw new RuntimeException("杂费冲单参数异常！");
+        }
+        DifferenceOrder differenceOrder = differenceOrderService.getByDifferenceOrderNo(differenceOrderNo);
+        if(differenceOrder == null){
+            throw new RuntimeException("杂费冲单异常，无原杂费单！");
+        }
+        return differenceOrder;
+    }
+
+
     /** 获取已支付的杂费订单 */
     private Result validateParam(DifferenceOrder differenceOrderInput,Result result) {
         if (null == differenceOrderInput) {
