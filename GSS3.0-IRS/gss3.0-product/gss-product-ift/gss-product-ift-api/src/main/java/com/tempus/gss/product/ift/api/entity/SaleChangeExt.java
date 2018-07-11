@@ -192,6 +192,10 @@ public class SaleChangeExt implements Serializable {
 	//改签出票员   DRAWER_LOGIN_NAME
 	private String drawerLoginName;
 
+
+	//提交航司后采购审核状态
+	private Integer airLineRefundStatus;
+
 	public String getDrawerLoginName() {
 		return drawerLoginName;
 	}
@@ -554,4 +558,14 @@ public class SaleChangeExt implements Serializable {
 	public void setSaleCurrency(String saleCurrency) {
 		this.saleCurrency = saleCurrency;
 	}
+
+
+	public Integer getAirLineRefundStatus() {
+		return airLineRefundStatus;
+	}
+
+	public void setAirLineRefundStatus(Integer airLineRefundStatus) {
+		this.airLineRefundStatus = airLineRefundStatus;
+	}
+
 }
