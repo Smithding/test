@@ -9,7 +9,7 @@ public interface IIftOutReportService {
     //汇总表
     Page<IftOutReport> selectAllIftReport(Page<IftOutReport> page, String deptName, String beginDate, String overDate,String changeType);
     //日报表
-    Page<IftOutReport> selectOneIftReport(Page<IftOutReport> page, String deptName, String date,String changeType);
+    Page<IftOutReport> selectOneIftReport(Page<IftOutReport> page, String deptName, String date,String changeType,String beginDate,String overDate);
 
     List<String> selectDept_nameList();
 

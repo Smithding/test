@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -552,6 +553,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 									proInfoDetai.setBedSize(proMap.get(baseList.getKey()).get(0).getBedSize());
 									List<ResProBaseInfo> valueList = baseList.getValue();
 									if(valueList != null && valueList.size() > 0) {
+										valueList.sort(Comparator.comparingInt(ResProBaseInfo :: getFirPrice));
 										int sum = valueList.stream().mapToInt(ResProBaseInfo :: getAdvancedLimitDays).sum();
 										int asInt = valueList.stream().mapToInt(ResProBaseInfo :: getFirPrice).min().getAsInt();
 										proInfoDetai.setMinPrice(asInt);
