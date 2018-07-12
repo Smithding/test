@@ -220,6 +220,26 @@ public class Passenger implements Serializable {
 	private BigDecimal deptProfit;
 	//毛利
 	private BigDecimal profit;
+	//采购币种 BUY_CURRENCY
+	private String buyCurrency;
+	//采购汇率 BUY_EXCHANGE_RATE
+	private BigDecimal buyExchangeRate;
+
+	public String getBuyCurrency() {
+		return buyCurrency;
+	}
+
+	public void setBuyCurrency(String buyCurrency) {
+		this.buyCurrency = buyCurrency;
+	}
+
+	public BigDecimal getBuyExchangeRate() {
+		return buyExchangeRate;
+	}
+
+	public void setBuyExchangeRate(BigDecimal buyExchangeRate) {
+		this.buyExchangeRate = buyExchangeRate;
+	}
 
 	@Override
 	public String toString() {

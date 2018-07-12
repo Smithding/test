@@ -84,6 +84,10 @@
         <result column="DEPT_PROFIT" property="deptProfit" jdbcType="DECIMAL"/>
         <!--毛利-->
         <result column="PROFIT" property="profit" jdbcType="DECIMAL"/>
+        <!--采购币种-->
+        <result column="BUY_CURRENCY" property="buyCurrency" jdbcType="VARCHAR" />
+        <!--采购汇率-->
+        <result column="BUY_EXCHANGE_RATE" property="buyExchangeRate" jdbcType="DECIMAL"/>
     </resultMap>
     <sql id="Base_Column_List" >
         PASSENGER_NO, OWNER, ID, SALE_ORDER_NO, PASSENGER_TYPE, SURNAME, NAME, CERT_TYPE,
@@ -91,7 +95,7 @@
         TICKET_TYPE, BUY_FARE, BUY_TAX, BUY_BROKERAGE, BUY_AGENCY_FEE, BUY_REBATE, BUY_AWARD_PRICE,
         BUY_PRICE, SALE_FARE, SALE_TAX, SALE_BROKERAGE, SALE_AGENCY_FEE, SALE_REBATE, SALE_AWARD_PRICE,
         SALE_PRICE, MODIFIER, STATUS, MODIFY_TIME, VALID, CREATE_TIME, CREATOR,SERVICE_CHARGE,PHONE,POLICY_NO,
-        DEPT_PROFIT,PROFIT
+        DEPT_PROFIT,PROFIT,BUY_CURRENCY,BUY_EXCHANGE_RATE
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
         select
@@ -115,7 +119,8 @@
         SALE_TAX, SALE_BROKERAGE, SALE_AGENCY_FEE,
         SALE_REBATE, SALE_AWARD_PRICE, SALE_PRICE,
         MODIFIER, STATUS, MODIFY_TIME,
-        VALID, CREATE_TIME, CREATOR,SERVICE_CHARGE, POLICY_NO
+        VALID, CREATE_TIME, CREATOR,SERVICE_CHARGE, POLICY_NO,
+         BUY_CURRENCY, BUY_EXCHANGE_RATE
         )
         values (#{passengerNo,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER}, #{id,jdbcType=BIGINT},
         #{saleOrderNo,jdbcType=BIGINT}, #{passengerType,jdbcType=VARCHAR}, #{surname,jdbcType=VARCHAR},
@@ -129,7 +134,8 @@
         #{saleRebate,jdbcType=DECIMAL}, #{saleAwardPrice,jdbcType=DECIMAL}, #{salePrice,jdbcType=DECIMAL},
         #{modifier,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR}, #{modifyTime,jdbcType=TIMESTAMP},
         #{valid,jdbcType=TINYINT}, #{createTime,jdbcType=TIMESTAMP}, #{creator,jdbcType=VARCHAR}, 
-        #{serviceCharge,jdbcType=DECIMAL}, #{policyNo,jdbcType=BIGINT}
+        #{serviceCharge,jdbcType=DECIMAL}, #{policyNo,jdbcType=BIGINT}, #{buyCurrency,jdbcType=VARCHAR},
+        #{buyExchangeRate,jdbcType=DECIMAL}
         )
     </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.Passenger" >
@@ -258,6 +264,12 @@
             <if test="profit !=null">
                 PROFIT,
             </if>
+            <if test="buyCurrency !=null">
+                BUY_CURRENCY,
+            </if>
+            <if test="buyExchangeRate !=null">
+                BUY_EXCHANGE_RATE,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides="," >
             <if test="passengerNo != null" >
@@ -383,6 +395,12 @@
             <if test="profit !=null">
                 #{profit,jdbcType=DECIMAL},
             </if>
+            <if test="buyCurrency !=null">
+                #{buyCurrency,jdbcType=VARCHAR},
+            </if>
+            <if test="buyExchangeRate !=null">
+                #{buyExchangeRate,jdbcType=DECIMAL},
+            </if>
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.Passenger" >
@@ -505,6 +523,12 @@
             <if test="profit != null" >
                 PROFIT = #{profit,jdbcType=DECIMAL},
             </if>
+            <if test="buyCurrency !=null">
+                BUY_CURRENCY = #{buyCurrency,jdbcType=VARCHAR},
+            </if>
+            <if test="buyExchangeRate !=null">
+                BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL},
+            </if>
         </set>
         where PASSENGER_NO = #{passengerNo,jdbcType=BIGINT}
     </update>
@@ -546,7 +570,9 @@
         CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
         SERVICE_CHARGE = #{serviceCharge,jdbcType=DECIMAL},
         CREATOR = #{creator,jdbcType=VARCHAR},
-        POLICY_NO = #{policyNo,jdbcType=BIGINT}
+        POLICY_NO = #{policyNo,jdbcType=BIGINT},
+        BUY_CURRENCY = #{buyCurrency,jdbcType=VARCHAR},
+        BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL}
         where PASSENGER_NO = #{passengerNo,jdbcType=BIGINT}
     </update>
     <select id="selectPassengerBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
@@ -659,6 +685,12 @@
           </if>
           <if test="serviceCharge != null" >
               SERVICE_CHARGE = #{serviceCharge,jdbcType=DECIMAL},
+          </if>
+          <if test="buyCurrency !=null">
+              BUY_CURRENCY = #{buyCurrency,jdbcType=VARCHAR},
+          </if>
+          <if test="buyExchangeRate !=null">
+              BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL},
           </if>
       </set>
         WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}

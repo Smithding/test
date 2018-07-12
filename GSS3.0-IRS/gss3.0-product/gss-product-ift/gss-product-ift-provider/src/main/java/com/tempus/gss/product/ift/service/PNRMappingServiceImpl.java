@@ -66,7 +66,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
             PnrOutPut pnr = getPnrService.getPnr(office, flightQuery);
             log.info("国际机票PNR预定返回原始信息：" + JsonUtil.toJson(pnr));
             queryIBEDetail = getPnrByQueryIBEDetail(pnr);
-            getFSI( queryIBEDetail);
+            getFSI(queryIBEDetail);
             queryService.mappingPriceSpec(queryIBEDetail, customerType, agent);
         } catch (Exception e) {
             log.error("pnr匹配出错", e);
@@ -165,7 +165,6 @@ public class PNRMappingServiceImpl implements PNRMappingService {
         boolean isinf = true;
         boolean iscnn = true;
         for (PnrAirTraveler pnrAirTraveler : pnrAirTravelers) {
-            pnrAirTraveler.setPassengerTypeCode(PassengerTypeEnum.getValue(pnrAirTraveler.getPassengerTypeCode()));
             PnrPassenger pnrPassenger = new PnrPassenger();
             if ("ADT".equals(pnrAirTraveler.getPassengerTypeCode()) && isinf) {
                 PassengerTypePricesTotal passengerTypePricesTotal = new PassengerTypePricesTotal();
@@ -352,6 +351,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
                     }
                     passengerTypePricesTotal.setFareLinear(qteResult.getNuc());
                     passengerTypePricesTotal.setFareBasis(qteResult.getFareBasis());
+                    passengerTypePricesTotal.setPassengerType(PassengerTypeEnum.getValue(passengerTypePricesTotal.getPassengerType()));
                 }
             }
         }

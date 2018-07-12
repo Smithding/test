@@ -13,11 +13,12 @@ import com.tempus.gss.serializer.LongSerializer;
  * 乘客废退明细，表示乘客废退是的销售价格和采购价格。
  */
 public class PassengerRefundPriceVo implements Serializable {
+	private static final long serialVersionUID = -2089025192865870487L;
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 1L;
+
 	
 	/**
 	 * 

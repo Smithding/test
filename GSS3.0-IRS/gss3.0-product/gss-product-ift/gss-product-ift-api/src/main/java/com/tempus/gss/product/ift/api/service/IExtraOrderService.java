@@ -16,6 +16,14 @@ public interface IExtraOrderService {
      */
     public void updateExtraOrderStatus(RequestWithActor<DifferenceOrder> requestWithActor) throws Exception;
 
+    /**
+     * 杂费冲单时修改原单的状态为审核未通过已冲单  2
+     * @param originDifferenceOrderNo
+     * @param differenceType
+     * @throws Exception
+     */
+    public void updateExtraAuditStatus(Long originDifferenceOrderNo, Integer differenceType) throws Exception;
 
+    public DifferenceOrder getDifferenceOrderByDifferenceOrderNo(Long differenceOrderNo) throws Exception;
 
 }

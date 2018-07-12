@@ -22,6 +22,7 @@ import com.tempus.tbd.entity.Airport;
 import com.tempus.tbd.service.IAirportService;
 import com.tempus.tbe.NotSupportException;
 import com.tempus.tbe.entity.*;
+import com.tempus.tbe.service.IFareService;
 import com.tempus.tbe.service.IShoppingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,8 @@ public class QueryCabinsServiceImpl implements IQueryCabinsService {
     /*shopping接口服务*/
     @Reference
     private IShoppingService shoppingService;
-    
+    @Reference
+    private IFareService fareService;
     protected final transient Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
@@ -176,11 +178,51 @@ public class QueryCabinsServiceImpl implements IQueryCabinsService {
             log.error("调用shopping数据转换", e);
         }
         log.info("开始匹配政策");
+
+        //获取规则
+        FareRulesIOutPut rule = getRule(availableJourney1);
+        String ruleStr = "";
+        if(rule != null && rule.getFareRuleCN() != null){
+            if(rule.getFareRuleCN().getResultData() != null){
+                 ruleStr = rule.getFareRuleCN().getResultData();
+            }
+        }
         for(QueryIBEDetail q:queryIBEDetails){
             queryService.mappingPriceSpec(q, flightQuery.getCustomerType(), agent);
                    log.info(JsonUtil.toJson(q));
+                    q.setFareRule(ruleStr);
         }
         return queryIBEDetails;
+    }
+
+    private FareRulesIOutPut  getRule(AvailableJourney availableJourney1) {
+        // json 对象availableJourney1
+        FareRulesIInput fareRulesIInput = new FareRulesIInput();
+        fareRulesIInput.setIataNo(iataNo);
+        try {
+            //格式：2016-12-15T17:15:00
+            String departureDate = availableJourney1.getOdOption().get(0).getFlight().get(0).getDepartureDate();
+            String departureTime = availableJourney1.getOdOption().get(0).getFlight().get(0).getDepartureTime();
+            departureTime = departureTime + ":00";
+            fareRulesIInput.setDepDate(departureDate+"T"+departureTime);
+            fareRulesIInput.setFareBase(availableJourney1.getOdOption().get(0).getFareBases().get(0).getFareBase());
+            fareRulesIInput.setAirCode(availableJourney1.getFare().getTicketingCarrier());
+            fareRulesIInput.setDepAirport(availableJourney1.getOdOption().get(0).getOrgCode());
+            fareRulesIInput.setArrAirport(availableJourney1.getOdOption().get(0).getDstCode());
+            fareRulesIInput.setRef1(availableJourney1.getOdOption().get(0).getRefs().get(0).getRef1());
+            fareRulesIInput.setRef2(availableJourney1.getOdOption().get(0).getRefs().get(0).getRef2());
+        } catch (Exception e) {
+            log.error("封装查询退改签规则入参异常", e);
+        }
+        log.info("开始查询退改签规则");
+        FareRulesIOutPut fareRuleI = null;
+        try {
+             fareRuleI = fareService.getFareRuleI(fareRulesIInput);
+        } catch (NotSupportException e) {
+            log.error("查询退改签规则异常", e);
+        }
+
+        return  fareRuleI;
     }
 
     /**

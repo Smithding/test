@@ -21,6 +21,12 @@ public class ProDetails implements Serializable {
 	private String resProName;
 	
 	/**
+	 * 酒店房型名称（对应房型名称/票型名称）
+	 */
+	@JSONField(name = "BedSize")
+	private String bedSize;
+	
+	/**
 	 * 是否有宽带
 	 */
 	@JSONField(name = "HasBroadband")
@@ -53,6 +59,9 @@ public class ProDetails implements Serializable {
 	 * 用来排序的均价
 	 */
 	private Integer proDetailConPrice;
+	
+	private Integer minPrice;
+	
 	/**
 	 * 0代表下线， 1代表上线
 	 */
@@ -140,6 +149,22 @@ public class ProDetails implements Serializable {
 
 	public void setImgUrl(String imgUrl) {
 		this.imgUrl = imgUrl;
+	}
+
+	public String getBedSize() {
+		return bedSize;
+	}
+
+	public void setBedSize(String bedSize) {
+		this.bedSize = bedSize;
+	}
+
+	public Integer getMinPrice() {
+		return minPrice;
+	}
+
+	public void setMinPrice(Integer minPrice) {
+		this.minPrice = minPrice;
 	}
 	
 }

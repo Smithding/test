@@ -19,8 +19,8 @@ import com.tempus.gss.serializer.LongSerializer;
  */
 public class SaleChangeExtVo implements Serializable{
 
-	private static final long serialVersionUID = 1L;
 
+	private static final long serialVersionUID = 6734725124414823563L;
 	/**
 	 * 申请开始日期
 	 */
@@ -191,13 +191,6 @@ public class SaleChangeExtVo implements Serializable{
 	//审核人
 	private String modifier;
 
-	public String getHandlers() {
-		return handlers;
-	}
-
-	public void setHandlers(String handlers) {
-		this.handlers = handlers;
-	}
 
 	//操作人
 	private  String handlers;
@@ -289,6 +282,9 @@ public class SaleChangeExtVo implements Serializable{
 	 * 0采购 1销售
 	 */
 	private Integer toDoType;
+
+	//提交航司后采购审核状态
+	private Integer airLineRefundStatus;
 
 	public Boolean getCustomerCount() {
 		return customerCount;
@@ -875,5 +871,21 @@ public class SaleChangeExtVo implements Serializable{
 
 	public void setExchangeRate(BigDecimal exchangeRate) {
 		this.exchangeRate = exchangeRate;
+	}
+
+	public String getHandlers() {
+		return handlers;
+	}
+
+	public void setHandlers(String handlers) {
+		this.handlers = handlers;
+	}
+
+	public Integer getAirLineRefundStatus() {
+		return airLineRefundStatus;
+	}
+
+	public void setAirLineRefundStatus(Integer airLineRefundStatus) {
+		this.airLineRefundStatus = airLineRefundStatus;
 	}
 }

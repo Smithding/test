@@ -11,6 +11,8 @@ import java.util.List;
 
 public class BuyOrderExt implements Serializable {
 
+
+	private static final long serialVersionUID = -2447333037554441472L;
 	/**
 	 * 采购订单编号
 	 */
@@ -129,7 +131,38 @@ public class BuyOrderExt implements Serializable {
 	
 	private String  buyRemarke;
 
-	private static final long serialVersionUID = 1L;
+	private Integer airLineRefundStatus;
+
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer("BuyOrderExt{");
+		sb.append("buyOrderNo=").append(buyOrderNo);
+		sb.append(", buyOrder=").append(buyOrder);
+		sb.append(", id=").append(id);
+		sb.append(", owner=").append(owner);
+		sb.append(", airline='").append(airline).append('\'');
+		sb.append(", ticketType='").append(ticketType).append('\'');
+		sb.append(", creator='").append(creator).append('\'');
+		sb.append(", createTime=").append(createTime);
+		sb.append(", modifier='").append(modifier).append('\'');
+		sb.append(", modifyTime=").append(modifyTime);
+		sb.append(", valid=").append(valid);
+		sb.append(", status='").append(status).append('\'');
+		sb.append(", policyNo=").append(policyNo);
+		sb.append(", priceSpecNo=").append(priceSpecNo);
+		sb.append(", pnrNo=").append(pnrNo);
+		sb.append(", supplierNo=").append(supplierNo);
+		sb.append(", supplierTypeNo=").append(supplierTypeNo);
+		sb.append(", importPnr=").append(importPnr);
+		sb.append(", buyOrderDetailList=").append(buyOrderDetailList);
+		sb.append(", saleOrderNo=").append(saleOrderNo);
+		sb.append(", changeOrderNo=").append(changeOrderNo);
+		sb.append(", office='").append(office).append('\'');
+		sb.append(", buyRemarke='").append(buyRemarke).append('\'');
+		sb.append(", airLineRefundStatus=").append(airLineRefundStatus);
+		sb.append('}');
+		return sb.toString();
+	}
 
 	public Long getBuyOrderNo() {
 
@@ -345,5 +378,13 @@ public class BuyOrderExt implements Serializable {
 
 	public void setBuyRemarke(String buyRemarke) {
 		this.buyRemarke = buyRemarke;
+	}
+
+	public Integer getAirLineRefundStatus() {
+		return airLineRefundStatus;
+	}
+
+	public void setAirLineRefundStatus(Integer airLineRefundStatus) {
+		this.airLineRefundStatus = airLineRefundStatus;
 	}
 }

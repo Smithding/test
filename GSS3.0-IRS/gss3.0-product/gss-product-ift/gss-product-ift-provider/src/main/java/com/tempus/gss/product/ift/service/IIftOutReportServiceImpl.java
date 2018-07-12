@@ -32,11 +32,11 @@ public class IIftOutReportServiceImpl implements IIftOutReportService {
     }
 
     @Override
-    public Page<IftOutReport> selectOneIftReport(Page<IftOutReport> page, String deptName, String date,String changeType) {
+    public Page<IftOutReport> selectOneIftReport(Page<IftOutReport> page, String deptName, String date,String changeType,String beginDate,String overDate) {
         if (null == page) {
             return  null;
         }
-        QueryIftOutReportVo queryIftOutReportVo=buildQuery(deptName,null,null,date,changeType);
+        QueryIftOutReportVo queryIftOutReportVo=buildQuery(deptName,beginDate,overDate,date,changeType);
         List<IftOutReport> iftOutReports = iftOutReportDao.queryIftOutReport(page, queryIftOutReportVo);
         page.setRecords(iftOutReports);
         return page;

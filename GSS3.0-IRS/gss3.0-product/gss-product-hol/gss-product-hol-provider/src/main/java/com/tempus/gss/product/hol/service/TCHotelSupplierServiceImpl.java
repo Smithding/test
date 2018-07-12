@@ -293,7 +293,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	@Override
 	public TCResponse<ResBaseInfo> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException{
 		//System.out.println("开始做任务一");  
-       // long start = System.currentTimeMillis();
+        //long start = System.currentTimeMillis();
        // System.out.println("f1 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
 		log.info("查询酒店列表开始");
         if (StringUtil.isNullOrEmpty(hotelSearchReq)) {
@@ -402,8 +402,8 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
  		        	hotelSearchReq.setCityCode("北京");
  		        }
  				if(StringUtils.isNotEmpty(hotelSearchReq.getCityCode())){
- 					criatira.and("cityName").regex("^.*"+hotelSearchReq.getCityCode()+".*$");
- 					//criatira.and("cityName").is(hotelSearchReq.getCityCode());
+ 					//criatira.and("cityName").regex("^.*"+hotelSearchReq.getCityCode()+".*$");
+ 					criatira.and("cityName").is(hotelSearchReq.getCityCode());
  					//criatira.orOperator(Criteria.where("cityName").is(hotelSearchReq.getCityCode()), Criteria.where("sectionName").regex(".*?\\" +hotelSearchReq.getCityCode()+ ".*"));
  				}
  				
@@ -645,7 +645,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
   		//RpcContext.getContext().setFuture(rrr);
 		log.info("查询酒店列表结束");
 		//long end = System.currentTimeMillis();  
-      //  System.out.println("完成任务一，耗时：" + (end - start) + "毫秒");  
+        //System.out.println("完成任务一，耗时：" + (end - start) + "毫秒");  
 		return response;
         
 		//return new AsyncResult<TCResponse<ResBaseInfo>>(response);

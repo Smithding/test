@@ -183,8 +183,21 @@ public class Insurance implements Serializable {
 	 * 是否是公务员保险  0为不是  1为是
 	 */
 	private int isCivilServant;
+	/**
+	 *  下限年龄限制  0为年份   1为月份
+	 * @return
+	 */
+	private int monthOrYear;
     public int getIsCivilServant() {
 		return isCivilServant;
+	}
+
+	public int getMonthOrYear() {
+		return monthOrYear;
+	}
+
+	public void setMonthOrYear(int monthOrYear) {
+		this.monthOrYear = monthOrYear;
 	}
 
 	public void setIsCivilServant(int isCivilServant) {
