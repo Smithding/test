@@ -185,6 +185,26 @@ public class PassengerRefundPrice implements Serializable {
     private String saleCurrency;
     //汇率
     private BigDecimal exchangeRate;
+    //采购币种 BUY_CURRENCY
+    private String buyCurrency;
+    //采购汇率 BUY_EXCHANGE_RATE
+    private BigDecimal buyExchangeRate;
+
+    public String getBuyCurrency() {
+        return buyCurrency;
+    }
+
+    public void setBuyCurrency(String buyCurrency) {
+        this.buyCurrency = buyCurrency;
+    }
+
+    public BigDecimal getBuyExchangeRate() {
+        return buyExchangeRate;
+    }
+
+    public void setBuyExchangeRate(BigDecimal buyExchangeRate) {
+        this.buyExchangeRate = buyExchangeRate;
+    }
 
     @Override
     public String toString() {

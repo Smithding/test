@@ -141,8 +141,29 @@ public class PassengerChangePrice implements Serializable {
 	private BigDecimal saleAgencyFee;
 	private BigDecimal saleRebate;
 
+	//采购币种 BUY_CURRENCY
+	private String buyCurrency;
+	//采购汇率 BUY_EXCHANGE_RATE
+	private BigDecimal buyExchangeRate;
+
 	private static final long serialVersionUID = 1L;
-	
+
+	public String getBuyCurrency() {
+		return buyCurrency;
+	}
+
+	public void setBuyCurrency(String buyCurrency) {
+		this.buyCurrency = buyCurrency;
+	}
+
+	public BigDecimal getBuyExchangeRate() {
+		return buyExchangeRate;
+	}
+
+	public void setBuyExchangeRate(BigDecimal buyExchangeRate) {
+		this.buyExchangeRate = buyExchangeRate;
+	}
+
 	public Long getChangePriceNo() {
 	
 		return changePriceNo;

@@ -59,7 +59,10 @@
         <!--采购其他费用-->
         <result column="SALE_REBATE" property="saleRebate" jdbcType="DECIMAL"/>
         <!--采购手续费-->
-
+        <!--采购币种-->
+        <result column="BUY_CURRENCY" property="buyCurrency" jdbcType="VARCHAR" />
+        <!--采购汇率-->
+        <result column="BUY_EXCHANGE_RATE" property="buyExchangeRate" jdbcType="DECIMAL"/>
 
 
         <!--一对一关联乘客-->
@@ -69,7 +72,7 @@
     <sql id="Base_Column_List">
         CHANGE_PRICE_NO, ID, OWNER, SALE_ORDER_NO,SALE_CHANGE_NO, PASSENGER_NO,PASSENGER_TYPE,ORDER_TYPE,SALE_COUNT_PRICE,BUY_COUNT_PRICE, SALE_PRICE, SALE_TAX, SALE_BROKERAGE,
         SALE_REST, BUY_PRICE, BUY_TAX, BUY_BROKERAGE, BUY_REST, VALID, STATUS, CREATOR, CREATE_TIME,
-        MODIFIER, MODIFY_TIME,BUY_AGENCY_FEE,BUY_REBATE,SALE_AGENCY_FEE,SALE_REBATE
+        MODIFIER, MODIFY_TIME,BUY_AGENCY_FEE,BUY_REBATE,SALE_AGENCY_FEE,SALE_REBATE,BUY_CURRENCY,BUY_EXCHANGE_RATE
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -95,7 +98,9 @@
         BUY_PRICE, BUY_TAX, BUY_BROKERAGE,
         BUY_REST, VALID, STATUS,
         CREATOR, CREATE_TIME, MODIFIER,
-        MODIFY_TIME,PASSENGER_TYPE,ORDER_TYPE,SALE_COUNT_PRICE,BUY_COUNT_PRICE,BUY_AGENCY_FEE,BUY_REBATE,SALE_AGENCY_FEE,SALE_REBATE)
+        MODIFY_TIME,PASSENGER_TYPE,ORDER_TYPE,SALE_COUNT_PRICE,BUY_COUNT_PRICE,
+        BUY_AGENCY_FEE,BUY_REBATE,SALE_AGENCY_FEE,SALE_REBATE,
+        BUY_CURRENCY, BUY_EXCHANGE_RATE)
         values (#{changePriceNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
         #{saleOrderNo,jdbcType=BIGINT},#{saleChangeNo,jdbcType=BIGINT}, #{passengerNo,jdbcType=BIGINT}, #{salePrice,jdbcType=DECIMAL},
         #{saleTax,jdbcType=DECIMAL}, #{saleBrokerage,jdbcType=DECIMAL}, #{saleRest,jdbcType=DECIMAL},
@@ -104,7 +109,8 @@
         #{creator,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{modifier,jdbcType=VARCHAR},
         #{modifyTime,jdbcType=TIMESTAMP},#{passengerType,jdbcType=VARCHAR},#{orderType,jdbcType=VARCHAR},
         #{saleCountPrice,jdbcType=DECIMAL},#{buyCountPrice,jdbcType=DECIMAL},#{buyAgencyFee,jdbcType=DECIMAL},#{buyRebate,jdbcType=DECIMAL}
-        ,#{saleAgencyFee,jdbcType=DECIMAL} ,#{saleRebate,jdbcType=DECIMAL})
+        ,#{saleAgencyFee,jdbcType=DECIMAL} ,#{saleRebate,jdbcType=DECIMAL},#{buyCurrency,jdbcType=VARCHAR},
+        #{buyExchangeRate,jdbcType=DECIMAL})
     </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.PassengerChangePrice">
         insert into IFT_PASSENGER_CHANGE_PRICE
@@ -181,6 +187,12 @@
             <if test="saleRebate != null">
                 SALE_REBATE,
             </if>
+            <if test="buyCurrency !=null">
+                BUY_CURRENCY,
+            </if>
+            <if test="buyExchangeRate !=null">
+                BUY_EXCHANGE_RATE,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="changePriceNo != null">
@@ -254,6 +266,12 @@
             </if>
             <if test="saleRebate != null">
                 #{saleRebate,jdbcType=DECIMAL},
+            </if>
+            <if test="buyCurrency !=null">
+                #{buyCurrency,jdbcType=VARCHAR},
+            </if>
+            <if test="buyExchangeRate !=null">
+                #{buyExchangeRate,jdbcType=DECIMAL},
             </if>
         </trim>
     </insert>
@@ -329,6 +347,12 @@
             <if test="saleRebate != null">
                 SALE_REBATE= #{saleRebate,jdbcType=DECIMAL},
             </if>
+            <if test="buyCurrency !=null">
+                BUY_CURRENCY = #{buyCurrency,jdbcType=VARCHAR},
+            </if>
+            <if test="buyExchangeRate !=null">
+                BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL},
+            </if>
         </set>
         where CHANGE_PRICE_NO = #{changePriceNo,jdbcType=BIGINT}
     </update>
@@ -356,7 +380,9 @@
         BUY_AGENCY_FEE= #{buyAgencyFee,jdbcType=DECIMAL},
         BUY_REBATE= #{buyRebate,jdbcType=DECIMAL},
         SALE_AGENCY_FEE= #{saleAgencyFee,jdbcType=DECIMAL},
-        SALE_REBATE= #{saleRebate,jdbcType=DECIMAL}
+        SALE_REBATE= #{saleRebate,jdbcType=DECIMAL},
+        BUY_CURRENCY = #{buyCurrency,jdbcType=VARCHAR},
+        BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL}
         where CHANGE_PRICE_NO = #{changePriceNo,jdbcType=BIGINT}
     </update>
     <update id="updateByOrderNo" parameterType="com.tempus.gss.product.ift.api.entity.PassengerChangePrice">
@@ -425,6 +451,12 @@
             <if test="saleRebate != null">
                 SALE_REBATE= #{saleRebate,jdbcType=DECIMAL},
             </if>
+            <if test="buyCurrency !=null">
+                BUY_CURRENCY = #{buyCurrency,jdbcType=VARCHAR},
+            </if>
+            <if test="buyExchangeRate !=null">
+                BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL},
+            </if>
         </set>
         WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
     </update>
@@ -492,6 +524,12 @@
             <if test="saleRebate != null">
                 SALE_REBATE= #{saleRebate,jdbcType=DECIMAL},
             </if>
+            <if test="buyCurrency !=null">
+                BUY_CURRENCY = #{buyCurrency,jdbcType=VARCHAR},
+            </if>
+            <if test="buyExchangeRate !=null">
+                BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL},
+            </if>
         </set>
         WHERE SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
     </update>
@@ -554,6 +592,12 @@
             </if>
             <if test="saleRebate != null">
                 SALE_REBATE= #{saleRebate,jdbcType=DECIMAL},
+            </if>
+            <if test="buyCurrency !=null">
+                BUY_CURRENCY = #{buyCurrency,jdbcType=VARCHAR},
+            </if>
+            <if test="buyExchangeRate !=null">
+                BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL},
             </if>
         </set>
         WHERE PASSENGER_NO = #{passengerNo,jdbcType=BIGINT}
