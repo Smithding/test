@@ -1495,6 +1495,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		hotelOrder.setProName(orderCreateReq.getProName());
 		hotelOrder.setProId(orderCreateReq.getProId());
 		hotelOrder.setBreakfastCount(orderCreateReq.getBreakfastCount());
+		hotelOrder.setRequestText(String.valueOf(saleOrder.getCustomerTypeNo()));	//存储CustomerType
 		//特殊要求
 		if (StringUtils.isNoneBlank(orderCreateReq.getOrderRemark())) {
 			hotelOrder.setRequestText(orderCreateReq.getOrderRemark());
