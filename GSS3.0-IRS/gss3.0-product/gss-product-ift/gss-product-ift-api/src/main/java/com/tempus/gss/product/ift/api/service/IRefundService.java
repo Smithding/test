@@ -80,7 +80,21 @@ public interface IRefundService {
 	 * @param passengerRefundList
 	 * @return
 	 */
-	boolean verify(RequestWithActor<List<PassengerRefundPrice>> passengerRefundList);
+	//boolean verify(RequestWithActor<List<PassengerRefundPrice>> passengerRefundList);
+
+	/**
+	 * 废退单审核创建爱采购应收
+	 * @param requestWithActor
+	 * @return
+	 */
+	boolean buyVerify(RequestWithActor<Long> requestWithActor);
+
+	/**
+	 * 销售废退单审核 创建销售应收
+	 * @param passengerRefundList
+	 * @return
+	 */
+	boolean saleVerify(RequestWithActor<List<PassengerRefundPrice>> passengerRefundList);
 
 	/**
 	 * 创建销售退款单
@@ -93,13 +107,12 @@ public interface IRefundService {
 
 	/**
 	 * 创建采购退款单
-	 * @param agent
-	 * @param saleChangeNo
+	 * @param requestWithActor
 	 * @param saleOrderNo
 	 * @return
 	 * @throws GSSException
 	 */
-	boolean buyRefund(Agent agent, Long saleChangeNo,Long saleOrderNo) throws GSSException;
+	boolean buyRefund(RequestWithActor<AirLineRefundRequest> requestWithActor,Long saleOrderNo) throws GSSException;
 
 	/**
 	 * 废票处理
@@ -178,9 +191,27 @@ public interface IRefundService {
 	 */
 	void assignBuyRefund(RequestWithActor<Long> requestWithActor);
 
-	//提交航司后 采购打回重审
+	/**
+	 * 提交航司后 采购打回重审
+	 * @param requestWithActor
+	 */
 	void shoppingRefuse(RequestWithActor<Long> requestWithActor);
-	//提交航司后 采购审核通过
+
+	/**
+	 * 提交航司后 采购审核通过
+	 * @param requestWithActor
+	 */
 	void shoppingAuditPass(RequestWithActor<AirLineRefundRequest> requestWithActor);
+	/**
+	 *废票退票 销售退款
+	 * @param requestWithActor
+	 */
+	void saleReturnMoney(RequestWithActor<PassengerRefundPriceVo> requestWithActor);
+
+	/**
+	 * 废票退票 采购退款
+	 * @param requestWithActor
+	 */
+	void buyReturnMoney(RequestWithActor<AirLineRefundRequest> requestWithActor);
 
 }

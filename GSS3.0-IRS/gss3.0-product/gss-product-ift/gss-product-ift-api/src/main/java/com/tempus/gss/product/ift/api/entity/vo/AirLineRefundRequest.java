@@ -11,6 +11,7 @@ public class AirLineRefundRequest implements Serializable{
 
     private static final long serialVersionUID = -6757495586427467663L;
     private Long auditSaleChangeNo;
+    private Long buyChangeNo;
     private Long customerNo;
     private Long customerTypeNo;
     private List<AirLineRefundVo> refundVoList;
@@ -54,5 +55,13 @@ public class AirLineRefundRequest implements Serializable{
 
     public void setCustomerTypeNo(Long customerTypeNo) {
         this.customerTypeNo = customerTypeNo;
+    }
+
+    public Long getBuyChangeNo() {
+        return buyChangeNo;
+    }
+
+    public void setBuyChangeNo(Long buyChangeNo) {
+        this.buyChangeNo = buyChangeNo;
     }
 }
