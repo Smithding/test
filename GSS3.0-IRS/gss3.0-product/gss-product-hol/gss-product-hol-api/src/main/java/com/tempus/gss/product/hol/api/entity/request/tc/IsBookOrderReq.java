@@ -78,6 +78,16 @@ public class IsBookOrderReq implements Serializable{
 	@JSONField(name = "LatestArrivalTime")
 	private String latestArrivalTime;
 	
+	/**
+	 * bqy预付检查字段
+	 */
+	private String ratePlanCategory;
+	
+	/**
+	 * 酒店代理人id
+	 */
+	private String supplierId;
+	
 	public Long getResId() {
 		return resId;
 	}
@@ -143,6 +153,18 @@ public class IsBookOrderReq implements Serializable{
 	}
 	public void setLatestArrivalTime(String latestArrivalTime) {
 		this.latestArrivalTime = latestArrivalTime;
+	}
+	public String getRatePlanCategory() {
+		return ratePlanCategory;
+	}
+	public void setRatePlanCategory(String ratePlanCategory) {
+		this.ratePlanCategory = ratePlanCategory;
+	}
+	public String getSupplierId() {
+		return supplierId;
+	}
+	public void setSupplierId(String supplierId) {
+		this.supplierId = supplierId;
 	}
 	
 	

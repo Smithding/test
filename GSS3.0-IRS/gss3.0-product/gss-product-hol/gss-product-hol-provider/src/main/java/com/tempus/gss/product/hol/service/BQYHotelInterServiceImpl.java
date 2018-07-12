@@ -4,8 +4,10 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,17 +29,34 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.tempus.gss.bbp.util.StringUtil;
+import com.tempus.gss.cps.entity.Supplier;
+import com.tempus.gss.cps.service.ISupplierService;
 import com.tempus.gss.exception.GSSException;
+import com.tempus.gss.order.entity.BuyOrder;
+import com.tempus.gss.order.entity.CreatePlanAmountVO;
+import com.tempus.gss.order.entity.GoodsBigType;
+import com.tempus.gss.order.entity.SaleOrder;
+import com.tempus.gss.order.service.IBuyOrderService;
+import com.tempus.gss.order.service.IPlanAmountRecordService;
+import com.tempus.gss.order.service.ISaleOrderService;
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
 import com.tempus.gss.product.hol.api.entity.ResNameSum;
 import com.tempus.gss.product.hol.api.entity.ResToMinPrice;
+import com.tempus.gss.product.hol.api.entity.request.tc.OrderCreateReq;
+import com.tempus.gss.product.hol.api.entity.response.HotelOrder;
+import com.tempus.gss.product.hol.api.entity.response.tc.OwnerOrderStatus;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.TcOrderStatus;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelBrand;
@@ -55,6 +74,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.ResponseResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomImageList;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.BookOrderParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.CreateOrderReq;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.request.OrderCancelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.OrderPayReq;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryCityInfoParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelIdParam;
@@ -63,14 +83,24 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelListParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.BookOrderResponse;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelLocationEntity;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelOrderInfo;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderCancelResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderPayResult;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BaseRoomInfo;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomBedTypeInfo;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomInfoItem;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.syn.IHolMongoQuery;
 import com.tempus.gss.product.hol.api.util.DocumentUtil;
+import com.tempus.gss.product.hol.api.util.OrderStatusUtils;
 import com.tempus.gss.product.hol.api.util.Tool;
+import com.tempus.gss.product.hol.dao.HotelOrderMapper;
 import com.tempus.gss.product.hol.utils.HttpClientUtil;
+import com.tempus.gss.system.service.IMaxNoService;
 import com.tempus.gss.util.JsonUtil;
+import com.tempus.gss.vo.Agent;
 
 @Service
 public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
@@ -125,6 +155,12 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	@Value("${bqy.hotelId.by.cityCode}")
 	private String BQY_HOTELID_BY_CITYCODE;			//城市ID获取酒店
 	
+	@Value("${bqy.hotel.order.cancel.url}")		
+	private String BQY_HOTEL_ORDER_CANCEL_URL;		//取消订单
+	
+	@Value("${bqy.hotel.order.detail.url}")
+	private String BQY_HOTEL_ORDER_DETAIL_URL;		//订单详情	
+	
 	@Value("${bqy.count}")
 	private int PAGE_SIZE;							//查询id数量
 	
@@ -136,6 +172,24 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	
 	@Autowired
 	private HttpClientUtil httpClientUtil;
+	
+	@Reference
+	private ISaleOrderService saleOrderService;
+
+	@Reference
+	private IBuyOrderService buyOrderService;
+
+	@Autowired
+	private HotelOrderMapper hotelOrderMapper;
+	
+	@Reference
+	private ISupplierService supplierService;
+
+	@Reference
+	private IMaxNoService maxNoService;
+	
+	@Reference
+	private IPlanAmountRecordService planAmountRecordService;
 	
 	/*@Autowired
 	private IHolMidService holMidService;*/
@@ -505,6 +559,50 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		return orderPayResult;
 	}
 	
+	
+	@Override
+	public OrderCancelResult cancelOrder(OrderCancelParam cancelParam) {
+		//BQY_HOTEL_ORDER_CANCEL_URL
+		cancelParam.setAgentId(Long.parseLong(BQY_AGENTID));
+		cancelParam.setToken(md5Encryption());
+		cancelParam.setBookingUserId(BQY_AGENTID);
+		OrderCancelResult orderCancelResult = null;
+		String paramJson = JsonUtil.toJson(cancelParam);
+		String result = httpClientUtil.doJsonPost(BQY_HOTEL_ORDER_CANCEL_URL, paramJson);
+		if (StringUtils.isNoneBlank(result.trim())) {
+			ResponseResult<OrderCancelResult> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<OrderCancelResult>>(){});
+			if (responseResult != null) {
+				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
+					orderCancelResult = responseResult.getResult();
+				}
+			}
+		}else {
+			throw new GSSException("酒店订单取消失败!", "0111", "酒店订单取消返回空值");
+		}
+		return orderCancelResult;
+	}
+
+	@Override
+	public HotelOrderInfo orderDetail(OrderPayReq orderDetailParam) {
+		// TODO BQY_HOTEL_ORDER_DETAIL_URL
+		orderDetailParam.setAgentId(Long.parseLong(BQY_AGENTID));
+		orderDetailParam.setToken(md5Encryption());
+		HotelOrderInfo hotelOrderInfo = null;
+		String paramJson = JsonUtil.toJson(orderDetailParam);
+		String result = httpClientUtil.doJsonPost(BQY_HOTEL_ORDER_DETAIL_URL, paramJson);
+		if (StringUtils.isNoneBlank(result.trim())) {
+			ResponseResult<HotelOrderInfo> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<HotelOrderInfo>>(){});
+			if (responseResult != null) {
+				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
+					hotelOrderInfo = responseResult.getResult();
+				}
+			}
+		}else {
+			throw new GSSException("获取酒店订单详情失败", "0111", "获取酒店订单详情失败!");
+		}
+		return hotelOrderInfo;
+	}
+	
 	/**
 	 * 根据酒店ID获取酒店信息
 	 */
@@ -699,7 +797,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			//holMidBaseInfo.setShortIntro(hotelInfo.getDescription());
 			
 			//酒店图片
-			holMidBaseInfo.setTitleImg(hotelInfo.getTitleImgUrl());
+			holMidBaseInfo.setTitleImg(hotelInfo.getImgURL());
 			
 			holMidBaseInfo.setBookRemark(hotelInfo.getRoadCross());
 			
@@ -1088,6 +1186,364 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		}
 		return re_md5;
 	}*/
+
+	@Override
+	@Transactional(propagation=Propagation.REQUIRED, isolation=Isolation.DEFAULT)
+	public HotelOrder createLocalOrder(Agent agent, CreateOrderReq orderReq, OrderCreateReq orderCreateReq) {
+		if (StringUtil.isNullOrEmpty(orderReq)) {
+			logger.error("orderReq查询条件为空");
+			throw new GSSException("创建订单信息", "0101", "orderReq查询条件为空");
+		}
+		if (StringUtil.isNullOrEmpty(agent)) {
+			logger.error("agent对象为空");
+			throw new GSSException("创建酒店订单", "0102", "agent对象为空");
+		}
+		if (StringUtil.isNullOrEmpty(orderReq.getHotelId())) {
+			logger.error("酒店ID为空！");
+			throw new GSSException("创建酒店订单", "0103", "酒店ID为空！");
+		}
+		if (StringUtil.isNullOrEmpty(orderReq.getHotelRoomId())) {
+			logger.error("房型ID为空！");
+			throw new GSSException("创建酒店订单", "0104", "房型ID为空！");
+		}
+		if (StringUtil.isNullOrEmpty(orderReq.getProductId())) {
+			logger.error("房间ID为空！");
+			throw new GSSException("创建酒店订单", "0109", "房间ID为空！");
+		}
+		if (StringUtils.isBlank(orderReq.getPassengers())) {
+			logger.error("酒店入住人为空!");
+			throw new GSSException("创建酒店订单", "0105", "酒店入住人为空!");
+		}
+		if (StringUtil.isNullOrEmpty(orderReq.getBookNumber())) {
+			logger.error("预定房间数为空！");
+			throw new GSSException("创建酒店订单", "0106", "预定房间数为空！");
+		}
+		/*if (StringUtil.isNullOrEmpty(orderReq.getUnitPrice())) {
+			logger.error("酒店单价为空！");
+			throw new GSSException("创建酒店订单", "0107", "酒店单价为空！");
+		}*/
+		if (StringUtil.isNullOrEmpty(orderReq.getCheckInTime())) {
+			logger.error("入住时间为空！");
+			throw new GSSException("创建酒店订单", "0107", "入住时间为空！");
+		}
+		if (StringUtil.isNullOrEmpty(orderReq.getCheckOutTime())) {
+			logger.error("离店时间为空！");
+			throw new GSSException("创建酒店订单", "0107", "离店时间为空！");
+		}
+		if (StringUtil.isNullOrEmpty(orderReq.getLateArrivalTime())) {
+			logger.error("最迟到店时间(整点数)为空！");
+			throw new GSSException("创建酒店订单", "0113", "最迟到店时间(只能是整点,默认18点)为空！");
+		}
+		if (StringUtil.isNullOrEmpty(orderReq.getHotelMobile())) {
+			logger.error("酒店联系电话为空！");
+			throw new GSSException("创建酒店订单", "0109", "酒店联系电话为空！");
+		}
+		if (StringUtil.isNullOrEmpty(orderReq.getCancelNotice())) {
+			logger.error("取消政策为空！");
+			throw new GSSException("创建酒店订单", "0110", "取消政策为空！");
+		}
+		if (StringUtil.isNullOrEmpty(orderReq.getOrderLink())) {
+			logger.error("联系人姓名为空！");
+			throw new GSSException("创建酒店订单", "0110", "联系人姓名为空！");
+		}
+		if (StringUtil.isNullOrEmpty(orderReq.getMobile())) {
+			logger.error("联系人电话为空！");
+			throw new GSSException("创建酒店订单", "0112", "联系人电话为空！");
+		}
+		/*
+		 * if (StringUtil.isNullOrEmpty(orderReq.getPaymentSign())) {
+		 * logger.error("支付模式为空！"); throw new GSSException("创建酒店订单", "0114",
+		 * "支付模式为空！"); }
+		 */
+		if (StringUtil.isNullOrEmpty(orderReq.getBreakfast())) {
+			logger.error("早餐为空！");
+			throw new GSSException("创建酒店订单", "0114", "早餐为空！");
+		}
+		
+		
+		
+		
+
+		Date dateStartDate;
+		Date departureDate;
+		int daysBetween;
+		try {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			dateStartDate = dateFormat.parse(orderReq.getCheckInTime());
+			Date departDate = dateFormat.parse(orderReq.getCheckOutTime());
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(departDate);
+			cal.add(Calendar.DAY_OF_MONTH, 1);
+			departureDate = cal.getTime();
+			daysBetween = com.tempus.gss.ops.util.DateUtil.daysBetween(orderReq.getCheckInTime(),
+					orderReq.getCheckOutTime());
+		} catch (ParseException e) {
+			logger.error("入住日期/离店日期 格式错误,请重新输入！入住日期/离店日期的正确格式为(yyyy-MM-dd)", e);
+			throw new GSSException("创建酒店订单", "0129",
+					"入住日期/离店日期 格式错误,请重新输入！入住日期/离店日期的正确格式为(yyyy-MM-dd)" + e.getMessage());
+		}
+
+		HotelOrder hotelOrder = new HotelOrder();
+
+		// 查询酒店房间价格
+		QueryHotelParam query = new QueryHotelParam();
+		query.setCheckInTime(orderReq.getCheckInTime());
+		query.setCheckOutTime(orderReq.getCheckOutTime());
+		query.setCityCode(String.valueOf(orderReq.getCityId()));
+		query.setHotelId(orderReq.getHotelId());
+		List<RoomPriceItem> roomPriceList = queryHotelRoomPrice(query);
+		// 房型ID
+		String roomTypeId = orderReq.getProductId();
+		//房间单价 (房间每天的价格相加)
+		BigDecimal unitPrice = null;
+		// 每天的价格记录
+		String eachNightPrice = null;
+		//供应商ID
+		String supplierId = null;
+		//预定检查类型
+		String ratePlanCategory = null;
+		//政策类型
+		String policyType = "";
+		outer:
+		for (RoomPriceItem roomPriceItem : roomPriceList) {
+			BaseRoomInfo baseRoomInfo = roomPriceItem.getBaseRoomInfo();
+			if (roomTypeId.equals(baseRoomInfo.getRoomTypeID())) {// 判断房型是否一致
+				List<RoomInfoItem> roomInfoList = roomPriceItem.getRoomInfo();
+				for (RoomInfoItem roomInfoItem : roomInfoList) {
+					if (orderReq.getHotelRoomId().equals(Long.valueOf(roomInfoItem.getRoomID()))) {// 判断房间ID是否一致
+						orderReq.setHotelRoomName(baseRoomInfo.getRoomName());
+						orderReq.setProductName(roomInfoItem.getRoomName());
+						//政策类型
+						policyType = roomInfoItem.getCancelLimitInfo().getPolicyType();
+						RoomPriceInfo roomPriceInfo = roomInfoItem.getRoomPriceInfo();
+						//预定检查类型
+						ratePlanCategory = roomPriceInfo.getRatePlanCategory();
+						//供应商ID
+						supplierId = roomInfoItem.getSupplierId();
+						//平均价格
+						Double settleFee = roomPriceInfo.getAveragePrice().getSettleFee();
+						unitPrice = new BigDecimal(settleFee);
+						/*List<RoomPriceDetail> priceDetailList = roomPriceInfo.getRoomPriceDetail();
+						for (RoomPriceDetail roomPriceDetail : priceDetailList) {
+							String oneDayPrice = roomPriceDetail.getPrice().getAmount();
+							// 计算一间房的价格
+							newTotalPrice = newTotalPrice.add(new BigDecimal(oneDayPrice));
+							// 记录每天的价格
+							if (eachNightPrice == null || "".equals(eachNightPrice)) {
+								eachNightPrice = oneDayPrice;
+							} else {
+								eachNightPrice = eachNightPrice + "," + oneDayPrice;
+							}
+						}*/
+						for (int i = 0; i < daysBetween; i++) {
+							if (eachNightPrice == null || "".equals(eachNightPrice)) {
+								eachNightPrice = settleFee.toString();
+							} else {
+								eachNightPrice = eachNightPrice + "," + settleFee.toString();
+							}
+						}
+						// 产品名称
+						hotelOrder.setSupPriceName(roomInfoItem.getRoomName());
+
+						// 床型
+						RoomBedTypeInfo roomBedTypeInfo = roomInfoItem.getRoomBedTypeInfo();
+						if ("T".equals(roomBedTypeInfo.getHasKingBed())) {
+							hotelOrder.setBedTypeName("大床");
+						} else if ("T".equals(roomBedTypeInfo.getHasTwinBed())) {
+							hotelOrder.setBedTypeName("双床");
+						} else if ("T".equals(roomBedTypeInfo.getHasSingleBed())) {
+							hotelOrder.setBedTypeName("单人床");
+						}
+						break;
+					}
+				}
+				break outer;
+			}
+		}
+		if (unitPrice == null) {
+			logger.error("酒店房间单价为空!");
+			throw new GSSException("创建酒店订单", "0107", "酒店单价为空！");
+		}
+		orderReq.setUnitPrice(unitPrice);
+		// 总价格
+		BigDecimal newTotalPrice = (unitPrice.multiply(new BigDecimal(daysBetween))).multiply(new BigDecimal(orderReq.getBookNumber()));
+		hotelOrder.setEachNightPrice(eachNightPrice);
+
+		Long businessSignNo = IdWorker.getId();
+		BuyOrder buyOrder = orderCreateReq.getBuyOrder();
+		if (buyOrder == null) {
+			buyOrder = new BuyOrder();
+		}
+		if (StringUtil.isNotNullOrEmpty(orderCreateReq.getSupplierNo())) {
+			Long supplierNo = Long.valueOf(orderCreateReq.getSupplierNo());
+			hotelOrder.setSupplierNo(supplierNo);
+			buyOrder.setSupplierNo(supplierNo);
+			// 从客商系统查询供应商信息
+			Supplier supplier = supplierService.getSupplierByNo(agent, supplierNo);
+			if (StringUtil.isNotNullOrEmpty(supplier)) {
+				buyOrder.setSupplierTypeNo(supplier.getCustomerTypeNo());
+			} else {
+				throw new GSSException("创建酒店订单", "0130", "根据编号查询供应商信息为空！");
+			}
+		} else {
+			logger.error("供应商信息不存在！");
+			throw new GSSException("创建酒店订单", "0130", "供应商信息不存在！");
+		}
+
+		/* 创建销售订单 */
+		Long saleOrderNo = maxNoService.generateBizNo("HOL_SALE_ORDER_NO", 13);
+		//获取交易单
+		SaleOrder saleOrder = orderCreateReq.getSaleOrder();
+		if (null == saleOrder) {
+			saleOrder = new SaleOrder();
+		}
+		saleOrder.setSaleOrderNo(saleOrderNo);
+		saleOrder.setOwner(agent.getOwner());
+		saleOrder.setSourceChannelNo(agent.getDevice());
+		saleOrder.setCustomerTypeNo(agent.getType());
+		saleOrder.setCustomerNo(agent.getNum());
+		saleOrder.setOrderingLoginName(agent.getAccount());
+		saleOrder.setGoodsType(GoodsBigType.GROGSHOP.getKey());//
+		saleOrder.setGoodsSubType(GoodsBigType.GROGSHOP.getKey());//
+		saleOrder.setOrderingTime(new Date());// 下单时间
+		saleOrder.setPayStatus(1);// 待支付
+		saleOrder.setValid(1);// 有效
+		saleOrder.setBusinessSignNo(businessSignNo);
+		saleOrder.setBsignType(1);// 1销采 2换票 3废和退 4改签
+		saleOrder.setTransationOrderNo(orderCreateReq.getSaleOrder().getTransationOrderNo());
+		saleOrder.setOrderType(1);
+		saleOrder.setOrderChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.ORDER_ONGOING));
+		saleOrder.setGoodsName(orderReq.getHotelName());
+		saleOrderService.create(agent, saleOrder);
+		
+		//创建应收单
+		CreatePlanAmountVO amountVO = new CreatePlanAmountVO();
+		amountVO.setRecordNo(saleOrderNo);
+		amountVO.setBusinessType(2);
+		amountVO.setGoodsType(4);
+		amountVO.setIncomeExpenseType(1);
+		amountVO.setPlanAmount(newTotalPrice);
+		amountVO.setRecordMovingType(1);
+		planAmountRecordService.create(agent, amountVO);
+
+		/* 创建采购单 */
+		Long buyOrderNo = maxNoService.generateBizNo("HOL_BUY_ORDER_NO", 14);
+		buyOrder.setOwner(agent.getOwner());
+		buyOrder.setBuyOrderNo(buyOrderNo);
+		buyOrder.setSaleOrderNo(saleOrderNo);
+		buyOrder.setGoodsType(GoodsBigType.GROGSHOP.getKey());
+		buyOrder.setGoodsSubType(GoodsBigType.GROGSHOP.getKey());
+		buyOrder.setGoodsName(orderReq.getHotelName());
+		buyOrder.setBuyChannelNo("HOTEL");
+		buyOrder.setBusinessSignNo(businessSignNo);
+		buyOrder.setBuyChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.ORDER_ONGOING));
+		buyOrder.setBsignType(1);// 1销采 2换票 3废和退 4改签
+		buyOrderService.create(agent, buyOrder);
+
+		// 入住旅客
+		String passengers = orderReq.getPassengers();
+		String[] passengerArr = passengers.split(",");
+
+		// 创建酒店订单
+		hotelOrder.setOwner(agent.getOwner());
+		hotelOrder.setCustomerNo(agent.getNum());
+		hotelOrder.setDbOrderType(orderCreateReq.getDbOrderType());
+		hotelOrder.setDbOrderMoney(orderCreateReq.getDbOrderMoney());
+		hotelOrder.setDbCancelRule(orderCreateReq.getDbCancelRule());
+		hotelOrder.setCancelPenalty(orderCreateReq.getCancelPenalty());
+		hotelOrder.setEarlyArriveTime(orderCreateReq.getEarlyArriveTime());
+		hotelOrder.setLatestArriveTime(orderCreateReq.getLatestArriveTime());
+		hotelOrder.setSaleOrderNo(saleOrderNo);
+		hotelOrder.setBuyOrderNo(buyOrderNo);
+		hotelOrder.setHotelCode(String.valueOf(orderCreateReq.getResId()));
+		hotelOrder.setHotelName(orderReq.getHotelName());
+		hotelOrder.setOrderType(2);	//设置为2代表订单属于BQY (1.TC; 2.BQY)
+		hotelOrder.setContactName(orderCreateReq.getLinkManName());
+		hotelOrder.setContactNumber(orderCreateReq.getLinkManMobile());
+		hotelOrder.setArrivalDate(dateStartDate);
+		hotelOrder.setDepartureDate(departureDate);
+		hotelOrder.setTotalPrice(newTotalPrice);
+		hotelOrder.setNightCount(daysBetween);
+		hotelOrder.setTransationOrderNo(orderCreateReq.getSaleOrder().getTransationOrderNo());
+		hotelOrder.setTotalRefund(orderCreateReq.getTotalRebateRateProfit());
+		hotelOrder.setFactTotalRefund(new BigDecimal(0));
+		hotelOrder.setGuestName(passengers);
+		hotelOrder.setGuestMobile(orderReq.getMobile());
+		hotelOrder.setDbOrderType(policyType);
+		if (StringUtil.isNotNullOrEmpty(orderCreateReq.getOrderRemark())) {
+			hotelOrder.setRemark(orderCreateReq.getOrderRemark());
+		}
+		//最迟取消时间
+		if (StringUtils.isNoneBlank(orderCreateReq.getCancelPenalty())) {
+			try {
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+				hotelOrder.setCancelTime(format.parse(orderCreateReq.getCancelPenalty()));
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+		hotelOrder.setLocker(0L);
+		hotelOrder.setOrderStatus(OwnerOrderStatus.ORDER_ONGOING.getKey());
+		hotelOrder.setCreator(agent.getAccount());
+		hotelOrder.setCreateOrderTime(new Date());
+		hotelOrder.setProductUniqueId(orderCreateReq.getProductUniqueId());
+		hotelOrder.setBookCount(orderCreateReq.getBookCount());
+		hotelOrder.setPaymentSign(orderCreateReq.getPaymentSign());
+		hotelOrder.setArriveHotelTime(orderCreateReq.getArriveHotelTime());
+		hotelOrder.setHotelAddress(orderReq.getCityName() + "市" + orderReq.getAddress());
+		hotelOrder.setHotelPhone(orderCreateReq.getHotelPhone());
+		hotelOrder.setProName(orderCreateReq.getProName());
+		hotelOrder.setProId(orderCreateReq.getProId());
+		hotelOrder.setBreakfastCount(orderCreateReq.getBreakfastCount());
+		//特殊要求
+		if (StringUtils.isNoneBlank(orderCreateReq.getOrderRemark())) {
+			hotelOrder.setRequestText(orderCreateReq.getOrderRemark());
+			orderReq.setRemark(orderCreateReq.getOrderRemark());
+		}
+		hotelOrderMapper.insertSelective(hotelOrder);
+
+		//前台传入的价格
+		BigDecimal beforeTotalPrice = orderCreateReq.getBeforeTotalPrice();
+		
+		//验证价格是否一致
+		//BigDecimal checkPrice = bookOrderResult.getCheckPrice();
+		
+		if (beforeTotalPrice.compareTo(newTotalPrice) != 0) {
+			logger.error("传入的总价与最新的总价不一致");
+			throw new GSSException("创建酒店订单失败", "0132", "价格不一致");
+		}
+		
+		if (StringUtils.isBlank(supplierId)) {
+			logger.error("BQY酒店供应商ID为空!");
+			throw new GSSException("创建酒店订单失败!", "0132", "酒店供应商ID为空!");
+		}
+		
+		if (StringUtils.isBlank(ratePlanCategory)) {
+			logger.error("预定检查类型为空!");
+			throw new GSSException("创建酒店订单失败!", "0133", "酒店预定检查类型为空!");
+		}
+		orderReq.setSupplierId(supplierId);
+		orderReq.setRatePlanCategory(ratePlanCategory);
+		//可以不传
+		orderReq.setChannelType(2);
+		
+		String orderNo = createOrder(orderReq);
+		// 判断条件返回0订单创建失败
+		if (StringUtils.isNotBlank(orderNo) && !"0".equals(orderNo)) {
+			int a = (int) (Math.random() * 100);
+			orderNo = sdf.format(new Date());
+			//订单创建成功更新订单表中数据
+			hotelOrder.setHotelOrderNo(orderNo + a);
+			//0=>下单失败，1=>下单成功，2=>下单成功，支付失败，3=>下单成功，支付成功
+			hotelOrder.setResultCode("1");
+			hotelOrder.setTcOrderStatus(TcOrderStatus.WAIT_PAY.getKey());
+			hotelOrderMapper.updateById(hotelOrder);
+			return hotelOrder;
+		}else {
+			throw new GSSException("bqy酒店创建失败!", "10001", "bqy酒店创建失败!");
+		}
+	}
+
 }
 
  

@@ -12,7 +12,13 @@ public class OrderPayReq extends BaseQueryParam implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	@JSONField(name="OrderNumber")
-	private Long orderNumber;	//酒店订单号
+	private Long orderNumber;		//总订单号
+	
+	public OrderPayReq (){}
+	
+	public OrderPayReq(Long orderNumber) {
+		this.orderNumber = orderNumber;
+	}
 
 	public Long getOrderNumber() {
 		return orderNumber;

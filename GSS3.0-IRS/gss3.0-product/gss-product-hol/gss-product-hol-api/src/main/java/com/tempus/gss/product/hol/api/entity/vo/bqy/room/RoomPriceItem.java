@@ -19,7 +19,7 @@ public class RoomPriceItem implements Serializable {
 	@JSONField(name="RoomInfo")
 	private  List<RoomInfoItem> roomInfo;		//房间集合
 	
-	private BigDecimal minprice;				//最低价
+	private Double minprice;				//最低价
 
 	public BaseRoomInfo getBaseRoomInfo() {
 		return baseRoomInfo;
@@ -37,11 +37,11 @@ public class RoomPriceItem implements Serializable {
 		this.roomInfo = roomInfo;
 	}
 
-	public BigDecimal getMinprice() {
+	public Double getMinprice() {
 		return minprice;
 	}
 
-	public void setMinprice(BigDecimal minprice) {
+	public void setMinprice(Double minprice) {
 		this.minprice = minprice;
 	}
 	

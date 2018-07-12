@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.concurrent.Future;
 
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
+import com.tempus.gss.product.hol.api.entity.request.tc.OrderCreateReq;
+import com.tempus.gss.product.hol.api.entity.response.HotelOrder;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelEntity;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelId;
@@ -15,6 +17,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.ImageList;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomImageList;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.BookOrderParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.CreateOrderReq;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.request.OrderCancelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.OrderPayReq;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryCityInfoParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelIdParam;
@@ -23,8 +26,11 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelListParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.BookOrderResponse;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelLocationEntity;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelOrderInfo;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderCancelResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderPayResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
+import com.tempus.gss.vo.Agent;
 
 /**
  * 同城酒店
@@ -183,5 +189,28 @@ public interface IBQYHotelInterService{
 	 * @return
 	 */
 	OrderPayResult orderPay(OrderPayReq orderPayReq);
+	
+	/**
+	 * 取消订单
+	 * @param cancelParam
+	 * @return
+	 */
+	OrderCancelResult cancelOrder(OrderCancelParam cancelParam);
+	
+	/**
+	 * 订单详情
+	 * @param orderDetailParam
+	 * @return
+	 */
+	HotelOrderInfo orderDetail(OrderPayReq orderDetailParam);
+	
+	/**
+	 * 创建本地订单
+	 * @param agent
+	 * @param orderReq
+	 * @param orderCreateReq
+	 * @return
+	 */
+	HotelOrder createLocalOrder(Agent agent, CreateOrderReq orderReq, OrderCreateReq orderCreateReq);
 	
 }

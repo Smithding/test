@@ -30,6 +30,9 @@ public class CancelOrderBeforePayReq implements Serializable{
 	 */
 	@JSONField(name = "OtherReason")
 	private String otherReason;
+	
+	private String supplierNo;		//供应商编号
+	
 	public String getOrderId() {
 		return orderId;
 	}
@@ -54,6 +57,11 @@ public class CancelOrderBeforePayReq implements Serializable{
 	public void setOtherReason(String otherReason) {
 		this.otherReason = otherReason;
 	}
-	
+	public String getSupplierNo() {
+		return supplierNo;
+	}
+	public void setSupplierNo(String supplierNo) {
+		this.supplierNo = supplierNo;
+	}
 	
 }

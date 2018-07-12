@@ -1167,7 +1167,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	}
 
 	@Override
-	public List<ResBaseInfo> findNearHotel(Agent agent, double lat, double lon) {
+	public List<HolMidBaseInfo> findNearHotel(Agent agent, double lat, double lon) {
 		Query query=new Query();
         Criteria criatira = new Criteria();
         query.skip(0);
@@ -1175,15 +1175,15 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
   		Point point =new Point(lon, lat);
 		criatira.and("resGpsLocation").near(point).maxDistance(0.2D);//100000/6378137
 		
-		List<ResBaseInfo> result = mongoTemplate1.find(query.addCriteria(criatira), ResBaseInfo.class);
+		List<HolMidBaseInfo> result = mongoTemplate1.find(query.addCriteria(criatira), HolMidBaseInfo.class);
 		if(StringUtil.isNotNullOrEmpty(result)) {
 			if(result.size() > 1) {
 				result.remove(0);
-				for (ResBaseInfo resBaseInfo : result) {
-					if(StringUtil.isNotNullOrEmpty(resBaseInfo.getResGpsLocation())) {
-						Double myDistance = GPSUtil.getDistance(lat, lon, resBaseInfo.getResGpsLocation()[1], resBaseInfo.getResGpsLocation()[0]); 
+				for (HolMidBaseInfo resBaseInfo : result) {
+					if(StringUtil.isNotNullOrEmpty(resBaseInfo.getResPosition())) {
+						Double myDistance = GPSUtil.getDistance(lat, lon, resBaseInfo.getResPosition()[1], resBaseInfo.getResPosition()[0]); 
 		   				//用于距离展示，不作他用
-		   				resBaseInfo.setShortIntro(String.valueOf(myDistance));
+		   				resBaseInfo.setTravelGuide(String.valueOf(myDistance));
 					}
 				}
 			}

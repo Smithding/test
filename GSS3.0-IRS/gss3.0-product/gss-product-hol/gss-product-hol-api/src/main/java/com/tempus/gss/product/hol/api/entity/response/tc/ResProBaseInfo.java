@@ -75,7 +75,7 @@ public class ResProBaseInfo implements Serializable{
 	@JSONField(name = "ProductUniqueId")
 	private String productUniqueId;
 	/**
-	 * 客房特点等信息：外宾专用等
+	 * 客房特点等信息：外宾专用等 (bqy用来存储预付房型检查字段   ratePlanCategory)
 	 */
 	@JSONField(name = "RoomFeature")
 	private String roomFeature;
@@ -95,7 +95,7 @@ public class ResProBaseInfo implements Serializable{
 	@JSONField(name = "SourceFrom")
 	private Long sourceFrom;
 	/**
-	 * 宾客类型
+	 * 宾客类型 (bqy用来存储酒店代理人Id supplierId)
 	 */
 	@JSONField(name = "CustomerType")
 	private String customerType;

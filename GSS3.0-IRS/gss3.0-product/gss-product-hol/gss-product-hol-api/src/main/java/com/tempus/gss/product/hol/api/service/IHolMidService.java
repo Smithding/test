@@ -29,7 +29,7 @@ public interface IHolMidService {
 	 * @param holMidId
 	 * @return
 	 */
-	HolMidBaseInfo queryHolMidById(Agent agent, Long holMidId);
+	HolMidBaseInfo queryHolMidById(Agent agent, String holMidId);
 	
 	/**
 	 * 酒店详情
@@ -37,7 +37,7 @@ public interface IHolMidService {
 	 * @param holMidId
 	 * @return
 	 */
-	ResBaseInfo hotelDetail(Agent agent, Long holMidId, String checkinDate, String checkoutDate) throws Exception;
+	ResBaseInfo hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception;
 	
 	/**
 	 * 酒店详情后台查询
@@ -45,7 +45,7 @@ public interface IHolMidService {
 	 * @param holMidId
 	 * @return
 	 */
-	ResBaseInfo hotelDetailForBack(Agent agent, Long holMidId, String checkinDate, String checkoutDate) throws Exception;
+	ResBaseInfo hotelDetailForBack(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception;
 	
 	/**
 	 * 查询酒店图片返回与TC图片字段一致
@@ -53,7 +53,7 @@ public interface IHolMidService {
 	 * @param holMidId
 	 * @return
 	 */
-	List<ImgInfo> listImgByHotelId(Agent agent, long holMidId);
+	List<ImgInfo> listImgByHotelId(Agent agent, String holMidId);
 	
 	/**
 	 * 修改酒店状态

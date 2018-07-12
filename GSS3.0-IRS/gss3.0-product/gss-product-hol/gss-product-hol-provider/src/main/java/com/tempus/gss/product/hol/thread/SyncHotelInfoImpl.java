@@ -397,7 +397,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	@Async
 	public Future<ResBaseInfo> queryTCHelListForAsync(Agent agent, Long tcHotelId, String checkinDate,
 			String checkoutDate) {
-		ResBaseInfo hotelDetail = tcHotelSupplierService.queryHotelDetail(agent, tcHotelId, checkinDate, checkoutDate);
+		ResBaseInfo hotelDetail = queryHotelDetail(agent, tcHotelId, checkinDate, checkoutDate);
 		return new AsyncResult<ResBaseInfo>(hotelDetail);
 	}
 

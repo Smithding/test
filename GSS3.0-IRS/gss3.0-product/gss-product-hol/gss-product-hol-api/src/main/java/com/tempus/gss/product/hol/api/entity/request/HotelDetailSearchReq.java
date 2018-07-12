@@ -27,6 +27,16 @@ public class HotelDetailSearchReq extends BaseRequest {
      */
     @JSONField(name = "CheckoutDate")
     private String checkoutDate;
+    
+    /**
+	 * bqy预付检查字段
+	 */
+	private String ratePlanCategory;
+	
+	/**
+	 * 酒店代理人id
+	 */
+	private String supplierId;
 
     public static long getSerialVersionUID() {
         return serialVersionUID;
@@ -55,4 +65,21 @@ public class HotelDetailSearchReq extends BaseRequest {
     public void setCheckoutDate(String checkoutDate) {
         this.checkoutDate = checkoutDate;
     }
+
+	public String getRatePlanCategory() {
+		return ratePlanCategory;
+	}
+
+	public void setRatePlanCategory(String ratePlanCategory) {
+		this.ratePlanCategory = ratePlanCategory;
+	}
+
+	public String getSupplierId() {
+		return supplierId;
+	}
+
+	public void setSupplierId(String supplierId) {
+		this.supplierId = supplierId;
+	}
+    
 }

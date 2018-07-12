@@ -70,8 +70,8 @@ public class HotelInfo implements Serializable {
 	@JSONField(name="LastUpdated")
 	private String lastUpdated;				//最后修改时间
 	
-	@JSONField(name="Roomquantity")         
-	private int roomquantity;               //房间数量
+	@JSONField(name="RoomQuantity")         
+	private int roomQuantity;               //房间数量
 	                                        
 	@JSONField(name="FloorHight")           
 	private String floorHight;              //楼高
@@ -132,8 +132,12 @@ public class HotelInfo implements Serializable {
 	/**
 	 * 酒店头图
 	 */
-	@JSONField(name="TitleImgUrl")
-	private String titleImgUrl;
+	@JSONField(name="ImgURL")
+	private String imgURL;
+	
+	//图片类型
+	@JSONField(name="ImgType")
+	private Integer imgType;
 
 	public long getHotelId() {
 		return hotelId;
@@ -229,14 +233,6 @@ public class HotelInfo implements Serializable {
 
 	public void setWhenBuilt(String whenBuilt) {
 		this.whenBuilt = whenBuilt;
-	}
-
-	public int getRoomquantity() {
-		return roomquantity;
-	}
-
-	public void setRoomquantity(int roomquantity) {
-		this.roomquantity = roomquantity;
 	}
 
 	public String getFloorHight() {
@@ -463,12 +459,28 @@ public class HotelInfo implements Serializable {
 		this.coordinatesType = coordinatesType;
 	}
 
-	public String getTitleImgUrl() {
-		return titleImgUrl;
+	public int getRoomQuantity() {
+		return roomQuantity;
 	}
 
-	public void setTitleImgUrl(String titleImgUrl) {
-		this.titleImgUrl = titleImgUrl;
+	public void setRoomQuantity(int roomQuantity) {
+		this.roomQuantity = roomQuantity;
+	}
+
+	public String getImgURL() {
+		return imgURL;
+	}
+
+	public void setImgURL(String imgURL) {
+		this.imgURL = imgURL;
+	}
+
+	public Integer getImgType() {
+		return imgType;
+	}
+
+	public void setImgType(Integer imgType) {
+		this.imgType = imgType;
 	}
 	
 }

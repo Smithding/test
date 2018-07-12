@@ -3,6 +3,7 @@ package com.tempus.gss.product.hol.service;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -109,14 +110,14 @@ public class HolMidServiceImpl implements IHolMidService {
 	        			escapeHtml = escapeHtml.replace(key, "\\" + key);
 	        		 }
 	        	 }
-	        Criteria bqyCriteria = new Criteria();
+	        /*Criteria bqyCriteria = new Criteria();
 	        bqyCriteria.and("bqyResName").regex("^.*"+escapeHtml+".*$");//"^.*"+hotelName+".*$"
-	        addSearchCriteria(hotelSearchReq, query, bqyCriteria);
-	        Criteria tcCriteria = new Criteria();
-	        tcCriteria.and("tcResName").regex("^.*"+escapeHtml+".*$");//"^.*"+hotelName+".*$"
-	        addSearchCriteria(hotelSearchReq, query, tcCriteria);
+	        addSearchCriteria(hotelSearchReq, query, bqyCriteria);*/
+	        Criteria criteria = new Criteria();
+	        criteria.and("resName").regex("^.*"+escapeHtml+".*$");//"^.*"+hotelName+".*$"
+	        addSearchCriteria(hotelSearchReq, query, criteria);
 			//criatira.and("bqyResName").regex("^.*"+escapeHtml+".*$");//"^.*"+hotelName+".*$"
-	        criatira.orOperator(bqyCriteria,tcCriteria);
+	        criatira.orOperator(criteria);
 		}else {
 			addSearchCriteria(hotelSearchReq, query, criatira);
 		}
@@ -200,13 +201,26 @@ public class HolMidServiceImpl implements IHolMidService {
  				}
 			}
 			if(StringUtil.isNotNullOrEmpty(hotelSearchReq.getSearchCondition().getBrandList())){
-				criatira.and("brandInfo.resBrandName").in(hotelSearchReq.getSearchCondition().getBrandList());
+				List<String> brandNameList = new ArrayList<>();
+				List<String> brandList = hotelSearchReq.getSearchCondition().getBrandList();
+				//String[] fbsArr = { "(", ")" };  //  "\\", "$", "(", ")", "*", "+", ".", "[", "]", "?", "^", "{", "}", "|" 
+				for (String brandName: brandList) {
+					brandName = StringEscapeUtils.unescapeHtml(brandName);
+		        	 /*for (String key : fbsArr) { 
+		        		 if(brandName.contains(key)){
+		        			 brandName = brandName.replace(key, "\\" + key);
+		        		 }
+		        	 }*/
+		        	 brandNameList.add(brandName);
+				}
+				
+				criatira.and("brandInfo.resBrandName").in(brandNameList);
 			}
 		}
 	}
 
 	@Override
-	public HolMidBaseInfo queryHolMidById(Agent agent, Long holMidId) {
+	public HolMidBaseInfo queryHolMidById(Agent agent, String holMidId) {
 		if (StringUtil.isNullOrEmpty(holMidId)) {
             logger.error("酒店中间表ID为空!");
             throw new GSSException("获取酒店中间表信息", "0101", "酒店中间表ID为空");
@@ -218,16 +232,12 @@ public class HolMidServiceImpl implements IHolMidService {
        /* if(StringUtil.isNullOrEmpty(agent.getType())){
             throw new GSSException("获取酒店列表", "0102", "agentType为空");
         }*/
-        List<HolMidBaseInfo> holMidList = mongoTemplate1.find(new Query(Criteria.where("_id").is(holMidId)), HolMidBaseInfo.class);
-		if (null != holMidList && holMidList.size() > 0) {
-			return holMidList.get(0);
-		}else {
-			throw new GSSException("获取酒店中间表信息", "0102", "中间表ID为:"+holMidId+"未查询到数据!");
-		}
+       return mongoTemplate1.findOne(new Query(Criteria.where("_id").is(holMidId)), HolMidBaseInfo.class);
+		
 	}
 
 	@Override
-	public ResBaseInfo hotelDetail(Agent agent, Long holMidId, String checkinDate, String checkoutDate) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
+	public ResBaseInfo hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
 		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
 	
 		Long bqyResId = null;
@@ -252,14 +262,20 @@ public class HolMidServiceImpl implements IHolMidService {
 		if (null != bqyResId && null != tcResId) {
 			try {
 				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate);
-				Future<ResBaseInfo> tcResponse = syncHotelInfo.queryTCHelListForAsync(agent, bqyResId, checkinDate, checkoutDate);
+				Future<ResBaseInfo> tcResponse = syncHotelInfo.queryTCHelListForAsync(agent, tcResId, checkinDate, checkoutDate);
 				while (bqyResponse.isDone() && tcResponse.isDone()) {
 						break;
 					}
 				bqyHotel = bqyResponse.get();
 				tcHotel = tcResponse.get();
-				List<ProDetails> bqyProDetailList = bqyHotel.getProDetails();
-				List<ProDetails> tcProDetailList = tcHotel.getProDetails();
+				List<ProDetails> bqyProDetailList = null;
+				List<ProDetails> tcProDetailList = null;
+				if (null != bqyHotel) {
+					bqyProDetailList = bqyHotel.getProDetails();
+				}
+				if (null != tcHotel) {
+					tcProDetailList = tcHotel.getProDetails();
+				}
 				
 				if (bqyProDetailList == null || bqyProDetailList.size() == 0) {
 					return tcHotel;
@@ -272,7 +288,7 @@ public class HolMidServiceImpl implements IHolMidService {
 					ProDetails bqyProDetail = bqyProDetailList.get(i);
 					//bqy房型名称
 					String bqyProName = bqyProDetail.getResProName();
-					for (int j = 0; i < tcProDetailList.size(); j++) {
+					for (int j = 0; j < tcProDetailList.size(); j++) {
 						ProDetails tcProDetail = tcProDetailList.get(j);
 						String tcProName = tcProDetail.getResProName();
 						
@@ -333,11 +349,18 @@ public class HolMidServiceImpl implements IHolMidService {
 				mongoTemplate1.upsert(query, update, HolMidBaseInfo.class);
 			}
 		}
+		List<ProDetails> proDetailList = bqyHotel.getProDetails();
+		if (null != proDetailList && proDetailList.size() > 0) {
+			for(int i = 0; i < proDetailList.size(); i++) {
+				List<ResProBaseInfo> resProBaseInfoList = proDetailList.get(i).getResProBaseInfoList();
+				resProBaseInfoList.sort(Comparator.comparingInt(ResProBaseInfo :: getFirPrice));
+			}
+		}
 		return bqyHotel;
 	}
 
 	@Override
-	public ResBaseInfo hotelDetailForBack(Agent agent, Long holMidId, String checkinDate, String checkoutDate)
+	public ResBaseInfo hotelDetailForBack(Agent agent, String holMidId, String checkinDate, String checkoutDate)
 			throws Exception {
 		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
 		Long bqyResId = null;
@@ -449,7 +472,7 @@ public class HolMidServiceImpl implements IHolMidService {
 	}
 	
 	@Override
-	public List<ImgInfo> listImgByHotelId(Agent agent, long holMidId) {
+	public List<ImgInfo> listImgByHotelId(Agent agent, String holMidId) {
 		List<ImgInfo> imgList = null;
 		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
 		Long bqyResId = null;

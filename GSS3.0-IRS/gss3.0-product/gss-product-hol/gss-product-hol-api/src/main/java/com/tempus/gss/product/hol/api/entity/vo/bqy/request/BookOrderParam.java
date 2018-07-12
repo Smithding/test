@@ -24,13 +24,16 @@ public class BookOrderParam extends QueryHotelInfoParam implements Serializable{
 	private String ratePlanCategory;	//预付房型可定检查需增加此字段
 	
 	@JSONField(name="quantity")
-	private int quantity;			//房间数量
+	private int quantity;				//房间数量
 	
 	@JSONField(name="GuestCount")
-	private int guestCount;			//入住人数
+	private int guestCount;				//入住人数
 	
 	@JSONField(name="lateArrivalTime")
 	private String lateArrivalTime;		//最晚到店时间
+	
+	@JSONField(name="SupplierId")
+	private String supplierId;			//酒店代理人Id
 
 	public String getCheckInTime() {
 		return checkInTime;
@@ -86,6 +89,14 @@ public class BookOrderParam extends QueryHotelInfoParam implements Serializable{
 
 	public void setGuestCount(int guestCount) {
 		this.guestCount = guestCount;
+	}
+
+	public String getSupplierId() {
+		return supplierId;
+	}
+
+	public void setSupplierId(String supplierId) {
+		this.supplierId = supplierId;
 	}
 	
 }

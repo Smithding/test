@@ -75,7 +75,27 @@ public enum TcOrderStatus implements Serializable{
 	/**
 	 * 订单变更
 	 */
-	ORDER_CHANGED("50","订单变化");
+	ORDER_CHANGED("50","订单变化"),
+	
+	/**
+	 * 支付失败
+	 */
+	PAY_BAD("999","支付失败"),
+	
+	/**
+	 * 变价
+	 */
+	CHANGE_PRICE("301", "变价"),
+	
+	/**
+	 * 退订中
+	 */
+	CANCEL_ING("401","退订中"),
+	
+	/**
+	 * 已退订
+	 */
+	CANCEL_FINISH("508","已退订");
 	
 	private String key;
 	private String value;
@@ -108,4 +128,28 @@ public enum TcOrderStatus implements Serializable{
 	        return null;
 	    }
 	
+	 public static TcOrderStatus bqyKey(String key){
+		 switch (key) {
+			
+		case "2":	//待确认
+			return WAIT_TC_CONFIRM;
+			
+		case "3":	//已确认
+			return ALREADY_TC_CONFIRM;
+		case "33":	//已支付
+			return ALREADY_PAY;
+		case "5":	//退订中
+			return CANCEL_ING;
+		case "9":	//已取消
+			return ALREADY_CANCEL;
+		default:
+			for (TcOrderStatus tcOrderStatus : values()) {
+	            if (tcOrderStatus.getKey().equals(key)) {
+	                return tcOrderStatus;
+	            }
+	        }
+	        return null;
+		}
+		 
+	 }
 }

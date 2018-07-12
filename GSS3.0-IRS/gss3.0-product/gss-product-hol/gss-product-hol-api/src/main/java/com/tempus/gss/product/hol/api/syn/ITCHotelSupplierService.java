@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 
 import com.tempus.gss.exception.GSSException;
+import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
 import com.tempus.gss.product.hol.api.entity.HotelName;
 import com.tempus.gss.product.hol.api.entity.LastestResRecord;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
@@ -172,7 +173,7 @@ public interface ITCHotelSupplierService {
 	 * @param distance
 	 * @return
 	 */
-	public List<ResBaseInfo> findNearHotel(Agent agent,double lat,double lon);
+	public List<HolMidBaseInfo> findNearHotel(Agent agent,double lat,double lon);
 	
 	/**
 	 * 根据酒店名字模糊匹配下拉信息

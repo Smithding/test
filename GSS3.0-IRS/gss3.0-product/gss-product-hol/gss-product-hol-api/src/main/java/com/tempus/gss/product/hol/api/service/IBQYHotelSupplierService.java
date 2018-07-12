@@ -70,7 +70,7 @@ public interface IBQYHotelSupplierService {
 	 * @param isBookOrderReq
 	 * @return
 	 */
-	BookOrderResponse isBookOrder(Agent agent, IsBookOrderReq isBookOrderReq);
+	BookOrderResponse isBookOrder(Agent agent, IsBookOrderReq isBookOrderReq, Integer flag);
 	
 	/**
 	 * 查询酒店图片返回与TC图片字段一致
