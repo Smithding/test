@@ -279,6 +279,7 @@ public class RefundServiceImpl implements IRefundService {
 					requestWithActor.getEntity().getSaleOrderNo());
 
 			Long buyChangeNo = 0L;
+			String ticketType = "BSP";
 			//取最新的采购商
 			if (buyOrderExtList != null && buyOrderExtList.size() != 0) {
 				BuyOrderExt buyOrderExt = buyOrderExtList.get(0);
@@ -304,6 +305,9 @@ public class RefundServiceImpl implements IRefundService {
 				buyChange.setIncomeExpenseType(1);// 收支类型 1.收 2.支
 				buyChange.setBuyOrderNo(buyOrderExt.getBuyOrderNo());
 				buyChangeService.create(requestWithActor.getAgent(), buyChange);
+				if(StringUtil.isNotNullOrEmpty(buyOrderExt.getTicketType())){
+					ticketType = buyOrderExt.getTicketType();
+				}
 
 				for (SaleOrderDetail saleOrderDetail : saleOrderDetailList) {
 
@@ -374,7 +378,7 @@ public class RefundServiceImpl implements IRefundService {
 			log.info("申请退费单时保存的退费单信息:{}",saleChangeExt.toString());
 			saleChangeExtDao.insertSelective(saleChangeExt);
 			//创建采购变更单
-			createBuyChangeExt(createTime,agent,buyChangeNo,saleOrderExt.getOffice());
+			createBuyChangeExt(createTime,agent,buyChangeNo,saleOrderExt.getOffice(),ticketType);
 
 
 			/* 修改销售单明细 */
@@ -1110,7 +1114,7 @@ public class RefundServiceImpl implements IRefundService {
 			// 获取SaleChange对象
 			SaleChange saleChange = saleChangeService
 					.getSaleChangeByNo(saleChangeNo.getAgent(), saleChangeNo.getEntity().longValue());
-			saleChange.setChildStatus(4);// 设置废退状态 4为拒绝废退
+			saleChange.setChildStatus(14);// 设置废退状态 4为拒绝废退 lizhi  4-->14
 			Date modifyTime = new Date();
 			Agent agent = saleChangeNo.getAgent();
 			saleChange.setModifier(agent.getAccount());
@@ -1123,7 +1127,7 @@ public class RefundServiceImpl implements IRefundService {
 				saleChangeExt.setModifier(agent.getAccount());
 				saleChangeExt.setModifyTime(modifyTime);
                 saleChangeExtDao.updateLocker(saleChangeExt);
-                Long saleOrderNo = saleChangeExt.getSaleChange().getSaleOrderNo();
+                //Long saleOrderNo = saleChangeExt.getSaleChange().getSaleOrderNo();
                 //只修改被拒单的航段+乘机人detail的状态，不能全部修改为4
 				List<SaleChangeDetail> saleChangeDetailList = saleChangeExt.getSaleChangeDetailList();
 				List<SaleOrderDetail> detailList = new ArrayList<>();
@@ -1362,7 +1366,9 @@ public class RefundServiceImpl implements IRefundService {
 
 		boolean flag = false;
 		try {
-			int updateFlag = saleChangeExtDao.updateByPrimaryKeySelective(saleOrderChangeExt.getEntity());
+			SaleChangeExt saleChangeExt = saleOrderChangeExt.getEntity();
+			log.info("修改销售变更单信息:");
+			int updateFlag = saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
 			if (updateFlag == 1) {
 				flag = true;
 			}
@@ -1619,6 +1625,8 @@ public class RefundServiceImpl implements IRefundService {
 			//更新当前操作员订单数量
 			Long lockerId = saleChangeExt.getLocker();
 			saleChangeExt.setLocker(0L);
+			//状态查看assist.js alineQuitSaleStatus方法状态 1,"待审核",2,"已审核",3,"已退废",4,"已拒单"
+			saleChangeExt.setAirlineStatus(3);
 			saleChangeExt.setModifier(agent.getAccount());
 			saleChangeExt.setAuditPerson(agent.getAccount());
 			saleChangeExt.setModifyTime(modifyTime);
@@ -1761,7 +1769,7 @@ public class RefundServiceImpl implements IRefundService {
 	}
 
 	//创建采购变更单扩展表
-	private void createBuyChangeExt(Date createTime,Agent agent,Long buyChangeNo,String office){
+	private void createBuyChangeExt(Date createTime,Agent agent,Long buyChangeNo,String office,String ticketType){
       BuyChangeExt buyChangeExt = new BuyChangeExt();
       buyChangeExt.setAirLineRefundStatus(0);
       buyChangeExt.setOwner(agent.getOwner());
@@ -1770,7 +1778,7 @@ public class RefundServiceImpl implements IRefundService {
       buyChangeExt.setCreator(agent.getAccount());
       buyChangeExt.setStatus("1");
       buyChangeExt.setOffice(office);
-     // buyChangeExt.setChangeRemark(remark);
+      buyChangeExt.setTicketType(ticketType);
       buyChangeExt.setBuyChangeNo(buyChangeNo);
       log.info("创建采购变更单扩展表"+buyChangeExt.toString());
       buyChangeExtDao.insertSelective(buyChangeExt);
