@@ -857,7 +857,12 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeExt.setCurrency(requestWithActor.getEntity().getCurrency());
             saleChangeExt.setExchangeRate(requestWithActor.getEntity().getExchangeRate());
             saleChangeExt.setSaleCurrency(requestWithActor.getEntity().getSaleCurrency());
-            saleChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
+            if (saleChangeExt !=null && saleChangeExt.getChangeRemark()!=null&&saleChangeExt.getChangeRemark() !=""){
+
+            saleChangeExt.setChangeRemark(saleChangeExt.getChangeRemark()+"#"+requestWithActor.getEntity().getChangeRemark());
+            }else {
+                saleChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
+            }
             log.info("保存采购数据" + saleChangeExt.toString());
             saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
             List<ChangePriceVo> adtList = requestWithActor.getEntity().getSaleAdtPriceList();
