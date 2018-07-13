@@ -204,13 +204,4 @@ public interface IBQYHotelInterService{
 	 */
 	HotelOrderInfo orderDetail(OrderPayReq orderDetailParam);
 	
-	/**
-	 * 创建本地订单
-	 * @param agent
-	 * @param orderReq
-	 * @param orderCreateReq
-	 * @return
-	 */
-	HotelOrder createLocalOrder(Agent agent, CreateOrderReq orderReq, OrderCreateReq orderCreateReq);
-	
 }
