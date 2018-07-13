@@ -94,12 +94,15 @@ public class RefundServiceImpl implements IRefundService {
 	BuyOrderExtDao buyOrderExtDao;
 
 	@Autowired
+	BuyChangeExtDao buyChangeExtDao;
+
+	@Autowired
 	PnrDao pnrDao;
 
 	@Autowired
 	SaleChangeDetailDao saleChangeDetailDao;
 
-	@Autowired
+	@Reference
 	IBuyOrderExtService buyOrderExtService;
 
 	@Reference
@@ -207,9 +210,7 @@ public class RefundServiceImpl implements IRefundService {
 	@Override
 	public SaleChangeExt createRefundExt(RequestWithActor<RefundCreateVo> requestWithActor) {
 		log.info("创建废退单申请开始===========");
-		/* 创建销售废退拓展单 */
-		SaleChangeExt saleChangeExt = new SaleChangeExt();
-		
+
 		if (requestWithActor.getEntity() == null) {
 			log.error("创建废退单参数不满足");
 			throw new GSSException("创建废退单参数不满足", "0001", "创建废退单失败");
@@ -243,6 +244,10 @@ public class RefundServiceImpl implements IRefundService {
 			log.error("销售单编号为空");
 			throw new GSSException("销售单编号为空（SaleOrderNo）", "0001", "创建废退单失败");
 		}
+		/* 创建销售废退拓展单 */
+		SaleChangeExt saleChangeExt = new SaleChangeExt();
+		Date createTime = new Date();
+
 		try {
 			Long businessSignNo = IdWorker.getId();
 			Agent agent = requestWithActor.getAgent();
@@ -273,12 +278,14 @@ public class RefundServiceImpl implements IRefundService {
 			List<BuyOrderExt> buyOrderExtList = buyOrderExtService.selectListBySaleOrderNo(agent,
 					requestWithActor.getEntity().getSaleOrderNo());
 
+			Long buyChangeNo = 0L;
 			//取最新的采购商
 			if (buyOrderExtList != null && buyOrderExtList.size() != 0) {
 				BuyOrderExt buyOrderExt = buyOrderExtList.get(0);
 				/* 创建采购废退单 */
 				BuyChange buyChange = new BuyChange();
-				buyChange.setBuyChangeNo(maxNoService.generateBizNo("IFT_BUY_CHANGE_NO", 47));
+				buyChangeNo = maxNoService.generateBizNo("IFT_BUY_CHANGE_NO", 47);
+				buyChange.setBuyChangeNo(buyChangeNo);
 				buyChange.setOrderChangeType(requestWithActor.getEntity().getRefundType());
 				buyChange.setBusinessSignNo(businessSignNo);
 				if(requestWithActor.getEntity().getRefundType()==1) {
@@ -288,7 +295,7 @@ public class RefundServiceImpl implements IRefundService {
 					buyChange.setBsignType(4);
 				}
 				buyChange.setOwner(agent.getOwner());
-				buyChange.setCreateTime(new Date());
+				buyChange.setCreateTime(createTime);
 				buyChange.setChildStatus(1);// 1.待审核 2.已审核 3.处理中
 				// 10.已处理 11.已取消
 				buyChange.setGoodsType(2);// 商品大类 2=国际机票
@@ -308,7 +315,7 @@ public class RefundServiceImpl implements IRefundService {
 						saleChangeDetail.setBuyChangeNo(buyChange.getBuyChangeNo());
 						saleChangeDetail.setSaleOrderDetailNo(saleOrderDetail.getSaleOrderDetailNo());
 						saleChangeDetail.setOwner(agent.getOwner());
-						saleChangeDetail.setCreateTime(new Date());
+						saleChangeDetail.setCreateTime(createTime);
 						saleChangeDetail.setCreator(String.valueOf(agent.getAccount()));
 						saleChangeDetail.setValid((byte) 1);
 						saleChangeDetailDao.insertSelective(saleChangeDetail);
@@ -324,7 +331,7 @@ public class RefundServiceImpl implements IRefundService {
 			saleChange.setBusinessSignNo(businessSignNo);
 			saleChange.setBsignType(3);// 1销采 2换票 3废和退 4改签
 			saleChange.setOwner(agent.getOwner());
-			saleChange.setCreateTime(new Date());
+			saleChange.setCreateTime(createTime);
 			saleChange.setChildStatus(1);// 1.待审核 2.已审核 3.退票中 废票中 改签中 10.已完成
 			// 11.已取消
 			saleChange.setChangeReason(requestWithActor.getEntity().getRefundReason());
@@ -341,7 +348,7 @@ public class RefundServiceImpl implements IRefundService {
 			/* 设置废退方式 1.自愿、2.非自愿 */
 			saleChangeExt.setRefundWay(requestWithActor.getEntity().getRefundWay());
 			saleChangeExt.setOwner(agent.getOwner());
-			saleChangeExt.setCreateTime(new Date());
+			saleChangeExt.setCreateTime(createTime);
 			saleChangeExt.setCreator(String.valueOf(agent.getAccount()));
 			saleChangeExt.setChangeType(requestWithActor.getEntity().getRefundType());
 			saleChangeExt.setContactName(requestWithActor.getEntity().getContactName());
@@ -366,16 +373,9 @@ public class RefundServiceImpl implements IRefundService {
 			setExtLockerVal(saleOrder,agent,saleChangeExt);
 			log.info("申请退费单时保存的退费单信息:{}",saleChangeExt.toString());
 			saleChangeExtDao.insertSelective(saleChangeExt);
-			/*//销售退废分单操作
-			Integer refundType = requestWithActor.getEntity().getRefundType();
-			String refundTypeStr = "";
-			if(new Integer(1).equals(refundType)){
-				//废票
-				refundTypeStr ="salesman-waste";
-			} else {
-				refundTypeStr ="salesman-refund";
-			}
-			IIftMessageService.sendRefuseMessage(requestWithActor.getEntity().getSaleOrderNo(),agent.getOwner()+"",refundTypeStr);*/
+			//创建采购变更单
+			createBuyChangeExt(createTime,agent,buyChangeNo,saleOrderExt.getOffice());
+
 
 			/* 修改销售单明细 */
 			if (requestWithActor.getEntity().getPassengerLegVoList() != null
@@ -420,7 +420,7 @@ public class RefundServiceImpl implements IRefundService {
 				passengerRefundPrice.setPassengerNo(passengerLegVo.getPassengerNo());
 				passengerRefundPrice.setOwner(agent.getOwner());
 				passengerRefundPrice.setCreator(agent.getAccount());
-				passengerRefundPrice.setCreateTime(new Date());
+				passengerRefundPrice.setCreateTime(createTime);
 				passengerRefundPrice.setValid((byte)1);
 				passengerRefundPrice.setStatus("1");
 				passengerRefundPrice.setPassengerType(passenger.getPassengerType());
@@ -717,7 +717,7 @@ public class RefundServiceImpl implements IRefundService {
 		return flag;
 	}*/
 
-	@Transactional
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@Override
 	public boolean buyVerify(RequestWithActor<Long> requestWithActor) {
 		log.info("废退单审核开始");
@@ -1633,60 +1633,23 @@ public class RefundServiceImpl implements IRefundService {
 		}else{
 			throw new GSSException("变更单为空", "0001", "查询废退改签单失败");
 		}
-		/*Long buyChangeNo = 0L;
-		CertificateCreateVO createVO = new CertificateCreateVO();
-		BuyOrderExt buyOrderExt = null;
-		if(saleChange!=null) {
-			Long saleOrderNo = saleChangeExt.getSaleChange().getSaleOrderNo();
-			createVO.setSaleOrderNo(String.valueOf(saleOrderNo));
-			createVO.setTransationOrderNo(String.valueOf(saleChange.getTransationOrderNo()));
-			try {
-				buyOrderExt = buyOrderExtService.selectBySaleOrderNo(agent,saleOrderNo);
-				if(buyOrderExt!=null){
-					buyOrderExt.setAirLineRefundStatus(1);//1审核通过
-					String remark = buyOrderExt.getBuyRemarke();
-					remark = remark + refundRequest.getRemark();
-					buyOrderExt.setBuyRemarke(remark);
-					List<BuyChange> buyChangeList = buyChangeService.getBuyChangesByBONo(agent,buyOrderExt.getBuyOrderNo());
-							for(BuyChange buyChange:buyChangeList){
-						      if(buyChange!=null && buyChange.getGoodsType()==2){
-								  buyChangeNo = buyChange.getBuyChangeNo();
-								  refundRequest.setBuyChangeNo(buyChangeNo);
-								  createVO = setCertificateVal(refundRequest,createVO);
-								  break;
-							  }
-							}
-				}
-			} catch (Exception e) {
-				log.error("获取国际采购扩展单异常",e);
-			}
-		}
-		ActualInfoSearchVO vo = actualAmountRecorService.queryActualInfoByBusNo(agent, buyOrderExt.getBuyOrderNo(), 3);//查询采购单对应的支付方式
-		if(vo!=null && StringUtils.isNotEmpty(vo.getPayWay())){
-		  Integer payWayCode=Integer.parseInt(vo.getPayWay().split(",")[0]);
-			createVO.setPayType(payWayCode);
-			createVO.setPayWay(Integer.parseInt(vo.getPayWay()));
-		}
-
-		log.info("航司退款审核结算,创建采购退款单参数:"+createVO.toString());
-		certificateService.buyRefundByList(agent,createVO);*/
 		//创建采购退款单退款
 		refundService.buyReturnMoney(requestWithActor);
 		//更新变更单审核状态
 		SaleChange saleChange = saleChangeExt.getSaleChange();
 		if(saleChange!=null) {
-			//创建采购退款单退款
-			//refundService.buyRefund(agent,saleChange.getSaleChangeNo(),saleChange.getSaleOrderNo());
 			try {
-				BuyOrderExt buyOrderExt = buyOrderExtService.selectBySaleOrderNo(agent, saleChange.getSaleOrderNo());
-				if (buyOrderExt != null) {
-					buyOrderExt.setAirLineRefundStatus(1);//1审核通过
-					String remark = buyOrderExt.getBuyRemarke();
+				BuyChangeExt buyChangeExt= buyChangeExtDao.selectBySaleChangeNo(saleChange.getSaleChangeNo());
+				if(buyChangeExt!=null) {
+					String remark = buyChangeExt.getChangeRemark();
 					remark = remark + refundRequest.getRemark();
-					buyOrderExt.setBuyRemarke(remark);
-					log.info("更新国际采购扩展单信息:" + buyOrderExt.toString());
+					buyChangeExt.setChangeRemark(remark);
+					buyChangeExt.setAirLineRefundStatus(1);
+					buyChangeExt.setModifier(agent.getAccount());
+					buyChangeExt.setModifyTime(modifyTime);
+					log.info("退废单航司退款审核通过时修改变更变信息："+buyChangeExt.toString());
+					buyChangeExtDao.updateByPrimaryKey(buyChangeExt);
 				}
-				buyOrderExtService.update(agent, buyOrderExt);
 			}catch (Exception e){
               log.error("更新国际采购扩展单信息异常",e);
 			}
@@ -1797,29 +1760,19 @@ public class RefundServiceImpl implements IRefundService {
 		return  saleChangeExt;
 	}
 
-	/*//设置采购退款单初始值
-	private CertificateCreateVO setCertificateVal(AirLineRefundRequest refundRequest,CertificateCreateVO createVO){
-		//CertificateCreateVO createVO = new CertificateCreateVO();
-		BigDecimal total = new BigDecimal(0);
-		List<AirLineRefundVo> vos = refundRequest.getRefundVoList();
-		for(AirLineRefundVo vo:vos){
-			total = total.add(vo.getPayment());
-		}
-		createVO.setAmount(total);
-		createVO.setAccoutNo(vos.get(0).getAccountNo());
-		createVO.setCustomerNo(refundRequest.getCustomerNo());
-		createVO.setCustomerTypeNo(refundRequest.getCustomerTypeNo());
-		//createVO.setPayType(3);//3线下支付
-		//createVO.setPayWay(2000003);
-		createVO.setIncomeExpenseType(1);//1 收 2 支 采购相当于航司而言 我们是收取
-		createVO.setSubBusinessType(3);//3 变更
-		List<BusinessOrderInfo> businessOrderInfos = new ArrayList<>();
-		BusinessOrderInfo orderInfo = new BusinessOrderInfo();
-		orderInfo.setBusinessType(5);//5 采购变更
-		orderInfo.setRecordNo(refundRequest.getBuyChangeNo());
-		orderInfo.setActualAmount(total);
-		businessOrderInfos.add(orderInfo);
-		createVO.setOrderInfoList(businessOrderInfos);
-		return  createVO;
-	}*/
+	//创建采购变更单扩展表
+	private void createBuyChangeExt(Date createTime,Agent agent,Long buyChangeNo,String office){
+      BuyChangeExt buyChangeExt = new BuyChangeExt();
+      buyChangeExt.setAirLineRefundStatus(0);
+      buyChangeExt.setOwner(agent.getOwner());
+      buyChangeExt.setCreateTime(createTime);
+      buyChangeExt.setValid((byte)1);
+      buyChangeExt.setCreator(agent.getAccount());
+      buyChangeExt.setStatus("1");
+      buyChangeExt.setOffice(office);
+     // buyChangeExt.setChangeRemark(remark);
+      buyChangeExt.setBuyChangeNo(buyChangeNo);
+      log.info("创建采购变更单扩展表"+buyChangeExt.toString());
+      buyChangeExtDao.insertSelective(buyChangeExt);
+	}
 }

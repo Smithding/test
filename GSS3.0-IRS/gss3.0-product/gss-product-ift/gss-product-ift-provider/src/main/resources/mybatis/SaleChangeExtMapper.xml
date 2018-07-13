@@ -555,9 +555,8 @@
                 EXCHANGE_RATE =#{exchangeRate,jdbcType=DECIMAL},
             </if>
             <if test="drawerLoginName!=null">
-                DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR},
+                DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR}
             </if>
-            SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
         </set>
         where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
     </update>
@@ -649,9 +648,8 @@
                 EXCHANGE_RATE =#{exchangeRate,jdbcType=DECIMAL},
             </if>
             <if test="drawerLoginName!=null">
-                DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR},
+                DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR}
             </if>
-            SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
         </set>
         where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
     </update>
