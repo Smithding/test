@@ -106,6 +106,7 @@ public class HolPayNoticeListener {
     	    		        		hotelOrder.setResultCode("3");
     	    		        		hotelOrder.setFactTotalPrice(payNoticeVO.getActualAmount());
     	    		        		hotelOrder.setTcOrderStatus(TcOrderStatus.ALREADY_PAY.getKey());
+    	    		        		hotelOrder.setRequestCode(String.valueOf(payNoticeVO.getBusinessNo()));//付款交易单号
     	    		        		hotelOrderMapper.updateById(hotelOrder);
     		                    }else {		//支付失败
     		                    	Agent agent = AgentUtil.getAgent();
