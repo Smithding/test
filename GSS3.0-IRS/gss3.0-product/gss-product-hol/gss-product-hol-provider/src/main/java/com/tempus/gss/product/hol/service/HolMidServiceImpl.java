@@ -322,31 +322,7 @@ public class HolMidServiceImpl implements IHolMidService {
 			}
 			if (null != tcResId) {
 				tcHotel = tcHotelSupplierService.queryHotelDetail(agent, tcResId, checkinDate, checkoutDate);
-			}
-			
-			//对比酒店最低价
-			double minPrice = 0;
-			List<ProDetails> proDetailList = bqyHotel.getProDetails();
-			if (null != proDetailList && proDetailList.size() > 0) {
-				for(int i = 0; i < proDetailList.size(); i++) {
-					//获取酒店房间集合
-					List<ResProBaseInfo> resProBaseInfoList = proDetailList.get(i).getResProBaseInfoList();
-					for (int j = 0; j < resProBaseInfoList.size(); j++) {
-						Integer firPrice = resProBaseInfoList.get(j).getFirPrice();
-						if (i == 0 && j == 0) {
-							minPrice = firPrice;
-						}else {
-							if (minPrice > firPrice) {
-								minPrice = firPrice;
-							}
-						}
-					}
-				}
-			}
-			if (minPrice != 0) {
-				Query query = new Query(Criteria.where("_id").is(holMidId));
-				Update update = Update.update("minPrice", minPrice);
-				mongoTemplate1.upsert(query, update, HolMidBaseInfo.class);
+				bqyHotel = tcHotel;
 			}
 		}
 		List<ProDetails> proDetailList = bqyHotel.getProDetails();
