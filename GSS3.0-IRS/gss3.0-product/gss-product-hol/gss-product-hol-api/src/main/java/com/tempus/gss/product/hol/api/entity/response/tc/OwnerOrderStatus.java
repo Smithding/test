@@ -11,10 +11,16 @@ public enum OwnerOrderStatus implements Serializable {
 	 * 处理中
 	 */
 	ORDER_ONGOING("100", "处理中"),
+	
+	/**
+	 * 待支付
+	 */
+	WAIT_PAY("111", "待支付"),
 	/**
 	 * 预定成功
 	 */
 	BOOK_OK("101","预订成功"),
+	
 	/**
 	 * 下单失败
 	 */
@@ -39,6 +45,11 @@ public enum OwnerOrderStatus implements Serializable {
 	 * 取消成功
 	 */
 	CANCEL_OK("401","取消成功"),
+	
+	/**
+	 * 取消失败
+	 */
+	CANCEL_BAD("404","取消失败"),
 	/**
 	 * 满房
 	 */

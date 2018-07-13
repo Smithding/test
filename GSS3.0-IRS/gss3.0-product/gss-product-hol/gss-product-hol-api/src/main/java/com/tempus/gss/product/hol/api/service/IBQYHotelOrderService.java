@@ -46,5 +46,5 @@ public interface IBQYHotelOrderService {
 	 * @param bqyPushOrderInfo
 	 * @return
 	 */
-	//Boolean bqyPushOrderInfo(Agent agent, BQYPushOrderInfo bqyPushOrderInfo);
+	Boolean bqyPushOrderInfo(Agent agent, BQYPushOrderInfo bqyPushOrderInfo);
 }
