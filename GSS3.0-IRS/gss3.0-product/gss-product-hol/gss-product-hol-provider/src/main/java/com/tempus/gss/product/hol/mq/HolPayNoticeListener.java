@@ -13,6 +13,7 @@
 
 package com.tempus.gss.product.hol.mq;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -104,7 +105,7 @@ public class HolPayNoticeListener {
     		                    if (orderPay.getReseult()) {		//bqy接口调用支付成功
     		                    	hotelOrder.setOrderStatus(OwnerOrderStatus.PAY_OK.getKey());
     	    		        		hotelOrder.setResultCode("3");
-    	    		        		hotelOrder.setFactTotalPrice(payNoticeVO.getActualAmount());
+    	    		        		hotelOrder.setFactTotalPrice(new BigDecimal(orderPay.getPayPrice()));
     	    		        		hotelOrder.setTcOrderStatus(TcOrderStatus.ALREADY_PAY.getKey());
     	    		        		hotelOrder.setRequestCode(String.valueOf(payNoticeVO.getBusinessNo()));//付款交易单号
     	    		        		hotelOrderMapper.updateById(hotelOrder);

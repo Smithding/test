@@ -1531,13 +1531,12 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		String orderNo = createOrder(orderReq);
 		// 判断条件返回0订单创建失败
 		if (StringUtils.isNotBlank(orderNo) && !"0".equals(orderNo)) {
-			int a = (int) (Math.random() * 100);
-			orderNo = sdf.format(new Date());
 			//订单创建成功更新订单表中数据
-			hotelOrder.setHotelOrderNo(orderNo + a);
+			hotelOrder.setHotelOrderNo(orderNo);
 			//0=>下单失败，1=>下单成功，2=>下单成功，支付失败，3=>下单成功，支付成功
 			hotelOrder.setResultCode("1");
 			hotelOrder.setTcOrderStatus(TcOrderStatus.WAIT_PAY.getKey());
+			hotelOrder.setOrderStatus(OwnerOrderStatus.WAIT_PAY.getKey());
 			hotelOrderMapper.updateById(hotelOrder);
 			return hotelOrder;
 		}else {
