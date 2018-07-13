@@ -131,8 +131,6 @@ public class BuyOrderExt implements Serializable {
 	
 	private String  buyRemarke;
 
-	private Integer airLineRefundStatus;
-
 	@Override
 	public String toString() {
 		final StringBuffer sb = new StringBuffer("BuyOrderExt{");
@@ -159,7 +157,6 @@ public class BuyOrderExt implements Serializable {
 		sb.append(", changeOrderNo=").append(changeOrderNo);
 		sb.append(", office='").append(office).append('\'');
 		sb.append(", buyRemarke='").append(buyRemarke).append('\'');
-		sb.append(", airLineRefundStatus=").append(airLineRefundStatus);
 		sb.append('}');
 		return sb.toString();
 	}
@@ -380,11 +377,4 @@ public class BuyOrderExt implements Serializable {
 		this.buyRemarke = buyRemarke;
 	}
 
-	public Integer getAirLineRefundStatus() {
-		return airLineRefundStatus;
-	}
-
-	public void setAirLineRefundStatus(Integer airLineRefundStatus) {
-		this.airLineRefundStatus = airLineRefundStatus;
-	}
 }

@@ -213,26 +213,55 @@
             <if test="buyRemarke != null">
                 BUY_REMARKE = #{buyRemarke,jdbcType=CLOB},
             </if>
-
         </set>
         where BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.ift.api.entity.BuyOrderExt">
         UPDATE IFT_BUY_ORDER_EXT
-        SET ID               = #{id,jdbcType=BIGINT},
-            OWNER            = #{owner,jdbcType=INTEGER},
-            PNR_NO           = #{pnrNo,jdbcType=BIGINT},
-            AIRLINE          = #{airline,jdbcType=VARCHAR},
-            TICKET_TYPE      = #{ticketType,jdbcType=VARCHAR},
-            CREATOR          = #{creator,jdbcType=VARCHAR},
-            CREATE_TIME      = #{createTime,jdbcType=TIMESTAMP},
-            MODIFIER         = #{modifier,jdbcType=VARCHAR},
-            MODIFY_TIME      = #{modifyTime,jdbcType=TIMESTAMP},
-            VALID            = #{valid,jdbcType=TINYINT},
-            STATUS           = #{status,jdbcType=VARCHAR},
-            SUPPLIER_TYPE_NO = #{supplierTypeNo,jdbcType=BIGINT},
-            SUPPLIER_NO      = #{supplierNo,jdbcType=BIGINT},
-            BUY_REMARKE      = #{buyRemarke,jdbcType=CLOB}
+        <set>
+            <if test="id != null">
+                ID = #{id,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="pnrNo != null">
+                PNR_NO = #{pnrNo,jdbcType=BIGINT},
+            </if>
+            <if test="airline != null">
+                AIRLINE = #{airline,jdbcType=VARCHAR},
+            </if>
+            <if test="ticketType != null">
+                TICKET_TYPE = #{ticketType,jdbcType=VARCHAR},
+            </if>
+            <if test="creator != null">
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifier != null">
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=TINYINT},
+            </if>
+            <if test="status != null">
+                STATUS = #{status,jdbcType=VARCHAR},
+            </if>
+            <if test="supplierTypeNo != null">
+                SUPPLIER_TYPE_NO = #{supplierTypeNo,jdbcType=VARCHAR},
+            </if>
+            <if test="supplierNo != null">
+                SUPPLIER_NO = #{supplierNo,jdbcType=VARCHAR},
+            </if>
+            <if test="buyRemarke != null">
+                BUY_REMARKE = #{buyRemarke,jdbcType=CLOB},
+            </if>
+        </set>
         WHERE BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
     </update>
     <select id="selectBuyOrderBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">

@@ -484,10 +484,10 @@ public class OrderServiceImpl implements IOrderService {
     @Override
     public SaleOrderExt getOrder(RequestWithActor<Long> orderNo) {
         
-        log.info("订单查询开始======orderNo=" + orderNo);
-        SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(orderNo.getEntity().longValue());
+        log.info("订单查询开始======orderNo=" + orderNo.getEntity());
+        SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(orderNo.getEntity());
         if (saleOrderExt == null) {
-            log.error("订单号不存在,orderNo=" + orderNo);
+            log.error("订单号不存在,orderNo=" + orderNo.getEntity());
             return null;
         }
         SaleOrder saleOrder = saleOrderService.getSOrderByNo(orderNo.getAgent(), orderNo.getEntity());

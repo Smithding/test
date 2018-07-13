@@ -14,7 +14,8 @@ import java.util.List;
  */
 public class BuyChangeExt implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+
+	private static final long serialVersionUID = 6422635273769309870L;
 	/**
 	 * Id
 	 */
@@ -83,6 +84,33 @@ public class BuyChangeExt implements Serializable {
 	 * 审核改签备注 CHANGE_REMARK
 	 */
 	private String changeRemark;
+
+	//航司退款审核状态
+	private Integer airLineRefundStatus;
+
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer("BuyChangeExt{");
+		sb.append("id=").append(id);
+		sb.append(", buyChangeNo=").append(buyChangeNo);
+		sb.append(", buyChange=").append(buyChange);
+		sb.append(", orderChangeType=").append(orderChangeType);
+		sb.append(", owner=").append(owner);
+		sb.append(", office='").append(office).append('\'');
+		sb.append(", ticketType='").append(ticketType).append('\'');
+		sb.append(", refuseReason='").append(refuseReason).append('\'');
+		sb.append(", pnrList=").append(pnrList);
+		sb.append(", creator='").append(creator).append('\'');
+		sb.append(", createTime=").append(createTime);
+		sb.append(", modifier='").append(modifier).append('\'');
+		sb.append(", modifyTime=").append(modifyTime);
+		sb.append(", valid=").append(valid);
+		sb.append(", status='").append(status).append('\'');
+		sb.append(", changeRemark='").append(changeRemark).append('\'');
+		sb.append(", airLineRefundStatus=").append(airLineRefundStatus);
+		sb.append('}');
+		return sb.toString();
+	}
 
 	public String getChangeRemark() {
 		return changeRemark;
@@ -234,6 +262,14 @@ public class BuyChangeExt implements Serializable {
 
 	public void setPnrList(List<Pnr> pnrList) {
 		this.pnrList = pnrList;
+	}
+
+	public Integer getAirLineRefundStatus() {
+		return airLineRefundStatus;
+	}
+
+	public void setAirLineRefundStatus(Integer airLineRefundStatus) {
+		this.airLineRefundStatus = airLineRefundStatus;
 	}
 	
 	
