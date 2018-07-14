@@ -1,13 +1,13 @@
 package com.tempus.gss.product.ift.api.entity.vo;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.tempus.gss.product.ift.api.entity.Passenger;
 import com.tempus.gss.product.ift.api.entity.PassengerRefundPrice;
 import com.tempus.gss.serializer.LongSerializer;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 乘客废退明细，表示乘客废退是的销售价格和采购价格。
@@ -69,8 +69,10 @@ public class PassengerRefundPriceVo implements Serializable {
 	private String currency;
 	//销售币种
     private String saleCurrency;
-	//汇率
+	//销售汇率
 	private BigDecimal exchangeRate;
+//	采购汇率
+	private BigDecimal buyExchangeRate;
 	//订单来源
 	private String sourceChannelNo;
 
@@ -177,4 +179,12 @@ public class PassengerRefundPriceVo implements Serializable {
 	public void setSourceChannelNo(String sourceChannelNo) {
 		this.sourceChannelNo = sourceChannelNo;
 	}
+
+    public BigDecimal getBuyExchangeRate() {
+        return buyExchangeRate;
+    }
+
+    public void setBuyExchangeRate(BigDecimal buyExchangeRate) {
+        this.buyExchangeRate = buyExchangeRate;
+    }
 }
