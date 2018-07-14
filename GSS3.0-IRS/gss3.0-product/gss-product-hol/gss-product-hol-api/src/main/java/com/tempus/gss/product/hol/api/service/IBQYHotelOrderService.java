@@ -21,16 +21,7 @@ public interface IBQYHotelOrderService {
 	 * @param orderReq
 	 * @return
 	 */
-	//HotelOrder createOrder(Agent agent, CreateOrderReq orderReq, OrderCreateReq orderCreateReq); 
-	
-	/**
-	 * 创建酒店订单
-	 * @param agent
-	 * @param orderReq
-	 * @param orderCreateReq
-	 * @return
-	 */
-	OrderCreateReq hotelReserve(Agent agent, CreateOrderReq orderReq, OrderCreateReq orderCreateReq);
+	HotelOrder createOrder(Agent agent, CreateOrderReq orderReq, OrderCreateReq orderCreateReq); 
 	
 	/**
 	 * 取消订单
@@ -46,5 +37,5 @@ public interface IBQYHotelOrderService {
 	 * @param bqyPushOrderInfo
 	 * @return
 	 */
-	Boolean bqyPushOrderInfo(Agent agent, BQYPushOrderInfo bqyPushOrderInfo);
+	Boolean bqyPushOrderInfo(Agent agent, BQYPushOrderInfo bqyPushOrderInfo) throws GSSException;
 }
