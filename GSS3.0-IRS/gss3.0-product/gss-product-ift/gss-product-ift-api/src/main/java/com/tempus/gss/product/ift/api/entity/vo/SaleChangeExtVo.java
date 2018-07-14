@@ -284,7 +284,7 @@ public class SaleChangeExtVo implements Serializable{
 	private Integer toDoType;
 
 	//提交航司后采购审核状态
-	private Integer airLineRefundStatus;
+	private Integer[] airLineRefundStatus;
 
 	public Boolean getCustomerCount() {
 		return customerCount;
@@ -881,11 +881,11 @@ public class SaleChangeExtVo implements Serializable{
 		this.handlers = handlers;
 	}
 
-	public Integer getAirLineRefundStatus() {
+	public Integer[] getAirLineRefundStatus() {
 		return airLineRefundStatus;
 	}
 
-	public void setAirLineRefundStatus(Integer airLineRefundStatus) {
+	public void setAirLineRefundStatus(Integer[] airLineRefundStatus) {
 		this.airLineRefundStatus = airLineRefundStatus;
 	}
 }

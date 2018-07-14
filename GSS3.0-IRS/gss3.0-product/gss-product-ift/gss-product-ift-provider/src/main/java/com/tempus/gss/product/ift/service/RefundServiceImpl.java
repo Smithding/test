@@ -1651,7 +1651,7 @@ public class RefundServiceImpl implements IRefundService {
 		SaleChange saleChange = saleChangeExt.getSaleChange();
 		if(saleChange!=null) {
 			try {
-				BuyChangeExt buyChangeExt= buyChangeExtDao.selectBySaleChangeNo(saleChange.getSaleChangeNo());
+				BuyChangeExt buyChangeExt= buyChangeExtDao.selectBySaleChangeNoFindOne(saleChange.getSaleChangeNo());
 				if(buyChangeExt!=null) {
 					String remark = buyChangeExt.getChangeRemark();
 					remark = remark + refundRequest.getRemark();
@@ -1698,7 +1698,7 @@ public class RefundServiceImpl implements IRefundService {
 	public void updateBuyExtRefund(RequestWithActor<Long> requestWithActor){
 		Long saleChangeNo = requestWithActor.getEntity();
 		Agent agent = requestWithActor.getAgent();
-		BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(saleChangeNo);
+		BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
 		if(buyChangeExt!=null){
 			//采购拒单  将状态设置为-1
 			buyChangeExt.setAirLineRefundStatus(-1);
