@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -75,7 +76,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	@Autowired
 	IHolProfitService holProfitService;
 	
-	@Reference
+	@Autowired
 	ITCHotelInterService hotelInterService;
 	
 	@Value("${bqy.count}")
@@ -536,6 +537,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		       			 				pro.setBookStatus(0);
 		       			 				pro.setFirPrice(firstPrice);
 		       			 			}
+		       			 			pro.setResProName(pro.getResProName().replaceAll("\\s*", "").replaceAll("（", "(").replaceAll("）", ")"));
 									resProBaseInfoList.add(pro);
 								}
 							}
@@ -804,7 +806,11 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	@Async
 	public Future<ResBaseInfo> queryBQYHotelListForAsync(Agent agent, Long bqyHotelId, String checkinDate,
 			String checkoutDate) throws Exception {
+		long start = System.currentTimeMillis();
+	    System.out.println("f1 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
 		ResBaseInfo hotelDetail = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyHotelId), checkinDate, checkoutDate);
+		long end = System.currentTimeMillis();  
+        System.out.println("完成任务一，耗时：" + (end - start) + "毫秒"); 
 		return new AsyncResult<ResBaseInfo>(hotelDetail);
 	}
 
@@ -812,7 +818,11 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	@Async
 	public Future<ResBaseInfo> queryTCHelListForAsync(Agent agent, Long tcHotelId, String checkinDate,
 			String checkoutDate) {
+		long start = System.currentTimeMillis();
+		System.out.println("f2 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
 		ResBaseInfo hotelDetail = newQueryHotelDetail(agent, tcHotelId, checkinDate, checkoutDate);
+		long end = System.currentTimeMillis();  
+		System.out.println("完成任务二，耗时：" + (end - start) + "毫秒"); 
 		return new AsyncResult<ResBaseInfo>(hotelDetail);
 	}
 
