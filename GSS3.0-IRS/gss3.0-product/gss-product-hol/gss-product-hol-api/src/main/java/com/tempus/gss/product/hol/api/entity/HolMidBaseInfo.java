@@ -35,6 +35,11 @@ public class HolMidBaseInfo implements Serializable{
 	private String provName;
 	
 	/**
+	 * 城市编号
+	 */
+	private String cityCode;
+	
+	/**
 	 * 城市名称
 	 */
 	private String cityName;
@@ -354,6 +359,14 @@ public class HolMidBaseInfo implements Serializable{
 
 	public void setResNums(Integer resNums) {
 		this.resNums = resNums;
+	}
+
+	public String getCityCode() {
+		return cityCode;
+	}
+
+	public void setCityCode(String cityCode) {
+		this.cityCode = cityCode;
 	}
 	
 }

@@ -47,6 +47,7 @@ import com.tempus.gss.product.hol.api.service.IHolMidService;
 import com.tempus.gss.product.hol.api.syn.ISyncHotelInfo;
 import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
+import com.tempus.gss.security.AgentUtil;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 
@@ -249,7 +250,6 @@ public class HolMidServiceImpl implements IHolMidService {
 	@Override
 	public ResBaseInfo hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
 		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
-	
 		Long bqyResId = null;
 		Long tcResId = null;
 		List<ResNameSum> listHol = holMid.getResNameSum();
@@ -271,7 +271,7 @@ public class HolMidServiceImpl implements IHolMidService {
 		//tc和bqy酒店ID都不为空则开启异步查询,否则执行同步
 		if (null != bqyResId && null != tcResId) {
 			try {
-				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate);
+				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate, holMid.getCityCode());
 				Future<ResBaseInfo> tcResponse = syncHotelInfo.queryTCHelListForAsync(agent, tcResId, checkinDate, checkoutDate);
 				while (bqyResponse.isDone() && tcResponse.isDone()) {
 						break;
@@ -332,7 +332,7 @@ public class HolMidServiceImpl implements IHolMidService {
 			}
 		}else {
 			if (null != bqyResId) {
-				bqyHotel = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyResId), checkinDate, checkoutDate);
+				bqyHotel = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyResId), checkinDate, checkoutDate, holMid.getCityCode());
 			}
 			if (null != tcResId) {
 				tcHotel = tcHotelSupplierService.queryHotelDetail(agent, tcResId, checkinDate, checkoutDate);
@@ -374,7 +374,7 @@ public class HolMidServiceImpl implements IHolMidService {
 		//tc和bqy酒店ID都不为空则开启异步查询
 		if (null != bqyResId && null != tcResId) {
 			try {
-				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate);
+				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate, holMid.getCityCode());
 				Future<ResBaseInfo> tcResponse = syncHotelInfo.queryTCHolForAsyncBack(agent, bqyResId);
 				while (bqyResponse.isDone() && tcResponse.isDone()) {
 						break;
@@ -425,7 +425,7 @@ public class HolMidServiceImpl implements IHolMidService {
 			}
 		}else {
 			if (null != bqyResId) {
-				bqyHotel = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyResId), checkinDate, checkoutDate);
+				bqyHotel = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyResId), checkinDate, checkoutDate, holMid.getCityCode());
 			}
 			if (null != tcResId) {
 				//tcHotel = tcHotelSupplierService.queryHotelDetail(agent, tcResId, checkinDate, checkoutDate);

@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -36,7 +35,6 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProDetails;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProSaleInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
-import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelEntity;
@@ -50,15 +48,14 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.room.AveragePrice;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BaseRoomInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BedTypeInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BroadNetInfo;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.room.Price;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomBedTypeInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomInfoItem;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
+import com.tempus.gss.product.hol.api.service.IBQYHotelConverService;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
-import com.tempus.gss.product.hol.api.service.IHolMidService;
 import com.tempus.gss.product.hol.api.util.DateUtil;
 import com.tempus.gss.vo.Agent;
 
@@ -70,6 +67,9 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 	
 	@Autowired
 	private IBQYHotelInterService bqyHotelInterService;
+	
+	@Autowired
+	private IBQYHotelConverService bqyHotelConverService;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -177,7 +177,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 		List<HotelInfo> hotelList = hotelResult.getResponseResult();
 		List<ResBaseInfo> resList = new ArrayList<>();
 		for (HotelInfo h : hotelList) {
-			ResBaseInfo resBaseInfo = bqyConvertTcHotelEntity(h);
+			ResBaseInfo resBaseInfo = bqyHotelConverService.bqyConvertTcHotelEntity(h);
 			resList.add(resBaseInfo);
 		}
 		TCResponse<ResBaseInfo> result = new TCResponse<>();
@@ -211,11 +211,8 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 	}
 
 	@Override
-	public ResBaseInfo singleHotelDetail(String hotelId, String checkinDate, String checkoutDate) throws InterruptedException, ExecutionException {
+	public ResBaseInfo singleHotelDetail(String hotelId, String checkinDate, String checkoutDate, String cityCode) throws InterruptedException, ExecutionException {
 		try {
-			Criteria criteria = Criteria.where("_id").is(Long.parseLong(hotelId));
-			HotelInfo hotelInfo = mongoTemplate1.findOne(new Query(criteria),HotelInfo.class);
-			ResBaseInfo resBaseInfo = bqyConvertTcHotelEntity(hotelInfo);
 			QueryHotelParam query = new QueryHotelParam();
 			if (StringUtils.isBlank(checkinDate) && StringUtils.isBlank(checkoutDate)) {
 				Calendar date = Calendar.getInstance();  
@@ -229,18 +226,20 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 				query.setCheckOutTime(checkoutDate);
 			}
 			
-			query.setCityCode(hotelInfo.getCityCode());
-			query.setHotelId(hotelInfo.getHotelId());
+			query.setCityCode(cityCode);
+			query.setHotelId(Long.valueOf(hotelId));
+			//ResBaseInfo resBaseInfo = null;
 			
 			//异步请求酒店图片和酒店详细信息
 			Future<List<ImageList>> asyncHotelImage = bqyHotelInterService.asyncHotelImage(query);
 			Future<HotelEntity> asyncHotelDetail = bqyHotelInterService.asyncHotelDetail(query);
-			while (asyncHotelImage.isDone() && asyncHotelDetail.isDone()) {
+			Future<ResBaseInfo> asyncResBaseInfo = bqyHotelConverService.asyncConvertTcHotelEntity(Long.valueOf(hotelId));
+			while (asyncHotelImage.isDone() && asyncHotelDetail.isDone() && asyncResBaseInfo.isDone()) {
 				break;
 			}
 			List<ImageList> bqyHotelImgList = asyncHotelImage.get();
 			HotelEntity hotelEntity = asyncHotelDetail.get();
-			
+			ResBaseInfo resBaseInfo = asyncResBaseInfo.get();
 			//List<ImgInfo> tcHotelImgList = convertTCImg(bqyHotelImgList);
 			//resBaseInfo.setImgInfoList(bqyHotelImgList);
 			
@@ -475,127 +474,6 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 		return null;
 	}
 
-	/**
-	 * bqy酒店信息转换tc实体
-	 * @param hotel
-	 * @return
-	 */
-	private ResBaseInfo bqyConvertTcHotelEntity(HotelInfo hotel) {
-		ResBaseInfo resBaseInfo = new ResBaseInfo();
-		resBaseInfo.setAddress(hotel.getAddress());
-		// 酒店品牌
-		ResBrandInfo brandInfo = new ResBrandInfo();
-		brandInfo.setResBrandName(hotel.getHotelBrandName());
-		brandInfo.setId(Long.parseLong(String.valueOf(hotel.getHotelBrandId())));
-		resBaseInfo.setBrandInfo(brandInfo);
-		
-		//酒店星级
-		String hotelStar = hotel.getHotelStar();
-		switch (hotelStar) {
-		case "5.00"://23
-			//五星级
-			resBaseInfo.setResGradeId("23");
-			resBaseInfo.setResGrade("五星级");
-			break;
-		case "4.00"://24
-			//四星级
-			resBaseInfo.setResGradeId("24");
-			resBaseInfo.setResGrade("四星级");
-			break;
-		case "3.00"://26
-			//三星级
-			resBaseInfo.setResGradeId("26");
-			resBaseInfo.setResGrade("三星级");
-			break;
-		case "2.00":	//27
-			//二星及二星以下
-			resBaseInfo.setResGradeId("27");
-			resBaseInfo.setResGrade("经济型");
-			break;
-		case "1.00":	//27
-			//二星及二星以下
-			resBaseInfo.setResGradeId("27");
-			resBaseInfo.setResGrade("经济型");
-			break;
-		case "0.00":	//27
-			//二星及二星以下
-			resBaseInfo.setResGradeId("27");
-			resBaseInfo.setResGrade("经济型");
-			break;
-		}
-
-		resBaseInfo.setCityId(Integer.parseInt(hotel.getCityCode()));
-		resBaseInfo.setCityName(hotel.getCityName());
-		resBaseInfo.setLocation(hotel.getRoadCross());
-		resBaseInfo.setId(hotel.getId());
-		resBaseInfo.setResId(hotel.getId());
-
-		// 酒店图片
-		List<ImageList> hotelImageList = hotel.getHotelImageList();
-		List<ImgInfo> imgInfoList = convertTCImg(hotelImageList);
-		resBaseInfo.setImgInfoList(imgInfoList);
-
-		resBaseInfo.setLatestUpdateTime(hotel.getLatestUpdateTime());
-		if (null != hotel.getLowPrice()) {
-			resBaseInfo.setMinPrice(hotel.getLowPrice().intValue());
-			resBaseInfo.setResCommonPrice(hotel.getLowPrice().intValue());
-		}
-		resBaseInfo.setResName(hotel.getHotelName());
-		resBaseInfo.setSaleStatus(hotel.getSaleStatus());
-		resBaseInfo.setResPhone(hotel.getMobile());
-		resBaseInfo.setShortIntro(hotel.getDescription());
-		resBaseInfo.setIntro(hotel.getDescription());
-		resBaseInfo.setSupplierNo(hotel.getSupplierNo());
-		return resBaseInfo;
-	}
-
-	/**
-	 * bqy酒店图片转换tc酒店图片实体
-	 * @param hotelImageList
-	 * @return
-	 */
-	private List<ImgInfo> convertTCImg(List<ImageList> hotelImageList) {
-		List<ImgInfo> imgInfoList = new ArrayList<>();
-		if (null != hotelImageList && hotelImageList.size() > 0) {
-			for (ImageList i : hotelImageList) {
-				ImgInfo imgInfo = new ImgInfo();
-				imgInfo.setImageName(i.getTitleName());
-				imgInfo.setImageUrl(i.getImageUrl());
-				imgInfo.setResId(i.getHotelId().longValue());
-				imgInfo.setResProId(i.getRoomTypeId());
-				if (StringUtils.isNotBlank(i.getImageType())) {
-					String imageType = i.getImageType();
-					switch (imageType) {
-					case "1":
-						imgInfo.setImageLabel((byte)0);
-						break;
-					case "2":
-						imgInfo.setImageLabel((byte)9);
-						break;
-					case "4":
-						imgInfo.setImageLabel((byte)6);
-						break;
-					case "5":
-						imgInfo.setImageLabel((byte)11);
-						break;
-					case "6":
-						imgInfo.setIsResProDefault(1);
-						imgInfo.setImageLabel((byte)4);
-						break;
-					case "20":
-						imgInfo.setImageLabel((byte)20);
-						break;
-					case "15":
-						imgInfo.setImageLabel((byte)15);
-						break;
-					}
-				}
-				imgInfoList.add(imgInfo);
-			}
-		}
-		return imgInfoList;
-	}
-
 	@Override
 	public CityDetail getCityDetailByCityCode(Agent agent, String cityName) {
 		List<CityDetail> cityDeatil = mongoTemplate1.find(new Query(Criteria.where("cityName").regex("^.*"+cityName+".*$")), CityDetail.class);
@@ -609,7 +487,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 	public ResBaseInfo getById(Agent agent, Long bqyHolId) {
 		List<HotelInfo> holList = mongoTemplate1.find(new Query(Criteria.where("_id").is(bqyHolId)), HotelInfo.class);
 		if (null != holList && holList.size() > 0) {
-			ResBaseInfo resBaseInfo = bqyConvertTcHotelEntity(holList.get(0));
+			ResBaseInfo resBaseInfo = bqyHotelConverService.bqyConvertTcHotelEntity(holList.get(0));
 			return resBaseInfo;
 		}
 		return null;
@@ -674,7 +552,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 		query.setHotelId(hotelId);
 		//query.setHotelId(705260L);
 		List<ImageList> hotelImageList = bqyHotelInterService.queryHotelImage(query);
-		List<ImgInfo> imgList = convertTCImg(hotelImageList);
+		List<ImgInfo> imgList = bqyHotelConverService.convertTCImg(hotelImageList);
 		return imgList;
 	}
 }
