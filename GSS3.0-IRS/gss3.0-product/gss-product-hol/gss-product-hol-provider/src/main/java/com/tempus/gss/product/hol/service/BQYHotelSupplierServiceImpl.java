@@ -211,7 +211,8 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 	}
 
 	@Override
-	public ResBaseInfo singleHotelDetail(String hotelId, String checkinDate, String checkoutDate, String cityCode) throws InterruptedException, ExecutionException {
+	@Async
+	public Future<ResBaseInfo> singleHotelDetail(String hotelId, String checkinDate, String checkoutDate, String cityCode) throws InterruptedException, ExecutionException {
 		try {
 			QueryHotelParam query = new QueryHotelParam();
 			if (StringUtils.isBlank(checkinDate) && StringUtils.isBlank(checkoutDate)) {
@@ -465,7 +466,8 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 					}
 					resBaseInfo.setResFacilities(resFacilities);
 				}
-				return resBaseInfo;
+				//return resBaseInfo;
+				return new AsyncResult<ResBaseInfo>(resBaseInfo);
 			}
 		} catch (ParseException e) {
 			e.printStackTrace();
