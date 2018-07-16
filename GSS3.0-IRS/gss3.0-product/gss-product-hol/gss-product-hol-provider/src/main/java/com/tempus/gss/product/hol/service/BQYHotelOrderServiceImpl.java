@@ -569,7 +569,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 						}
 						// 产品名称
 						hotelOrder.setSupPriceName(roomInfoItem.getRoomName());
-
+						hotelOrder.setProName(roomInfoItem.getRoomName());
 						// 床型
 						RoomBedTypeInfo roomBedTypeInfo = roomInfoItem.getRoomBedTypeInfo();
 						if ("T".equals(roomBedTypeInfo.getHasKingBed())) {
@@ -717,7 +717,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		hotelOrder.setArriveHotelTime(orderCreateReq.getArriveHotelTime());
 		hotelOrder.setHotelAddress(orderReq.getCityName() + "市" + orderReq.getAddress());
 		hotelOrder.setHotelPhone(orderCreateReq.getHotelPhone());
-		hotelOrder.setProName(orderCreateReq.getProName());
+		//hotelOrder.setProName(orderCreateReq.getProName());
 		hotelOrder.setProId(orderCreateReq.getProId());
 		hotelOrder.setBreakfastCount(orderCreateReq.getBreakfastCount());
 		hotelOrder.setRequestText(String.valueOf(saleOrder.getCustomerTypeNo()));	//存储CustomerType
