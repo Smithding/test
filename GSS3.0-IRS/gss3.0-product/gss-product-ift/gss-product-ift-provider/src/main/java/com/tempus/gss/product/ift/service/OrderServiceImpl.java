@@ -429,6 +429,7 @@ public class OrderServiceImpl implements IOrderService {
             saleOrderExt.setCreateTime(today);
             saleOrderExt.setValid((byte) 1);
             saleOrderExt.setLocker(0L);// 解锁状态
+           // saleOrderExt.setSaleCurrency();
             IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
             Map<String, Object> map = configs.getConfigsMap();
             Object object = map.get("exChangeRate");
