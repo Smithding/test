@@ -256,7 +256,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 						ProDetails proDetail = new ProDetails();
 						BaseRoomInfo baseRoomInfo = roomPriceItem.getBaseRoomInfo();
 						proDetail.setProId(baseRoomInfo.getRoomTypeID());
-						proDetail.setResProName(baseRoomInfo.getRoomName());
+						proDetail.setResProName(baseRoomInfo.getRoomName().replaceAll("\\s*", "").replaceAll("（", "(").replaceAll("）", ")"));
 						proDetail.setRoomFloor(baseRoomInfo.getFloorRange());
 						proDetail.setRoomSize(baseRoomInfo.getAreaRange());
 						
