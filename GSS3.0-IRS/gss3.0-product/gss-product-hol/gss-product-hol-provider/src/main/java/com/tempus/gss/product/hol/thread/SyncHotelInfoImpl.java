@@ -417,9 +417,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			        calendar.setTime(sdf.parse(endTime));
 			        calendar.add(Calendar.DAY_OF_MONTH, -1);
 					assignDateHotelReq.setEndTime(sdf.format(calendar.getTime()));
-					AssignDateHotel assignDateHotel=  hotelInterService.queryAssignDateHotel(assignDateHotelReq);
+					Future<AssignDateHotel> assignDateHotelFu=  hotelInterService.queryFuAssignDateHotel(assignDateHotelReq);
 					while(true) {
-						if( resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && imgInfoSumFuture.isDone()) {
+						if( resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && imgInfoSumFuture.isDone() && assignDateHotelFu.isDone()) {
 							break;
 						}
 					}
@@ -427,7 +427,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					tcResBaseInfo = resBaseInfoFuture.get();
 					ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
 					ImgInfoSum imgInfoSum = imgInfoSumFuture.get();
-					
+					AssignDateHotel assignDateHotel = assignDateHotelFu.get();
+					//System.out.println("TC: "+JsonUtil.toJson(assignDateHotel));
 					if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())) {
 						List<ProInfoDetail> proInfoDetailList= assignDateHotel.getProInfoDetailList();
 						List<ResProBaseInfo> resProBaseInfoListBeFore= resProBaseInfos.getResProBaseInfos();
@@ -557,8 +558,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 									if(valueList != null && valueList.size() > 0) {
 										valueList.sort(Comparator.comparingInt(ResProBaseInfo :: getFirPrice));
 										int sum = valueList.stream().mapToInt(ResProBaseInfo :: getAdvancedLimitDays).sum();
-										int asInt = valueList.stream().mapToInt(ResProBaseInfo :: getFirPrice).min().getAsInt();
-										proInfoDetai.setMinPrice(asInt);
+										//int asInt = valueList.stream().mapToInt(ResProBaseInfo :: getFirPrice).min().getAsInt();
+										//proInfoDetai.setMinPrice(asInt);
 										proInfoDetai.setProDetailConPrice(sum/valueList.size());
 									}else {
 										proInfoDetai.setSaleStatus(0);
@@ -629,15 +630,16 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	        calendar.setTime(sdf.parse(endTime));
 	        calendar.add(Calendar.DAY_OF_MONTH, -1);
 			assignDateHotelReq.setEndTime(sdf.format(calendar.getTime()));
-			AssignDateHotel assignDateHotel=  hotelInterService.queryAssignDateHotel(assignDateHotelReq);
+			Future<AssignDateHotel> assignDateHotelFu=  hotelInterService.queryFuAssignDateHotel(assignDateHotelReq);
 			while(true) {
-				if( resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone()) {
+				if( resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && assignDateHotelFu.isDone()) {
 					break;
 				}
 			}
 			
 			tcResBaseInfo = resBaseInfoFuture.get();
 			ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
+			AssignDateHotel assignDateHotel = assignDateHotelFu.get();
 			
 			if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())) {
 				Integer firstPrice = 999999;
@@ -759,13 +761,10 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 							List<ResProBaseInfo> valueList = baseList.getValue();
 							if(valueList != null && valueList.size() > 0) {
 								int sum = valueList.stream().mapToInt(ResProBaseInfo :: getAdvancedLimitDays).sum();
-								int asInt = valueList.stream().mapToInt(ResProBaseInfo :: getFirPrice).min().getAsInt();
-								proInfoDetai.setMinPrice(asInt);
 								proInfoDetai.setProDetailConPrice(sum/valueList.size());
 							}else {
 								proInfoDetai.setSaleStatus(0);
 							}
-							
 							proInfoDetai.setResProBaseInfoList(valueList);
 							ProInfoDetaisList.add(proInfoDetai);
 						}
