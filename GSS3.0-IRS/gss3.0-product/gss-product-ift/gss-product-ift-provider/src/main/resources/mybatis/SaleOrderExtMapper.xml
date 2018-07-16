@@ -550,7 +550,13 @@
         select DISTINCT
         f.SALE_ORDER_NO, f.ID, f.OWNER, f.DEMAND_NO, f.LEG_TYPE, f.CONTACT_NAME, f.CONTACT_PHONE, f.CONTACT_MOBILE,
         f.CONTACT_MAIL, f.SALE_REMARK, f.VALID, f.VERSION, f.LOCKER, f.LOCK_TIME, f.CREATE_TYPE, f.CREATE_TIME,
-        f.MODIFY_TIME, (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,(select NAME from SM_USER where LOGIN_NAME =aa.MODIFIER) as MODIFIER,
+        f.MODIFY_TIME, (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,
+        <if test="orderSource == 'OP'">
+            (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as MODIFIER,
+        </if>
+        <if test="orderSource != 'OP'">
+            (select NAME from SM_USER where LOGIN_NAME =f.MODIFIER) as MODIFIER,
+        </if>
         o.ORDER_CHILD_STATUS,f.LINKTYPE,(SELECT NAME FROM SM_USER where ID = f.LOCKER) as HANDLERS,f.ORIGINAL_ORDER_NO
         FROM
         IFT_SALE_ORDER_EXT f

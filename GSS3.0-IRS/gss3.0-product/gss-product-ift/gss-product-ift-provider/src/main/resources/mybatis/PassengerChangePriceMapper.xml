@@ -86,6 +86,12 @@
         from IFT_PASSENGER_CHANGE_PRICE
         where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT} AND VALID=1
     </select>
+    <select id="selectPricerByChangeNoAndPassengerNo" resultMap="BaseResultMap" >
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_PASSENGER_CHANGE_PRICE
+        where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT} AND PASSENGER_NO = #{passengerNo,jdbcType=BIGINT} AND VALID=1
+    </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from IFT_PASSENGER_CHANGE_PRICE

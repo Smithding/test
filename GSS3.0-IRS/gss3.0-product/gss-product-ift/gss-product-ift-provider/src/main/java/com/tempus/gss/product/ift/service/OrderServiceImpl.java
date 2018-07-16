@@ -429,6 +429,7 @@ public class OrderServiceImpl implements IOrderService {
             saleOrderExt.setCreateTime(today);
             saleOrderExt.setValid((byte) 1);
             saleOrderExt.setLocker(0L);// 解锁状态
+           // saleOrderExt.setSaleCurrency();
             IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
             Map<String, Object> map = configs.getConfigsMap();
             Object object = map.get("exChangeRate");
@@ -1456,14 +1457,10 @@ public class OrderServiceImpl implements IOrderService {
                 // locker 为0表示解锁 大于0表示锁定
                 if (saleOrderExt.getLocker() == null || saleOrderExt.getLocker() == 0) {
                     saleOrderExt.setLocker(saleOrderNo.getAgent().getId() == null ? 1 : saleOrderNo.getAgent().getId());
-                    //saleOrderExt.setModifier(saleOrderNo.getAgent().getAccount());
                     saleOrderExt.setLockTime(new Date());
-                    //saleOrderExt.setModifyTime(new Date());
                 } else {
                     saleOrderExt.setLocker(0L);
-                    //saleOrderExt.setModifier(saleOrderNo.getAgent().getAccount());
                     saleOrderExt.setLockTime(new Date());
-                  //  saleOrderExt.setModifyTime(new Date());
                 }
                 int updateLocker = saleOrderExtDao.updateLocker(saleOrderExt);
                 if (updateLocker == 1) {

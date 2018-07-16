@@ -190,8 +190,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	protected final transient Logger logger = LogManager.getLogger(TCHotelOrderServiceImpl.class);
 	SimpleDateFormat simple = new SimpleDateFormat("yyyy-MM-dd");
 	
-	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
 	@Override
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
 	public HotelOrder createOrder(Agent agent,OrderCreateReq orderCreateReq)throws GSSException{
 		if (StringUtil.isNullOrEmpty(orderCreateReq)) {
 			logger.error("orderCreateReq查询条件为空");
