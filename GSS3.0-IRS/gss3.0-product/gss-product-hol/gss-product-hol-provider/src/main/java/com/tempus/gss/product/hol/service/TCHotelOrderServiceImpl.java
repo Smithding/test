@@ -652,6 +652,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 
 	@Override
 	public IsBookOrder isBookOrder(Agent agent,IsBookOrderReq isBookOrderReq) throws GSSException{
+		long start = System.currentTimeMillis();
+		long start1 = 0L;
 		if (StringUtil.isNullOrEmpty(agent)) {
 			logger.error("agent对象为空");
             throw new GSSException("订单是否可定信息", "0102", "agent对象为空");
@@ -715,6 +717,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			//System.out.println("ComeTime: "+isBookOrderReq.getComeTime());
 			
 			String reqJson = JSONObject.toJSONString(isBookOrderReq);
+			start1 = System.currentTimeMillis();
+			long end = System.currentTimeMillis();  
+		    System.out.println("1，耗时：" + (end - start) + "毫秒"); 
 			String resultJson= httpClientUtil.doTCJsonPost(CARD_SUPP_URL, reqJson);
 			logger.info("可定检查请求返回:" + resultJson);
 			if(StringUtil.isNotNullOrEmpty(resultJson)){
@@ -835,6 +840,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			logger.error("订单可定检查请求异常"+e);
 			 throw new GSSException("订单是否可定信息", "0101", e.getMessage());
 		}
+		long end1 = System.currentTimeMillis();  
+	    System.out.println("2，耗时：" + (end1 - start1) + "毫秒"); 
 		return resBase;
 		
 	}
