@@ -332,10 +332,11 @@ public class HolMidServiceImpl implements IHolMidService {
 			}
 		}else {
 			if (null != bqyResId) {
-				bqyHotel = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyResId), checkinDate, checkoutDate, holMid.getCityCode());
+				Future<ResBaseInfo> hotelDetail = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyResId), checkinDate, checkoutDate, holMid.getCityCode());
+				bqyHotel = hotelDetail.get();
 			}
 			if (null != tcResId) {
-				tcHotel = tcHotelSupplierService.queryHotelDetail(agent, tcResId, checkinDate, checkoutDate);
+				tcHotel = syncHotelInfo.newQueryHotelDetail(agent, tcResId, checkinDate, checkoutDate);
 				bqyHotel = tcHotel;
 			}
 		}
@@ -425,7 +426,8 @@ public class HolMidServiceImpl implements IHolMidService {
 			}
 		}else {
 			if (null != bqyResId) {
-				bqyHotel = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyResId), checkinDate, checkoutDate, holMid.getCityCode());
+				Future<ResBaseInfo> hotelDetail = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyResId), checkinDate, checkoutDate, holMid.getCityCode());
+				bqyHotel = hotelDetail.get();
 			}
 			if (null != tcResId) {
 				//tcHotel = tcHotelSupplierService.queryHotelDetail(agent, tcResId, checkinDate, checkoutDate);

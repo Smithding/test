@@ -38,6 +38,8 @@ public interface ITCHotelSupplierService {
 	 */
 	public ResBaseInfo queryListByResId(Agent agent, Long id);
 	
+	public HolMidBaseInfo queryMidListByResId(Agent agent, String id);
+	
 	/**
 	 * 根据销售策略id查找
 	 * @param id
@@ -135,7 +137,7 @@ public interface ITCHotelSupplierService {
 	 * @param userId
 	 * @return
 	 */
-	public void insertLastestResByUser(Agent agent, String userId, Long resId) throws GSSException;
+	public void insertLastestResByUser(Agent agent, String userId, String resId) throws GSSException;
 	
 	/**
 	 * 根据用户id查询最近浏览的10个酒店

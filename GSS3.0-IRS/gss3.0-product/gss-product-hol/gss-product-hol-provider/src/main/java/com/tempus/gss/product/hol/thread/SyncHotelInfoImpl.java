@@ -808,10 +808,10 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			String checkoutDate, String cityCode) throws Exception {
 		long start = System.currentTimeMillis();
 	    System.out.println("f1 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
-		ResBaseInfo hotelDetail = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyHotelId), checkinDate, checkoutDate, cityCode);
+	    Future<ResBaseInfo> hotelDetail = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyHotelId), checkinDate, checkoutDate, cityCode);
 		long end = System.currentTimeMillis();  
         System.out.println("完成任务一，耗时：" + (end - start) + "毫秒"); 
-		return new AsyncResult<ResBaseInfo>(hotelDetail);
+		return new AsyncResult<ResBaseInfo>(hotelDetail.get());
 	}
 
 	@Override

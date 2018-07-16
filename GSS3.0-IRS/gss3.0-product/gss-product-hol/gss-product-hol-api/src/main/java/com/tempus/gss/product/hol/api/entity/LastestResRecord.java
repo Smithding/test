@@ -25,7 +25,7 @@ public class LastestResRecord implements Serializable {
 	 * 酒店id
 	 */
 	@JSONField(name = "ResId")
-	private Long resId;
+	private String resId;
 	/**
 	 * 酒店名称
 	 */
@@ -49,11 +49,11 @@ public class LastestResRecord implements Serializable {
 	@JSONField(name = "ImageUrl")
 	private String imageUrl;
 
-	public Long getResId() {
+	public String getResId() {
 		return resId;
 	}
 
-	public void setResId(Long resId) {
+	public void setResId(String resId) {
 		this.resId = resId;
 	}
 
