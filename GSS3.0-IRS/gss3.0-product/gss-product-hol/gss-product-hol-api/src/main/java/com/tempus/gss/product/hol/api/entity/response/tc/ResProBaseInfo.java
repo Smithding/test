@@ -211,7 +211,7 @@ public class ResProBaseInfo implements Serializable{
 	/**
 	 * 房间类型 1是TC, 默认2为BQY
 	 */
-	private Integer supplierType = 2;
+	private Integer supplierType = 1;
 	
 	public Long getResId() {
 		return resId;

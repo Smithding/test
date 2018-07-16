@@ -15,6 +15,10 @@ public class ResNameSum implements Serializable{
 	 */
 	private String resName;
 	/**
+	 * 城市代码
+	 */
+	private String cityCode; 
+	/**
 	 * 酒店地址
 	 */
 	private String resAdress;
@@ -132,6 +136,16 @@ public class ResNameSum implements Serializable{
 
 	public void setSaleStatus(Integer saleStatus) {
 		this.saleStatus = saleStatus;
+	}
+
+
+	public String getCityCode() {
+		return cityCode;
+	}
+
+
+	public void setCityCode(String cityCode) {
+		this.cityCode = cityCode;
 	}
 	
 }

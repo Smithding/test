@@ -161,6 +161,21 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		return resDetail;
 	}
 	
+	/**
+	 * 根据酒店id查找具体酒店信息
+	 */
+	@Cacheable(value = "HolMidBaseInfo", key = "#id",unless="")
+	@Override
+	public HolMidBaseInfo queryMidListByResId(Agent agent, String id) {
+		
+		HolMidBaseInfo resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), HolMidBaseInfo.class);
+		/*if(StringUtil.isNotNullOrEmpty(resDetail)){
+			List<String> strs  = Tool.intToTwoPower(resDetail.getCreditCards().intValue());
+        	resDetail.setCreditCardsTarget(strs);
+		}*/
+		return resDetail;
+	}
+	
 	@Override
 	public <T> T queryListByProId(String id, Class<T> clazz) {
 		T t= mongoTemplate1.findOne(new Query(Criteria.where("proId").is(id)),clazz);
@@ -800,7 +815,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		}
 
 	@Override
-	public void insertLastestResByUser(Agent agent, String userId, Long resId) throws GSSException{
+	public void insertLastestResByUser(Agent agent, String userId, String resId) throws GSSException{
 		if (StringUtil.isNullOrEmpty(agent)) {
             log.error("agent对象为空");
             throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
@@ -814,20 +829,14 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
             throw new GSSException("插入某一用户最近浏览记录", "0100", "酒店id为空");
         }
 		try {
-			ResBaseInfo resDetail = queryListByResId(agent, resId);
+			//ResBaseInfo resDetail = queryListByResId(agent, resId);
+			HolMidBaseInfo resDetail = queryMidListByResId(agent, resId);
 			LastestResRecord lastestResRecord=new LastestResRecord();
 			Date newDate=new Date();
 			//List<LastestResRecord> lastestResRecordList= new ArrayList<LastestResRecord>();
 			if(StringUtil.isNotNullOrEmpty(resDetail)){
-				if(StringUtil.isNotNullOrEmpty(resDetail.getImgInfoList())){
-					List<ImgInfo> img = resDetail.getImgInfoList();
-					if(StringUtil.isNotNullOrEmpty(img)){
-			    		for(ImgInfo mm : img){
-			    			if(mm.getIsResDefault().equals(1)){
-			    				lastestResRecord.setImageUrl(mm.getImageUrl());
-			    				break;
-			    			}
-			    		}
+				if(StringUtils.isNotEmpty(resDetail.getTitleImg())) {
+					lastestResRecord.setImageUrl(resDetail.getTitleImg());
 				}
 	    		lastestResRecord.setUserId(userId);
 	    		lastestResRecord.setResId(resDetail.getResId());
@@ -835,9 +844,8 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	        	lastestResRecord.setResGrade(resDetail.getResGrade());
 	        	lastestResRecord.setMinPrice(resDetail.getMinPrice());
 	        	lastestResRecord.setRecordDate(newDate);
-	        	mongoTemplate1.insert(lastestResRecord, "lastestResRecord");
+	        	mongoTemplate1.save(lastestResRecord, "lastestResRecord");
 	        	//lastestResRecordList.add(lastestResRecord);
-				}
 			}
 		} catch (Exception e) {
 			 log.error("用户id为空"+e);
@@ -916,19 +924,21 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         BigDecimal totalProfitPrice = new BigDecimal(0);
         ResProBaseInfo resProBaseInfo=new ResProBaseInfo();
         try{
+        	
+        	
         	 days= DateUtil.daysBetween(startTime, endTime);
-        }catch(ParseException e){
-        	e.printStackTrace();
-        }
+        
 		//ProInfoDetail proInfoDetail=queryListByProductUniqueId(productUniqueId, ProInfoDetail.class);
        // AssignDateHotel assignDateHotel = queryDetailById(resId, AssignDateHotel.class);
         
         AssignDateHotelReq assignDateHotelReq=new AssignDateHotelReq();
-		assignDateHotelReq.setResId(resId);
-		assignDateHotelReq.setProductUniqueId(productUniqueId);
+        assignDateHotelReq.setResId(resId);
 		assignDateHotelReq.setSourceFrom("-1");
 		assignDateHotelReq.setStartTime(startTime);
-		assignDateHotelReq.setEndTime(endTime);
+		Calendar calendar = Calendar.getInstance();
+        calendar.setTime(sdf.parse(endTime));
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+		assignDateHotelReq.setEndTime(sdf.format(calendar.getTime()));
 		AssignDateHotel assignDateHotel=  hotel.queryAssignDateHotel(assignDateHotelReq);
 		
         if(StringUtil.isNotNullOrEmpty(assignDateHotel)) {
@@ -976,6 +986,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         			}
         		}
         	}
+        }
+        }catch(Exception e){
+        	e.printStackTrace();
         }
 		return resProBaseInfo;
 	}
@@ -1172,8 +1185,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         Criteria criatira = new Criteria();
         query.skip(0);
   		query.limit(9);
+  		criatira.and("saleStatus").is(1);
   		Point point =new Point(lon, lat);
-		criatira.and("resGpsLocation").near(point).maxDistance(0.2D);//100000/6378137
+		criatira.and("resPosition").near(point).maxDistance(0.005D);//100000/6378137
 		
 		List<HolMidBaseInfo> result = mongoTemplate1.find(query.addCriteria(criatira), HolMidBaseInfo.class);
 		if(StringUtil.isNotNullOrEmpty(result)) {

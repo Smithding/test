@@ -34,7 +34,7 @@ import java.util.*;
  */
 @Service
 public class PNRMappingServiceImpl implements PNRMappingService {
-    @Autowired
+    @Reference
     private IQueryService queryService;
     @Reference
     public IGetPnrService getPnrService;

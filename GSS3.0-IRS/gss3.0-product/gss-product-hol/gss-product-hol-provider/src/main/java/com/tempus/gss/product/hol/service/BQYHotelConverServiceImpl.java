@@ -16,6 +16,7 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ResGPSInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.ImageList;
 import com.tempus.gss.product.hol.api.service.IBQYHotelConverService;
@@ -116,7 +117,15 @@ public class BQYHotelConverServiceImpl implements IBQYHotelConverService {
 			resBaseInfo.setResGrade("经济型");
 			break;
 		}
-
+		
+		//GPS
+		List<ResGPSInfo> liGps = new ArrayList<>();
+		ResGPSInfo resGPSInfo=new ResGPSInfo();
+		resGPSInfo.setLat(hotel.getLatitude().toString());
+		resGPSInfo.setLon(hotel.getLongitude().toString());
+		liGps.add(resGPSInfo);
+		resBaseInfo.setResGPS(liGps);
+		
 		resBaseInfo.setCityId(Integer.parseInt(hotel.getCityCode()));
 		resBaseInfo.setCityName(hotel.getCityName());
 		resBaseInfo.setLocation(hotel.getRoadCross());

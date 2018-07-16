@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TreeMap;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -23,6 +24,8 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
@@ -200,6 +203,31 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 				if(ass.getRet_code().equals("200") && StringUtil.isNotNullOrEmpty(ass.getResult())){
 					AssignDateHotel assignDateHotel= ass.getResult();
 					return assignDateHotel;
+				}
+			}else{
+				throw new GSSException("获取酒店价格库存", "0115", "酒店价格库存请求出错");
+			}
+		} catch (Exception e) {
+			throw new GSSException("获取酒店价格库存", "0115", "酒店价格库存请求出错");
+		}
+		return null;
+	}
+	
+	@Override
+	@Async
+	public Future<AssignDateHotel> queryFuAssignDateHotel(AssignDateHotelReq assignDateHotelReq) throws GSSException{
+		//log.info("查询某一时间内的酒店价格和库存信息开始");
+		String reqJson= JSONObject.toJSONString(assignDateHotelReq);
+		//System.out.println("查询某一时间内的酒店价格的入参为：--------"+reqJson);
+		try {
+			String resultJson= httpClientUtil.doTCJsonPost(PRICE_REPO_URL, reqJson);
+			if(StringUtil.isNotNullOrEmpty(resultJson)){
+				//System.out.println("返回值为：--------"+resultJson);
+				ResultTc<AssignDateHotel> ass=JsonUtil.toBean(resultJson, new TypeReference<ResultTc<AssignDateHotel>>(){} );
+				if(ass.getRet_code().equals("200") && StringUtil.isNotNullOrEmpty(ass.getResult())){
+					AssignDateHotel assignDateHotel= ass.getResult();
+					//return assignDateHotel;
+					return new AsyncResult<AssignDateHotel>(assignDateHotel);
 				}
 			}else{
 				throw new GSSException("获取酒店价格库存", "0115", "酒店价格库存请求出错");
