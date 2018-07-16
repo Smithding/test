@@ -127,6 +127,9 @@ public class SaleChangeExtVo implements Serializable{
 	 *业务类型 0（1废 2退） 1废 2退 3改
 	 */
 	private Integer changeType;
+
+	private String saleCurrency;
+
 	
 	/**(0表示非锁定状态)
 	 * 状态 1:待处理(订单子状态为：1,locker:0)  
@@ -284,7 +287,7 @@ public class SaleChangeExtVo implements Serializable{
 	private Integer toDoType;
 
 	//提交航司后采购审核状态
-	private Integer airLineRefundStatus;
+	private Integer[] airLineRefundStatus;
 
 	public Boolean getCustomerCount() {
 		return customerCount;
@@ -308,6 +311,14 @@ public class SaleChangeExtVo implements Serializable{
 
 	public void setLegArray(String legArray) {
 		this.legArray = legArray;
+	}
+
+	public String getSaleCurrency() {
+		return saleCurrency;
+	}
+
+	public void setSaleCurrency(String saleCurrency) {
+		this.saleCurrency = saleCurrency;
 	}
 
 	public String getBeforeDate() {
@@ -881,11 +892,11 @@ public class SaleChangeExtVo implements Serializable{
 		this.handlers = handlers;
 	}
 
-	public Integer getAirLineRefundStatus() {
+	public Integer[] getAirLineRefundStatus() {
 		return airLineRefundStatus;
 	}
 
-	public void setAirLineRefundStatus(Integer airLineRefundStatus) {
+	public void setAirLineRefundStatus(Integer[] airLineRefundStatus) {
 		this.airLineRefundStatus = airLineRefundStatus;
 	}
 }

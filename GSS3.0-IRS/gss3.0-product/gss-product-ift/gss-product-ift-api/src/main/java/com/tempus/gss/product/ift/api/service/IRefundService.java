@@ -214,4 +214,6 @@ public interface IRefundService {
 	 */
 	void buyReturnMoney(RequestWithActor<AirLineRefundRequest> requestWithActor);
 
+	void updateBuyExtRefund(RequestWithActor<Long> requestWithActor);
+
 }

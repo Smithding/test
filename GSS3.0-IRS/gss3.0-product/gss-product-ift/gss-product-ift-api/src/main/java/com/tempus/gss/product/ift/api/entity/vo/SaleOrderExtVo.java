@@ -353,13 +353,21 @@ public class SaleOrderExtVo implements Serializable {
 	 * 12（已挂起).13.(已解挂)
 	 */
 	private String status;
-	private BigDecimal exchangeRate;
+	private BigDecimal exchangeRate;//采购汇率
 	private String currency;//采购币种
+	private BigDecimal saleExchangeRate;//销售汇率
 	private String saleCurrency;//销售币种
 	private String handlers;//当前订单操作人
 	private Long originalOrderNo;//原订单号
-	
-	
+
+	public BigDecimal getSaleExchangeRate() {
+		return saleExchangeRate;
+	}
+
+	public void setSaleExchangeRate(BigDecimal saleExchangeRate) {
+		this.saleExchangeRate = saleExchangeRate;
+	}
+
 	private static final long serialVersionUID = 1L;
 
 	

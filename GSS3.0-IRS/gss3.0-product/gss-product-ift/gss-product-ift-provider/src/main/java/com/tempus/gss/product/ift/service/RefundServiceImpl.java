@@ -353,6 +353,10 @@ public class RefundServiceImpl implements IRefundService {
 			saleChangeExt.setRefundWay(requestWithActor.getEntity().getRefundWay());
 			saleChangeExt.setOwner(agent.getOwner());
 			saleChangeExt.setCreateTime(createTime);
+			User user = userService.findUserByLoginName(agent,agent.getAccount());
+			if(user!=null) {
+				saleChangeExt.setLocker(user.getId());
+			}
 			saleChangeExt.setCreator(String.valueOf(agent.getAccount()));
 			saleChangeExt.setChangeType(requestWithActor.getEntity().getRefundType());
 			saleChangeExt.setContactName(requestWithActor.getEntity().getContactName());
@@ -1114,7 +1118,7 @@ public class RefundServiceImpl implements IRefundService {
 			// 获取SaleChange对象
 			SaleChange saleChange = saleChangeService
 					.getSaleChangeByNo(saleChangeNo.getAgent(), saleChangeNo.getEntity().longValue());
-			saleChange.setChildStatus(14);// 设置废退状态 4为拒绝废退 lizhi  4-->14
+			saleChange.setChildStatus(14);// 设置废退状态 4为拒绝废退 ChangeStatus byLZ  4-->14
 			Date modifyTime = new Date();
 			Agent agent = saleChangeNo.getAgent();
 			saleChange.setModifier(agent.getAccount());
@@ -1647,7 +1651,7 @@ public class RefundServiceImpl implements IRefundService {
 		SaleChange saleChange = saleChangeExt.getSaleChange();
 		if(saleChange!=null) {
 			try {
-				BuyChangeExt buyChangeExt= buyChangeExtDao.selectBySaleChangeNo(saleChange.getSaleChangeNo());
+				BuyChangeExt buyChangeExt= buyChangeExtDao.selectBySaleChangeNoFindOne(saleChange.getSaleChangeNo());
 				if(buyChangeExt!=null) {
 					String remark = buyChangeExt.getChangeRemark();
 					remark = remark + refundRequest.getRemark();
@@ -1687,6 +1691,22 @@ public class RefundServiceImpl implements IRefundService {
 		refundService.saleVerify(passengerRefundList);
 		//创建销售退款单
 		refundService.saleRefund(agent,passengerRefundPriceVo.getSaleChangeNo());
+	}
+
+	//更新采购变更单扩展表航司审核状态为拒单
+	@Transactional
+	public void updateBuyExtRefund(RequestWithActor<Long> requestWithActor){
+		Long saleChangeNo = requestWithActor.getEntity();
+		Agent agent = requestWithActor.getAgent();
+		BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
+		if(buyChangeExt!=null){
+			//采购拒单  将状态设置为-1
+			buyChangeExt.setAirLineRefundStatus(-1);
+			buyChangeExt.setModifier(agent.getAccount());
+			buyChangeExt.setModifyTime(new Date());
+			log.info("更新采购变更单扩展表航司审核状态为拒单:"+buyChangeExt.toString());
+			buyChangeExtDao.updateByPrimaryKeySelective(buyChangeExt);
+		}
 	}
 
 	/**

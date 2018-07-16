@@ -2,6 +2,7 @@ package com.tempus.gss.product.ift.dao;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
 
 import com.tempus.gss.product.ift.api.entity.PassengerChangePrice;
@@ -30,4 +31,6 @@ public interface PassengerChangePriceDao extends BaseDao<PassengerChangePrice,Pa
 	 * @return
 	 */
 	int updateByPassengerNo(PassengerChangePrice passengerChangePrice);
+
+	PassengerChangePrice selectPricerByChangeNoAndPassengerNo(@Param("saleChangeNo") Long saleChangeNo, @Param("passengerNo") Long passengerNo);
 }

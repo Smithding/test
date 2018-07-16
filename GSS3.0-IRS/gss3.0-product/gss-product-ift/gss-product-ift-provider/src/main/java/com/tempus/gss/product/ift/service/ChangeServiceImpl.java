@@ -855,7 +855,7 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeExt.setModifier(requestWithActor.getAgent().getAccount());
             saleChangeExt.setModifyTime(new Date());
             saleChangeExt.setCurrency(requestWithActor.getEntity().getCurrency());
-            saleChangeExt.setExchangeRate(requestWithActor.getEntity().getExchangeRate());
+            saleChangeExt.setExchangeRate(requestWithActor.getEntity().getSaleExchangeRate());
             saleChangeExt.setSaleCurrency(requestWithActor.getEntity().getSaleCurrency());
             if (saleChangeExt !=null && saleChangeExt.getChangeRemark()!=null&&saleChangeExt.getChangeRemark() !=""){
 
@@ -949,7 +949,7 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeExt.setModifier(requestWithActor.getAgent().getAccount());
             saleChangeExt.setModifyTime(new Date());
             saleChangeExt.setCurrency(requestWithActor.getEntity().getCurrency());
-            saleChangeExt.setExchangeRate(requestWithActor.getEntity().getExchangeRate());
+            saleChangeExt.setExchangeRate(requestWithActor.getEntity().getSaleExchangeRate());
             saleChangeExt.setSaleCurrency(requestWithActor.getEntity().getSaleCurrency());
             log.info("保存采购数据" + saleChangeExt.toString());
             saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
@@ -1130,6 +1130,8 @@ public class ChangeServiceImpl implements IChangeService {
             priceChange.setStatus("1");
             priceChange.setCreator(requestWithActor.getAgent().getAccount());
             priceChange.setModifier(requestWithActor.getAgent().getAccount());
+            priceChange.setBuyCurrency(priceVo.getBuyCurrency());
+            priceChange.setBuyExchangeRate(priceVo.getBuyExchangeRate());
             int result = passengerChangePriceDao.insert(priceChange);
             if (result == 0) {
                 flag = false;
@@ -1175,6 +1177,8 @@ public class ChangeServiceImpl implements IChangeService {
                 passengerChangePrice.setBuyAgencyFee(priceVo.getBuyAgencyFee());
                 passengerChangePrice.setBuyRebate(priceVo.getBuyRebate());
                 passengerChangePrice.setBuyBrokerage(priceVo.getBuyBrokerage());
+                passengerChangePrice.setBuyCurrency(priceVo.getBuyCurrency());
+                passengerChangePrice.setBuyExchangeRate(priceVo.getBuyExchangeRate());
                 passengerChangePrice.setModifyTime(new Date());
                 passengerChangePrice.setOwner(requestWithActor.getAgent().getOwner());
                 passengerChangePrice.setStatus("1");
@@ -1617,6 +1621,8 @@ public class ChangeServiceImpl implements IChangeService {
                 passengerChangePrice.setBuyPrice(priceVo.getBuyPrice());
                 passengerChangePrice.setBuyRest(priceVo.getBuyRest());
                 passengerChangePrice.setBuyTax(priceVo.getBuyTax());
+                passengerChangePrice.setBuyCurrency(priceVo.getBuyCurrency());
+                passengerChangePrice.setBuyExchangeRate(priceVo.getBuyExchangeRate());
                 passengerChangePriceDao.updateByPrimaryKeySelective(passengerChangePrice);
 
             }

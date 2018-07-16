@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.tempus.gss.cps.entity.Account;
@@ -243,6 +244,37 @@ public class PassengerVo implements Serializable {
 	private String exchangeRate;
 	private String currency;
 	private String profit;
+
+	private List<Map<String,Object>> currencyList;
+
+	public List<Map<String, Object>> getCurrencyList() {
+		return currencyList;
+	}
+
+	public void setCurrencyList(List<Map<String, Object>> currencyList) {
+		this.currencyList = currencyList;
+	}
+
+	//采购币种 BUY_CURRENCY
+	private String buyCurrency;
+	//采购汇率 BUY_EXCHANGE_RATE
+	private BigDecimal buyExchangeRate;
+
+	public String getBuyCurrency() {
+		return buyCurrency;
+	}
+
+	public void setBuyCurrency(String buyCurrency) {
+		this.buyCurrency = buyCurrency;
+	}
+
+	public BigDecimal getBuyExchangeRate() {
+		return buyExchangeRate;
+	}
+
+	public void setBuyExchangeRate(BigDecimal buyExchangeRate) {
+		this.buyExchangeRate = buyExchangeRate;
+	}
 
 	@Override
 	public String toString() {

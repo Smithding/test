@@ -70,6 +70,16 @@ public class ChangePriceRequest implements Serializable {
 	private String changeRemark;
 	//pnrNo
 	private Long pnrNo;
+	//销售汇率
+	private BigDecimal saleExchangeRate;
+
+	public BigDecimal getSaleExchangeRate() {
+		return saleExchangeRate;
+	}
+
+	public void setSaleExchangeRate(BigDecimal saleExchangeRate) {
+		this.saleExchangeRate = saleExchangeRate;
+	}
 
 	public Long getPnrNo() {
 		return pnrNo;
