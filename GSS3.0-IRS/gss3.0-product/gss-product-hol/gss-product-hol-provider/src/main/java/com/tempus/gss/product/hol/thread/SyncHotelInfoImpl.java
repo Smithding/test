@@ -805,10 +805,10 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	@Override
 	@Async
 	public Future<ResBaseInfo> queryBQYHotelListForAsync(Agent agent, Long bqyHotelId, String checkinDate,
-			String checkoutDate) throws Exception {
+			String checkoutDate, String cityCode) throws Exception {
 		long start = System.currentTimeMillis();
 	    System.out.println("f1 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
-		ResBaseInfo hotelDetail = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyHotelId), checkinDate, checkoutDate);
+		ResBaseInfo hotelDetail = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyHotelId), checkinDate, checkoutDate, cityCode);
 		long end = System.currentTimeMillis();  
         System.out.println("完成任务一，耗时：" + (end - start) + "毫秒"); 
 		return new AsyncResult<ResBaseInfo>(hotelDetail);

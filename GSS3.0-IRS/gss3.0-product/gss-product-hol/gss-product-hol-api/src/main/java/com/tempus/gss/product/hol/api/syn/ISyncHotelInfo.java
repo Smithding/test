@@ -30,7 +30,7 @@ public interface ISyncHotelInfo {
 	 * @return
 	 * @throws GSSException
 	 */
-	Future<ResBaseInfo> queryBQYHotelListForAsync(Agent agent, Long bqyHotelId, String checkinDate, String checkoutDate) throws Exception;
+	Future<ResBaseInfo> queryBQYHotelListForAsync(Agent agent, Long bqyHotelId, String checkinDate, String checkoutDate, String cityCode) throws Exception;
 	
 	/**
 	 * tc酒店详细信息异步查询

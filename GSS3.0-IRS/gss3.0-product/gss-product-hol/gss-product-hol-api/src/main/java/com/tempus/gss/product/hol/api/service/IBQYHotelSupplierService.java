@@ -46,7 +46,7 @@ public interface IBQYHotelSupplierService {
 	 * @param hotelId
 	 * @return
 	 */
-	ResBaseInfo singleHotelDetail(String hotelId, String checkinDate, String checkoutDate) throws Exception;
+	ResBaseInfo singleHotelDetail(String hotelId, String checkinDate, String checkoutDate, String cityCode) throws Exception;
 	
 	/**
 	 * 查询城市信息
