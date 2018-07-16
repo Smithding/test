@@ -924,19 +924,21 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         BigDecimal totalProfitPrice = new BigDecimal(0);
         ResProBaseInfo resProBaseInfo=new ResProBaseInfo();
         try{
+        	
+        	
         	 days= DateUtil.daysBetween(startTime, endTime);
-        }catch(ParseException e){
-        	e.printStackTrace();
-        }
+        
 		//ProInfoDetail proInfoDetail=queryListByProductUniqueId(productUniqueId, ProInfoDetail.class);
        // AssignDateHotel assignDateHotel = queryDetailById(resId, AssignDateHotel.class);
         
         AssignDateHotelReq assignDateHotelReq=new AssignDateHotelReq();
-		assignDateHotelReq.setResId(resId);
-		assignDateHotelReq.setProductUniqueId(productUniqueId);
+        assignDateHotelReq.setResId(resId);
 		assignDateHotelReq.setSourceFrom("-1");
 		assignDateHotelReq.setStartTime(startTime);
-		assignDateHotelReq.setEndTime(endTime);
+		Calendar calendar = Calendar.getInstance();
+        calendar.setTime(sdf.parse(endTime));
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+		assignDateHotelReq.setEndTime(sdf.format(calendar.getTime()));
 		AssignDateHotel assignDateHotel=  hotel.queryAssignDateHotel(assignDateHotelReq);
 		
         if(StringUtil.isNotNullOrEmpty(assignDateHotel)) {
@@ -984,6 +986,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
         			}
         		}
         	}
+        }
+        }catch(Exception e){
+        	e.printStackTrace();
         }
 		return resProBaseInfo;
 	}
