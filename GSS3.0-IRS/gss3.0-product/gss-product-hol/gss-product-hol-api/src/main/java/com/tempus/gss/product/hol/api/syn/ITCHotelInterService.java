@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.syn;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.FormDate;
@@ -53,6 +54,13 @@ public interface ITCHotelInterService {
 	 * @return
 	 */
 	public AssignDateHotel queryAssignDateHotel(AssignDateHotelReq assignDateHotelReq) throws GSSException;
+	
+	/**
+	 * 获取同程某一时间段/某个月的酒店价格和库存信息
+	 * @param assignDateHotelReq
+	 * @return
+	 */
+	public Future<AssignDateHotel> queryFuAssignDateHotel(AssignDateHotelReq assignDateHotelReq) throws GSSException;
 	
 	/**
 	 * 获取取消订单原因列表存入数据库
