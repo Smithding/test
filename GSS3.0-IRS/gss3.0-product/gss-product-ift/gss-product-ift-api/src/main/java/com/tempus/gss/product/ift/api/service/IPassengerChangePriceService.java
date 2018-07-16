@@ -28,4 +28,6 @@ public interface IPassengerChangePriceService  {
 	 * 修改
 	 */
 	int updatePassengerChangePrice(RequestWithActor<PassengerChangePrice> passengerChangePrice);
+
+	PassengerChangePrice getPassengerChangePriceBypassengerNoAndSaleChangeNo(Long saleChangeNo,Long passengerNo);
 }

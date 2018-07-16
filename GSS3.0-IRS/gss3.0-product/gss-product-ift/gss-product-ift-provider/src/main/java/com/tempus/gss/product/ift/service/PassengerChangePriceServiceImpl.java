@@ -102,7 +102,15 @@ public class PassengerChangePriceServiceImpl implements IPassengerChangePriceSer
         }
         return flag;
     }
-    
+
+    @Override
+    public PassengerChangePrice getPassengerChangePriceBypassengerNoAndSaleChangeNo(Long saleChangeNo, Long passengerNo) {
+
+
+        return passengerChangePriceDao.selectPricerByChangeNoAndPassengerNo(saleChangeNo,passengerNo);
+    }
+
+
     public List<PassengerChangePrice> getChangePriceList(RequestWithActor<Long> ChangePriceNo) {
         List<PassengerChangePrice> priceList = new ArrayList<PassengerChangePrice>();
         try {

@@ -3,22 +3,28 @@ package com.tempus.gss.product.hol.api.entity.vo.bqy;
 import java.io.Serializable;
 import java.util.List;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
 
 public class HotelEntity extends BaseHoelInfo implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
+	@JSONField(serialize=false)
 	private String BulitTime; //建造时间
 	
+	@JSONField(serialize=false)
 	private double CtripUserRate;	//用户评分等级
 	
+	@JSONField(serialize=false)
 	private List<CityImportantMessage> cityImportantMessage; //城市重要信息
 	
 	private List<Policy> policy;	//酒店政策
 	
+	@JSONField(serialize=false)
 	private List<HotelStar> hotelStar; //酒店星级
 	
+	@JSONField(serialize=false)
 	private List<RoomType> roomType;	//酒店房型
 	
 	private List<RoomPriceItem> roomPriceItem;

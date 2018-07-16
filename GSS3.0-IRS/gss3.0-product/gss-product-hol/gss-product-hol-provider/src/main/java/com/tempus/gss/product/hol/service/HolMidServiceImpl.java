@@ -3,11 +3,17 @@ package com.tempus.gss.product.hol.service;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
@@ -23,6 +29,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.google.common.collect.Lists;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
@@ -32,6 +39,7 @@ import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfoSum;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProDetails;
+import com.tempus.gss.product.hol.api.entity.response.tc.ProSaleInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
 import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
@@ -39,6 +47,8 @@ import com.tempus.gss.product.hol.api.service.IHolMidService;
 import com.tempus.gss.product.hol.api.syn.ISyncHotelInfo;
 import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
+import com.tempus.gss.security.AgentUtil;
+import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 
 import httl.util.StringUtils;
@@ -127,6 +137,7 @@ public class HolMidServiceImpl implements IHolMidService {
         int skip= (hotelSearchReq.getPageCount()-1)* (hotelSearchReq.getRowCount());
   		query.skip(skip);
   		query.limit(hotelSearchReq.getRowCount());
+  		logger.info("酒店查询条件："+JsonUtil.toJson(criatira));
   		List<HolMidBaseInfo> holList = mongoTemplate1.find(query.addCriteria(criatira), HolMidBaseInfo.class);
   		//总条数
   		int count= (int)mongoTemplate1.count(query, HolMidBaseInfo.class);
@@ -239,7 +250,6 @@ public class HolMidServiceImpl implements IHolMidService {
 	@Override
 	public ResBaseInfo hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
 		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
-	
 		Long bqyResId = null;
 		Long tcResId = null;
 		List<ResNameSum> listHol = holMid.getResNameSum();
@@ -261,7 +271,7 @@ public class HolMidServiceImpl implements IHolMidService {
 		//tc和bqy酒店ID都不为空则开启异步查询,否则执行同步
 		if (null != bqyResId && null != tcResId) {
 			try {
-				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate);
+				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate, holMid.getCityCode());
 				Future<ResBaseInfo> tcResponse = syncHotelInfo.queryTCHelListForAsync(agent, tcResId, checkinDate, checkoutDate);
 				while (bqyResponse.isDone() && tcResponse.isDone()) {
 						break;
@@ -283,42 +293,46 @@ public class HolMidServiceImpl implements IHolMidService {
 				if (tcProDetailList == null || tcProDetailList.size() == 0) {
 					return bqyHotel;
 				}
+				List<ProDetails> newProDetailList = new ArrayList<ProDetails>();
+				bqyProDetailList.addAll(tcProDetailList);
 				
-				for (int i = 0; i < bqyProDetailList.size(); i++) {
-					ProDetails bqyProDetail = bqyProDetailList.get(i);
-					//bqy房型名称
-					String bqyProName = bqyProDetail.getResProName();
-					for (int j = 0; j < tcProDetailList.size(); j++) {
-						ProDetails tcProDetail = tcProDetailList.get(j);
-						String tcProName = tcProDetail.getResProName();
-						
-						//酒店房型是否一样
-						if (bqyProName.equals(tcProName)) {
-							bqyProDetail.getResProBaseInfoList().addAll(tcProDetail.getResProBaseInfoList());
-							continue;
+				/*Map<String, List<ProDetails>> collect = bqyProDetailList.stream().collect(Collectors.groupingBy(ProDetails::getResProName));
+				for(Map.Entry<String, List<ProDetails>> entry : collect.entrySet()) {
+					List<ProDetails> value = entry.getValue();
+					if(value!= null && value.size() > 0) {
+						if(value.size() >= 2) {
+							for (int i = 1; i < value.size(); i++) {
+								List<ResProBaseInfo> resProBaseInfoList = value.get(0).getResProBaseInfoList();
+								resProBaseInfoList.addAll(value.get(i).getResProBaseInfoList());
+							}
 						}
-						
-						//String reg = "[\u4e00-\u9fa5]";
-						//判断酒店房型面积和酒店楼层
-						//面积
-						String bqyRoomSize = bqyProDetail.getRoomSize();
-						String tcRoomSize = tcProDetail.getRoomSize();
-						//楼层
-						String bqyRoomFloor = bqyProDetail.getRoomFloor();
-						String tcRoomFloor = tcProDetail.getRoomFloor();
-						
-						if (bqyRoomSize.equals(tcRoomSize) && bqyRoomFloor.equals(tcRoomFloor)) {
-							bqyProDetail.getResProBaseInfoList().addAll(tcProDetail.getResProBaseInfoList());
-							continue;
-						}
+						newProDetailList.add(value.get(0));
 					}
 				}
+				bqyHotel.setProDetails(newProDetailList);*/
+				
+				
+				Map<String, ProDetails> map = new HashMap<String, ProDetails>();
+				for(ProDetails pro : bqyProDetailList) {
+					if(map.containsKey(pro.getResProName())) {
+						ProDetails proDetails = map.get(pro.getResProName());
+						List<ResProBaseInfo> resProBaseInfoList = proDetails.getResProBaseInfoList();
+						resProBaseInfoList.addAll(pro.getResProBaseInfoList());
+						proDetails.setResProBaseInfoList(resProBaseInfoList);
+						map.put(pro.getResProName(), proDetails);
+					}else {
+						map.put(pro.getResProName(), pro);
+					}
+				}
+				newProDetailList = map.entrySet().stream().map(et ->et.getValue()).collect(Collectors.toList());
+				bqyHotel.setProDetails(newProDetailList);
+			
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}else {
 			if (null != bqyResId) {
-				bqyHotel = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyResId), checkinDate, checkoutDate);
+				bqyHotel = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyResId), checkinDate, checkoutDate, holMid.getCityCode());
 			}
 			if (null != tcResId) {
 				tcHotel = tcHotelSupplierService.queryHotelDetail(agent, tcResId, checkinDate, checkoutDate);
@@ -360,7 +374,7 @@ public class HolMidServiceImpl implements IHolMidService {
 		//tc和bqy酒店ID都不为空则开启异步查询
 		if (null != bqyResId && null != tcResId) {
 			try {
-				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate);
+				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate, holMid.getCityCode());
 				Future<ResBaseInfo> tcResponse = syncHotelInfo.queryTCHolForAsyncBack(agent, bqyResId);
 				while (bqyResponse.isDone() && tcResponse.isDone()) {
 						break;
@@ -411,7 +425,7 @@ public class HolMidServiceImpl implements IHolMidService {
 			}
 		}else {
 			if (null != bqyResId) {
-				bqyHotel = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyResId), checkinDate, checkoutDate);
+				bqyHotel = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyResId), checkinDate, checkoutDate, holMid.getCityCode());
 			}
 			if (null != tcResId) {
 				//tcHotel = tcHotelSupplierService.queryHotelDetail(agent, tcResId, checkinDate, checkoutDate);

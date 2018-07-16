@@ -7,7 +7,6 @@ import com.tempus.gss.product.hol.api.entity.response.HotelOrder;
 import com.tempus.gss.product.hol.api.entity.response.tc.CancelOrderRes;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.BQYPushOrderInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.CreateOrderReq;
-import com.tempus.gss.security.AgentUtil;
 import com.tempus.gss.vo.Agent;
 
 /**

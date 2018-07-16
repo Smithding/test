@@ -127,6 +127,9 @@ public class SaleChangeExtVo implements Serializable{
 	 *业务类型 0（1废 2退） 1废 2退 3改
 	 */
 	private Integer changeType;
+
+	private String saleCurrency;
+
 	
 	/**(0表示非锁定状态)
 	 * 状态 1:待处理(订单子状态为：1,locker:0)  
@@ -308,6 +311,14 @@ public class SaleChangeExtVo implements Serializable{
 
 	public void setLegArray(String legArray) {
 		this.legArray = legArray;
+	}
+
+	public String getSaleCurrency() {
+		return saleCurrency;
+	}
+
+	public void setSaleCurrency(String saleCurrency) {
+		this.saleCurrency = saleCurrency;
 	}
 
 	public String getBeforeDate() {
