@@ -278,6 +278,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 							resProBaseInfo.setProId(baseRoomInfo.getRoomTypeID());
 							resProBaseInfo.setCustomerType(roomInfo.getSupplierId());	//用来存储酒店代理人Id
 							resProBaseInfo.setPaymnetType(2);							//0：All-全部；1：SelfPay-现付；2：Prepay-预付
+							resProBaseInfo.setSupplierType(2);
 							List<BedTypeInfo> bedTypeInfo = baseRoomInfo.getBedTypeInfo();
 							if (null != bedTypeInfo && bedTypeInfo.size() > 0) {
 								String bedWidth = "";
