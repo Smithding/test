@@ -335,6 +335,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 
 	@Override
 	public HotelEntity queryHotelDetail(QueryHotelParam query) {
+		
 		query.setAgentId(Long.parseLong(BQY_AGENTID));
 		query.setToken(md5Encryption());
 		HotelEntity hotelEntity = null;
