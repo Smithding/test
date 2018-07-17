@@ -1605,12 +1605,16 @@ public class ChangeServiceImpl implements IChangeService {
                 //List<String> ticketNoList = priceVo.getTicketNoList();
                 for (int i = 0; i < detailNoList.size(); i++) {
                     SaleOrderDetail orderDetail = saleOrderDetailDao.selectByPrimaryKey(detailNoList.get(i));
-                    orderDetail.setOwner(requestWithActor.getAgent().getOwner());
-                    orderDetail.setModifyTime(new Date());
-                    orderDetail.setModifier(requestWithActor.getAgent().getAccount());
-                    orderDetail.setStatus("4");//将改签的新行程变为已出票
-                    orderDetail.setTicketNo(priceVo.getTicketNo());
-                    saleOrderDetailDao.updateByPrimaryKeySelective(orderDetail);
+                    SaleChangeDetail changeDetail = saleChangeDetailDao.selectBySaleOrderDetailNoAndSaleChangeNo(orderDetail.getSaleOrderDetailNo(),saleChangeNo);
+                    if(changeDetail.getOrderDetailType() == 2){
+                        //新增航段才把状态改为出票
+                        orderDetail.setOwner(requestWithActor.getAgent().getOwner());
+                        orderDetail.setModifyTime(new Date());
+                        orderDetail.setModifier(requestWithActor.getAgent().getAccount());
+                        orderDetail.setStatus("4");//将改签的新行程变为已出票
+                        orderDetail.setTicketNo(priceVo.getTicketNo());
+                        saleOrderDetailDao.updateByPrimaryKeySelective(orderDetail);
+                    }
                 }
                 PassengerChangePrice passengerChangePrice = new PassengerChangePrice();
                 passengerChangePrice.setChangePriceNo(priceVo.getChangePriceNo());
