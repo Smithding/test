@@ -1,13 +1,16 @@
 package com.tempus.gss.product.hol.api.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Future;
 
+import com.tempus.gss.product.hol.api.entity.request.HotelDetailSearchReq;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.IsBookOrderReq;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.BookOrderResponse;
@@ -46,7 +49,7 @@ public interface IBQYHotelSupplierService {
 	 * @param hotelId
 	 * @return
 	 */
-	Future<ResBaseInfo> singleHotelDetail(String hotelId, String checkinDate, String checkoutDate, String cityCode) throws Exception;
+	Future<ResBaseInfo> singleHotelDetail(Agent agent, String hotelId, String checkinDate, String checkoutDate, String cityCode) throws Exception;
 	
 	/**
 	 * 查询城市信息
@@ -79,4 +82,11 @@ public interface IBQYHotelSupplierService {
 	 * @return
 	 */
 	List<ImgInfo> listImgByHotelId(Agent agent, long hotelId);
+	
+	/**
+	 * 就带你房间
+	 * @param hotelDetailSearchReq
+	 * @return
+	 */
+	Map<String, Object> getProByRoomCode(Agent agent, HotelDetailSearchReq hotelDetailSearchReq, Long resId);
 }

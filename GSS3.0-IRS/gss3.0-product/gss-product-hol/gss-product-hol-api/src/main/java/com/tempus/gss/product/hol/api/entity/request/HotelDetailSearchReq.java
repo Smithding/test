@@ -93,5 +93,21 @@ public class HotelDetailSearchReq extends BaseRequest {
 	public void setSupplierId(String supplierId) {
 		this.supplierId = supplierId;
 	}
+
+	public String getProId() {
+		return proId;
+	}
+
+	public void setProId(String proId) {
+		this.proId = proId;
+	}
+
+	public String getProductUniqueId() {
+		return productUniqueId;
+	}
+
+	public void setProductUniqueId(String productUniqueId) {
+		this.productUniqueId = productUniqueId;
+	}
     
 }

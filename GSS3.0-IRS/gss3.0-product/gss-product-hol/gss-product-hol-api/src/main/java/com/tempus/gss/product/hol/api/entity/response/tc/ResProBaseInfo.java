@@ -190,8 +190,8 @@ public class ResProBaseInfo implements Serializable{
 	/**
 	 * 剩余库存
 	 */
-	/*@JSONField(name = "ProMinInventory")
-	private Integer proMinInventory;*/
+	@JSONField(name = "ProMinInventory")
+	private Integer proMinInventory;
 	/**
 	 * 返佣率
 	 */
@@ -469,6 +469,12 @@ public class ResProBaseInfo implements Serializable{
 	@JSONField(deserialize=false)
 	public void setSupplierType(Integer supplierType) {
 		this.supplierType = supplierType;
+	}
+	public Integer getProMinInventory() {
+		return proMinInventory;
+	}
+	public void setProMinInventory(Integer proMinInventory) {
+		this.proMinInventory = proMinInventory;
 	}
 	
 	

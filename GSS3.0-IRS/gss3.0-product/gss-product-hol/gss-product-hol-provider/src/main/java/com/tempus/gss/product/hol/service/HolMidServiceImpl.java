@@ -334,7 +334,7 @@ public class HolMidServiceImpl implements IHolMidService {
 			}
 		}else {
 			if (null != bqyResId) {
-				Future<ResBaseInfo> hotelDetail = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyResId), checkinDate, checkoutDate, bqyCityCode);
+				Future<ResBaseInfo> hotelDetail = bqyHotelSupplierService.singleHotelDetail(agent,String.valueOf(bqyResId), checkinDate, checkoutDate, bqyCityCode);
 				bqyHotel = hotelDetail.get();
 			}
 			if (null != tcResId) {
@@ -430,7 +430,7 @@ public class HolMidServiceImpl implements IHolMidService {
 			}
 		}else {
 			if (null != bqyResId) {
-				Future<ResBaseInfo> hotelDetail = bqyHotelSupplierService.singleHotelDetail(String.valueOf(bqyResId), checkinDate, checkoutDate, bqyCityCode);
+				Future<ResBaseInfo> hotelDetail = bqyHotelSupplierService.singleHotelDetail(agent,String.valueOf(bqyResId), checkinDate, checkoutDate, bqyCityCode);
 				bqyHotel = hotelDetail.get();
 			}
 			if (null != tcResId) {

@@ -1,11 +1,14 @@
 package com.tempus.gss.product.hol.service;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -26,7 +29,9 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
+import com.tempus.gss.product.hol.api.entity.ProfitPrice;
 import com.tempus.gss.product.hol.api.entity.ResNameSum;
+import com.tempus.gss.product.hol.api.entity.request.HotelDetailSearchReq;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.IsBookOrderReq;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
@@ -48,6 +53,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.room.AveragePrice;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BaseRoomInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BedTypeInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BroadNetInfo;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.room.CancelLimitInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomBedTypeInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomInfoItem;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceDetail;
@@ -56,6 +62,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomPriceItem;
 import com.tempus.gss.product.hol.api.service.IBQYHotelConverService;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
+import com.tempus.gss.product.hol.api.service.IHolProfitService;
 import com.tempus.gss.product.hol.api.util.DateUtil;
 import com.tempus.gss.vo.Agent;
 
@@ -70,6 +77,9 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 	
 	@Autowired
 	private IBQYHotelConverService bqyHotelConverService;
+	
+	@Autowired
+	IHolProfitService holProfitService;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -212,7 +222,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 
 	@Override
 	@Async
-	public Future<ResBaseInfo> singleHotelDetail(String hotelId, String checkinDate, String checkoutDate, String cityCode) throws InterruptedException, ExecutionException {
+	public Future<ResBaseInfo> singleHotelDetail(Agent agent, String hotelId, String checkinDate, String checkoutDate, String cityCode) throws InterruptedException, ExecutionException {
 		try {
 			QueryHotelParam query = new QueryHotelParam();
 			if (StringUtils.isBlank(checkinDate) && StringUtils.isBlank(checkoutDate)) {
@@ -235,6 +245,10 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 			Future<List<ImageList>> asyncHotelImage = bqyHotelInterService.asyncHotelImage(query);
 			Future<HotelEntity> asyncHotelDetail = bqyHotelInterService.asyncHotelDetail(query);
 			Future<ResBaseInfo> asyncResBaseInfo = bqyHotelConverService.asyncConvertTcHotelEntity(Long.valueOf(hotelId));
+			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
+			if(!agent.getNum().equals(401803070321014723L)) {
+				computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+			}
 			while (asyncHotelImage.isDone() && asyncHotelDetail.isDone() && asyncResBaseInfo.isDone()) {
 				break;
 			}
@@ -376,6 +390,23 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 				                      resProBaseInfo.setNonSmoking((byte) 0);
 				                  }
 				              }
+							//设置控润
+							if(computeProfitByAgentFu!=null) {
+			 						List<ProfitPrice> computeProfitByAgent = computeProfitByAgentFu.get();
+   			 					if(computeProfitByAgent != null && computeProfitByAgent.size() > 0) {
+       			 					for(ProfitPrice profit : computeProfitByAgent) {
+       			 						BigDecimal lowerPrice = profit.getPriceFrom();
+       			 						BigDecimal upPrice = profit.getPriceTo();
+       			 						BigDecimal firPrice = new BigDecimal(resProBaseInfo.getConPrice());
+       			 						if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
+       			 							BigDecimal rate = profit.getRate();
+       			 							rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
+       			 							resProBaseInfo.setRebateRateProfit(rate);
+       			 						}
+       			 					}
+   			 					}
+			 				}
+							
 							//是否有宽带
 							BroadNetInfo broadNetInfo = roomInfo.getBroadNetInfo();
 							if (null != broadNetInfo) {
@@ -557,5 +588,138 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 		List<ImageList> hotelImageList = bqyHotelInterService.queryHotelImage(query);
 		List<ImgInfo> imgList = bqyHotelConverService.convertTCImg(hotelImageList);
 		return imgList;
+	}
+
+	@Override
+	public Map<String, Object> getProByRoomCode(Agent agent, HotelDetailSearchReq hotelDetailSearchReq, Long resId) {
+		try {
+			QueryHotelParam query = new QueryHotelParam();
+			query.setCheckInTime(hotelDetailSearchReq.getCheckinDate());
+			query.setCheckOutTime(hotelDetailSearchReq.getCheckoutDate());
+			query.setHotelId(resId);
+			List<RoomPriceItem> roomPriceList = bqyHotelInterService.queryHotelRoomPrice(query);
+			
+			String planCode = hotelDetailSearchReq.getProductUniqueId();
+			int diff = DateUtil.daysBetween(hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate());
+			
+			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
+			if(!agent.getNum().equals(401803070321014723L)) {
+				computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+			}
+			
+			Double oneDayPrice = null;
+			int roomNum = 0;
+			ResProBaseInfo useRoom = null;
+			//取消规则
+			String cancelPolicy = "";	
+			//取消时间
+			String lastCancelTime = "";
+			
+			if (null != roomPriceList && roomPriceList.size() > 0) {
+	
+				outer:
+				for (RoomPriceItem roomPriceItem : roomPriceList) {
+					List<RoomInfoItem> roomInfo = roomPriceItem.getRoomInfo();
+					for (RoomInfoItem roomInfoItem : roomInfo) {
+						if (!planCode.equals(roomInfoItem.getRoomID())) {
+							continue;
+						}
+						
+						RoomPriceInfo roomPriceInfo = roomInfoItem.getRoomPriceInfo();
+						//房间数
+						String roomNumStr = roomPriceInfo.getRemainingRooms();
+						if (roomNumStr.contains("+")) {
+							roomNumStr = roomNumStr.substring(0, roomNumStr.indexOf("+"));
+						}else if ("true".equalsIgnoreCase(roomNumStr)) {
+							roomNumStr = "10";
+						}
+						roomNum = Integer.valueOf(roomNumStr);
+						//价格	
+						List<RoomPriceDetail> roomPriceDetailList = roomPriceInfo.getRoomPriceDetail();
+						AveragePrice averagePrice = roomPriceInfo.getAveragePrice();
+						oneDayPrice = averagePrice.getSettleFee();
+						/*for (RoomPriceDetail roomPriceDetail : roomPriceDetailList) {
+							Price roomPrice = roomPriceDetail.getPrice();
+							allPrice += Integer.valueOf(roomPrice.getAmount());
+						}*/
+						
+						//取消规则
+						CancelLimitInfo cancelLimitInfo = roomInfoItem.getCancelLimitInfo();
+						if (null != cancelLimitInfo) {
+							cancelPolicy = cancelLimitInfo.getCancelPolicyInfo();
+							lastCancelTime = cancelLimitInfo.getLastCancelTime();
+						}
+						useRoom = new ResProBaseInfo();
+						useRoom.setUserSumPrice(oneDayPrice.intValue() * diff);
+						useRoom.setResId(resId);
+						useRoom.setBreakfastCount(Integer.valueOf(roomPriceDetailList.get(0).getBreakfast()));
+						//房型ID
+						BaseRoomInfo baseRoomInfo = roomPriceItem.getBaseRoomInfo();
+						useRoom.setProId(baseRoomInfo.getRoomTypeID());
+						useRoom.setProductUniqueId(roomInfoItem.getRoomID());
+						//入住人数
+						useRoom.setAdultCount(Integer.valueOf(roomInfoItem.getPerson()));
+						//平均价格
+						AveragePrice avgPrice = roomPriceInfo.getAveragePrice();
+						if (null != avgPrice) {
+							String amount = avgPrice.getAmount();
+							if (amount.contains(".")) {
+								amount = amount.substring(0, amount.indexOf("."));
+							}
+							useRoom.setConPrice(Integer.valueOf(amount));
+						}else {
+							useRoom.setConPrice(99999);
+						}
+						
+						//设置控润
+						if(computeProfitByAgentFu!=null) {
+		 						List<ProfitPrice> computeProfitByAgent = computeProfitByAgentFu.get();
+			 					if(computeProfitByAgent != null && computeProfitByAgent.size() > 0) {
+   			 					for(ProfitPrice profit : computeProfitByAgent) {
+   			 						BigDecimal lowerPrice = profit.getPriceFrom();
+   			 						BigDecimal upPrice = profit.getPriceTo();
+   			 						BigDecimal firPrice = new BigDecimal(oneDayPrice);
+   			 						if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
+   			 							BigDecimal rate = profit.getRate();
+   			 							rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
+   			 							useRoom.setRebateRateProfit(rate);
+   			 						}
+   			 					}
+			 				}
+		 				}
+						
+						//房间床型
+						//床型
+						RoomBedTypeInfo roomBedTypeInfo = roomInfoItem.getRoomBedTypeInfo();
+						String bedSize = "";
+						if ("T".equals(roomBedTypeInfo.getHasKingBed())) {
+							bedSize = roomBedTypeInfo.getKingBedWidth();
+						}else if ("T".equals(roomBedTypeInfo.getHasTwinBed())) {
+							bedSize = roomBedTypeInfo.getTwinBedWidth();
+						}else if ("T".equals(roomBedTypeInfo.getHasSingleBed())) {
+							bedSize = roomBedTypeInfo.getSingleBedWidth();
+						}
+						useRoom.setBedSize(bedSize);
+						//跳出循环
+						break outer;
+					}
+				}
+			}
+			Map<String, Object> map = new HashMap<>();
+			map.put("oneDayPrice", oneDayPrice);
+			map.put("cancelPolicy", cancelPolicy);
+			map.put("useRoom", useRoom);
+			map.put("roomNum", roomNum);
+			map.put("diff", diff);
+			map.put("lastCancelTime", lastCancelTime);
+			return map;
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
