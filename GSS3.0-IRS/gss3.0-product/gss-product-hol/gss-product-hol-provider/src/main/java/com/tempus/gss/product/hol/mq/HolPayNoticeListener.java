@@ -101,8 +101,10 @@ public class HolPayNoticeListener {
     		        hotelOrder = hotelOrderMapper.selectOne(hotelOrder);
     		        if(StringUtil.isNotNullOrEmpty(hotelOrder.getHotelOrderNo())) {
     		        	if(payNoticeVO.getPayStatus().equals(1)) {	//本地支付成功
-    		        		  OrderPayResult orderPay = bqyHotelInterService.orderPay(new OrderPayReq(saleOrderNo));
-    		                    if (orderPay.getReseult()) {		//bqy接口调用支付成功
+    		        		logger.info("酒店订单8000Yi支付接口,入参{}" + hotelOrder.getHotelOrderNo());
+    		        		  OrderPayResult orderPay = bqyHotelInterService.orderPay(new OrderPayReq(Long.valueOf(hotelOrder.getHotelOrderNo())));
+    		        		  logger.info("酒店订单8000Yi支付接口,返回值{}" + JSON.toJSONString(orderPay)); 
+    		        		  if (orderPay.getReseult()) {		//bqy接口调用支付成功
     		                    	hotelOrder.setOrderStatus(OwnerOrderStatus.PAY_OK.getKey());
     	    		        		hotelOrder.setResultCode("3");
     	    		        		hotelOrder.setFactTotalPrice(new BigDecimal(orderPay.getPayPrice()));

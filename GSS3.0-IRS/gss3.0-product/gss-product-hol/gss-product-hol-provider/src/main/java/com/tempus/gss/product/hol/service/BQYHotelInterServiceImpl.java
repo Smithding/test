@@ -543,6 +543,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		OrderPayResult orderPayResult = null;
 		String paramJson = JsonUtil.toJson(orderPayReq);
 		String result = httpClientUtil.doJsonPost(BQY_HOTEL_ORDER_PAY_URL, paramJson);
+		logger.info("BQY酒店订单支付结果: "+result);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<OrderPayResult> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<OrderPayResult>>(){});
 			if (responseResult != null) {

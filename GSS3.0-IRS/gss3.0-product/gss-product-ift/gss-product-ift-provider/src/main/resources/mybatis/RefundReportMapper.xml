@@ -174,10 +174,13 @@
            AND OSO.SOURCE_CHANNEL_NO=#{sourceChannel,jdbcType=VARCHAR}
        </if>
        <if test="startDate!=null and startDate!=''">
-           AND ISOE.ISSUE_TIME &gt;=#{startDate,jdbcType=TIMESTAMP}
+
+           AND DATE_FORMAT(ISOE.ISSUE_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{startDate,jdbcType=TIMESTAMP}, '%Y-%m-%d')
        </if>
        <if test="endDate!=null and endDate!=''">
-           AND ISOE.ISSUE_TIME &lt;=#{endDate,jdbcType=TIMESTAMP}
+           <![CDATA[
+           AND DATE_FORMAT(ISOE.ISSUE_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{endDate,jdbcType=TIMESTAMP}, '%Y-%m-%d')
+            ]]>
        </if>
        <if test="refundType!=null and refundType!=''">
            AND ICE.CHANGE_TYPE =#{refundType,jdbcType=VARCHAR}
@@ -500,10 +503,13 @@
             AND OSO.SOURCE_CHANNEL_NO=#{sourceChannel,jdbcType=VARCHAR}
         </if>
         <if test="startDate!=null and startDate!=''">
-            AND ISOE.ISSUE_TIME &gt;=#{startDate,jdbcType=TIMESTAMP}
+
+            AND DATE_FORMAT(ISOE.ISSUE_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{startDate,jdbcType=TIMESTAMP}, '%Y-%m-%d')
         </if>
         <if test="endDate!=null and endDate!=''">
-            AND ISOE.ISSUE_TIME &lt;=#{endDate,jdbcType=TIMESTAMP}
+            <![CDATA[
+           AND DATE_FORMAT(ISOE.ISSUE_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{endDate,jdbcType=TIMESTAMP}, '%Y-%m-%d')
+            ]]>
         </if>
         <if test="refundType!=null and refundType!=''">
             AND ICE.CHANGE_TYPE =#{refundType,jdbcType=VARCHAR}
