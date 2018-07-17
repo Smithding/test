@@ -672,7 +672,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		// 创建酒店订单
 		hotelOrder.setOwner(agent.getOwner());
 		hotelOrder.setCustomerNo(agent.getNum());
-		hotelOrder.setDbOrderType(orderCreateReq.getDbOrderType());
+		//hotelOrder.setDbOrderType(orderCreateReq.getDbOrderType());
 		hotelOrder.setDbOrderMoney(orderCreateReq.getDbOrderMoney());
 		hotelOrder.setDbCancelRule(orderCreateReq.getDbCancelRule());
 		hotelOrder.setCancelPenalty(orderCreateReq.getCancelPenalty());

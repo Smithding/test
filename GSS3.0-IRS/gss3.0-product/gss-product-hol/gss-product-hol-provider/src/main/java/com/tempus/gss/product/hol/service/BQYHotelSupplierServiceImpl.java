@@ -649,6 +649,20 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 							cancelPolicy = cancelLimitInfo.getCancelPolicyInfo();
 							lastCancelTime = cancelLimitInfo.getLastCancelTime();
 						}
+						
+						TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
+						
+						for (int i = 0; i < roomPriceDetailList.size(); i++) {
+							
+							RoomPriceDetail roomPriceDetail = roomPriceDetailList.get(i);
+							String effectDate = roomPriceDetail.getEffectDate();
+							String checkInFormat = sdf.format(sdf.parse(effectDate));
+							ProSaleInfoDetail pid = new ProSaleInfoDetail();
+							pid.setBreakfastNum(Integer.valueOf(roomPriceDetail.getBreakfast()));
+							pid.setDistributionSalePrice(averagePrice.getSettleFee().intValue());
+							mapPro.put(checkInFormat, pid);
+						}
+						
 						useRoom = new ResProBaseInfo();
 						useRoom.setUserSumPrice(oneDayPrice.intValue() * diff);
 						useRoom.setResId(resId);
@@ -659,6 +673,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 						useRoom.setProductUniqueId(roomInfoItem.getRoomID());
 						//入住人数
 						useRoom.setAdultCount(Integer.valueOf(roomInfoItem.getPerson()));
+						useRoom.setProSaleInfoDetailsTarget(mapPro);
 						//平均价格
 						AveragePrice avgPrice = roomPriceInfo.getAveragePrice();
 						if (null != avgPrice) {
