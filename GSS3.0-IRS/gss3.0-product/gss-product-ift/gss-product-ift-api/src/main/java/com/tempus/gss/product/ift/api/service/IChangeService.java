@@ -188,4 +188,6 @@ public interface IChangeService {
 	void assignChange(RequestWithActor<Long> requestWithActor);
 
 	public int updateLocker(SaleChangeExt changeExt);
+	//更新销售备注
+    void  updateBuyRemarkBySelectBuyChangeNo(BuyChangeExt buyChangeExt);
 }
