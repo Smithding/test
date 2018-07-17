@@ -3,6 +3,7 @@ package com.tempus.gss.product.ift.api.service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.order.entity.SaleChange;
+import com.tempus.gss.product.ift.api.entity.BuyChangeExt;
 import com.tempus.gss.product.ift.api.entity.PassengerRefundPrice;
 import com.tempus.gss.product.ift.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ift.api.entity.SaleOrderExt;
@@ -58,6 +59,13 @@ public interface IRefundService {
 	 * @return
 	 */
     SaleChangeExt getSaleChangeExtByNo(RequestWithActor<Long> requestWithActor);
+
+	/**
+	 * 获得采购变更单
+	 * @param saleChangeNo
+	 * @return
+	 */
+	BuyChangeExt getBuyChangeExtBySaleChangeNo(Long saleChangeNo);
 
 	/*
 	*

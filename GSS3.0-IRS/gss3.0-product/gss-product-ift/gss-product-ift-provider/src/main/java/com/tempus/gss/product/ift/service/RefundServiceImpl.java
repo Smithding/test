@@ -565,6 +565,12 @@ public class RefundServiceImpl implements IRefundService {
 		return saleChangeExt;
 	}
 
+	@Override
+	public BuyChangeExt getBuyChangeExtBySaleChangeNo(Long saleChangeNo) {
+		BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
+		return buyChangeExt;
+	}
+
 
 	@Override
 	@Transactional
@@ -1652,6 +1658,7 @@ public class RefundServiceImpl implements IRefundService {
 		if(saleChange!=null) {
 			try {
 				BuyChangeExt buyChangeExt= buyChangeExtDao.selectBySaleChangeNoFindOne(saleChange.getSaleChangeNo());
+				Long buyChangeNo = buyChangeExt.getBuyChangeNo();
 				if(buyChangeExt!=null) {
 					String remark = buyChangeExt.getChangeRemark();
 					remark = remark + refundRequest.getRemark();
@@ -1661,6 +1668,14 @@ public class RefundServiceImpl implements IRefundService {
 					buyChangeExt.setModifyTime(modifyTime);
 					log.info("退废单航司退款审核通过时修改变更变信息："+buyChangeExt.toString());
 					buyChangeExtDao.updateByPrimaryKey(buyChangeExt);
+				}
+				BuyChange buyChange = buyChangeService.getBuyChangeByNo(agent,buyChangeNo);
+				if(saleChangeExt.getIsRefund()==1 && buyChange!=null){//1 已退款
+					buyChange.setChildStatus(10);
+					buyChange.setModifier(agent.getAccount());
+					buyChange.setModifyTime(modifyTime);
+					log.info("修改采购变更单信息"+buyChange.toString());
+					buyChangeService.update(agent, buyChange);
 				}
 			}catch (Exception e){
               log.error("更新国际采购扩展单信息异常",e);
