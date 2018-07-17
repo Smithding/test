@@ -66,6 +66,7 @@
         <!--改签出票人-->
         <result column="DRAWER_LOGIN_NAME" property="drawerLoginName" jdbcType="VARCHAR"/>
         <result column="AIRLINE_REFUND_STATUS" property="airLineRefundStatus" jdbcType="INTEGER"/>
+        <result column="IS_REFUND" property="isRefund" jdbcType="INTEGER" ></result>
         <!--一对多关联销售单明细-->
         <collection property="saleChangeDetailList" ofType="com.tempus.gss.product.ift.api.entity.SaleChangeDetail"
                     column="SALE_CHANGE_NO"
@@ -81,7 +82,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        SALE_CHANGE_NO, ID, OWNER, REFUND_WAY,  MODIFIER, STATUS, MODIFY_TIME,
+        SALE_CHANGE_NO, ID, OWNER, REFUND_WAY,  MODIFIER, STATUS, MODIFY_TIME,IS_REFUND,
         VALID, CREATE_TIME, CREATOR, LOCKER, LOCK_TIME, CHANGE_TYPE, CONTACT_NAME, CONTACT_MOBILE,
         CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL,CUSTOMER_NO,
     CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,CURRENCY,SALE_CURRENCY,EXCHANGE_RATE,OFFICE,DRAWER_LOGIN_NAME
@@ -554,6 +555,9 @@
             <if test="exchangeRate!=null">
                 EXCHANGE_RATE =#{exchangeRate,jdbcType=DECIMAL},
             </if>
+            <if test="isRefund!=null">
+                IS_REFUND=#{isRefund,jdbcType=INTEGER},
+            </if>
             <if test="drawerLoginName!=null">
                 DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR}
             </if>
@@ -646,6 +650,9 @@
             </if>
             <if test="exchangeRate!=null">
                 EXCHANGE_RATE =#{exchangeRate,jdbcType=DECIMAL},
+            </if>
+            <if test="isRefund!=null">
+                IS_REFUND=#{isRefund,jdbcType=INTEGER},
             </if>
             <if test="drawerLoginName!=null">
                 DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR}

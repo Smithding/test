@@ -192,33 +192,11 @@ public class SaleChangeExt implements Serializable {
 	//改签出票员   DRAWER_LOGIN_NAME
 	private String drawerLoginName;
 
+	//是否已退款
+	private Integer isRefund;
 
 	//提交航司后采购审核状态
 	private Integer airLineRefundStatus;
-
-	public String getDrawerLoginName() {
-		return drawerLoginName;
-	}
-
-	public void setDrawerLoginName(String drawerLoginName) {
-		this.drawerLoginName = drawerLoginName;
-	}
-
-	public String getOffice() {
-		return office;
-	}
-	
-	public void setOffice(String office) {
-		this.office = office;
-	}
-	
-	public String getHandlers() {
-		return handlers;
-	}
-
-	public void setHandlers(String handlers) {
-		this.handlers = handlers;
-	}
 
 	@Override
 	public String toString() {
@@ -258,8 +236,38 @@ public class SaleChangeExt implements Serializable {
 				", currency='" + currency + '\'' +
 				", saleCurrency='" + saleCurrency + '\'' +
 				", exchangeRate=" + exchangeRate +
+				", handlers='" + handlers + '\'' +
+				", office='" + office + '\'' +
+				", drawerLoginName='" + drawerLoginName + '\'' +
+				", isRefund=" + isRefund +
+				", airLineRefundStatus=" + airLineRefundStatus +
 				'}';
 	}
+
+	public String getDrawerLoginName() {
+		return drawerLoginName;
+	}
+
+	public void setDrawerLoginName(String drawerLoginName) {
+		this.drawerLoginName = drawerLoginName;
+	}
+
+	public String getOffice() {
+		return office;
+	}
+
+	public void setOffice(String office) {
+		this.office = office;
+	}
+
+	public String getHandlers() {
+		return handlers;
+	}
+
+	public void setHandlers(String handlers) {
+		this.handlers = handlers;
+	}
+
 
 	private static final long serialVersionUID = 1L;
 
@@ -568,4 +576,11 @@ public class SaleChangeExt implements Serializable {
 		this.airLineRefundStatus = airLineRefundStatus;
 	}
 
+	public Integer getIsRefund() {
+		return isRefund;
+	}
+
+	public void setIsRefund(Integer isRefund) {
+		this.isRefund = isRefund;
+	}
 }
