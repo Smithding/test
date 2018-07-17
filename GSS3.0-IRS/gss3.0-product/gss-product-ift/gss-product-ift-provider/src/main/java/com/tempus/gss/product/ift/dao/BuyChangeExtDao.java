@@ -10,5 +10,7 @@ public interface BuyChangeExtDao extends BaseDao<BuyChangeExt, Object> {
     BuyChangeExt selectBySaleChangeNo(Long saleChangeNo);
 
     BuyChangeExt selectBySaleChangeNoFindOne(Long saleChangeNo);
+
+    void  updateBuyRemarkBySelectBuyChangeNo(BuyChangeExt buyChangeExt);
 }
 

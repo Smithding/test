@@ -1581,6 +1581,24 @@ public class ChangeServiceImpl implements IChangeService {
         return saleChangeExtDao.updateLocker(changeExt);
     }
 
+    @Override
+    public void updateBuyRemarkBySelectBuyChangeNo(BuyChangeExt buyChangeExt) {
+        try {
+            //根据改签单号查询改签单
+            BuyChangeExt buyChangeExtBySaleChange = changeExtService.getBuyChangeExtBySaleChangeNo(buyChangeExt.getBuyChangeNo());
+            String changeRemark = buyChangeExt.getChangeRemark();
+            if (buyChangeExtBySaleChange != null) {
+                if (buyChangeExtBySaleChange.getChangeRemark() != null && "" != buyChangeExtBySaleChange.getChangeRemark())
+                    buyChangeExt.setChangeRemark(buyChangeExtBySaleChange.getChangeRemark() + "#$" + changeRemark);
+                buyChangeExtDao.updateBuyRemarkBySelectBuyChangeNo(buyChangeExt);
+            } else {
+                buyChangeExtDao.updateBuyRemarkBySelectBuyChangeNo(buyChangeExt);
+            }
+        }catch (Exception e){
+            log.error("采购备注更新异常", e);
+        }
+    }
+
     /**
      * 改签单出单确认
      * 状态改成10=已改签
@@ -1922,4 +1940,5 @@ public class ChangeServiceImpl implements IChangeService {
         }
         return  saleChangeExt;
     }
+
 }

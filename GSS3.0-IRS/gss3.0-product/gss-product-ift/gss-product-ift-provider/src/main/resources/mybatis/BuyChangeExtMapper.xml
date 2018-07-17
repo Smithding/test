@@ -240,5 +240,14 @@
       </if>
     </set>
     where BUY_CHANGE_NO = #{buyChangeNo,jdbcType=BIGINT}
+  </update><update id="updateBuyRemarkBySelectBuyChangeNo" parameterType="com.tempus.gss.product.ift.api.entity.BuyChangeExt">
+    UPDATE IFT_BUY_CHANGE_EXT b
+    <set>
+      <if test="changeRemark != null">
+        b.CHANGE_REMARK = #{changeRemark,jdbcType=VARCHAR}
+      </if>
+    </set>
+    WHERE b.BUY_CHANGE_NO= #{buyChangeNo,jdbcType=BIGINT}
   </update>
+
 </mapper>
