@@ -108,7 +108,26 @@ public class OrderPriceVo implements Serializable{
 	 */
 	private BigDecimal profit;
 
-	
+	private String buyCurrency;
+
+	private BigDecimal buyExchangeRate;
+
+	public String getBuyCurrency() {
+		return buyCurrency;
+	}
+
+	public void setBuyCurrency(String buyCurrency) {
+		this.buyCurrency = buyCurrency;
+	}
+
+	public BigDecimal getBuyExchangeRate() {
+		return buyExchangeRate;
+	}
+
+	public void setBuyExchangeRate(BigDecimal buyExchangeRate) {
+		this.buyExchangeRate = buyExchangeRate;
+	}
+
 	public String getPassengerType() {
 		return passengerType;
 	}

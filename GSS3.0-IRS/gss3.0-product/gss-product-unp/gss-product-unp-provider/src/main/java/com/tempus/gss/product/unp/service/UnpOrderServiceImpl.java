@@ -81,7 +81,7 @@ public class UnpOrderServiceImpl implements IUnpOrderService {
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
+    @Transactional(propagation = Propagation.REQUIRED)
     public Long createOrder(RequestWithActor<OrderCreateVo> requestWithActor) throws Exception {
         log.info("创建通用产品订单开始==========");
         
@@ -91,19 +91,14 @@ public class UnpOrderServiceImpl implements IUnpOrderService {
         }
         Agent agent = requestWithActor.getAgent();
         
-		/*创建通用产品订单*/
+        /*创建通用产品订单*/
         UnpOrder unpOrder = requestWithActor.getEntity().getUnpOrder();
         if (unpOrder == null) {
             log.info("通用产品订单对象为空");
             throw new GSSException("通用产品订单对象为空", "1010", "创建通用产品订单失败");
         }
-        //注意！！！在前台页面中，为了防止修改与数据库表映射的实体类，造成字段错乱，我将前台传过来的通用商品代码（dict表中记录的ID）用  unp对象的orderNo保存
-        //因为这个属性是一定会被覆盖的，所以在覆盖之前将其保存下来  // by张议元//  此做法代码修改处：WEB-INF/views/product/unp/order/add.jsp  添加自定义商品位置
-        Integer subType = unpOrder.getOwner();
-        
         unpOrder.setOwner(agent.getOwner());
-
-		/*判断用户是否输入了交易单号，输入了的话，将之关联，没有的话创建一个交易单*/
+        /*判断用户是否输入了交易单号，输入了的话，将之关联，没有的话创建一个交易单*/
         Long transactionId = requestWithActor.getEntity().getUnpOrder().getTradeNo();
         if (null == transactionId) {
             transactionId = IdWorker.getId();
@@ -129,10 +124,13 @@ public class UnpOrderServiceImpl implements IUnpOrderService {
         
         Long businessSignNo = IdWorker.getId();
         //如果有销售信息，那么生成销售单
-        SaleOrder saleOrder = null;
-        CreatePlanAmountVO saleOrderPlanAmountVO = null;
+        SaleOrder saleOrder = new SaleOrder();
+        CreatePlanAmountVO planAmountVO = new CreatePlanAmountVO();
+        Boolean createSale = false;
+        Boolean createBuy = false;
         if (null != unpOrder.getChannelId()) {
-            unpOrder.setPayStatus(1);//待支付
+            //待支付
+            unpOrder.setPayStatus(1);
             /*创建销售单*/
             saleOrder = new SaleOrder();
             saleOrder.setOrderType(1);
@@ -144,70 +142,83 @@ public class UnpOrderServiceImpl implements IUnpOrderService {
             saleOrder.setSourceChannelNo("unp");
             saleOrder.setTransationOrderNo(unpOrder.getTradeNo());
             saleOrder.setOrderingLoginName(agent.getAccount());
-            saleOrder.setGoodsType(GoodsBigType.GENERAL.getKey());//通用产品
+            //通用产品
+            saleOrder.setGoodsType(GoodsBigType.GENERAL.getKey());
             //通用商品 代码
-            saleOrder.setGoodsSubType(subType);
+//            saleOrder.setGoodsSubType(subType);
             saleOrder.setGoodsName(StringUtils.isBlank(unpOrder.getRemark()) ? "通用产品" : unpOrder.getRemark());
-            saleOrder.setPayStatus(1); // 待支付
+            // 待支付
+            saleOrder.setPayStatus(1);
             saleOrder.setOrderChildStatus(1);
             // 创建销售应收记录
-            saleOrderPlanAmountVO = new CreatePlanAmountVO();
-            saleOrderPlanAmountVO.setRecordNo(unpOrder.getOrderNo());//记录编号   自动生成
-            saleOrderPlanAmountVO.setBusinessType(BusinessType.SALEORDER.getKey());//业务类型 2，销售单，3，采购单，4 ，变更单（可以根据变更表设计情况将废退改分开）
-            saleOrderPlanAmountVO.setGoodsType(GoodsBigType.GENERAL.getKey());//商品大类
-            saleOrderPlanAmountVO.setRecordMovingType(CostType.FARE.getKey());
-            saleOrderPlanAmountVO.setIncomeExpenseType(1);// 收支类型 1 收，2 为支
-            saleOrderPlanAmountVO.setPlanAmount(unpOrder.getSalePrice());
+            planAmountVO.setRecordNo(unpOrder.getOrderNo());
+            //记录编号   自动生成
+            planAmountVO.setBusinessType(BusinessType.SALEORDER.getKey());
+            //业务类型 2，销售单，3，采购单，4 ，变更单（可以根据变更表设计情况将废退改分开）
+            planAmountVO.setGoodsType(GoodsBigType.GENERAL.getKey());
+            //商品大类
+            planAmountVO = new CreatePlanAmountVO();
+            planAmountVO.setIncomeExpenseType(1);
+            // 收支类型 1 收，2 为支
+            planAmountVO.setRecordMovingType(CostType.FARE.getKey());
+            planAmountVO.setPlanAmount(unpOrder.getSalePrice());
+            createSale = true;
+            
         }
         //如果有采购信息，那么生成采购单
         BuyOrder buyOrder = null;
-        CreatePlanAmountVO buyOrderPlanAmountVO = null;
         if (null != unpOrder.getBuyChannelId()) {
             Long buyOrderNo = maxNoService.generateBizNo("UNP_BUY_ORDER_NO", 61);
             unpOrder.setBuyOrderNo(buyOrderNo);
-            unpOrder.setBuyPayStatus(1);//待支付
+            //待支付
+            unpOrder.setBuyPayStatus(1);
             /* 创建采购单 */
             buyOrder = new BuyOrder();
             buyOrder.setSaleOrderNo(unpOrder.getOrderNo());
             buyOrder.setBuyOrderNo(unpOrder.getBuyOrderNo());
             buyOrder.setBusinessSignNo(businessSignNo);
             buyOrder.setBsignType(1);
-            buyOrder.setGoodsType(GoodsBigType.GENERAL.getKey());//通用产品
+            //通用产品
+            buyOrder.setGoodsType(GoodsBigType.GENERAL.getKey());
             //subType填入的是 dict表对应的产品的id
             buyOrder.setGoodsSubType(subType);
             buyOrder.setGoodsName(StringUtils.isBlank(unpOrder.getRemark()) ? "通用产品" : unpOrder.getRemark());
             buyOrder.setBuyChannelNo("unp");
             buyOrder.setSupplierNo(unpOrder.getBuyChannelId());
             buyOrder.setSupplierTypeNo(unpOrder.getBuyChannelType());
-            buyOrder.setBuyChildStatus(1); // 采购单子状态 待处理（1），处理中（2），已完成（3），已取消（4）
+            // 采购单子状态 待处理（1），处理中（2），已完成（3），已取消（4）
+            buyOrder.setBuyChildStatus(1);
             // 创建采购应付记录
-            buyOrderPlanAmountVO = new CreatePlanAmountVO();
-            buyOrderPlanAmountVO.setRecordNo(unpOrder.getBuyOrderNo());//记录编号   自动生成
-            buyOrderPlanAmountVO.setBusinessType(BusinessType.BUYORDER.getKey());//业务类型 2，销售单，3，采购单，4 ，变更单（可以根据变更表设计情况将废退改分开）
-            buyOrderPlanAmountVO.setGoodsType(GoodsBigType.GENERAL.getKey());//商品大类
-            buyOrderPlanAmountVO.setRecordMovingType(CostType.FARE.getKey());
-            buyOrderPlanAmountVO.setIncomeExpenseType(2);// 收支类型 1 收，2 为支
-            buyOrderPlanAmountVO.setPlanAmount(unpOrder.getBuyPrice());
+            planAmountVO = new CreatePlanAmountVO();
+            //记录编号   自动生成
+            planAmountVO.setRecordNo(unpOrder.getBuyOrderNo());
+            //业务类型 2，销售单，3，采购单，4 ，变更单（可以根据变更表设计情况将废退改分开）
+            planAmountVO.setBusinessType(BusinessType.BUYORDER.getKey());
+            //商品大类
+            planAmountVO.setGoodsType(GoodsBigType.GENERAL.getKey());
+            planAmountVO.setRecordMovingType(CostType.FARE.getKey());
+            // 收支类型 1 收，2 为支
+            planAmountVO.setIncomeExpenseType(2);
+            planAmountVO.setPlanAmount(unpOrder.getBuyPrice());
+            createBuy = true;
+            
         }
         //保存通用产品订单信息
-        unpOrderDao.insertSelective(unpOrder);
+        int insertOK = unpOrderDao.insertSelective(unpOrder);
         
-        //生成销售单
-        if (null != saleOrder) {
-            saleOrderService.create(requestWithActor.getAgent(), saleOrder);
+        if (insertOK > 0) {
+            //生成通用订单成功后
+            if (createSale) {
+                //生成销售单
+                saleOrderService.create(requestWithActor.getAgent(), saleOrder);
+            }
+            if (createBuy) {
+                //生成采购单
+                buyOrderService.create(requestWithActor.getAgent(), buyOrder);
+            }
         }
-        //生成采购单
-        if (null != buyOrder) {
-            buyOrderService.create(requestWithActor.getAgent(), buyOrder);
-        }
-        // 创建销售应收记录
-        if (null != saleOrderPlanAmountVO) {
-            planAmountRecordService.create(requestWithActor.getAgent(), saleOrderPlanAmountVO);
-        }
-        // 创建采购应付记录
-        if (null != buyOrderPlanAmountVO) {
-            planAmountRecordService.create(requestWithActor.getAgent(), buyOrderPlanAmountVO);
-        }
+        //创建应收应付
+        planAmountRecordService.create(requestWithActor.getAgent(), planAmountVO);
         log.info("创建通用产品订单结束==========");
         return unpOrder.getOrderNo();
     }
@@ -474,7 +485,7 @@ public class UnpOrderServiceImpl implements IUnpOrderService {
                 certificateCreateVO.setOrderInfoList(orderInfoList);//业务单信息
                 certificateCreateVO.setPayWay(unpOrderVo.getSaleAccountType());//支付方式
                 certificateCreateVO.setPayType(payType);
-                certificateCreateVO.setAccoutNo(unpOrderVo.getSaleAccount()+"");//销售付款账号
+                certificateCreateVO.setAccoutNo(unpOrderVo.getSaleAccount() + "");//销售付款账号
                 certificateCreateVO.setServiceLine("1");//业务线固定传1
                 certificateCreateVO.setChannel("SALE");//
                 certificateCreateVO.setCustomerTypeNo(unpOrder.getChannelType());
@@ -523,7 +534,7 @@ public class UnpOrderServiceImpl implements IUnpOrderService {
                 certificateCreateVO.setPayWay(unpOrderVo.getBuyAccountType());//支付方式
                 certificateCreateVO.setPayType(payType);
                 //certificateCreateVO.setAccoutNo("3".equals(payType) ? unpOrderVo.getCapitalAccount() : unpOrderVo.getBuyAccount());//付款账号
-                certificateCreateVO.setAccoutNo(unpOrderVo.getBuyAccount()+"");//付款账号
+                certificateCreateVO.setAccoutNo(unpOrderVo.getBuyAccount() + "");//付款账号
                 certificateCreateVO.setServiceLine("1");//业务线固定传1
                 certificateCreateVO.setChannel("BUY");//
                 certificateCreateVO.setCustomerTypeNo(unpOrder.getBuyChannelType());
