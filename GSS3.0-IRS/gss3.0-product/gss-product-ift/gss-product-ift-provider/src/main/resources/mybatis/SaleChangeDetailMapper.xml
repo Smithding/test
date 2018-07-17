@@ -189,6 +189,12 @@
     from IFT_SALE_CHANGE_DETAIL
     where SALE_ORDER_DETAIL_NO = #{saleOrderDetailNo,jdbcType=BIGINT}
   </select>
+  <select id="selectBySaleOrderDetailNoAndSaleChangeNo" resultMap="BaseResultMap" >
+    select
+    <include refid="Base_Column_List" />
+    from IFT_SALE_CHANGE_DETAIL
+    where SALE_ORDER_DETAIL_NO = #{saleOrderDetailNo,jdbcType=BIGINT} AND  SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
+  </select>
   <update id="updateByChangeOrderNo" parameterType="com.tempus.gss.product.ift.api.entity.SaleChangeDetail">
     update IFT_SALE_CHANGE_DETAIL
     <set >

@@ -652,8 +652,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 
 	@Override
 	public IsBookOrder isBookOrder(Agent agent,IsBookOrderReq isBookOrderReq) throws GSSException{
-		long start = System.currentTimeMillis();
-		long start1 = 0L;
+		//long start = System.currentTimeMillis();
+		//long end2 = 0L;
 		if (StringUtil.isNullOrEmpty(agent)) {
 			logger.error("agent对象为空");
             throw new GSSException("订单是否可定信息", "0102", "agent对象为空");
@@ -677,50 +677,14 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				da.set(Calendar.SECOND, 0);
 				isBookOrderReq.setEarliestArrivalTime(sim.format(da.getTime()));
 			}
-			/*SimpleDateFormat sim = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-			Calendar da = Calendar.getInstance();
-			if(StringUtils.isEmpty(isBookOrderReq.getEarliestArrivalTime())) {
-				String today = simple.format(da.getTime());
-				if(today.compareTo(isBookOrderReq.getComeTime().substring(0, 10)) < 0) {
-					da.setTime(simple.parse(isBookOrderReq.getComeTime()));
-					da.set(Calendar.HOUR, 6);
-					da.set(Calendar.MINUTE, 0);
-					da.set(Calendar.SECOND, 0);
-					isBookOrderReq.setEarliestArrivalTime(sim.format(da.getTime()));
-				}else {
-					da.add(Calendar.HOUR,1);
-					da.set(Calendar.MINUTE, 0);
-					da.set(Calendar.SECOND, 0);
-					isBookOrderReq.setEarliestArrivalTime(sim.format(da.getTime()));
-				}
-			}
-			if(sim.format(new Date()).compareTo(isBookOrderReq.getComeTime()) > 0) {
-				da.add(Calendar.HOUR,2);
-				da.set(Calendar.MINUTE, 0);
-				da.set(Calendar.SECOND, 0);
-				isBookOrderReq.setComeTime(sim.format(da.getTime()));
-			}
-			if(StringUtils.isEmpty(isBookOrderReq.getLatestArrivalTime())) {
-				if(isBookOrderReq.getComeTime().equals(isBookOrderReq.getEarliestArrivalTime())) {
-					da.setTime(simple.parse(isBookOrderReq.getComeTime()));
-					da.set(Calendar.HOUR,23);
-					da.set(Calendar.MINUTE, 0);
-					da.set(Calendar.SECOND, 0);
-					isBookOrderReq.setLatestArrivalTime(sim.format(da.getTime()));
-				}else {
-					isBookOrderReq.setLatestArrivalTime(isBookOrderReq.getComeTime());
-				}
-			}*/
 			logger.info("酒店订单进行可定检查,入参:" + JSONObject.toJSONString(isBookOrderReq));
-			//System.out.println("EarliestArrivalTime: "+isBookOrderReq.getEarliestArrivalTime());
-			//System.out.println("LatestArrivalTime: "+isBookOrderReq.getLatestArrivalTime());
-			//System.out.println("ComeTime: "+isBookOrderReq.getComeTime());
-			
 			String reqJson = JSONObject.toJSONString(isBookOrderReq);
-			start1 = System.currentTimeMillis();
-			long end = System.currentTimeMillis();  
-		    System.out.println("1，耗时：" + (end - start) + "毫秒"); 
+			
+			//long end = System.currentTimeMillis();  
+		    //System.out.println("1，耗时：" + (end - start) + "毫秒"); 
 			String resultJson= httpClientUtil.doTCJsonPost(CARD_SUPP_URL, reqJson);
+			//end2 = System.currentTimeMillis();  
+		   // System.out.println("2，耗时：" + (end2 - end) + "毫秒"); 
 			logger.info("可定检查请求返回:" + resultJson);
 			if(StringUtil.isNotNullOrEmpty(resultJson)){
 				isBookOrderBase= JsonUtil.toBean(resultJson, new TypeReference<ResultTc<IsBookOrder>>(){});
@@ -732,27 +696,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								BookableMessage jobj=JSON.parseObject(resBase.getBookableMessage(), BookableMessage.class);  
 								resBase.setBookableMessageTarget(jobj);
 								if(resBase.getBookableMessageTarget() != null ){
-									/*String cancelPenaltyStart = resBase.getBookableMessageTarget().getCtripGuaranteeInfo().getCancelPenaltyStart();
-									System.out.println("aaa: "+cancelPenaltyStart);*/
-									/*if(resBase.getBookableMessageTarget().getLimitLatestArrivalTime() != null){
-										//Date inputComeDate = sim.parse(isBookOrderReq.getComeTime());
-										String inputComeDate = isBookOrderReq.getComeTime();
-										String returnDate = resBase.getBookableMessageTarget().getLimitLatestArrivalTime();
-										if(inputComeDate.compareTo(returnDate) > 0 || inputComeDate.equals(returnDate)){
-											resBase.setLastestArriveTimeConfirm(true);
-										}else{
-											resBase.setLastestArriveTimeConfirm(false);
-											isBookOrderCheck =  resBase;
-											return isBookOrderCheck;
-										}
-									}*/
-									/*if(resBase.getBookableMessageTarget().getExcessRooms() < isBookOrderReq.getBookingCount()){
-										isBookOrderCheck.setCanBooking(0);
-										isBookOrderCheck.setSelfMessage("可选房间数量不足, 请重新选择");
-										return isBookOrderCheck;
-									}*/
 									String bookCode = "0";
-									//BigDecimal totalPrice = new BigDecimal(Double.toString(0));
 									if(resBase.getBookableMessageTarget().getCtripGuaranteeInfo() != null){
 										if(StringUtil.isNotNullOrEmpty(resBase.getBookableMessageTarget().getCtripGuaranteeInfo().getCgCode())){
 											String[] strs = resBase.getBookableMessageTarget().getCtripGuaranteeInfo().getCgCode();
@@ -774,44 +718,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 												}
 											}
 											
-											/*if(resBase.getBookableMessageTarget().getCtripGuaranteeInfo().getCgCode()[0].equals(GuaranteeTypeIsBook.THREE.getKey())){
-												ProInfoDetail proInfoDetail = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(isBookOrderReq.getProductUniqueId())),ProInfoDetail.class);
-												int comres = 0;
-												for (Map.Entry<String, ProSaleInfoDetail> entry : proInfoDetail.getProSaleInfoDetails().entrySet()) {
-				 	    	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(isBookOrderReq.getComeDate());
-					 	    	        				if(begincompare == 0){
-					 	    	        					comres = 1;
-					 	    	        					String substring = isBookOrderReq.getComeTime().substring(11,16);
-					 	    	        						
-					 	    	        					int compareTo = (entry.getValue().getGuaranteeHoldTime().replace(":0:",":00:").substring(0,5)).compareTo(substring);
-					 	    	        					if(compareTo > 0){
-					 	    	        						newstr[0] = "5";
-					 	    	        						resBase.getBookableMessageTarget().getCtripGuaranteeInfo().setCgCode(newstr);
-					 	    	        					}
-					 	    	        				}
-					 	    	        				if(comres == 1){
-					 	    	        					break;
-					 	    	        				}
-				 	            					}
-											}*/
-											/*int daysBetween = 0;
-											try {
-												daysBetween = DateUtil.daysBetween(isBookOrderReq.getComeDate(), isBookOrderReq.getLeaveDate());
-											} catch (ParseException e) {
-												e.printStackTrace();
-											}
-											if(daysBetween > 1){
-												if(resBase.getBookableMessageTarget().getCtripGuaranteeInfo().getCgCode()[0].equals(GuaranteeTypeIsBook.TWO.getKey())){
-													BigDecimal[] big = resBase.getBookableMessageTarget().getCtripGuaranteeInfo().getAmountPercent();
-													if(big != null && big.length >= 2){
-														for(BigDecimal b : big){
-															totalPrice = totalPrice.add(b);
-														}
-														big[0] = totalPrice;
-														resBase.getBookableMessageTarget().getCtripGuaranteeInfo().setAmountPercent(big);
-													}
-												}
-											}*/
 										}
 										resBase.setBookCode(bookCode);
 									}
@@ -823,15 +729,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				}else{
 		            throw new GSSException("订单是否可定信息", "0101", "解析数据异常");
 				}
-				
-				/*else{
-					Integer aa = 0;
-					isBookOrderCheck.setCanBooking(aa);
-					isBookOrderCheck.setSelfMessage("可选房间数量不足, 请重新选择");
-					return isBookOrderCheck;
-				}*/
-				//sortPayList(resBase);
-				
 			}else{
 	            throw new GSSException("订单是否可定信息", "0101", "查询请求返回空值");
 			}
@@ -840,8 +737,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			logger.error("订单可定检查请求异常"+e);
 			 throw new GSSException("订单是否可定信息", "0101", e.getMessage());
 		}
-		long end1 = System.currentTimeMillis();  
-	    System.out.println("2，耗时：" + (end1 - start1) + "毫秒"); 
+		//long end1 = System.currentTimeMillis();  
+	   // System.out.println("3，耗时：" + (end1 - end2) + "毫秒"); 
 		return resBase;
 		
 	}
