@@ -752,8 +752,9 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		orderReq.setRatePlanCategory(ratePlanCategory);
 		//可以不传
 		orderReq.setChannelType(2);
-		
+		logger.info("创建8000YI酒店订单入参"+JsonUtil.toJson(orderReq));
 		String orderNo = bqyHotelInterService.createOrder(orderReq);
+		logger.info("创建8000YI酒店订单返回"+ orderNo);
 		// 判断条件返回0订单创建失败
 		if (StringUtils.isNotBlank(orderNo) && !"0".equals(orderNo)) {
 			//订单创建成功更新订单表中数据
