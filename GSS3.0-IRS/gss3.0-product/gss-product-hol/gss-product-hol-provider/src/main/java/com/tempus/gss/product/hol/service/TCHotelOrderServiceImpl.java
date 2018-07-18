@@ -1395,7 +1395,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 										hotelOrder.setTotalPrice(orderInfoModel.getOrigin());
 										BigDecimal multiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
 										hotelOrder.setTotalRefund(multiply);
-										hotelOrder.setNightCount(factNight);
+										//hotelOrder.setNightCount(factNight);
 										String eachNightPrice = null;
 										String breakfastNum = null;
 										ProInfoDetail proInfoDetail=null;
@@ -1800,7 +1800,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								newHotelOrder.setTotalPrice(orderInfoModel.getOrigin());
 								BigDecimal multiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
 								newHotelOrder.setTotalRefund(multiply);
-								newHotelOrder.setNightCount(factNight);
+								//newHotelOrder.setNightCount(factNight);
+								newHotelOrder.setFactNightCount(factNight);
 								String eachNightPrice = null;
 								String breakfastNum = null;
 								//ProInfoDetail proInfoDetail=tCHotelSupplierService.queryListByProductUniqueId(newHotelOrder.getProductUniqueId(), ProInfoDetail.class);
@@ -2254,10 +2255,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								hotelOrder.setFactProCount(priceFraction);
 							}
 							//当关联订单号为空说明这个订单不为补单订单,更新预定时的房间数和晚数为最新没有影响
-							if(StringUtils.isEmpty(hotelOrder.getRelateOrderNo())){
+							/*if(StringUtils.isEmpty(hotelOrder.getRelateOrderNo())){
 								hotelOrder.setBookCount(priceFraction);
 								hotelOrder.setNightCount(factNight);
-							}
+							}*/
 							if(StringUtil.isNullOrEmpty(hotelOrder.getEachNightPrice()) || StringUtil.isNullOrEmpty(hotelOrder.getBreakfastCount())){
 								String eachNightPrice = null;
 								String breakfastNum = null;
