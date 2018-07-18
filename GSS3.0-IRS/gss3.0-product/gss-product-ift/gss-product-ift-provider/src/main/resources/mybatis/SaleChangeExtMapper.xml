@@ -820,8 +820,15 @@
             <!--<if test="status == 33">
                 AND ((m.CHILD_STATUS =1 and i.LOCKER !=0 ) or (m.CHILD_STATUS=2 and i.LOCKER=0))
             </if>-->
-            <if test="buyStatus!= null">
+           <!-- <if test="buyStatus!= null">
                 AND m.CHILD_STATUS =#{buyStatus,jdbcType=BIGINT}
+            </if>-->
+            <if test="buyStatus!= null">
+                AND m.CHILD_STATUS in
+                <foreach collection="buyStatus" item="buyStatus"
+                         index="index" open="(" close=")" separator=",">
+                    #{buyStatus[${index}]}
+                </foreach>
             </if>
 
             <if test="customerCount==false and customerNo != null">
@@ -842,6 +849,10 @@
                          index="index" open="(" close=")" separator=",">
                     #{payStatus[${index}]}
                 </foreach>
+            </if>
+
+            <if test="isNotRefund !=null and isNotRefund!=''">
+                AND o.CHILD_STATUS !=10
             </if>
             <if test="childStatus!=null">
                 AND o.CHILD_STATUS in

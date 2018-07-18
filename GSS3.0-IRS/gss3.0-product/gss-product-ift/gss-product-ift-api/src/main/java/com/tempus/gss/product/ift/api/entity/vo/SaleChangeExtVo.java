@@ -143,7 +143,7 @@ public class SaleChangeExtVo implements Serializable{
 	 * 状态 1:待处理(订单子状态为：1,locker:0)
 	 * 2已处理
 	 */
-	private String buyStatus;
+	private String[] buyStatus;
 
 	/**
 	 * owner
@@ -244,6 +244,8 @@ public class SaleChangeExtVo implements Serializable{
 	 * 审核时间（前台展示）
 	 */
 	private String auditTimeArray;
+
+	private String isNotRefund;
 	
 	/**
 	 * 改签类型 改签类型 1升舱 2改期 3换开
@@ -860,11 +862,11 @@ public class SaleChangeExtVo implements Serializable{
 		this.toDoType = toDoType;
 	}
 
-	public String getBuyStatus() {
+	public String[] getBuyStatus() {
 		return buyStatus;
 	}
 
-	public void setBuyStatus(String buyStatus) {
+	public void setBuyStatus(String[] buyStatus) {
 		this.buyStatus = buyStatus;
 	}
 
@@ -898,5 +900,13 @@ public class SaleChangeExtVo implements Serializable{
 
 	public void setAirLineRefundStatus(Integer[] airLineRefundStatus) {
 		this.airLineRefundStatus = airLineRefundStatus;
+	}
+
+	public String getIsNotRefund() {
+		return isNotRefund;
+	}
+
+	public void setIsNotRefund(String isNotRefund) {
+		this.isNotRefund = isNotRefund;
 	}
 }
