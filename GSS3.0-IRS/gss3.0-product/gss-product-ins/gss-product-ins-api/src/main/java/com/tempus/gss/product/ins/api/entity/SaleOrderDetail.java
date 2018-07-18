@@ -191,6 +191,9 @@ public class SaleOrderDetail implements Serializable,Cloneable {
 	 * pnr(保险报表使用)
 	 */
 	private String pnr;
+	/**
+	 * 投保时间
+	 */
 	private Date insureTime;
     public Date getInsureTime() {
 		return insureTime;
