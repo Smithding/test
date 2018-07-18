@@ -997,7 +997,7 @@ public class OrderServiceImpl implements IOrderService {
      */
     @Override
     @Transactional
-    public boolean issuing(RequestWithActor<PassengerListVo> requestWithActor) {
+    public boolean issuing(RequestWithActor<PassengerListVo> requestWithActor) throws GSSException{
         
         Agent agent = requestWithActor.getAgent();
         log.info("出单开始");
@@ -1108,7 +1108,11 @@ public class OrderServiceImpl implements IOrderService {
             log.info("出单操作成功");
             //销售员订单数量减一
             subSaleOrderNum(agent, preLocker);
-        } catch (Exception e) {
+        }  catch (GSSException e) {
+            log.error("创建采购付款单异常！GSSException", e);
+            throw new GSSException(e.getModule(), e.getCode(), e.getMessage());
+        }  catch (Exception e) {
+            //这里的异常一般不是业务异常
             log.error("国际机票出票异常", e);
             throw new GSSException("国际机票出票异常", "0102", "出单操作失败!" + e);
         }
@@ -1168,7 +1172,9 @@ public class OrderServiceImpl implements IOrderService {
         
         try {
             this.certificateService.createBuyCertificate(agent, certificateCreateVO);
-        } catch (Exception e) {
+        }   catch (GSSException e) {
+            throw new GSSException(e.getModule(), e.getCode(), e.getMessage());
+        }  catch (Exception e) {
             throw new GSSException("创建采购付款单失败，e=" + e, "10001", "创建采购付款单失败");
         }
         
