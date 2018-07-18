@@ -1790,6 +1790,7 @@ public class ChangeServiceImpl implements IChangeService {
 
     @Override
     public int updateByPrimarykey(SaleChangeExt salechangeExt) {
+        log.info("更新销售变更单扩展表信息"+salechangeExt.toString());
         return saleChangeExtDao.updateByPrimaryKey(salechangeExt);
     }
 
