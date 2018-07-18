@@ -1,13 +1,12 @@
 package com.tempus.gss.product.ift.api.entity;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.tempus.gss.serializer.LongSerializer;
+import org.apache.ibatis.type.Alias;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
-
-import org.apache.ibatis.type.Alias;
-
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.tempus.gss.serializer.LongSerializer;
 
 @Alias("iftPassenger")
 public class Passenger implements Serializable {
@@ -21,7 +20,10 @@ public class Passenger implements Serializable {
 	 * 数据归属单位
 	 */
 	private Integer owner;
-
+	/**
+	 * 是否设置为常旅客（0 否 1 是）
+	 */
+	private String historyPassenger;
 	/**
 	 * ID
 	 */
@@ -629,4 +631,11 @@ public class Passenger implements Serializable {
 		this.profit = profit;
 	}
 
+	public String getHistoryPassenger() {
+		return historyPassenger;
+	}
+
+	public void setHistoryPassenger(String historyPassenger) {
+		this.historyPassenger = historyPassenger;
+	}
 }
