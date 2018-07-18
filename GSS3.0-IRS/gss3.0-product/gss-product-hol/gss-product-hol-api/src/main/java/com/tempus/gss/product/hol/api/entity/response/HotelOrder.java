@@ -256,9 +256,9 @@ public class HotelOrder implements Serializable {
      */
     private BigDecimal dbOrderMoney;
     /**
-     * 担保取消规则
+     * 担保取消规则  ( bqy取消政策类型 )
      */
-    private String dbCancelRule;
+    private String dbCancelRule;	
     /**
      * 最迟的取消时间，在这个时间前取消不需要扣除罚金
      */
