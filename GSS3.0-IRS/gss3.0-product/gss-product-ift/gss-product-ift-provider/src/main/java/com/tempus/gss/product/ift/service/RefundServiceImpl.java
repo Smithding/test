@@ -1148,6 +1148,12 @@ public class RefundServiceImpl implements IRefundService {
 					saleOrderDetail.setRefuseReason(reason);
 					detailList.add(saleOrderDetail);
 				}
+				//修改废退乘客的refundPrice的valid为0
+				List<PassengerRefundPrice> passengerRefundPrices = passengerRefundPriceDao.selectPassengerRefundPriceBySaleOrderNo(saleChangeNo.getEntity());
+				for (PassengerRefundPrice passengerRefundPrice : passengerRefundPrices) {
+					passengerRefundPrice.setValid((byte) 0);
+					passengerRefundPriceDao.updateByPrimaryKeySelective(passengerRefundPrice);
+				}
 				detailService.batchUpdate(detailList);
 				//detailService.updateSaleOrderDetailStatusByNo(saleOrderNo,4);
 				ticketSenderService.updateByLockerId(agent,locker,"SALE_REFUSE_NUM");
