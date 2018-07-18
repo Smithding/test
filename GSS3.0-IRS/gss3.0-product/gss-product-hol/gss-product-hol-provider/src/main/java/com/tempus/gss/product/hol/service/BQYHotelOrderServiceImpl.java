@@ -58,6 +58,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.request.CreateOrderReq;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.OrderCancelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.BookOrderResponse;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.response.CreateOrderRespone;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderCancelResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BaseRoomInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.RoomBedTypeInfo;
@@ -753,16 +754,18 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		//可以不传
 		orderReq.setChannelType(2);
 		logger.info("创建8000YI酒店订单入参"+JsonUtil.toJson(orderReq));
-		String orderNo = bqyHotelInterService.createOrder(orderReq);
-		logger.info("创建8000YI酒店订单返回"+ orderNo);
+		CreateOrderRespone createOrderRespone = bqyHotelInterService.createOrder(orderReq);
+		logger.info("创建8000YI酒店订单返回结果:"+ JsonUtil.toJson(createOrderRespone));
+		Long orderNo = createOrderRespone.getOrderNumber();
 		// 判断条件返回0订单创建失败
-		if (StringUtils.isNotBlank(orderNo) && !"0".equals(orderNo)) {
+		if (null != createOrderRespone && orderNo > 0) {
 			//订单创建成功更新订单表中数据
-			hotelOrder.setHotelOrderNo(orderNo);
+			hotelOrder.setHotelOrderNo(orderNo.toString());
 			//0=>下单失败，1=>下单成功，2=>下单成功，支付失败，3=>下单成功，支付成功
 			hotelOrder.setResultCode("1");
 			hotelOrder.setTcOrderStatus(TcOrderStatus.WAIT_PAY.getKey());
 			hotelOrder.setOrderStatus(OwnerOrderStatus.WAIT_PAY.getKey());
+			hotelOrder.setFactTotalPrice(createOrderRespone.getPayPrice());
 			hotelOrderMapper.updateById(hotelOrder);
 			return hotelOrder;
 		}else {
