@@ -192,9 +192,6 @@ public class SaleChangeExt implements Serializable {
 	//改签出票员   DRAWER_LOGIN_NAME
 	private String drawerLoginName;
 
-	//是否已退款
-	private Integer isRefund;
-
 	//提交航司后采购审核状态
 	private Integer airLineRefundStatus;
 
@@ -239,7 +236,6 @@ public class SaleChangeExt implements Serializable {
 				", handlers='" + handlers + '\'' +
 				", office='" + office + '\'' +
 				", drawerLoginName='" + drawerLoginName + '\'' +
-				", isRefund=" + isRefund +
 				", airLineRefundStatus=" + airLineRefundStatus +
 				'}';
 	}
@@ -567,7 +563,6 @@ public class SaleChangeExt implements Serializable {
 		this.saleCurrency = saleCurrency;
 	}
 
-
 	public Integer getAirLineRefundStatus() {
 		return airLineRefundStatus;
 	}
@@ -576,11 +571,4 @@ public class SaleChangeExt implements Serializable {
 		this.airLineRefundStatus = airLineRefundStatus;
 	}
 
-	public Integer getIsRefund() {
-		return isRefund;
-	}
-
-	public void setIsRefund(Integer isRefund) {
-		this.isRefund = isRefund;
-	}
 }

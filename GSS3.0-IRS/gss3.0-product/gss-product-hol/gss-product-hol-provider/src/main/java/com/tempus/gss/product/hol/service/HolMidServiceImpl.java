@@ -347,7 +347,9 @@ public class HolMidServiceImpl implements IHolMidService {
 			for(int i = 0; i < proDetailList.size(); i++) {
 				List<ResProBaseInfo> resProBaseInfoList = proDetailList.get(i).getResProBaseInfoList();
 				resProBaseInfoList.sort(Comparator.comparingInt(ResProBaseInfo :: getFirPrice));
+				proDetailList.get(i).setMinPrice(resProBaseInfoList.get(0).getFirPrice());
 			}
+			proDetailList.sort(Comparator.comparingInt(ProDetails :: getMinPrice));
 		}
 		return bqyHotel;
 	}
