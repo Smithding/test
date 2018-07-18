@@ -906,7 +906,7 @@ public class ChangeServiceImpl implements IChangeService {
             BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
             if(buyChangeExt != null){
                 log.info("修改审核备注" + buyChangeExt.getBuyChangeNo());
-                buyChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
+              //  buyChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
                 buyChangeExtDao.updateByPrimaryKey(buyChangeExt);
             }
             if (legList != null && legList.size() > 0) {
