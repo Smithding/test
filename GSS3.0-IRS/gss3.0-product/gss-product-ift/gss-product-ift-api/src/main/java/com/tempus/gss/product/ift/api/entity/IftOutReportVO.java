@@ -1,6 +1,10 @@
 package com.tempus.gss.product.ift.api.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.lang.reflect.Array.newInstance;
 
 /**
  * @author ZhangBro
@@ -12,7 +16,7 @@ public class IftOutReportVO implements Serializable {
     /**
      * 精确查找  在sql条件中不使用like关键字
      */
-    private Boolean exactQuery;
+    private String exactQuery;
     /**
      * 供应商
      */
@@ -110,18 +114,18 @@ public class IftOutReportVO implements Serializable {
     }
     
     public void setOrderStatusArray(Integer[] orderStatusArray) {
-        this.orderStatusArray = orderStatusArray;
+        this.orderStatusArray = filterNull(orderStatusArray, Integer.class);
     }
     
     public void setType(Integer type) {
         this.type = type;
     }
     
-    public Boolean getExactQuery() {
+    public String getExactQuery() {
         return exactQuery;
     }
     
-    public void setExactQuery(Boolean exactQuery) {
+    public void setExactQuery(String exactQuery) {
         this.exactQuery = exactQuery;
     }
     
@@ -238,7 +242,8 @@ public class IftOutReportVO implements Serializable {
     }
     
     public void setCabins(String[] cabins) {
-        this.cabins = cabins;
+        
+        this.cabins = filterNull(cabins, String.class);
     }
     
     public String[] getSaleDept() {
@@ -246,7 +251,7 @@ public class IftOutReportVO implements Serializable {
     }
     
     public void setSaleDept(String[] saleDept) {
-        this.saleDept = saleDept;
+        this.saleDept = filterNull(saleDept, String.class);
     }
     
     public String[] getSource() {
@@ -254,7 +259,41 @@ public class IftOutReportVO implements Serializable {
     }
     
     public void setSource(String[] source) {
-        this.source = source;
+        this.source = filterNull(source, String.class);
+    }
+    
+    private <T> T[] filterNull(T[] source, Class<T> type) {
+        if (null == source || source.length <= 0) {
+            return null;
+        } else {
+            List<T> list = new ArrayList<T>();
+            T[] result;
+            
+            boolean notNull;
+            for (T i : source) {
+                notNull = false;
+                if (i != null) {
+                    if (i instanceof String) {
+                        if (!"".equals(i)) {
+                            notNull = true;
+                        }
+                    }
+                    if (notNull) {
+                        list.add(i);
+                    }
+                    
+                }
+            }
+            if (list.size() > 0) {
+                result = (T[]) newInstance(type, list.size());
+                for (int i = 0; i < list.size(); i++) {
+                    result[i] = list.get(i);
+                }
+                return result;
+            } else {
+                return null;
+            }
+        }
     }
 }
 
