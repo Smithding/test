@@ -61,13 +61,13 @@
             AND ISOE.ISSUE_TIME<![CDATA[>=]]>DATE_FORMAT(#{ticketDateStart}, '%Y-%m-%d')
         </if>
         <if test="ticketDateEnd !=null  and ticketDateEnd != ''">
-            AND ISOE.ISSUE_TIME<![CDATA[<=]]>DATE_FORMAT(#{ticketDateEnd}, '%Y-%m-%d')
+            AND ISOE.ISSUE_TIME<![CDATA[<=]]>DATE_FORMAT(STR_TO_DATE(#{ticketDateEnd}, '%Y-%m-%d')+1, '%Y-%m-%d')
         </if>
         <if test="depDateStart !=null and depDateStart != '' ">
             AND IL.DEP_TIME <![CDATA[>=]]>DATE_FORMAT(#{depDateStart}, '%Y-%m-%d')
         </if>
         <if test="depDateEnd !=null  and depDateEnd != ''">
-            AND IL.DEP_TIME <![CDATA[<=]]>DATE_FORMAT(#{depDateEnd}, '%Y-%m-%d')
+            AND IL.DEP_TIME <![CDATA[<=]]>DATE_FORMAT(STR_TO_DATE(#{depDateEnd}, '%Y-%m-%d')+1, '%Y-%m-%d')
         </if>
         <if test="saleDept !=null and saleDept!=''">
             AND SD.NAME IN
