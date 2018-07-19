@@ -20,14 +20,14 @@ public class IftOutReportVO implements Serializable {
     /**
      * 类型
      */
-    private String type;
+    private Integer type;
     /**
      * 出票日期
      */
     private String ticketDateStart;
     private String ticketDateEnd;
     /**
-     * 工单号
+     * 单号
      */
     private String saleOrderNo;
     /**
@@ -45,7 +45,7 @@ public class IftOutReportVO implements Serializable {
     /**
      * 舱位
      */
-    private String cabin;
+    private String[] cabins;
     /**
      * 起飞日期
      */
@@ -58,7 +58,7 @@ public class IftOutReportVO implements Serializable {
     /**
      * 出票部门
      */
-    private String saleDept;
+    private String[] saleDept;
     /**
      * 出票员
      */
@@ -72,28 +72,57 @@ public class IftOutReportVO implements Serializable {
      */
     private String passengerName;
     /**
+     * 姓
+     */
+    private String surname;
+    /**
+     * 名
+     */
+    private String name;
+    
+    /**
      * 订单来源
      */
-    private String source;
+    private String[] source;
     /**
-     * 改签类型
+     * 多状态查询条件
      */
-    private Integer changeType;
+    private Integer[] orderStatusArray;
     
-    public Integer getChangeType() {
-        return changeType;
+    public String getSurname() {
+        return surname;
     }
     
-    public boolean isExactQuery() {
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
+    
+    public Integer[] getOrderStatusArray() {
+        return orderStatusArray;
+    }
+    
+    public void setOrderStatusArray(Integer[] orderStatusArray) {
+        this.orderStatusArray = orderStatusArray;
+    }
+    
+    public void setType(Integer type) {
+        this.type = type;
+    }
+    
+    public Boolean getExactQuery() {
         return exactQuery;
     }
     
-    public void setExactQuery(boolean exactQuery) {
+    public void setExactQuery(Boolean exactQuery) {
         this.exactQuery = exactQuery;
-    }
-    
-    public void setChangeType(Integer changeType) {
-        this.changeType = changeType;
     }
     
     public String getTicketPerson() {
@@ -120,14 +149,6 @@ public class IftOutReportVO implements Serializable {
         this.supplierName = supplierName;
     }
     
-    public String getType() {
-        return type;
-    }
-    
-    public void setType(String type) {
-        this.type = type;
-    }
-    
     public String getSaleOrderNo() {
         return saleOrderNo;
     }
@@ -150,14 +171,6 @@ public class IftOutReportVO implements Serializable {
     
     public void setFlightNo(String flightNo) {
         this.flightNo = flightNo;
-    }
-    
-    public String getCabin() {
-        return cabin;
-    }
-    
-    public void setCabin(String cabin) {
-        this.cabin = cabin;
     }
     
     public String getTicketDateStart() {
@@ -200,14 +213,6 @@ public class IftOutReportVO implements Serializable {
         this.salePerson = salePerson;
     }
     
-    public String getSaleDept() {
-        return saleDept;
-    }
-    
-    public void setSaleDept(String saleDept) {
-        this.saleDept = saleDept;
-    }
-    
     public String getCompany() {
         return company;
     }
@@ -224,11 +229,32 @@ public class IftOutReportVO implements Serializable {
         this.passengerName = passengerName;
     }
     
-    public String getSource() {
+    public Integer getType() {
+        return type;
+    }
+    
+    public String[] getCabins() {
+        return cabins;
+    }
+    
+    public void setCabins(String[] cabins) {
+        this.cabins = cabins;
+    }
+    
+    public String[] getSaleDept() {
+        return saleDept;
+    }
+    
+    public void setSaleDept(String[] saleDept) {
+        this.saleDept = saleDept;
+    }
+    
+    public String[] getSource() {
         return source;
     }
     
-    public void setSource(String source) {
+    public void setSource(String[] source) {
         this.source = source;
     }
 }
+
