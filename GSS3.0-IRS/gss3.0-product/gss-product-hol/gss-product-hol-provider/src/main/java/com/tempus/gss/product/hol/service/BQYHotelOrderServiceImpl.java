@@ -148,8 +148,8 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
         		String orderStatus = hotelOrder.getTcOrderStatus();
             	if (TcOrderStatus.WAIT_PAY.getKey().equals(orderStatus)) {	//待支付
             		cancelParam.setOrderNumber(Long.valueOf(orderCancelBeforePayReq.getOrderId()));
-            		OrderCancelResult orderCancelResult = bqyHotelInterService.cancelOrder(cancelParam);
-            		if (orderCancelResult.getResult()) {
+            		Boolean orderCancelResult = bqyHotelInterService.cancelOrder(cancelParam);
+            		if (orderCancelResult) {
             			des = "订单号"+hotelOrder.getHotelOrderNo() +",订单状态由"+ OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus()).getValue()+"变成:"+ OwnerOrderStatus.CANCEL_OK.getValue();
             			//更新销售单和采购单状态
             		    updateSaleAndBuyOrderStatus(agent, hotelOrder.getSaleOrderNo(), hotelOrder.getBuyOrderNo(), OrderStatusUtils.getStatus(OwnerOrderStatus.CANCEL_OK));
@@ -159,11 +159,11 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
             		    hotelOrder.setCancelTime(new Date());
             		    hotelOrderMapper.updateById(hotelOrder); 
             		    cancelOrderRes.setResult(true);
-            		    cancelOrderRes.setMsg(orderCancelResult.getMessage());
+            		    cancelOrderRes.setMsg("订单取消成功!");
             		    cancelOrderRes.setLasestCancelTime(hotelOrder.getCancelPenalty());
             		}else {
             			cancelOrderRes.setResult(false);
-            		    cancelOrderRes.setMsg(orderCancelResult.getMessage());
+            		    cancelOrderRes.setMsg("订单取消失败!");
             		    cancelOrderRes.setLasestCancelTime(hotelOrder.getCancelPenalty());
             		}
             		
@@ -211,8 +211,8 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 	private String cancelOrder(Agent agent, CancelOrderBeforePayReq orderCancelBeforePayReq,
 			CancelOrderRes cancelOrderRes, OrderCancelParam cancelParam, HotelOrder hotelOrder, String des) {
 		cancelParam.setOrderNumber(Long.valueOf(orderCancelBeforePayReq.getOrderId()));
-		OrderCancelResult orderCancelResult = bqyHotelInterService.cancelOrder(cancelParam);
-		if (orderCancelResult.getResult()) {
+		Boolean orderCancelResult = bqyHotelInterService.cancelOrder(cancelParam);
+		if (orderCancelResult) {
 			BigDecimal saleRefundCert = saleRefund(agent, hotelOrder);
 			if (null != saleRefundCert && saleRefundCert.compareTo(BigDecimal.ZERO) == 1) {	//退款成功
 				des = "订单号"+hotelOrder.getHotelOrderNo() +",订单状态由"+ OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus()).getValue()+"变成:"+ OwnerOrderStatus.CANCEL_OK.getValue();
@@ -225,7 +225,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			    hotelOrder.setFactTotalPrice(hotelOrder.getFactTotalPrice().subtract(saleRefundCert));
 			    hotelOrderMapper.updateById(hotelOrder); 
 			    cancelOrderRes.setResult(true);
-			    cancelOrderRes.setMsg(orderCancelResult.getMessage());
+			    cancelOrderRes.setMsg("订单取消成功!");
 			    cancelOrderRes.setLasestCancelTime(hotelOrder.getCancelPenalty());
 			}else {
 				throw new GSSException("取消酒店订单", "0107", "取消酒店订单,退款失败!");
@@ -233,7 +233,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			
 		}else {
 			cancelOrderRes.setResult(false);
-		    cancelOrderRes.setMsg(orderCancelResult.getMessage());
+		    cancelOrderRes.setMsg("订单取消失败!");
 		    cancelOrderRes.setLasestCancelTime(hotelOrder.getCancelPenalty());
 		}
 		return des;
