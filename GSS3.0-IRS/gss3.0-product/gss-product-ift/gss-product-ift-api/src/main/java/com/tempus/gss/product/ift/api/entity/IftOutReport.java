@@ -2,7 +2,6 @@ package com.tempus.gss.product.ift.api.entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Date;
 
 public class IftOutReport implements Serializable {
     
@@ -51,6 +50,10 @@ public class IftOutReport implements Serializable {
      * 汇率
      */
     private BigDecimal rate;
+    /**
+     * 币种
+     */
+    private String currency;
     /**
      * 实价
      */
@@ -115,20 +118,13 @@ public class IftOutReport implements Serializable {
      * 改签类型
      */
     private String changeType;
-    /**
-     * 是否日报表
-     */
-    private Boolean dailyReport;
     
-    public Boolean getDailyReport() {
-        if (this.dailyReport == null) {
-            return true;
-        }
-        return dailyReport;
+    public String getCurrency() {
+        return currency;
     }
     
-    public void setDailyReport(Boolean dailyReport) {
-        this.dailyReport = dailyReport;
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
     
     public String getChangeType() {
