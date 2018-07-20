@@ -1,6 +1,169 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tempus.gss.product.ift.dao.IftOutReportDao">
+    <select id="queryIftOutReport" parameterType="com.tempus.gss.product.ift.api.entity.IftOutReportVO" resultMap="IftReportResultMap">
+        SELECT
+        CS.NAME AS SUPPLIER_NAME,
+        ISOE.SALE_ORDER_NO AS SALE_ORDER_NO,
+        COUNT(DISTINCT ISOD.PASSENGER_NO) AS TICKET_NUM,
+        ISOE.ISSUE_TIME AS TICKET_DATE,
+        GROUP_CONCAT(DISTINCT ISOD.TICKET_NO) AS TICKET_NO,
+        CONCAT((SELECT IL2.DEP_AIRPORT
+        FROM IFT_LEG IL2
+        WHERE IL2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
+        GROUP BY IL2.SALE_ORDER_NO, IL2.LEG_NO
+        ORDER BY IL2.DEP_TIME
+        LIMIT 1), '-', (SELECT IL2.ARR_AIRPORT
+        FROM IFT_LEG IL2
+        WHERE IL2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
+        GROUP BY IL2.SALE_ORDER_NO, IL2.LEG_NO
+        ORDER BY IL2.DEP_TIME DESC
+        LIMIT 1)) AS ROUTING,
+        GROUP_CONCAT(DISTINCT IL.FLIGHT_NO) AS FLIGHT_NO,
+        GROUP_CONCAT(DISTINCT IL.CABIN) AS CABIN,
+        (SELECT IL2.DEP_TIME
+        FROM IFT_LEG IL2
+        WHERE IL2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
+        GROUP BY IL2.SALE_ORDER_NO, IL2.LEG_NO
+        ORDER BY IL2.DEP_TIME
+        LIMIT 1) AS DEP_DATE,
+        ISOE.EXCHANGE_RATE AS RATE,
+        ISOE.CURRENCY AS CURRENCY,
+        IP.SALE_FARE AS TRUE_PRICE,
+        IP.SALE_PRICE AS SETTLE_PRICE,
+        IP.SALE_TAX AS TAX,
+        IP.SALE_PRICE AS TOTAL_PRICE,
+        IP.SALE_PRICE - IP.BUY_PRICE - IP.BUY_TAX AS GROSS,
+        ISOE.CREATOR AS SALE_PERSON,
+        SD.NAME AS SALE_DEPT,
+        SOI.SHORT_NAME AS COMPANY,
+        CONCAT(IP.SURNAME, '/', IP.NAME) AS PASSENGER_NAME,
+        CASE WHEN IP.GENDER = 1
+        THEN '男'
+        ELSE '女' END AS GENDER,
+        CC.BUSINESS_LINE AS SOURCE,
+        ISOE.SALE_REMARK AS REMARK,
+        ISOE.MODIFIER AS TICKET_PERSON
+        FROM IFT_SALE_ORDER_EXT ISOE
+        LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
+        LEFT JOIN OS_SALEORDER OS ON OS.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
+        LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO = OS.CUSTOMER_NO
+        LEFT JOIN OS_BUYORDER OB ON OB.SALE_ORDER_NO = OS.SALE_ORDER_NO
+        LEFT JOIN IFT_BUY_ORDER_EXT IBOE ON IBOE.BUY_ORDER_NO = OB.BUY_ORDER_NO
+        LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO = OB.SUPPLIER_NO
+        LEFT JOIN IFT_PASSENGER IP ON IP.PASSENGER_NO = ISOD.PASSENGER_NO
+        LEFT JOIN IFT_LEG IL ON IL.LEG_NO = ISOD.LEG_NO
+        LEFT JOIN SM_USER SU ON SU.LOGIN_NAME = ISOE.DRAWER_LOGIN_NAME
+        LEFT JOIN SM_DEPT SD ON SD.ID = SU.DEPT_ID
+        LEFT JOIN SM_OWNER_INFO SOI ON SOI.OWNER = ISOE.OWNER
+        WHERE 1=1
+        <if test="ticketDateStart !=null and ticketDateStart != '' ">
+            AND ISOE.ISSUE_TIME<![CDATA[>=]]>DATE_FORMAT(#{ticketDateStart}, '%Y-%m-%d')
+        </if>
+        <if test="ticketDateEnd !=null  and ticketDateEnd != ''">
+            AND ISOE.ISSUE_TIME<![CDATA[<=]]>DATE_FORMAT(STR_TO_DATE(#{ticketDateEnd}, '%Y-%m-%d')+1, '%Y-%m-%d')
+        </if>
+        <if test="depDateStart !=null and depDateStart != '' ">
+            AND IL.DEP_TIME <![CDATA[>=]]>DATE_FORMAT(#{depDateStart}, '%Y-%m-%d')
+        </if>
+        <if test="depDateEnd !=null  and depDateEnd != ''">
+            AND IL.DEP_TIME <![CDATA[<=]]>DATE_FORMAT(STR_TO_DATE(#{depDateEnd}, '%Y-%m-%d')+1, '%Y-%m-%d')
+        </if>
+        <if test="saleDept !=null and saleDept!=''">
+            AND SD.NAME IN
+            <foreach collection="saleDept" item="saleDept"
+                     index="index" open="(" close=")" separator=",">
+                #{saleDept[${index}]}
+            </foreach>
+        </if>
+        <if test="source!=null and source!=''">
+            AND CC.BUSINESS_LINE IN
+            <foreach collection="source" item="source"
+                     index="index" open="(" close=")" separator=",">
+                #{source[${index}]}
+            </foreach>
+        </if>
+        <if test="exactQuery ==null or exactQuery=='true'">
+            <if test="surname!=null and surname!=''">
+                AND IP.SURNAME= #{surname}
+                AND IP.NAME== #{name}
+            </if>
+        </if>
+        <if test="exactQuery !=null and exactQuery=='false'">
+            <if test="name!=null and name!=''">
+                AND  IP.NAME LIKE CONCAT('%', CONCAT(#{name}, '%'))
+                AND LIKE CONCAT('%', CONCAT(#{surname}, '%'))
+            </if>
+        </if>
+        <if test="company!=null and company!=''">
+            <if test="exactQuery ==null or exactQuery=='true'">
+                AND SOI.SHORT_NAME = #{company}
+            </if>
+            <if test="exactQuery !=null and exactQuery=='false'">
+                AND SOI.SHORT_NAME LIKE CONCAT('%', CONCAT(#{company}, '%'))
+            </if>
+
+        </if>
+        <if test="ticketPerson!=null and ticketPerson!=''">
+            <if test="exactQuery ==null or exactQuery=='true'">
+                AND ISOE.MODIFIER = #{ticketPerson}
+            </if>
+            <if test="exactQuery !=null and exactQuery=='false'">
+                AND ISOE.MODIFIER LIKE CONCAT('%', CONCAT(#{ticketPerson}, '%'))
+            </if>
+        </if>
+        <if test="salePerson!=null and salePerson!=''">
+            <if test="exactQuery == null or exactQuery=='true'">
+                AND ISOE.CREATOR  = #{salePerson}
+            </if>
+            <if test="exactQuery !=null and exactQuery=='false'">
+                AND ISOE.CREATOR LIKE CONCAT('%', CONCAT(#{salePerson}, '%'))
+            </if>
+        </if>
+        <if test="cabins!=null and cabins!=''">
+            AND IL.CABIN IN
+            <foreach collection="cabins" item="cabin"
+                     index="index" open="(" close=")" separator=",">
+                #{cabins[${index}]}
+            </foreach>
+        </if>
+        <if test="flightNo!=null and flightNo!=''">
+            <if test="exactQuery ==null or exactQuery=='true'">
+                AND IL.FLIGHT_NO = #{flightNo}
+            </if>
+            <if test="exactQuery !=null and exactQuery=='false'">
+                AND IL.FLIGHT_NO LIKE CONCAT('%', CONCAT(#{flightNo}, '%'))
+            </if>
+
+        </if>
+        <if test="ticketNo!=null and ticketNo!=''">
+            AND ISOD.TICKET_NO LIKE CONCAT('%', CONCAT(#{ticketNo}, '%'))
+        </if>
+        <if test="saleOrderNo!=null and saleOrderNo!=''">
+            AND ISOE.SALE_ORDER_NO = #{saleOrderNo}
+        </if>
+        <if test="supplierName!=null and supplierName!=''">
+            <if test="exactQuery ==null or exactQuery=='true'">
+                AND CS.NAME  = #{supplierName}
+            </if>
+            <if test="exactQuery !=null and exactQuery=='false'">
+                AND CS.NAME LIKE CONCAT('%', CONCAT(#{supplierName}, '%'))
+            </if>
+
+        </if>
+        <if test="orderStatusArray!=null and orderStatusArray!='' ">
+            AND ISOD.STATUS IN
+            <foreach collection="orderStatusArray" item="orderStatusArray"
+                     index="index" open="(" close=")" separator=",">
+                #{orderStatusArray[${index}]}
+            </foreach>
+        </if>
+        <if test="orderStatusArray==null or orderStatusArray=='' ">
+            AND ISOD.STATUS IN (4, 10)
+        </if>
+        GROUP BY ISOD.SALE_ORDER_NO
+        ORDER BY ISOE.ISSUE_TIME
+    </select>
     <resultMap id="IftReportResultMap" type="com.tempus.gss.product.ift.api.entity.IftOutReport">
         <result column="SUPPLIER_NAME" property="supplierName"/>
         <result column="TYPE" property="type"/>
@@ -12,6 +175,7 @@
         <result column="DEP_DATE" property="depDate"/>
         <result column="TICKET_NUM" property="ticketNum"/>
         <result column="RATE" property="rate"/>
+        <result column="CURRENCY" property="currency"/>
         <result column="TRUE_PRICE" property="truePrice"/>
         <result column="SETTLE_PRICE" property="settlePrice"/>
         <result column="TAX" property="tax"/>
@@ -29,86 +193,13 @@
         <result column="REMARK" property="remark"/>
         <result column="CHANGE_TYPE" property="changeType"/>
     </resultMap>
-    <select id="queryIftOutReport" parameterType="com.tempus.gss.product.ift.api.entity.IftOutReportVO" resultMap="IftReportResultMap">
-        SELECT DISTINCT
-        CS.NAME AS SUPPLIER_NAME,
-        CASE WHEN ISCE.SALE_CHANGE_NO IS NOT NULL AND ISCE.CHANGE_TYPE = 3
-        THEN '改签'
-        ELSE '出票' END AS CHANGE_TYPE,
-        ISOE.ISSUE_TIME AS TICKET_DATE,
-        ISOE.SALE_ORDER_NO AS SALE_ORDER_NO,
-        ISOD.TICKET_NO AS TICKET_NO,
-        CONCAT(IL.DEP_AIRPORT, '-', IL.ARR_AIRPORT) AS ROUTING,
-        IL.FLIGHT_NO AS FLIGHT_NO,
-        IL.CABIN AS CABIN,
-        IL.DEP_TIME AS DEP_DATE,
-        1 AS TICKET_NUM,
-        ISOE.EXCHANGE_RATE AS RATE,
-        IP.SALE_FARE AS TRUE_PRICE,
-        IP.SALE_PRICE AS SETTLE_PRICE,
-        IP.SALE_TAX AS TAX,
-        IP.SALE_PRICE AS TOTAL_PRICE,
-        IP.SALE_PRICE - IP.BUY_PRICE - IP.BUY_TAX AS GROSS,
-        ISOE.CREATOR AS SALE_PERSON,
-        SD.NAME AS SALE_DEPT,
-        SMD.NAME AS MONTH_SETTLE,
-        SOI.NAME AS COMPANY,
-        CONCAT(IP.SURNAME, '/', IP.NAME) AS PASSENGER_NAME,
-        CASE WHEN IP.GENDER = 1
-        THEN '男'
-        ELSE '女' END AS GENDER,
-        CC.BUSINESS_LINE AS SOURCE,
-        ISOE.SALE_REMARK AS REMARK,
-        ISOE.MODIFIER AS TICKET_PERSON
-        FROM IFT_SALE_ORDER_EXT ISOE LEFT JOIN OS_SALEORDER OS ON OS.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
-        LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
-        LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO = OS.CUSTOMER_NO
-        LEFT JOIN OS_BUYORDER OB ON OB.SALE_ORDER_NO = OS.SALE_ORDER_NO
-        LEFT JOIN IFT_BUY_ORDER_EXT IBOE ON IBOE.BUY_ORDER_NO = OB.BUY_ORDER_NO
-        LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO = OB.SUPPLIER_NO
-        LEFT JOIN IFT_PASSENGER IP ON IP.PASSENGER_NO = ISOD.PASSENGER_NO
-        LEFT JOIN IFT_LEG IL ON IL.LEG_NO = ISOD.LEG_NO
-        LEFT JOIN SM_OWNER_INFO SOI ON SOI.OWNER = ISOE.OWNER
-        LEFT JOIN GBC_DEOTCTYPE GD ON (GD.CTYPE_NO = CC.GROUP_NO and GD.PTYPE = 1)
-        LEFT JOIN SM_DEPT SD ON SD.ID = GD.DEPT_ID
-        LEFT JOIN SM_DICT SMD ON SMD.CODE = CC.BALANCE_CORPORATION
-        LEFT JOIN OS_SALECHANGE OSC ON OSC.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
-        LEFT JOIN IFT_SALE_CHANGE_EXT ISCE ON ISCE.SALE_CHANGE_NO = OSC.SALE_CHANGE_NO
-        WHERE OSC.GOODS_TYPE = 2
-
-        <include refid="selectSumByDateAndDept"/>
-        order by ISOE.ISSUE_TIME
-
-    </select>
 
     <select id="getDept_nameList" resultType="java.lang.String">
-        SELECT DISTINCT NAME
-        FROM SM_DEPT
+        SELECT DISTINCT SD.NAME AS SALE_DEPT
+        FROM IFT_SALE_ORDER_EXT ISOE
+            LEFT JOIN SM_USER SU ON SU.LOGIN_NAME = ISOE.DRAWER_LOGIN_NAME
+            LEFT JOIN SM_DEPT SD ON SD.ID = SU.DEPT_ID
+        WHERE SD.NAME IS NOT NULL
     </select>
-
-    <sql id="selectSumByDateAndDept">
-        <if test="ticketDateStart !=null and ticketDateStart != '' ">
-            AND ISOE.ISSUE_TIME<![CDATA[>=]]>STR_TO_DATE(CONCAT(#{ticketDateStart},'00:00:00'), '%Y-%m-%d %H:%i:%s')
-        </if>
-        <if test="ticketDateEnd !=null  and ticketDateEnd != ''">
-            AND ISOE.ISSUE_TIME<![CDATA[<=]]>STR_TO_DATE(CONCAT(#{ticketDateEnd},'23:59:59'), '%Y-%m-%d %H:%i:%s')
-         </if>
-        <if test="depDateStart !=null and depDateStart != '' ">
-            AND IL.DEP_TIME <![CDATA[>=]]>STR_TO_DATE(CONCAT(#{depDateStart},'00:00:00'), '%Y-%m-%d %H:%i:%s')
-        </if>
-        <if test="depDateEnd !=null  and depDateEnd != ''">
-            AND IL.DEP_TIME <![CDATA[<=]]>STR_TO_DATE(CONCAT(#{depDateEnd},'23:59:59'), '%Y-%m-%d %H:%i:%s')
-         </if>
-        <if test="saleDept !=null and saleDept!=''">
-            AND SD.NAME like CONCAT('%',CONCAT(#{saleDept},'%'))
-        </if>
-        <if test="changeType !=null and changeType!=''">
-            AND ISCE.CHANGE_TYPE = #{changeType}
-        </if>
-        <if test="changeType ==0 or changeType==null">
-            AND (ISCE.CHANGE_TYPE is null)
-        </if>
-    </sql>
-
 
 </mapper>

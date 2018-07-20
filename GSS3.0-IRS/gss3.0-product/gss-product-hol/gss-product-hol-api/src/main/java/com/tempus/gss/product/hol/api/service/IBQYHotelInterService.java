@@ -193,7 +193,7 @@ public interface IBQYHotelInterService{
 	 * @param cancelParam
 	 * @return
 	 */
-	OrderCancelResult cancelOrder(OrderCancelParam cancelParam);
+	Boolean cancelOrder(OrderCancelParam cancelParam);
 	
 	/**
 	 * 订单详情
