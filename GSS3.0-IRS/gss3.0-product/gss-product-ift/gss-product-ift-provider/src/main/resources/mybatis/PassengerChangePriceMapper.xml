@@ -63,6 +63,10 @@
         <result column="BUY_CURRENCY" property="buyCurrency" jdbcType="VARCHAR" />
         <!--采购汇率-->
         <result column="BUY_EXCHANGE_RATE" property="buyExchangeRate" jdbcType="DECIMAL"/>
+        <!--原单销售结算价和销售改签差价之和-->
+        <result column="ALL_SALE_PRICE" property="allSalePrice" jdbcType="DECIMAL"/>
+        <!--原单采购结算价和采购改签差价之和-->
+        <result column="ALL_BUY_PRICE" property="allBuyPrice" jdbcType="DECIMAL"/>
 
 
         <!--一对一关联乘客-->
@@ -72,7 +76,7 @@
     <sql id="Base_Column_List">
         CHANGE_PRICE_NO, ID, OWNER, SALE_ORDER_NO,SALE_CHANGE_NO, PASSENGER_NO,PASSENGER_TYPE,ORDER_TYPE,SALE_COUNT_PRICE,BUY_COUNT_PRICE, SALE_PRICE, SALE_TAX, SALE_BROKERAGE,
         SALE_REST, BUY_PRICE, BUY_TAX, BUY_BROKERAGE, BUY_REST, VALID, STATUS, CREATOR, CREATE_TIME,
-        MODIFIER, MODIFY_TIME,BUY_AGENCY_FEE,BUY_REBATE,SALE_AGENCY_FEE,SALE_REBATE,BUY_CURRENCY,BUY_EXCHANGE_RATE
+        MODIFIER, MODIFY_TIME,BUY_AGENCY_FEE,BUY_REBATE,SALE_AGENCY_FEE,SALE_REBATE,BUY_CURRENCY,BUY_EXCHANGE_RATE,ALL_SALE_PRICE,ALL_BUY_PRICE
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -90,7 +94,7 @@
         select
         <include refid="Base_Column_List"/>
         from IFT_PASSENGER_CHANGE_PRICE
-        where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT} AND PASSENGER_NO = #{passengerNo,jdbcType=BIGINT} AND VALID=1
+        where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT} AND PASSENGER_NO = #{passengerNo,jdbcType=BIGINT} AND VALID=1 limit 0,1
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
@@ -106,7 +110,7 @@
         CREATOR, CREATE_TIME, MODIFIER,
         MODIFY_TIME,PASSENGER_TYPE,ORDER_TYPE,SALE_COUNT_PRICE,BUY_COUNT_PRICE,
         BUY_AGENCY_FEE,BUY_REBATE,SALE_AGENCY_FEE,SALE_REBATE,
-        BUY_CURRENCY, BUY_EXCHANGE_RATE)
+        BUY_CURRENCY, BUY_EXCHANGE_RATE, ALL_SALE_PRICE, ALL_BUY_PRICE)
         values (#{changePriceNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
         #{saleOrderNo,jdbcType=BIGINT},#{saleChangeNo,jdbcType=BIGINT}, #{passengerNo,jdbcType=BIGINT}, #{salePrice,jdbcType=DECIMAL},
         #{saleTax,jdbcType=DECIMAL}, #{saleBrokerage,jdbcType=DECIMAL}, #{saleRest,jdbcType=DECIMAL},
@@ -116,7 +120,7 @@
         #{modifyTime,jdbcType=TIMESTAMP},#{passengerType,jdbcType=VARCHAR},#{orderType,jdbcType=VARCHAR},
         #{saleCountPrice,jdbcType=DECIMAL},#{buyCountPrice,jdbcType=DECIMAL},#{buyAgencyFee,jdbcType=DECIMAL},#{buyRebate,jdbcType=DECIMAL}
         ,#{saleAgencyFee,jdbcType=DECIMAL} ,#{saleRebate,jdbcType=DECIMAL},#{buyCurrency,jdbcType=VARCHAR},
-        #{buyExchangeRate,jdbcType=DECIMAL})
+        #{buyExchangeRate,jdbcType=DECIMAL}, #{allSalePrice,jdbcType=DECIMAL}, #{allBuyPrice,jdbcType=DECIMAL})
     </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.PassengerChangePrice">
         insert into IFT_PASSENGER_CHANGE_PRICE
@@ -199,6 +203,12 @@
             <if test="buyExchangeRate !=null">
                 BUY_EXCHANGE_RATE,
             </if>
+            <if test="allSalePrice !=null">
+                ALL_SALE_PRICE,
+            </if>
+            <if test="allBuyPrice !=null">
+                ALL_BUY_PRICE,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="changePriceNo != null">
@@ -278,6 +288,12 @@
             </if>
             <if test="buyExchangeRate !=null">
                 #{buyExchangeRate,jdbcType=DECIMAL},
+            </if>
+            <if test="allSalePrice !=null">
+                #{allSalePrice,jdbcType=DECIMAL},
+            </if>
+            <if test="allBuyPrice !=null">
+                #{allBuyPrice,jdbcType=DECIMAL},
             </if>
         </trim>
     </insert>
@@ -359,6 +375,12 @@
             <if test="buyExchangeRate !=null">
                 BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL},
             </if>
+            <if test="allSalePrice !=null">
+                ALL_SALE_PRICE = #{allSalePrice,jdbcType=DECIMAL},
+            </if>
+            <if test="allBuyPrice !=null">
+                ALL_BUY_PRICE = #{allBuyPrice,jdbcType=DECIMAL},
+            </if>
         </set>
         where CHANGE_PRICE_NO = #{changePriceNo,jdbcType=BIGINT}
     </update>
@@ -388,7 +410,9 @@
         SALE_AGENCY_FEE= #{saleAgencyFee,jdbcType=DECIMAL},
         SALE_REBATE= #{saleRebate,jdbcType=DECIMAL},
         BUY_CURRENCY = #{buyCurrency,jdbcType=VARCHAR},
-        BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL}
+        BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL},
+        ALL_SALE_PRICE = #{allSalePrice,jdbcType=DECIMAL},
+        ALL_BUY_PRICE = #{allBuyPrice,jdbcType=DECIMAL}
         where CHANGE_PRICE_NO = #{changePriceNo,jdbcType=BIGINT}
     </update>
     <update id="updateByOrderNo" parameterType="com.tempus.gss.product.ift.api.entity.PassengerChangePrice">
@@ -463,6 +487,12 @@
             <if test="buyExchangeRate !=null">
                 BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL},
             </if>
+            <if test="allSalePrice !=null">
+                ALL_SALE_PRICE = #{allSalePrice,jdbcType=DECIMAL},
+            </if>
+            <if test="allBuyPrice !=null">
+                ALL_BUY_PRICE = #{allBuyPrice,jdbcType=DECIMAL},
+            </if>
         </set>
         WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
     </update>
@@ -536,6 +566,12 @@
             <if test="buyExchangeRate !=null">
                 BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL},
             </if>
+            <if test="allSalePrice !=null">
+                ALL_SALE_PRICE = #{allSalePrice,jdbcType=DECIMAL},
+            </if>
+            <if test="allBuyPrice !=null">
+                ALL_BUY_PRICE = #{allBuyPrice,jdbcType=DECIMAL},
+            </if>
         </set>
         WHERE SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
     </update>
@@ -604,6 +640,12 @@
             </if>
             <if test="buyExchangeRate !=null">
                 BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL},
+            </if>
+            <if test="allSalePrice !=null">
+                ALL_SALE_PRICE = #{allSalePrice,jdbcType=DECIMAL},
+            </if>
+            <if test="allBuyPrice !=null">
+                ALL_BUY_PRICE = #{allBuyPrice,jdbcType=DECIMAL},
             </if>
         </set>
         WHERE PASSENGER_NO = #{passengerNo,jdbcType=BIGINT}
