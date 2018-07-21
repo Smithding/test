@@ -33,4 +33,6 @@ public interface PassengerChangePriceDao extends BaseDao<PassengerChangePrice,Pa
 	int updateByPassengerNo(PassengerChangePrice passengerChangePrice);
 
 	PassengerChangePrice selectPricerByChangeNoAndPassengerNo(@Param("saleChangeNo") Long saleChangeNo, @Param("passengerNo") Long passengerNo);
+
+    PassengerChangePrice selectByPgerNoAndSaleOrderNo(@Param("passengerNo")Long passengerNo, @Param("saleOrderNo")Long saleOrderNo);
 }

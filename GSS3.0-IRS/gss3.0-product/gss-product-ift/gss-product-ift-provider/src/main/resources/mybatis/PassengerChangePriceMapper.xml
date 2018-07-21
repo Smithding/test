@@ -96,6 +96,12 @@
         from IFT_PASSENGER_CHANGE_PRICE
         where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT} AND PASSENGER_NO = #{passengerNo,jdbcType=BIGINT} AND VALID=1 limit 0,1
     </select>
+    <select id="selectByPgerNoAndSaleOrderNo" resultMap="BaseResultMap" >
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_PASSENGER_CHANGE_PRICE
+        where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} AND PASSENGER_NO = #{passengerNo,jdbcType=BIGINT} AND VALID=1 limit 0,1
+    </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from IFT_PASSENGER_CHANGE_PRICE
@@ -327,6 +333,10 @@
             <if test="saleRest != null">
                 SALE_REST = #{saleRest,jdbcType=DECIMAL},
             </if>
+            <if test="saleCountPrice != null">
+                SALE_COUNT_PRICE = #{saleCountPrice,jdbcType=DECIMAL},
+            </if>
+
             <if test="buyPrice != null">
                 BUY_PRICE = #{buyPrice,jdbcType=DECIMAL},
             </if>
@@ -339,6 +349,10 @@
             <if test="buyRest != null">
                 BUY_REST = #{buyRest,jdbcType=DECIMAL},
             </if>
+            <if test="buyCountPrice != null">
+                BUY_COUNT_PRICE = #{buyCountPrice,jdbcType=DECIMAL},
+            </if>
+
             <if test="valid != null">
                 VALID = #{valid,jdbcType=TINYINT},
             </if>
