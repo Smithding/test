@@ -1108,6 +1108,8 @@ public class ChangeServiceImpl implements IChangeService {
             }
             PassengerChangePrice priceChange = new PassengerChangePrice();
             Long passengerChangePriceNo = maxNoService.generateBizNo("IFT_PASSENGER_CHANGE_PRICE_NO", 30);
+            priceChange.setAllBuyPrice(priceVo.getAllBuyPrice().add(priceVo.getBuyCountPrice()));
+            priceChange.setAllSalePrice(priceVo.getAllSalePrice().add(priceVo.getCountPrice()));
             priceChange.setChangePriceNo(passengerChangePriceNo);
             priceChange.setSaleChangeNo(priceVo.getSaleChangeNo());
             priceChange.setPassengerNo(priceVo.getPassengerNo());
@@ -1187,7 +1189,9 @@ public class ChangeServiceImpl implements IChangeService {
                 passengerChangePrice.setOwner(requestWithActor.getAgent().getOwner());
                 passengerChangePrice.setStatus("1");
                 passengerChangePrice.setModifier(requestWithActor.getAgent().getAccount());
-                int result = passengerChangePriceDao.updateByPassengerNo(passengerChangePrice);
+                passengerChangePrice.setAllBuyPrice(priceVo.getAllBuyPrice().add(priceVo.getBuyCountPrice()));
+                passengerChangePrice.setAllSalePrice(priceVo.getAllSalePrice().add(priceVo.getCountPrice()));
+                int result = passengerChangePriceDao.updateByPrimaryKeySelective(passengerChangePrice);
                 if (result == 0) {
                     flag = false;
                     throw new GSSException("改签重新审核创建失败", "0101", "创建发生异常,请检查");

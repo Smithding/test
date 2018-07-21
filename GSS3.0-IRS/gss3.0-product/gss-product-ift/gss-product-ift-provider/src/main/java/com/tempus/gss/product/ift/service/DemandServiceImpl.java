@@ -100,7 +100,7 @@ public class DemandServiceImpl implements IDemandService {
             throw new GSSException("创建需求模块", "0110", "需求单类型为空");
 		}
 
-
+		Date createTime = new Date();
 		/**
 		 * 校验客商编号
 		 */
@@ -123,7 +123,7 @@ public class DemandServiceImpl implements IDemandService {
 			demandRequest.getEntity().setValid((byte)1);
 			demandRequest.getEntity().setLocker(0L);//创建需求单统一为解锁状态
 			demandRequest.getEntity().setCreator(agent.getAccount());
-			demandRequest.getEntity().setCreateTime(new Date());
+			demandRequest.getEntity().setCreateTime(createTime);
 			demandRequest.getEntity().setStatus("1");//待核价
 			demandRequest.getEntity().setCustomerNo(agent.getNum());
 			demandRequest.getEntity().setCustomerTypeNo(String.valueOf(agent.getType()));
@@ -137,7 +137,7 @@ public class DemandServiceImpl implements IDemandService {
 				for (DemandDetail demandDetail : demandRequest.getEntity().getDemandDetailList()) {
 					demandDetail.setDemandDetailNo(maxNoService.generateBizNo("IFT_DEMAND_DETAIL_NO", 26));
 					demandDetail.setDemandNo(demandNo);
-					demandDetail.setCreateTime(new Date());
+					demandDetail.setCreateTime(createTime);
 					demandDetail.setCreator(agent.getAccount());
 					if (demandDetail.getDemandDetailNo() == null
 							|| demandDetail.getDepTime() == null
@@ -163,7 +163,7 @@ public class DemandServiceImpl implements IDemandService {
 						demandPassenger.setPassengerNo(maxNoService.generateBizNo("IFT_DEMAND_PASSENGER_NO", 50));
 						demandPassenger.setCreator(agent.getAccount());
 						demandPassenger.setDemandNo(demandNo);
-						demandPassenger.setCreateTime(new Date());
+						demandPassenger.setCreateTime(createTime);
 						demandPassenger.setOwner(agent.getOwner());
 						if (demandPassenger.getPassengerNo() == null) {
 							log.error("需求乘客信息表关键字段不能为空");
