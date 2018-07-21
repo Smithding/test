@@ -2,7 +2,7 @@
  * UnpOrderServiceImpl.java
  * com.tempus.gss.product.unp.service
  *
- * Function： TODO 
+ * Function： TODO
  *
  *   ver     date      		author
  * ──────────────────────────────────
@@ -30,12 +30,12 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.order.entity.BusinessOrderInfo;
-import com.tempus.gss.order.entity.BusinessType;
+import com.tempus.gss.order.entity.enums.BusinessType;
 import com.tempus.gss.order.entity.BuyChange;
 import com.tempus.gss.order.entity.BuyOrder;
-import com.tempus.gss.order.entity.CertificateCreateVO;
-import com.tempus.gss.order.entity.CreatePlanAmountVO;
-import com.tempus.gss.order.entity.IncomeExpenseType;
+import com.tempus.gss.order.entity.vo.CertificateCreateVO;
+import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
+import com.tempus.gss.order.entity.enums.IncomeExpenseType;
 import com.tempus.gss.order.entity.PlanAmountRecord;
 import com.tempus.gss.order.entity.SaleChange;
 import com.tempus.gss.order.entity.SaleOrder;
@@ -60,12 +60,12 @@ import com.tempus.gss.vo.Agent;
  * Function: 通用产品订单管理
  *
  * @author   niepeng
- * @version  
+ * @version
  * @since    Ver 1.1
  * @Date	 2017年3月10日		上午8:59:26
  *
- * @see 	 
- *  
+ * @see
+ *
  */
 @Service
 @EnableAutoConfiguration
@@ -104,7 +104,7 @@ public class UnpOrderChangeServiceImpl implements IUnpOrderChangeService {
 	@Override
 	public boolean createOrderChange(RequestWithActor<Long> requestWithActor) throws Exception {
         log.info("通用产品退票开始==============");
-        if (requestWithActor.getAgent() == null 
+        if (requestWithActor.getAgent() == null
         		|| requestWithActor.getEntity() == null ) {
             log.error("传入参数为空");
             throw new GSSException("传入参数为空", "1010", "通用产品退票失败");
@@ -245,7 +245,7 @@ public class UnpOrderChangeServiceImpl implements IUnpOrderChangeService {
             if (planAmountRecord1 == null) {
                 log.info("创建采购应收记录失败");
                 throw new GSSException("创建采购应收记录失败", "1010", "通用产品退票失败");
-            }	
+            }
             int flag = orderChangeDao.insertSelective(unpOrderChange);
             if (flag == 0) {
                 log.error("创建火车票变更扩展单失败");

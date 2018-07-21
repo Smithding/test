@@ -13,7 +13,7 @@ import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.tempus.gss.order.entity.BuyOrder;
-import com.tempus.gss.order.entity.PayNoticeVO;
+import com.tempus.gss.order.entity.vo.PayNoticeVO;
 import com.tempus.gss.order.service.IBuyOrderService;
 import com.tempus.gss.vo.Agent;
 

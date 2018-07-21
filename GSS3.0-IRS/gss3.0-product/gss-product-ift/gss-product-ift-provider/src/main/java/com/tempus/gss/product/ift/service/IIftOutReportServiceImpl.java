@@ -4,7 +4,6 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.ift.api.entity.IftOutReport;
 import com.tempus.gss.product.ift.api.entity.IftOutReportVO;
-import com.tempus.gss.product.ift.api.entity.vo.QueryIftOutReportVo;
 import com.tempus.gss.product.ift.api.service.IIftOutReportService;
 import com.tempus.gss.product.ift.dao.IftOutReportDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,12 @@ public class IIftOutReportServiceImpl implements IIftOutReportService {
     }
     
     @Override
-    public List<String> selectDept_nameList() {
-        return iftOutReportDao.getDept_nameList();
+    public List<String> selectDeptNameList() {
+        return iftOutReportDao.selectDeptNameList();
+    }
+    
+    @Override
+    public List<String> getCabins() {
+        return iftOutReportDao.getCabins();
     }
 }

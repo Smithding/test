@@ -1,6 +1,6 @@
 package com.tempus.gss.product.ift.api.service;
 
-import com.tempus.gss.order.entity.UpdatePlanAmountVO;
+import com.tempus.gss.order.entity.vo.UpdatePlanAmountVO;
 import com.tempus.gss.vo.Agent;
 
 import java.math.BigDecimal;

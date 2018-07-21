@@ -1,6 +1,5 @@
 package com.tempus.gss.product.ift.dao;
 
-import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.ift.api.entity.IftOutReport;
 import com.tempus.gss.product.ift.api.entity.IftOutReportVO;
 import org.apache.ibatis.session.RowBounds;
@@ -11,5 +10,7 @@ public interface IftOutReportDao {
     
     List<IftOutReport> queryIftOutReport(RowBounds page, IftOutReportVO query);
     
-    List<String> getDept_nameList();
+    List<String> selectDeptNameList();
+    
+    List<String> getCabins();
 }

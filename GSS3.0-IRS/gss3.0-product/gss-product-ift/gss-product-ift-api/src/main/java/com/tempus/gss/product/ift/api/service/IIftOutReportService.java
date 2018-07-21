@@ -11,8 +11,21 @@ import java.util.List;
  */
 public interface IIftOutReportService {
     
+    /**
+     * @param page
+     * @param iftOutReportVo
+     * @return
+     */
     Page<IftOutReport> getReports(Page<IftOutReport> page, IftOutReportVO iftOutReportVo);
     
-    List<String> selectDept_nameList();
+    /**
+     * @return
+     */
+    List<String> selectDeptNameList();
+    
+    /**
+     * @return
+     */
+    List<String> getCabins();
     
 }
