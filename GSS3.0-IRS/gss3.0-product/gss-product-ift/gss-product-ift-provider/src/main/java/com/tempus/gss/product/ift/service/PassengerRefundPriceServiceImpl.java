@@ -77,9 +77,10 @@ public class PassengerRefundPriceServiceImpl  implements IPassengerRefundPriceSe
 		try{
 			passengerRefundPrice.getEntity().setModifier(passengerRefundPrice.getAgent().getAccount());
 			passengerRefundPrice.getEntity().setModifyTime(new Date());
-			logger.info("退票，修改乘客票价信息",passengerRefundPrice.getEntity().toString());
+			logger.info("更新的退废乘客价格{}",passengerRefundPrice.getEntity().toString());
 			flag=passengerRefundPriceDao.updateByPrimaryKeySelective(passengerRefundPrice.getEntity());
 		}catch(Exception e ){
+			logger.error("废退改修改失败价格",e);
 			throw new GSSException("废退改修改失败", "0301", "修改发生异常,请检查");
 		}
 		return flag;

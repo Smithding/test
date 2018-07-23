@@ -129,10 +129,10 @@ public class HolPayNoticeListener {
     		                        hotelErrorOrder.setContactNumber(hotelOrder.getContactNumber());
     		                        if (orderPay.getIsChangePrice()) {
     		                        	hotelErrorOrder.setOrderStatus(TcOrderStatus.CHANGE_PRICE.getKey());
-    		                        	hotelErrorOrder.setMsg(TcOrderStatus.CHANGE_PRICE.getValue());
+    		                        	hotelErrorOrder.setMsg(orderPay.getMsg());
     		                        }else {
     		                        	hotelErrorOrder.setOrderStatus(TcOrderStatus.PAY_BAD.getKey());
-    		                        	hotelErrorOrder.setMsg(TcOrderStatus.PAY_BAD.getValue());
+    		                        	hotelErrorOrder.setMsg(orderPay.getMsg());
     		                        }
     		                        hotelErrorOrder.setResultCode("0");
     		                        tCHotelOrderService.createErrorOrder(agent, hotelErrorOrder);

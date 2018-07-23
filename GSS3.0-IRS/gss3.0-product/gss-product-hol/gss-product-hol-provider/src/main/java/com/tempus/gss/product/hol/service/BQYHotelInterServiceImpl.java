@@ -82,6 +82,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelInfoParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelListParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.BookOrderResponse;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.response.CreateOrderRespone;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelLocationEntity;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelOrderInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderCancelResult;
@@ -508,20 +509,20 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	}
 	
 	@Override
-	public String createOrder(CreateOrderReq createOrderReq) {
+	public CreateOrderRespone createOrder(CreateOrderReq createOrderReq) {
 		//BQY_HOTEL_CREATE_ORDER_URL
 		logger.info("BQY酒店订单创建开始...");
 		createOrderReq.setAgentId(Long.parseLong(BQY_AGENTID));
 		createOrderReq.setBookingUserId(BQY_AGENTID);
 		createOrderReq.setToken(md5Encryption());
-		String orderNo = null;
+		CreateOrderRespone createOrderRespone = null;
 		String paramJson = JsonUtil.toJson(createOrderReq);
 		String result = httpClientUtil.doJsonPost(BQY_HOTEL_CREATE_ORDER_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
-			ResponseResult<String> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<String>>(){});
+			ResponseResult<CreateOrderRespone> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<CreateOrderRespone>>(){});
 			if (responseResult != null) {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
-					orderNo = responseResult.getResult();
+					createOrderRespone = responseResult.getResult();
 				}else {
 					logger.error("BQY酒店订单创建失败!");
 					throw new GSSException("酒店订单创建失败!", "0111", "酒店订单创建返回空值");
@@ -531,17 +532,17 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			throw new GSSException("酒店订单创建失败!", "0111", "酒店订单创建返回空值");
 		}
 		logger.info("BQY酒店订单创建结束!");
-		return orderNo;
+		return createOrderRespone;
 	}
 	
 	@Override
 	public OrderPayResult orderPay(OrderPayReq orderPayReq) {
 		//BQY_HOTEL_ORDER_PAY_URL
-		logger.info("BQY酒店订单支付开始...");
 		orderPayReq.setAgentId(Long.parseLong(BQY_AGENTID));
 		orderPayReq.setToken(md5Encryption());
 		OrderPayResult orderPayResult = null;
 		String paramJson = JsonUtil.toJson(orderPayReq);
+		logger.info("BQY酒店订单支付入参: " + paramJson);
 		String result = httpClientUtil.doJsonPost(BQY_HOTEL_ORDER_PAY_URL, paramJson);
 		logger.info("BQY酒店订单支付结果: "+result);
 		if (StringUtils.isNoneBlank(result.trim())) {
@@ -557,22 +558,23 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		}else {
 			throw new GSSException("酒店订单支付失败!", "0111", "酒店订单支付返回空值");
 		}
-		logger.info("BQY酒店订单支付结束!");
 		return orderPayResult;
 	}
 	
 	
 	@Override
-	public OrderCancelResult cancelOrder(OrderCancelParam cancelParam) {
+	public Boolean cancelOrder(OrderCancelParam cancelParam) {
 		//BQY_HOTEL_ORDER_CANCEL_URL
 		cancelParam.setAgentId(Long.parseLong(BQY_AGENTID));
 		cancelParam.setToken(md5Encryption());
 		cancelParam.setBookingUserId(BQY_AGENTID);
-		OrderCancelResult orderCancelResult = null;
+		Boolean orderCancelResult = null;
 		String paramJson = JsonUtil.toJson(cancelParam);
+		logger.info("取消酒店订单入参：" + paramJson);
 		String result = httpClientUtil.doJsonPost(BQY_HOTEL_ORDER_CANCEL_URL, paramJson);
+		logger.info("取消酒店订单返回结果：" + result);
 		if (StringUtils.isNoneBlank(result.trim())) {
-			ResponseResult<OrderCancelResult> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<OrderCancelResult>>(){});
+			ResponseResult<Boolean> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<Boolean>>(){});
 			if (responseResult != null) {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
 					orderCancelResult = responseResult.getResult();

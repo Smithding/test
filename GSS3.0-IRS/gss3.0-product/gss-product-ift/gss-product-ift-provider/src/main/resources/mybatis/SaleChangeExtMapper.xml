@@ -66,7 +66,6 @@
         <!--改签出票人-->
         <result column="DRAWER_LOGIN_NAME" property="drawerLoginName" jdbcType="VARCHAR"/>
         <result column="AIRLINE_REFUND_STATUS" property="airLineRefundStatus" jdbcType="INTEGER"/>
-        <result column="IS_REFUND" property="isRefund" jdbcType="INTEGER" ></result>
         <!--一对多关联销售单明细-->
         <collection property="saleChangeDetailList" ofType="com.tempus.gss.product.ift.api.entity.SaleChangeDetail"
                     column="SALE_CHANGE_NO"
@@ -82,7 +81,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        SALE_CHANGE_NO, ID, OWNER, REFUND_WAY,  MODIFIER, STATUS, MODIFY_TIME,IS_REFUND,
+        SALE_CHANGE_NO, ID, OWNER, REFUND_WAY,  MODIFIER, STATUS, MODIFY_TIME,
         VALID, CREATE_TIME, CREATOR, LOCKER, LOCK_TIME, CHANGE_TYPE, CONTACT_NAME, CONTACT_MOBILE,
         CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL,CUSTOMER_NO,
     CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,CURRENCY,SALE_CURRENCY,EXCHANGE_RATE,OFFICE,DRAWER_LOGIN_NAME
@@ -555,9 +554,6 @@
             <if test="exchangeRate!=null">
                 EXCHANGE_RATE =#{exchangeRate,jdbcType=DECIMAL},
             </if>
-            <if test="isRefund!=null">
-                IS_REFUND=#{isRefund,jdbcType=INTEGER},
-            </if>
             <if test="drawerLoginName!=null">
                 DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR}
             </if>
@@ -650,9 +646,6 @@
             </if>
             <if test="exchangeRate!=null">
                 EXCHANGE_RATE =#{exchangeRate,jdbcType=DECIMAL},
-            </if>
-            <if test="isRefund!=null">
-                IS_REFUND=#{isRefund,jdbcType=INTEGER},
             </if>
             <if test="drawerLoginName!=null">
                 DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR}
@@ -824,11 +817,18 @@
             <if test="depAirport !=null and depAirport !='' and arrAirport !=null and arrAirport !=''">
                 AND (l.DEP_AIRPORT = #{depAirport,jdbcType=VARCHAR} or  l.ARR_AIRPORT = #{arrAirport,jdbcType=VARCHAR})
             </if>
-            <if test="status == 33">
+            <!--<if test="status == 33">
                 AND ((m.CHILD_STATUS =1 and i.LOCKER !=0 ) or (m.CHILD_STATUS=2 and i.LOCKER=0))
-            </if>
-            <if test="buyStatus!= null">
+            </if>-->
+           <!-- <if test="buyStatus!= null">
                 AND m.CHILD_STATUS =#{buyStatus,jdbcType=BIGINT}
+            </if>-->
+            <if test="buyStatus!= null">
+                AND m.CHILD_STATUS in
+                <foreach collection="buyStatus" item="buyStatus"
+                         index="index" open="(" close=")" separator=",">
+                    #{buyStatus[${index}]}
+                </foreach>
             </if>
 
             <if test="customerCount==false and customerNo != null">
@@ -837,18 +837,22 @@
             <if test="customerTypeNo != null">
                 AND i.CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT}
             </if>
-            <if test="status == 22">
+            <!--<if test="status == 22">
                 AND ((o.CHILD_STATUS =1 and i.LOCKER !=0 ) or (o.CHILD_STATUS=2 and i.LOCKER=0))
             </if>
             <if test="status == 24">
                 AND ((o.CHILD_STATUS =1 and i.LOCKER !=0 ) or (o.CHILD_STATUS=2 ))
-            </if>
+            </if>-->
             <if test="payStatus!=null">
                 AND o.PAY_STATUS in
                 <foreach collection="payStatus" item="payStatus"
                          index="index" open="(" close=")" separator=",">
                     #{payStatus[${index}]}
                 </foreach>
+            </if>
+
+            <if test="isNotRefund !=null and isNotRefund!=''">
+                AND o.CHILD_STATUS !=10
             </if>
             <if test="childStatus!=null">
                 AND o.CHILD_STATUS in

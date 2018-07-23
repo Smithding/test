@@ -23,6 +23,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelInfoParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelListParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.BookOrderResponse;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.response.CreateOrderRespone;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelLocationEntity;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelOrderInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderCancelResult;
@@ -178,7 +179,7 @@ public interface IBQYHotelInterService{
 	 * @param createOrderReq
 	 * @return
 	 */
-	String createOrder(CreateOrderReq createOrderReq);
+	CreateOrderRespone createOrder(CreateOrderReq createOrderReq);
 	
 	/**
 	 * 订单支付
@@ -192,7 +193,7 @@ public interface IBQYHotelInterService{
 	 * @param cancelParam
 	 * @return
 	 */
-	OrderCancelResult cancelOrder(OrderCancelParam cancelParam);
+	Boolean cancelOrder(OrderCancelParam cancelParam);
 	
 	/**
 	 * 订单详情

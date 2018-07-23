@@ -76,6 +76,26 @@ public class ChangePriceVo implements Serializable{
 	private String buyCurrency;
 	//采购汇率
 	private BigDecimal buyExchangeRate;
+	//原单销售结算价和销售改签差价之和
+	private BigDecimal allSalePrice;
+	//原单采购结算价和采购改签差价之和
+	private BigDecimal allBuyPrice;
+
+	public BigDecimal getAllSalePrice() {
+		return allSalePrice;
+	}
+
+	public void setAllSalePrice(BigDecimal allSalePrice) {
+		this.allSalePrice = allSalePrice;
+	}
+
+	public BigDecimal getAllBuyPrice() {
+		return allBuyPrice;
+	}
+
+	public void setAllBuyPrice(BigDecimal allBuyPrice) {
+		this.allBuyPrice = allBuyPrice;
+	}
 
 	public String getBuyCurrency() {
 		return buyCurrency;

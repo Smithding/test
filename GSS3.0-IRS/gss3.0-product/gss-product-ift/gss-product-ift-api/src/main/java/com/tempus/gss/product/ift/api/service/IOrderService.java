@@ -132,7 +132,7 @@ public interface IOrderService {
 	 * 出单.
 	 * @return
 	 */
-	boolean issuing(RequestWithActor<PassengerListVo> pgerListVo);
+	boolean issuing(RequestWithActor<PassengerListVo> pgerListVo) throws GSSException;
 	/**
 	 * 拒单.
 	 *

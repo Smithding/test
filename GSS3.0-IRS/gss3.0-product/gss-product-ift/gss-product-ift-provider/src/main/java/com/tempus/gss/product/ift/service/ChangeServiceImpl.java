@@ -12,6 +12,11 @@ import com.tempus.gss.log.entity.LogRecord;
 import com.tempus.gss.log.service.ILogService;
 import com.tempus.gss.mss.service.IMssReserveService;
 import com.tempus.gss.order.entity.*;
+import com.tempus.gss.order.entity.enums.BusinessType;
+import com.tempus.gss.order.entity.enums.CostType;
+import com.tempus.gss.order.entity.enums.GoodsBigType;
+import com.tempus.gss.order.entity.vo.CertificateCreateVO;
+import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
 import com.tempus.gss.order.service.*;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.*;
@@ -25,7 +30,6 @@ import com.tempus.gss.system.entity.User;
 import com.tempus.gss.system.service.IMaxNoService;
 import com.tempus.gss.system.service.IUserService;
 import com.tempus.gss.vo.Agent;
-import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1104,6 +1108,8 @@ public class ChangeServiceImpl implements IChangeService {
             }
             PassengerChangePrice priceChange = new PassengerChangePrice();
             Long passengerChangePriceNo = maxNoService.generateBizNo("IFT_PASSENGER_CHANGE_PRICE_NO", 30);
+            priceChange.setAllBuyPrice(priceVo.getAllBuyPrice().add(priceVo.getBuyCountPrice()));
+            priceChange.setAllSalePrice(priceVo.getAllSalePrice().add(priceVo.getCountPrice()));
             priceChange.setChangePriceNo(passengerChangePriceNo);
             priceChange.setSaleChangeNo(priceVo.getSaleChangeNo());
             priceChange.setPassengerNo(priceVo.getPassengerNo());
@@ -1183,7 +1189,9 @@ public class ChangeServiceImpl implements IChangeService {
                 passengerChangePrice.setOwner(requestWithActor.getAgent().getOwner());
                 passengerChangePrice.setStatus("1");
                 passengerChangePrice.setModifier(requestWithActor.getAgent().getAccount());
-                int result = passengerChangePriceDao.updateByPassengerNo(passengerChangePrice);
+                passengerChangePrice.setAllBuyPrice(priceVo.getAllBuyPrice().add(priceVo.getBuyCountPrice()));
+                passengerChangePrice.setAllSalePrice(priceVo.getAllSalePrice().add(priceVo.getCountPrice()));
+                int result = passengerChangePriceDao.updateByPrimaryKeySelective(passengerChangePrice);
                 if (result == 0) {
                     flag = false;
                     throw new GSSException("改签重新审核创建失败", "0101", "创建发生异常,请检查");
@@ -1790,6 +1798,7 @@ public class ChangeServiceImpl implements IChangeService {
 
     @Override
     public int updateByPrimarykey(SaleChangeExt salechangeExt) {
+        log.info("更新销售变更单扩展表信息"+salechangeExt.toString());
         return saleChangeExtDao.updateByPrimaryKey(salechangeExt);
     }
 

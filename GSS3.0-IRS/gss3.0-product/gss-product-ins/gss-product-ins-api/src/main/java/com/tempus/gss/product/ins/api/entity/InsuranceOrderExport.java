@@ -2,6 +2,7 @@ package com.tempus.gss.product.ins.api.entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Date;
 
 public class InsuranceOrderExport implements Serializable{
 /*订单编号*/
@@ -53,10 +54,20 @@ private BigDecimal Profit;
 private String flightNo;
 /*起飞时间*/
 private String flightTime;
+/*投保时间*/
+private String insureTime;
 
 public String getPolicyNo() {
 	return policyNo;
 }
+
+public String getInsureTime() {
+	return insureTime;
+}
+public void setInsureTime(String insureTime) {
+	this.insureTime = insureTime;
+}
+
 /*客户类型*/
 private String customerType;
 /*客户名称*/

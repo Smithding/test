@@ -14,6 +14,11 @@ import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.log.service.ILogService;
 import com.tempus.gss.mq.MqSender;
 import com.tempus.gss.order.entity.*;
+import com.tempus.gss.order.entity.enums.BusinessType;
+import com.tempus.gss.order.entity.enums.CostType;
+import com.tempus.gss.order.entity.vo.ActualInfoSearchVO;
+import com.tempus.gss.order.entity.vo.CertificateCreateVO;
+import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
 import com.tempus.gss.order.service.*;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.*;
@@ -39,7 +44,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Parameter;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -1148,6 +1152,12 @@ public class RefundServiceImpl implements IRefundService {
 					saleOrderDetail.setRefuseReason(reason);
 					detailList.add(saleOrderDetail);
 				}
+				//修改废退乘客的refundPrice的valid为0
+				List<PassengerRefundPrice> passengerRefundPrices = passengerRefundPriceDao.selectPassengerRefundPriceBySaleOrderNo(saleChangeNo.getEntity());
+				for (PassengerRefundPrice passengerRefundPrice : passengerRefundPrices) {
+					passengerRefundPrice.setValid((byte) 0);
+					passengerRefundPriceDao.updateByPrimaryKeySelective(passengerRefundPrice);
+				}
 				detailService.batchUpdate(detailList);
 				//detailService.updateSaleOrderDetailStatusByNo(saleOrderNo,4);
 				ticketSenderService.updateByLockerId(agent,locker,"SALE_REFUSE_NUM");
@@ -1189,6 +1199,7 @@ public class RefundServiceImpl implements IRefundService {
 			}
 			String sourceChannelNo = null;
 			log.info("获取费退改签单的数据,查询条件为："+ JsonUtil.toJson(requestWithActor.getEntity()));
+
 			List<SaleChangeExt> list = saleChangeExtDao.queryObjByKey(page, requestWithActor.getEntity());
 			log.info("获取费退改签单的集合数据条数为："+list.size());
 			List<SaleChangeVo> saleChangeVoList = new ArrayList<>();
@@ -1585,7 +1596,9 @@ public class RefundServiceImpl implements IRefundService {
 		Agent agent = requestWithActor.getAgent();
 		saleChange.setModifier(agent.getAccount());
 		saleChange.setModifyTime(modifyTime);
-		saleChange.setChildStatus(2);//
+		if(saleChange.getChildStatus()!=10) {//若不是已退款则更新为已核价
+			saleChange.setChildStatus(2);//
+		}
 		saleChangeService.update(agent, saleChange);
 		//修改采购单状态
 		Long saleOrdernNo = saleChange.getSaleOrderNo();
@@ -1636,7 +1649,7 @@ public class RefundServiceImpl implements IRefundService {
 			Long lockerId = saleChangeExt.getLocker();
 			saleChangeExt.setLocker(0L);
 			//状态查看assist.js alineQuitSaleStatus方法状态 1,"待审核",2,"已审核",3,"已退废",4,"已拒单"
-			saleChangeExt.setAirlineStatus(3);
+			saleChangeExt.setAirlineStatus(3);//航司已审核
 			saleChangeExt.setModifier(agent.getAccount());
 			saleChangeExt.setAuditPerson(agent.getAccount());
 			saleChangeExt.setModifyTime(modifyTime);
@@ -1663,15 +1676,15 @@ public class RefundServiceImpl implements IRefundService {
 					String remark = buyChangeExt.getChangeRemark();
 					remark = remark + refundRequest.getRemark();
 					buyChangeExt.setChangeRemark(remark);
-					buyChangeExt.setAirLineRefundStatus(1);
+					buyChangeExt.setAirLineRefundStatus(1);//二审审核通过
 					buyChangeExt.setModifier(agent.getAccount());
 					buyChangeExt.setModifyTime(modifyTime);
 					log.info("退废单航司退款审核通过时修改变更变信息："+buyChangeExt.toString());
 					buyChangeExtDao.updateByPrimaryKey(buyChangeExt);
 				}
 				BuyChange buyChange = buyChangeService.getBuyChangeByNo(agent,buyChangeNo);
-				if(saleChangeExt.getIsRefund()==1 && buyChange!=null){//1 已退款
-					buyChange.setChildStatus(10);
+				if(buyChange!=null){//1 已退款
+					buyChange.setChildStatus(10);//采购审核完成  采购退款完成
 					buyChange.setModifier(agent.getAccount());
 					buyChange.setModifyTime(modifyTime);
 					log.info("修改采购变更单信息"+buyChange.toString());

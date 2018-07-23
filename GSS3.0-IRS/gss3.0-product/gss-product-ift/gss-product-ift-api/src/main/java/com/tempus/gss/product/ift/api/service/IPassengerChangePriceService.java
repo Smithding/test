@@ -30,4 +30,6 @@ public interface IPassengerChangePriceService  {
 	int updatePassengerChangePrice(RequestWithActor<PassengerChangePrice> passengerChangePrice);
 
 	PassengerChangePrice getPassengerChangePriceBypassengerNoAndSaleChangeNo(Long saleChangeNo,Long passengerNo);
+
+    PassengerChangePrice getLastChangeByPgerNoAndSaleOrderNo(Long passengerNo, Long saleOrderNo);
 }

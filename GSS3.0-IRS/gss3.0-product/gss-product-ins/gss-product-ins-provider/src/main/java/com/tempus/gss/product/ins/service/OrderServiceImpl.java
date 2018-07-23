@@ -1581,7 +1581,7 @@ public class OrderServiceImpl implements IOrderService {
 						int s = saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 			         	   SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 8);//退款中
 						// 创建销售退款单
-						this.saleRefund(agent, saleOrderNo);
+						this.saleRefund(agent, saleOrderNo,String.valueOf(saleOrderDetail.getInsuredNo()));
 					}else{
 						isCancel = false;
 						for(SaleOrderDetail saleOrderDetailChange:saleOrderExt.getSaleOrderDetailList()){
@@ -1917,7 +1917,7 @@ public class OrderServiceImpl implements IOrderService {
 						log.info("创建采购应收记录失败");
 						throw new GSSException("创建采购应收记录失败", "1010", "退保失败");
 					}
-					  this.newSaleRefund(agent, saleOrderExt.getSaleOrderNo(),saleOrderDetail.getPremium());
+					  this.newSaleRefund(agent, saleOrderExt.getSaleOrderNo(),saleOrderDetail.getPremium(),String.valueOf(saleOrderDetail.getInsuredNo()));
     	return true;
     }
 	/**
@@ -2132,7 +2132,7 @@ public class OrderServiceImpl implements IOrderService {
 					}
 			   		saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 8);//退款中
 					// 创建销售退款单
-					this.saleRefund(agent,saleOrderNo);
+					this.saleRefund(agent,saleOrderNo,String.valueOf(saleOrderDetail.getInsuredNo()));
 				}
 				}
 			//更新销售单和采购单状态
@@ -2374,7 +2374,7 @@ public class OrderServiceImpl implements IOrderService {
 	 */
 	public void createBuyCertificate(Agent agent, long buyOrderNo, double payAmount, long payAccount, long customerNo,
 			long customerTypeNo,
-			int payType, int payWay, String channel, String thirdBusNo) {
+			int payType, int payWay, String channel, String thirdBusNo,String insuredNO) {
 		CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
 		certificateCreateVO.setAccoutNo(String.valueOf(payAccount)); //支付账号
 		certificateCreateVO.setChannel(channel); //渠道 未知
@@ -2387,6 +2387,8 @@ public class OrderServiceImpl implements IOrderService {
 		certificateCreateVO.setServiceLine("1"); //业务线
 		certificateCreateVO.setSubBusinessType(1); //业务小类 1.销采 2.补收退 3.废退 4.变更 5.错误修改
 		certificateCreateVO.setThirdBusNo(thirdBusNo); //第三方业务编号 多个以","隔开 (销售不用传)
+		certificateCreateVO.setSpecialType(1);
+		certificateCreateVO.setTicketNos(insuredNO);
 		List<BusinessOrderInfo> orderInfoList = new ArrayList<>(); //支付订单
 		BusinessOrderInfo businessOrderInfo = new BusinessOrderInfo();
 		businessOrderInfo.setActualAmount(new BigDecimal(payAmount));
@@ -2407,7 +2409,7 @@ public class OrderServiceImpl implements IOrderService {
 	 *
 	 * @return
 	 */
-	public boolean saleRefund(Agent agent, Long saleOrderNo) throws GSSException {
+	public boolean saleRefund(Agent agent, Long saleOrderNo,String insuredNo) throws GSSException {
 		log.info("退保时创建销售退款单开始-------------");
 		if (agent == null) {
 			log.error("agent 为空");
@@ -2427,6 +2429,8 @@ public class OrderServiceImpl implements IOrderService {
 					//		certificateCreateVO.setPayType(payType); //支付类型（1 在线支付 2 帐期或代付 3 线下支付）
 					certificateCreateVO.setReason("销售退款单信息"); //补充说明
 					certificateCreateVO.setSubBusinessType(1); //业务小类 1.销采 2.补收退 3.废退 4.变更 5.错误修改
+					certificateCreateVO.setSpecialType(1);
+					certificateCreateVO.setTicketNos(insuredNo);
 					List<BusinessOrderInfo> orderInfoList = new ArrayList<>(); //支付订单
 					BusinessOrderInfo businessOrderInfo = new BusinessOrderInfo();
 					businessOrderInfo.setActualAmount(saleOrder.getReceived());
@@ -2501,7 +2505,7 @@ public class OrderServiceImpl implements IOrderService {
 	 *
 	 * @return
 	 */
-	public boolean newSaleRefund(Agent agent, Long saleOrderNo,BigDecimal actualAmount) throws GSSException {
+	public boolean newSaleRefund(Agent agent, Long saleOrderNo,BigDecimal actualAmount,String insuredNo) throws GSSException {
 		log.info("退保时创建销售退款单开始-------------");
 		if (agent == null) {
 			log.error("agent 为空");
@@ -2531,6 +2535,8 @@ public class OrderServiceImpl implements IOrderService {
 					orderInfoList.add(businessOrderInfo);
 					certificateCreateVO.setOrderInfoList(orderInfoList);
 					certificateCreateVO.setServiceLine("3");
+					certificateCreateVO.setSpecialType(1);
+					certificateCreateVO.setTicketNos(insuredNo);
 					log.info("创建销售退款单的参数certificateCreateVO---------->" + certificateCreateVO.toString());
 					certificateService.saleRefundCert(agent, certificateCreateVO);
 				} catch (Exception e) {
@@ -2752,7 +2758,7 @@ public class OrderServiceImpl implements IOrderService {
 					saleOrderDetail.setStatus(3);
 					saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					// 创建销售退款单
-					this.saleRefund(agent, saleOrderNo);
+					this.saleRefund(agent, saleOrderNo,String.valueOf(saleOrderDetail.getInsuredNo()));
 				} else {
 					// 退保失败
 					log.error(response.getMsg());
@@ -2987,7 +2993,7 @@ public class OrderServiceImpl implements IOrderService {
 						throw new GSSException("创建采购应收记录失败", "1010", "退保失败");
 					}
 					// 创建销售退款单
-					this.saleRefund(agent,saleOrderNo);
+					this.saleRefund(agent,saleOrderNo,String.valueOf(saleOrderDetail.getInsuredNo()));
 				}
 			//更新销售单和采购单状态
 			List<SaleOrderDetail> saleOrderDetails = saleOrderExt.getSaleOrderDetailList();

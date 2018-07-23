@@ -689,12 +689,16 @@ public class QueryServiceImpl implements IQueryService {
             boolean isok = false;
             for (String travelDate : travelDates) {
                 String[] s_travelDate = travelDate.split("-");
-                if (goflight.getDepTime().getTime() >= stFlight.parse(s_travelDate[0]).getTime() && goflight.getDepTime().getTime() <= stFlight.parse(s_travelDate[1]).getTime()) {
-                    isok = true;
+                if(s_travelDate.length>=2){
+                    if (goflight.getDepTime().getTime() >= stFlight.parse(s_travelDate[0]).getTime() && goflight.getDepTime().getTime() <= stFlight.parse(s_travelDate[1]).getTime()) {
+                        isok = true;
+                    }
                 }
             }
-            if (isok && goflight.getDepTime().getTime() >= stPolicy.parse(ticketDates[0]).getTime() && goflight.getDepTime().getTime() <= stPolicy.parse(ticketDates[1]).getTime()) {
-                check = true;
+            if(ticketDates.length>=2){
+                if (isok && goflight.getDepTime().getTime() >= stPolicy.parse(ticketDates[0]).getTime() && goflight.getDepTime().getTime() <= stPolicy.parse(ticketDates[1]).getTime()) {
+                    check = true;
+                }
             } else {
                 return false;
             }
