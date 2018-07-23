@@ -4,7 +4,6 @@ import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
-import com.tempus.gss.order.entity.PayNoticeVO;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.service.IChangeService;
 import com.tempus.gss.product.ift.api.service.IOrderService;
