@@ -19,6 +19,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.tempus.gss.order.entity.vo.PayNoticeVO;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
 import org.springframework.amqp.rabbit.annotation.Queue;
@@ -33,7 +34,6 @@ import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
 import com.tempus.gss.bbp.util.StringUtil;
-import com.tempus.gss.order.entity.PayNoticeVO;
 import com.tempus.gss.order.service.IPlanAmountRecordService;
 import com.tempus.gss.product.hol.api.entity.response.HolErrorOrder;
 import com.tempus.gss.product.hol.api.entity.response.HotelOrder;
