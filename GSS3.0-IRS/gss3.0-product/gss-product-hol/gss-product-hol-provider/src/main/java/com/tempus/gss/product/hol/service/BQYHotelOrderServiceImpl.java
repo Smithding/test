@@ -8,6 +8,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.tempus.gss.order.entity.enums.GoodsBigType;
+import com.tempus.gss.order.entity.vo.ActualInfoSearchVO;
+import com.tempus.gss.order.entity.vo.CertificateCreateVO;
+import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +34,8 @@ import com.tempus.gss.dps.order.service.SaleService;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.log.entity.LogRecord;
 import com.tempus.gss.log.service.ILogService;
-import com.tempus.gss.order.entity.ActualInfoSearchVO;
 import com.tempus.gss.order.entity.BusinessOrderInfo;
 import com.tempus.gss.order.entity.BuyOrder;
-import com.tempus.gss.order.entity.CertificateCreateVO;
-import com.tempus.gss.order.entity.CreatePlanAmountVO;
-import com.tempus.gss.order.entity.GoodsBigType;
 import com.tempus.gss.order.entity.SaleOrder;
 import com.tempus.gss.order.service.IActualAmountRecorService;
 import com.tempus.gss.order.service.IBuyOrderService;
@@ -271,7 +271,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
     
 	@Override
 	@Transactional(propagation=Propagation.REQUIRED, isolation=Isolation.DEFAULT)
-	public Boolean bqyPushOrderInfo(Agent agent, BQYPushOrderInfo bqyPushOrderInfo) {
+	public Boolean bqyPushOrderInfo(Agent agent, BQYPushOrderInfo bqyPushOrderInfo) throws GSSException{
 		logger.info("推送更新订单状态:{}",JSON.toJSONString(bqyPushOrderInfo));
 		if (StringUtil.isNotNullOrEmpty(bqyPushOrderInfo) && StringUtil.isNotNullOrEmpty(bqyPushOrderInfo.getOrdernumber()) 
 				&& StringUtil.isNotNullOrEmpty(bqyPushOrderInfo.getOrderId())) {

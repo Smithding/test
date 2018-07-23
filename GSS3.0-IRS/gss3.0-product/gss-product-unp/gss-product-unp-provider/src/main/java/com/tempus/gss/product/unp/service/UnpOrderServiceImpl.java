@@ -13,27 +13,11 @@
 
 package com.tempus.gss.product.unp.service;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.dubbo.config.annotation.Service;
-import com.baomidou.mybatisplus.plugins.Page;
-import com.baomidou.mybatisplus.toolkit.IdWorker;
-import com.tempus.gss.exception.GSSException;
-import com.tempus.gss.order.entity.*;
-import com.tempus.gss.order.entity.enums.BusinessType;
-import com.tempus.gss.order.entity.enums.CostType;
-import com.tempus.gss.order.entity.enums.GoodsBigType;
-import com.tempus.gss.order.entity.enums.IncomeExpenseType;
-import com.tempus.gss.order.entity.vo.CertificateCreateVO;
-import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
-import com.tempus.gss.order.service.*;
-import com.tempus.gss.product.common.entity.RequestWithActor;
-import com.tempus.gss.product.unp.api.entity.UnpOrder;
-import com.tempus.gss.product.unp.api.entity.vo.OrderCreateVo;
-import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
-import com.tempus.gss.product.unp.api.service.IUnpOrderService;
-import com.tempus.gss.product.unp.dao.OrderDao;
-import com.tempus.gss.system.service.IMaxNoService;
-import com.tempus.gss.vo.Agent;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Lists;
 import org.slf4j.Logger;
@@ -43,10 +27,34 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.dubbo.config.annotation.Service;
+import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.toolkit.IdWorker;
+import com.tempus.gss.exception.GSSException;
+import com.tempus.gss.order.entity.BusinessOrderInfo;
+import com.tempus.gss.order.entity.BuyOrder;
+import com.tempus.gss.order.entity.SaleOrder;
+import com.tempus.gss.order.entity.TransationOrder;
+import com.tempus.gss.order.entity.enums.BusinessType;
+import com.tempus.gss.order.entity.enums.CostType;
+import com.tempus.gss.order.entity.enums.GoodsBigType;
+import com.tempus.gss.order.entity.enums.IncomeExpenseType;
+import com.tempus.gss.order.entity.vo.CertificateCreateVO;
+import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
+import com.tempus.gss.order.service.IBuyOrderService;
+import com.tempus.gss.order.service.ICertificateService;
+import com.tempus.gss.order.service.IPlanAmountRecordService;
+import com.tempus.gss.order.service.ISaleOrderService;
+import com.tempus.gss.order.service.ITransationOrderService;
+import com.tempus.gss.product.common.entity.RequestWithActor;
+import com.tempus.gss.product.unp.api.entity.UnpOrder;
+import com.tempus.gss.product.unp.api.entity.vo.OrderCreateVo;
+import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
+import com.tempus.gss.product.unp.api.service.IUnpOrderService;
+import com.tempus.gss.product.unp.dao.OrderDao;
+import com.tempus.gss.system.service.IMaxNoService;
+import com.tempus.gss.vo.Agent;
 
 /**
  * ClassName:UnpOrderServiceImpl
@@ -186,7 +194,7 @@ public class UnpOrderServiceImpl implements IUnpOrderService {
             //通用产品
             buyOrder.setGoodsType(GoodsBigType.GENERAL.getKey());
             //subType填入的是 dict表对应的产品的id
-            buyOrder.setGoodsSubType(subType);
+            //buyOrder.setGoodsSubType(subType);
             buyOrder.setGoodsName(StringUtils.isBlank(unpOrder.getRemark()) ? "通用产品" : unpOrder.getRemark());
             buyOrder.setBuyChannelNo("unp");
             buyOrder.setSupplierNo(unpOrder.getBuyChannelId());

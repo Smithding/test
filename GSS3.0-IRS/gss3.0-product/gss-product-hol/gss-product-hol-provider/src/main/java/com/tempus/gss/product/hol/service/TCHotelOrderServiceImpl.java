@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.tempus.gss.order.entity.enums.GoodsBigType;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,7 +47,6 @@ import com.tempus.gss.log.service.ILogService;
 import com.tempus.gss.mq.MqSender;
 import com.tempus.gss.mss.service.IMssReserveService;
 import com.tempus.gss.order.entity.BuyOrder;
-import com.tempus.gss.order.entity.GoodsBigType;
 import com.tempus.gss.order.entity.SaleOrder;
 import com.tempus.gss.order.service.IBuyOrderService;
 import com.tempus.gss.order.service.ISaleOrderService;

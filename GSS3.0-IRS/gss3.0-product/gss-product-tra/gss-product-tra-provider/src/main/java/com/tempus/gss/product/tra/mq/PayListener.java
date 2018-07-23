@@ -1,19 +1,20 @@
 package com.tempus.gss.product.tra.mq;
 
+import org.springframework.amqp.core.ExchangeTypes;
+import org.springframework.amqp.rabbit.annotation.Exchange;
+import org.springframework.amqp.rabbit.annotation.Queue;
+import org.springframework.amqp.rabbit.annotation.QueueBinding;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.dubbo.common.logger.Logger;
 import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
-import com.tempus.gss.order.entity.PayNoticeVO;
-import com.tempus.gss.product.common.entity.RequestWithActor;
-import com.tempus.gss.product.ift.api.service.IChangeService;
-import com.tempus.gss.product.ift.api.service.IOrderService;
+import com.tempus.gss.order.entity.vo.PayNoticeVO;
 import com.tempus.gss.product.tra.api.service.ITrainService;
 import com.tempus.gss.vo.Agent;
-import org.springframework.amqp.core.ExchangeTypes;
-import org.springframework.amqp.rabbit.annotation.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Created by xujia.wu on 2016/12/16.
