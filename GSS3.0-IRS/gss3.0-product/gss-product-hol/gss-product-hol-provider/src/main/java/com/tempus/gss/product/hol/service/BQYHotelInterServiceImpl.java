@@ -43,8 +43,6 @@ import com.tempus.gss.cps.entity.Supplier;
 import com.tempus.gss.cps.service.ISupplierService;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.order.entity.BuyOrder;
-import com.tempus.gss.order.entity.CreatePlanAmountVO;
-import com.tempus.gss.order.entity.GoodsBigType;
 import com.tempus.gss.order.entity.SaleOrder;
 import com.tempus.gss.order.service.IBuyOrderService;
 import com.tempus.gss.order.service.IPlanAmountRecordService;

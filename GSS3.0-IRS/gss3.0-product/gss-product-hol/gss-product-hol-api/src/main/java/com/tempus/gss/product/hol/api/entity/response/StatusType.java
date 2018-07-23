@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.entity.response;
 
-import com.tempus.gss.order.entity.GoodsBigType;
+
+import com.tempus.gss.order.entity.enums.GoodsBigType;
 
 import java.io.Serializable;
 import java.util.HashMap;
