@@ -271,7 +271,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
     
 	@Override
 	@Transactional(propagation=Propagation.REQUIRED, isolation=Isolation.DEFAULT)
-	public Boolean bqyPushOrderInfo(Agent agent, BQYPushOrderInfo bqyPushOrderInfo) {
+	public Boolean bqyPushOrderInfo(Agent agent, BQYPushOrderInfo bqyPushOrderInfo) throws GSSException{
 		logger.info("推送更新订单状态:{}",JSON.toJSONString(bqyPushOrderInfo));
 		if (StringUtil.isNotNullOrEmpty(bqyPushOrderInfo) && StringUtil.isNotNullOrEmpty(bqyPushOrderInfo.getOrdernumber()) 
 				&& StringUtil.isNotNullOrEmpty(bqyPushOrderInfo.getOrderId())) {
