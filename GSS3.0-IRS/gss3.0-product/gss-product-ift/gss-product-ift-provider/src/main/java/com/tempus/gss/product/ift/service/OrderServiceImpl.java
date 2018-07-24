@@ -1,11 +1,24 @@
 package com.tempus.gss.product.ift.service;
 
-import java.math.BigDecimal;
-import java.net.URL;
-import java.util.*;
-
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.toolkit.IdWorker;
+import com.tempus.gss.bbp.util.DateUtil;
+import com.tempus.gss.cps.entity.Customer;
+import com.tempus.gss.cps.entity.Supplier;
+import com.tempus.gss.cps.service.IAccountService;
+import com.tempus.gss.cps.service.ICustomerService;
+import com.tempus.gss.cps.service.ICustomerTypeService;
+import com.tempus.gss.cps.service.ISupplierService;
+import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.mq.MqSender;
-import com.tempus.gss.order.entity.*;
+import com.tempus.gss.mss.service.IMssReserveService;
+import com.tempus.gss.order.entity.BusinessOrderInfo;
+import com.tempus.gss.order.entity.BuyOrder;
+import com.tempus.gss.order.entity.SaleOrder;
+import com.tempus.gss.order.entity.TransationOrder;
 import com.tempus.gss.order.entity.enums.BusinessType;
 import com.tempus.gss.order.entity.enums.CostType;
 import com.tempus.gss.order.entity.vo.CertificateCreateVO;
@@ -14,17 +27,33 @@ import com.tempus.gss.order.entity.vo.UpdatePlanAmountVO;
 import com.tempus.gss.order.service.*;
 import com.tempus.gss.pay.entity.CapitalAccount;
 import com.tempus.gss.pay.service.ICapitalAccountService;
+import com.tempus.gss.pay.service.facade.IPayRestService;
+import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.*;
 import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
+import com.tempus.gss.product.ift.api.entity.vo.*;
+import com.tempus.gss.product.ift.api.entity.webservice.InairlinesVo;
+import com.tempus.gss.product.ift.api.entity.webservice.InpayVo;
+import com.tempus.gss.product.ift.api.entity.webservice.InsaleVo;
+import com.tempus.gss.product.ift.api.entity.webservice.settt.InallsaleVo;
+import com.tempus.gss.product.ift.api.entity.webservice.settt.InsaleService;
+import com.tempus.gss.product.ift.api.entity.webservice.settt.InsaleService_Service;
+import com.tempus.gss.product.ift.api.entity.webservice.settt.ReturnSettInfo;
 import com.tempus.gss.product.ift.api.service.*;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.*;
 import com.tempus.gss.product.ift.help.IftLogHelper;
+import com.tempus.gss.product.ift.mq.IftTicketMqSender;
+import com.tempus.gss.security.AgentUtil;
 import com.tempus.gss.system.entity.User;
+import com.tempus.gss.system.service.IMaxNoService;
 import com.tempus.gss.system.service.IUserService;
+import com.tempus.gss.util.JsonUtil;
+import com.tempus.gss.vo.Agent;
 import com.tempus.gss.websocket.SocketDO;
 import com.tempus.tbd.entity.Airport;
 import com.tempus.tbd.service.IAirportService;
+import com.tempus.tbe.entity.PnrOutPut;
 import com.tempus.tbe.service.IGetPnrService;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -38,52 +67,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.dubbo.config.annotation.Service;
-import com.alibaba.fastjson.JSON;
-import com.baomidou.mybatisplus.plugins.Page;
-import com.baomidou.mybatisplus.toolkit.IdWorker;
-import com.tempus.gss.bbp.util.DateUtil;
-import com.tempus.gss.cps.entity.Account;
-import com.tempus.gss.cps.entity.Customer;
-import com.tempus.gss.cps.entity.Supplier;
-import com.tempus.gss.cps.service.IAccountService;
-import com.tempus.gss.cps.service.ICustomerService;
-import com.tempus.gss.cps.service.ICustomerTypeService;
-import com.tempus.gss.cps.service.ISupplierService;
-import com.tempus.gss.exception.GSSException;
-import com.tempus.gss.mss.service.IMssReserveService;
-import com.tempus.gss.pay.service.facade.IPayRestService;
-import com.tempus.gss.product.common.entity.RequestWithActor;
-import com.tempus.gss.product.ift.api.entity.vo.BlackOrderExtVo;
-import com.tempus.gss.product.ift.api.entity.vo.DemandTeamVo;
-import com.tempus.gss.product.ift.api.entity.vo.IftTicketMessage;
-import com.tempus.gss.product.ift.api.entity.vo.OrderCreateVo;
-import com.tempus.gss.product.ift.api.entity.vo.OrderInformVo;
-import com.tempus.gss.product.ift.api.entity.vo.OrderPriceVo;
-import com.tempus.gss.product.ift.api.entity.vo.OrderRefuseRequest;
-import com.tempus.gss.product.ift.api.entity.vo.PassengerListVo;
-import com.tempus.gss.product.ift.api.entity.vo.PassengerVo;
-import com.tempus.gss.product.ift.api.entity.vo.QueryPnrAndTimeVo;
-import com.tempus.gss.product.ift.api.entity.vo.ReportVo;
-import com.tempus.gss.product.ift.api.entity.vo.SaleOrderDetailVo;
-import com.tempus.gss.product.ift.api.entity.vo.SaleOrderExtVo;
-import com.tempus.gss.product.ift.api.entity.vo.SaleQueryOrderVo;
-import com.tempus.gss.product.ift.api.entity.vo.TicketRequest;
-import com.tempus.gss.product.ift.api.entity.vo.WarnOrderRequest;
-import com.tempus.gss.product.ift.api.entity.webservice.InairlinesVo;
-import com.tempus.gss.product.ift.api.entity.webservice.InpayVo;
-import com.tempus.gss.product.ift.api.entity.webservice.InsaleVo;
-import com.tempus.gss.product.ift.api.entity.webservice.settt.InallsaleVo;
-import com.tempus.gss.product.ift.api.entity.webservice.settt.InsaleService;
-import com.tempus.gss.product.ift.api.entity.webservice.settt.InsaleService_Service;
-import com.tempus.gss.product.ift.api.entity.webservice.settt.ReturnSettInfo;
-import com.tempus.gss.product.ift.mq.IftTicketMqSender;
-import com.tempus.gss.security.AgentUtil;
-import com.tempus.gss.system.service.IMaxNoService;
-import com.tempus.gss.util.JsonUtil;
-import com.tempus.gss.vo.Agent;
-import com.tempus.tbe.entity.PnrOutPut;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.util.*;
 
 @Service
 @org.springframework.stereotype.Service("iftOrderService")
@@ -1004,7 +990,7 @@ public class OrderServiceImpl implements IOrderService {
      */
     @Override
     @Transactional
-    public boolean issuing(RequestWithActor<PassengerListVo> requestWithActor) throws GSSException{
+    public boolean issuing(RequestWithActor<PassengerListVo> requestWithActor) throws GSSException {
         
         Agent agent = requestWithActor.getAgent();
         log.info("出单开始");
@@ -1016,9 +1002,9 @@ public class OrderServiceImpl implements IOrderService {
             PassengerListVo listVo = requestWithActor.getEntity();
             
             //判断资金帐号提前至此
-           // Account account = accountService.getAccountByAccountNo(agent, listVo.getAccountNo());
+            // Account account = accountService.getAccountByAccountNo(agent, listVo.getAccountNo());
             CapitalAccount account = capitalAccountService.findByNo(agent, listVo.getAccountNo());
-
+            
             if (account == null) {
                 throw new GSSException("创建采购付款单失败", "0102", "资金帐号未能查出相应数据!account为空！accountNo=" + listVo.getAccountNo());
             }
@@ -1028,7 +1014,7 @@ public class OrderServiceImpl implements IOrderService {
             BuyOrder buyOrder = null;
             if (buyOrderList != null && buyOrderList.size() != 0) {
                 buyOrder = buyOrderList.get(0);
-                this.createBuyCertificate(agent, buyOrder.getBuyOrderNo(), buyOrder.getPayable().doubleValue(), account.getCapitalAccountNo(), supplier.getSupplierNo(), supplier.getCustomerTypeNo(), 3, account.getPayWayCode(), "BUY", listVo.getDealNo(), buyOrder.getBuyOrderNo() +" ");//thirdBusNo 随意填的
+                this.createBuyCertificate(agent, buyOrder.getBuyOrderNo(), buyOrder.getPayable().doubleValue(), account.getCapitalAccountNo(), supplier.getSupplierNo(), supplier.getCustomerTypeNo(), 3, account.getPayWayCode(), "BUY", listVo.getDealNo(), buyOrder.getBuyOrderNo() + " ");//thirdBusNo 随意填的
             }
             //StringBuffer ticketNoArray = new StringBuffer();
             Date date = new Date();
@@ -1041,6 +1027,7 @@ public class OrderServiceImpl implements IOrderService {
                 pnr.setPnr(listVo.getPnr());
                 pnr.setBigPnr(listVo.getBigPnr());
                 pnrDao.updateByPrimaryKey(pnr);
+                pnrNo = pnr.getPnrNo();
             } else {
                 pnrNo = savePnr(pnrNo, listVo, saleOrderNo, agent, date);
             }
@@ -1117,10 +1104,10 @@ public class OrderServiceImpl implements IOrderService {
             log.info("出单操作成功");
             //销售员订单数量减一
             subSaleOrderNum(agent, preLocker);
-        }  catch (GSSException e) {
+        } catch (GSSException e) {
             log.error("创建采购付款单异常！GSSException", e);
             throw new GSSException(e.getModule(), e.getCode(), e.getMessage());
-        }  catch (Exception e) {
+        } catch (Exception e) {
             //这里的异常一般不是业务异常
             log.error("国际机票出票异常", e);
             throw new GSSException("国际机票出票异常", "0102", "出单操作失败!" + e);
@@ -1153,7 +1140,7 @@ public class OrderServiceImpl implements IOrderService {
      * @param thirdPayNo
      *         第三方业务编号 多个以","隔开
      */
-    public void createBuyCertificate(Agent agent, long buyOrderNo, double payAmount, long payAccount, long customerNo, long customerTypeNo, int payType, int payWay, String channel, String thirdPayNo,String thirdBusNo) {
+    public void createBuyCertificate(Agent agent, long buyOrderNo, double payAmount, long payAccount, long customerNo, long customerTypeNo, int payType, int payWay, String channel, String thirdPayNo, String thirdBusNo) {
         
         CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
         certificateCreateVO.setAccoutNo(payAccount + ""); // 支付账号
@@ -1181,9 +1168,9 @@ public class OrderServiceImpl implements IOrderService {
         
         try {
             this.certificateService.createBuyCertificate(agent, certificateCreateVO);
-        }   catch (GSSException e) {
+        } catch (GSSException e) {
             throw new GSSException(e.getModule(), e.getCode(), e.getMessage());
-        }  catch (Exception e) {
+        } catch (Exception e) {
             throw new GSSException("创建采购付款单失败，e=" + e, "10001", "创建采购付款单失败");
         }
         
