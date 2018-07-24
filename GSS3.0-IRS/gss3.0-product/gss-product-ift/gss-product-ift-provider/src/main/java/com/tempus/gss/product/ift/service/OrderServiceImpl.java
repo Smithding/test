@@ -12,6 +12,8 @@ import com.tempus.gss.order.entity.vo.CertificateCreateVO;
 import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
 import com.tempus.gss.order.entity.vo.UpdatePlanAmountVO;
 import com.tempus.gss.order.service.*;
+import com.tempus.gss.pay.entity.CapitalAccount;
+import com.tempus.gss.pay.service.ICapitalAccountService;
 import com.tempus.gss.product.ift.api.entity.*;
 import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
 import com.tempus.gss.product.ift.api.service.*;
@@ -130,7 +132,8 @@ public class OrderServiceImpl implements IOrderService {
     
     @Reference
     ICertificateService certificateService;
-    
+    @Reference
+    ICapitalAccountService capitalAccountService;
     @Reference
     IAccountService accountService;
     
@@ -1013,7 +1016,9 @@ public class OrderServiceImpl implements IOrderService {
             PassengerListVo listVo = requestWithActor.getEntity();
             
             //判断资金帐号提前至此
-            Account account = accountService.getAccountByAccountNo(agent, listVo.getAccountNo());
+           // Account account = accountService.getAccountByAccountNo(agent, listVo.getAccountNo());
+            CapitalAccount account = capitalAccountService.findByNo(agent, listVo.getAccountNo());
+
             if (account == null) {
                 throw new GSSException("创建采购付款单失败", "0102", "资金帐号未能查出相应数据!account为空！accountNo=" + listVo.getAccountNo());
             }
@@ -1023,7 +1028,7 @@ public class OrderServiceImpl implements IOrderService {
             BuyOrder buyOrder = null;
             if (buyOrderList != null && buyOrderList.size() != 0) {
                 buyOrder = buyOrderList.get(0);
-                this.createBuyCertificate(agent, buyOrder.getBuyOrderNo(), buyOrder.getPayable().doubleValue(), account.getAccountNo(), supplier.getSupplierNo(), supplier.getCustomerTypeNo(), 2, account.getType(), "BUY", listVo.getDealNo());
+                this.createBuyCertificate(agent, buyOrder.getBuyOrderNo(), buyOrder.getPayable().doubleValue(), account.getCapitalAccountNo(), supplier.getSupplierNo(), supplier.getCustomerTypeNo(), 3, account.getPayWayCode(), "BUY", listVo.getDealNo(), buyOrder.getBuyOrderNo() +" ");//thirdBusNo 随意填的
             }
             //StringBuffer ticketNoArray = new StringBuffer();
             Date date = new Date();
@@ -1148,7 +1153,7 @@ public class OrderServiceImpl implements IOrderService {
      * @param thirdPayNo
      *         第三方业务编号 多个以","隔开
      */
-    public void createBuyCertificate(Agent agent, long buyOrderNo, double payAmount, long payAccount, long customerNo, long customerTypeNo, int payType, int payWay, String channel, String thirdPayNo) {
+    public void createBuyCertificate(Agent agent, long buyOrderNo, double payAmount, long payAccount, long customerNo, long customerTypeNo, int payType, int payWay, String channel, String thirdPayNo,String thirdBusNo) {
         
         CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
         certificateCreateVO.setAccoutNo(payAccount + ""); // 支付账号
@@ -1162,7 +1167,7 @@ public class OrderServiceImpl implements IOrderService {
         certificateCreateVO.setServiceLine("1"); // 业务线
         certificateCreateVO.setSubBusinessType(1); // 业务小类 1.销采 2.补收退 3.废退 4.变更
         // 5.错误修改
-        //certificateCreateVO.setThirdBusNo(thirdBusNo); // 第三方业务编号 多个以","隔开
+        certificateCreateVO.setThirdBusNo(thirdBusNo); // 第三方业务编号 多个以","隔开
         // (销售不用传)
         certificateCreateVO.setThirdPayNo(thirdPayNo); // 第三方支付流水 多个以","隔开
         // (销售不用传)
