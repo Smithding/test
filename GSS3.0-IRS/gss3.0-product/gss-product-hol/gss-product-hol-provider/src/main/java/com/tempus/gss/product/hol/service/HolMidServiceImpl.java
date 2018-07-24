@@ -1,20 +1,21 @@
 package com.tempus.gss.product.hol.service;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.Future;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.alibaba.dubbo.config.annotation.Service;
+import com.tempus.gss.bbp.util.StringUtil;
+import com.tempus.gss.exception.GSSException;
+import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
+import com.tempus.gss.product.hol.api.entity.ResNameSum;
+import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
+import com.tempus.gss.product.hol.api.entity.response.TCResponse;
+import com.tempus.gss.product.hol.api.entity.response.tc.*;
+import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
+import com.tempus.gss.product.hol.api.service.IHolMidService;
+import com.tempus.gss.product.hol.api.syn.ISyncHotelInfo;
+import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
+import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
+import com.tempus.gss.util.JsonUtil;
+import com.tempus.gss.vo.Agent;
+import httl.util.StringUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,36 +23,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.domain.Sort.Order;
-import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 
-import com.alibaba.dubbo.config.annotation.Service;
-import com.google.common.collect.Lists;
-import com.tempus.gss.bbp.util.StringUtil;
-import com.tempus.gss.exception.GSSException;
-import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
-import com.tempus.gss.product.hol.api.entity.ResNameSum;
-import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
-import com.tempus.gss.product.hol.api.entity.response.TCResponse;
-import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
-import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfoSum;
-import com.tempus.gss.product.hol.api.entity.response.tc.ProDetails;
-import com.tempus.gss.product.hol.api.entity.response.tc.ProSaleInfoDetail;
-import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
-import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
-import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
-import com.tempus.gss.product.hol.api.service.IHolMidService;
-import com.tempus.gss.product.hol.api.syn.ISyncHotelInfo;
-import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
-import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
-import com.tempus.gss.security.AgentUtil;
-import com.tempus.gss.util.JsonUtil;
-import com.tempus.gss.vo.Agent;
-
-import httl.util.StringUtils;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 /**
  * 酒店中间表Service实现
@@ -249,24 +229,10 @@ public class HolMidServiceImpl implements IHolMidService {
 
 	@Override
 	public ResBaseInfo hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
-		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
-		Long bqyResId = null;
-		Long tcResId = null;
-		String bqyCityCode = null;
-		List<ResNameSum> listHol = holMid.getResNameSum();
-		if (null != listHol && listHol.size() > 0) {
-			for (ResNameSum resNameSum : listHol) {
-				switch (resNameSum.getResType()) {
-					case 1:
-						tcResId = resNameSum.getResId();
-						break;
-					case 2:
-						bqyResId = resNameSum.getResId();
-						bqyCityCode = resNameSum.getCityCode();
-						break;
-				}
-			}
-		}
+		Map<String, Object> resultMap = getHotelId(agent, holMidId);
+		Long bqyResId = (Long)resultMap.get("bqyResId");
+		Long tcResId = (Long)resultMap.get("tcResId");
+		String bqyCityCode = (String) resultMap.get("bqyCityCode");
 		ResBaseInfo bqyHotel = null;
 		ResBaseInfo tcHotel = null;
 		
@@ -357,24 +323,11 @@ public class HolMidServiceImpl implements IHolMidService {
 	@Override
 	public ResBaseInfo hotelDetailForBack(Agent agent, String holMidId, String checkinDate, String checkoutDate)
 			throws Exception {
-		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
-		Long bqyResId = null;
-		Long tcResId = null;
-		String bqyCityCode = null;
-		List<ResNameSum> listHol = holMid.getResNameSum();
-		if (null != listHol && listHol.size() > 0) {
-			for (ResNameSum resNameSum : listHol) {
-				switch (resNameSum.getResType()) {
-					case 1:
-						tcResId = resNameSum.getResId();
-						break;
-					case 2:
-						bqyResId = resNameSum.getResId();
-						bqyCityCode = resNameSum.getCityCode();
-						break;
-				}
-			}
-		}
+		Map<String, Object> resultMap = getHotelId(agent, holMidId);
+		Long bqyResId = (Long)resultMap.get("bqyResId");
+		Long tcResId = (Long)resultMap.get("tcResId");
+		String bqyCityCode = (String) resultMap.get("bqyCityCode");
+
 		ResBaseInfo bqyHotel = null;
 		ResBaseInfo tcHotel = null;
 		
@@ -472,20 +425,9 @@ public class HolMidServiceImpl implements IHolMidService {
 	@Override
 	public List<ImgInfo> listImgByHotelId(Agent agent, String holMidId) {
 		List<ImgInfo> imgList = null;
-		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
-		Long bqyResId = null;
-		Long tcResId = null;
-		List<ResNameSum> listHol = holMid.getResNameSum();
-		for (ResNameSum resNameSum: listHol ) {
-			switch (resNameSum.getResType()) {
-			case 1:
-				tcResId = resNameSum.getResId();
-				break;
-			case 2:
-				bqyResId = resNameSum.getResId();
-				break;
-		}
-		}
+		Map<String, Object> resultMap = getHotelId(agent, holMidId);
+		Long bqyResId = (Long) resultMap.get("bqyResId");
+		Long tcResId = (Long) resultMap.get("tcResId");
 		if (null != bqyResId && bqyResId != 0) {
 			imgList = bqyHotelSupplierService.listImgByHotelId(agent, bqyResId);
 		}else {
@@ -517,5 +459,37 @@ public class HolMidServiceImpl implements IHolMidService {
 			throw new GSSException("修改可售状态", "0118", "修改可售状态失败");
 		}
 		return 1;
+	}
+
+	/**
+	 * 酒店ID,城市编号
+	 * @param agent
+	 * @param holMidId
+	 * @return
+	 */
+	private Map<String, Object> getHotelId(Agent agent, String holMidId) {
+		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
+		Long bqyResId = null;
+		Long tcResId = null;
+		String bqyCityCode = null;
+		List<ResNameSum> listHol = holMid.getResNameSum();
+		if (null != listHol && listHol.size() > 0) {
+			for (ResNameSum resNameSum : listHol) {
+				switch (resNameSum.getResType()) {
+					case 1:
+						tcResId = resNameSum.getResId();
+						break;
+					case 2:
+						bqyResId = resNameSum.getResId();
+						bqyCityCode = resNameSum.getCityCode();
+						break;
+				}
+			}
+		}
+		Map<String, Object> map = new HashMap<>();
+		map.put("bqyResId", bqyResId);
+		map.put("tcResId", tcResId);
+		map.put("bqyCityCode", bqyCityCode);
+		return map;
 	}
 }
