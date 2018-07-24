@@ -1102,7 +1102,8 @@ public class ChangeServiceImpl implements IChangeService {
                 priceVo.setBuyRebate(temp.getBuyRebate());
                 priceVo.setBuyTax(temp.getBuyTax());
                 priceVo.setBuyRest(temp.getBuyRest());
-
+                priceVo.setAllBuyPrice(temp.getAllBuyPrice());
+                priceVo.setAllSalePrice(temp.getAllSalePrice());
             } else {
                 priceVo = voList.get(i);
             }
