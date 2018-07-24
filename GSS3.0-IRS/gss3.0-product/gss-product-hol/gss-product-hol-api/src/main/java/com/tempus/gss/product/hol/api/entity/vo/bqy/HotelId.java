@@ -1,6 +1,8 @@
 package com.tempus.gss.product.hol.api.entity.vo.bqy;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -17,6 +19,8 @@ public class HotelId implements Serializable {
 	@JSONField(name="HotelName")
 	private String hotelName; 	//酒店名称
 
+	private String lastUpdateTime;
+
 	public Long getHotelId() {
 		return hotelId;
 	}
@@ -32,5 +36,14 @@ public class HotelId implements Serializable {
 	public void setHotelName(String hotelName) {
 		this.hotelName = hotelName;
 	}
-	
+
+	public String getLastUpdateTime() {
+		return lastUpdateTime;
+	}
+
+	public void setLastUpdateTime(String lastUpdateTime) {
+		Date now = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		this.lastUpdateTime = sdf.format(now);
+	}
 }
