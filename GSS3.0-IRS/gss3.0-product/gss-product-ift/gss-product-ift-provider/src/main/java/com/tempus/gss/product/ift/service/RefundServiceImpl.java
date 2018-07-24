@@ -926,6 +926,14 @@ public class RefundServiceImpl implements IRefundService {
 				createVO.setPayType(payWayCode);
 				createVO.setPayWay(Integer.parseInt(vo.getPayWay()));
 			}
+			List<AirLineRefundVo> refundVos = refundRequest.getRefundVoList();
+			if(refundVos!=null && refundVos.size()>0){
+			     String str = "";
+				for(AirLineRefundVo refundVo:refundVos){
+			   	str = str+ "," +refundVo.getCapitalFow();
+			   }
+				createVO.setThirdPayNo(str);
+			}
 			//创建采购退款单
 			log.info("航司退款审核结算,创建采购退款单参数:"+createVO.toString());
 			certificateService.buyRefundByList(agent,createVO);
