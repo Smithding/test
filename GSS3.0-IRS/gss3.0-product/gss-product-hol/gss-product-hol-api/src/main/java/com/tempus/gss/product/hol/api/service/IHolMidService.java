@@ -63,5 +63,12 @@ public interface IHolMidService {
 	 * @return
 	 */
 	int saleStatusUpdate(Agent agent, Long holMidId, Integer saleStatus);
-	
+
+	/**
+	 * 酒店基本信息
+	 * @param agent
+	 * @param holMidId
+	 * @return
+	 */
+	ResBaseInfo hotelBaseInfo(Agent agent, String holMidId);
 }
