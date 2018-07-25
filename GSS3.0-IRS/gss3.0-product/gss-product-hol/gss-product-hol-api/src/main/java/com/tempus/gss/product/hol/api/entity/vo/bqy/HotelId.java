@@ -19,7 +19,7 @@ public class HotelId implements Serializable {
 	@JSONField(name="HotelName")
 	private String hotelName; 	//酒店名称
 
-	private String lastUpdateTime;
+	private String lastUpdateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
 	public Long getHotelId() {
 		return hotelId;
@@ -42,8 +42,6 @@ public class HotelId implements Serializable {
 	}
 
 	public void setLastUpdateTime(String lastUpdateTime) {
-		Date now = new Date();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		this.lastUpdateTime = sdf.format(now);
+		this.lastUpdateTime = lastUpdateTime;
 	}
 }
