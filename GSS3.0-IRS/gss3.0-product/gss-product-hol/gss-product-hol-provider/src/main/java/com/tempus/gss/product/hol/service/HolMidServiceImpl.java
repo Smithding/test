@@ -244,8 +244,12 @@ public class HolMidServiceImpl implements IHolMidService {
 				while (bqyResponse.isDone() && tcResponse.isDone()) {
 						break;
 					}
-				bqyHotel = bqyResponse.get();
-				tcHotel = tcResponse.get();
+				if (null != bqyResponse) {
+					bqyHotel = bqyResponse.get();
+				}
+				if (null != tcResponse) {
+					tcHotel = tcResponse.get();
+				}
 				List<ProDetails> bqyProDetailList = null;
 				List<ProDetails> tcProDetailList = null;
 				if (null != bqyHotel) {
@@ -459,6 +463,27 @@ public class HolMidServiceImpl implements IHolMidService {
 			throw new GSSException("修改可售状态", "0118", "修改可售状态失败");
 		}
 		return 1;
+	}
+
+	@Override
+	public ResBaseInfo hotelBaseInfo(Agent agent, String holMidId) {
+		if (StringUtil.isNullOrEmpty(agent)) {
+			logger.error("agent对象为空");
+			throw new GSSException("修改酒店可售状态", "0102", "agent对象为空");
+		}
+		if (StringUtil.isNullOrEmpty(holMidId)) {
+			throw new GSSException("修改酒店可售状态", "0118", "传入中间表ID为空");
+		}
+		ResBaseInfo resBaseInfo = null;
+		Map<String, Object> resultMap = getHotelId(agent, holMidId);
+		Long bqyResId = (Long)resultMap.get("bqyResId");
+		Long tcResId = (Long)resultMap.get("tcResId");
+		if (null != bqyResId) {
+			resBaseInfo = bqyHotelSupplierService.getById(agent, bqyResId);
+		}else if (null != tcResId) {
+			resBaseInfo = tcHotelSupplierService.queryListByResId(agent, tcResId);
+		}
+		return resBaseInfo;
 	}
 
 	/**
