@@ -23,4 +23,6 @@ public interface TicketSenderDao extends BaseDao<TicketSender,TicketSenderVo> {
     List<TicketSender> queryByLoginId(@Param("loginId") String loginId);
 
     List<Map<String,Object>> queryTicketNameAndLockerId();
+
+    TicketSender queryByUserId(Long userId);
 }

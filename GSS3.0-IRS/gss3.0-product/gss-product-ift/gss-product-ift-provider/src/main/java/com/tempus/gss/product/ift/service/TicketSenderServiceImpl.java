@@ -230,4 +230,10 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
         return  ticketSenders;
     }
 
+    @Override
+    public TicketSender queryByUserId(Long userId) {
+
+        return ticketSenderDao.queryByUserId(userId);
+    }
+
 }
