@@ -393,19 +393,20 @@ public class ChangeServiceImpl implements IChangeService {
     }
 
     @Override
-    public boolean createChange(RequestWithActor<ChangeCreateVo> requestWithActor) {
+    public Long createChange(RequestWithActor<ChangeCreateVo> requestWithActor) {
         boolean flag = false;
+        SaleChangeExt saleChangeExt = null;
         try {
-            SaleChangeExt saleChangeExt = this.apiCreateChange(requestWithActor);
-            if (saleChangeExt == null) {
+            saleChangeExt = this.apiCreateChange(requestWithActor);
+            /*if (saleChangeExt == null) {
                 flag = false;
             }
-            flag = true;
+            flag = true;*/
         } catch (Exception e) {
-            flag = false;
+            //flag = false;
             throw new GSSException("创建改签单失败", "0003", "创建改签单失败" + e);
         }
-        return flag;
+        return saleChangeExt!=null?saleChangeExt.getSaleChangeNo():null;
     }
 
     /**
