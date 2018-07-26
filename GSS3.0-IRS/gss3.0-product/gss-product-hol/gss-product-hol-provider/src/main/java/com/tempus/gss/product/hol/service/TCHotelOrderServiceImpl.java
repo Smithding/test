@@ -784,7 +784,14 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	                pageRequest.getEntity().setCustomerNo(pageRequest.getAgent().getNum());
 	            }
 	        }
-	        List<HotelOrder> hotelOrderList = hotelOrderMapper.queryOrderList(page, pageRequest.getEntity());
+            //直接用订单号查询时,不受日期限制
+			if(StringUtil.isNotNullOrEmpty(pageRequest.getEntity().getSaleOrderNo())){
+				pageRequest.getEntity().setCreateEndTime(null);
+				pageRequest.getEntity().setCreateStartTime(null);
+			}
+
+
+			List<HotelOrder> hotelOrderList = hotelOrderMapper.queryOrderList(page, pageRequest.getEntity());
 	        /**
 	         * 根据saleOrderNo通过API接口去其他子系统去获取数据
 	         * 需要根据list的长度去执行获取数据的次数,此操作可能会存在性能问题

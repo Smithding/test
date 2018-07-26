@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.tempus.gss.cps.entity.Channel;
 import com.tempus.gss.cps.service.IChannelService;
 import com.tempus.gss.mq.event.EventType;
+import com.tempus.gss.product.ift.api.entity.SaleChangeExt;
+import com.tempus.gss.product.ift.api.entity.SaleOrderExt;
 import com.tempus.gss.product.ift.api.entity.exception.Errors;
 import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
 import com.tempus.gss.product.ift.api.entity.setting.Status;
@@ -13,6 +15,8 @@ import com.tempus.gss.product.ift.api.exceptions.ConfigsException;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.api.utils.IFTDateUtil;
 import com.tempus.gss.product.ift.api.utils.IFTFestivalUtil;
+import com.tempus.gss.product.ift.dao.SaleChangeExtDao;
+import com.tempus.gss.product.ift.dao.SaleOrderExtDao;
 import com.tempus.gss.product.ift.dao.setting.ConfigsDao;
 import com.tempus.gss.product.ift.mq.IFTConfigsMqSender;
 import com.tempus.gss.util.EntityUtil;
@@ -61,7 +65,10 @@ public class IFTConfigsServiceImpl implements IConfigsService {
     
     @Autowired
     private IFTFestivalUtil festivalUtil;
-    
+    @Autowired
+    SaleOrderExtDao saleOrderExtDao;
+    @Autowired
+    SaleChangeExtDao saleChangeExtDao;
     /**
      * 日志记录器.
      */
@@ -387,7 +394,32 @@ public class IFTConfigsServiceImpl implements IConfigsService {
         }
         return result;
     }
-    
+
+    @Override
+    public boolean getIsDistributeTicket(Agent agent) {
+        IFTConfigs configs = getConfigByChannelID(agent, 0l);
+        if (configs.getConfig().get("isDistributeTicket")==null) {
+            return false;
+        }
+        boolean isDistributeTicket = Boolean.parseBoolean((String) configs.getConfig().get("isDistributeTicket"));
+        return isDistributeTicket;
+    }
+
+    @Override
+    public <T> T setLockerAsAloneLocker(T ext) {
+        if(ext instanceof SaleOrderExt){
+            SaleOrderExt saleOrderExt = (SaleOrderExt) ext;
+            saleOrderExt.setLocker(saleOrderExt.getAloneLocker());
+            saleOrderExtDao.updateLocker(saleOrderExt);
+        }
+        if(ext instanceof SaleChangeExt){
+            SaleChangeExt saleChangeExt = (SaleChangeExt) ext;
+            saleChangeExt.setLocker(saleChangeExt.getAloneLocker());
+            saleChangeExtDao.updateLocker(saleChangeExt);
+        }
+        return ext;
+    }
+
     public boolean isRange(Date time, String starthour, String startminute, String endhour, String endminute) {
         System.out.println(time);
         Calendar cal = Calendar.getInstance();

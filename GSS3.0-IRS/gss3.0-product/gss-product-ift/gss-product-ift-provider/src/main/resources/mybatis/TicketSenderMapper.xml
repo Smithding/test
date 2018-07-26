@@ -92,6 +92,16 @@
         <include refid="base_column"/>
         FROM IFT_TICKETSENDER WHERE ID = #{id,jdbcType=BIGINT}
     </select>
+    <select id="queryByUserId" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+        i.`ID`,i.`USERID`,i.`NAME`,i.`STATUS`,i.`NO`,i.`CREATOR`,i.`MODIFIER`,
+        i.`CREATEDATETIME`,i.`UPDATETIME`,i.`ORDERCOUNT`,i.`POINT`,i.`SEQUENCENO`,
+        i.`TYPE`,i.`SALE_ORDER_NUM`,i.`BUY_CHANGE_NUM`,i.`SALE_CHANGE_NUM`,i.`BUY_REFUSE_NUM`,
+        i.`SALE_REFUSE_NUM`,(i.`BUY_CHANGE_NUM`+i.`SALE_CHANGE_NUM`) as  `TOTAL_CHANGE_NUM`,(i.`SALE_REFUSE_NUM`+i.`BUY_REFUSE_NUM`) as `TOTAL_REFUSE_NUM`
+        FROM IFT_TICKETSENDER i
+        LEFT JOIN SM_USER u on i.USERID = u.LOGIN_NAME
+         WHERE u.ID = #{userId,jdbcType=BIGINT}
+    </select>
 
     <select id="queryByLoginId" resultMap="BaseResultMap" parameterType="java.lang.String">
         SELECT

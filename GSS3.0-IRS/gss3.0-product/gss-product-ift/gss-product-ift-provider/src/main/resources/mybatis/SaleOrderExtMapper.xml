@@ -58,6 +58,8 @@
         <result column="DRAWER_LOGIN_NAME" property="drawerLoginName" jdbcType="VARCHAR"/>
         <result column="HANDLERS" property="handlers" jdbcType="VARCHAR"/>
         <result column="OFFICE" property="office" jdbcType="VARCHAR"/>
+        <!--不分单时所有操作步骤都是由这个字段的操作员操作-->
+        <result column="ALONE_LOCKER" property="aloneLocker" jdbcType="BIGINT"/>
         <association property="saleOrder" column="SALE_ORDER_NO"
                      select="com.tempus.gss.order.dao.SaleOrderMapper.selectByRecordNo"/>
         <!-- 一对一 PNR-->
@@ -113,7 +115,7 @@
         SALE_ORDER_NO, ID, OWNER, DEMAND_NO, LEG_TYPE, CONTACT_NAME, CONTACT_PHONE, CONTACT_MOBILE,
         CONTACT_MAIL, SALE_REMARK, VALID, VERSION, LOCKER, LOCK_TIME, CREATE_TYPE, CREATE_TIME,
         MODIFY_TIME, CREATOR, MODIFIER, ISSUE_TIME, ORIGINAL_ORDER_NO, LINKNO, LINKTYPE, CURRENCY,
-        SALE_CURRENCY,EXCHANGE_RATE,DRAWER_LOGIN_NAME,OFFICE
+        SALE_CURRENCY,EXCHANGE_RATE,DRAWER_LOGIN_NAME,OFFICE,ALONE_LOCKER
 
     </sql>
     <select id="querySaleCountByLocker" resultType="java.lang.Integer">
@@ -163,14 +165,14 @@
                                         SALE_REMARK, VALID, VERSION,
                                         LOCKER, LOCK_TIME, CREATE_TYPE,
                                         CREATE_TIME, MODIFY_TIME, CREATOR, ISSUE_TIME
-                                        MODIFIER)
+                                        MODIFIER,ALONE_LOCKER)
         VALUES (#{saleOrderNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
                                                 #{demandNo,jdbcType=BIGINT}, #{legType,jdbcType=INTEGER}, #{contactName,jdbcType=VARCHAR},
                                                 #{contactPhone,jdbcType=VARCHAR}, #{contactMobile,jdbcType=VARCHAR}, #{contactMail,jdbcType=VARCHAR},
                                                 #{saleRemark,jdbcType=VARCHAR}, #{valid,jdbcType=TINYINT}, #{version,jdbcType=DECIMAL},
                 #{locker,jdbcType=BIGINT}, #{lockTime,jdbcType=TIMESTAMP}, #{createType,jdbcType=DECIMAL},
                 #{createTime,jdbcType=TIMESTAMP}, #{modifyTime,jdbcType=TIMESTAMP}, #{creator,jdbcType=VARCHAR},
-                #{issueTime,jdbcType=TIMESTAMP}, #{modifier,jdbcType=VARCHAR})
+                #{issueTime,jdbcType=TIMESTAMP}, #{modifier,jdbcType=VARCHAR},#{aloneLocker,jdbcType=BIGINT})
     </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.SaleOrderExt">
         insert into IFT_SALE_ORDER_EXT
@@ -262,6 +264,9 @@
             <if test="office != null">
                 OFFICE,
             </if>
+            <if test="aloneLocker != null">
+                ALONE_LOCKER,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="saleOrderNo != null">
@@ -349,7 +354,10 @@
                 #{originalOrderNo,jdbcType=BIGINT},
             </if>
             <if test="office != null and office !=''">
-                #{office,jdbcType=VARCHAR}
+                #{office,jdbcType=VARCHAR},
+            </if>
+            <if test="aloneLocker != null">
+                #{aloneLocker,jdbcType=BIGINT},
             </if>
         </trim>
     </insert>
@@ -435,7 +443,10 @@
                 EXCHANGE_RATE = #{exchangeRate},
             </if>
             <if test="office!=null">
-                OFFICE = #{office}
+                OFFICE = #{office},
+            </if>
+            <if test="aloneLocker != null">
+                ALONE_LOCKER = #{aloneLocker,jdbcType=BIGINT},
             </if>
         </set>
         where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
@@ -462,7 +473,8 @@
             CREATOR        = #{creator,jdbcType=VARCHAR},
             ISSUE_TIME     = #{issueTime,jdbcType=TIMESTAMP},
             MODIFIER       = #{modifier,jdbcType=VARCHAR},
-            OFFICE         = #{office,jdbcType=VARCHAR}
+            OFFICE         = #{office,jdbcType=VARCHAR},
+            ALONE_LOCKER   = #{aloneLocker,jdbcType=BIGINT}
         WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
     </update>
     <select id="queryByPnrNoAndTime" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.QueryPnrAndTimeVo">
@@ -550,7 +562,7 @@
         select DISTINCT
         f.SALE_ORDER_NO, f.ID, f.OWNER, f.DEMAND_NO, f.LEG_TYPE, f.CONTACT_NAME, f.CONTACT_PHONE, f.CONTACT_MOBILE,
         f.CONTACT_MAIL, f.SALE_REMARK, f.VALID, f.VERSION, f.LOCKER, f.LOCK_TIME, f.CREATE_TYPE, f.CREATE_TIME,
-        f.MODIFY_TIME, (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,
+        f.MODIFY_TIME, (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,f.ALONE_LOCKER,
         <if test="orderSource == 'OP'">
             (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as MODIFIER,
         </if>
@@ -747,6 +759,9 @@
             <if test="modifier != null">
                 MODIFIER    = #{modifier,jdbcType=VARCHAR},
             </if>
+            <if test="aloneLocker != null">
+                ALONE_LOCKER = #{aloneLocker,jdbcType=BIGINT},
+            </if>
         </set>
         WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
     </update>
@@ -800,7 +815,7 @@
         select DISTINCT
         f.SALE_ORDER_NO, f.ID, f.OWNER, f.DEMAND_NO, f.LEG_TYPE, f.CONTACT_NAME, f.CONTACT_PHONE, f.CONTACT_MOBILE,
         f.CONTACT_MAIL, f.SALE_REMARK, f.VALID, f.VERSION, f.LOCKER, f.LOCK_TIME, f.CREATE_TYPE, f.CREATE_TIME,
-        f.MODIFY_TIME, (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,(select NAME from SM_USER where LOGIN_NAME =aa.MODIFIER) as MODIFIER,o.ORDER_CHILD_STATUS,f.LINKTYPE
+        f.MODIFY_TIME,f.ALONE_LOCKER, (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,(select NAME from SM_USER where LOGIN_NAME =aa.MODIFIER) as MODIFIER,o.ORDER_CHILD_STATUS,f.LINKTYPE
         FROM
         IFT_SALE_ORDER_EXT f
         left join OS_SALEORDER o on f.SALE_ORDER_NO = o.SALE_ORDER_NO
@@ -997,22 +1012,8 @@
 			f.CREATE_TYPE,
 			f.CREATE_TIME,
 			f.MODIFY_TIME,
-			(
-				SELECT
-					NAME
-				FROM
-					SM_USER
-				WHERE
-					LOGIN_NAME = f.CREATOR
-			) AS CREATOR,
-			(
-				SELECT
-					NAME
-				FROM
-					SM_USER
-				WHERE
-					LOGIN_NAME = aa.MODIFIER
-			) AS MODIFIER,
+			f.CREATOR,
+			f.MODIFIER,
 			o.ORDER_CHILD_STATUS,
 			f.LINKTYPE,
 			(
@@ -1023,7 +1024,8 @@
 				WHERE
 					ID = f.LOCKER
 			) AS HANDLERS,
-			f.ORIGINAL_ORDER_NO
+			f.ORIGINAL_ORDER_NO,
+			f.ALONE_LOCKER
 		FROM
 			IFT_SALE_ORDER_EXT f
 		LEFT JOIN OS_SALEORDER o ON f.SALE_ORDER_NO = o.SALE_ORDER_NO
@@ -1050,7 +1052,7 @@
         f.SALE_ORDER_NO, f.ID, f.OWNER, f.DEMAND_NO, f.LEG_TYPE, f.CONTACT_NAME, f.CONTACT_PHONE, f.CONTACT_MOBILE,
         f.CONTACT_MAIL, f.SALE_REMARK, f.VALID, f.VERSION, f.LOCKER, f.LOCK_TIME, f.CREATE_TYPE, f.CREATE_TIME,
         f.MODIFY_TIME, (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,
-        o.ORDER_CHILD_STATUS,f.LINKTYPE as HANDLERS
+        o.ORDER_CHILD_STATUS,f.LINKTYPE as HANDLERS,f.ALONE_LOCKER
         FROM
         IFT_SALE_ORDER_EXT f
         left join OS_SALEORDER o on f.SALE_ORDER_NO = o.SALE_ORDER_NO

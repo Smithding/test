@@ -1,6 +1,7 @@
 package com.tempus.gss.product.ift.api.service.setting;
 
 import com.tempus.gss.cps.entity.Channel;
+import com.tempus.gss.product.ift.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
 import com.tempus.gss.product.ift.api.entity.setting.Status;
 import com.tempus.gss.product.ift.api.exceptions.ConfigsException;
@@ -90,5 +91,10 @@ public interface IConfigsService {
     void remove(Agent agent, Long channelId) throws ConfigsException;
     
     Map<String, Object> getInfoByTime(Agent agent, Long channelId, Date time) throws ConfigsException;
-    
+
+    //获取是否自动分单配置
+    boolean getIsDistributeTicket(Agent agent);
+
+    //设置orderExt或者changeExt的
+    <T> T setLockerAsAloneLocker(T ext);
 }

@@ -22,7 +22,7 @@ public interface IChangeService {
 	 * @param requestWithActor
 	 * @return
 	 */
-	boolean createChange(RequestWithActor<ChangeCreateVo> requestWithActor);
+	Long createChange(RequestWithActor<ChangeCreateVo> requestWithActor);
 	
 	/**
 	 * 创建改签单.
