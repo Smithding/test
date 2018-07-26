@@ -66,6 +66,8 @@
         <!--改签出票人-->
         <result column="DRAWER_LOGIN_NAME" property="drawerLoginName" jdbcType="VARCHAR"/>
         <result column="AIRLINE_REFUND_STATUS" property="airLineRefundStatus" jdbcType="INTEGER"/>
+        <!-- 不分单时所有操作步骤都是由这个字段的操作员操作-->
+        <result column="ALONE_LOCKER" property="aloneLocker" jdbcType="BIGINT"/>
         <!--一对多关联销售单明细-->
         <collection property="saleChangeDetailList" ofType="com.tempus.gss.product.ift.api.entity.SaleChangeDetail"
                     column="SALE_CHANGE_NO"
@@ -84,7 +86,8 @@
         SALE_CHANGE_NO, ID, OWNER, REFUND_WAY,  MODIFIER, STATUS, MODIFY_TIME,
         VALID, CREATE_TIME, CREATOR, LOCKER, LOCK_TIME, CHANGE_TYPE, CONTACT_NAME, CONTACT_MOBILE,
         CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL,CUSTOMER_NO,
-    CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,CURRENCY,SALE_CURRENCY,EXCHANGE_RATE,OFFICE,DRAWER_LOGIN_NAME
+    CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,CURRENCY,SALE_CURRENCY,EXCHANGE_RATE,OFFICE,
+    DRAWER_LOGIN_NAME,ALONE_LOCKER
     </sql>
 
     <select id="queryRefundCountBylocker" resultType="java.lang.Integer">
@@ -277,7 +280,7 @@
         CREATE_TIME, CREATOR, LOCKER,
         LOCK_TIME, CHANGE_TYPE, CONTACT_NAME,
         CONTACT_MOBILE, CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL,
-      	CUSTOMER_NO, CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,DRAWER_LOGIN_NAME
+      	CUSTOMER_NO, CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,DRAWER_LOGIN_NAME,ALONE_LOCKER
         )
         values (#{saleChangeNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
         #{refundWay,jdbcType=INTEGER},  #{modifier,jdbcType=VARCHAR},
@@ -287,7 +290,7 @@
         #{contactMobile,jdbcType=VARCHAR}, #{customerRemark,jdbcType=VARCHAR}, #{refuseReason,jdbcType=VARCHAR},
         #{airlineStatus,jdbcType=INTEGER},#{auditPerson,jdbcType=VARCHAR},#{auditTime,jdbcType=VARCHAR},#{refundFileUrl,jdbcType=VARCHAR},
 	    #{customerNo,jdbcType=BIGINT}, #{customerTypeNo,jdbcType=BIGINT}, #{ticketChangeType,jdbcType=INTEGER}),
-	    #{pnrNo,jdbcType=BIGINT}), #{changeRemark,jdbcType=VARCHAR},#{drawerLoginName,jdbcType=VARCHAR})
+	    #{pnrNo,jdbcType=BIGINT}), #{changeRemark,jdbcType=VARCHAR},#{drawerLoginName,jdbcType=VARCHAR},#{aloneLocker,jdbcType=BIGINT})
         )
     </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.SaleChangeExt">
@@ -378,6 +381,9 @@
             <if test="drawerLoginName !=null">
                 DRAWER_LOGIN_NAME,
             </if>
+            <if test="aloneLocker !=null">
+                ALONE_LOCKER,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="saleChangeNo != null">
@@ -464,6 +470,9 @@
             </if>
             <if test="drawerLoginName !=null">
                 #{drawerLoginName,jdbcType=VARCHAR},
+            </if>
+            <if test="aloneLocker !=null">
+                #{aloneLocker,jdbcType=BIGINT},
             </if>
         </trim>
     </insert>
@@ -555,7 +564,10 @@
                 EXCHANGE_RATE =#{exchangeRate,jdbcType=DECIMAL},
             </if>
             <if test="drawerLoginName!=null">
-                DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR}
+                DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR},
+            </if>
+            <if test="aloneLocker !=null">
+                ALONE_LOCKER = #{aloneLocker,jdbcType=BIGINT}
             </if>
         </set>
         where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
@@ -648,7 +660,10 @@
                 EXCHANGE_RATE =#{exchangeRate,jdbcType=DECIMAL},
             </if>
             <if test="drawerLoginName!=null">
-                DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR}
+                DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR},
+            </if>
+            <if test="aloneLocker !=null">
+                ALONE_LOCKER = #{aloneLocker,jdbcType=BIGINT}
             </if>
         </set>
         where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
@@ -677,7 +692,8 @@
             i.AUDIT_PERSON,
             i.AUDIT_TIME,
             i.TICKET_CHANGE_TYPE,
-            i.DRAWER_LOGIN_NAME
+            i.DRAWER_LOGIN_NAME,
+            i.ALONE_LOCKER
         FROM IFT_SALE_CHANGE_EXT i
             LEFT JOIN OS_SALECHANGE s ON s.SALE_CHANGE_NO = i.SALE_CHANGE_NO
         WHERE s.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} and i.LOCKER = 0 and s.CHILD_STATUS = 1
@@ -689,7 +705,7 @@
         i.VALID, i.CREATE_TIME, i.CREATOR, i.LOCKER, i.LOCK_TIME, i.CHANGE_TYPE, i.CONTACT_NAME, i.CONTACT_MOBILE,
         i.CUSTOMER_REMARK, i.REFUSE_REASON,i.TICKET_CHANGE_TYPE
         ,i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO,/*su.LOGIN_NAME,*/i.DRAWER_LOGIN_NAME,
-        h.AIRLINE_REFUND_STATUS,
+        h.AIRLINE_REFUND_STATUS,i.ALONE_LOCKER,
         (SELECT NAME FROM SM_USER where ID = i.LOCKER) as LOGIN_NAME
         FROM
         IFT_SALE_CHANGE_EXT i
@@ -892,6 +908,9 @@
             <if test="lockTime != null">
                 LOCK_TIME   = #{lockTime,jdbcType=TIMESTAMP},
             </if>
+            <if test="aloneLocker !=null">
+                ALONE_LOCKER = #{aloneLocker,jdbcType=BIGINT},
+            </if>
         </set>
         WHERE SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
     </update>
@@ -972,6 +991,9 @@
             </if>
             <if test="drawerLoginName !=null">
                 c.DRAWER_LOGIN_NAME= #{drawerLoginName,jdbcType=VARCHAR},
+            </if>
+            <if test="aloneLocker !=null">
+                c.ALONE_LOCKER = #{aloneLocker,jdbcType=BIGINT},
             </if>
         </set>
         WHERE c.SALE_CHANGE_NO IN (SELECT p.SALE_CHANGE_NO FROM IFT_PASSENGER_CHANGE_PRICE p WHERE p.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT})

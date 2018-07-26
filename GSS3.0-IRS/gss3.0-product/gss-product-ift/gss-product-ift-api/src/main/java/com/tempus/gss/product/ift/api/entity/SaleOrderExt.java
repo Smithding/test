@@ -15,7 +15,10 @@ import java.util.List;
  * 销售订单扩展.
  */
 public class SaleOrderExt implements Serializable {
-    
+
+    //ALONE_LOCKER 不分单时所有操作步骤都是由这个字段的操作员操作
+    private Long aloneLocker;
+
     @JsonSerialize(using = LongSerializer.class)
     private static final long serialVersionUID = 1L;
     /**
@@ -176,7 +179,15 @@ public class SaleOrderExt implements Serializable {
      * @return
      */
     private List<DifferenceOrder> differenceOrderList;
-    
+
+    public Long getAloneLocker() {
+        return aloneLocker;
+    }
+
+    public void setAloneLocker(Long aloneLocker) {
+        this.aloneLocker = aloneLocker;
+    }
+
     public String getOffice() {
         return office;
     }

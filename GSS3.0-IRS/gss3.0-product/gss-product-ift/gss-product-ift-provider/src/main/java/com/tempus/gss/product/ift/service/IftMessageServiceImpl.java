@@ -79,6 +79,7 @@ public class IftMessageServiceImpl implements IIftMessageService {
                     Agent agent = new Agent(Integer.valueOf(ownerCode));
                     User user = userService.findUserByLoginName(agent, sdo.getLoginName());
                     saleOrderExt.setLocker(user.getId());
+                    saleOrderExt.setAloneLocker(user.getId());
                     Date date = new Date();
                     saleOrderExt.setLockTime(date);
                     saleOrderExt.setModifyTime(date);
@@ -107,6 +108,7 @@ public class IftMessageServiceImpl implements IIftMessageService {
                     Agent agent = new Agent(Integer.valueOf(ownerCode));
                     User user = userService.findUserByLoginName(agent, sdo.getLoginName());
                     sext.setLocker(user.getId());
+                    sext.setAloneLocker(user.getId());
                     Date date = new Date();
                     sext.setLockTime(date);
                     sext.setModifyTime(date);
@@ -135,14 +137,15 @@ public class IftMessageServiceImpl implements IIftMessageService {
                     //将订单锁单
                     for (SaleChangeExt sext : saleChangeExts) {
                         Agent agent = new Agent(Integer.valueOf(ownerCode));
+                        //自动分单
                         User user = userService.findUserByLoginName(agent, sdo.getLoginName());
-
                         sext.setLocker(user.getId());
+                        sext.setAloneLocker(user.getId());
                         Date date = new Date();
                         sext.setLockTime(date);
                         sext.setModifyTime(date);
                         saleChangeExtDao.updateLocker(sext);
-                        ticketSenderService.updateByLockerId(agent,user.getId(),"SALE_CHANGE_NUM");
+                        ticketSenderService.updateByLockerId(agent,sext.getLocker(),"SALE_CHANGE_NUM");
                     }
                     mqSender.send("gss-websocket-exchange", "notice", sdo);
                     log.info("放入MQ队列信息:" + sdo.toString());

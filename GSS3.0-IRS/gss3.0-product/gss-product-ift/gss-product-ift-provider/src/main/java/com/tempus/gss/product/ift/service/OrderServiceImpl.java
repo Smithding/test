@@ -1844,25 +1844,48 @@ public class OrderServiceImpl implements IOrderService {
             log.info("未查询到可以分配的出票订单,结束此次任务...");
             return;
         }
-        log.info("第二步：查询在线采购出票员...");
+        log.info("第二步：查询是否配置了系统分单...");
+        //获取自动分单配置
+        Agent agent = new Agent(Integer.valueOf(owner));
+        IFTConfigs configs = configsService.getConfigByChannelID(agent,0l);
+        boolean isDistributeTicket = Boolean.parseBoolean((String) configs.getConfig().get("isDistributeTicket"));
+        if(!isDistributeTicket){
+            log.info("系统不自动分单...");
+            for (SaleOrderExt order : saleOrderExtList) {
+                log.info("1.锁单,锁单人是出单人...");
+                order.setLocker(order.getAloneLocker());
+                saleOrderExtDao.updateByPrimaryKeySelective(order);
+                log.info("2.增加出票人的未出票订单数量...");
+                TicketSender ticketSender = ticketSenderService.queryByUserId(order.getAloneLocker());
+                if(ticketSender != null){
+                    increaseOrderCount(ticketSender);
+                } else{
+                    log.info("该用户不是国际出票员");
+                }
+            }
+            log.info("系统分单结束...");
+            return ;
+        } else{
+            log.info("系统自动分单...");
+        }
+        log.info("第三步：查询在线采购出票员...");
         List<TicketSender> senders = ticketSenderService.getSpecTypeOnLineTicketSender("buysman-ticketSender"); //采购出票员
         log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
-            Agent agent = new Agent(Integer.valueOf(owner));
-            IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
+            //IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
             Map config = configs.getConfig();
             String str_maxOrderNum = (String) config.get("maxOrderNum");
             log.info("有在线出票员人数:{},获得配置最大分单数：{}", senders.size(), str_maxOrderNum);
             Long maxOrderNum = Long.valueOf(str_maxOrderNum);
             Date updateTime = new Date();
-            log.info("第三步：判断出票员手头出票订单数量...");
+            log.info("第四步：判断出票员手头出票订单数量...");
             for (SaleOrderExt order : saleOrderExtList) {
                 for (TicketSender peopleInfo : senders) {
                     log.info(peopleInfo.getName() + "订单数量：" + peopleInfo.getOrdercount());
                     if (peopleInfo.getOrdercount() >= maxOrderNum) {
                         continue;
                     } else {
-                        log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
+                        log.info("第五步:满足条件的分配详细明细...1.将设置为出票中");
                         /***修改订单明细表*/
                         updateSaleOrderDetail(order, peopleInfo, updateTime);
                         /**锁单*/

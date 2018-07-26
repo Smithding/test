@@ -94,6 +94,7 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
         User tempUser = userService.findUserByLoginName(agent,loginName);
         if(tempUser!=null) {
             saleOrderExt.setLocker(tempUser.getId());
+            saleOrderExt.setAloneLocker(tempUser.getId());
         }
         return saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
     }
@@ -122,6 +123,7 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
             User tempUser = this.userService.findUserByLoginName(agent, loginName);
             if (tempUser != null) {
                 saleChangeExt.setLocker(tempUser.getId());
+                saleChangeExt.setAloneLocker(tempUser.getId());
                 saleChangeExt.setLockTime(new Date());
             }
 
