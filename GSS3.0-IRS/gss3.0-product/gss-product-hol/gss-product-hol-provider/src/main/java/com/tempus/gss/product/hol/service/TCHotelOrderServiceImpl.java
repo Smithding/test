@@ -2261,10 +2261,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								hotelOrder.setFactProCount(priceFraction);
 							}
 							//当关联订单号为空说明这个订单不为补单订单,更新预定时的房间数和晚数为最新没有影响
-							if(StringUtils.isEmpty(hotelOrder.getRelateOrderNo())){
+							/*if(StringUtils.isEmpty(hotelOrder.getRelateOrderNo())){
 								hotelOrder.setBookCount(priceFraction);
 								hotelOrder.setNightCount(factNight);
-							}
+							}*/
 							if(StringUtil.isNullOrEmpty(hotelOrder.getEachNightPrice()) || StringUtil.isNullOrEmpty(hotelOrder.getBreakfastCount())){
 								String eachNightPrice = null;
 								String breakfastNum = null;
