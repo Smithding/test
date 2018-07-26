@@ -9,7 +9,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.tempus.gss.cps.entity.Account;
 import com.tempus.gss.serializer.LongSerializer;
-import com.tempus.gss.pay.entity.CapitalAccount;
+import com.tempus.gss.pay.entity.vo.CapitalAccount;
 
 public class PassengerVo implements Serializable {
 	/**
