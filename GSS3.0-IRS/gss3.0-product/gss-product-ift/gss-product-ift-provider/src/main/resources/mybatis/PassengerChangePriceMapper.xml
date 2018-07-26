@@ -100,7 +100,7 @@
         select
         <include refid="Base_Column_List"/>
         from IFT_PASSENGER_CHANGE_PRICE
-        where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} AND PASSENGER_NO = #{passengerNo,jdbcType=BIGINT} AND VALID=1 limit 0,1
+        where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} AND PASSENGER_NO = #{passengerNo,jdbcType=BIGINT} AND VALID=1 ORDER BY CREATE_TIME DESC limit 0,1
     </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">

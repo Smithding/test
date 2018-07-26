@@ -12,6 +12,9 @@ import com.tempus.gss.serializer.LongSerializer;
 import org.springframework.data.annotation.Transient;
 
 public class SaleChangeExt implements Serializable {
+
+	//ALONE_LOCKER 不分单时所有操作步骤都是由这个字段的操作员操作
+	private Long aloneLocker;
 	/**
 	 * 销售单废退改编号
 	 */
@@ -195,6 +198,8 @@ public class SaleChangeExt implements Serializable {
 	//提交航司后采购审核状态
 	private Integer airLineRefundStatus;
 
+
+
 	@Override
 	public String toString() {
 		return "SaleChangeExt{" +
@@ -238,6 +243,14 @@ public class SaleChangeExt implements Serializable {
 				", drawerLoginName='" + drawerLoginName + '\'' +
 				", airLineRefundStatus=" + airLineRefundStatus +
 				'}';
+	}
+
+	public Long getAloneLocker() {
+		return aloneLocker;
+	}
+
+	public void setAloneLocker(Long aloneLocker) {
+		this.aloneLocker = aloneLocker;
 	}
 
 	public String getDrawerLoginName() {

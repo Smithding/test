@@ -320,10 +320,10 @@ public class ChangeServiceImpl implements IChangeService {
             setChangeOrderLocker(saleChangeExt,agent,saleOrder);
             log.info("申请改签单时保存的改签单信息:{}",saleChangeExt.toString());
             saleChangeExtDao.insertSelective(saleChangeExt);
-
-            //销售改签分单
+            //销售改签分单（如果该单不是OP下单才会执行分单）
             iftMessageService.sendChangeMessage(saleOrderExt.getSaleOrderNo(),agent.getOwner()+"","salesman-change");
-
+            //如果在setChangeOrderLocker方法中设置了locker那么在sendChangeMessage则查询不到该订单，所以需要在跟新一次该出票员的销售改签数量
+            setTicketSenderNum(saleChangeExt,agent,saleOrder);
             /*通过销售单编号获取采购单*/
             List<BuyOrderExt> buyOrderExtList = buyOrderExtDao.selectBuyOrderBySaleOrderNo(requestWithActor.getEntity().getSaleOrderNo());
             /*创建采购改签单*/
@@ -383,20 +383,30 @@ public class ChangeServiceImpl implements IChangeService {
         return saleChangeExt;
     }
 
+    private void setTicketSenderNum(SaleChangeExt saleChangeExt, Agent agent, SaleOrder saleOrder) {
+        if(StringUtils.isNotBlank(saleOrder.getSourceChannelNo()) && StringUtils.equals("OP",saleOrder.getSourceChannelNo())){
+            User user = userService.findUserByLoginName(agent,agent.getAccount());
+            if(user!=null) {
+                ticketSenderService.updateByLockerId(agent,user.getId(),"SALE_CHANGE_NUM");
+            }
+        }
+    }
+
     @Override
-    public boolean createChange(RequestWithActor<ChangeCreateVo> requestWithActor) {
+    public Long createChange(RequestWithActor<ChangeCreateVo> requestWithActor) {
         boolean flag = false;
+        SaleChangeExt saleChangeExt = null;
         try {
-            SaleChangeExt saleChangeExt = this.apiCreateChange(requestWithActor);
-            if (saleChangeExt == null) {
+            saleChangeExt = this.apiCreateChange(requestWithActor);
+            /*if (saleChangeExt == null) {
                 flag = false;
             }
-            flag = true;
+            flag = true;*/
         } catch (Exception e) {
-            flag = false;
+            //flag = false;
             throw new GSSException("创建改签单失败", "0003", "创建改签单失败" + e);
         }
-        return flag;
+        return saleChangeExt!=null?saleChangeExt.getSaleChangeNo():null;
     }
 
     /**
@@ -973,7 +983,7 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 3);
             log.info("修改采购状态" + saleChangeNo);
             try{
-                //直接将单分配给销售改签员
+                //直接将单分配给采购人
                 RequestWithActor<Long> saleChangeRequest = new RequestWithActor<>();
                 saleChangeRequest.setAgent(requestWithActor.getAgent());
                 saleChangeRequest.setEntity(requestWithActor.getEntity().getSaleChangeNo());
@@ -1102,6 +1112,8 @@ public class ChangeServiceImpl implements IChangeService {
                 priceVo.setBuyRebate(temp.getBuyRebate());
                 priceVo.setBuyTax(temp.getBuyTax());
                 priceVo.setBuyRest(temp.getBuyRest());
+                priceVo.setAllSalePrice(temp.getAllSalePrice());
+                priceVo.setAllBuyPrice(temp.getAllBuyPrice());
 
             } else {
                 priceVo = voList.get(i);
@@ -1544,12 +1556,14 @@ public class ChangeServiceImpl implements IChangeService {
                 if (changeExt.getLocker() == null || changeVo.getLocker() == 1) {
                     afterLocker = saleChange.getAgent().getId();
                     changeExt.setLocker(afterLocker);
+                    changeExt.setAloneLocker(afterLocker);
                     changeExt.setModifier(saleChange.getAgent().getAccount());
                     changeExt.setLockTime(new Date());
                     changeExt.setModifyTime(new Date());
 
                 } else {
                     changeExt.setLocker(0L);
+                    changeExt.setAloneLocker(0l);
                     changeExt.setModifier(saleChange.getAgent().getAccount());
                     changeExt.setLockTime(new Date());
                     changeExt.setModifyTime(new Date());
@@ -1844,6 +1858,16 @@ public class ChangeServiceImpl implements IChangeService {
             log.info("直接将采购改签单分给在线业务员员，单号:{}", changeOrderNo);
             saleChangeExt = this.getSaleChangeExtByNo(requestWithActor);
         }
+        if(!configsService.getIsDistributeTicket(requestWithActor.getAgent())){
+            //如果不是系统分单
+            if ((changeOrderNo == null || changeOrderNo == 0L) && saleChangeExts != null) {
+                taskAssign(saleChangeExts,null,null,requestWithActor.getAgent(),null);
+            }else{
+                derectAssign(saleChangeExt, null, null, requestWithActor.getAgent(), null);
+            }
+            log.info("此次分单结束...");
+            return ;
+        }
         log.info("第二步：查询在线采购改签员...");
         List<TicketSender> senders = ticketSenderService.getSpecTypeOnLineTicketSender("buysman-change");  //采购改签员
         log.info("是否有在线出票员:" + (senders != null));
@@ -1894,19 +1918,27 @@ public class ChangeServiceImpl implements IChangeService {
     private void taskAssign(List<SaleChangeExt> saleChangeExts, List<TicketSender> senders, Long maxOrderNum,Agent agent,Date updateTime){
         log.info("第三步：判断出票员手头出票订单数量...");
         for (SaleChangeExt order : saleChangeExts) {
-            for (TicketSender peopleInfo : senders) {
-                log.info(peopleInfo.getName() + "未处理采购改签单数量：" + peopleInfo.getBuyChangeNum());
-                if (peopleInfo.getBuyChangeNum() >= maxOrderNum) {
-                    continue;
-                } else {
-                    log.info("第四步:分单...");
-                    /**锁单*/
-                    log.info("1.锁单,锁单人是被分配人...");
-                    assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
-                    /***增加出票人订单数*/
-                    log.info("2.增加出票人的未处理采购改签单数量...");
-                    increaseBuyChangeNum(agent, peopleInfo);
-                    break;
+            if(!configsService.getIsDistributeTicket(agent)){
+                //如果不是系统分单
+                order = configsService.setLockerAsAloneLocker(order);
+                Long locker = order.getLocker();
+                TicketSender ticketSender = iTicketSenderService.queryByUserId(locker);
+                increaseBuyChangeNum(agent, ticketSender);
+            } else{
+                for (TicketSender peopleInfo : senders) {
+                    log.info(peopleInfo.getName() + "未处理采购改签单数量：" + peopleInfo.getBuyChangeNum());
+                    if (peopleInfo.getBuyChangeNum() >= maxOrderNum) {
+                        continue;
+                    } else {
+                        log.info("第四步:分单...");
+                        /**锁单*/
+                        log.info("1.锁单,锁单人是被分配人...");
+                        assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
+                        /***增加出票人订单数*/
+                        log.info("2.增加出票人的未处理采购改签单数量...");
+                        increaseBuyChangeNum(agent, peopleInfo);
+                        break;
+                    }
                 }
             }
         }
@@ -1922,19 +1954,27 @@ public class ChangeServiceImpl implements IChangeService {
      */
     private void derectAssign(SaleChangeExt saleChangeExt,List<TicketSender> senders, Long maxOrderNum,Agent agent,Date updateTime){
         log.info("第三步：判断出票员手头出票订单数量...");
-        for (TicketSender peopleInfo : senders) {
-            log.info(peopleInfo.getName() + "未处理采购改签单数量：" + peopleInfo.getBuyChangeNum());
-            if (peopleInfo.getBuyChangeNum() >= maxOrderNum) {
-                continue;
-            } else {
-                log.info("第四步:分单...");
-                /**锁单*/
-                log.info("1.锁单,锁单人是被分配人...");
-                assingLockSaleChangeExt(saleChangeExt, peopleInfo, updateTime, agent);
-                /***增加出票人订单数*/
-                log.info("2.增加出票人的未处理采购改签单数量...");
-                increaseBuyChangeNum(agent, peopleInfo);
-                break;
+        if(!configsService.getIsDistributeTicket(agent)){
+            //如果不是系统分单
+            saleChangeExt = configsService.setLockerAsAloneLocker(saleChangeExt);
+            Long locker = saleChangeExt.getLocker();
+            TicketSender ticketSender = iTicketSenderService.queryByUserId(locker);
+            increaseBuyChangeNum(agent, ticketSender);
+        } else{
+            for (TicketSender peopleInfo : senders) {
+                log.info(peopleInfo.getName() + "未处理采购改签单数量：" + peopleInfo.getBuyChangeNum());
+                if (peopleInfo.getBuyChangeNum() >= maxOrderNum) {
+                    continue;
+                } else {
+                    log.info("第四步:分单...");
+                    /**锁单*/
+                    log.info("1.锁单,锁单人是被分配人...");
+                    assingLockSaleChangeExt(saleChangeExt, peopleInfo, updateTime, agent);
+                    /***增加出票人订单数*/
+                    log.info("2.增加出票人的未处理采购改签单数量...");
+                    increaseBuyChangeNum(agent, peopleInfo);
+                    break;
+                }
             }
         }
     }
@@ -1945,6 +1985,7 @@ public class ChangeServiceImpl implements IChangeService {
             User user = userService.findUserByLoginName(agent,agent.getAccount());
             if(user!=null) {
                 saleChangeExt.setLocker(agent.getId());
+                saleChangeExt.setAloneLocker(agent.getId());
             }
         }
         return  saleChangeExt;

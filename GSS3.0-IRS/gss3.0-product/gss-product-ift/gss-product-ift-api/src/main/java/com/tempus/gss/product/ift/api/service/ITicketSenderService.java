@@ -75,4 +75,6 @@ public interface ITicketSenderService {
      * @return
      */
     List<TicketSender> getSpecTypeOnLineTicketSender(String type);
+
+    TicketSender queryByUserId(Long userId);
 }
