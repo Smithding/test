@@ -783,9 +783,9 @@
             <if test="airline !=null and airline!=''">
                 AND a.AIRLINE = #{airline,jdbcType=VARCHAR}
             </if>
-            <if test="changeType==0">
+            <!--<if test="changeType==0">
                 AND (i.CHANGE_TYPE = 1 or i.CHANGE_TYPE =2)
-            </if>
+            </if>-->
             <if test="pgerName !=null and pgerName !=''">
                 AND CONCAT_WS('',p.SURNAME,p.`NAME`) like CONCAT('%',#{pgerName,jdbcType=VARCHAR},'%' )
             </if>
