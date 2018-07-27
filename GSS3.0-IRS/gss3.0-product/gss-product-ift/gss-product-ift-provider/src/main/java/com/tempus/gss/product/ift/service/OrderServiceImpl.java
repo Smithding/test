@@ -179,7 +179,12 @@ public class OrderServiceImpl implements IOrderService {
     
     @Value("${dpsconfig.job.owner}")
     protected String owner;
-    
+    /*创建pnr*/
+    @Override
+    public void setPnr(Pnr pnr) {
+        pnrDao.insertSelective(pnr);
+    }
+
     /**
      * 创建订单. 通过白屏查询、Pnr、需求单、手工方式创建订单.
      *

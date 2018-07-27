@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -67,7 +68,7 @@ import com.tempus.gss.product.hol.api.util.DateUtil;
 import com.tempus.gss.vo.Agent;
 
 @Service
-public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
+public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 
 	@Autowired
 	private MongoTemplate mongoTemplate1;
@@ -307,6 +308,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 									}
 								}
 								resProBaseInfo.setBedSize(bedWidth);
+								proDetail.setBedSize(bedWidth);
 							}
 							//产品名称
 							resProBaseInfo.setSupPriceName(roomInfo.getRoomName());
@@ -466,38 +468,10 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 				resBaseInfo.setProDetails(proDetails);
 				//酒店政策
 				List<Policy> policyList = hotelEntity.getPolicy();
-				for (Policy policy : policyList) {
-					String ploicyName = policy.getPloicyName();
-					switch (ploicyName) {
-						case "ArrivalAndDeparture":
-							resBaseInfo.setArrivalAndDeparture(policy.getPolicyText());
-							break;
-						case "Cancel":
-							resBaseInfo.setCancelDescription(policy.getPolicyText());
-							break;
-						case "DepositAndPrepaid":
-							resBaseInfo.setDepositAndPrepaid(policy.getPolicyText());
-							break;
-						case "Pet":
-							resBaseInfo.setPetDescription(policy.getPolicyText());
-							break;
-						case "Child":
-							resBaseInfo.setChildDescription(policy.getPolicyText());
-							break;
-					}
-				}
+				bqyHotelPolicyConver(resBaseInfo, policyList);
 				//酒店服务
 				String serviceNameStr = hotelEntity.getServiceName();
-				if (StringUtils.isNoneBlank(serviceNameStr)) {
-					List<FacilityServices> resFacilities = new ArrayList<>();
-					String[] serviceNameArr = serviceNameStr.split(",");
-					for (String serviceName : serviceNameArr) {
-						FacilityServices facilityServices = new FacilityServices();
-						facilityServices.setFacilityServicesName(serviceName);
-						resFacilities.add(facilityServices);
-					}
-					resBaseInfo.setResFacilities(resFacilities);
-				}
+				setHotelServiceName(resBaseInfo, serviceNameStr);
 				//return resBaseInfo;
 				return new AsyncResult<ResBaseInfo>(resBaseInfo);
 			}
@@ -506,6 +480,19 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 			logger.error("酒店详情页面错误");
 		}
 		return null;
+	}
+
+	public void setHotelServiceName(ResBaseInfo resBaseInfo, String serviceNameStr) {
+		if (StringUtils.isNoneBlank(serviceNameStr)) {
+            List<FacilityServices> resFacilities = new ArrayList<>();
+            String[] serviceNameArr = serviceNameStr.split(",");
+            for (String serviceName : serviceNameArr) {
+                FacilityServices facilityServices = new FacilityServices();
+                facilityServices.setFacilityServicesName(serviceName);
+                resFacilities.add(facilityServices);
+            }
+            resBaseInfo.setResFacilities(resFacilities);
+        }
 	}
 
 	@Override
@@ -519,12 +506,9 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 
 	@Override
 	public ResBaseInfo getById(Agent agent, Long bqyHolId) {
-		List<HotelInfo> holList = mongoTemplate1.find(new Query(Criteria.where("_id").is(bqyHolId)), HotelInfo.class);
-		if (null != holList && holList.size() > 0) {
-			ResBaseInfo resBaseInfo = bqyHotelConverService.bqyConvertTcHotelEntity(holList.get(0));
-			return resBaseInfo;
-		}
-		return null;
+		HotelInfo hotelInfo = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(bqyHolId)), HotelInfo.class);
+		ResBaseInfo resBaseInfo = bqyHotelConverService.bqyConvertTcHotelEntity(hotelInfo);
+		return resBaseInfo;
 	}
 
 	@Override
@@ -736,5 +720,56 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	@Override
+	@Cacheable(value = "ResBaseInfo", key = "#bqyResId", unless = "")
+	public ResBaseInfo queryHotelBaseInfo(Agent agent, Long bqyResId, String checkInDate, String checkOutDate, String cityCode) {
+		ResBaseInfo resBaseInfo = getById(agent, bqyResId);
+		QueryHotelParam query = new QueryHotelParam();
+		query.setCheckInTime(checkInDate);
+		query.setCheckOutTime(checkOutDate);
+		query.setCityCode(cityCode);
+		query.setHotelId(bqyResId);
+		HotelEntity hotelEntity = bqyHotelInterService.queryHotelDetail(query);
+		//酒店政策
+		List<Policy> policyList = hotelEntity.getPolicy();
+		bqyHotelPolicyConver(resBaseInfo, policyList);
+		//酒店服务
+		String serviceNameStr = hotelEntity.getServiceName();
+		setHotelServiceName(resBaseInfo, serviceNameStr);
+		String bulitTime = hotelEntity.getBulitTime();
+		String defaultTime = "0000-00-00 00:00:00";
+		if (StringUtils.isNoneBlank(bulitTime)) {
+			resBaseInfo.setWhenBuilt(bulitTime);
+		}else {
+			resBaseInfo.setWhenBuilt(defaultTime);
+		}
+		resBaseInfo.setEstablishmentDate(defaultTime);
+		resBaseInfo.setRenovationDate(defaultTime);
+		return resBaseInfo;
+	}
+
+	public void bqyHotelPolicyConver(ResBaseInfo resBaseInfo, List<Policy> policyList) {
+		for (Policy policy : policyList) {
+			String policyName = policy.getPloicyName();
+			switch (policyName) {
+				case "ArrivalAndDeparture":
+					resBaseInfo.setArrivalAndDeparture(policy.getPolicyText());
+					break;
+				case "Cancel":
+					resBaseInfo.setCancelDescription(policy.getPolicyText());
+					break;
+				case "DepositAndPrepaid":
+					resBaseInfo.setDepositAndPrepaid(policy.getPolicyText());
+					break;
+				case "Pet":
+					resBaseInfo.setPetDescription(policy.getPolicyText());
+					break;
+				case "Child":
+					resBaseInfo.setChildDescription(policy.getPolicyText());
+					break;
+			}
+		}
 	}
 }

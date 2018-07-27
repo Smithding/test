@@ -569,7 +569,13 @@
                 DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR},
             </if>
             <if test="aloneLocker !=null">
-                ALONE_LOCKER = #{aloneLocker,jdbcType=BIGINT}
+                ALONE_LOCKER = #{aloneLocker,jdbcType=BIGINT},
+            </if>
+            <if test="office!=null">
+                OFFICE =#{office,jdbcType=VARCHAR},
+            </if>
+            <if test="supplierNo!=null">
+                SUPPLIER_NO =#{supplierNo,jdbcType=BIGINT}
             </if>
         </set>
         where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}

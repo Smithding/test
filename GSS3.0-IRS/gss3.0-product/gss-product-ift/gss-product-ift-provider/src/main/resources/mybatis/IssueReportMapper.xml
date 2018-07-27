@@ -100,14 +100,14 @@
         <if test="depDateEnd !=null  and depDateEnd != ''">
             AND IL.DEP_TIME <![CDATA[<=]]>DATE_FORMAT(STR_TO_DATE(#{depDateEnd}, '%Y-%m-%d')+1, '%Y-%m-%d')
         </if>
-        <if test="saleDept !=null and saleDept!=''">
+        <if test="saleDept !=null and saleDept.size>0">
             AND SD.NAME IN
             <foreach collection="saleDept" item="saleDept"
                      index="index" open="(" close=")" separator=",">
                 #{saleDept[${index}]}
             </foreach>
         </if>
-        <if test="source!=null and source!=''">
+        <if test="source!=null and source.size>0">
             AND CC.BUSINESS_LINE IN
             <foreach collection="source" item="source"
                      index="index" open="(" close=")" separator=",">
@@ -157,7 +157,7 @@
                 AND ISOE.CREATOR LIKE CONCAT('%', CONCAT(#{salePerson}, '%'))
             </if>
         </if>
-        <if test="cabins!=null and cabins!=''">
+        <if test="cabins!=null and cabins.size>0">
             AND IL.CABIN IN
             <foreach collection="cabins" item="cabins"
                      index="index" open="(" close=")" separator=",">
@@ -193,14 +193,14 @@
             </if>
 
         </if>
-        <if test="orderStatusArray!=null and orderStatusArray!='' ">
+        <if test="orderStatusList!=null and orderStatusList.size>0">
             AND ISOD.STATUS IN
-            <foreach collection="orderStatusArray" item="orderStatusArray"
+            <foreach collection="orderStatusList" item="orderStatusList"
                      index="index" open="(" close=")" separator=",">
-                #{orderStatusArray[${index}]}
+                #{orderStatusList[${index}]}
             </foreach>
         </if>
-        <if test="orderStatusArray==null or orderStatusArray=='' ">
+        <if test="orderStatusList==null or orderStatusList.size>0 ">
             AND ISOD.STATUS IN (4, 10)
         </if>
         GROUP BY ISOD.SALE_ORDER_NO

@@ -1621,6 +1621,13 @@ public class ChangeServiceImpl implements IChangeService {
         }
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public int queryChangeCountBylocker(Long userId) {
+        int lockCount = saleChangeExtDao.queryChangeCountBylocker(owner, userId);
+        return lockCount;
+    }
+
     /**
      * 改签单出单确认
      * 状态改成10=已改签
@@ -1890,10 +1897,11 @@ public class ChangeServiceImpl implements IChangeService {
         }
     }
 
-    @Transactional(propagation=Propagation.REQUIRES_NEW)
+
+
     public void increaseBuyChangeNum(Agent agent, TicketSender sender) {
         User user = userService.findUserByLoginName(agent, sender.getUserid());
-        int lockCount = saleChangeExtDao.queryChangeCountBylocker(owner, user.getId());
+        int lockCount = changeExtService.queryChangeCountBylocker(user.getId());
         sender.setBuyChangeNum(lockCount);
         sender.setIds(sender.getId() + "");
         iTicketSenderService.update(sender);
