@@ -190,4 +190,6 @@ public interface IChangeService {
 	public int updateLocker(SaleChangeExt changeExt);
 	//更新销售备注
     void  updateBuyRemarkBySelectBuyChangeNo(BuyChangeExt buyChangeExt);
+    //事务原因创建的服务
+    int queryChangeCountBylocker(Long userId);
 }

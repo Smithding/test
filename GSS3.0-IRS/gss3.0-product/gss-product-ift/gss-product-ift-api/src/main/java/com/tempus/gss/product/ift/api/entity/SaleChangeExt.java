@@ -191,6 +191,7 @@ public class SaleChangeExt implements Serializable {
 	 * office
 	 */
 	private String office;
+	private Long supplierNo;
 
 	//改签出票员   DRAWER_LOGIN_NAME
 	private String drawerLoginName;
@@ -243,6 +244,14 @@ public class SaleChangeExt implements Serializable {
 				", drawerLoginName='" + drawerLoginName + '\'' +
 				", airLineRefundStatus=" + airLineRefundStatus +
 				'}';
+	}
+
+	public Long getSupplierNo() {
+		return supplierNo;
+	}
+
+	public void setSupplierNo(Long supplierNo) {
+		this.supplierNo = supplierNo;
 	}
 
 	public Long getAloneLocker() {

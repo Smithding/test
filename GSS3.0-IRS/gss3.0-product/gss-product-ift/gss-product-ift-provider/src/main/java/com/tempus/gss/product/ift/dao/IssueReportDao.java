@@ -9,11 +9,23 @@ import java.util.List;
 /**
  * @author ZhangBro
  */
-public interface IssueReportDao {
+public interface IssueReportDao extends BaseDao<IFTIssueReport, IFTIssueReportParams> {
     
-    List<IFTIssueReport> queryIftOutReport(RowBounds page, IFTIssueReportParams params);
+    /**
+     * @param page
+     * @param params
+     *         IFTIssueReportParams 实体
+     * @return list<IFTIssueReport>
+     */
+    List<IFTIssueReport> queryIFTIssueReport(RowBounds page, IFTIssueReportParams params);
     
-    List<String> selectDeptNameList();
+    /**
+     * @return list
+     */
+    List<String> queryIssueDeptNameList();
     
-    List<String> getCabins();
+    /**
+     * @return list
+     */
+    List<String> queryIssueCabins();
 }
