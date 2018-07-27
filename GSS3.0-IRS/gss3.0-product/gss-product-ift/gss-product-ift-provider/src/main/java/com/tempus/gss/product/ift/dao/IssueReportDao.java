@@ -1,14 +1,17 @@
 package com.tempus.gss.product.ift.dao;
 
-import com.tempus.gss.product.ift.api.entity.IftOutReport;
-import com.tempus.gss.product.ift.api.entity.IftOutReportVO;
+import com.tempus.gss.product.ift.api.entity.IFTIssueReport;
+import com.tempus.gss.product.ift.api.entity.IFTIssueReportParams;
 import org.apache.ibatis.session.RowBounds;
 
 import java.util.List;
 
+/**
+ * @author ZhangBro
+ */
 public interface IssueReportDao {
     
-    List<IftOutReport> queryIftOutReport(RowBounds page, IftOutReportVO query);
+    List<IFTIssueReport> queryIftOutReport(RowBounds page, IFTIssueReportParams params);
     
     List<String> selectDeptNameList();
     

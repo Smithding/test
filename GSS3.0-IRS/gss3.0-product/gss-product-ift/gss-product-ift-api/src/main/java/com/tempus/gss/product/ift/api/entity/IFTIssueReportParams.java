@@ -10,7 +10,7 @@ import static java.lang.reflect.Array.newInstance;
  * @author ZhangBro
  * 查询条件
  */
-public class IftOutReportVO implements Serializable {
+public class IFTIssueReportParams implements Serializable {
     
     private static final long serialVersionUID = -6393082115652051244L;
     /**

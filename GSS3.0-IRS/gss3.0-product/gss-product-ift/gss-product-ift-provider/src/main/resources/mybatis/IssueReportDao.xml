@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tempus.gss.product.ift.dao.IssueReportDao">
-    <select id="queryIftOutReport" parameterType="com.tempus.gss.product.ift.api.entity.IftOutReportVO" resultMap="IftReportResultMap">
+    <select id="queryIftOutReport" parameterType="com.tempus.gss.product.ift.api.entity.IFTIssueReportParams" resultMap="IftReportResultMap">
         SELECT
         CS.NAME AS SUPPLIER_NAME,
         ISOE.SALE_ORDER_NO AS SALE_ORDER_NO,
@@ -175,7 +175,7 @@
         GROUP BY ISOD.SALE_ORDER_NO
         ORDER BY ISOE.ISSUE_TIME
     </select>
-    <resultMap id="IftReportResultMap" type="com.tempus.gss.product.ift.api.entity.IftOutReport">
+    <resultMap id="IftReportResultMap" type="com.tempus.gss.product.ift.api.entity.IFTIssueReport">
         <result column="SUPPLIER_NAME" property="supplierName"/>
         <result column="TYPE" property="type"/>
         <result column="TICKET_DATE" property="ticketDate"/>

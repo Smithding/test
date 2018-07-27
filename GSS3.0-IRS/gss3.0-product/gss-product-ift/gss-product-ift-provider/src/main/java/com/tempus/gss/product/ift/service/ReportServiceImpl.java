@@ -9,13 +9,11 @@ import com.tempus.gss.product.ift.api.service.ReportService;
 import com.tempus.gss.product.ift.dao.IssueReportDao;
 import com.tempus.gss.product.ift.dao.RefundReportDao;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Service
-@EnableAutoConfiguration
 public class ReportServiceImpl implements ReportService {
     @Autowired
     RefundReportDao refundReportDao;
@@ -131,8 +129,8 @@ public class ReportServiceImpl implements ReportService {
     }
     
     @Override
-    public Page<IftOutReport> queryIssueRecords(Page<IftOutReport> page, IftOutReportVO iftOutReportVo) {
-        List<IftOutReport> list = issueReportDao.queryIftOutReport(page, iftOutReportVo);
+    public Page<IFTIssueReport> queryIssueRecords(Page<IFTIssueReport> page, IFTIssueReportParams params) {
+        List<IFTIssueReport> list = issueReportDao.queryIftOutReport(page, params);
         page.setRecords(list);
         return page;
     }
