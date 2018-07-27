@@ -130,19 +130,19 @@ public class ReportServiceImpl implements ReportService {
     
     @Override
     public Page<IFTIssueReport> queryIssueRecords(Page<IFTIssueReport> page, IFTIssueReportParams params) {
-        List<IFTIssueReport> list = issueReportDao.queryIftOutReport(page, params);
+        List<IFTIssueReport> list = issueReportDao.queryIFTIssueReport(page, params);
         page.setRecords(list);
         return page;
     }
     
     @Override
     public List<String> queryIssueDeptNameList() {
-        return issueReportDao.selectDeptNameList();
+        return issueReportDao.queryIssueDeptNameList();
     }
     
     @Override
     public List<String> queryIssueCabins() {
-        return issueReportDao.getCabins();
+        return issueReportDao.queryIssueCabins();
     }
     
 }

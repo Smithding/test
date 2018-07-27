@@ -1,7 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tempus.gss.product.ift.dao.IssueReportDao">
-    <select id="queryIftOutReport" parameterType="com.tempus.gss.product.ift.api.entity.IFTIssueReportParams" resultMap="IftReportResultMap">
+
+    <resultMap id="IftReportResultMap" type="com.tempus.gss.product.ift.api.entity.IFTIssueReport">
+        <result column="SUPPLIER_NAME" property="supplierName"/>
+        <result column="TYPE" property="type"/>
+        <result column="TICKET_DATE" property="ticketDate"/>
+        <result column="SALE_ORDER_NO" property="saleOrderNo"/>
+        <result column="ROUTING" property="routing"/>
+        <result column="FLIGHT_NO" property="flightNo"/>
+        <result column="CABIN" property="cabin"/>
+        <result column="DEP_DATE" property="depDate"/>
+        <result column="TICKET_NUM" property="ticketNum"/>
+        <result column="RATE" property="rate"/>
+        <result column="CURRENCY" property="currency"/>
+        <result column="TRUE_PRICE" property="truePrice"/>
+        <result column="SETTLE_PRICE" property="settlePrice"/>
+        <result column="TAX" property="tax"/>
+        <result column="TOTAL_PRICE" property="totalPrice"/>
+        <result column="GROSS" property="gross"/>
+        <result column="SALE_PERSON" property="salePerson"/>
+        <result column="SALE_DEPT" property="saleDept"/>
+        <result column="TICKET_PERSON" property="ticketPerson"/>
+        <result column="MONTH_SETTLE" property="monthSettle"/>
+        <result column="COMPANY" property="company"/>
+        <result column="SETTLE_METHOD" property="settleMethod"/>
+        <result column="PASSENGER_NAME" property="passengerName"/>
+        <result column="GENDER" property="gender"/>
+        <result column="SOURCE" property="source"/>
+        <result column="REMARK" property="remark"/>
+        <result column="CHANGE_TYPE" property="changeType"/>
+    </resultMap>
+
+    <select id="queryIFTIssueReport" parameterType="com.tempus.gss.product.ift.api.entity.IFTIssueReportParams" resultMap="IftReportResultMap">
         SELECT
         CS.NAME AS SUPPLIER_NAME,
         ISOE.SALE_ORDER_NO AS SALE_ORDER_NO,
@@ -37,7 +68,7 @@
         ISOE.CREATOR AS SALE_PERSON,
         SD.NAME AS SALE_DEPT,
         SOI.SHORT_NAME AS COMPANY,
-        CONCAT(IP.SURNAME, '/', IP.NAME) AS PASSENGER_NAME,
+        GROUP_CONCAT(IP.SURNAME, '/', IP.NAME SEPARATOR ' ') AS PASSENGER_NAME,
         CASE WHEN IP.GENDER = 1
         THEN '男'
         ELSE '女' END AS GENDER,
@@ -175,44 +206,17 @@
         GROUP BY ISOD.SALE_ORDER_NO
         ORDER BY ISOE.ISSUE_TIME
     </select>
-    <resultMap id="IftReportResultMap" type="com.tempus.gss.product.ift.api.entity.IFTIssueReport">
-        <result column="SUPPLIER_NAME" property="supplierName"/>
-        <result column="TYPE" property="type"/>
-        <result column="TICKET_DATE" property="ticketDate"/>
-        <result column="SALE_ORDER_NO" property="saleOrderNo"/>
-        <result column="ROUTING" property="routing"/>
-        <result column="FLIGHT_NO" property="flightNo"/>
-        <result column="CABIN" property="cabin"/>
-        <result column="DEP_DATE" property="depDate"/>
-        <result column="TICKET_NUM" property="ticketNum"/>
-        <result column="RATE" property="rate"/>
-        <result column="CURRENCY" property="currency"/>
-        <result column="TRUE_PRICE" property="truePrice"/>
-        <result column="SETTLE_PRICE" property="settlePrice"/>
-        <result column="TAX" property="tax"/>
-        <result column="TOTAL_PRICE" property="totalPrice"/>
-        <result column="GROSS" property="gross"/>
-        <result column="SALE_PERSON" property="salePerson"/>
-        <result column="SALE_DEPT" property="saleDept"/>
-        <result column="TICKET_PERSON" property="ticketPerson"/>
-        <result column="MONTH_SETTLE" property="monthSettle"/>
-        <result column="COMPANY" property="company"/>
-        <result column="SETTLE_METHOD" property="settleMethod"/>
-        <result column="PASSENGER_NAME" property="passengerName"/>
-        <result column="GENDER" property="gender"/>
-        <result column="SOURCE" property="source"/>
-        <result column="REMARK" property="remark"/>
-        <result column="CHANGE_TYPE" property="changeType"/>
-    </resultMap>
 
-    <select id="selectDeptNameList" resultType="java.lang.String">
+
+    <select id="queryIssueDeptNameList" resultType="java.lang.String">
         SELECT DISTINCT SD.NAME AS SALE_DEPT
         FROM IFT_SALE_ORDER_EXT ISOE
             LEFT JOIN SM_USER SU ON SU.LOGIN_NAME = ISOE.DRAWER_LOGIN_NAME
             LEFT JOIN SM_DEPT SD ON SD.ID = SU.DEPT_ID
         WHERE SD.NAME IS NOT NULL
     </select>
-    <select id="getCabins" resultType="java.lang.String">
+
+    <select id="queryIssueCabins" resultType="java.lang.String">
         SELECT
             DISTINCT IL.CABIN AS CABIN
         FROM IFT_SALE_ORDER_EXT ISOE LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
