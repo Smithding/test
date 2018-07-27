@@ -204,12 +204,14 @@
         LEFT JOIN OS_SALECHANGE o ON o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
         LEFT JOIN OS_BUYORDER k ON k.SALE_ORDER_NO = o.SALE_ORDER_NO
         LEFT JOIN OS_BUYCHANGE m ON m.BUY_ORDER_NO = k.BUY_ORDER_NO
+        LEFT JOIN IFT_BUY_CHANGE_EXT h ON h.BUY_CHANGE_NO = m.BUY_CHANGE_NO
         WHERE
         i.VALID = 1
         AND o.BUSINESS_SIGN_NO = m.BUSINESS_SIGN_NO
         AND i.CHANGE_TYPE in (1,2)
         AND m.CHILD_STATUS = 1
-        AND o.CHILD_STATUS IN (2)
+        AND o.CHILD_STATUS IN (2,10)
+        AND h.`AIRLINE_REFUND_STATUS` IN (0, - 1)
         <if test="owner != null">
             AND   i.OWNER = #{owner}
         </if>
@@ -231,8 +233,8 @@
         AND i.CHANGE_TYPE in(1,2)
         AND i.LOCKER != 0
         AND m.CHILD_STATUS = '1'
-        AND
-        o.CHILD_STATUS = 1
+        AND o.CHILD_STATUS != 10
+        AND o.CHILD_STATUS = 1
         <if test="owner != null">
             AND   i.OWNER = #{owner}
         </if>
@@ -799,9 +801,9 @@
             <if test="airline !=null and airline!=''">
                 AND a.AIRLINE = #{airline,jdbcType=VARCHAR}
             </if>
-            <if test="changeType==0">
+            <!--<if test="changeType==0">
                 AND (i.CHANGE_TYPE = 1 or i.CHANGE_TYPE =2)
-            </if>
+            </if>-->
             <if test="pgerName !=null and pgerName !=''">
                 AND CONCAT_WS('',p.SURNAME,p.`NAME`) like CONCAT('%',#{pgerName,jdbcType=VARCHAR},'%' )
             </if>
