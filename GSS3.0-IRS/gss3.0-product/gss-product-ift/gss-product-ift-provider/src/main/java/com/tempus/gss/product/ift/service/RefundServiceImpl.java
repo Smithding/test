@@ -1577,7 +1577,7 @@ public class RefundServiceImpl implements IRefundService {
 
 		//查询该种类型单被该业务员锁住的数量赋值给BuyRefuseNum字段
 		User user = userService.findUserByLoginName(agent, sender.getUserid());
-		int lockCount = saleChangeExtDao.queryBuyRefundAndDelCountBylocker(owner, user.getId());
+		int lockCount = refundService.queryBuyRefundAndDelCountBylocker(user.getId());
 		sender.setBuyRefuseNum(lockCount);
 		sender.setIds(sender.getId() + "");
 		iTicketSenderService.update(sender);
@@ -1799,6 +1799,13 @@ public class RefundServiceImpl implements IRefundService {
 			log.info("更新采购变更单扩展表航司审核状态为拒单:"+buyChangeExt.toString());
 			buyChangeExtDao.updateByPrimaryKeySelective(buyChangeExt);
 		}
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public int queryBuyRefundAndDelCountBylocker(Long userId) {
+		int lockCount = saleChangeExtDao.queryBuyRefundAndDelCountBylocker(owner, userId);
+		return lockCount;
 	}
 
 	/**
