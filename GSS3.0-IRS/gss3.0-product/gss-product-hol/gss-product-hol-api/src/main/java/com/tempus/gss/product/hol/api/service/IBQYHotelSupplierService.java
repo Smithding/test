@@ -84,9 +84,19 @@ public interface IBQYHotelSupplierService {
 	List<ImgInfo> listImgByHotelId(Agent agent, long hotelId);
 	
 	/**
-	 * 就带你房间
+	 * 酒店房间
 	 * @param hotelDetailSearchReq
 	 * @return
 	 */
 	Map<String, Object> getProByRoomCode(Agent agent, HotelDetailSearchReq hotelDetailSearchReq, Long resId);
+
+	/**
+	 * 酒店基本信息
+	 * @param agent
+	 * @param bqyResId
+	 * @param checkInDate
+	 * @param checkOutDate
+	 * @return
+	 */
+	ResBaseInfo queryHotelBaseInfo(Agent agent, Long bqyResId, String checkInDate, String checkOutDate, String cityCode);
 }
