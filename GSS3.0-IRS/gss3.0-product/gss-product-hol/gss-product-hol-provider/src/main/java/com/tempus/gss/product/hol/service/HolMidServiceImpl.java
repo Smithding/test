@@ -308,7 +308,7 @@ public class HolMidServiceImpl implements IHolMidService {
 				bqyHotel = hotelDetail.get();
 			}
 			if (null != tcResId) {
-				tcHotel = syncHotelInfo.newQueryHotelDetail(agent, tcResId, checkinDate, checkoutDate);
+				tcHotel = syncHotelInfo.queryProDetail(agent, tcResId, checkinDate, checkoutDate);
 				bqyHotel = tcHotel;
 			}
 		}
@@ -467,7 +467,7 @@ public class HolMidServiceImpl implements IHolMidService {
 	}
 
 	@Override
-	public ResBaseInfo hotelBaseInfo(Agent agent, String holMidId ,String checkInDate, String checkOutDate) {
+	public ResBaseInfo hotelBaseInfo(Agent agent, String holMidId ,String checkInDate, String checkOutDate) throws Exception {
 		if (StringUtil.isNullOrEmpty(agent)) {
 			logger.error("agent对象为空");
 			throw new GSSException("修改酒店可售状态", "0102", "agent对象为空");
