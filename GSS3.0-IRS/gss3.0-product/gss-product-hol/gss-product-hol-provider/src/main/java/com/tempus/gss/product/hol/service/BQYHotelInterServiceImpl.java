@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -333,8 +334,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	}
 
 	@Override
-	public HotelEntity queryHotelDetail(QueryHotelParam query) {
-		
+	@Async
+	public Future<HotelEntity> queryHotelDetail(QueryHotelParam query) {
 		query.setAgentId(Long.parseLong(BQY_AGENTID));
 		query.setToken(md5Encryption());
 		HotelEntity hotelEntity = null;
@@ -352,7 +353,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		} else {
 			throw new GSSException("获取TC酒店详情", "0111", "BQY酒店详情请求返回空值");
 		}
-		return hotelEntity;
+		return new AsyncResult<HotelEntity>(hotelEntity);
+		//return hotelEntity;
 	}
 
 	@Override
@@ -1112,9 +1114,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 
 	@Override
 	@Async
-	public Future<HotelEntity> asyncHotelDetail(QueryHotelParam query) {
-		HotelEntity hotelEntity = queryHotelDetail(query);
-		return new AsyncResult<HotelEntity>(hotelEntity);
+	public Future<HotelEntity> asyncHotelDetail(QueryHotelParam query) throws Exception {
+		Future<HotelEntity> hotelEntity = queryHotelDetail(query);
+		return new AsyncResult<HotelEntity>(hotelEntity.get());
 	}
 
 	/**
