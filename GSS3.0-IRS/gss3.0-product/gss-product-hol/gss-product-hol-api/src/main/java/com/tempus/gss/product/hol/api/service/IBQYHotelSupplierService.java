@@ -98,5 +98,5 @@ public interface IBQYHotelSupplierService {
 	 * @param checkOutDate
 	 * @return
 	 */
-	ResBaseInfo queryHotelBaseInfo(Agent agent, Long bqyResId, String checkInDate, String checkOutDate, String cityCode);
+	ResBaseInfo queryHotelBaseInfo(Agent agent, Long bqyResId, String checkInDate, String checkOutDate, String cityCode) throws Exception;
 }
