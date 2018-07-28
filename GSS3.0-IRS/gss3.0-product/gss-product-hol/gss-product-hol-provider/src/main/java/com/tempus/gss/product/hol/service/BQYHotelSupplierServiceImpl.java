@@ -65,6 +65,7 @@ import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
 import com.tempus.gss.product.hol.api.service.IHolProfitService;
 import com.tempus.gss.product.hol.api.util.DateUtil;
+import com.tempus.gss.product.hol.utils.RedisService;
 import com.tempus.gss.vo.Agent;
 
 @Service
@@ -81,6 +82,9 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 	
 	@Autowired
 	IHolProfitService holProfitService;
+	
+	@Autowired
+	RedisService redisService;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -223,7 +227,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 
 	@Override
 	@Async
-	public Future<ResBaseInfo> singleHotelDetail(Agent agent, String hotelId, String checkinDate, String checkoutDate, String cityCode) throws InterruptedException, ExecutionException {
+	public Future<ResBaseInfo> singleHotelDetail(Agent agent, String hotelId, String checkinDate, String checkoutDate, String cityCode) throws Exception {
 		try {
 			QueryHotelParam query = new QueryHotelParam();
 			if (StringUtils.isBlank(checkinDate) && StringUtils.isBlank(checkoutDate)) {
@@ -506,7 +510,16 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 
 	@Override
 	public ResBaseInfo getById(Agent agent, Long bqyHolId) {
-		HotelInfo hotelInfo = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(bqyHolId)), HotelInfo.class);
+		long start = System.currentTimeMillis();
+		String perKey = "BQYHOL"+bqyHolId;
+		HotelInfo hotelInfo =(HotelInfo) redisService.get(perKey);
+		long end = System.currentTimeMillis();
+        System.out.println("redis，耗时：" + (end - start) + "毫秒");
+		if(hotelInfo == null) {
+			hotelInfo = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(bqyHolId)), HotelInfo.class);
+			redisService.set(perKey, hotelInfo, Long.valueOf(60 * 60 * 24 * 3));
+		}
+		
 		ResBaseInfo resBaseInfo = bqyHotelConverService.bqyConvertTcHotelEntity(hotelInfo);
 		return resBaseInfo;
 	}
@@ -723,15 +736,18 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 	}
 
 	@Override
-	@Cacheable(value = "ResBaseInfo", key = "#bqyResId", unless = "")
-	public ResBaseInfo queryHotelBaseInfo(Agent agent, Long bqyResId, String checkInDate, String checkOutDate, String cityCode) {
-		ResBaseInfo resBaseInfo = getById(agent, bqyResId);
+	//@Cacheable(value = "ResBaseInfo", key = "#bqyResId", unless = "")
+	public ResBaseInfo queryHotelBaseInfo(Agent agent, Long bqyResId, String checkInDate, String checkOutDate, String cityCode) throws Exception{
 		QueryHotelParam query = new QueryHotelParam();
 		query.setCheckInTime(checkInDate);
 		query.setCheckOutTime(checkOutDate);
 		query.setCityCode(cityCode);
 		query.setHotelId(bqyResId);
-		HotelEntity hotelEntity = bqyHotelInterService.queryHotelDetail(query);
+		Future<HotelEntity> hotelEntityFu = bqyHotelInterService.queryHotelDetail(query);
+		
+		ResBaseInfo resBaseInfo = getById(agent, bqyResId);
+		
+		HotelEntity hotelEntity = hotelEntityFu.get();
 		//酒店政策
 		List<Policy> policyList = hotelEntity.getPolicy();
 		bqyHotelPolicyConver(resBaseInfo, policyList);
