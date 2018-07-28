@@ -141,7 +141,7 @@
                 AND HO.BOOK_COUNT=#{bookPro,jdbcType=TINYINT}
             </if>
             <if test="orderStatus!=null and orderStatus!=''">
-            AND HO.ORDER_STATUS =#{orderStatus,jdbcType=VARCHAR}
+                AND HO.ORDER_STATUS =#{orderStatus,jdbcType=VARCHAR}
             </if>
             <if test="bookNight!=null and bookNight!=''">
                 AND HO.NIGHT_COUNT=#{bookNight,jdbcType=TINYINT}
@@ -282,6 +282,9 @@
             </if>
             <if test="customerTypeName!=null and customerTypeName!=''">
                 AND CCT.NAME=#{customerTypeName,jdbcType=VARCHAR}
+            </if>
+            <if test="orderStatus!=null and orderStatus!=''">
+                AND HO.ORDER_STATUS =#{orderStatus,jdbcType=VARCHAR}
             </if>
             <if test="customerNo!=null and customerNo!=''">
                 AND HO.CUSTOMER_NO=#{customerNo,jdbcType=BIGINT}
