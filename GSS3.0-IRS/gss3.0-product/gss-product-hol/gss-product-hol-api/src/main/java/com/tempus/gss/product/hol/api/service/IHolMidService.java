@@ -71,5 +71,5 @@ public interface IHolMidService {
 	 * @param holMidId
 	 * @return
 	 */
-	ResBaseInfo hotelBaseInfo(Agent agent, String holMidId, String checkInDate, String checkOutDate);
+	ResBaseInfo hotelBaseInfo(Agent agent, String holMidId, String checkInDate, String checkOutDate) throws Exception;
 }
