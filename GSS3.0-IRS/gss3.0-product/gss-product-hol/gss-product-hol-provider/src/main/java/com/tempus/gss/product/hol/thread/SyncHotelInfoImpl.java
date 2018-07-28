@@ -84,67 +84,6 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	
 	SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 	
-	@Override
-	public TCResponse<ResBaseInfo> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException {
-		//Future<TCResponse<ResBaseInfo>> queryHotelList = tcHotelSupplierService.queryHotelList(agent, hotelSearchReq);
-		//Future<TCResponse<ResBaseInfo>> queryHotelList2 = iBQYHotelSupplierService.queryHotelList(hotelSearchReq);
-		TCResponse<ResBaseInfo> tcResponse = null;
-		//TCResponse<ResBaseInfo> bqyResponse = null;
-		/*try {
-			//Future<TCResponse<ResBaseInfo>> future = RpcContext.getContext().getFuture();
-			
-			while(true) {
-				if(queryHotelList.isDone()) {
-					if(StringUtil.isNotNullOrEmpty(queryHotelList)) {
-						tcResponse = queryHotelList.get();
-					}
-					//bqyResponse = queryHotelList2.get();
-					System.out.println("bqy Size: "+bqyResponse.getResponseResult().size());
-					System.out.println(JsonUtil.toJson(bqyResponse.getResponseResult()));
-					for(ResBaseInfo rs : bqyResponse.getResponseResult()) {
-						System.out.println("bqy: "+rs.getResName());
-					}
-					break;
-				}
-			}
-			if(StringUtil.isNullOrEmpty(hotelSearchReq.getAirRailWay())) {
-				
-			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		*/
-		
-		
-		return tcResponse;
-		//return null;
-	}
-
-	@Override
-	public TCResponse<ResBaseInfo> queryHotelListForBack(Agent agent, HotelListSearchReq hotelSearchReq)
-			throws GSSException {
-		Future<TCResponse<ResBaseInfo>> queryHotelList = tcHotelSupplierService.queryHotelListForBack(agent, hotelSearchReq);
-		Future<TCResponse<ResBaseInfo>> queryHotelList2 = bqyHotelSupplierService.queryHotelList(hotelSearchReq);
-		TCResponse<ResBaseInfo> tcResponse = null;
-		TCResponse<ResBaseInfo> bqyResponse = null;
-		try {
-			while(true) {
-				if(queryHotelList.isDone() && queryHotelList2.isDone()) {
-					tcResponse = queryHotelList.get();
-					bqyResponse = queryHotelList2.get();
-					break;
-				}
-			}
-			if(StringUtil.isNullOrEmpty(hotelSearchReq.getAirRailWay())) {
-				
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return tcResponse;
-	}
-
 
 	@Override
 	public ResBaseInfo queryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
@@ -592,6 +531,221 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	}
 	
 	@Override
+	@Async
+	public ResBaseInfo queryProDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
+				long start = System.currentTimeMillis();
+				if (StringUtil.isNullOrEmpty(agent)) {
+		            logger.error("agent对象为空");
+		            throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
+		        }else{
+		        	if(StringUtil.isNullOrEmpty(agent.getType())){
+		        		throw new GSSException("获取某一酒店详细信息", "0102", "agentType为空");
+		        	}
+		        }
+				if (StringUtil.isNullOrEmpty(resId)) {
+		            logger.error("酒店id为空");
+		            throw new GSSException("获取某一酒店详细信息", "0100", "酒店id为空");
+		        }
+				if (StringUtil.isNullOrEmpty(startTime)) {
+					logger.error("开始日期为空");
+		            throw new GSSException("获取某一酒店详细信息", "0105", "开始日期为空");
+		        }
+		        if (StringUtil.isNullOrEmpty(endTime)) {
+		            logger.error("结束日期为空");
+		            throw new GSSException("获取某一酒店详细信息", "0105", "结束日期为空");
+		        }
+		        ResBaseInfo tcResBaseInfo = new ResBaseInfo();
+		        tcResBaseInfo.setId(resId);
+		        tcResBaseInfo.setResId(resId);
+		        Integer sumPrice=0;
+		        Integer days = 0;
+				try {
+					
+					AssignDateHotelReq assignDateHotelReq=new AssignDateHotelReq();
+					assignDateHotelReq.setResId(resId);
+					assignDateHotelReq.setSourceFrom("-1");
+					assignDateHotelReq.setStartTime(startTime);
+					Calendar calendar = Calendar.getInstance();
+			        calendar.setTime(sdf.parse(endTime));
+			        calendar.add(Calendar.DAY_OF_MONTH, -1);
+					assignDateHotelReq.setEndTime(sdf.format(calendar.getTime()));
+					Future<AssignDateHotel> assignDateHotelFu=  hotelInterService.queryFuAssignDateHotel(assignDateHotelReq);
+					
+					days= DateUtil.daysBetween(startTime, endTime);
+					Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryListById(resId, ResProBaseInfos.class);
+					Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryListById(resId, ImgInfoSum.class);
+					Future<List<ProfitPrice>> computeProfitByAgentFu = null;
+					if(!agent.getNum().equals(401803070321014723L)) {
+						computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+					}
+					
+					while(true) {
+						if( resProBaseInfosFuture.isDone() && imgInfoSumFuture.isDone() && assignDateHotelFu.isDone()) {
+							break;
+						}
+					}
+					
+					ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
+					ImgInfoSum imgInfoSum = imgInfoSumFuture.get();
+					AssignDateHotel assignDateHotel = assignDateHotelFu.get();
+					//System.out.println("TC: "+JsonUtil.toJson(assignDateHotel));
+					if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())) {
+						List<ProInfoDetail> proInfoDetailList= assignDateHotel.getProInfoDetailList();
+						List<ResProBaseInfo> resProBaseInfoListBeFore= resProBaseInfos.getResProBaseInfos();
+						List<ImgInfo> imgInfoList= imgInfoSum.getImgInfoList();
+						
+						if(StringUtil.isNotNullOrEmpty(resProBaseInfoListBeFore)){
+							Map<String, ImgInfo> mm = new HashMap<String, ImgInfo>();
+							if(imgInfoList!=null && imgInfoList.size() > 0) {
+								mm = imgInfoList.stream().collect(Collectors.toMap(ImgInfo::getResProId, a -> a,(k1,k2)->k1));
+								//list2 = mm.entrySet().stream().map(et ->et.getValue()).collect(Collectors.toList());
+							}
+							
+							List<ResProBaseInfo> resProBaseInfoList = new ArrayList<ResProBaseInfo>();
+							for(ProInfoDetail proSaleKey : proInfoDetailList) {
+								Integer firstPrice = 999999;
+								List<ResProBaseInfo> filterList = resProBaseInfoListBeFore.stream().filter(pro -> pro.getProductUniqueId().equals(proSaleKey.getProductUniqueId())).collect(Collectors.toList());
+								if(filterList != null && filterList.size() >0) {
+									ResProBaseInfo pro = filterList.get(0);
+									TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
+									List<Integer> pppRice = new ArrayList<Integer>();
+		 	            			Calendar da = Calendar.getInstance(); 
+		                   			 for (int i = 0; i < days; i++) {
+		                   				 ProSaleInfoDetail ProSaleInfoDetail=new ProSaleInfoDetail();
+		                   				 ProSaleInfoDetail.setDistributionSalePrice(0);
+		                   				 da.setTime(sdf.parse(startTime));
+		                   				 da.add(Calendar.DAY_OF_MONTH, i);
+		                   				 mapPro.put(sdf.format(da.getTime()), ProSaleInfoDetail);
+		                				}
+									TreeMap<String, ProSaleInfoDetail> proSaleInfoDetails = proSaleKey.getProSaleInfoDetails();
+		       			 			if(StringUtil.isNotNullOrEmpty(proSaleInfoDetails)) {
+		       			 				if(proSaleInfoDetails.containsKey(DateUtil.stringToLonString(startTime))) {
+		           			 				Integer firProPrice = proSaleInfoDetails.get(DateUtil.stringToLonString(startTime)).getDistributionSalePrice();
+		           			 				if(StringUtil.isNotNullOrEmpty(firProPrice)) {
+		           			 					if(computeProfitByAgentFu!=null) {
+		           			 						List<ProfitPrice> computeProfitByAgent = computeProfitByAgentFu.get();
+			           			 					if(computeProfitByAgent != null && computeProfitByAgent.size() > 0) {
+			               			 					for(ProfitPrice profit : computeProfitByAgent) {
+			               			 						BigDecimal lowerPrice = profit.getPriceFrom();
+			               			 						BigDecimal upPrice = profit.getPriceTo();
+			               			 						BigDecimal firPrice = new BigDecimal(firProPrice);
+			               			 						if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
+			               			 							BigDecimal rate = profit.getRate();
+			               			 							rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
+			               			 							pro.setRebateRateProfit(rate);
+			               			 						}
+			               			 					}
+			           			 					}
+		           			 					}
+		           			 				}
+		       			 				}
+		           			 			int kk = 0;
+		 	    	        			for (Map.Entry<String, ProSaleInfoDetail> entry : proSaleInfoDetails.entrySet()) {
+		 	    	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(startTime);
+		 	    	        				int endCompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(endTime);
+		 	    	        					if(begincompare >= 0 && endCompare < 0){
+		 	    	        						mapPro.put(DateUtil.stringToSimpleString(entry.getKey()), entry.getValue());
+		 	    	        						Integer price= entry.getValue().getDistributionSalePrice();
+		 	    	        						pppRice.add(price);
+		 	    	        						if(!entry.getValue().getInventoryStats().equals(4)) {
+		 	    	        							SimpleDateFormat newsdf=new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+		 	    	        							String nowTime = newsdf.format(new Date());
+		 	    	        							int startDate = entry.getValue().getStartDate().compareTo(nowTime);
+		 	    	        							int endDate = entry.getValue().getEndDate().compareTo(nowTime);
+		 	    	        							if(startDate > 0 || endDate < 0) {
+		 	    	        								pro.setBookStatus(0);
+		 	    	        							}
+		 	    	        						}else {
+		 	    	        							pro.setBookStatus(0);
+		 	    	        						}
+			    	        							if(days.equals(1) && (sdf.format(new Date()).equals(startTime))) {
+			    	        								Date startTime1 = DateUtil.stringToSimpleDate(entry.getValue().getStartTime());
+		 	    	        							Date endTime1 = DateUtil.stringToSimpleDate(entry.getValue().getEndTime());
+		 	    	        							Date nowDate = new Date();
+			 	    	        							if(nowDate.before(startTime1) || endTime1.before(nowDate)) {
+			 	    	        								pro.setBookStatus(0);
+			 	    	        							}
+			    	        							}
+		 	    	        						sumPrice += price;
+		 	    	        						kk += 1;
+		 	    	        						if(kk == 1) {
+		 	    	        							firstPrice = entry.getValue().getDistributionSalePrice();
+		 	    	        						}
+		 	    	        					}
+		 	    	        					if(kk == days.intValue()) {
+			    	        							break;
+			    	        						}
+		 	            					}
+			    	        					pro.setProSaleInfoDetailsTarget(mapPro);
+			    	        					pro.setFirPrice(firstPrice);
+			    	        					if(pppRice.size() == 1){
+			    	        						pro.setAdvancedLimitDays(pppRice.get(0));
+			    	        					}else if(pppRice.size() >= 2){
+			    	        						pro.setAdvancedLimitDays(Collections.min(pppRice));
+			    	        					}else {
+			    	        						pro.setBookStatus(0);
+			    	        					}
+			    	        					if(kk < days.intValue()) {
+			    	        						pro.setBookStatus(0);
+			    	        					}
+			    	        					if(kk != 0){
+			    	        					pro.setConPrice(sumPrice/kk);
+			    	        				}
+			    	        				kk = 0;
+			    	        				sumPrice =0;
+		       			 			}else {
+		       			 				pro.setBookStatus(0);
+		       			 				pro.setFirPrice(firstPrice);
+		       			 			}
+		       			 			pro.setResProName(pro.getResProName().replaceAll("\\s*", "").replaceAll("（", "(").replaceAll("）", ")"));
+									resProBaseInfoList.add(pro);
+								}
+							}
+							Map<String, List<ResProBaseInfo>> proMap = resProBaseInfoList.stream().collect(Collectors.groupingBy(ResProBaseInfo::getProId));
+							
+							List<ProDetails> ProInfoDetaisList=new ArrayList<ProDetails>();
+							if(StringUtil.isNotNullOrEmpty(proMap)){
+								for (Map.Entry<String, List<ResProBaseInfo>> baseList : proMap.entrySet()) {
+									ProDetails proInfoDetai=new ProDetails();
+									proInfoDetai.setProId(baseList.getKey());
+									proInfoDetai.setResProName(proMap.get(baseList.getKey()).get(0).getResProName());
+									proInfoDetai.setRoomSize(proMap.get(baseList.getKey()).get(0).getRoomSize());
+									proInfoDetai.setRoomFloor(proMap.get(baseList.getKey()).get(0).getRoomFloor());
+									proInfoDetai.setRoomFacilities(proMap.get(baseList.getKey()).get(0).getRoomFacilities());
+									proInfoDetai.setBedSize(proMap.get(baseList.getKey()).get(0).getBedSize());
+									List<ResProBaseInfo> valueList = baseList.getValue();
+									if(valueList != null && valueList.size() > 0) {
+										valueList.sort(Comparator.comparingInt(ResProBaseInfo :: getFirPrice));
+										int sum = valueList.stream().mapToInt(ResProBaseInfo :: getAdvancedLimitDays).sum();
+										//int asInt = valueList.stream().mapToInt(ResProBaseInfo :: getFirPrice).min().getAsInt();
+										//proInfoDetai.setMinPrice(asInt);
+										proInfoDetai.setProDetailConPrice(sum/valueList.size());
+									}else {
+										proInfoDetai.setSaleStatus(0);
+									}
+									if(mm.containsKey(baseList.getKey())) {
+										String imageUrl = mm.get(baseList.getKey()).getImageUrl();
+										proInfoDetai.setImgUrl(imageUrl);
+									}
+									
+									proInfoDetai.setResProBaseInfoList(valueList);
+									ProInfoDetaisList.add(proInfoDetai);
+								}
+							}
+							tcResBaseInfo.setProDetails(ProInfoDetaisList);
+						}
+					}
+					
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				long end = System.currentTimeMillis();  
+			    System.out.println("完成任务newQueryHotelDetail，耗时：" + (end - start) + "毫秒"); 
+				return tcResBaseInfo;
+			    //return new AsyncResult<ResBaseInfo>(tcResBaseInfo);
+	}
+	
+	@Override
 	public ResBaseInfo newQueryHolProDetail(Agent agent, Long resId, String uniProId, String startTime, String endTime) throws GSSException {
 		long start = System.currentTimeMillis();
 		if (StringUtil.isNullOrEmpty(agent)) {
@@ -842,7 +996,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			String checkoutDate) throws Exception{
 		long start = System.currentTimeMillis();
 		System.out.println("f2 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
-		ResBaseInfo hotelDetail = newQueryHotelDetail(agent, tcHotelId, checkinDate, checkoutDate);
+		ResBaseInfo hotelDetail = queryProDetail(agent, tcHotelId, checkinDate, checkoutDate);
 		long end = System.currentTimeMillis();  
 		System.out.println("完成任务二，耗时：" + (end - start) + "毫秒"); 
 		return new AsyncResult<ResBaseInfo>(hotelDetail);
