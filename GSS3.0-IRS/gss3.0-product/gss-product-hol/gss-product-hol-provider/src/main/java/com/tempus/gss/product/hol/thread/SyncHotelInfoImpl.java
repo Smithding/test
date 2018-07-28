@@ -28,6 +28,7 @@ import org.springframework.scheduling.annotation.AsyncResult;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.google.common.collect.Lists;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.hol.api.entity.ProfitPrice;
@@ -378,11 +379,13 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 						List<ImgInfo> imgInfoList= imgInfoSum.getImgInfoList();
 						
 						if(StringUtil.isNotNullOrEmpty(tcResBaseInfo) && StringUtil.isNotNullOrEmpty(resProBaseInfoListBeFore)){
-							List<ImgInfo> list2=new ArrayList<ImgInfo>();
+							List<ImgInfo> list2=Lists.newArrayList();
 							Map<String, ImgInfo> mm = new HashMap<String, ImgInfo>();
 							if(imgInfoList!=null && imgInfoList.size() > 0) {
 								mm = imgInfoList.stream().collect(Collectors.toMap(ImgInfo::getResProId, a -> a,(k1,k2)->k1));
 								list2 = mm.entrySet().stream().map(et ->et.getValue()).collect(Collectors.toList());
+								//这个去重效率慢
+								//list2 = imgInfoList.stream().collect(Collectors.collectingAndThen(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(ImgInfo::getResProId))), ArrayList::new));
 							}
 							
 							List<ResProBaseInfo> resProBaseInfoList = new ArrayList<ResProBaseInfo>();
@@ -499,7 +502,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 									proInfoDetai.setBedSize(proMap.get(baseList.getKey()).get(0).getBedSize());
 									List<ResProBaseInfo> valueList = baseList.getValue();
 									if(valueList != null && valueList.size() > 0) {
-										valueList.sort(Comparator.comparingInt(ResProBaseInfo :: getFirPrice));
+										//valueList.sort(Comparator.comparingInt(ResProBaseInfo :: getFirPrice));
 										int sum = valueList.stream().mapToInt(ResProBaseInfo :: getAdvancedLimitDays).sum();
 										//int asInt = valueList.stream().mapToInt(ResProBaseInfo :: getFirPrice).min().getAsInt();
 										//proInfoDetai.setMinPrice(asInt);
@@ -715,7 +718,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 									proInfoDetai.setBedSize(proMap.get(baseList.getKey()).get(0).getBedSize());
 									List<ResProBaseInfo> valueList = baseList.getValue();
 									if(valueList != null && valueList.size() > 0) {
-										valueList.sort(Comparator.comparingInt(ResProBaseInfo :: getFirPrice));
+										//valueList.sort(Comparator.comparingInt(ResProBaseInfo :: getFirPrice));
 										int sum = valueList.stream().mapToInt(ResProBaseInfo :: getAdvancedLimitDays).sum();
 										//int asInt = valueList.stream().mapToInt(ResProBaseInfo :: getFirPrice).min().getAsInt();
 										//proInfoDetai.setMinPrice(asInt);
