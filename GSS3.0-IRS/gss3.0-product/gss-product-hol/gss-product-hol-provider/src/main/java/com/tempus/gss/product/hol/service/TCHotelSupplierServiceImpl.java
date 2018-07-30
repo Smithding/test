@@ -163,7 +163,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		if(null == resDetail) {
 			resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), ResBaseInfo.class);
 			
-			redisService.set(perKey, resDetail, Long.valueOf(60 * 60 * 24 * 3));
+			redisService.set(perKey, resDetail, Long.valueOf(60 * 60 * 24));
 		}
 		//ResBaseInfo resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), ResBaseInfo.class);
 		return resDetail;
@@ -233,7 +233,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		if(null == t) {
 			t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
 			
-			redisService.set(perKey, t, Long.valueOf(60 * 60 * 24 * 3));
+			redisService.set(perKey, t, Long.valueOf(60 * 60 * 24));
 		}
 		
 		//T t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
