@@ -172,11 +172,18 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	/**
 	 * 根据酒店id查找具体酒店信息
 	 */
-	@Cacheable(value = "HolMidBaseInfo", key = "#id",unless="")
+	//@Cacheable(value = "HolMidBaseInfo", key = "#id",unless="")
 	@Override
 	public HolMidBaseInfo queryMidListByResId(Agent agent, String id) {
+		HolMidBaseInfo resDetail = null;
+		String perKey = "MidHOL"+id;
+		resDetail = (HolMidBaseInfo)redisService.get(perKey);
+		if(null == resDetail) {
+			resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), HolMidBaseInfo.class);
+			
+			redisService.set(perKey, resDetail, Long.valueOf(60 * 60 * 24 * 3));
+		}
 		
-		HolMidBaseInfo resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), HolMidBaseInfo.class);
 		return resDetail;
 	}
 	
