@@ -466,6 +466,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		       			 				pro.setFirPrice(firstPrice);
 		       			 			}
 		       			 			pro.setResProName(pro.getResProName().replaceAll("\\s*", "").replaceAll("（", "(").replaceAll("）", ")"));
+		       			 			pro.setSupplierType(1);
 									resProBaseInfoList.add(pro);
 								}
 							}
@@ -674,6 +675,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		       			 				pro.setFirPrice(firstPrice);
 		       			 			}
 		       			 			pro.setResProName(pro.getResProName().replaceAll("\\s*", "").replaceAll("（", "(").replaceAll("）", ")"));
+		       			 			pro.setSupplierType(1);
 									resProBaseInfoList.add(pro);
 								}
 							}
