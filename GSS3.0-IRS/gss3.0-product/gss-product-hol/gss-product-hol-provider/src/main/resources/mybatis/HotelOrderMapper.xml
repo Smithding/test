@@ -357,24 +357,27 @@
             <if test="locker != null">
                 AND hho.LOCKER = #{locker,jdbcType=BIGINT}
             </if>
-            <if test="createStartTime != null">
-                AND date(hho.CREATE_ORDER_TIME) &gt;= date(#{createStartTime,jdbcType=DATE})
+            <if test="createStartTime != null and createEndTime != null">
+             	AND hho.CREATE_ORDER_TIME BETWEEN #{createStartTime} AND #{createEndTime} 
+                <!-- AND date(hho.CREATE_ORDER_TIME) &gt;= date(#{createStartTime,jdbcType=DATE}) -->
             </if>
-            <if test="createEndTime != null">
+           <!--  <if test="createEndTime != null">
                 AND date(hho.CREATE_ORDER_TIME) &lt;= date(#{createEndTime,jdbcType=DATE})
+            </if> -->
+            <if test="arrivalStartDate != null and arrivalEndDate != null">
+            	AND hho.ARRIVAL_DATE BETWEEN #{arrivalStartDate} AND #{arrivalEndDate}
+                <!-- AND date(hho.ARRIVAL_DATE) &gt;= date(#{arrivalStartDate,jdbcType=DATE}) -->
             </if>
-            <if test="arrivalStartDate != null">
-                AND date(hho.ARRIVAL_DATE) &gt;= date(#{arrivalStartDate,jdbcType=DATE})
-            </if>
-            <if test="arrivalEndDate != null">
+            <!-- <if test="arrivalEndDate != null">
                 AND date(hho.ARRIVAL_DATE) &lt;= date(#{arrivalEndDate,jdbcType=DATE})
+            </if> -->
+            <if test="departureStartDate != null and departureEndDate != null">
+            	AND hho.DEPARTURE_DATE BETWEEN #{departureStartDate} AND #{departureEndDate}
+                <!-- AND date(hho.DEPARTURE_DATE) &gt;= date(#{departureStartDate,jdbcType=DATE}) -->
             </if>
-            <if test="departureStartDate != null">
-                AND date(hho.DEPARTURE_DATE) &gt;= date(#{departureStartDate,jdbcType=DATE})
-            </if>
-            <if test="departureEndDate != null">
+           <!--  <if test="departureEndDate != null">
                 AND date(hho.DEPARTURE_DATE) &lt;= date(#{departureEndDate,jdbcType=DATE})
-            </if>
+            </if> -->
             <if test="hotelName != null and hotelName !=''">
                 AND hho.HOTEL_NAME LIKE CONCAT(CONCAT('%', #{hotelName}), '%')
             </if>
