@@ -239,6 +239,7 @@ public class HolMidServiceImpl implements IHolMidService {
 		//tc和bqy酒店ID都不为空则开启异步查询,否则执行同步
 		if (null != bqyResId && null != tcResId) {
 			try {
+				long start = System.currentTimeMillis();
 				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate, bqyCityCode);
 				Future<ResBaseInfo> tcResponse = syncHotelInfo.queryTCHelListForAsync(agent, tcResId, checkinDate, checkoutDate);
 				/*while (bqyResponse.isDone() && tcResponse.isDone()) {
@@ -250,6 +251,9 @@ public class HolMidServiceImpl implements IHolMidService {
 				//if (null != tcResponse) {
 					tcHotel = tcResponse.get();
 				//}
+					
+				System.out.println("111111111: " + (System.currentTimeMillis() - start));
+				long start1 = System.currentTimeMillis();
 				List<ProDetails> bqyProDetailList = null;
 				List<ProDetails> tcProDetailList = null;
 				if (null != bqyHotel) {
@@ -298,7 +302,7 @@ public class HolMidServiceImpl implements IHolMidService {
 				}
 				newProDetailList = map.entrySet().stream().map(et ->et.getValue()).collect(Collectors.toList());
 				bqyHotel.setProDetails(newProDetailList);
-			
+				System.out.println("222222: " + (System.currentTimeMillis() - start1));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -308,8 +312,8 @@ public class HolMidServiceImpl implements IHolMidService {
 				bqyHotel = hotelDetail.get();
 			}
 			if (null != tcResId) {
-				tcHotel = syncHotelInfo.queryProDetail(agent, tcResId, checkinDate, checkoutDate);
-				bqyHotel = tcHotel;
+				Future<ResBaseInfo> fu = syncHotelInfo.queryProDetail(agent, tcResId, checkinDate, checkoutDate);
+				bqyHotel = fu.get();
 			}
 		}
 		List<ProDetails> proDetailList = bqyHotel.getProDetails();
