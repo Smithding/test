@@ -224,7 +224,7 @@ public class HotelOrder implements Serializable {
     */
    private Boolean isAffirm;
    /**
-    * 返回码，0=>下单失败，1=>下单成功，2=>下单成功，支付失败，3=>下单成功，支付成功
+    * 
     */
    private String resultCode;
    /**
@@ -290,17 +290,17 @@ public class HotelOrder implements Serializable {
      */
     private String arriveHotelTime;
     /**
-     * 特殊要求代码
+     * 弃用, 现改为付款交易单号
      */
     private String requestCode;
    
     /**
-     * 特殊要求文本
+     * (存储销售单CustomerType)
      */
     private String requestText;
    
     /**
-     * 特殊要求名称
+     * 弃用， 现改为实际间夜数
      */
     private String requestName;
     /**

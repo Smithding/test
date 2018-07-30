@@ -412,6 +412,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            hotelOrder.setOrderType(orderCreateReq.getOrderType());
 	            hotelOrder.setContactName(orderCreateReq.getLinkManName());
 	            hotelOrder.setContactNumber(orderCreateReq.getLinkManMobile());
+	            hotelOrder.setGuestMobile(orderCreateReq.getLinkManMobile());
 				hotelOrder.setArrivalDate(dateStartDate);
 	            hotelOrder.setDepartureDate(departureDate);
 	            hotelOrder.setTotalPrice(totalPrice);
@@ -425,6 +426,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            String requestName = null;
 	            for (TravlePassengerInfo guest : orderCreateReq.getOrderPassengerDetails()) {
 	            	guest.setNationality("中国");
+	            	guest.setMobile(GUEST_NO);
 	                if (guestName == null || "".equals(guestName)) {
 	                    guestName = guest.getName();
 	                } else {
@@ -462,7 +464,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		            hotelOrder.setRequestName(requestName);
 	            }*/
 	            hotelOrder.setGuestName(guestName);
-	            hotelOrder.setGuestMobile(orderCreateReq.getOrderPassengerDetails().get(0).getMobile());
+	            //hotelOrder.setGuestMobile(orderCreateReq.getOrderPassengerDetails().get(0).getMobile());
 	            if(StringUtil.isNotNullOrEmpty(orderCreateReq.getOrderRemark())){
 	            	 hotelOrder.setRemark(orderCreateReq.getOrderRemark());
 	            }
@@ -516,9 +518,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				if(totalPrice.compareTo(new BigDecimal(newTotalPrice)) == 0){
 					orderCreateReq.setOutSideOrderId("newordertc_"+buyOrderNo);
 					orderCreateReq.setLinkManMobile(CONTACT_NO);
-					for (TravlePassengerInfo guest : orderCreateReq.getOrderPassengerDetails()) {
+					/*for (TravlePassengerInfo guest : orderCreateReq.getOrderPassengerDetails()) {
 						guest.setMobile(GUEST_NO);
-					}
+					}*/
 					logger.info("创建酒店订单开始,入参:" + JSONObject.toJSONString(orderCreateReq));
 					String reqJson= JSONObject.toJSONString(orderCreateReq);
 					String resultJson= httpClientUtil.doTCJsonPost(CREATE_ORDER_URL, reqJson);
@@ -529,9 +531,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						if(StringUtil.isNotNullOrEmpty(orderCreateBase)){
 							if(orderCreateBase.getRet_code().equals("200")){
 								hotelOrder.setHotelOrderNo(orderCreateBase.getResult().getOrderId());
-								//hotelOrder.setMsg(orderCreateBase.getResult().getMsg().trim());
-								//hotelOrder.setIsAffirm(orderCreateBase.getResult().getIsAffirm());
-								//hotelOrder.setResultCode(orderCreateBase.getResult().getResultCode());
 								hotelOrder.setTcOrderStatus(TcOrderStatus.WAIT_TC_CONFIRM.getKey());
 								hotelOrderMapper.updateById(hotelOrder);
 							}else{
@@ -556,15 +555,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
     		logger.error("创建酒店订单请求出错",e);
             throw new GSSException(hotelOrder.getHotelName(), String.valueOf(saleOrderNo), e.getMessage());
     	}
-    	/*finally {
-			if(resultCode.equals("0")) {
-				HolErrorOrder holErrorOrder=new HolErrorOrder();
-				holErrorOrder.setResultCode("resultCode");
-	    		BeanUtils.copyProperties(hotelOrder, holErrorOrder);
-	    		holErrorOrder.setMsg(errMsg);
-	    		hotelErrorOrderMapper.insertSelective(holErrorOrder);
-			}
-		}*/
     	logger.info("创建酒店订单结束=====");
 		return hotelOrder;
 	}
@@ -1140,7 +1130,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	@Override
 	public Long incrOrderChangeInfo(Agent agent, IncrOrderChangeInfoReq incrOrderChangeInfoReq) throws GSSException{
 		logger.info("酒店订单状态增量更新开始,入参:" + JSONObject.toJSONString(incrOrderChangeInfoReq));
-		//List<HotelOrder> res = hotelOrderMapper.queryOrderByOrderResultCode("1");
 		String reqJson = JSONObject.toJSONString(incrOrderChangeInfoReq);
 		String result= httpClientUtil.doTCJsonPost(ORDER_CHANGE_URL, reqJson);
 		logger.info("酒店订单状态增量更新: "+result);
@@ -1673,8 +1662,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						        	throw new GSSException("更新状态信息异常", "0192", "根据消费日期计算天数异常");
 						        }
 								hotelOrder.setFactNightCount(factNight);
-								Integer roomCount = orderInfoModel.getCounts().getRoomCount();
 								
+								Integer roomCount = orderInfoModel.getCounts().getRoomCount();
+								hotelOrder.setRequestName(roomCount.toString());
 								
 								BigDecimal hoteelDivide = hotelOrder.getTotalPrice().divide(new BigDecimal(hotelOrder.getNightCount()*hotelOrder.getBookCount()), 2, BigDecimal.ROUND_HALF_UP);
 								BigDecimal tcInfoDivide = (orderInfoModel.getOrigin()).divide(new BigDecimal(roomCount),2, BigDecimal.ROUND_HALF_UP);

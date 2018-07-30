@@ -163,7 +163,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		if(null == resDetail) {
 			resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), ResBaseInfo.class);
 			
-			redisService.set(perKey, resDetail, Long.valueOf(60 * 60 * 24 * 3));
+			redisService.set(perKey, resDetail, Long.valueOf(60 * 60 * 24));
 		}
 		//ResBaseInfo resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), ResBaseInfo.class);
 		return resDetail;
@@ -177,10 +177,6 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	public HolMidBaseInfo queryMidListByResId(Agent agent, String id) {
 		
 		HolMidBaseInfo resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), HolMidBaseInfo.class);
-		/*if(StringUtil.isNotNullOrEmpty(resDetail)){
-			List<String> strs  = Tool.intToTwoPower(resDetail.getCreditCards().intValue());
-        	resDetail.setCreditCardsTarget(strs);
-		}*/
 		return resDetail;
 	}
 	
@@ -222,33 +218,50 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		return t;
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	@Async
-	public <T> Future<T> queryListById(Long id, Class<T> clazz) {
+	public <T> T queryListById(Long id, Class<T> clazz) {
 		T t = null;
-		String perKey = "TCHOL"+id;
-		t = (T)redisService.get(perKey);
-		
-		if(null == t) {
-			t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
-			
-			redisService.set(perKey, t, Long.valueOf(60 * 60 * 24 * 3));
-		}
-		
-		//T t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
-		
-		return new AsyncResult<T>(t);
-		//return t;
+		t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
+		return t;
 	}
 	
 	@Override
 	@Async
-	public <T> Future<T> queryProSaleListByResId(Long id, Class<T> clazz) {
-		
-		T t= mongoTemplate1.findOne(new Query(Criteria.where("resId").is(id)),clazz);
-		return new AsyncResult<T>(t);
-		//return t;
+	public Future<ResBaseInfo> queryResBaseInfo(Long id){
+		ResBaseInfo result = null;
+		String perKey = "TCHOL"+id;
+		result = (ResBaseInfo)redisService.get(perKey);
+		if(null == result) {
+			result = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),ResBaseInfo.class);
+			redisService.set(perKey, result, Long.valueOf(60 * 60 * 24));
+		}
+		return new AsyncResult<ResBaseInfo>(result);
+	}
+	
+	@Override
+	@Async
+	public Future<ResProBaseInfos> queryResProBaseInfos(Long id){
+		ResProBaseInfos result = null;
+		String perKey = "TCResPro"+id;
+		result = (ResProBaseInfos)redisService.get(perKey);
+		if(null == result) {
+			result = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),ResProBaseInfos.class);
+			redisService.set(perKey, result, Long.valueOf(60 * 60 * 24 * 3));
+		}
+		return new AsyncResult<ResProBaseInfos>(result);
+	}
+	
+	@Override
+	@Async
+	public Future<ImgInfoSum> queryImgInfoSum(Long id){
+		ImgInfoSum result = null;
+		String perKey = "TCHOLImg"+id;
+		result = (ImgInfoSum)redisService.get(perKey);
+		if(null == result) {
+			result = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),ImgInfoSum.class);
+			redisService.set(perKey, result, Long.valueOf(60 * 60 * 24 * 3));
+		}
+		return new AsyncResult<ImgInfoSum>(result);
 	}
 	
 	@Override
@@ -1399,18 +1412,35 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 
 	@Override
 	public ImgInfoSum queryImgInfoSum(Agent agent, Long resId) {
+		String perKey = "TCHOLImg"+resId;
 		ImgInfoSum imgInfoSum = null;
+		imgInfoSum = (ImgInfoSum)redisService.get(perKey);
+		
 		try {
-			imgInfoSum = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(resId)),ImgInfoSum.class);
+			if(null == imgInfoSum) {
+				imgInfoSum = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(resId)),ImgInfoSum.class);
+				redisService.set(perKey, imgInfoSum, Long.valueOf(60 * 60 * 24 * 7));
+			}
+			
 		} catch (Exception e) {
 			throw new GSSException("查询酒店图片", "0220", "查询酒店图片异常, "+e.getMessage());
 		}
 		return imgInfoSum;
 	}
-
+	
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<PaymentWay> queryPaymentWay() {
-		List<PaymentWay> list = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)),PaymentWay.class);
+		List<PaymentWay> list = null;
+		String perKey = "HolCard";
+		list = (List<PaymentWay>)redisService.get(perKey);
+		
+		if(null == list) {
+			list = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)),PaymentWay.class);
+			redisService.set(perKey, list);
+		}else {
+			System.out.println("list不为空");
+		}
 		return list;
 	}
 

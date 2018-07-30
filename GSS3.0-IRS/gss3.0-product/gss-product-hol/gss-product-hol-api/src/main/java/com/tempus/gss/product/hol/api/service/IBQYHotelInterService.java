@@ -201,5 +201,12 @@ public interface IBQYHotelInterService{
 	 * @return
 	 */
 	HotelOrderInfo orderDetail(OrderPayReq orderDetailParam);
-	
+
+	/**
+	 * 异步查询酒店房间价格
+	 * @param query
+	 * @return
+	 * @throws Exception
+	 */
+	Future<List<RoomPriceItem>> asyncRoomPrice(QueryHotelParam query) throws Exception;
 }

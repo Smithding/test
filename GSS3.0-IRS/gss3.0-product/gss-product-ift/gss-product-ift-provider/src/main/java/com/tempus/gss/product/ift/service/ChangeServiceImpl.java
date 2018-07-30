@@ -1114,7 +1114,7 @@ public class ChangeServiceImpl implements IChangeService {
                 priceVo.setBuyRest(temp.getBuyRest());
                 priceVo.setAllSalePrice(temp.getAllSalePrice());
                 priceVo.setAllBuyPrice(temp.getAllBuyPrice());
-
+                priceVo.setProfit(temp.getProfit());
             } else {
                 priceVo = voList.get(i);
             }
@@ -1150,6 +1150,7 @@ public class ChangeServiceImpl implements IChangeService {
             priceChange.setModifier(requestWithActor.getAgent().getAccount());
             priceChange.setBuyCurrency(priceVo.getBuyCurrency());
             priceChange.setBuyExchangeRate(priceVo.getBuyExchangeRate());
+            priceChange.setProfit(priceVo.getProfit());
             int result = passengerChangePriceDao.insert(priceChange);
             if (result == 0) {
                 flag = false;

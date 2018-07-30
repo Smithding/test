@@ -67,7 +67,8 @@
         <result column="ALL_SALE_PRICE" property="allSalePrice" jdbcType="DECIMAL"/>
         <!--原单采购结算价和采购改签差价之和-->
         <result column="ALL_BUY_PRICE" property="allBuyPrice" jdbcType="DECIMAL"/>
-
+        <!--毛利-->
+        <result column="PROFIT" property="profit" jdbcType="DECIMAL"/>
 
         <!--一对一关联乘客-->
         <association property="passenger" column="PASSENGER_NO"
@@ -76,7 +77,7 @@
     <sql id="Base_Column_List">
         CHANGE_PRICE_NO, ID, OWNER, SALE_ORDER_NO,SALE_CHANGE_NO, PASSENGER_NO,PASSENGER_TYPE,ORDER_TYPE,SALE_COUNT_PRICE,BUY_COUNT_PRICE, SALE_PRICE, SALE_TAX, SALE_BROKERAGE,
         SALE_REST, BUY_PRICE, BUY_TAX, BUY_BROKERAGE, BUY_REST, VALID, STATUS, CREATOR, CREATE_TIME,
-        MODIFIER, MODIFY_TIME,BUY_AGENCY_FEE,BUY_REBATE,SALE_AGENCY_FEE,SALE_REBATE,BUY_CURRENCY,BUY_EXCHANGE_RATE,ALL_SALE_PRICE,ALL_BUY_PRICE
+        MODIFIER, MODIFY_TIME,BUY_AGENCY_FEE,BUY_REBATE,SALE_AGENCY_FEE,SALE_REBATE,BUY_CURRENCY,BUY_EXCHANGE_RATE,ALL_SALE_PRICE,ALL_BUY_PRICE,PROFIT
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -116,7 +117,7 @@
         CREATOR, CREATE_TIME, MODIFIER,
         MODIFY_TIME,PASSENGER_TYPE,ORDER_TYPE,SALE_COUNT_PRICE,BUY_COUNT_PRICE,
         BUY_AGENCY_FEE,BUY_REBATE,SALE_AGENCY_FEE,SALE_REBATE,
-        BUY_CURRENCY, BUY_EXCHANGE_RATE, ALL_SALE_PRICE, ALL_BUY_PRICE)
+        BUY_CURRENCY, BUY_EXCHANGE_RATE, ALL_SALE_PRICE, ALL_BUY_PRICE,PROFIT)
         values (#{changePriceNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
         #{saleOrderNo,jdbcType=BIGINT},#{saleChangeNo,jdbcType=BIGINT}, #{passengerNo,jdbcType=BIGINT}, #{salePrice,jdbcType=DECIMAL},
         #{saleTax,jdbcType=DECIMAL}, #{saleBrokerage,jdbcType=DECIMAL}, #{saleRest,jdbcType=DECIMAL},
@@ -126,7 +127,7 @@
         #{modifyTime,jdbcType=TIMESTAMP},#{passengerType,jdbcType=VARCHAR},#{orderType,jdbcType=VARCHAR},
         #{saleCountPrice,jdbcType=DECIMAL},#{buyCountPrice,jdbcType=DECIMAL},#{buyAgencyFee,jdbcType=DECIMAL},#{buyRebate,jdbcType=DECIMAL}
         ,#{saleAgencyFee,jdbcType=DECIMAL} ,#{saleRebate,jdbcType=DECIMAL},#{buyCurrency,jdbcType=VARCHAR},
-        #{buyExchangeRate,jdbcType=DECIMAL}, #{allSalePrice,jdbcType=DECIMAL}, #{allBuyPrice,jdbcType=DECIMAL})
+        #{buyExchangeRate,jdbcType=DECIMAL}, #{allSalePrice,jdbcType=DECIMAL}, #{allBuyPrice,jdbcType=DECIMAL}, #{profit,jdbcType=DECIMAL})
     </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.PassengerChangePrice">
         insert into IFT_PASSENGER_CHANGE_PRICE
@@ -215,6 +216,9 @@
             <if test="allBuyPrice !=null">
                 ALL_BUY_PRICE,
             </if>
+            <if test="profit !=null">
+                PROFIT,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="changePriceNo != null">
@@ -300,6 +304,9 @@
             </if>
             <if test="allBuyPrice !=null">
                 #{allBuyPrice,jdbcType=DECIMAL},
+            </if>
+            <if test="profit !=null">
+                #{profit,jdbcType=DECIMAL},
             </if>
         </trim>
     </insert>
@@ -395,6 +402,9 @@
             <if test="allBuyPrice !=null">
                 ALL_BUY_PRICE = #{allBuyPrice,jdbcType=DECIMAL},
             </if>
+            <if test="profit !=null">
+                PROFIT = #{profit,jdbcType=DECIMAL},
+            </if>
         </set>
         where CHANGE_PRICE_NO = #{changePriceNo,jdbcType=BIGINT}
     </update>
@@ -426,7 +436,8 @@
         BUY_CURRENCY = #{buyCurrency,jdbcType=VARCHAR},
         BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL},
         ALL_SALE_PRICE = #{allSalePrice,jdbcType=DECIMAL},
-        ALL_BUY_PRICE = #{allBuyPrice,jdbcType=DECIMAL}
+        ALL_BUY_PRICE = #{allBuyPrice,jdbcType=DECIMAL},
+        PROFIT = #{profit,jdbcType=DECIMAL}
         where CHANGE_PRICE_NO = #{changePriceNo,jdbcType=BIGINT}
     </update>
     <update id="updateByOrderNo" parameterType="com.tempus.gss.product.ift.api.entity.PassengerChangePrice">
@@ -507,6 +518,9 @@
             <if test="allBuyPrice !=null">
                 ALL_BUY_PRICE = #{allBuyPrice,jdbcType=DECIMAL},
             </if>
+            <if test="profit !=null">
+                PROFIT = #{profit,jdbcType=DECIMAL},
+            </if>
         </set>
         WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
     </update>
@@ -586,6 +600,9 @@
             <if test="allBuyPrice !=null">
                 ALL_BUY_PRICE = #{allBuyPrice,jdbcType=DECIMAL},
             </if>
+            <if test="profit !=null">
+                PROFIT = #{profit,jdbcType=DECIMAL},
+            </if>
         </set>
         WHERE SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
     </update>
@@ -660,6 +677,9 @@
             </if>
             <if test="allBuyPrice !=null">
                 ALL_BUY_PRICE = #{allBuyPrice,jdbcType=DECIMAL},
+            </if>
+            <if test="profit !=null">
+                PROFIT = #{profit,jdbcType=DECIMAL},
             </if>
         </set>
         WHERE PASSENGER_NO = #{passengerNo,jdbcType=BIGINT}
