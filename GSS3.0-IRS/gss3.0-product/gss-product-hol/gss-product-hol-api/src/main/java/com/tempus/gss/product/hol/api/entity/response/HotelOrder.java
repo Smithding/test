@@ -224,7 +224,7 @@ public class HotelOrder implements Serializable {
     */
    private Boolean isAffirm;
    /**
-    * 返回码，0=>下单失败，1=>下单成功，2=>下单成功，支付失败，3=>下单成功，支付成功
+    * 弃用， 现改为实际间夜数
     */
    private String resultCode;
    /**
