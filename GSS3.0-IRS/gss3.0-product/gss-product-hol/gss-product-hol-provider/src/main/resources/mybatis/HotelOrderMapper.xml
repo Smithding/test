@@ -265,7 +265,7 @@
 
     <select id="queryOrderList" resultMap="BaseResultMap"
             parameterType="com.tempus.gss.product.hol.api.entity.vo.HotelOrderVo">
-        select DISTINCT
+        select
         hho.ID,
         hho.HOTEL_ORDER_NO,
         hho.SALE_ORDER_NO,
