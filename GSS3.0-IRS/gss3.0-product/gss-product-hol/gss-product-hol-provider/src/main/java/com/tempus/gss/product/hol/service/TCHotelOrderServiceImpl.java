@@ -412,6 +412,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            hotelOrder.setOrderType(orderCreateReq.getOrderType());
 	            hotelOrder.setContactName(orderCreateReq.getLinkManName());
 	            hotelOrder.setContactNumber(orderCreateReq.getLinkManMobile());
+	            hotelOrder.setGuestMobile(orderCreateReq.getLinkManMobile());
 				hotelOrder.setArrivalDate(dateStartDate);
 	            hotelOrder.setDepartureDate(departureDate);
 	            hotelOrder.setTotalPrice(totalPrice);
@@ -425,6 +426,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            String requestName = null;
 	            for (TravlePassengerInfo guest : orderCreateReq.getOrderPassengerDetails()) {
 	            	guest.setNationality("中国");
+	            	guest.setMobile(GUEST_NO);
 	                if (guestName == null || "".equals(guestName)) {
 	                    guestName = guest.getName();
 	                } else {
@@ -462,7 +464,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		            hotelOrder.setRequestName(requestName);
 	            }*/
 	            hotelOrder.setGuestName(guestName);
-	            hotelOrder.setGuestMobile(orderCreateReq.getOrderPassengerDetails().get(0).getMobile());
+	            //hotelOrder.setGuestMobile(orderCreateReq.getOrderPassengerDetails().get(0).getMobile());
 	            if(StringUtil.isNotNullOrEmpty(orderCreateReq.getOrderRemark())){
 	            	 hotelOrder.setRemark(orderCreateReq.getOrderRemark());
 	            }
@@ -516,9 +518,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				if(totalPrice.compareTo(new BigDecimal(newTotalPrice)) == 0){
 					orderCreateReq.setOutSideOrderId("newordertc_"+buyOrderNo);
 					orderCreateReq.setLinkManMobile(CONTACT_NO);
-					for (TravlePassengerInfo guest : orderCreateReq.getOrderPassengerDetails()) {
+					/*for (TravlePassengerInfo guest : orderCreateReq.getOrderPassengerDetails()) {
 						guest.setMobile(GUEST_NO);
-					}
+					}*/
 					logger.info("创建酒店订单开始,入参:" + JSONObject.toJSONString(orderCreateReq));
 					String reqJson= JSONObject.toJSONString(orderCreateReq);
 					String resultJson= httpClientUtil.doTCJsonPost(CREATE_ORDER_URL, reqJson);
