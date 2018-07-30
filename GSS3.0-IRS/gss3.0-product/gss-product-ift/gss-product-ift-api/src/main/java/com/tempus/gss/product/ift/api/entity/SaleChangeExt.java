@@ -187,6 +187,8 @@ public class SaleChangeExt implements Serializable {
 	private BigDecimal exchangeRate;
 	//操作人
 	private String handlers;
+	//客户名称
+	private String customerName;
 	/**
 	 * office
 	 */
@@ -593,4 +595,11 @@ public class SaleChangeExt implements Serializable {
 		this.airLineRefundStatus = airLineRefundStatus;
 	}
 
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
 }

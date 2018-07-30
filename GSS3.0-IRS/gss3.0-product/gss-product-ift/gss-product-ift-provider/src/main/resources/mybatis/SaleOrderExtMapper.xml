@@ -58,6 +58,7 @@
         <result column="DRAWER_LOGIN_NAME" property="drawerLoginName" jdbcType="VARCHAR"/>
         <result column="HANDLERS" property="handlers" jdbcType="VARCHAR"/>
         <result column="OFFICE" property="office" jdbcType="VARCHAR"/>
+        <result column="CUSTOMER_NAME" property="customerName" jdbcType="VARCHAR"/>
         <!--不分单时所有操作步骤都是由这个字段的操作员操作-->
         <result column="ALONE_LOCKER" property="aloneLocker" jdbcType="BIGINT"/>
         <association property="saleOrder" column="SALE_ORDER_NO"
@@ -563,6 +564,7 @@
         f.SALE_ORDER_NO, f.ID, f.OWNER, f.DEMAND_NO, f.LEG_TYPE, f.CONTACT_NAME, f.CONTACT_PHONE, f.CONTACT_MOBILE,
         f.CONTACT_MAIL, f.SALE_REMARK, f.VALID, f.VERSION, f.LOCKER, f.LOCK_TIME, f.CREATE_TYPE, f.CREATE_TIME,
         f.MODIFY_TIME, (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,f.ALONE_LOCKER,
+        CC.`NAME` CUSTOMER_NAME,
         <if test="orderSource == 'OP'">
             (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as MODIFIER,
         </if>
@@ -586,44 +588,32 @@
             f.VALID = 1 and
             <if test="bookStartDate != null and bookStartDate !=''">
                 <![CDATA[
-
                   DATE_FORMAT(o.ORDERING_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{bookStartDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
                 ]]>
             </if>
             <if test="bookEndDate !=null and bookEndDate !=''">
                 <![CDATA[
-
                   DATE_FORMAT(o.ORDERING_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{bookEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
                 ]]>
             </if>
             <if test="flyStartDate != null and flyStartDate !=''">
                 <![CDATA[
-
                   DATE_FORMAT(l.DEP_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{flyStartDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
                 ]]>
             </if>
             <if test="flyStartEndDate !=null and flyStartEndDate !=''">
                 <![CDATA[
-
                   DATE_FORMAT(l.DEP_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{flyStartEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
                 ]]>
             </if>
             <if test="flyEndDate != null and flyEndDate !=''">
                 <![CDATA[
-
                   DATE_FORMAT(l.ARR_TIME , '%Y-%m-%d') >= DATE_FORMAT(#{flyEndDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
                 ]]>
             </if>
             <if test=" flyEndArrDate !=null and flyEndArrDate !='' ">
                 <![CDATA[
-
                   DATE_FORMAT(l.ARR_TIME , '%Y-%m-%d')<= DATE_FORMAT(#{flyEndArrDate,jdbcType=TIMESTAMP},'%Y-%m-%d') AND
-
                 ]]>
             </if>
             <if test="customerType != null and customerType !='' ">
@@ -678,7 +668,6 @@
             <if test="phone!=null and phone !=''">
                 f.CONTACT_PHONE like CONCAT('%',#{phone,jdbcType=VARCHAR},'%' ) AND
             </if>
-
             <if test="saleOrderNo!=null">
                 f.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} AND
             </if>

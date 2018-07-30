@@ -624,9 +624,9 @@ public class OrderServiceImpl implements IOrderService {
             }
             saleOrderQueryRequest.getEntity().setOwner(saleOrderQueryRequest.getAgent().getOwner());
             saleOrderQueryRequest.getEntity().setValid((byte) 1);
-            if (saleOrderQueryRequest.getAgent().getNum() != null) {
+            /*if (saleOrderQueryRequest.getAgent().getNum() != null) {
                 saleOrderQueryRequest.getEntity().setCustomerNo(saleOrderQueryRequest.getAgent().getNum().toString());
-            }
+            }*/
             
             // long startTime = System.currentTimeMillis();
             log.info("查询订单接口开始=====");
