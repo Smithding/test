@@ -148,6 +148,8 @@ public class SaleChangeVo implements Serializable{
 
 	private Integer airLineRefundStatus;
 
+	private String customerName;
+
 	public String getHandlers() {
 		return handlers;
 	}
@@ -404,5 +406,13 @@ public class SaleChangeVo implements Serializable{
 
 	public void setAirLineRefundStatus(Integer airLineRefundStatus) {
 		this.airLineRefundStatus = airLineRefundStatus;
+	}
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
 	}
 }

@@ -68,6 +68,7 @@
         <result column="AIRLINE_REFUND_STATUS" property="airLineRefundStatus" jdbcType="INTEGER"/>
         <!-- 不分单时所有操作步骤都是由这个字段的操作员操作-->
         <result column="ALONE_LOCKER" property="aloneLocker" jdbcType="BIGINT"/>
+        <result column="CUSTOMER_NAME" property="customerName" jdbcType="VARCHAR"/>
         <!--一对多关联销售单明细-->
         <collection property="saleChangeDetailList" ofType="com.tempus.gss.product.ift.api.entity.SaleChangeDetail"
                     column="SALE_CHANGE_NO"
@@ -713,7 +714,7 @@
         i.VALID, i.CREATE_TIME, i.CREATOR, i.LOCKER, i.LOCK_TIME, i.CHANGE_TYPE, i.CONTACT_NAME, i.CONTACT_MOBILE,
         i.CUSTOMER_REMARK, i.REFUSE_REASON,i.TICKET_CHANGE_TYPE
         ,i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO,/*su.LOGIN_NAME,*/i.DRAWER_LOGIN_NAME,
-        h.AIRLINE_REFUND_STATUS,i.ALONE_LOCKER,
+        h.AIRLINE_REFUND_STATUS,i.ALONE_LOCKER,CC.`NAME` CUSTOMER_NAME,
         (SELECT NAME FROM SM_USER where ID = i.LOCKER) as LOGIN_NAME
         FROM
         IFT_SALE_CHANGE_EXT i

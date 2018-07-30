@@ -359,6 +359,8 @@ public class SaleOrderExtVo implements Serializable {
 	private String saleCurrency;//销售币种
 	private String handlers;//当前订单操作人
 	private Long originalOrderNo;//原订单号
+	//客户名称
+	private String customerName;
 
 	public BigDecimal getSaleExchangeRate() {
 		return saleExchangeRate;
@@ -1261,7 +1263,15 @@ public class SaleOrderExtVo implements Serializable {
 	public void setOffice(String office) {
 		this.office = office;
 	}
-	
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
+
 	@Override
 	public String toString() {
 		return "SaleOrderExtVo{" +
