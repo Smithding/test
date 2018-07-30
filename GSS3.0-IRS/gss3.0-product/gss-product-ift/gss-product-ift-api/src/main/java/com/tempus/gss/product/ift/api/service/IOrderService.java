@@ -33,7 +33,8 @@ import com.tempus.gss.vo.Agent;
 public interface IOrderService {
 
 	//<editor-fold desc="创建订单">
-
+	//改签创建pnr
+	void setPnr(Pnr pnr);
 	/**
 	 * 创建订单.
 	 * 通过白屏查询、Pnr、需求单、手工方式创建订单.

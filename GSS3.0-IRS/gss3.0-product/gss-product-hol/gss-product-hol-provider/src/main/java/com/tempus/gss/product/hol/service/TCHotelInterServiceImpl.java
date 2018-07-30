@@ -139,6 +139,8 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 		try {
 			 String reqJson = JSONObject.toJSONString(singleHotelDetailReq);
 	    	 String result= httpClientUtil.doTCJsonPost(SINGLE_HOL_URL, reqJson);
+	    	 
+	    	// System.out.println("result: "+result);
 			 if(StringUtil.isNotNullOrEmpty(result)){
 				hotelDetail= JsonUtil.toBean(result, new TypeReference<ResultTc<TCHotelDetailResult>>(){});
 				if(hotelDetail.getRet_code().equals("200") && StringUtil.isNotNullOrEmpty(hotelDetail.getResult())){

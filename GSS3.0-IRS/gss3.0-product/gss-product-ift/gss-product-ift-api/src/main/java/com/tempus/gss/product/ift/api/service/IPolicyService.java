@@ -128,5 +128,13 @@ public interface IPolicyService  {
 	 * @return
 	 */
 	 Result createPnr(SaleOrderExt saleOrderExt);
+	/**
+	 * 根据SaleOrderExt数据创建PNR
+	 * @param saleOrderExt
+	 * @return
+	 * 并且返回pnr
+	 */
+	Result createAndReturnPnr(SaleOrderExt saleOrderExt);
+
 
 }

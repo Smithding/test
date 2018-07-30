@@ -228,7 +228,7 @@ public class HolMidServiceImpl implements IHolMidService {
 	}
 
 	@Override
-	public ResBaseInfo hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
+	public List<ProDetails> hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
 		Map<String, Object> resultMap = getHotelId(agent, holMidId);
 		Long bqyResId = (Long)resultMap.get("bqyResId");
 		Long tcResId = (Long)resultMap.get("tcResId");
@@ -260,10 +260,10 @@ public class HolMidServiceImpl implements IHolMidService {
 				}
 				
 				if (bqyProDetailList == null || bqyProDetailList.size() == 0) {
-					return tcHotel;
+					return tcHotel.getProDetails();
 				}
 				if (tcProDetailList == null || tcProDetailList.size() == 0) {
-					return bqyHotel;
+					return bqyHotel.getProDetails();
 				}
 				List<ProDetails> newProDetailList = new ArrayList<ProDetails>();
 				bqyProDetailList.addAll(tcProDetailList);
@@ -308,7 +308,7 @@ public class HolMidServiceImpl implements IHolMidService {
 				bqyHotel = hotelDetail.get();
 			}
 			if (null != tcResId) {
-				tcHotel = syncHotelInfo.newQueryHotelDetail(agent, tcResId, checkinDate, checkoutDate);
+				tcHotel = syncHotelInfo.queryProDetail(agent, tcResId, checkinDate, checkoutDate);
 				bqyHotel = tcHotel;
 			}
 		}
@@ -321,7 +321,8 @@ public class HolMidServiceImpl implements IHolMidService {
 			}
 			proDetailList.sort(Comparator.comparingInt(ProDetails :: getMinPrice));
 		}
-		return bqyHotel;
+		//return bqyHotel;
+		return proDetailList;
 	}
 
 	@Override
@@ -466,7 +467,7 @@ public class HolMidServiceImpl implements IHolMidService {
 	}
 
 	@Override
-	public ResBaseInfo hotelBaseInfo(Agent agent, String holMidId) {
+	public ResBaseInfo hotelBaseInfo(Agent agent, String holMidId ,String checkInDate, String checkOutDate) throws Exception {
 		if (StringUtil.isNullOrEmpty(agent)) {
 			logger.error("agent对象为空");
 			throw new GSSException("修改酒店可售状态", "0102", "agent对象为空");
@@ -478,10 +479,11 @@ public class HolMidServiceImpl implements IHolMidService {
 		Map<String, Object> resultMap = getHotelId(agent, holMidId);
 		Long bqyResId = (Long)resultMap.get("bqyResId");
 		Long tcResId = (Long)resultMap.get("tcResId");
-		if (null != bqyResId) {
-			resBaseInfo = bqyHotelSupplierService.getById(agent, bqyResId);
-		}else if (null != tcResId) {
+		String cityCode = (String) resultMap.get("bqyCityCode");
+		if (null != tcResId) {
 			resBaseInfo = tcHotelSupplierService.queryListByResId(agent, tcResId);
+		}else if (null != bqyResId) {
+			resBaseInfo = bqyHotelSupplierService.queryHotelBaseInfo(agent, bqyResId, checkInDate, checkOutDate, cityCode);
 		}
 		return resBaseInfo;
 	}

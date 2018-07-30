@@ -7,6 +7,7 @@ import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ProDetails;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.vo.Agent;
 
@@ -37,7 +38,7 @@ public interface IHolMidService {
 	 * @param holMidId
 	 * @return
 	 */
-	ResBaseInfo hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception;
+	List<ProDetails> hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception;
 	
 	/**
 	 * 酒店详情后台查询
@@ -70,5 +71,5 @@ public interface IHolMidService {
 	 * @param holMidId
 	 * @return
 	 */
-	ResBaseInfo hotelBaseInfo(Agent agent, String holMidId);
+	ResBaseInfo hotelBaseInfo(Agent agent, String holMidId, String checkInDate, String checkOutDate) throws Exception;
 }

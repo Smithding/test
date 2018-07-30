@@ -700,7 +700,81 @@ public class PolicyServiceImpl implements IPolicyService {
 		}
 	}
 
-	
+	public Result createAndReturnPnr(SaleOrderExt saleOrderExt) {
+		String isCreatePnr = iParamService.getValueByKey("is_CreatPnr");
+		if ("true".equals(isCreatePnr)) {
+			try {
+				log.info("创建国际PNR传入参数:" + JsonUtil.toJson(saleOrderExt));
+				CreatePnrIn createPnrIn = new CreatePnrIn();
+				createPnrIn.setOffice(office);
+
+				createPnrIn.setTicketTimeLimit(com.tempus.gss.product.hol.api.util.DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
+
+
+				List<SdFlightSegment> segments = new ArrayList<SdFlightSegment>();
+				List<AirTraveler> passengers = new ArrayList<AirTraveler>();
+				int detailSize = saleOrderExt.getSaleOrderDetailList().size();
+				for (int i = 0; i < detailSize; i++) {
+					SdFlightSegment sdFlightSegment = new SdFlightSegment();
+					sdFlightSegment.setRph((i + 1));
+					sdFlightSegment.setDepartureAirport(saleOrderExt.getSaleOrderDetailList().get(i).getLeg().getDepAirport());
+					sdFlightSegment.setArrivalAirport(saleOrderExt.getSaleOrderDetailList().get(i).getLeg().getArrAirport());
+					sdFlightSegment.setDepartureDateTime(com.tempus.gss.product.hol.api.util.DateUtil.format(saleOrderExt.getSaleOrderDetailList().get(i).getLeg().getDepTime(), "yyyy-MM-dd"));
+					sdFlightSegment.setFlightNumber(saleOrderExt.getSaleOrderDetailList().get(i).getLeg().getFlightNo());
+					sdFlightSegment.setMarketingAirline(saleOrderExt.getSaleOrderDetailList().get(i).getLeg().getAirline());
+					sdFlightSegment.setResBookDesigCode(saleOrderExt.getSaleOrderDetailList().get(i).getLeg().getCabin());
+					AirTraveler airTraveler = new AirTraveler();
+					airTraveler.setPersonNameZH(saleOrderExt.getSaleOrderDetailList().get(i).getPassenger().getSurname() + "/" + saleOrderExt.getSaleOrderDetailList().get(i).getPassenger().getName());
+					airTraveler.setPersonNameEN(saleOrderExt.getSaleOrderDetailList().get(i).getPassenger().getSurname() + "/" + saleOrderExt.getSaleOrderDetailList().get(i).getPassenger().getName());
+					airTraveler.setDocType(saleOrderExt.getSaleOrderDetailList().get(i).getPassenger().getCertType());
+					airTraveler.setDocID(saleOrderExt.getSaleOrderDetailList().get(i).getPassenger().getCertNo());
+					airTraveler.setRph((i + 1));
+					airTraveler.setTel(saleOrderExt.getSaleOrderDetailList().get(i).getPassenger().getPhone());
+					airTraveler.setPassengerTypeCode(saleOrderExt.getSaleOrderDetailList().get(i).getPassenger().getPassengerType());
+					airTraveler.setGender("1".equals(saleOrderExt.getSaleOrderDetailList().get(i).getPassenger().getGender()) ? "MALE" : "FEMALE");
+					airTraveler.setExpireDate(com.tempus.gss.product.hol.api.util.DateUtil.format(saleOrderExt.getSaleOrderDetailList().get(i).getPassenger().getCertValid(), "yyyy-MM-dd"));
+					airTraveler.setDocHolderNationality(saleOrderExt.getSaleOrderDetailList().get(i).getPassenger().getNationality());
+					airTraveler.setBirthDate(com.tempus.gss.product.hol.api.util.DateUtil.format(saleOrderExt.getSaleOrderDetailList().get(i).getPassenger().getPassengerBirth(), "yyyy-MM-dd"));
+					passengers.add(airTraveler);
+					segments.add(sdFlightSegment);
+
+				}
+				createPnrIn.setSegments(segments);
+
+				int passengerSize = passengers.size() - 1;
+				for (int i = 0; i < passengerSize; i++) {
+					for (int j = passengerSize; j > i; j--) {
+						if (passengers.get(j).getPersonNameEN().equals(passengers.get(i).getPersonNameEN())) {
+							passengers.remove(j);
+						}
+					}
+				}
+				createPnrIn.setPassengers(passengers);
+
+				Contact contact = new Contact(saleOrderExt.getContactName(), saleOrderExt.getContactMobile(), "");
+				createPnrIn.setLxr(contact);
+				CreatePnrOut reatePnrOut = createPnrService.createPnrI(createPnrIn);
+				log.info("操作成功返回数据" + JsonUtil.toJson(reatePnrOut));
+//				String json = "{\"pnr\":\"KP557W\",\"segs\":[{\"rph\":1,\"departureDateTime\":\"2017-05-24 19:40\",\"arrivalDateTime\":\"2017-05-24 22:00\",\"flightNumber\":\"5712\",\"numberInParty\":1,\"status\":\"HK\",\"isChanged\":false,\"departureAirport\":\"HND\",\"arrivalAirport\":\"GMP\",\"departureTerminal\":\"\",\"arrivalTerminal\":\"\",\"airline\":\"KE\",\"resBookDesigCode\":\"B\",\"isCodeshare\":false}],\"code\":\"178200\",\"shortText\":\"成功返回\"}";
+//				CreatePnrOut  reatePnrOut  = new Gson().fromJson(json,CreatePnrOut.class);
+				if (StringUtil.isNotNullOrEmpty(reatePnrOut.getPnr())) {
+					Pnr pnr = new Pnr();
+					pnr.setPnr(reatePnrOut.getPnr());
+					//Pnr changePnr = orderService.createChangePnr(AgentUtil.getAgent(), pnr, saleOrderExt);
+
+					return new Result(SUCCESS_CODE, SAVE_SUCCESS,pnr);
+				} else {
+					return new Result(FAILED_CODE, SAVE_SUCCESS);
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage(), e);
+				return new Result(FAILED_CODE, SAVE_SUCCESS);
+			}
+		} else {
+			return new Result(FAILED_CODE, SAVE_SUCCESS, "创建PNR接口已经关闭,请联系平台开启！");
+		}
+	}
+
 	private String writeErrorToFile(String sb) {
 		try {
 			FilePath uploadFile = fastDFSClientService.uploadFile(new ByteArrayInputStream(sb.getBytes("GBK")), "txt");

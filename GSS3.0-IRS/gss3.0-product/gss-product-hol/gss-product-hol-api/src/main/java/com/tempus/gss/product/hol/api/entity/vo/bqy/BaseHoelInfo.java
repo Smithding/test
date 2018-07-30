@@ -47,7 +47,7 @@ public class BaseHoelInfo {
 	private String serviceName;		//设施服务Code	 1
 	
 	@JSONField(name="HotelStarRate")
-	private double hotelStarRate;		//酒店评分等级	1
+	private Double hotelStarRate;		//酒店评分等级	1
 	
 	@JSONField(name="FirstImg")
 	private String firstImg;			//酒店头图		1
@@ -205,7 +205,7 @@ public class BaseHoelInfo {
 		return hotelStarRate;
 	}
 
-	public void setHotelStarRate(double hotelStarRate) {
+	public void setHotelStarRate(Double hotelStarRate) {
 		this.hotelStarRate = hotelStarRate;
 	}
 

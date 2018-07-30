@@ -224,4 +224,6 @@ public interface IRefundService {
 
 	void updateBuyExtRefund(RequestWithActor<Long> requestWithActor);
 
+	//事务原因创建的服务
+	int queryBuyRefundAndDelCountBylocker(Long userId);
 }

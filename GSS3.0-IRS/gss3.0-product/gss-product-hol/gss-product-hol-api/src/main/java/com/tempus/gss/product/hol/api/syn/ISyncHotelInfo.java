@@ -10,12 +10,11 @@ import com.tempus.gss.vo.Agent;
 
 public interface ISyncHotelInfo {
 	
-	public TCResponse<ResBaseInfo> queryHotelList(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException;
-	public TCResponse<ResBaseInfo> queryHotelListForBack(Agent agent, HotelListSearchReq hotelSearchReq) throws GSSException;
-	
 	public ResBaseInfo queryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException;
 	
 	public ResBaseInfo newQueryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException;
+	
+	public ResBaseInfo queryProDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException;
 	
 	public ResBaseInfo newQueryHolProDetail(Agent agent, Long resId, String uniProId, String startTime, String endTime) throws GSSException;
 	

@@ -111,6 +111,7 @@ import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
 import com.tempus.gss.product.hol.api.util.DateUtil;
 import com.tempus.gss.product.hol.api.util.GPSUtil;
 import com.tempus.gss.product.hol.api.util.Tool;
+import com.tempus.gss.product.hol.utils.RedisService;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 
@@ -136,6 +137,9 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	@Reference
 	IHolProfitService holProfitService;
 	
+	@Autowired
+	RedisService redisService;
+	
 	SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
 	
 	@Override
@@ -149,15 +153,19 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	/**
 	 * 根据酒店id查找具体酒店信息
 	 */
-	@Cacheable(value = "ResBaseInfo", key = "#id",unless="")
+	//@Cacheable(value = "ResBaseInfo", key = "#id",unless="")
 	@Override
 	public ResBaseInfo queryListByResId(Agent agent, Long id) {
+		ResBaseInfo resDetail = null;
+		String perKey = "TCHOL"+id;
+		resDetail = (ResBaseInfo)redisService.get(perKey);
 		
-		ResBaseInfo resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), ResBaseInfo.class);
-		/*if(StringUtil.isNotNullOrEmpty(resDetail)){
-			List<String> strs  = Tool.intToTwoPower(resDetail.getCreditCards().intValue());
-        	resDetail.setCreditCardsTarget(strs);
-		}*/
+		if(null == resDetail) {
+			resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), ResBaseInfo.class);
+			
+			redisService.set(perKey, resDetail, Long.valueOf(60 * 60 * 24 * 3));
+		}
+		//ResBaseInfo resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), ResBaseInfo.class);
 		return resDetail;
 	}
 	
@@ -214,11 +222,21 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		return t;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	@Async
 	public <T> Future<T> queryListById(Long id, Class<T> clazz) {
+		T t = null;
+		String perKey = "TCHOL"+id;
+		t = (T)redisService.get(perKey);
 		
-		T t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
+		if(null == t) {
+			t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
+			
+			redisService.set(perKey, t, Long.valueOf(60 * 60 * 24 * 3));
+		}
+		
+		//T t= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)),clazz);
 		
 		return new AsyncResult<T>(t);
 		//return t;
@@ -493,104 +511,6 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
  	        	log.error("时间选择不对");
  	        	throw new GSSException("获取酒店列表", "0999", "时间选择不对,只能选择即日起两个月之内的日期");
  	        }
- 		
-        /*if(StringUtil.isNotNullOrEmpty(res)){
-        	for(ResBaseInfo rs: res){
-            	//Map<String, List<ResProBaseInfo>> proMap= rs.getProMap();
-            	List<ProDetails> lii = rs.getProDetails();
-            		if(StringUtil.isNotNullOrEmpty(lii)){
-            			Iterator<ProDetails> iterlii = lii.iterator();
-            			//for(ProDetails ppp : lii){
-            			while(iterlii.hasNext()){
-            				ProDetails ppp= iterlii.next();
-            				List<ResProBaseInfo> p = ppp.getResProBaseInfoList();
-            				if(StringUtil.isNotNullOrEmpty(p)){
-            					Iterator<ResProBaseInfo> iter = p.iterator();
-                        		//for(ResProBaseInfo pro : p){
-                				while(iter.hasNext()){
-                					ResProBaseInfo pro = iter.next();
-                        			ProInfoDetail proInfoDetail=queryListByProductUniqueId(pro.getProductUniqueId().longValue(), ProInfoDetail.class);
-                        			TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
-                        			Calendar da = Calendar.getInstance(); 
-                        			 for (int i = 0; i < days; i++) {
-                        				 ProSaleInfoDetail ProSaleInfoDetail=new ProSaleInfoDetail();
-                        				 ProSaleInfoDetail.setDistributionSalePrice(0);
-                        				 ProSaleInfoDetail.setInventoryStats(4);
-                        				 ProSaleInfoDetail.setInventoryRemainder(0);
-                        				 ProSaleInfoDetail.setOpeningSale(false);
-                        				 da.setTime(sdf.parse(hotelSearchReq.getBegin()));
-                        				 da.add(Calendar.DAY_OF_MONTH, i);
-                        				 mapPro.put(sdf.format(da.getTime()), ProSaleInfoDetail);
-                     				}
-                        			//List<Integer> proInventory = new ArrayList<Integer>();
-                        			//List<Integer> guaranteeType = new ArrayList<Integer>();
-                        			if(proInfoDetail != null && proInfoDetail.getProSaleInfoDetails() == null){
-                        				 iter.remove();
-                        				 if(p.size() == 0){
-                        					 iterlii.remove();	
-                        				 }
-                        			}
-                            		if(StringUtil.isNotNullOrEmpty(proInfoDetail) && StringUtil.isNotNullOrEmpty(proInfoDetail.getProSaleInfoDetails())){
-                            			if(!proInfoDetail.getProSaleInfoDetails().containsKey(DateUtil.stringToLonString(hotelSearchReq.getBegin()))){
-                            				 iter.remove();
-                            				 if(p.size() == 0){
-                            					 iterlii.remove();
-                            				 }
-                            			}
-                            			if(proInfoDetail.getProSaleInfoDetails().containsKey(DateUtil.stringToLonString(hotelSearchReq.getBegin()))){
-                            				Integer firProPrice = proInfoDetail.getProSaleInfoDetails().get(DateUtil.stringToLonString(hotelSearchReq.getBegin())).getDistributionSalePrice();
-                            				
-                            				BigDecimal profitPrice = holProfitService.computeTcProfitPrice(agent, firProPrice, agent.getType());
-                            				if(StringUtil.isNotNullOrEmpty(profitPrice)){
-                            					pro.setRebateRateProfit(profitPrice);
-                            				}
-                            			}
-                            				int kk = 0;
-                    	        			for (Map.Entry<String, ProSaleInfoDetail> entry : proInfoDetail.getProSaleInfoDetails().entrySet()) {
-                    	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(hotelSearchReq.getBegin());
-                    	        				int endCompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(hotelSearchReq.getEnd());
-                    	        				if(begincompare >= 0 && endCompare < 0){
-                	        						mapPro.put(DateUtil.stringToSimpleString(entry.getKey()), entry.getValue());
-                	        						Integer price= entry.getValue().getDistributionSalePrice();
-                	        						sumPrice += price;
-                	        						kk += 1;
-                            					}
-                            				}
-                    	        			if(mapPro.size() >= 1){
-            	    	        				pro.setProSaleInfoDetailsTarget(mapPro);
-            	    	        				ProSaleInfoDetail proSaleInfoDetail = mapPro.get(hotelSearchReq.getBegin());
-												if(StringUtil.isNotNullOrEmpty(proSaleInfoDetail)){
-            	    	        					pro.setFirPrice(proSaleInfoDetail.getDistributionSalePrice());
-            	    	        					if(proSaleInfoDetail.getInventoryStats().equals(4) || (proSaleInfoDetail.getOpeningSale().equals(false) && proSaleInfoDetail.getInventoryRemainder().equals(0))){
-                	        							pro.setFirPrice(987654321);
-                	        							ppp.setProDetailConPrice(987654321);
-                	        						}
-            	    	        				}
-            	    	        				if(kk != 0){
-            	    	        					pro.setConPrice(sumPrice/kk);
-            	    	        				}
-            	    	        				kk = 0;
-            	    	        			}
-                    	        			else{
-            	    	        				pro.setFirPrice(987654321);
-            	    	        				ppp.setProDetailConPrice(987654321);
-            	    	        			}
-            	    	        			sumPrice =0;
-            	            		}
-                            			if(StringUtil.isNullOrEmpty(pro.getFirPrice()) || pro.getFirPrice().equals(0)){
-                            				pro.setFirPrice(987654321);
-                            				ppp.setProDetailConPrice(987654321);
-                            			}
-            	            	}
-            	            }
-            				else{
-            					ppp.setProDetailConPrice(987654321);
-            				}
-            			}
-            			rs.setProDetails(lii);
-            		}
-            	}
-        	}*/
         } catch (Exception e) {
         	log.error("查询酒店列表异常：",e);
  		}
@@ -600,61 +520,6 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
   		int totalPage= (int)(count/hotelSearchReq.getRowCount()+1);
   		response.setTotalPatge(Integer.valueOf(totalPage));
   		response.setTotalCount(Integer.valueOf(count));
-		/*if(StringUtil.isNotNullOrEmpty(res)){
-				for(ResBaseInfo resInfo : res){
-					if(StringUtil.isNotNullOrEmpty(resInfo)){
-						List<ProDetails> proDetails = resInfo.getProDetails();
-						if(StringUtil.isNotNullOrEmpty(proDetails)){
-							for(ProDetails pros :proDetails){
-								List<ResProBaseInfo> resProBaseInfoList = pros.getResProBaseInfoList();
-								if(resProBaseInfoList.size() >= 2){
-									Collections.sort(resProBaseInfoList, new Comparator<ResProBaseInfo>() {
-										@Override
-										public int compare(ResProBaseInfo o1, ResProBaseInfo o2) {
-											if(StringUtil.isNotNullOrEmpty(o1.getFirPrice()) && StringUtil.isNotNullOrEmpty(o2.getFirPrice())){
-												if(o1.getFirPrice() > o2.getFirPrice()){
-													pros.setProDetailConPrice(o2.getFirPrice());
-													return 1;
-												}else if(o1.getFirPrice() < o2.getFirPrice()){
-													pros.setProDetailConPrice(o1.getFirPrice());
-													return -1;
-												}
-												else{
-													return 0;
-												}
-											}
-												return 0;
-										}
-									});
-								}else if(resProBaseInfoList.size() == 1){
-									pros.setProDetailConPrice(resProBaseInfoList.get(0).getFirPrice());
-								}else{
-									pros.setProDetailConPrice(987654321);
-								}
-							}
-							if(proDetails.size() >= 2){
-								Collections.sort(proDetails, new Comparator<ProDetails>() {
-									@Override
-									public int compare(ProDetails o1, ProDetails o2) {
-										if(StringUtil.isNotNullOrEmpty(o1.getProDetailConPrice()) && StringUtil.isNotNullOrEmpty(o2.getProDetailConPrice())){
-											if(o1.getProDetailConPrice() > o2.getProDetailConPrice()){
-												return 1;
-											}else if(o1.getProDetailConPrice() < o2.getProDetailConPrice()){
-												return -1;
-											}
-											else{
-												return 0;
-											}
-										}
-											return 0;
-									}
-								});
-							}
-						}
-					}
-				}
-			response.setResponseResult(res);
-		}*/
   		response.setResponseResult(res);
   		//Future<TCResponse<ResBaseInfo>> rrr = new AsyncResult<TCResponse<ResBaseInfo>>(response);
   		//RpcContext.getContext().setFuture(rrr);

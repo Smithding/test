@@ -66,7 +66,7 @@ public interface IBQYHotelInterService{
 	 * @param query 酒店详细信息参数查询
 	 * @return
 	 */
-	HotelEntity queryHotelDetail(QueryHotelParam query);
+	Future<HotelEntity> queryHotelDetail(QueryHotelParam query);
 	
 	/**
 	 * 根据城市名称查询城市信息
@@ -116,7 +116,7 @@ public interface IBQYHotelInterService{
 	 * @param query 酒店详细信息参数查询
 	 * @return
 	 */
-	Future<HotelEntity> asyncHotelDetail(QueryHotelParam query);
+	Future<HotelEntity> asyncHotelDetail(QueryHotelParam query) throws Exception;
 	
 	/**
 	 * 根据酒店ID查询酒店信息

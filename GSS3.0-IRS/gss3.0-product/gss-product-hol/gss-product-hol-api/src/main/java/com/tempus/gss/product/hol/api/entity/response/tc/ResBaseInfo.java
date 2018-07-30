@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.tempus.gss.product.hol.api.util.DateUtil;
 
 /**
  * 酒店基本信息
@@ -491,14 +490,14 @@ public class ResBaseInfo implements Serializable{
 		return renovationDate;
 	}
 	public void setRenovationDate(String renovationDate) {
-		renovationDate= DateUtil.stringToStrDate(renovationDate);
+		//renovationDate= DateUtil.stringToStrDate(renovationDate);
 		this.renovationDate = renovationDate;
 	}
 	public String getEstablishmentDate() {
 		return establishmentDate;
 	}
 	public void setEstablishmentDate(String establishmentDate) {
-		establishmentDate= DateUtil.stringToStrDate(establishmentDate);
+		//establishmentDate= DateUtil.stringToStrDate(establishmentDate);
 		this.establishmentDate = establishmentDate;
 		//this.establishmentDate = DateUtil.stringToStrDate(establishmentDate);
 		//this.establishmentDateFormat =DateUtil.stringToDateFormat(this.establishmentDate);
@@ -507,7 +506,7 @@ public class ResBaseInfo implements Serializable{
 		return whenBuilt;
 	}
 	public void setWhenBuilt(String whenBuilt) {
-		whenBuilt= DateUtil.stringToStrDate(whenBuilt);
+		//whenBuilt= DateUtil.stringToStrDate(whenBuilt);
 		this.whenBuilt = whenBuilt;
 	}
 	public String getArrivalAndDeparture() {

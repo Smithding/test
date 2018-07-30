@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelEntity;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -85,39 +86,8 @@ public class BQYHotelConverServiceImpl implements IBQYHotelConverService {
 		
 		//酒店星级
 		String hotelStar = hotel.getHotelStar();
-		switch (hotelStar) {
-		case "5.00"://23
-			//五星级
-			resBaseInfo.setResGradeId("23");
-			resBaseInfo.setResGrade("五星级");
-			break;
-		case "4.00"://24
-			//四星级
-			resBaseInfo.setResGradeId("24");
-			resBaseInfo.setResGrade("四星级");
-			break;
-		case "3.00"://26
-			//三星级
-			resBaseInfo.setResGradeId("26");
-			resBaseInfo.setResGrade("三星级");
-			break;
-		case "2.00":	//27
-			//二星及二星以下
-			resBaseInfo.setResGradeId("27");
-			resBaseInfo.setResGrade("经济型");
-			break;
-		case "1.00":	//27
-			//二星及二星以下
-			resBaseInfo.setResGradeId("27");
-			resBaseInfo.setResGrade("经济型");
-			break;
-		case "0.00":	//27
-			//二星及二星以下
-			resBaseInfo.setResGradeId("27");
-			resBaseInfo.setResGrade("经济型");
-			break;
-		}
-		
+		setHotelStar(resBaseInfo, hotelStar);
+
 		//GPS
 		List<ResGPSInfo> liGps = new ArrayList<>();
 		ResGPSInfo resGPSInfo=new ResGPSInfo();
@@ -150,6 +120,41 @@ public class BQYHotelConverServiceImpl implements IBQYHotelConverService {
 		resBaseInfo.setSupplierNo(hotel.getSupplierNo());
 		return resBaseInfo;
 	
+	}
+
+	private void setHotelStar(ResBaseInfo resBaseInfo, String hotelStar) {
+		switch (hotelStar) {
+			case "5.00"://23
+				//五星级
+				resBaseInfo.setResGradeId("23");
+				resBaseInfo.setResGrade("五星级");
+				break;
+			case "4.00"://24
+				//四星级
+				resBaseInfo.setResGradeId("24");
+				resBaseInfo.setResGrade("四星级");
+				break;
+			case "3.00"://26
+				//三星级
+				resBaseInfo.setResGradeId("26");
+				resBaseInfo.setResGrade("三星级");
+				break;
+			case "2.00":	//27
+				//二星及二星以下
+				resBaseInfo.setResGradeId("27");
+				resBaseInfo.setResGrade("经济型");
+				break;
+			case "1.00":	//27
+				//二星及二星以下
+				resBaseInfo.setResGradeId("27");
+				resBaseInfo.setResGrade("经济型");
+				break;
+			case "0.00":	//27
+				//二星及二星以下
+				resBaseInfo.setResGradeId("27");
+				resBaseInfo.setResGrade("经济型");
+				break;
+		}
 	}
 
 	@Override

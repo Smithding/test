@@ -1402,7 +1402,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 										hotelOrder.setTotalPrice(orderInfoModel.getOrigin());
 										BigDecimal multiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
 										hotelOrder.setTotalRefund(multiply);
-										hotelOrder.setNightCount(factNight);
+										//hotelOrder.setNightCount(factNight);
 										String eachNightPrice = null;
 										String breakfastNum = null;
 										ProInfoDetail proInfoDetail=null;
@@ -1807,7 +1807,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								newHotelOrder.setTotalPrice(orderInfoModel.getOrigin());
 								BigDecimal multiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
 								newHotelOrder.setTotalRefund(multiply);
-								newHotelOrder.setNightCount(factNight);
+								//newHotelOrder.setNightCount(factNight);
+								newHotelOrder.setFactNightCount(factNight);
 								String eachNightPrice = null;
 								String breakfastNum = null;
 								//ProInfoDetail proInfoDetail=tCHotelSupplierService.queryListByProductUniqueId(newHotelOrder.getProductUniqueId(), ProInfoDetail.class);
