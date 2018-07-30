@@ -248,25 +248,31 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 			
 			//异步请求酒店图片和酒店详细信息
 			Future<List<ImageList>> asyncHotelImage = bqyHotelInterService.asyncHotelImage(query);
-			Future<HotelEntity> asyncHotelDetail = bqyHotelInterService.asyncHotelDetail(query);
-			Future<ResBaseInfo> asyncResBaseInfo = bqyHotelConverService.asyncConvertTcHotelEntity(Long.valueOf(hotelId));
+			//Future<HotelEntity> asyncHotelDetail = bqyHotelInterService.asyncHotelDetail(query);
+			//Future<ResBaseInfo> asyncResBaseInfo = bqyHotelConverService.asyncConvertTcHotelEntity(Long.valueOf(hotelId));
+			Future<List<RoomPriceItem>> asynRoomPrice = bqyHotelInterService.asyncRoomPrice(query);
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
 			if(!agent.getNum().equals(401803070321014723L)) {
 				computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
 			}
-			while (asyncHotelImage.isDone() && asyncHotelDetail.isDone() && asyncResBaseInfo.isDone()) {
+			/*while (asyncHotelImage.isDone() && asyncHotelDetail.isDone() && asyncResBaseInfo.isDone()) {
+				break;
+			}*/
+			while (asynRoomPrice.isDone() && asyncHotelImage.isDone()) {
 				break;
 			}
+
 			List<ImageList> bqyHotelImgList = asyncHotelImage.get();
-			HotelEntity hotelEntity = asyncHotelDetail.get();
-			ResBaseInfo resBaseInfo = asyncResBaseInfo.get();
+			List<RoomPriceItem> roomPriceItemList = asynRoomPrice.get();
+			//HotelEntity hotelEntity = asyncHotelDetail.get();
+			//ResBaseInfo resBaseInfo = asyncResBaseInfo.get();
 			//List<ImgInfo> tcHotelImgList = convertTCImg(bqyHotelImgList);
 			//resBaseInfo.setImgInfoList(bqyHotelImgList);
 			
 			//List<RoomPriceItem> roomPriceItemList = bqyHotelInterService.queryHotelRoomPrice(query);
 			
-			if (null != hotelEntity) {
-				List<RoomPriceItem> roomPriceItemList = hotelEntity.getRoomPriceItem();
+			//if (null != hotelEntity) {
+				//List<RoomPriceItem> roomPriceItemList = hotelEntity.getRoomPriceItem();
 			
 				List<ProDetails> proDetails = new ArrayList<>();
 				if (null != roomPriceItemList && roomPriceItemList.size() > 0) {
@@ -469,16 +475,17 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 						proDetails.add(proDetail);
 					}
 				}
+				ResBaseInfo resBaseInfo = new ResBaseInfo();
 				resBaseInfo.setProDetails(proDetails);
 				//酒店政策
-				List<Policy> policyList = hotelEntity.getPolicy();
-				bqyHotelPolicyConver(resBaseInfo, policyList);
+				//List<Policy> policyList = hotelEntity.getPolicy();
+				//bqyHotelPolicyConver(resBaseInfo, policyList);
 				//酒店服务
-				String serviceNameStr = hotelEntity.getServiceName();
-				setHotelServiceName(resBaseInfo, serviceNameStr);
+				//String serviceNameStr = hotelEntity.getServiceName();
+				//setHotelServiceName(resBaseInfo, serviceNameStr);
 				//return resBaseInfo;
 				return new AsyncResult<ResBaseInfo>(resBaseInfo);
-			}
+			//}
 		} catch (ParseException e) {
 			e.printStackTrace();
 			logger.error("酒店详情页面错误");

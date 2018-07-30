@@ -1119,6 +1119,19 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		return new AsyncResult<HotelEntity>(hotelEntity.get());
 	}
 
+	@Async
+	public Future<List<RoomPriceItem>> asyncHotelRoomPrice(QueryHotelParam query) throws Exception {
+		List<RoomPriceItem> roomPriceItemsList = queryHotelRoomPrice(query);
+		return new AsyncResult<List<RoomPriceItem>>(roomPriceItemsList);
+	}
+
+	@Override
+	@Async
+	public Future<List<RoomPriceItem>> asyncRoomPrice(QueryHotelParam query) throws Exception {
+		Future<List<RoomPriceItem>> listFuture = asyncHotelRoomPrice(query);
+		return new AsyncResult<List<RoomPriceItem>>(listFuture.get());
+	}
+
 	/**
 	 * 加密代理人id
 	 * @return
