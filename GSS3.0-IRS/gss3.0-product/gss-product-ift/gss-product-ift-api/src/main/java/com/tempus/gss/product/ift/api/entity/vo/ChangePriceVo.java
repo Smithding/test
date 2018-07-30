@@ -80,6 +80,8 @@ public class ChangePriceVo implements Serializable{
 	private BigDecimal allSalePrice;
 	//原单采购结算价和采购改签差价之和
 	private BigDecimal allBuyPrice;
+	/**毛利*/
+	private BigDecimal profit;
 
 	public BigDecimal getAllSalePrice() {
 		return allSalePrice;
@@ -329,5 +331,13 @@ public class ChangePriceVo implements Serializable{
 
 	public void setTicketNo(String ticketNo) {
 		this.ticketNo = ticketNo;
+	}
+
+	public BigDecimal getProfit() {
+		return profit;
+	}
+
+	public void setProfit(BigDecimal profit) {
+		this.profit = profit;
 	}
 }

@@ -149,7 +149,8 @@ public class PassengerChangePrice implements Serializable {
 	private BigDecimal allSalePrice;
 	//原单采购结算价和采购改签差价之和 ALL_BUY_PRICE
 	private BigDecimal allBuyPrice;
-
+	/**毛利*/
+	private BigDecimal profit;
 
 	private static final long serialVersionUID = 1L;
 
@@ -465,5 +466,13 @@ public class PassengerChangePrice implements Serializable {
 
 	public void setSaleRebate(BigDecimal saleRebate) {
 		this.saleRebate = saleRebate;
+	}
+
+	public BigDecimal getProfit() {
+		return profit;
+	}
+
+	public void setProfit(BigDecimal profit) {
+		this.profit = profit;
 	}
 }
