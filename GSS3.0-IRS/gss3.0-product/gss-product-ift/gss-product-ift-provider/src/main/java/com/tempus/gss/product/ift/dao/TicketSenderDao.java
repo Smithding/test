@@ -1,6 +1,7 @@
 package com.tempus.gss.product.ift.dao;
 
 import com.tempus.gss.product.ift.api.entity.TicketSender;
+import com.tempus.gss.product.ift.api.entity.iftVo.IftUserVo;
 import com.tempus.gss.product.ift.api.entity.vo.TicketSenderVo;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -25,4 +26,6 @@ public interface TicketSenderDao extends BaseDao<TicketSender,TicketSenderVo> {
     List<Map<String,Object>> queryTicketNameAndLockerId();
 
     TicketSender queryByUserId(Long userId);
+
+    List<IftUserVo> queryTkMembersInUsers();
 }

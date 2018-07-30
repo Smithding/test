@@ -164,4 +164,10 @@
         </set>
         where id =#{id}
     </update>
+    
+    <select id="queryTkMembersInUsers" resultType="com.tempus.gss.product.ift.api.entity.iftVo.IftUserVo">
+         SELECT SU.ID,IT.NAME FROM IFT_TICKETSENDER IT
+           LEFT JOIN SM_USER SU
+           ON IT.USERID = SU.LOGIN_NAME
+    </select>
 </mapper>
