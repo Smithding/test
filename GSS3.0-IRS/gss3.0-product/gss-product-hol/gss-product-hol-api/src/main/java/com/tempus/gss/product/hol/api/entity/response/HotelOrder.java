@@ -295,7 +295,7 @@ public class HotelOrder implements Serializable {
     private String requestCode;
    
     /**
-     * 特殊要求文本
+     * (存储销售单CustomerType)
      */
     private String requestText;
    
