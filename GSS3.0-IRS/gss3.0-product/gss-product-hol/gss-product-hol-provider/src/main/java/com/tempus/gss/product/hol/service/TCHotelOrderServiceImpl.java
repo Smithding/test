@@ -531,9 +531,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						if(StringUtil.isNotNullOrEmpty(orderCreateBase)){
 							if(orderCreateBase.getRet_code().equals("200")){
 								hotelOrder.setHotelOrderNo(orderCreateBase.getResult().getOrderId());
-								//hotelOrder.setMsg(orderCreateBase.getResult().getMsg().trim());
-								//hotelOrder.setIsAffirm(orderCreateBase.getResult().getIsAffirm());
-								//hotelOrder.setResultCode(orderCreateBase.getResult().getResultCode());
 								hotelOrder.setTcOrderStatus(TcOrderStatus.WAIT_TC_CONFIRM.getKey());
 								hotelOrderMapper.updateById(hotelOrder);
 							}else{
@@ -558,15 +555,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
     		logger.error("创建酒店订单请求出错",e);
             throw new GSSException(hotelOrder.getHotelName(), String.valueOf(saleOrderNo), e.getMessage());
     	}
-    	/*finally {
-			if(resultCode.equals("0")) {
-				HolErrorOrder holErrorOrder=new HolErrorOrder();
-				holErrorOrder.setResultCode("resultCode");
-	    		BeanUtils.copyProperties(hotelOrder, holErrorOrder);
-	    		holErrorOrder.setMsg(errMsg);
-	    		hotelErrorOrderMapper.insertSelective(holErrorOrder);
-			}
-		}*/
     	logger.info("创建酒店订单结束=====");
 		return hotelOrder;
 	}
@@ -1142,7 +1130,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	@Override
 	public Long incrOrderChangeInfo(Agent agent, IncrOrderChangeInfoReq incrOrderChangeInfoReq) throws GSSException{
 		logger.info("酒店订单状态增量更新开始,入参:" + JSONObject.toJSONString(incrOrderChangeInfoReq));
-		//List<HotelOrder> res = hotelOrderMapper.queryOrderByOrderResultCode("1");
 		String reqJson = JSONObject.toJSONString(incrOrderChangeInfoReq);
 		String result= httpClientUtil.doTCJsonPost(ORDER_CHANGE_URL, reqJson);
 		logger.info("酒店订单状态增量更新: "+result);
@@ -1675,8 +1662,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						        	throw new GSSException("更新状态信息异常", "0192", "根据消费日期计算天数异常");
 						        }
 								hotelOrder.setFactNightCount(factNight);
-								Integer roomCount = orderInfoModel.getCounts().getRoomCount();
 								
+								Integer roomCount = orderInfoModel.getCounts().getRoomCount();
+								hotelOrder.setResultCode(roomCount.toString());
 								
 								BigDecimal hoteelDivide = hotelOrder.getTotalPrice().divide(new BigDecimal(hotelOrder.getNightCount()*hotelOrder.getBookCount()), 2, BigDecimal.ROUND_HALF_UP);
 								BigDecimal tcInfoDivide = (orderInfoModel.getOrigin()).divide(new BigDecimal(roomCount),2, BigDecimal.ROUND_HALF_UP);
