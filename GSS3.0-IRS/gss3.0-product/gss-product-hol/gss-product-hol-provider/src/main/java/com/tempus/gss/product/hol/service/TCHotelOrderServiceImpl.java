@@ -1664,7 +1664,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								hotelOrder.setFactNightCount(factNight);
 								
 								Integer roomCount = orderInfoModel.getCounts().getRoomCount();
-								hotelOrder.setResultCode(roomCount.toString());
+								hotelOrder.setRequestName(roomCount.toString());
 								
 								BigDecimal hoteelDivide = hotelOrder.getTotalPrice().divide(new BigDecimal(hotelOrder.getNightCount()*hotelOrder.getBookCount()), 2, BigDecimal.ROUND_HALF_UP);
 								BigDecimal tcInfoDivide = (orderInfoModel.getOrigin()).divide(new BigDecimal(roomCount),2, BigDecimal.ROUND_HALF_UP);

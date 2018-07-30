@@ -128,17 +128,6 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	        calendar.add(Calendar.DAY_OF_MONTH, -1);
 			assignDateHotelReq.setEndTime(sdf.format(calendar.getTime()));
 			AssignDateHotel assignDateHotel=  hotelInterService.queryAssignDateHotel(assignDateHotelReq);
-			while(true) {
-				if( resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && imgInfoSumFuture.isDone()) {
-					break;
-				}
-			}
-			/*while(true) {
-				if( assignDateHotelFuture.isDone() && resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && imgInfoSumFuture.isDone()) {
-					break;
-				}
-			}
-			AssignDateHotel assignDateHotel = assignDateHotelFuture.get();*/
 			
 			tcResBaseInfo = resBaseInfoFuture.get();
 			ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
@@ -358,15 +347,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryListById(resId, ResBaseInfo.class);
 					Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryListById(resId, ImgInfoSum.class);
 					Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-					if(!agent.getNum().equals(401803070321014723L)) {
-						computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
-					}
-					
-					while(true) {
-						if( resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && imgInfoSumFuture.isDone() && assignDateHotelFu.isDone()) {
-							break;
-						}
-					}
+					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
 					
 					tcResBaseInfo = resBaseInfoFuture.get();
 					ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
@@ -578,15 +559,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryListById(resId, ResProBaseInfos.class);
 					Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryListById(resId, ImgInfoSum.class);
 					Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-					if(!agent.getNum().equals(401803070321014723L)) {
-						computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
-					}
-					
-					while(true) {
-						if( resProBaseInfosFuture.isDone() && imgInfoSumFuture.isDone() && assignDateHotelFu.isDone()) {
-							break;
-						}
-					}
+					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
 					
 					ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
 					ImgInfoSum imgInfoSum = imgInfoSumFuture.get();
@@ -793,12 +766,6 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
 			computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
 			
-			while(true) {
-				if( resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && assignDateHotelFu.isDone()) {
-					break;
-				}
-			}
-			
 			tcResBaseInfo = resBaseInfoFuture.get();
 			ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
 			AssignDateHotel assignDateHotel = assignDateHotelFu.get();
@@ -966,11 +933,6 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	public <T> T queryDetailById(Long id, Class<T> clazz) throws GSSException {
 		Future<T> imgInfoSumFuture = tcHotelSupplierService.queryListById(id, clazz);
 		T t = null;
-		while(true) {
-			if(imgInfoSumFuture.isDone()) {
-				break;
-			}
-		}
 		try {
 			t = imgInfoSumFuture.get();
 			return t;

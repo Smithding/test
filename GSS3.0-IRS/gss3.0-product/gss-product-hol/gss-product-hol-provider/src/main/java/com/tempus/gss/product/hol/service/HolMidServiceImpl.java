@@ -241,15 +241,15 @@ public class HolMidServiceImpl implements IHolMidService {
 			try {
 				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate, bqyCityCode);
 				Future<ResBaseInfo> tcResponse = syncHotelInfo.queryTCHelListForAsync(agent, tcResId, checkinDate, checkoutDate);
-				while (bqyResponse.isDone() && tcResponse.isDone()) {
+				/*while (bqyResponse.isDone() && tcResponse.isDone()) {
 						break;
 					}
-				if (null != bqyResponse) {
+				if (null != bqyResponse) {*/
 					bqyHotel = bqyResponse.get();
-				}
-				if (null != tcResponse) {
+				//}
+				//if (null != tcResponse) {
 					tcHotel = tcResponse.get();
-				}
+				//}
 				List<ProDetails> bqyProDetailList = null;
 				List<ProDetails> tcProDetailList = null;
 				if (null != bqyHotel) {
@@ -341,9 +341,9 @@ public class HolMidServiceImpl implements IHolMidService {
 			try {
 				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate, bqyCityCode);
 				Future<ResBaseInfo> tcResponse = syncHotelInfo.queryTCHolForAsyncBack(agent, bqyResId);
-				while (bqyResponse.isDone() && tcResponse.isDone()) {
+				/*while (bqyResponse.isDone() && tcResponse.isDone()) {
 						break;
-					}
+					}*/
 				bqyHotel = bqyResponse.get();
 				tcHotel = tcResponse.get();
 				List<ProDetails> bqyProDetailList = bqyHotel.getProDetails();
