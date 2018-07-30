@@ -16,6 +16,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.PaymentWay;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResInfoList;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
+import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfos;
 import com.tempus.gss.vo.Agent;
 /**
  * 同程酒店查询数据库接口
@@ -48,6 +49,7 @@ public interface ITCHotelSupplierService {
 	 */
 	public <T> T queryListByProductUniqueId(String id, Class<T> clazz);
 	
+	
 	/**
 	 * 根据id查找
 	 * @param id
@@ -61,15 +63,30 @@ public interface ITCHotelSupplierService {
 	 * @param clazz
 	 * @return
 	 */
-	public <T> Future<T> queryListById(Long id, Class<T> clazz);
+	public <T> T queryListById(Long id, Class<T> clazz);
+	
 	
 	/**
-	 * 根据id查找
+	 * 查询酒店基本信息
 	 * @param id
-	 * @param clazz
 	 * @return
 	 */
-	public <T> Future<T> queryProSaleListByResId(Long resId, Class<T> clazz);
+	public Future<ResBaseInfo> queryResBaseInfo(Long id);
+	
+	/**
+	 * 查询房型
+	 * @param id
+	 * @return
+	 */
+	public Future<ResProBaseInfos> queryResProBaseInfos(Long id);
+	
+	/**
+	 * 查询酒店图片
+	 * @param id
+	 * @return
+	 */
+	public Future<ImgInfoSum> queryImgInfoSum(Long id);
+	
 	
 	/**
 	 * 根据房型id查询
