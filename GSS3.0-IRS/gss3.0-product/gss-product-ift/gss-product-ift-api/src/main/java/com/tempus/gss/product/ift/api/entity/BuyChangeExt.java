@@ -87,6 +87,16 @@ public class BuyChangeExt implements Serializable {
 
 	//航司退款审核状态
 	private Integer airLineRefundStatus;
+	//BUY_LOCKER
+	private Long buyLocker;
+
+	public Long getBuyLocker() {
+		return buyLocker;
+	}
+
+	public void setBuyLocker(Long buyLocker) {
+		this.buyLocker = buyLocker;
+	}
 
 	@Override
 	public String toString() {
