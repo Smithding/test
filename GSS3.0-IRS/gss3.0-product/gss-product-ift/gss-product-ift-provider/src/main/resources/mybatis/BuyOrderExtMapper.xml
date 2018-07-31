@@ -298,6 +298,7 @@
         FROM IFT_BUY_ORDER_EXT i, OS_BUYORDER o
         WHERE i.BUY_ORDER_NO = o.BUY_ORDER_NO
               AND o.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+              order by i.CREATE_TIME
     </select>
 
     <update id="updateByOrderNo" parameterType="com.tempus.gss.product.ift.api.entity.BuyOrderExt">
