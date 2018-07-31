@@ -690,6 +690,13 @@
                     <otherwise>f.LOCKER = #{locker,jdbcType=BIGINT} AND</otherwise>
                 </choose>
             </if>
+            <if test="buyLocker !=null">
+                <choose>
+                    <when test="buyLocker == 0">AND ab.BUY_LOCKER = 0</when>
+                    <when test="buyLocker == 1">AND ab.BUY_LOCKER != 0</when>
+                    <otherwise>AND ab.BUY_LOCKER = #{buyLocker,jdbcType=BIGINT}</otherwise>
+                </choose>
+            </if>
             <if test="cardNo!=null and cardNo !=''">
                 a.CERT_NO like CONCAT('%',#{cardNo,jdbcType=VARCHAR},'%' ) AND
             </if>

@@ -823,6 +823,13 @@
                     <otherwise>AND i.LOCKER = #{locker,jdbcType=BIGINT}</otherwise>
                 </choose>
             </if>
+            <if test="buyLocker !=null">
+                <choose>
+                    <when test="buyLocker == 0">AND h.BUY_LOCKER = 0</when>
+                    <when test="buyLocker == 1">AND h.BUY_LOCKER != 0</when>
+                    <otherwise>AND h.BUY_LOCKER = #{buyLocker,jdbcType=BIGINT}</otherwise>
+                </choose>
+            </if>
             <if test="ticketNo !=null and ticketNo !=''">
                 AND od.TICKET_NO like CONCAT ('%', #{ticketNo,jdbcType=VARCHAR} ,'%')
             </if>

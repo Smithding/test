@@ -174,7 +174,8 @@ public class SaleChangeExtVo implements Serializable{
 	 */
 	@JsonSerialize(using = LongSerializer.class)
 	private Long locker;
-	
+	@JsonSerialize(using = LongSerializer.class)
+	private Long buyLocker;
 	/**
 	 * 供应商
 	 */
@@ -918,5 +919,13 @@ public class SaleChangeExtVo implements Serializable{
 
 	public void setIsNotRefund(String isNotRefund) {
 		this.isNotRefund = isNotRefund;
+	}
+
+	public Long getBuyLocker() {
+		return buyLocker;
+	}
+
+	public void setBuyLocker(Long buyLocker) {
+		this.buyLocker = buyLocker;
 	}
 }
