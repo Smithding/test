@@ -263,6 +263,18 @@ public class OrderCreateReq implements Serializable{
 	@JSONField(serialize = false)
 	private BigDecimal totalRebateRateProfit;
 	
+	/**
+	 * 房型名称
+	 */
+	@JSONField(serialize = false)
+	private String supPriceName;
+	
+	/**
+	 * 床型名称
+	 */
+	@JSONField(serialize = false)
+	private String bedTypeName;
+	
 	public Long getResId() {
 		return resId;
 	}
@@ -569,5 +581,18 @@ public class OrderCreateReq implements Serializable{
 	public void setCityName(String cityName) {
 		this.cityName = cityName;
 	}
+	public String getSupPriceName() {
+		return supPriceName;
+	}
+	public void setSupPriceName(String supPriceName) {
+		this.supPriceName = supPriceName;
+	}
+	public String getBedTypeName() {
+		return bedTypeName;
+	}
+	public void setBedTypeName(String bedTypeName) {
+		this.bedTypeName = bedTypeName;
+	}
+	
 	
 }
