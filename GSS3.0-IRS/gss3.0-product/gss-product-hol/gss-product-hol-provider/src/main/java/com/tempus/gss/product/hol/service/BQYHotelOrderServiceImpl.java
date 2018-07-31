@@ -711,8 +711,9 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		hotelOrder.setRequestText(String.valueOf(saleOrder.getCustomerTypeNo()));	//存储CustomerType
 		//特殊要求
 		if (StringUtils.isNoneBlank(orderCreateReq.getOrderRemark())) {
-			hotelOrder.setRequestText(orderCreateReq.getOrderRemark());
+			//hotelOrder.setRequestText(orderCreateReq.getOrderRemark());
 			orderReq.setRemark(orderCreateReq.getOrderRemark());
+			hotelOrder.setRemark(orderCreateReq.getOrderRemark());
 		}
 		hotelOrderMapper.insertSelective(hotelOrder);
 

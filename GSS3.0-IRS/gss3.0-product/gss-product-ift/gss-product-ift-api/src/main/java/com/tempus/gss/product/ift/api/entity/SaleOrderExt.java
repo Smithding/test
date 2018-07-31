@@ -167,6 +167,8 @@ public class SaleOrderExt implements Serializable {
     private BigDecimal exchangeRate;//汇率
     private String handlers;//操作人姓名
     private String drawerLoginName;//出票员登录名
+    //客户名称
+    private String customerName;
     
     /**
      * office
@@ -563,7 +565,15 @@ public class SaleOrderExt implements Serializable {
     public void setDrawerLoginName(String drawerLoginName) {
         this.drawerLoginName = drawerLoginName;
     }
-    
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
     @Override
     public String toString() {
         return "SaleOrderExt{" + "saleOrderNo=" + saleOrderNo + ", saleOrder=" + saleOrder + ", id=" + id + ", owner=" + owner + ", demandNo=" + demandNo + ", teamNo=" + teamNo + ", demand=" + demand + ", legType=" + legType + ", contactName='" + contactName + '\'' + ", contactPhone='" + contactPhone + '\'' + ", contactMobile='" + contactMobile + '\'' + ", contactMail='" + contactMail + '\'' + ", saleRemark='" + saleRemark + '\'' + ", valid=" + valid + ", version=" + version + ", locker=" + locker + ", lockTime=" + lockTime + ", createType=" + createType + ", pnrNo=" + pnrNo + ", importPnr=" + importPnr + ", createTime=" + createTime + ", modifyTime=" + modifyTime + ", creator='" + creator + '\'' + ", modifier='" + modifier + '\'' + ", issueTime=" + issueTime + ", originalOrderNo=" + originalOrderNo + ", legList=" + legList + ", status='" + status + '\'' + ", linkType=" + linkType + ", linkNo='" + linkNo + '\'' + ", currency='" + currency + '\'' + ", saleCurrency='" + saleCurrency + '\'' + ", exchangeRate=" + exchangeRate + '}';

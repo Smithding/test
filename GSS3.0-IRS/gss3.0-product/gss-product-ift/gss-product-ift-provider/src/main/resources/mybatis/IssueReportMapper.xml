@@ -33,50 +33,63 @@
     </resultMap>
 
     <select id="queryIFTIssueReport" parameterType="com.tempus.gss.product.ift.api.entity.IFTIssueReportParams" resultMap="IftReportResultMap">
-        SELECT
-        CS.NAME AS SUPPLIER_NAME,
-        ISOE.SALE_ORDER_NO AS SALE_ORDER_NO,
-        COUNT(DISTINCT ISOD.PASSENGER_NO) AS TICKET_NUM,
-        ISOE.ISSUE_TIME AS TICKET_DATE,
+        <if test="type!=null and type==1">
+            <include refid="queryIFTIssued"/>
+        </if>
+        <if test="type!=null and type==2">
+            <include refid="queryIFTChanged"/>
+        </if>
+        <if test="type==null or (type!=2 and type!=1)">
+            <include refid="queryIFTIssued"/>
+            union(
+            <include refid="queryIFTChanged"/>
+            )
+        </if>
+    </select>
+    <sql id="queryIFTIssued">
+        SELECT ISOE.SALE_ORDER_NO AS SALE_ORDER_NO,
         GROUP_CONCAT(DISTINCT ISOD.TICKET_NO) AS TICKET_NO,
-        CONCAT((SELECT IL2.DEP_AIRPORT
-        FROM IFT_LEG IL2
-        WHERE IL2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
-        GROUP BY IL2.SALE_ORDER_NO, IL2.LEG_NO
-        ORDER BY IL2.DEP_TIME
-        LIMIT 1), '-', (SELECT IL2.ARR_AIRPORT
-        FROM IFT_LEG IL2
-        WHERE IL2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
-        GROUP BY IL2.SALE_ORDER_NO, IL2.LEG_NO
-        ORDER BY IL2.DEP_TIME DESC
-        LIMIT 1)) AS ROUTING,
+        SD.NAME AS SALE_DEPT,
+        CC.NAME AS CUSTOMER_NAME,
+        CC.CUSTOMER_NO AS CUSTOMER_NO,
+        GROUP_CONCAT(DISTINCT IL.AIRLINE) AS AIRLINE,
+        GROUP_CONCAT(DISTINCT CONCAT(IL.DEP_AIRPORT, '-', IL.ARR_AIRPORT)) AS ROUTING,
         GROUP_CONCAT(DISTINCT IL.FLIGHT_NO) AS FLIGHT_NO,
         GROUP_CONCAT(DISTINCT IL.CABIN) AS CABIN,
-        (SELECT IL2.DEP_TIME
-        FROM IFT_LEG IL2
-        WHERE IL2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
-        GROUP BY IL2.SALE_ORDER_NO, IL2.LEG_NO
-        ORDER BY IL2.DEP_TIME
-        LIMIT 1) AS DEP_DATE,
-        ISOE.EXCHANGE_RATE AS RATE,
-        ISOE.CURRENCY AS CURRENCY,
-        IP.SALE_FARE AS TRUE_PRICE,
-        IP.SALE_PRICE AS SETTLE_PRICE,
-        IP.SALE_TAX AS TAX,
-        IP.SALE_PRICE AS TOTAL_PRICE,
-        IP.SALE_PRICE - IP.BUY_PRICE - IP.BUY_TAX AS GROSS,
+        ISOE.ISSUE_TIME AS TICKET_DATE,
+        (
+        SELECT IL2.DEP_TIME FROM IFT_LEG IL2 WHERE IL2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO GROUP BY IL2.SALE_ORDER_NO, IL2.LEG_NO ORDER BY IL2.DEP_TIME LIMIT 1)
+        AS DEP_DATE,
+        (
+        SELECT sum(IP2.SALE_FARE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS TRUE_PRICE,
+        (
+        SELECT sum(IP2.SALE_TAX) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS TAX,
+        (
+        SELECT sum(IP2.SALE_BROKERAGE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS SALE_BROKERAGE,
+        round(100 * (1 - ((sum(IP.SALE_PRICE) - sum(IP.SALE_TAX) - sum(IP.SALE_BROKERAGE)) / (sum(IP.SALE_AWARD_PRICE) * (1 - sum(IP.SALE_AGENCY_FEE) / 100)) -
+        (sum(IP.SALE_FARE) - sum(IP.SALE_AWARD_PRICE)) / sum(IP.SALE_AWARD_PRICE))), 0) AS SALE_REBATE,
+        (
+        SELECT sum(IP2.SERVICE_CHARGE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS SERVICE_CHARGE,
+        (
+        SELECT sum(IP2.SALE_PRICE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS SALE_PRICE,
+        CONCAT(IP.SURNAME, '/', IP.NAME) AS PASSENGER_NAME,
+        PNR.PNR AS PNR,
+        '出票' AS TICKET_TYPE,
         ISOE.CREATOR AS SALE_PERSON,
-        SD.NAME AS SALE_DEPT,
-        SOI.SHORT_NAME AS COMPANY,
-        GROUP_CONCAT(IP.SURNAME, '/', IP.NAME SEPARATOR ' ') AS PASSENGER_NAME,
-        CASE WHEN IP.GENDER = 1
-        THEN '男'
-        ELSE '女' END AS GENDER,
-        CC.BUSINESS_LINE AS SOURCE,
-        ISOE.SALE_REMARK AS REMARK,
-        ISOE.MODIFIER AS TICKET_PERSON
+        ISOE.DRAWER_LOGIN_NAME AS TICKET_PERSON,
+        PPW.NAME AS PAY_WAY,
+        PAPI.ALL_PAY_INFO_NO AS PAY_NO,
+        (
+        SELECT LDI.ITINERARY_NO FROM LS_DELIVERY_ITINERARY LDI WHERE LDI.TICKET_NO = ISOD.TICKET_NO LIMIT 1) AS ITINERARY_NO,
+        sum(IP.SALE_PRICE) AS SETTLE_PRICE,
+        ISOE.EXCHANGE_RATE AS EXCHANGE_RATE,
+        ISOE.CURRENCY AS CURRENCY,
+        CC.BUSINESS_LINE AS SOURCE
+
+
         FROM IFT_SALE_ORDER_EXT ISOE
         LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
+        LEFT JOIN IFT_PNR PNR ON PNR.PNR_NO = ISOE.PNR_NO
         LEFT JOIN OS_SALEORDER OS ON OS.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
         LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO = OS.CUSTOMER_NO
         LEFT JOIN OS_BUYORDER OB ON OB.SALE_ORDER_NO = OS.SALE_ORDER_NO
@@ -87,6 +100,9 @@
         LEFT JOIN SM_USER SU ON SU.LOGIN_NAME = ISOE.DRAWER_LOGIN_NAME
         LEFT JOIN SM_DEPT SD ON SD.ID = SU.DEPT_ID
         LEFT JOIN SM_OWNER_INFO SOI ON SOI.OWNER = ISOE.OWNER
+        LEFT JOIN OS_ACTUALAMOUNTRECORD OA ON OA.RECORD_NO = ISOE.SALE_ORDER_NO
+        LEFT JOIN PS_ALL_PAY_INFO PAPI ON PAPI.ALL_PAY_INFO_NO = OA.PAY_NO
+        LEFT JOIN PS_PAY_WAY PPW ON PPW.CODE = PAPI.PAY_WAY_CODE
         WHERE 1=1
         <if test="ticketDateStart !=null and ticketDateStart != '' ">
             AND ISOE.ISSUE_TIME<![CDATA[>=]]>DATE_FORMAT(#{ticketDateStart}, '%Y-%m-%d')
@@ -100,14 +116,14 @@
         <if test="depDateEnd !=null  and depDateEnd != ''">
             AND IL.DEP_TIME <![CDATA[<=]]>DATE_FORMAT(STR_TO_DATE(#{depDateEnd}, '%Y-%m-%d')+1, '%Y-%m-%d')
         </if>
-        <if test="saleDept !=null and saleDept.size>0">
+        <if test="saleDept !=null and saleDept!=''">
             AND SD.NAME IN
             <foreach collection="saleDept" item="saleDept"
                      index="index" open="(" close=")" separator=",">
                 #{saleDept[${index}]}
             </foreach>
         </if>
-        <if test="source!=null and source.size>0">
+        <if test="source!=null and source!=''">
             AND CC.BUSINESS_LINE IN
             <foreach collection="source" item="source"
                      index="index" open="(" close=")" separator=",">
@@ -157,7 +173,7 @@
                 AND ISOE.CREATOR LIKE CONCAT('%', CONCAT(#{salePerson}, '%'))
             </if>
         </if>
-        <if test="cabins!=null and cabins.size>0">
+        <if test="cabins!=null and cabins!=''">
             AND IL.CABIN IN
             <foreach collection="cabins" item="cabins"
                      index="index" open="(" close=")" separator=",">
@@ -193,19 +209,200 @@
             </if>
 
         </if>
-        <if test="orderStatusList!=null and orderStatusList.size>0">
+        <if test="orderStatusArray!=null and orderStatusArray!='' ">
             AND ISOD.STATUS IN
-            <foreach collection="orderStatusList" item="orderStatusList"
+            <foreach collection="orderStatusArray" item="orderStatusArray"
                      index="index" open="(" close=")" separator=",">
-                #{orderStatusList[${index}]}
+                #{orderStatusArray[${index}]}
             </foreach>
         </if>
-        <if test="orderStatusList==null or orderStatusList.size>0 ">
-            AND ISOD.STATUS IN (4, 10)
+        <if test="orderStatusArray==null or orderStatusArray=='' ">
+            ISOD.STATUS BETWEEN 4 AND 10
         </if>
-        GROUP BY ISOD.SALE_ORDER_NO
-        ORDER BY ISOE.ISSUE_TIME
-    </select>
+        AND ISOD.IS_CHANGE = 0
+        GROUP BY ISOD.SALE_ORDER_NO, ISOD.TICKET_NO
+        ORDER BY ISOE.ISSUE_TIME DESC
+    </sql>
+    <sql id="queryIFTChanged">
+        SELECT ISCE.SALE_CHANGE_NO AS SALE_ORDER_NO,
+        ISOD.TICKET_NO AS TICKET_NO,
+        SD.NAME AS SALE_DEPT,
+        CC.NAME AS CUSTOMER_NAME,
+        CC.CUSTOMER_NO AS CUSTOMER_NO,
+        GROUP_CONCAT(DISTINCT IL.AIRLINE) AS AIRLINE,
+        GROUP_CONCAT(DISTINCT CONCAT(IL.DEP_AIRPORT, '-', IL.ARR_AIRPORT)) AS ROUTING,
+        GROUP_CONCAT(DISTINCT IL.FLIGHT_NO) AS FLIGHT_NO,
+        GROUP_CONCAT(DISTINCT IL.CABIN) AS CABIN,
+        ISOD.MODIFY_TIME AS TICKET_DATE,
+        GROUP_CONCAT(IL.DEP_TIME) AS DEP_DATE,
+        SUM(IP.SALE_FARE) AS TRUE_PRICE,
+        SUM(IPCP.SALE_TAX) AS TAX,
+        GROUP_CONCAT(DISTINCT IP.SALE_REBATE) AS SALE_REBATE,
+        (
+        SELECT sum(IP2.SERVICE_CHARGE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISCE.SALE_CHANGE_NO) AS SERVICE_CHARGE,
+        SUM(IPCP.SALE_COUNT_PRICE) AS SALE_PRICE,
+        GROUP_CONCAT(DISTINCT CONCAT(IP.SURNAME, '/', IP.NAME)) AS PASSENGER_NAME,
+        PNR.PNR AS PNR,
+        CASE WHEN ISCE.TICKET_CHANGE_TYPE = 1
+        THEN '升舱'
+        WHEN ISCE.TICKET_CHANGE_TYPE = 2
+        THEN '改期'
+        WHEN ISCE.TICKET_CHANGE_TYPE = 3
+        THEN '换开'
+        END AS TICKET_TYPE,
+        CS.NAME AS SUPPLIER_NAME,
+        ISCE.SALE_CHANGE_NO AS SALE_ORDER_NO,
+        COUNT(DISTINCT ISOD.PASSENGER_NO) AS TICKET_NUM,
+        ISCE.EXCHANGE_RATE AS EXCHANGE_RATE,
+        ISCE.CURRENCY AS CURRENCY,
+        sum(IPCP.SALE_COUNT_PRICE) AS SETTLE_PRICE,
+        sum(IPCP.SALE_COUNT_PRICE) AS TOTAL_PRICE,
+        SUM(IPCP.PROFIT) AS GROSS,
+        ISCE.CREATOR AS SALE_PERSON,
+        SOI.SHORT_NAME AS COMPANY,
+        CASE WHEN IP.GENDER = 1
+        THEN '男' ELSE '女' END AS GENDER,
+        CC.BUSINESS_LINE AS SOURCE,
+        ISCE.CHANGE_REMARK AS REMARK,
+        SU.NAME AS TICKET_PERSON
+        FROM IFT_SALE_CHANGE_EXT ISCE
+        LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO = ISCE.SALE_CHANGE_NO
+        LEFT JOIN IFT_PNR PNR ON PNR.PNR_NO = ISCE.PNR_NO
+        LEFT JOIN OS_SALECHANGE OS ON OS.SALE_CHANGE_NO = ISCE.SALE_CHANGE_NO
+        LEFT JOIN OS_SALECHANGE_EXTEND OSCE ON OSCE.SALE_CHANGE_NO = ISCE.SALE_CHANGE_NO
+        LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO = OSCE.CUSTOMER_NO
+        LEFT JOIN OS_BUYORDER OB ON OB.SALE_ORDER_NO = OS.SALE_ORDER_NO
+        LEFT JOIN IFT_BUY_ORDER_EXT IBOE ON IBOE.BUY_ORDER_NO = OB.BUY_ORDER_NO
+        LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO = OB.SUPPLIER_NO
+        LEFT JOIN IFT_PASSENGER IP ON IP.PASSENGER_NO = ISOD.PASSENGER_NO
+        LEFT JOIN IFT_LEG IL ON IL.LEG_NO = ISOD.LEG_NO
+        LEFT JOIN SM_USER SU ON SU.LOGIN_NAME = ISCE.DRAWER_LOGIN_NAME
+        LEFT JOIN SM_DEPT SD ON SD.ID = SU.DEPT_ID
+        LEFT JOIN SM_OWNER_INFO SOI ON SOI.OWNER = ISCE.OWNER
+        LEFT JOIN OS_ACTUALAMOUNTRECORD OA ON OA.RECORD_NO = ISCE.SALE_CHANGE_NO
+        LEFT JOIN PS_ALL_PAY_INFO PAPI ON PAPI.ALL_PAY_INFO_NO = OA.PAY_NO
+        LEFT JOIN PS_PAY_WAY PPW ON PPW.CODE = PAPI.PAY_WAY_CODE
+        LEFT JOIN IFT_PASSENGER_CHANGE_PRICE IPCP ON IPCP.PASSENGER_NO = ISOD.PASSENGER_NO
+        WHERE 1=1
+        <if test="ticketDateStart !=null and ticketDateStart != '' ">
+            AND ISOE.ISSUE_TIME<![CDATA[>=]]>DATE_FORMAT(#{ticketDateStart}, '%Y-%m-%d')
+        </if>
+        <if test="ticketDateEnd !=null  and ticketDateEnd != ''">
+            AND ISOE.ISSUE_TIME<![CDATA[<=]]>DATE_FORMAT(STR_TO_DATE(#{ticketDateEnd}, '%Y-%m-%d')+1, '%Y-%m-%d')
+        </if>
+        <if test="depDateStart !=null and depDateStart != '' ">
+            AND IL.DEP_TIME <![CDATA[>=]]>DATE_FORMAT(#{depDateStart}, '%Y-%m-%d')
+        </if>
+        <if test="depDateEnd !=null  and depDateEnd != ''">
+            AND IL.DEP_TIME <![CDATA[<=]]>DATE_FORMAT(STR_TO_DATE(#{depDateEnd}, '%Y-%m-%d')+1, '%Y-%m-%d')
+        </if>
+        <if test="saleDept !=null and saleDept!=''">
+            AND SD.NAME IN
+            <foreach collection="saleDept" item="saleDept"
+                     index="index" open="(" close=")" separator=",">
+                #{saleDept[${index}]}
+            </foreach>
+        </if>
+        <if test="source!=null and source!=''">
+            AND CC.BUSINESS_LINE IN
+            <foreach collection="source" item="source"
+                     index="index" open="(" close=")" separator=",">
+                #{source[${index}]}
+            </foreach>
+        </if>
+        <if test="exactQuery ==null or exactQuery=='true'">
+            <if test="surname!=null and surname!=''">
+                AND IP.SURNAME= #{surname}
+                AND IP.NAME== #{name}
+            </if>
+        </if>
+        <if test="exactQuery !=null and exactQuery=='false'">
+            <if test="name!=null and name!=''">
+                AND  IP.NAME LIKE CONCAT('%', CONCAT(#{name}, '%'))
+                OR LIKE CONCAT('%', CONCAT(#{surname}, '%'))
+            </if>
+        </if>
+        <if test="company!=null and company!=''">
+            <if test="exactQuery ==null or exactQuery=='true'">
+                AND SOI.SHORT_NAME = #{company}
+            </if>
+            <if test="exactQuery !=null and exactQuery=='false'">
+                AND SOI.SHORT_NAME LIKE CONCAT('%', CONCAT(#{company}, '%'))
+            </if>
+
+        </if>
+        <if test="passengerName!=null and passengerName!=''">
+            AND (IP.SURNAME LIKE CONCAT('%', CONCAT(#{passengerName}, '%'))
+            OR IP.NAME LIKE CONCAT('%', CONCAT(#{passengerName}, '%'))
+            )
+
+        </if>
+        <if test="ticketPerson!=null and ticketPerson!=''">
+            <if test="exactQuery ==null or exactQuery=='true'">
+                AND ISOE.MODIFIER = #{ticketPerson}
+            </if>
+            <if test="exactQuery !=null and exactQuery=='false'">
+                AND ISOE.MODIFIER LIKE CONCAT('%', CONCAT(#{ticketPerson}, '%'))
+            </if>
+        </if>
+        <if test="salePerson!=null and salePerson!=''">
+            <if test="exactQuery == null or exactQuery=='true'">
+                AND ISOE.CREATOR  = #{salePerson}
+            </if>
+            <if test="exactQuery !=null and exactQuery=='false'">
+                AND ISOE.CREATOR LIKE CONCAT('%', CONCAT(#{salePerson}, '%'))
+            </if>
+        </if>
+        <if test="cabins!=null and cabins!=''">
+            AND IL.CABIN IN
+            <foreach collection="cabins" item="cabins"
+                     index="index" open="(" close=")" separator=",">
+                #{cabins[${index}]}
+            </foreach>
+        </if>
+        <if test="flightNo!=null and flightNo!=''">
+            <if test="exactQuery ==null or exactQuery=='true'">
+                AND IL.FLIGHT_NO = #{flightNo}
+            </if>
+            <if test="exactQuery !=null and exactQuery=='false'">
+                AND IL.FLIGHT_NO LIKE CONCAT('%', CONCAT(#{flightNo}, '%'))
+            </if>
+
+        </if>
+        <if test="ticketNo!=null and ticketNo!=''">
+            <if test="exactQuery ==null or exactQuery=='true'">
+                AND ISOD.TICKET_NO = #{ticketNo}
+            </if>
+            <if test="ticketNo !=null and ticketNo=='false'">
+                AND ISOD.TICKET_NO LIKE CONCAT('%', CONCAT(#{ticketNo}, '%'))
+            </if>
+        </if>
+        <if test="saleOrderNo!=null and saleOrderNo!=''">
+            AND ISOE.SALE_ORDER_NO = #{saleOrderNo}
+        </if>
+        <if test="supplierName!=null and supplierName!=''">
+            <if test="exactQuery ==null or exactQuery=='true'">
+                AND CS.NAME  = #{supplierName}
+            </if>
+            <if test="exactQuery !=null and exactQuery=='false'">
+                AND CS.NAME LIKE CONCAT('%', CONCAT(#{supplierName}, '%'))
+            </if>
+
+        </if>
+        <if test="orderStatusArray!=null and orderStatusArray!='' ">
+            AND ISOD.STATUS IN
+            <foreach collection="orderStatusArray" item="orderStatusArray"
+                     index="index" open="(" close=")" separator=",">
+                #{orderStatusArray[${index}]}
+            </foreach>
+        </if>
+        <if test="orderStatusArray==null or orderStatusArray=='' ">
+            ISOD.STATUS BETWEEN 4 AND 10
+        </if>
+        AND ISOD.IS_CHANGE = 0
+        GROUP BY ISOD.SALE_ORDER_NO, ISOD.TICKET_NO
+        ORDER BY ISOE.ISSUE_TIME DESC
+    </sql>
 
 
     <select id="queryIssueDeptNameList" resultType="java.lang.String">

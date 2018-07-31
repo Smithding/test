@@ -248,25 +248,31 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 			
 			//异步请求酒店图片和酒店详细信息
 			Future<List<ImageList>> asyncHotelImage = bqyHotelInterService.asyncHotelImage(query);
-			Future<HotelEntity> asyncHotelDetail = bqyHotelInterService.asyncHotelDetail(query);
-			Future<ResBaseInfo> asyncResBaseInfo = bqyHotelConverService.asyncConvertTcHotelEntity(Long.valueOf(hotelId));
+			//Future<HotelEntity> asyncHotelDetail = bqyHotelInterService.asyncHotelDetail(query);
+			//Future<ResBaseInfo> asyncResBaseInfo = bqyHotelConverService.asyncConvertTcHotelEntity(Long.valueOf(hotelId));
+			Future<List<RoomPriceItem>> asynRoomPrice = bqyHotelInterService.asyncRoomPrice(query);
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
 			if(!agent.getNum().equals(401803070321014723L)) {
 				computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
 			}
-			while (asyncHotelImage.isDone() && asyncHotelDetail.isDone() && asyncResBaseInfo.isDone()) {
+			/*while (asyncHotelImage.isDone() && asyncHotelDetail.isDone() && asyncResBaseInfo.isDone()) {
+				break;
+			}*/
+			while (asynRoomPrice.isDone() && asyncHotelImage.isDone()) {
 				break;
 			}
+
 			List<ImageList> bqyHotelImgList = asyncHotelImage.get();
-			HotelEntity hotelEntity = asyncHotelDetail.get();
-			ResBaseInfo resBaseInfo = asyncResBaseInfo.get();
+			List<RoomPriceItem> roomPriceItemList = asynRoomPrice.get();
+			//HotelEntity hotelEntity = asyncHotelDetail.get();
+			//ResBaseInfo resBaseInfo = asyncResBaseInfo.get();
 			//List<ImgInfo> tcHotelImgList = convertTCImg(bqyHotelImgList);
 			//resBaseInfo.setImgInfoList(bqyHotelImgList);
 			
 			//List<RoomPriceItem> roomPriceItemList = bqyHotelInterService.queryHotelRoomPrice(query);
 			
-			if (null != hotelEntity) {
-				List<RoomPriceItem> roomPriceItemList = hotelEntity.getRoomPriceItem();
+			//if (null != hotelEntity) {
+				//List<RoomPriceItem> roomPriceItemList = hotelEntity.getRoomPriceItem();
 			
 				List<ProDetails> proDetails = new ArrayList<>();
 				if (null != roomPriceItemList && roomPriceItemList.size() > 0) {
@@ -469,16 +475,17 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 						proDetails.add(proDetail);
 					}
 				}
+				ResBaseInfo resBaseInfo = new ResBaseInfo();
 				resBaseInfo.setProDetails(proDetails);
 				//酒店政策
-				List<Policy> policyList = hotelEntity.getPolicy();
-				bqyHotelPolicyConver(resBaseInfo, policyList);
+				//List<Policy> policyList = hotelEntity.getPolicy();
+				//bqyHotelPolicyConver(resBaseInfo, policyList);
 				//酒店服务
-				String serviceNameStr = hotelEntity.getServiceName();
-				setHotelServiceName(resBaseInfo, serviceNameStr);
+				//String serviceNameStr = hotelEntity.getServiceName();
+				//setHotelServiceName(resBaseInfo, serviceNameStr);
 				//return resBaseInfo;
 				return new AsyncResult<ResBaseInfo>(resBaseInfo);
-			}
+			//}
 		} catch (ParseException e) {
 			e.printStackTrace();
 			logger.error("酒店详情页面错误");
@@ -512,17 +519,13 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 	public ResBaseInfo getById(Agent agent, Long bqyHolId) {
 		long start = System.currentTimeMillis();
 		String perKey = "BQYHOL"+bqyHolId;
-		HotelInfo hotelInfo =(HotelInfo) redisService.get(perKey);
+		ResBaseInfo resBaseInfo = (ResBaseInfo) redisService.get(perKey);
 		long end = System.currentTimeMillis();
         System.out.println("redis，耗时：" + (end - start) + "毫秒");
-		if(hotelInfo == null) {
-			hotelInfo = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(bqyHolId)), HotelInfo.class);
-			redisService.set(perKey, hotelInfo, Long.valueOf(60 * 60 * 24 * 3));
-		}
-		
-		ResBaseInfo resBaseInfo = bqyHotelConverService.bqyConvertTcHotelEntity(hotelInfo);
 		return resBaseInfo;
 	}
+
+
 
 	@Override
 	public BookOrderResponse isBookOrder(Agent agent, IsBookOrderReq isBookOrderReq, Integer flag) {
@@ -738,15 +741,20 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 	@Override
 	//@Cacheable(value = "ResBaseInfo", key = "#bqyResId", unless = "")
 	public ResBaseInfo queryHotelBaseInfo(Agent agent, Long bqyResId, String checkInDate, String checkOutDate, String cityCode) throws Exception{
+
+		ResBaseInfo resBaseInfo = getById(agent, bqyResId);
+		if (null != resBaseInfo) {
+			return resBaseInfo;
+		}
+		HotelInfo hotelInfo = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(bqyResId)), HotelInfo.class);
+		resBaseInfo = bqyHotelConverService.bqyConvertTcHotelEntity(hotelInfo);
 		QueryHotelParam query = new QueryHotelParam();
 		query.setCheckInTime(checkInDate);
 		query.setCheckOutTime(checkOutDate);
 		query.setCityCode(cityCode);
 		query.setHotelId(bqyResId);
 		Future<HotelEntity> hotelEntityFu = bqyHotelInterService.queryHotelDetail(query);
-		
-		ResBaseInfo resBaseInfo = getById(agent, bqyResId);
-		
+
 		HotelEntity hotelEntity = hotelEntityFu.get();
 		//酒店政策
 		List<Policy> policyList = hotelEntity.getPolicy();
@@ -763,6 +771,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 		}
 		resBaseInfo.setEstablishmentDate(defaultTime);
 		resBaseInfo.setRenovationDate(defaultTime);
+		redisService.set("BQYHOL"+ bqyResId, resBaseInfo, Long.valueOf(60 * 60 * 24 * 3));
 		return resBaseInfo;
 	}
 

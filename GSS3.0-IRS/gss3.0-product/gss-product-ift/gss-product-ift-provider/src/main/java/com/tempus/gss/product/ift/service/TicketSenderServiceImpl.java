@@ -7,6 +7,7 @@ import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ift.api.entity.TicketSender;
+import com.tempus.gss.product.ift.api.entity.iftVo.IftUserVo;
 import com.tempus.gss.product.ift.api.entity.vo.TicketSenderVo;
 import com.tempus.gss.product.ift.api.service.IChangeService;
 import com.tempus.gss.product.ift.api.service.ITicketSenderService;
@@ -234,6 +235,16 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
     public TicketSender queryByUserId(Long userId) {
 
         return ticketSenderDao.queryByUserId(userId);
+    }
+
+    /*
+    为各列表查询获取出票员
+     */
+    @Override
+    public List<IftUserVo> queryTkMembersInUsers() {
+        List<IftUserVo> users = null;
+        users = ticketSenderDao.queryTkMembersInUsers();
+        return users;
     }
 
 }

@@ -11,10 +11,9 @@ import com.tempus.gss.serializer.LongSerializer;
  * Created by 杨威 on 2016/11/2.
  */
 public class SaleQueryOrderVo implements Serializable {
-	/**
-	 *
-	 */
-	private static final long serialVersionUID = 1L;
+
+
+	private static final long serialVersionUID = 3528529316948671647L;
 	/**
 	 * 产品类型
 	 */

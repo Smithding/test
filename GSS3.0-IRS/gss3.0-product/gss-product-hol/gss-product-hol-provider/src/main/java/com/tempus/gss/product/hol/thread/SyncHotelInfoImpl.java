@@ -115,9 +115,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		try {
 			days= DateUtil.daysBetween(startTime, endTime);
 		//	Future<AssignDateHotel> assignDateHotelFuture = tcHotelSupplierService.queryListById(resId, AssignDateHotel.class);
-			Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryListById(resId, ResProBaseInfos.class);
-			Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryListById(resId, ResBaseInfo.class);
-			Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryListById(resId, ImgInfoSum.class);
+			Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryResProBaseInfos(resId);
+			Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryResBaseInfo(resId);
+			Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryImgInfoSum(resId);
 			
 			AssignDateHotelReq assignDateHotelReq=new AssignDateHotelReq();
 			assignDateHotelReq.setResId(resId);
@@ -128,17 +128,6 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	        calendar.add(Calendar.DAY_OF_MONTH, -1);
 			assignDateHotelReq.setEndTime(sdf.format(calendar.getTime()));
 			AssignDateHotel assignDateHotel=  hotelInterService.queryAssignDateHotel(assignDateHotelReq);
-			while(true) {
-				if( resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && imgInfoSumFuture.isDone()) {
-					break;
-				}
-			}
-			/*while(true) {
-				if( assignDateHotelFuture.isDone() && resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && imgInfoSumFuture.isDone()) {
-					break;
-				}
-			}
-			AssignDateHotel assignDateHotel = assignDateHotelFuture.get();*/
 			
 			tcResBaseInfo = resBaseInfoFuture.get();
 			ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
@@ -315,7 +304,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	
 	@Override
 	@Async
-	public ResBaseInfo newQueryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
+	public Future<ResBaseInfo> newQueryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
 				long start = System.currentTimeMillis();
 				if (StringUtil.isNullOrEmpty(agent)) {
 		            logger.error("agent对象为空");
@@ -354,19 +343,11 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					
 					days= DateUtil.daysBetween(startTime, endTime);
 				//	Future<AssignDateHotel> assignDateHotelFuture = tcHotelSupplierService.queryListById(resId, AssignDateHotel.class);
-					Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryListById(resId, ResProBaseInfos.class);
-					Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryListById(resId, ResBaseInfo.class);
-					Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryListById(resId, ImgInfoSum.class);
+					Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryResProBaseInfos(resId);
+					Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryResBaseInfo(resId);
+					Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryImgInfoSum(resId);
 					Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-					if(!agent.getNum().equals(401803070321014723L)) {
-						computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
-					}
-					
-					while(true) {
-						if( resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && imgInfoSumFuture.isDone() && assignDateHotelFu.isDone()) {
-							break;
-						}
-					}
+					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
 					
 					tcResBaseInfo = resBaseInfoFuture.get();
 					ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
@@ -485,6 +466,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		       			 				pro.setFirPrice(firstPrice);
 		       			 			}
 		       			 			pro.setResProName(pro.getResProName().replaceAll("\\s*", "").replaceAll("（", "(").replaceAll("）", ")"));
+		       			 			pro.setSupplierType(1);
 									resProBaseInfoList.add(pro);
 								}
 							}
@@ -529,13 +511,13 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 				}
 				long end = System.currentTimeMillis();  
 			    System.out.println("完成任务newQueryHotelDetail，耗时：" + (end - start) + "毫秒"); 
-				return tcResBaseInfo;
-			    //return new AsyncResult<ResBaseInfo>(tcResBaseInfo);
+				//return tcResBaseInfo;
+			    return new AsyncResult<ResBaseInfo>(tcResBaseInfo);
 	}
 	
 	@Override
 	@Async
-	public ResBaseInfo queryProDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
+	public Future<ResBaseInfo> queryProDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
 				long start = System.currentTimeMillis();
 				if (StringUtil.isNullOrEmpty(agent)) {
 		            logger.error("agent对象为空");
@@ -575,18 +557,10 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					Future<AssignDateHotel> assignDateHotelFu=  hotelInterService.queryFuAssignDateHotel(assignDateHotelReq);
 					
 					days= DateUtil.daysBetween(startTime, endTime);
-					Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryListById(resId, ResProBaseInfos.class);
-					Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryListById(resId, ImgInfoSum.class);
+					Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryResProBaseInfos(resId);
+					Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryImgInfoSum(resId);
 					Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-					if(!agent.getNum().equals(401803070321014723L)) {
-						computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
-					}
-					
-					while(true) {
-						if( resProBaseInfosFuture.isDone() && imgInfoSumFuture.isDone() && assignDateHotelFu.isDone()) {
-							break;
-						}
-					}
+					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
 					
 					ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
 					ImgInfoSum imgInfoSum = imgInfoSumFuture.get();
@@ -701,6 +675,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		       			 				pro.setFirPrice(firstPrice);
 		       			 			}
 		       			 			pro.setResProName(pro.getResProName().replaceAll("\\s*", "").replaceAll("（", "(").replaceAll("）", ")"));
+		       			 			pro.setSupplierType(1);
 									resProBaseInfoList.add(pro);
 								}
 							}
@@ -740,12 +715,12 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					}
 					
 				} catch (Exception e) {
-					// TODO: handle exception
+					e.printStackTrace();
 				}
 				long end = System.currentTimeMillis();  
 			    System.out.println("完成任务newQueryHotelDetail，耗时：" + (end - start) + "毫秒"); 
-				return tcResBaseInfo;
-			    //return new AsyncResult<ResBaseInfo>(tcResBaseInfo);
+				//return tcResBaseInfo;
+			    return new AsyncResult<ResBaseInfo>(tcResBaseInfo);
 	}
 	
 	@Override
@@ -788,16 +763,10 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			
 			days= DateUtil.daysBetween(startTime, endTime);
 		//	Future<AssignDateHotel> assignDateHotelFuture = tcHotelSupplierService.queryListById(resId, AssignDateHotel.class);
-			Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryListById(resId, ResProBaseInfos.class);
-			Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryListById(resId, ResBaseInfo.class);
+			Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryResProBaseInfos(resId);
+			Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryResBaseInfo(resId);
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
 			computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
-			
-			while(true) {
-				if( resProBaseInfosFuture.isDone() && resBaseInfoFuture.isDone() && assignDateHotelFu.isDone()) {
-					break;
-				}
-			}
 			
 			tcResBaseInfo = resBaseInfoFuture.get();
 			ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
@@ -962,24 +931,6 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		
 	}
 
-	@Override
-	public <T> T queryDetailById(Long id, Class<T> clazz) throws GSSException {
-		Future<T> imgInfoSumFuture = tcHotelSupplierService.queryListById(id, clazz);
-		T t = null;
-		while(true) {
-			if(imgInfoSumFuture.isDone()) {
-				break;
-			}
-		}
-		try {
-			t = imgInfoSumFuture.get();
-			return t;
-			
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
 
 	@Override
 	@Async
@@ -999,10 +950,10 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			String checkoutDate) throws Exception{
 		long start = System.currentTimeMillis();
 		System.out.println("f2 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
-		ResBaseInfo hotelDetail = queryProDetail(agent, tcHotelId, checkinDate, checkoutDate);
+		Future<ResBaseInfo> hotelDetailFu = queryProDetail(agent, tcHotelId, checkinDate, checkoutDate);
 		long end = System.currentTimeMillis();  
 		System.out.println("完成任务二，耗时：" + (end - start) + "毫秒"); 
-		return new AsyncResult<ResBaseInfo>(hotelDetail);
+		return new AsyncResult<ResBaseInfo>(hotelDetailFu.get());
 	}
 
 	@Override

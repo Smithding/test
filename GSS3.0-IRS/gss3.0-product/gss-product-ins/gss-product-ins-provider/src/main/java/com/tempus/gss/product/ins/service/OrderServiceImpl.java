@@ -2385,7 +2385,7 @@ public class OrderServiceImpl implements IOrderService {
 		certificateCreateVO.setServiceLine("1"); //业务线
 		certificateCreateVO.setSubBusinessType(1); //业务小类 1.销采 2.补收退 3.废退 4.变更 5.错误修改
 		certificateCreateVO.setThirdBusNo(thirdBusNo); //第三方业务编号 多个以","隔开 (销售不用传)
-		certificateCreateVO.setSpecialType(1);
+		certificateCreateVO.setSpecialType(2);
 		certificateCreateVO.setTicketNos(insuredNO);
 		List<BusinessOrderInfo> orderInfoList = new ArrayList<>(); //支付订单
 		BusinessOrderInfo businessOrderInfo = new BusinessOrderInfo();
@@ -2427,7 +2427,7 @@ public class OrderServiceImpl implements IOrderService {
 					//		certificateCreateVO.setPayType(payType); //支付类型（1 在线支付 2 帐期或代付 3 线下支付）
 					certificateCreateVO.setReason("销售退款单信息"); //补充说明
 					certificateCreateVO.setSubBusinessType(1); //业务小类 1.销采 2.补收退 3.废退 4.变更 5.错误修改
-					certificateCreateVO.setSpecialType(1);
+					certificateCreateVO.setSpecialType(2);
 					certificateCreateVO.setTicketNos(insuredNo);
 					List<BusinessOrderInfo> orderInfoList = new ArrayList<>(); //支付订单
 					BusinessOrderInfo businessOrderInfo = new BusinessOrderInfo();
@@ -2533,7 +2533,7 @@ public class OrderServiceImpl implements IOrderService {
 					orderInfoList.add(businessOrderInfo);
 					certificateCreateVO.setOrderInfoList(orderInfoList);
 					certificateCreateVO.setServiceLine("3");
-					certificateCreateVO.setSpecialType(1);
+					certificateCreateVO.setSpecialType(2);
 					certificateCreateVO.setTicketNos(insuredNo);
 					log.info("创建销售退款单的参数certificateCreateVO---------->" + certificateCreateVO.toString());
 					certificateService.saleRefundCert(agent, certificateCreateVO);

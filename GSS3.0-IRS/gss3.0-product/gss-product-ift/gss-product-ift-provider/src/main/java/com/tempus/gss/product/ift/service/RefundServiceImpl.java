@@ -1360,6 +1360,7 @@ public class RefundServiceImpl implements IRefundService {
 					saleChangeVo.setSaleChangeNo(saleChangeExt.getSaleChangeNo());//
 					saleChangeVo.setAgentId(requestWithActor.getAgent().getId());
 					saleChangeVo.setLocker(saleChangeExt.getLocker());
+					saleChangeVo.setCustomerName(saleChangeExt.getCustomerName());
 					//设置操作人
 					saleChangeVo.setHandlers(saleChangeExt.getHandlers());
 					saleChangeVo.setAirLineRefundStatus(saleChangeExt.getAirLineRefundStatus());
@@ -1431,7 +1432,7 @@ public class RefundServiceImpl implements IRefundService {
 		boolean flag = false;
 		try {
 			SaleChangeExt saleChangeExt = saleOrderChangeExt.getEntity();
-			log.info("修改销售变更单信息:");
+			log.info("修改销售变更单信息:"+saleChangeExt.toString());
 			int updateFlag = saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
 			if (updateFlag == 1) {
 				flag = true;

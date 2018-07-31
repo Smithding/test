@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ift.api.entity.TicketSender;
+import com.tempus.gss.product.ift.api.entity.iftVo.IftUserVo;
 import com.tempus.gss.product.ift.api.entity.vo.TicketSenderVo;
 import com.tempus.gss.system.entity.User;
 import com.tempus.gss.vo.Agent;
@@ -77,4 +78,6 @@ public interface ITicketSenderService {
     List<TicketSender> getSpecTypeOnLineTicketSender(String type);
 
     TicketSender queryByUserId(Long userId);
+
+    List<IftUserVo> queryTkMembersInUsers();
 }
