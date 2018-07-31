@@ -3,7 +3,7 @@ package com.tempus.gss.product.ift.dao;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.ift.api.entity.IFTIssueReport;
 import com.tempus.gss.product.ift.api.entity.IFTIssueReportParams;
-import com.tempus.gss.product.ift.api.entity.webservice.IftBuyReport;
+import com.tempus.gss.product.ift.api.entity.IftBuyReport;
 import org.apache.ibatis.session.RowBounds;
 
 import java.util.List;

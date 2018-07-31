@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.ift.api.entity.*;
 import com.tempus.gss.product.ift.api.entity.vo.ReportRefundVo;
 import com.tempus.gss.product.ift.api.entity.vo.ReportVo;
-import com.tempus.gss.product.ift.api.entity.webservice.IftBuyReport;
+import com.tempus.gss.product.ift.api.entity.IftBuyReport;
 import com.tempus.gss.product.ift.api.service.ReportService;
 import com.tempus.gss.product.ift.dao.IssueReportDao;
 import com.tempus.gss.product.ift.dao.RefundReportDao;

@@ -1,4 +1,4 @@
-package com.tempus.gss.product.ift.api.entity.webservice;
+package com.tempus.gss.product.ift.api.entity;
 
 import java.io.Serializable;
 
