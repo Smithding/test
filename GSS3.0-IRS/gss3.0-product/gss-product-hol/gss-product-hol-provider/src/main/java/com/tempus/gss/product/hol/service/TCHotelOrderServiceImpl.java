@@ -98,6 +98,7 @@ import com.tempus.gss.product.hol.dao.HolSupplierMapper;
 import com.tempus.gss.product.hol.dao.HotelErrorOrderMapper;
 import com.tempus.gss.product.hol.dao.HotelOrderMapper;
 import com.tempus.gss.product.hol.utils.HttpClientUtil;
+import com.tempus.gss.product.hol.utils.TrackTime;
 import com.tempus.gss.sms.SMSUtil;
 import com.tempus.gss.system.entity.SmsTemplateDetail;
 import com.tempus.gss.system.service.IMaxNoService;
@@ -651,7 +652,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		}
 		return null;
 	}
-
+	
+	@TrackTime(param = "isBookOrder")
 	@Override
 	public IsBookOrder isBookOrder(Agent agent,IsBookOrderReq isBookOrderReq) throws GSSException{
 		//long start = System.currentTimeMillis();
@@ -682,11 +684,11 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			logger.info("酒店订单进行可定检查,入参:" + JSONObject.toJSONString(isBookOrderReq));
 			String reqJson = JSONObject.toJSONString(isBookOrderReq);
 			
-			long end = System.currentTimeMillis();  
+			//long end = System.currentTimeMillis();  
 		    //System.out.println("1，耗时：" + (end - start) + "毫秒"); 
 			String resultJson= httpClientUtil.doTCJsonPost(CARD_SUPP_URL, reqJson);
-			Long end2 = System.currentTimeMillis();  
-		    System.out.println("可定检查耗时：" + (end2 - end) + "毫秒"); 
+			//Long end2 = System.currentTimeMillis();  
+		   // System.out.println("可定检查耗时：" + (end2 - end) + "毫秒"); 
 			logger.info("可定检查请求返回:" + resultJson);
 			if(StringUtil.isNotNullOrEmpty(resultJson)){
 				isBookOrderBase= JsonUtil.toBean(resultJson, new TypeReference<ResultTc<IsBookOrder>>(){});

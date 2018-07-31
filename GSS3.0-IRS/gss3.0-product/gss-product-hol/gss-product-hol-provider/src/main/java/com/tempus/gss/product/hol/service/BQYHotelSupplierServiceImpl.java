@@ -13,6 +13,8 @@ import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import com.tempus.gss.product.hol.api.entity.vo.bqy.*;
+import com.tempus.gss.security.AgentUtil;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -42,11 +44,6 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ProDetails;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProSaleInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelEntity;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelInfo;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.ImageList;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.Policy;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.BookOrderParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.BookOrderResponse;
@@ -556,6 +553,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 
 	@Override
 	public BookOrderResponse isBookOrder(Agent agent, IsBookOrderReq isBookOrderReq, Integer flag) {
+
 		BookOrderParam query = new BookOrderParam();
 		query.setCheckInTime(isBookOrderReq.getComeDate());
 		query.setCheckOutTime(isBookOrderReq.getLeaveDate());
@@ -783,6 +781,91 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 	}
 
 	@Override
+	public Map<String, Object> getProByRoomCode(Agent agent, RoomInfo roomInfo) {
+		try {
+			String holMidId = roomInfo.getHolMidId();
+			HolMidBaseInfo holMid = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(holMidId)), HolMidBaseInfo.class);
+			Long resId = null;
+			List<ResNameSum> resNameSumList = holMid.getResNameSum();
+			for (ResNameSum resNameSum : resNameSumList) {
+				if (resNameSum.getResType() - 2 == 0) {
+					resId = resNameSum.getResId();
+					break;
+				}
+			}
+			//酒店基础信息
+			ResBaseInfo resBaseInfo = bqyHotelConverService.bqyConvertTcHotelEntity(getHotelInfoById(agent, resId));
+			int oneDayPrice = roomInfo.getPrice();
+			ResProBaseInfo useRoom = new ResProBaseInfo();
+			String checkInDate = roomInfo.getCheckInDate();
+			String checkOutDate = roomInfo.getCheckOutDate();
+
+			int diff  = DateUtil.daysBetween(checkInDate, checkOutDate);
+			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
+			if(!agent.getNum().equals(401803070321014723L)) {
+				computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+			}
+			//设置控润
+			if(computeProfitByAgentFu!=null) {
+				List<ProfitPrice> computeProfitByAgent  = computeProfitByAgentFu.get();
+				if(computeProfitByAgent != null && computeProfitByAgent.size() > 0) {
+					for(ProfitPrice profit : computeProfitByAgent) {
+						BigDecimal lowerPrice = profit.getPriceFrom();
+						BigDecimal upPrice = profit.getPriceTo();
+						BigDecimal firPrice = new BigDecimal(roomInfo.getPrice());
+						if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
+							BigDecimal rate = profit.getRate();
+							rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
+							useRoom.setRebateRateProfit(rate);
+						}
+					}
+				}
+			}
+
+			useRoom.setUserSumPrice(oneDayPrice * diff);
+			useRoom.setTotalRebateRateProfit(new BigDecimal(oneDayPrice).multiply(useRoom.getRebateRateProfit()));
+			useRoom.setConPrice(roomInfo.getPrice());
+			useRoom.setAdultCount(roomInfo.getPerson());
+			useRoom.setResProName(roomInfo.getRoomTypeName());
+			useRoom.setSupPriceName(roomInfo.getRoomName());
+			useRoom.setProId(roomInfo.getRoomTypeId().toString());
+			useRoom.setProductUniqueId(roomInfo.getRoomId().toString());
+			useRoom.setBreakfastCount(roomInfo.getBreakfastCount());
+			useRoom.setBookingNotes(roomInfo.getCancelPolicyInfo());
+			useRoom.setPolicyRemark(roomInfo.getLastCancelTime());
+			useRoom.setSourceFrom(Long.valueOf(roomInfo.getPolicyType()));
+
+			TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
+			for (int i = 0; i < diff; i++) {
+				Date checkIn = sdf .parse(checkInDate);
+				String checkInFormat = sdf.format(com.tempus.gss.product.hol.api.util.DateUtil.offsiteDay(checkIn, i));
+				ProSaleInfoDetail pid = new ProSaleInfoDetail();
+				pid.setDistributionSalePrice(oneDayPrice);
+				if (null != roomInfo.getBreakfastCount()) {
+					pid.setBreakfastNum(roomInfo.getBreakfastCount());
+				}else {
+					pid.setBreakfastNum(0);
+				}
+				mapPro.put(checkInFormat, pid);
+			}
+			useRoom.setProSaleInfoDetailsTarget(mapPro);
+
+			Map<String, Object> map = new HashMap<>();
+			map.put("resBaseInfo", resBaseInfo);
+			map.put("userRoom", useRoom);
+			map.put("diff", diff);
+			return map;
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	@Override
 	//@Cacheable(value = "ResBaseInfo", key = "#bqyResId", unless = "")
 	public ResBaseInfo queryHotelBaseInfo(Agent agent, Long bqyResId, String checkInDate, String checkOutDate, String cityCode) throws Exception{
 
@@ -817,6 +900,11 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 		resBaseInfo.setRenovationDate(defaultTime);
 		redisService.set("BQYHOL"+ bqyResId, resBaseInfo, Long.valueOf(60 * 60 * 24 * 3));
 		return resBaseInfo;
+	}
+
+	@Override
+	public HotelInfo getHotelInfoById(Agent agent, Long bqyResId) {
+		return mongoTemplate1.findOne(new Query(Criteria.where("_id").is(bqyResId)), HotelInfo.class);
 	}
 
 	public void bqyHotelPolicyConver(ResBaseInfo resBaseInfo, List<Policy> policyList) {

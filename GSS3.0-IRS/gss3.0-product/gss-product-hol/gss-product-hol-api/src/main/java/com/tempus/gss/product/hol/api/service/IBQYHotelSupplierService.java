@@ -13,6 +13,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelInfo;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.BookOrderResponse;
 import com.tempus.gss.vo.Agent;
 
@@ -91,6 +92,13 @@ public interface IBQYHotelSupplierService {
 	Map<String, Object> getProByRoomCode(Agent agent, HotelDetailSearchReq hotelDetailSearchReq, Long resId);
 
 	/**
+	 * 酒店房间
+	 * @param hotelDetailSearchReq
+	 * @return
+	 */
+	Map<String, Object> getProByRoomCode(Agent agent, RoomInfo roomInfo);
+
+	/**
 	 * 酒店基本信息
 	 * @param agent
 	 * @param bqyResId
@@ -99,4 +107,12 @@ public interface IBQYHotelSupplierService {
 	 * @return
 	 */
 	ResBaseInfo queryHotelBaseInfo(Agent agent, Long bqyResId, String checkInDate, String checkOutDate, String cityCode) throws Exception;
+
+	/**
+	 * 获取BQY的基本信息
+	 * @param agent
+	 * @param bqyResId
+	 * @return
+	 */
+	HotelInfo getHotelInfoById(Agent agent, Long bqyResId);
 }
