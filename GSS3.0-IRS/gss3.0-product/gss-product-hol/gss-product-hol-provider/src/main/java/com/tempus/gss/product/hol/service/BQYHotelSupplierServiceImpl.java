@@ -338,10 +338,38 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 							resProBaseInfo.setConPrice(averagePrice.getSettleFee().intValue());
 							resProBaseInfo.setRoomFeature(roomPriceInfo.getRatePlanCategory()); //预付检查字段
 							List<RoomPriceDetail> roomPriceDetail = roomPriceInfo.getRoomPriceDetail();
-							
+							resProBaseInfo.setFirPrice(averagePrice.getSettleFee().intValue());	//首日价
+
+							//取消规则
+							CancelLimitInfo cancelLimitInfo = roomInfo.getCancelLimitInfo();
+							if (null != cancelLimitInfo) {
+								resProBaseInfo.setBookingNotes(cancelLimitInfo.getCancelPolicyInfo());
+								resProBaseInfo.setPolicyRemark(cancelLimitInfo.getLastCancelTime());
+								resProBaseInfo.setSourceFrom(Long.valueOf(cancelLimitInfo.getPolicyType()));
+							}
+							//入住人数
+							resProBaseInfo.setAdultCount(Integer.valueOf(roomInfo.getPerson()));
+
+							//预定检查类型
+							resProBaseInfo.setRoomFeature(roomPriceInfo.getRatePlanCategory());
+							//供应商ID
+							resProBaseInfo.setCustomerType(roomInfo.getSupplierId());
+
+							//房间数
+							String roomNumStr = roomPriceInfo.getRemainingRooms();
+							if (roomNumStr.contains("+")) {
+								roomNumStr = roomNumStr.substring(0, roomNumStr.indexOf("+"));
+							}else if ("true".equalsIgnoreCase(roomNumStr)) {
+								roomNumStr = "10";
+							}
+							if (StringUtils.isNotBlank(roomNumStr)) {
+								resProBaseInfo.setProMinInventory(Integer.valueOf(roomNumStr));
+							}else {
+								resProBaseInfo.setProMinInventory(1);
+							}
+
+							//价格弹窗
 							TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
-							resProBaseInfo.setFirPrice(averagePrice.getSettleFee().intValue());
-							
 							int daysBetween = DateUtil.daysBetween(checkinDate, checkoutDate);
 							for (int i = 0; i < daysBetween; i++) {
 								Date checkIn = sdf.parse(checkinDate);
@@ -450,7 +478,6 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 							    }
 							}
 							//是否有早餐
-							//List<RoomPriceDetail> roomPriceDetail = roomInfo.getRoomPriceInfo().getRoomPriceDetail();
 							if (null != roomPriceDetail && roomPriceDetail.size() > 0) {
 								//早餐(0.无早;1.一份; 2.双份; 3.三份…)
 								String hasBreakfast = roomPriceDetail.get(0).getBreakfast();
