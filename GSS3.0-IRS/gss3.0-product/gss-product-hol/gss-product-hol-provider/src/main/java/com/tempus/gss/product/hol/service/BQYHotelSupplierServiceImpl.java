@@ -338,10 +338,38 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 							resProBaseInfo.setConPrice(averagePrice.getSettleFee().intValue());
 							resProBaseInfo.setRoomFeature(roomPriceInfo.getRatePlanCategory()); //预付检查字段
 							List<RoomPriceDetail> roomPriceDetail = roomPriceInfo.getRoomPriceDetail();
-							
+							resProBaseInfo.setFirPrice(averagePrice.getSettleFee().intValue());	//首日价
+
+							//取消规则
+							CancelLimitInfo cancelLimitInfo = roomInfo.getCancelLimitInfo();
+							if (null != cancelLimitInfo) {
+								resProBaseInfo.setBookingNotes(cancelLimitInfo.getCancelPolicyInfo());
+								resProBaseInfo.setPolicyRemark(cancelLimitInfo.getLastCancelTime());
+								resProBaseInfo.setSourceFrom(Long.valueOf(cancelLimitInfo.getPolicyType()));
+							}
+							//入住人数
+							resProBaseInfo.setAdultCount(Integer.valueOf(roomInfo.getPerson()));
+
+							//预定检查类型
+							resProBaseInfo.setRoomFeature(roomPriceInfo.getRatePlanCategory());
+							//供应商ID
+							resProBaseInfo.setCustomerType(roomInfo.getSupplierId());
+
+							//房间数
+							String roomNumStr = roomPriceInfo.getRemainingRooms();
+							if (roomNumStr.contains("+")) {
+								roomNumStr = roomNumStr.substring(0, roomNumStr.indexOf("+"));
+							}else if ("true".equalsIgnoreCase(roomNumStr)) {
+								roomNumStr = "10";
+							}
+							if (StringUtils.isNotBlank(roomNumStr)) {
+								resProBaseInfo.setProMinInventory(Integer.valueOf(roomNumStr));
+							}else {
+								resProBaseInfo.setProMinInventory(1);
+							}
+
+							//价格弹窗
 							TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
-							resProBaseInfo.setFirPrice(averagePrice.getSettleFee().intValue());
-							
 							int daysBetween = DateUtil.daysBetween(checkinDate, checkoutDate);
 							for (int i = 0; i < daysBetween; i++) {
 								Date checkIn = sdf.parse(checkinDate);
@@ -450,7 +478,6 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 							    }
 							}
 							//是否有早餐
-							//List<RoomPriceDetail> roomPriceDetail = roomInfo.getRoomPriceInfo().getRoomPriceDetail();
 							if (null != roomPriceDetail && roomPriceDetail.size() > 0) {
 								//早餐(0.无早;1.一份; 2.双份; 3.三份…)
 								String hasBreakfast = roomPriceDetail.get(0).getBreakfast();
@@ -593,12 +620,17 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 	@Override
 	public Map<String, Object> getProByRoomCode(Agent agent, HotelDetailSearchReq hotelDetailSearchReq, Long resId) {
 		try {
+			String checkinDate = hotelDetailSearchReq.getCheckinDate();
+			String checkoutDate = hotelDetailSearchReq.getCheckoutDate();
+
 			QueryHotelParam query = new QueryHotelParam();
-			query.setCheckInTime(hotelDetailSearchReq.getCheckinDate());
-			query.setCheckOutTime(hotelDetailSearchReq.getCheckoutDate());
+			query.setCheckInTime(checkinDate);
+			query.setCheckOutTime(checkoutDate);
 			query.setHotelId(resId);
+			long s = System.currentTimeMillis();
 			List<RoomPriceItem> roomPriceList = bqyHotelInterService.queryHotelRoomPrice(query);
-			
+			System.out.println("查询房型时间:" + (System.currentTimeMillis() - s));
+
 			String planCode = hotelDetailSearchReq.getProductUniqueId();
 			int diff = DateUtil.daysBetween(hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate());
 			
@@ -652,7 +684,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 						
 						TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
 						
-						for (int i = 0; i < roomPriceDetailList.size(); i++) {
+						/*for (int i = 0; i < roomPriceDetailList.size(); i++) {
 							
 							RoomPriceDetail roomPriceDetail = roomPriceDetailList.get(i);
 							String effectDate = roomPriceDetail.getEffectDate();
@@ -660,6 +692,18 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 							ProSaleInfoDetail pid = new ProSaleInfoDetail();
 							pid.setBreakfastNum(Integer.valueOf(roomPriceDetail.getBreakfast()));
 							pid.setDistributionSalePrice(averagePrice.getSettleFee().intValue());
+							mapPro.put(checkInFormat, pid);
+						}*/
+
+						int daysBetween = DateUtil.daysBetween(checkinDate, checkoutDate);
+						for (int i = 0; i < daysBetween; i++) {
+							Date checkIn = sdf.parse(checkinDate);
+							String checkInFormat = sdf.format(DateUtil.offsiteDay(checkIn, i));
+							ProSaleInfoDetail pid = new ProSaleInfoDetail();
+							pid.setDistributionSalePrice(averagePrice.getSettleFee().intValue());
+							if (null != roomPriceDetailList && roomPriceDetailList.size() > 0) {
+								pid.setBreakfastNum(Integer.valueOf(roomPriceDetailList.get(0).getBreakfast()));
+							}
 							mapPro.put(checkInFormat, pid);
 						}
 						

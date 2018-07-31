@@ -60,7 +60,7 @@ public class ResProBaseInfo implements Serializable{
 	@JSONField(name = "AdvanceBooking")
 	private Integer advanceBooking;
 	/**
-	 * 酒店房型预订说明
+	 * 酒店房型预订说明(bqy取消政策)
 	 */
 	@JSONField(name = "BookingNotes")
 	private String bookingNotes;
@@ -90,7 +90,7 @@ public class ResProBaseInfo implements Serializable{
 	@JSONField(name = "BreakfastCount")
 	private Integer breakfastCount;
 	/**
-	 * 政策来源
+	 * 政策来源(bqy政策类型)
 	 */
 	@JSONField(name = "SourceFrom")
 	private Long sourceFrom;
@@ -155,7 +155,7 @@ public class ResProBaseInfo implements Serializable{
 	@JSONField(name = "OtherDescription")
 	private String otherDescription;
 	/**
-	 * 政策备注
+	 * 政策备注(bqy政策取消时间)
 	 */
 	@JSONField(name = "PolicyRemark")
 	private String policyRemark;
@@ -188,7 +188,7 @@ public class ResProBaseInfo implements Serializable{
 	 */
 	private Integer userSumPrice;
 	/**
-	 * 剩余库存
+	 * 剩余库存 (bqy房间数)
 	 */
 	@JSONField(name = "ProMinInventory")
 	private Integer proMinInventory;
