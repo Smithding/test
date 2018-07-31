@@ -288,8 +288,18 @@ public class SaleChangeExtVo implements Serializable{
 	 */
 	private Integer toDoType;
 
+	private String customerName;
+
 	//提交航司后采购审核状态
 	private Integer[] airLineRefundStatus;
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
 
 	public Boolean getCustomerCount() {
 		return customerCount;

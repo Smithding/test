@@ -844,12 +844,6 @@
             <if test="depAirport !=null and depAirport !='' and arrAirport !=null and arrAirport !=''">
                 AND (l.DEP_AIRPORT = #{depAirport,jdbcType=VARCHAR} or  l.ARR_AIRPORT = #{arrAirport,jdbcType=VARCHAR})
             </if>
-            <!--<if test="status == 33">
-                AND ((m.CHILD_STATUS =1 and i.LOCKER !=0 ) or (m.CHILD_STATUS=2 and i.LOCKER=0))
-            </if>-->
-           <!-- <if test="buyStatus!= null">
-                AND m.CHILD_STATUS =#{buyStatus,jdbcType=BIGINT}
-            </if>-->
             <if test="buyStatus!= null">
                 AND m.CHILD_STATUS in
                 <foreach collection="buyStatus" item="buyStatus"
@@ -857,19 +851,12 @@
                     #{buyStatus[${index}]}
                 </foreach>
             </if>
-
             <if test="customerCount==false and customerNo != null">
                 AND i.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT}
             </if>
             <if test="customerTypeNo != null">
                 AND i.CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT}
             </if>
-            <!--<if test="status == 22">
-                AND ((o.CHILD_STATUS =1 and i.LOCKER !=0 ) or (o.CHILD_STATUS=2 and i.LOCKER=0))
-            </if>
-            <if test="status == 24">
-                AND ((o.CHILD_STATUS =1 and i.LOCKER !=0 ) or (o.CHILD_STATUS=2 ))
-            </if>-->
             <if test="payStatus!=null">
                 AND o.PAY_STATUS in
                 <foreach collection="payStatus" item="payStatus"
