@@ -5,7 +5,7 @@ import com.tempus.gss.product.ift.api.entity.IFTIssueReport;
 import com.tempus.gss.product.ift.api.entity.IFTIssueReportParams;
 import com.tempus.gss.product.ift.api.entity.vo.ReportRefundVo;
 import com.tempus.gss.product.ift.api.entity.vo.ReportVo;
-import com.tempus.gss.product.ift.api.entity.webservice.IftBuyReport;
+import com.tempus.gss.product.ift.api.entity.IftBuyReport;
 
 import java.util.List;
 

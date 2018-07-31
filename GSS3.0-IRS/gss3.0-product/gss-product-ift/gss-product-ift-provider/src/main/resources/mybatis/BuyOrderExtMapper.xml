@@ -33,6 +33,7 @@
         <!-- 采购商备注 -->
         <result column="BUY_REMARKE" property="buyRemarke" jdbcType="CLOB"/>
         <result column="OFFICE" property="office" jdbcType="VARCHAR"/>
+        <result column="BUY_LOCKER" property="buyLocker" jdbcType="BIGINT" />
         <!--一对多关联采购单详情信息-->
         <collection property="buyOrderDetailList" ofType="com.tempus.gss.product.ift.api.entity.BuyOrderDetail"
                     column="BUY_ORDER_NO"
@@ -40,7 +41,7 @@
     </resultMap>
     <sql id="Base_Column_List">
         BUY_ORDER_NO, ID, OWNER, PNR_NO, AIRLINE, TICKET_TYPE, CREATOR, CREATE_TIME, MODIFIER,
-        MODIFY_TIME, VALID, STATUS,SUPPLIER_TYPE_NO,SUPPLIER_NO,BUY_REMARKE,OFFICE
+        MODIFY_TIME, VALID, STATUS,SUPPLIER_TYPE_NO,SUPPLIER_NO,BUY_REMARKE,OFFICE,BUY_LOCKER
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -56,13 +57,13 @@
         insert into IFT_BUY_ORDER_EXT (BUY_ORDER_NO, ID, OWNER,
         PNR_NO, AIRLINE, TICKET_TYPE,
         CREATOR, CREATE_TIME, MODIFIER,
-        MODIFY_TIME, VALID, STATUS,SUPPLIER_TYPE_NO,SUPPLIER_NO,BUY_REMARKE
+        MODIFY_TIME, VALID, STATUS,SUPPLIER_TYPE_NO,SUPPLIER_NO,BUY_REMARKE,BUY_LOCKER
         )
         values (#{buyOrderNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
         #{pnrNo,jdbcType=BIGINT}, #{airline,jdbcType=VARCHAR}, #{ticketType,jdbcType=VARCHAR},
         #{creator,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{modifier,jdbcType=VARCHAR},
         #{modifyTime,jdbcType=TIMESTAMP}, #{valid,jdbcType=TINYINT}, #{status,jdbcType=VARCHAR},#{supplierTypeNo,jdbcType=BIGINT},
-        #{supplierNo,jdbcType=BIGINT},  #{buyRemarke,jdbcType=CLOB}
+        #{supplierNo,jdbcType=BIGINT},  #{buyRemarke,jdbcType=CLOB},#{buyLocker,jdbcType=BIGINT}
         )
     </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.BuyOrderExt">
@@ -116,6 +117,9 @@
             <if test="office != null">
                 OFFICE,
             </if>
+            <if test="buyLocker != null" >
+                BUY_LOCKER,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="buyOrderNo != null">
@@ -166,6 +170,9 @@
             <if test="office != null">
                 #{office,jdbcType=VARCHAR},
             </if>
+            <if test="buyLocker != null" >
+                #{buyLocker,jdbcType=BIGINT},
+            </if>
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.BuyOrderExt">
@@ -212,6 +219,9 @@
             </if>
             <if test="buyRemarke != null">
                 BUY_REMARKE = #{buyRemarke,jdbcType=CLOB},
+            </if>
+            <if test="buyLocker != null" >
+                BUY_LOCKER = #{buyLocker,jdbcType=BIGINT},
             </if>
         </set>
         where BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
@@ -261,6 +271,9 @@
             <if test="buyRemarke != null">
                 BUY_REMARKE = #{buyRemarke,jdbcType=CLOB},
             </if>
+            <if test="buyLocker != null" >
+                BUY_LOCKER = #{buyLocker,jdbcType=BIGINT},
+            </if>
         </set>
         WHERE BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
     </update>
@@ -280,10 +293,12 @@
             i.STATUS,
             i.SUPPLIER_TYPE_NO,
             i.SUPPLIER_NO,
-            i.BUY_REMARKE
+            i.BUY_REMARKE,
+            i.BUY_LOCKER
         FROM IFT_BUY_ORDER_EXT i, OS_BUYORDER o
         WHERE i.BUY_ORDER_NO = o.BUY_ORDER_NO
               AND o.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+              order by i.CREATE_TIME
     </select>
 
     <update id="updateByOrderNo" parameterType="com.tempus.gss.product.ift.api.entity.BuyOrderExt">
@@ -326,7 +341,10 @@
                 b.SUPPLIER_NO = #{supplierNo,jdbcType=VARCHAR},
             </if>
             <if test="buyRemarke != null">
-            BUY_REMARKE = #{buyRemarke,jdbcType=CLOB}
+                b.BUY_REMARKE = #{buyRemarke,jdbcType=CLOB},
+            </if>
+            <if test="buyLocker != null" >
+                b.BUY_LOCKER = #{buyLocker,jdbcType=BIGINT}
             </if>
         </set>
         WHERE b.buy_order_no IN (SELECT bd.BUY_ORDER_NO FROM IFT_BUY_ORDER_DETAIL bd WHERE bd.SALE_ORDER_DETAIL_NO IN
@@ -373,7 +391,10 @@
                 b.SUPPLIER_NO = #{supplierNo,jdbcType=VARCHAR},
             </if>
             <if test="buyRemarke != null">
-                b.BUY_REMARKE = #{buyRemarke,jdbcType=CLOB}
+                b.BUY_REMARKE = #{buyRemarke,jdbcType=CLOB},
+            </if>
+            <if test="buyLocker != null" >
+                b.BUY_LOCKER = #{buyLocker,jdbcType=BIGINT}
             </if>
         </set>
         WHERE b.buy_order_no IN (SELECT bd.BUY_ORDER_NO FROM IFT_BUY_ORDER_DETAIL bd WHERE bd.SALE_ORDER_DETAIL_NO IN

@@ -1461,7 +1461,23 @@ public class OrderServiceImpl implements IOrderService {
         log.info("锁单、解锁开始");
         boolean flag = false;
         try {
-            SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(saleOrderNo.getEntity().longValue());
+            Agent agent = saleOrderNo.getAgent();
+            List<BuyOrderExt> buyOrderExtList = buyOrderExtDao.selectBuyOrderBySaleOrderNo(saleOrderNo.getEntity());
+            if(buyOrderExtList!=null && buyOrderExtList.size()>0){
+                BuyOrderExt buyOrderExt = buyOrderExtList.get(0);
+                if(buyOrderExt.getBuyLocker()==null || buyOrderExt.getBuyLocker()==0){
+                    if(agent!=null && agent.getId()!=null) {
+                        buyOrderExt.setBuyLocker(agent.getId());
+                    }else{
+                        buyOrderExt.setBuyLocker(1L);
+                    }
+                }else{
+                    buyOrderExt.setBuyLocker(0L);
+                }
+                buyOrderExt.setModifyTime(new Date());
+                buyOrderExtDao.updateByPrimaryKeySelective(buyOrderExt);
+            }
+            /*SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(saleOrderNo.getEntity().longValue());
             if (saleOrderExt != null) {
                 // locker 为0表示解锁 大于0表示锁定
                 if (saleOrderExt.getLocker() == null || saleOrderExt.getLocker() == 0) {
@@ -1475,7 +1491,7 @@ public class OrderServiceImpl implements IOrderService {
                 if (updateLocker == 1) {
                     flag = true;
                 }
-            }
+            }*/
             log.info("锁单、解锁结束");
         } catch (Exception e) {
             log.error("锁单、解锁失败", e);
