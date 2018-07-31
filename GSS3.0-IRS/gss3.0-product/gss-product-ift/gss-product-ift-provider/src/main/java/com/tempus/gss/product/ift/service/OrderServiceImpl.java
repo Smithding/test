@@ -1108,7 +1108,8 @@ public class OrderServiceImpl implements IOrderService {
             IftLogHelper.logger(agent, transationOrderNo, saleOrderNo, title, logstr);
             log.info("出单操作成功");
             //销售员订单数量减一
-            subSaleOrderNum(agent, preLocker);
+            iTicketSenderService.updateByLockerId(agent, preLocker,"ORDERCOUNT");
+            //subSaleOrderNum(agent, preLocker);
         } catch (GSSException e) {
             log.error("创建采购付款单异常！GSSException", e);
             throw new GSSException(e.getModule(), e.getCode(), e.getMessage());

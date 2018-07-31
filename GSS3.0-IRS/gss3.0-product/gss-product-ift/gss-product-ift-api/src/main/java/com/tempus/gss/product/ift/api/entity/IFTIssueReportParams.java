@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.reflect.Array.newInstance;
+
 /**
  * @author ZhangBro
  * 查询条件
@@ -47,7 +49,7 @@ public class IFTIssueReportParams implements Serializable {
     /**
      * 舱位
      */
-    private List<String> cabins;
+    private String[] cabins;
     /**
      * 起飞日期
      */
@@ -60,7 +62,7 @@ public class IFTIssueReportParams implements Serializable {
     /**
      * 出票部门
      */
-    private List<String> saleDept;
+    private String[] saleDept;
     /**
      * 出票员
      */
@@ -85,11 +87,11 @@ public class IFTIssueReportParams implements Serializable {
     /**
      * 订单来源
      */
-    private List<String> source;
+    private String[] source;
     /**
      * 多状态查询条件
      */
-    private List<Integer> orderStatusList;
+    private Integer[] orderStatusArray;
     
     public String getSurname() {
         return surname;
@@ -107,12 +109,12 @@ public class IFTIssueReportParams implements Serializable {
         this.name = name;
     }
     
-    public List<Integer> getOrderStatusList() {
-        return orderStatusList;
+    public Integer[] getOrderStatusArray() {
+        return orderStatusArray;
     }
     
-    public void setOrderStatusList(List<Integer> orderStatusList) {
-        this.orderStatusList = orderStatusList;
+    public void setOrderStatusArray(Integer[] orderStatusArray) {
+        this.orderStatusArray = filterNull(orderStatusArray, Integer.class);
     }
     
     public void setType(Integer type) {
@@ -235,36 +237,38 @@ public class IFTIssueReportParams implements Serializable {
         return type;
     }
     
-    public List<String> getCabins() {
+    public String[] getCabins() {
         return cabins;
     }
     
-    public void setCabins(List<String> cabins) {
+    public void setCabins(String[] cabins) {
         
-        this.cabins = filterNull(cabins);
+        this.cabins = filterNull(cabins, String.class);
     }
     
-    public List<String> getSaleDept() {
+    public String[] getSaleDept() {
         return saleDept;
     }
     
-    public void setSaleDept(List<String> saleDept) {
-        this.saleDept = filterNull(saleDept);
+    public void setSaleDept(String[] saleDept) {
+        this.saleDept = filterNull(saleDept, String.class);
     }
     
-    public List<String> getSource() {
+    public String[] getSource() {
         return source;
     }
     
-    public void setSource(List<String> source) {
-        this.source = filterNull(source);
+    public void setSource(String[] source) {
+        this.source = filterNull(source, String.class);
     }
     
-    private <T> List<T> filterNull(List<T> source) {
-        if (null == source || source.size() <= 0) {
+    private <T> T[] filterNull(T[] source, Class<T> type) {
+        if (null == source || source.length <= 0) {
             return null;
         } else {
             List<T> list = new ArrayList<T>();
+            T[] result;
+            
             boolean notNull;
             for (T i : source) {
                 notNull = false;
@@ -280,7 +284,15 @@ public class IFTIssueReportParams implements Serializable {
                     
                 }
             }
-            return list;
+            if (list.size() > 0) {
+                result = (T[]) newInstance(type, list.size());
+                for (int i = 0; i < list.size(); i++) {
+                    result[i] = list.get(i);
+                }
+                return result;
+            } else {
+                return null;
+            }
         }
     }
 }

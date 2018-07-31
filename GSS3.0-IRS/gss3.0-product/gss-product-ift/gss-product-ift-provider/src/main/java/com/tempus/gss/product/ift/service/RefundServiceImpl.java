@@ -1803,7 +1803,7 @@ public class RefundServiceImpl implements IRefundService {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public int queryBuyRefundAndDelCountBylocker(Long userId) {
 		int lockCount = saleChangeExtDao.queryBuyRefundAndDelCountBylocker(owner, userId);
 		return lockCount;

@@ -8,6 +8,7 @@ import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.*;
 import com.tempus.gss.product.ift.api.entity.vo.SeparatedOrderVo;
 import com.tempus.gss.product.ift.api.service.ISeparatedOrderService;
+import com.tempus.gss.product.ift.api.service.ITicketSenderService;
 import com.tempus.gss.product.ift.dao.SaleChangeExtDao;
 import com.tempus.gss.product.ift.dao.SaleOrderExtDao;
 import com.tempus.gss.product.ift.dao.SeparatedOrderDao;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
@@ -46,6 +48,8 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
     private IUserService userService;
     @Value("${dpsconfig.job.owner}")
     protected String ownerCode;
+    @Reference
+    private ITicketSenderService ticketSenderService;
 
     @Override
     public Page<SeparatedOrder> pageList(Page<SeparatedOrder> page, RequestWithActor<SeparatedOrderVo> requestWithActor) {
@@ -68,7 +72,7 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
      * @return
      */
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public int updateSeparatedOrder(Long saleOrderNo,String loginName,String currentUserId) {
         log.info("参数：saleOrderNo:{},loginName:{},currentUserId:{}",saleOrderNo,loginName,currentUserId);
         //查询订单，根据订单状态判定是那种情形下的重新分单
@@ -80,26 +84,29 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
                 status = details.get(0).getStatus();
             }
         }
-        //更新将被分单人员
-        updateTicketSenderInfo(loginName, status, currentUserId, "add", 0, "");
-        Long lockerId = saleOrderExt.getLocker();
         //更新原被分配人员
+        Long lockerId = saleOrderExt.getLocker();
         User user = userService.selectById(lockerId);
-        if(user!=null) {
-            updateTicketSenderInfo(user.getLoginName(), status, currentUserId, "sub", 0, "");
-        }
         //分给指定出票员后，订单被此人ID锁定
         Integer owner = Integer.valueOf(ownerCode);
         Agent agent = new Agent(owner);
         User tempUser = userService.findUserByLoginName(agent,loginName);
+        Long tempUserId = tempUser.getId();
         if(tempUser!=null) {
             saleOrderExt.setLocker(tempUser.getId());
             saleOrderExt.setAloneLocker(tempUser.getId());
         }
-        return saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
+        int num = saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
+        //更新将被分单人员
+        updateTicketSenderInfo(loginName, status, currentUserId, "add", 0, "",agent,tempUserId);
+        if(user!=null) {
+            updateTicketSenderInfo(user.getLoginName(), status, currentUserId, "sub", 0, "",agent,lockerId);
+        }
+        return num;
     }
 
     @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public int updateSeparatedChangeOrder(Long saleChangeNo, String loginName, String currentUserId, String saleOrBuyType) {
         log.info("参数：saleOrderNo:{},loginName:{},currentUserId:{}",saleChangeNo,loginName,currentUserId);
         int changeType = 0;
@@ -111,28 +118,36 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
         if (changeType == 0) {
             return 0;
         } else {
-            this.updateTicketSenderInfo(loginName, "", currentUserId, "add", changeType, saleOrBuyType);
+
             Long lockerId = saleChangeExt.getLocker();
             User user = (User)this.userService.selectById(lockerId);
-            if (user != null) {
-                this.updateTicketSenderInfo(user.getLoginName(), "", currentUserId, "sub", changeType, saleOrBuyType);
-            }
-
             Integer owner = Integer.valueOf(this.ownerCode);
             Agent agent = new Agent(owner);
             User tempUser = this.userService.findUserByLoginName(agent, loginName);
+            Long tempUserId = tempUser.getId();
             if (tempUser != null) {
                 saleChangeExt.setLocker(tempUser.getId());
                 saleChangeExt.setAloneLocker(tempUser.getId());
                 saleChangeExt.setLockTime(new Date());
             }
-
-            return this.saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
+            int num = this.saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
+            this.updateTicketSenderInfo(loginName, "", currentUserId, "add", changeType, saleOrBuyType,agent,tempUserId);
+            if (user != null) {
+                this.updateTicketSenderInfo(user.getLoginName(), "", currentUserId, "sub", changeType, saleOrBuyType,agent,lockerId);
+            }
+            return num;
         }
     }
 
-    private TicketSender setNumberByStatus(TicketSender ticketSender,String status,String method){
-        if(StringUtils.equals("add",method)){
+    private TicketSender setNumberByStatus(TicketSender ticketSender, String status, String method, Agent agent, Long lockerId){
+        if (StringUtils.equals(status, "1")) {
+            ticketSenderService.updateByLockerId(agent,lockerId,"SALE_ORDER_NUM");
+            ticketSender.setSaleOrderNum(null);
+        } else {
+            ticketSenderService.updateByLockerId(agent,lockerId,"ORDERCOUNT");
+            ticketSender.setOrdercount(null);
+        }
+        /*if(StringUtils.equals("add",method)){
             if (StringUtils.equals(status, "1")) {
                 ticketSender.setSaleOrderNum(ticketSender.getSaleOrderNum() + 1);
             } else {
@@ -144,7 +159,7 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
             } else {
                 ticketSender.setOrdercount(ticketSender.getOrdercount() - 1);
             }
-        }
+        }*/
         return ticketSender;
     }
 
@@ -157,15 +172,15 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
      * @param type   0 正常单   1 2 3 是 废 退 改
      * @param saleOrBuyType   sale  是销售   buy   是采购
      */
-    private void updateTicketSenderInfo(String loginId, String status, String currentUserId, String method, int type, String saleOrBuyType) {
+    private void updateTicketSenderInfo(String loginId, String status, String currentUserId, String method, int type, String saleOrBuyType,Agent agent,Long lockerId) {
         Date updateTime = new Date();
         List<TicketSender> ticketSenders = this.ticketSenderDao.queryByLoginId(loginId);
         if (ticketSenders != null && ticketSenders.size() > 0) {
             TicketSender ticketSender = (TicketSender)ticketSenders.get(0);
             if (type == 0) {
-                this.setNumberByStatus(ticketSender, status, method);
+                this.setNumberByStatus(ticketSender, status, method,agent,lockerId);
             } else if (type == 1 || type == 2 || type == 3) {
-                this.setNumberByChangeType(ticketSender, type, method, saleOrBuyType);
+                this.setNumberByChangeType(ticketSender, type, method, saleOrBuyType,agent,lockerId);
             }
 
             ticketSender.setUpdatetime(updateTime);
@@ -176,38 +191,34 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
 
     }
 
-    private TicketSender setNumberByChangeType(TicketSender ticketSender, int changeType, String method, String saleOrBuyType) {
+    private TicketSender setNumberByChangeType(TicketSender ticketSender, int changeType, String method, String saleOrBuyType, Agent agent, Long lockerId) {
         if ("buy".equals(saleOrBuyType)) {
-            if (StringUtils.equals("add", method)) {
-                if (changeType != 2 && changeType != 1) {
-                    if (changeType == 3) {
-                        ticketSender.setBuyChangeNum(ticketSender.getBuyChangeNum().intValue() + 1);
-                    }
-                } else {
-                    ticketSender.setBuyRefuseNum(ticketSender.getBuyRefuseNum().intValue() + 1);
-                }
-            } else if (changeType != 2 && changeType != 1) {
-                if (changeType == 3) {
-                    ticketSender.setBuyChangeNum(ticketSender.getBuyChangeNum().intValue() - 1);
-                }
-            } else {
-                ticketSender.setBuyRefuseNum(ticketSender.getBuyRefuseNum().intValue() - 1);
-            }
-        } else if (StringUtils.equals("add", method)) {
             if (changeType != 2 && changeType != 1) {
                 if (changeType == 3) {
-                    ticketSender.setSaleChangeNum(ticketSender.getSaleChangeNum().intValue() + 1);
+                    ticketSenderService.updateByLockerId(agent,lockerId,"BUY_CHANGE_NUM");
+                    ticketSender.setBuyChangeNum(null);
                 }
             } else {
-                ticketSender.setSaleRefuseNum(ticketSender.getSaleRefuseNum().intValue() + 1);
+                ticketSenderService.updateByLockerId(agent,lockerId,"BUY_REFUSE_NUM");
+                ticketSender.setBuyRefuseNum(null);
             }
-        } else if (changeType != 2 && changeType != 1) {
+        } else  {
+            if (changeType != 2 && changeType != 1) {
+                if (changeType == 3) {
+                    ticketSenderService.updateByLockerId(agent,lockerId,"SALE_CHANGE_NUM");
+                    ticketSender.setSaleChangeNum(null);
+                }
+            } else {
+                ticketSenderService.updateByLockerId(agent,lockerId,"SALE_REFUSE_NUM");
+                ticketSender.setSaleRefuseNum(null);
+            }
+        } /*else if (changeType != 2 && changeType != 1) {
             if (changeType == 3) {
                 ticketSender.setSaleChangeNum(ticketSender.getSaleChangeNum().intValue() - 1);
             }
         } else {
             ticketSender.setSaleRefuseNum(ticketSender.getSaleRefuseNum().intValue() - 1);
-        }
+        }*/
 
         return ticketSender;
     }
