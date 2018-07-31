@@ -183,9 +183,11 @@
         FROM
         IFT_SALE_CHANGE_EXT i
         LEFT JOIN OS_SALECHANGE o ON o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
-
+        LEFT JOIN OS_BUYORDER k ON k.SALE_ORDER_NO = o.SALE_ORDER_NO
+        LEFT JOIN OS_BUYCHANGE m ON m.BUY_ORDER_NO = k.BUY_ORDER_NO
         WHERE
         i.VALID = 1
+        AND o.BUSINESS_SIGN_NO = m.BUSINESS_SIGN_NO
         <if test="owner != null">
             AND i. OWNER = #{owner}
         </if>
