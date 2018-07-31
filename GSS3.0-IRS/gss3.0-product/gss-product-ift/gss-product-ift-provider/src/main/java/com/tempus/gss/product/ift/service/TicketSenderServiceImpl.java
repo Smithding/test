@@ -68,7 +68,7 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
                 update(sender);
             }
             //设置单的locker字段为0
-            salechangeExt.setLocker(0L);
+           // salechangeExt.setLocker(0L);
             saleChangeExtDao.updateByPrimaryKeySelective(salechangeExt);
         }
         log.info("减少lockerID："+lockerId+" 出票员 第"+type+"的num值结束");
