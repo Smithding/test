@@ -5,6 +5,7 @@ import com.tempus.gss.product.ift.api.entity.IFTIssueReport;
 import com.tempus.gss.product.ift.api.entity.IFTIssueReportParams;
 import com.tempus.gss.product.ift.api.entity.vo.ReportRefundVo;
 import com.tempus.gss.product.ift.api.entity.vo.ReportVo;
+import com.tempus.gss.product.ift.api.entity.webservice.IftBuyReport;
 
 import java.util.List;
 
@@ -28,4 +29,6 @@ public interface ReportService {
     List<String> queryIssueDeptNameList();
     
     Page<IFTIssueReport> queryIssueRecords(Page<IFTIssueReport> page, IFTIssueReportParams params);
+
+    Page<IftBuyReport> iftBuyReport(Page<IftBuyReport> page, IFTIssueReportParams iftOutReportVo);
 }
