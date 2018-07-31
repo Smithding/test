@@ -15,7 +15,7 @@ public class TrackTimeAspect {
 	    long startTime = System.currentTimeMillis();
 	    result = joinPoint.proceed();
 	    long timeTaken = System.currentTimeMillis() - startTime;
-	    System.out.println(" -------------> Time Taken by " + joinPoint + " with param[" + trackTime.param() + "] is " + timeTaken +"ms");
+	    System.out.println("--> Time Taken by " + joinPoint + " with param[" + trackTime.param() + "] is " + timeTaken +"ms");
 	    return result;
 	 }
 }
