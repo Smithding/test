@@ -1853,17 +1853,17 @@ public class OrderServiceImpl implements IOrderService {
     @Deprecated
     public void assign(Long saleOrderNo) {
         log.info("第一步：查询符合条件的出票订单...");
-        Integer[] createTypeStatusArray = {1, 2, 3, 4, 6};
-        List<SaleOrderExt> saleOrderExtList = getNoHandleOrders(createTypeStatusArray);
-        if (saleOrderNo != null) {
-            //如果有销售单号，把其他的订单都移出只分改销售单号对应的单
-            Iterator<SaleOrderExt> iterator = saleOrderExtList.iterator();
-            while (iterator.hasNext()) {
-                SaleOrderExt orderExt = iterator.next();
-                if (!orderExt.getSaleOrderNo().equals(saleOrderNo)) {
-                    iterator.remove();
-                }
-            }
+        Agent agent = new Agent(Integer.valueOf(owner));
+        List<SaleOrderExt> saleOrderExtList = new ArrayList<>();
+        if(saleOrderNo == null){
+            Integer[] createTypeStatusArray = {1, 2, 3, 4, 6};
+            saleOrderExtList = getNoHandleOrders(createTypeStatusArray);
+        } else{
+            RequestWithActor<Long> orderNo = new RequestWithActor<>();
+            orderNo.setAgent(agent);
+            orderNo.setEntity(saleOrderNo);
+            SaleOrderExt order = orderService.getOrder(orderNo);
+            saleOrderExtList.add(order);
         }
         if (saleOrderExtList != null && saleOrderExtList.size() > 0) {
             log.info("查询到" + saleOrderExtList.size() + "条可分配订单...");
@@ -1873,7 +1873,7 @@ public class OrderServiceImpl implements IOrderService {
         }
         log.info("第二步：查询是否配置了系统分单...");
         //获取自动分单配置
-        Agent agent = new Agent(Integer.valueOf(owner));
+
         IFTConfigs configs = configsService.getConfigByChannelID(agent,0l);
         boolean isDistributeTicket = Boolean.parseBoolean((String) configs.getConfig().get("isDistributeTicket"));
         if(!isDistributeTicket){
