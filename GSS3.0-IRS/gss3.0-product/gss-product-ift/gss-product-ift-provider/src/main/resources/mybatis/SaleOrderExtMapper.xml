@@ -701,11 +701,11 @@
                     <otherwise>f.LOCKER = #{locker,jdbcType=BIGINT} AND</otherwise>
                 </choose>
             </if>
-            <if test="buyLocker !=null">
+            <if test="buyLocker!=null">
                 <choose>
-                    <when test="buyLocker == 0">AND ab.BUY_LOCKER = 0</when>
-                    <when test="buyLocker == 1">AND ab.BUY_LOCKER != 0</when>
-                    <otherwise>AND ab.BUY_LOCKER = #{buyLocker,jdbcType=BIGINT}</otherwise>
+                    <when test="buyLocker == 0">ab.BUY_LOCKER = 0 AND</when>
+                    <when test="buyLocker == 1">ab.BUY_LOCKER != 0 AND</when>
+                    <otherwise>ab.BUY_LOCKER = #{buyLocker,jdbcType=BIGINT} AND </otherwise>
                 </choose>
             </if>
             <if test="cardNo!=null and cardNo !=''">
