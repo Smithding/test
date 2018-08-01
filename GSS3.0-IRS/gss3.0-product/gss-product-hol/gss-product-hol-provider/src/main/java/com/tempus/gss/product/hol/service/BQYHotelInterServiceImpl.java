@@ -97,6 +97,7 @@ import com.tempus.gss.product.hol.api.util.DocumentUtil;
 import com.tempus.gss.product.hol.api.util.OrderStatusUtils;
 import com.tempus.gss.product.hol.api.util.Tool;
 import com.tempus.gss.product.hol.dao.HotelOrderMapper;
+import com.tempus.gss.product.hol.utils.HolAnnotation;
 import com.tempus.gss.product.hol.utils.HttpClientUtil;
 import com.tempus.gss.system.service.IMaxNoService;
 import com.tempus.gss.util.JsonUtil;
@@ -1123,17 +1124,13 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		return new AsyncResult<HotelEntity>(hotelEntity.get());
 	}
 
-	@Async
-	public Future<List<RoomPriceItem>> asyncHotelRoomPrice(QueryHotelParam query) throws Exception {
-		List<RoomPriceItem> roomPriceItemsList = queryHotelRoomPrice(query);
-		return new AsyncResult<List<RoomPriceItem>>(roomPriceItemsList);
-	}
 
 	@Override
 	@Async
+	@HolAnnotation
 	public Future<List<RoomPriceItem>> asyncRoomPrice(QueryHotelParam query) throws Exception {
-		Future<List<RoomPriceItem>> listFuture = asyncHotelRoomPrice(query);
-		return new AsyncResult<List<RoomPriceItem>>(listFuture.get());
+		List<RoomPriceItem> roomPriceItemsList = queryHotelRoomPrice(query);
+		return new AsyncResult<List<RoomPriceItem>>(roomPriceItemsList);
 	}
 
 	/**
