@@ -3,6 +3,7 @@ package com.tempus.gss.product.ift.service;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.ift.api.entity.*;
+import com.tempus.gss.product.ift.api.entity.vo.IftReportRefundVo;
 import com.tempus.gss.product.ift.api.entity.vo.ReportRefundVo;
 import com.tempus.gss.product.ift.api.entity.vo.ReportVo;
 import com.tempus.gss.product.ift.api.entity.IftBuyReport;
@@ -37,9 +38,8 @@ public class ReportServiceImpl implements ReportService {
     }
     
     @Override
-    public List<ReportRefundVo> getAllRefundRecords(ReportVo reportVo) {
-        List<ReportRefundVo> list = refundReportDao.getAllRefundRecords(reportVo);
-        handleReportRefundVo(list);
+    public List<IftReportRefundVo> getAllRefundRecords(ReportVo reportVo) {
+        List<IftReportRefundVo> list = refundReportDao.getAllRefundRecords(reportVo);
         return list;
     }
     
