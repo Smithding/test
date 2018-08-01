@@ -65,6 +65,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -1082,8 +1083,12 @@ public class OrderServiceImpl implements IOrderService {
             }
             //设置采购币种
             saleOrderExt.setCurrency(listVo.getpVoList().get(0).getCurrency());
-            Long preLocker = saleOrderExt.getLocker();
-            saleOrderExt.setLocker(0L);
+            List<BuyOrderExt> buyOrderExts = buyOrderExtDao.selectBuyOrderBySaleOrderNo(saleOrderExt.getSaleOrderNo());
+            Long buyLocker = null;
+            if(buyOrderExts != null && buyOrderExts.size()>0){
+                buyLocker = buyOrderExts.get(0).getBuyLocker();
+            }
+            //saleOrderExt.setLocker(0L);
             // 修改采购单信息
             //TODO
             updateBuyOrder(agent, buyOrder, payable, listVo, supplier);
@@ -1108,7 +1113,7 @@ public class OrderServiceImpl implements IOrderService {
             IftLogHelper.logger(agent, transationOrderNo, saleOrderNo, title, logstr);
             log.info("出单操作成功");
             //销售员订单数量减一
-            iTicketSenderService.updateByLockerId(agent, preLocker,"ORDERCOUNT");
+            iTicketSenderService.updateByLockerId(agent, buyLocker,"ORDERCOUNT");
             //subSaleOrderNum(agent, preLocker);
         } catch (GSSException e) {
             log.error("创建采购付款单异常！GSSException", e);
@@ -1875,15 +1880,21 @@ public class OrderServiceImpl implements IOrderService {
             log.info("系统不自动分单...");
             for (SaleOrderExt order : saleOrderExtList) {
                 log.info("1.锁单,锁单人是出单人...");
-                order.setLocker(order.getAloneLocker());
-                saleOrderExtDao.updateByPrimaryKeySelective(order);
-                log.info("2.增加出票人的未出票订单数量...");
-                TicketSender ticketSender = ticketSenderService.queryByUserId(order.getAloneLocker());
-                if(ticketSender != null){
-                    increaseOrderCount(ticketSender);
-                } else{
-                    log.info("该用户不是国际出票员");
+                //order.setLocker(order.getAloneLocker());
+                //saleOrderExtDao.updateByPrimaryKeySelective(order);
+                List<BuyOrderExt> buyOrderExts = buyOrderExtDao.selectBuyOrderBySaleOrderNo(order.getSaleOrderNo());
+                if(buyOrderExts != null && buyOrderExts.size()>0){
+                     BuyOrderExt buyOrderExt = buyOrderExts.get(0);
+                     buyOrderExt.setBuyLocker(order.getAloneLocker());
+                     orderService.updateBuyOrderExt(buyOrderExt);
                 }
+                log.info("2.增加出票人的未出票订单数量...");
+                /*TicketSender ticketSender = ticketSenderService.queryByUserId(order.getAloneLocker());
+                if(ticketSender != null){*/
+                increaseOrderCount(agent,order.getAloneLocker());
+                /*} else{
+                    log.info("该用户不是国际出票员");
+                }*/
             }
             log.info("系统分单结束...");
             return ;
@@ -1912,10 +1923,10 @@ public class OrderServiceImpl implements IOrderService {
                         updateSaleOrderDetail(order, peopleInfo, updateTime);
                         /**锁单*/
                         log.info("2.锁单,锁单人是被分配人...");
-                        assingLockOrder(order, peopleInfo, updateTime, agent);
+                        Long lockerId = assingLockOrder(order, peopleInfo, updateTime, agent);
                         /***增加出票人订单数*/
                         log.info("3.增加出票人的未出票订单数量...");
-                        increaseOrderCount(peopleInfo);
+                        increaseOrderCount(agent, lockerId);
                         /***发送消息至消息队列 通知出票员*/
                         sendInfo(peopleInfo.getUserid(), order.getSaleOrderNo(), String.valueOf(order.getSaleOrder().getOrderStatus()));
                         log.info("4.发信息通知出票员出票,订单" + order.getSaleOrderNo() + "将分给出票员结束");
@@ -1928,6 +1939,8 @@ public class OrderServiceImpl implements IOrderService {
             log.info("未查询在线出票员...");
         }
     }
+
+
     
     @Override
     @Transactional
@@ -2798,17 +2811,29 @@ public class OrderServiceImpl implements IOrderService {
         saleOrderDetailDao.updateByOrderNo(saleOrderDetail);
     }
     
-    private void assingLockOrder(SaleOrderExt order, TicketSender sender, Date date, Agent agent) {
+    private Long assingLockOrder(SaleOrderExt order, TicketSender sender, Date date, Agent agent) {
         User user = userService.findUserByLoginName(agent, sender.getUserid());
-        order.setLocker(user.getId());
+        Long lockerId = null;
+        if(user.getId() != null){
+            lockerId = user.getId();
+            List<BuyOrderExt> buyOrderExts = buyOrderExtDao.selectBuyOrderBySaleOrderNo(order.getSaleOrderNo());
+            if(buyOrderExts != null && buyOrderExts.size()>0){
+                BuyOrderExt buyOrderExt = buyOrderExts.get(0);
+                buyOrderExt.setBuyLocker(lockerId);
+                orderService.updateBuyOrderExt(buyOrderExt);
+            }
+        }
+        return lockerId;
+        /*order.setLocker(user.getId());
         order.setLockTime(date);
-        saleOrderExtDao.updateLocker(order);
+        saleOrderExtDao.updateLocker(order);*/
     }
     
-    private void increaseOrderCount(TicketSender sender) {
-        sender.setOrdercount(sender.getOrdercount() + 1);
-        sender.setIds(sender.getId() + "");
-        iTicketSenderService.update(sender);
+    private void increaseOrderCount(Agent agent, Long userId) {
+          iTicketSenderService.updateByLockerId(agent,userId,"ORDERCOUNT");
+//        userId.setOrdercount(userId.getOrdercount() + 1);
+//        userId.setIds(userId.getId() + "");
+//        iTicketSenderService.update(userId);
     }
     
     private void subSaleOrderNum(Agent agent, Long locker) {
@@ -2847,7 +2872,13 @@ public class OrderServiceImpl implements IOrderService {
         List<SaleOrderExt> saleOrderExtList = saleOrderExtDao.queryAssignOrder(saleQueryOrderVo);
         return saleOrderExtList;
     }
-    
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateBuyOrderExt(BuyOrderExt buyOrderExt) {
+        buyOrderExtDao.updateByPrimaryKeySelective(buyOrderExt);
+    }
+
     /**
      * 定时器获取待出票订单
      *

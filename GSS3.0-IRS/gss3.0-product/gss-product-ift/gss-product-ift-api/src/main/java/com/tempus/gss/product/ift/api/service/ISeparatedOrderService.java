@@ -2,7 +2,6 @@ package com.tempus.gss.product.ift.api.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.common.entity.RequestWithActor;
-import com.tempus.gss.product.ift.api.entity.SaleOrderExt;
 import com.tempus.gss.product.ift.api.entity.SeparatedOrder;
 import com.tempus.gss.product.ift.api.entity.vo.SeparatedOrderVo;
 
@@ -21,8 +20,9 @@ public interface ISeparatedOrderService {
     /**
      * 修改出票人
      * @param saleOrderNo
+     * @param saleOrBuyType
      */
-    int updateSeparatedOrder(Long saleOrderNo,String loginName,String currentUserId);
+    int updateSeparatedOrder(Long saleOrderNo, String loginName, String currentUserId, String saleOrBuyType);
 
     /**
      * 废退改单修改出票员

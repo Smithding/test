@@ -33,9 +33,9 @@ public class IftBuyChangeExtServiceImpl implements IftBuyChangeExtService{
     }
 
     @Override
-    public void updateBuyChangeExt(BuyChangeExt buyChangeExt) {
+    public int updateBuyChangeExt(BuyChangeExt buyChangeExt) {
         log.info("更新改签扩展记录信息:"+buyChangeExt.toString());
-        buyChangeExtDao.updateByPrimaryKeySelective(buyChangeExt);
+       return buyChangeExtDao.updateByPrimaryKeySelective(buyChangeExt);
     }
 
     @Override

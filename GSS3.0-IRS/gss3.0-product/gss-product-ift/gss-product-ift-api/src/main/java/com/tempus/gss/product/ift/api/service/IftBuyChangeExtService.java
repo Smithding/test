@@ -10,7 +10,7 @@ public interface IftBuyChangeExtService {
     //获得采购变更单扩展信息
     public BuyChangeExt queryBuyChgeExtByNo(Long saleChangeNo);
 
-    public void updateBuyChangeExt(BuyChangeExt buyChangeExt);
+    public int updateBuyChangeExt(BuyChangeExt buyChangeExt);
 
     public void updateBuyChangeByChangeNo(RequestWithActor<Long> requestWithActor, String status);
 }

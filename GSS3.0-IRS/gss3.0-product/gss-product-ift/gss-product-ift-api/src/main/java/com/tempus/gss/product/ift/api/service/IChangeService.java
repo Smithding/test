@@ -1,5 +1,6 @@
 package com.tempus.gss.product.ift.api.service;
 
+import java.util.Date;
 import java.util.List;
 
 import com.baomidou.mybatisplus.plugins.Page;
@@ -194,4 +195,5 @@ public interface IChangeService {
     int queryChangeCountBylocker(Long userId);
 
 	 SaleChangeExt updateSaleChangeExt(RequestWithActor<ChangePriceRequest> requestWithActor, SaleChangeExt saleChangeExt);
+
 }

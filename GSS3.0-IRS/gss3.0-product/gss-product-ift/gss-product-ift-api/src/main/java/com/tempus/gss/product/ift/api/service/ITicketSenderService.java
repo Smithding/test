@@ -26,7 +26,7 @@ public interface ITicketSenderService {
     void decreaseBySaleChangeExt(Agent agent, SaleChangeExt salechangeExt, int type) ;
 
     /**
-     * 减少出票员的锁定单数量
+     * 更新出票员的锁定单数量
      * @param agent
      * @param type 1.BUY_CHANGE_NUM 2.SALE_CHANGE_NUM  3.BUY_REFUSE_NUM 4.SALE_REFUSE_NUM 5.SALE_ORDER_NUM 6.ORDERCOUNT
      */

@@ -5,14 +5,7 @@ import java.util.List;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.common.entity.RequestWithActor;
-import com.tempus.gss.product.ift.api.entity.AdjustOrder;
-import com.tempus.gss.product.ift.api.entity.GssMain;
-import com.tempus.gss.product.ift.api.entity.InallsaleRequest;
-import com.tempus.gss.product.ift.api.entity.Passenger;
-import com.tempus.gss.product.ift.api.entity.Pnr;
-import com.tempus.gss.product.ift.api.entity.QueryByPnr;
-import com.tempus.gss.product.ift.api.entity.SaleOrderDetail;
-import com.tempus.gss.product.ift.api.entity.SaleOrderExt;
+import com.tempus.gss.product.ift.api.entity.*;
 import com.tempus.gss.product.ift.api.entity.vo.BlackOrderExtVo;
 import com.tempus.gss.product.ift.api.entity.vo.DemandTeamVo;
 import com.tempus.gss.product.ift.api.entity.vo.OrderCreateVo;
@@ -292,5 +285,7 @@ public interface IOrderService {
 	Page<SaleOrderExt> selectOutTicketOrder(Page<SaleOrderExt> page,RequestWithActor<SaleQueryOrderVo> saleOrderQueryRequest);
 
 	public List<SaleOrderExt> getAssignedOrders(Integer[] createTypeArray);
+
+	public void updateBuyOrderExt(BuyOrderExt buyOrderExt);
 
 }

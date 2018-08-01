@@ -137,12 +137,13 @@
             IFT_SALE_ORDER_EXT f
             LEFT JOIN OS_SALEORDER o ON f.SALE_ORDER_NO = o.SALE_ORDER_NO
             LEFT JOIN OS_BUYORDER aa ON f.SALE_ORDER_NO = aa.SALE_ORDER_NO
+            LEFT JOIN IFT_BUY_ORDER_EXT ab ON aa.BUY_ORDER_NO = ab.BUY_ORDER_NO
         WHERE
             f.VALID = 1
             AND aa.BUY_CHILD_STATUS IN (1, 2)
             AND f.CREATE_TYPE IN (1, 2, 3, 4, 6)
             AND o.PAY_STATUS IN (3, 4)
-            AND f.LOCKER = #{locker}
+            AND ab.BUY_LOCKER = #{locker}
     </select>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
         select
@@ -701,11 +702,11 @@
                     <otherwise>f.LOCKER = #{locker,jdbcType=BIGINT} AND</otherwise>
                 </choose>
             </if>
-            <if test="buyLocker!=null">
+            <if test="buyLocker !=null">
                 <choose>
-                    <when test="buyLocker == 0">ab.BUY_LOCKER = 0 AND</when>
-                    <when test="buyLocker == 1">ab.BUY_LOCKER != 0 AND</when>
-                    <otherwise>ab.BUY_LOCKER = #{buyLocker,jdbcType=BIGINT} AND </otherwise>
+                    <when test="buyLocker == 0"> ab.BUY_LOCKER = 0 AND</when>
+                    <when test="buyLocker == 1"> ab.BUY_LOCKER != 0 AND</when>
+                    <otherwise> ab.BUY_LOCKER = #{buyLocker,jdbcType=BIGINT} AND</otherwise>
                 </choose>
             </if>
             <if test="cardNo!=null and cardNo !=''">
