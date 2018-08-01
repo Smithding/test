@@ -42,7 +42,7 @@
 
     <sql id="noHandleSqlwhere">
         <where>
-            ift.CREATE_TYPE in(1,2,3,4,6)  and ift.LOCKER!=0
+            ift.CREATE_TYPE in(1,2,3,4,6) AND ift.VALID = 1 AND ISOD.`STATUS` != 10
             <if test="type=='sale'"> AND  o.ORDER_CHILD_STATUS  in (${status})</if>
             <if test="type=='buy'"> AND o.PAY_STATUS IN (3, 4)  AND aa.BUY_CHILD_STATUS IN (1, 2)</if>
             <if test="saleOrderNO!=null"> and ift.SALE_ORDER_NO = #{saleOrderNO}</if>

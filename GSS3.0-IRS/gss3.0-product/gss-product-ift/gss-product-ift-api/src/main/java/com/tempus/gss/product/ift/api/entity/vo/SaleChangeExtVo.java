@@ -174,7 +174,8 @@ public class SaleChangeExtVo implements Serializable{
 	 */
 	@JsonSerialize(using = LongSerializer.class)
 	private Long locker;
-	
+	@JsonSerialize(using = LongSerializer.class)
+	private Long buyLocker;
 	/**
 	 * 供应商
 	 */
@@ -288,8 +289,18 @@ public class SaleChangeExtVo implements Serializable{
 	 */
 	private Integer toDoType;
 
+	private String customerName;
+
 	//提交航司后采购审核状态
 	private Integer[] airLineRefundStatus;
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
 
 	public Boolean getCustomerCount() {
 		return customerCount;
@@ -908,5 +919,13 @@ public class SaleChangeExtVo implements Serializable{
 
 	public void setIsNotRefund(String isNotRefund) {
 		this.isNotRefund = isNotRefund;
+	}
+
+	public Long getBuyLocker() {
+		return buyLocker;
+	}
+
+	public void setBuyLocker(Long buyLocker) {
+		this.buyLocker = buyLocker;
 	}
 }

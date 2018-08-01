@@ -154,7 +154,7 @@
             AND i. OWNER = #{owner}
         </if>
         AND i.CHANGE_TYPE = 1
-        AND i.LOCKER = #{locker}
+       /* AND i.LOCKER = #{locker}*/
         AND m.CHILD_STATUS = 1
         AND o.CHILD_STATUS IN (2)
         ORDER BY
@@ -184,9 +184,11 @@
         FROM
         IFT_SALE_CHANGE_EXT i
         LEFT JOIN OS_SALECHANGE o ON o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
-
+        LEFT JOIN OS_BUYORDER k ON k.SALE_ORDER_NO = o.SALE_ORDER_NO
+        LEFT JOIN OS_BUYCHANGE m ON m.BUY_ORDER_NO = k.BUY_ORDER_NO
         WHERE
         i.VALID = 1
+        AND o.BUSINESS_SIGN_NO = m.BUSINESS_SIGN_NO
         <if test="owner != null">
             AND i. OWNER = #{owner}
         </if>
@@ -210,7 +212,7 @@
         i.VALID = 1
         AND o.BUSINESS_SIGN_NO = m.BUSINESS_SIGN_NO
         AND i.CHANGE_TYPE in (1,2)
-        AND m.CHILD_STATUS = 1
+        AND m.CHILD_STATUS in(1,2)
         AND o.CHILD_STATUS IN (2,10)
         AND h.`AIRLINE_REFUND_STATUS` IN (0, - 1)
         <if test="owner != null">
@@ -808,9 +810,9 @@
             <if test="airline !=null and airline!=''">
                 AND a.AIRLINE = #{airline,jdbcType=VARCHAR}
             </if>
-            <!--<if test="changeType==0">
+            <if test="changeType==0">
                 AND (i.CHANGE_TYPE = 1 or i.CHANGE_TYPE =2)
-            </if>-->
+            </if>
             <if test="pgerName !=null and pgerName !=''">
                 AND CONCAT_WS('',p.SURNAME,p.`NAME`) like CONCAT('%',#{pgerName,jdbcType=VARCHAR},'%' )
             </if>
@@ -819,6 +821,13 @@
                     <when test="locker == 0">AND i.LOCKER = 0</when>
                     <when test="locker == 1">AND i.LOCKER != 0</when>
                     <otherwise>AND i.LOCKER = #{locker,jdbcType=BIGINT}</otherwise>
+                </choose>
+            </if>
+            <if test="buyLocker !=null">
+                <choose>
+                    <when test="buyLocker == 0">AND h.BUY_LOCKER = 0</when>
+                    <when test="buyLocker == 1">AND h.BUY_LOCKER != 0</when>
+                    <otherwise>AND h.BUY_LOCKER = #{buyLocker,jdbcType=BIGINT}</otherwise>
                 </choose>
             </if>
             <if test="ticketNo !=null and ticketNo !=''">
@@ -842,12 +851,6 @@
             <if test="depAirport !=null and depAirport !='' and arrAirport !=null and arrAirport !=''">
                 AND (l.DEP_AIRPORT = #{depAirport,jdbcType=VARCHAR} or  l.ARR_AIRPORT = #{arrAirport,jdbcType=VARCHAR})
             </if>
-            <!--<if test="status == 33">
-                AND ((m.CHILD_STATUS =1 and i.LOCKER !=0 ) or (m.CHILD_STATUS=2 and i.LOCKER=0))
-            </if>-->
-           <!-- <if test="buyStatus!= null">
-                AND m.CHILD_STATUS =#{buyStatus,jdbcType=BIGINT}
-            </if>-->
             <if test="buyStatus!= null">
                 AND m.CHILD_STATUS in
                 <foreach collection="buyStatus" item="buyStatus"
@@ -855,19 +858,12 @@
                     #{buyStatus[${index}]}
                 </foreach>
             </if>
-
             <if test="customerCount==false and customerNo != null">
                 AND i.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT}
             </if>
             <if test="customerTypeNo != null">
                 AND i.CUSTOMER_TYPE_NO = #{customerTypeNo,jdbcType=BIGINT}
             </if>
-            <!--<if test="status == 22">
-                AND ((o.CHILD_STATUS =1 and i.LOCKER !=0 ) or (o.CHILD_STATUS=2 and i.LOCKER=0))
-            </if>
-            <if test="status == 24">
-                AND ((o.CHILD_STATUS =1 and i.LOCKER !=0 ) or (o.CHILD_STATUS=2 ))
-            </if>-->
             <if test="payStatus!=null">
                 AND o.PAY_STATUS in
                 <foreach collection="payStatus" item="payStatus"

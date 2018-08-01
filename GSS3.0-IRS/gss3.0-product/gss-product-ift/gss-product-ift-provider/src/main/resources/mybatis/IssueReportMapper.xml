@@ -425,5 +425,68 @@
         WHERE IL.CABIN IS NOT NULL
 
     </select>
+    <select id="iftBuyReport" resultType="com.tempus.gss.product.ift.api.entity.IftBuyReport">
+        select
+        obo.SALE_ORDER_NO as saleOrderNo,
+        obo.BUY_ORDER_NO as buyOrderNo,
+        obo.BUYER as buyer,
+        obo.BUYING_TIME as buyTime,
+        oboe.SUPPLIER_TYPE_NAME as supplierType,
+        oboe.SUPPLIER_NO_NAME as supplierName,
+        ibo.AIRLINE as airline,
+        ibo.TICKET_TYPE as ticketType,
+        ibo.BUY_REMARKE as remark,
+        concat(ip.SURNAME, '/', ip.SURNAME,'(',ip.PASSENGER_TYPE,')') as passengerName,
+        ip.BUY_CURRENCY as currency,
+        isod.TICKET_NO as ticketNo,
+        group_concat(isod.LEG_NO) as legNos,
+        ip.BUY_EXCHANGE_RATE as rate,
+        ip.BUY_FARE as fare,
+        ip.BUY_BROKERAGE as brokerage,
+        ip.BUY_TAX as tax,
+        ipnr.PNR as pnr,
+        osoe.CUSTOMER_NO_NAME as customName,
+        osoe.CUSTOMER_TYPE_NAME as customType,
+        oso.CUSTOMER_NO as customNo,
+        oso.ORDERING_LOGIN_NAME as saler,
+        sd.NAME as dept,
+        sub.NAME as modifier,
+        soi.SHORT_NAME as owner
+        from OS_BUYORDER obo
+        join OS_BUYORDER_EXTEND oboe on obo.BUY_ORDER_NO = oboe.BUY_ORDER_NO
+        join IFT_BUY_ORDER_EXT ibo on ibo.BUY_ORDER_NO = obo.BUY_ORDER_NO
+        join IFT_BUY_ORDER_DETAIL ibod on ibod.BUY_ORDER_NO = obo.BUY_ORDER_NO
+        join OS_SALEORDER_EXTEND osoe on osoe.SALE_ORDER_NO = obo.SALE_ORDER_NO
+        join OS_SALEORDER oso on oso.SALE_ORDER_NO = obo.SALE_ORDER_NO
+        join IFT_SALE_ORDER_EXT isoe on isoe.SALE_ORDER_NO = obo.SALE_ORDER_NO
+        join IFT_SALE_ORDER_DETAIL isod on isod.SALE_ORDER_DETAIL_NO = ibod.SALE_ORDER_DETAIL_NO
+        join IFT_PASSENGER ip on ip.PASSENGER_NO = isod.PASSENGER_NO
+        left join premier.IFT_PNR ipnr on ipnr.PNR_NO = isoe.PNR_NO
+        left join premier.SM_USER sub on sub.LOGIN_NAME = obo.MODIFIER
+        left join premier.SM_DEPT sd on sd.ID = sub.DEPT_ID
+        left join premier.SM_OWNER_INFO soi on soi.OWNER = obo.OWNER
+        where
+        obo.GOODS_TYPE = 2 and obo.PAY_STATUS in (3,4) and obo.BSIGN_TYPE = 1 and obo.BUY_STATUS = 5
+        <if test="ticketDateStart != null and ticketDateStart != ''">
+            and <![CDATA[ obo.BUYING_TIME > str_to_date(#{ticketDateStart},'%Y-%m-%d') ]]>
+        </if>
+        <if test="ticketDateEnd != null and ticketDateEnd != ''">
+            and <![CDATA[ obo.BUYING_TIME < date_add(STR_TO_DATE(#{ticketDateEnd}, '%Y-%m-%d'), interval 1 day) ]]>
+        </if>
+        group by isod.PASSENGER_NO
+        order by obo.BUYING_TIME desc
+    </select>
 
+    <select id="selectLegsByBuyOrderNo" resultType="com.tempus.gss.product.ift.api.entity.IftBuyReport"
+            parameterType="java.lang.String">
+        select
+        group_concat(concat(DEP_AIRPORT, '-', ARR_AIRPORT) order by PARENT_SECTION,CHILD_SECTION) as routing,
+        group_concat(concat(AIRLINE, FLIGHT_NO) order by PARENT_SECTION,CHILD_SECTION) as flightNo,
+        group_concat(CABIN order by PARENT_SECTION,CHILD_SECTION) as cabin
+        from IFT_LEG
+        where LEG_NO in
+        <trim prefix="(" suffix=")">
+            #{legNos}
+        </trim>
+    </select>
 </mapper>

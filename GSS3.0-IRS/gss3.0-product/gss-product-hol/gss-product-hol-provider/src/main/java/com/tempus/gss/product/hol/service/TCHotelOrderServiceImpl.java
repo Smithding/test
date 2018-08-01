@@ -98,6 +98,7 @@ import com.tempus.gss.product.hol.dao.HolSupplierMapper;
 import com.tempus.gss.product.hol.dao.HotelErrorOrderMapper;
 import com.tempus.gss.product.hol.dao.HotelOrderMapper;
 import com.tempus.gss.product.hol.utils.HttpClientUtil;
+import com.tempus.gss.product.hol.utils.TrackTime;
 import com.tempus.gss.sms.SMSUtil;
 import com.tempus.gss.system.entity.SmsTemplateDetail;
 import com.tempus.gss.system.service.IMaxNoService;
@@ -227,9 +228,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
         	}
         }
         if(StringUtil.isNotNullOrEmpty(orderCreateReq.getOrderPassengerDetails())){
-        	if (StringUtil.isNullOrEmpty(orderCreateReq.getOrderPassengerDetails().get(0).getName()) || StringUtil.isNullOrEmpty(orderCreateReq.getOrderPassengerDetails().get(0).getMobile())) {
-                logger.error("出游人信息姓名或手机号为空！");
-                throw new GSSException("创建酒店订单", "0108", "出游人信息姓名或手机号为空(第一姓名或第一手机号为空)！");
+        	if (StringUtil.isNullOrEmpty(orderCreateReq.getOrderPassengerDetails().get(0).getName()) ) {
+                logger.error("出游人信息姓名为空！");
+                throw new GSSException("创建酒店订单", "0108", "出游人信息姓名为空(第一姓名为空)！");
             }
         }else{
         	logger.error("出游人信息集合为空！");
@@ -263,6 +264,10 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
             logger.error("早餐为空！");
             throw new GSSException("创建酒店订单", "0115", "早餐为空！");
         }
+        if (StringUtil.isNullOrEmpty(orderCreateReq.getResName())) {
+            logger.error("酒店名字为空！");
+            throw new GSSException("创建酒店订单", "0216", "酒店名字为空！");
+        }
        
         Long saleOrderNo = maxNoService.generateBizNo("HOL_SALE_ORDER_NO", 13);
         HotelOrder hotelOrder = new HotelOrder();
@@ -270,8 +275,29 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		List<ResourceUseDateDetail> resourceUseDateDetail = orderCreateReq.getOrderUseDateDetails();
 		String startDate = resourceUseDateDetail.get(0).getUseDate();
 		String endDate = resourceUseDateDetail.get((resourceUseDateDetail.size()-1)).getUseDate();
-		String hotelName="";
-		String cityName = "";
+		String hotelName = StringEscapeUtils.unescapeHtml(orderCreateReq.getResName().trim());
+		String cityName = orderCreateReq.getCityName();
+		String supPriceName = "";
+		String bedTypeName = "";
+		if(StringUtils.isNotEmpty(orderCreateReq.getSupPriceName()) && StringUtils.isNotEmpty(orderCreateReq.getBedTypeName())) {
+			supPriceName = StringEscapeUtils.unescapeHtml(orderCreateReq.getSupPriceName().trim());
+			bedTypeName = StringEscapeUtils.unescapeHtml(orderCreateReq.getBedTypeName().trim());
+		}else {
+			ResProBaseInfos resInfomation =mongoTemplate1.findOne(new Query(Criteria.where("_id").is(orderCreateReq.getResId())),ResProBaseInfos.class);
+			if(resInfomation != null){
+				for(ResProBaseInfo detail : resInfomation.getResProBaseInfos()){
+					if(detail.getProductUniqueId().equals(orderCreateReq.getProductUniqueId())){
+						if(StringUtils.isNotEmpty(detail.getSupPriceName())){
+							supPriceName = detail.getSupPriceName(); 
+						}
+						if(StringUtils.isNotEmpty(detail.getBedTypeName())){
+							bedTypeName = detail.getBedTypeName();
+						}
+					}
+				}
+			}
+		}
+		
 		BigDecimal totalPrice = new BigDecimal(Double.toString(0));
 		String eachNightPrice= null;
 		Date dateStartDate;
@@ -288,23 +314,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			}
 			totalPrice = totalPrice.multiply(new BigDecimal(orderCreateReq.getBookCount()));
 			hotelOrder.setEachNightPrice(eachNightPrice);
-			ResProBaseInfos resInfomation =mongoTemplate1.findOne(new Query(Criteria.where("_id").is(orderCreateReq.getResId())),ResProBaseInfos.class);
-			if(resInfomation != null){
-				hotelName = StringEscapeUtils.unescapeHtml(orderCreateReq.getResName().trim());
-				cityName =  orderCreateReq.getCityName();
-				for(ResProBaseInfo detail : resInfomation.getResProBaseInfos()){
-						if(detail.getProductUniqueId().equals(orderCreateReq.getProductUniqueId())){
-							if(StringUtils.isNotEmpty(detail.getSupPriceName())){
-								hotelOrder.setSupPriceName(detail.getSupPriceName());
-							}
-							if(StringUtils.isNotEmpty(detail.getBedTypeName())){
-								hotelOrder.setBedTypeName(detail.getBedTypeName());
-							}
-						}
-					
-				}
-				
-			}
+			
 
 			dateStartDate = simple.parse(startDate);
 			Date departDate = simple.parse(endDate);
@@ -408,6 +418,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            hotelOrder.setBuyOrderNo(buyOrderNo);
 	            hotelOrder.setHotelCode(String.valueOf(orderCreateReq.getResId()));
 	            hotelOrder.setHotelName(hotelName);
+	            hotelOrder.setSupPriceName(supPriceName);
+				hotelOrder.setBedTypeName(bedTypeName);
+	            
 	            hotelOrder.setOrderType(1);
 	            hotelOrder.setOrderType(orderCreateReq.getOrderType());
 	            hotelOrder.setContactName(orderCreateReq.getLinkManName());
@@ -504,7 +517,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            	hotelOrder.setCardMobile(orderCreateReq.getMobile());
 	            }
 	            hotelOrder.setArriveHotelTime(orderCreateReq.getArriveHotelTime());
-	            hotelOrder.setHotelAddress(cityName+orderCreateReq.getHotelAddress());
+	            hotelOrder.setHotelAddress(cityName+"市"+orderCreateReq.getHotelAddress());
 	            hotelOrder.setHotelPhone(orderCreateReq.getHotelPhone());
 	            hotelOrder.setProName(orderCreateReq.getProName());
 	            hotelOrder.setProId(orderCreateReq.getProId());
@@ -639,7 +652,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		}
 		return null;
 	}
-
+	
+	@TrackTime(param = "isBookOrder")
 	@Override
 	public IsBookOrder isBookOrder(Agent agent,IsBookOrderReq isBookOrderReq) throws GSSException{
 		//long start = System.currentTimeMillis();
@@ -673,8 +687,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			//long end = System.currentTimeMillis();  
 		    //System.out.println("1，耗时：" + (end - start) + "毫秒"); 
 			String resultJson= httpClientUtil.doTCJsonPost(CARD_SUPP_URL, reqJson);
-			//end2 = System.currentTimeMillis();  
-		   // System.out.println("2，耗时：" + (end2 - end) + "毫秒"); 
+			//Long end2 = System.currentTimeMillis();  
+		   // System.out.println("可定检查耗时：" + (end2 - end) + "毫秒"); 
 			logger.info("可定检查请求返回:" + resultJson);
 			if(StringUtil.isNotNullOrEmpty(resultJson)){
 				isBookOrderBase= JsonUtil.toBean(resultJson, new TypeReference<ResultTc<IsBookOrder>>(){});
@@ -728,7 +742,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 			 throw new GSSException("订单是否可定信息", "0101", e.getMessage());
 		}
 		//long end1 = System.currentTimeMillis();  
-	   // System.out.println("3，耗时：" + (end1 - end2) + "毫秒"); 
+	  //System.out.println("3，耗时：" + (end1 - end2) + "毫秒"); 
 		return resBase;
 		
 	}

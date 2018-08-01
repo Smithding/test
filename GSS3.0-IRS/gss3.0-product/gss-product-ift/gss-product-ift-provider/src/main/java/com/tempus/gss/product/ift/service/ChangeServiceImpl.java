@@ -864,21 +864,8 @@ public class ChangeServiceImpl implements IChangeService {
         try {
             //修改改签类型
             SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(requestWithActor.getEntity().getSaleChangeNo());
-            saleChangeExt.setTicketChangeType(requestWithActor.getEntity().getTicketChangeType());
-            saleChangeExt.setLocker(0L);
-            saleChangeExt.setModifier(requestWithActor.getAgent().getAccount());
-            saleChangeExt.setModifyTime(new Date());
-            saleChangeExt.setCurrency(requestWithActor.getEntity().getCurrency());
-            saleChangeExt.setExchangeRate(requestWithActor.getEntity().getSaleExchangeRate());
-            saleChangeExt.setSaleCurrency(requestWithActor.getEntity().getSaleCurrency());
-            if (saleChangeExt !=null && saleChangeExt.getChangeRemark()!=null&&saleChangeExt.getChangeRemark() !=""){
-
-            saleChangeExt.setChangeRemark(saleChangeExt.getChangeRemark()+"#"+requestWithActor.getEntity().getChangeRemark());
-            }else {
-                saleChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
-            }
-            log.info("保存采购数据" + saleChangeExt.toString());
-            saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
+            Long saleLocker = saleChangeExt.getLocker();
+            saleChangeExt = changeExtService.updateSaleChangeExt(requestWithActor, saleChangeExt);
             List<ChangePriceVo> adtList = requestWithActor.getEntity().getSaleAdtPriceList();
             List<ChangePriceVo> chdList = requestWithActor.getEntity().getSaleChdPriceList();
             List<ChangePriceVo> infList = requestWithActor.getEntity().getSaleInfPriceList();
@@ -895,6 +882,9 @@ public class ChangeServiceImpl implements IChangeService {
             if(isNoFee(requestWithActor.getEntity().getSaleAdtPriceList(),requestWithActor.getEntity().getSaleChdPriceList(),requestWithActor.getEntity().getSaleInfPriceList())){
                 saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 3);
                 log.info("修改采购状态" + saleChangeNo);
+                //如果支付为0
+                saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 3);
+                log.info("修改采购支付状态" + saleChangeNo);
                 try{
                     //直接将单分配给销售改签员
                     RequestWithActor<Long> saleChangeRequest = new RequestWithActor<>();
@@ -918,6 +908,8 @@ public class ChangeServiceImpl implements IChangeService {
                 log.info("修改采购支付状态" + saleChangeNo);*/
            // BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(saleChangeNo);
             BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
+            //出票员更新销售
+            ticketSenderService.updateByLockerId(requestWithActor.getAgent(),saleLocker,"SALE_CHANGE_NUM");
             if(buyChangeExt != null){
                 log.info("修改审核备注" + buyChangeExt.getBuyChangeNo());
               //  buyChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
@@ -943,11 +935,31 @@ public class ChangeServiceImpl implements IChangeService {
         return true;
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public SaleChangeExt updateSaleChangeExt(RequestWithActor<ChangePriceRequest> requestWithActor, SaleChangeExt saleChangeExt) {
+        saleChangeExt.setTicketChangeType(requestWithActor.getEntity().getTicketChangeType());
+        saleChangeExt.setLocker(0L);
+        saleChangeExt.setModifier(requestWithActor.getAgent().getAccount());
+        saleChangeExt.setModifyTime(new Date());
+        saleChangeExt.setCurrency(requestWithActor.getEntity().getCurrency());
+        saleChangeExt.setExchangeRate(requestWithActor.getEntity().getSaleExchangeRate());
+        saleChangeExt.setSaleCurrency(requestWithActor.getEntity().getSaleCurrency());
+        if (saleChangeExt !=null && saleChangeExt.getChangeRemark()!=null&&saleChangeExt.getChangeRemark() !=""){
+
+        saleChangeExt.setChangeRemark(saleChangeExt.getChangeRemark()+"#"+requestWithActor.getEntity().getChangeRemark());
+        }else {
+            saleChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
+        }
+        log.info("保存采购数据" + saleChangeExt.toString());
+        saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
+        return saleChangeExt;
+    }
+
     /**
      * 改签打回单审核
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean changeReAudit(RequestWithActor<ChangePriceRequest> requestWithActor) {
         if (requestWithActor.getAgent() == null) {
             throw new GSSException("当前用户不能为空", "0101", "当前操作用户为空");

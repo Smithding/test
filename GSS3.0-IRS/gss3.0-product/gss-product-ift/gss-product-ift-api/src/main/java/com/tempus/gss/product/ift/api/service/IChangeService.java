@@ -192,4 +192,6 @@ public interface IChangeService {
     void  updateBuyRemarkBySelectBuyChangeNo(BuyChangeExt buyChangeExt);
     //事务原因创建的服务
     int queryChangeCountBylocker(Long userId);
+
+	 SaleChangeExt updateSaleChangeExt(RequestWithActor<ChangePriceRequest> requestWithActor, SaleChangeExt saleChangeExt);
 }

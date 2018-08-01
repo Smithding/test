@@ -126,6 +126,8 @@ public class SaleQueryOrderVo implements Serializable {
 	 */
 	@JsonSerialize(using = LongSerializer.class)
 	private Long locker;
+	@JsonSerialize(using = LongSerializer.class)
+	private Long buyLocker;
 	/**
 	 * 订单状态
 	 */
@@ -626,5 +628,13 @@ public class SaleQueryOrderVo implements Serializable {
 
 	public void setIssuemodifier(String issuemodifier) {
 		this.issuemodifier = issuemodifier;
+	}
+
+	public Long getBuyLocker() {
+		return buyLocker;
+	}
+
+	public void setBuyLocker(Long buyLocker) {
+		this.buyLocker = buyLocker;
 	}
 }

@@ -3,8 +3,10 @@ package com.tempus.gss.product.ift.service;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.ift.api.entity.*;
+import com.tempus.gss.product.ift.api.entity.vo.IftReportRefundVo;
 import com.tempus.gss.product.ift.api.entity.vo.ReportRefundVo;
 import com.tempus.gss.product.ift.api.entity.vo.ReportVo;
+import com.tempus.gss.product.ift.api.entity.IftBuyReport;
 import com.tempus.gss.product.ift.api.service.ReportService;
 import com.tempus.gss.product.ift.dao.IssueReportDao;
 import com.tempus.gss.product.ift.dao.RefundReportDao;
@@ -36,9 +38,8 @@ public class ReportServiceImpl implements ReportService {
     }
     
     @Override
-    public List<ReportRefundVo> getAllRefundRecords(ReportVo reportVo) {
-        List<ReportRefundVo> list = refundReportDao.getAllRefundRecords(reportVo);
-        handleReportRefundVo(list);
+    public List<IftReportRefundVo> getAllRefundRecords(ReportVo reportVo) {
+        List<IftReportRefundVo> list = refundReportDao.getAllRefundRecords(reportVo);
         return list;
     }
     
@@ -144,5 +145,16 @@ public class ReportServiceImpl implements ReportService {
     public List<String> queryIssueCabins() {
         return issueReportDao.queryIssueCabins();
     }
-    
+    @Override
+    public Page<IftBuyReport> iftBuyReport(Page<IftBuyReport> page, IFTIssueReportParams iftOutReportVo) {
+        List<IftBuyReport> list = issueReportDao.iftBuyReport(page, iftOutReportVo);
+        for (IftBuyReport iftOutReport : list) {
+            IftBuyReport ift = issueReportDao.selectLegsByBuyOrderNo(iftOutReport.getLegNos());
+            iftOutReport.setCabin(ift.getCabin());
+            iftOutReport.setRouting(ift.getRouting());
+            iftOutReport.setFlightNo(ift.getFlightNo());
+        }
+        page.setRecords(list);
+        return page;
+    }
 }

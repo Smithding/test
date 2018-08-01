@@ -25,14 +25,15 @@
     <!--启用状态 1：启用，2：停用-->
     <result column="STATUS" property="status" jdbcType="VARCHAR" />
     <result column="CHANGE_REMARK" property="changeRemark" jdbcType="VARCHAR" />
+    <result column="BUY_LOCKER" property="buyLocker" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
     BUY_CHANGE_NO, ID, OWNER, OFFICE, TICKET_TYPE, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME,
-    VALID, STATUS, CHANGE_REMARK
+    VALID, STATUS, CHANGE_REMARK,BUY_LOCKER
   </sql>
   <sql id="Join_Column_List" >
     h.BUY_CHANGE_NO, h.ID, h.OWNER, h.OFFICE, h.TICKET_TYPE, h.CREATOR, h.CREATE_TIME, h.MODIFIER, h.MODIFY_TIME,
-    h.VALID, h.STATUS, h.CHANGE_REMARK
+    h.VALID, h.STATUS, h.CHANGE_REMARK,h.BUY_LOCKER
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select
@@ -70,11 +71,11 @@
     insert into IFT_BUY_CHANGE_EXT (BUY_CHANGE_NO, ID, OWNER,
       OFFICE, TICKET_TYPE, CREATOR,
       CREATE_TIME, MODIFIER, MODIFY_TIME,
-      VALID, STATUS, CHANGE_REMARK)
+      VALID, STATUS, CHANGE_REMARK,BUY_LOCKER)
     values (#{buyChangeNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
       #{office,jdbcType=VARCHAR}, #{ticketType,jdbcType=VARCHAR}, #{creator,jdbcType=VARCHAR},
       #{createTime,jdbcType=TIMESTAMP}, #{modifier,jdbcType=VARCHAR}, #{modifyTime,jdbcType=TIMESTAMP},
-      #{valid,jdbcType=TINYINT}, #{status,jdbcType=VARCHAR}, #{changeRemark,jdbcType=VARCHAR})
+      #{valid,jdbcType=TINYINT}, #{status,jdbcType=VARCHAR}, #{changeRemark,jdbcType=VARCHAR}, #{buyLocker,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.BuyChangeExt" >
     insert into IFT_BUY_CHANGE_EXT
@@ -115,6 +116,9 @@
       <if test="changeRemark != null" >
         CHANGE_REMARK,
       </if>
+      <if test="buyLocker != null" >
+        BUY_LOCKER,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="buyChangeNo != null" >
@@ -152,6 +156,9 @@
       </if>
       <if test="changeRemark != null" >
         #{changeRemark,jdbcType=VARCHAR},
+      </if>
+      <if test="buyLocker != null" >
+        #{buyLocker,jdbcType=BIGINT},
       </if>
     </trim>
   </insert>
@@ -193,7 +200,10 @@
         CHANGE_REMARK = #{changeRemark,jdbcType=VARCHAR},
       </if>
       <if test="airLineRefundStatus !=null">
-        AIRLINE_REFUND_STATUS = #{airLineRefundStatus}
+        AIRLINE_REFUND_STATUS = #{airLineRefundStatus},
+      </if>
+      <if test="buyLocker != null" >
+        BUY_LOCKER = #{buyLocker,jdbcType=BIGINT}
       </if>
     </set>
     where BUY_CHANGE_NO = #{buyChangeNo,jdbcType=BIGINT}
@@ -236,7 +246,10 @@
         CHANGE_REMARK = #{changeRemark,jdbcType=VARCHAR},
       </if>
       <if test="airLineRefundStatus !=null">
-        AIRLINE_REFUND_STATUS = #{airLineRefundStatus}
+        AIRLINE_REFUND_STATUS = #{airLineRefundStatus},
+      </if>
+      <if test="buyLocker != null" >
+        BUY_LOCKER = #{buyLocker,jdbcType=BIGINT}
       </if>
     </set>
     where BUY_CHANGE_NO = #{buyChangeNo,jdbcType=BIGINT}
