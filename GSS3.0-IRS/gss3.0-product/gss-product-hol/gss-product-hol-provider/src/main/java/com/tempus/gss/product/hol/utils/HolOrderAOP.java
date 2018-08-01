@@ -27,12 +27,12 @@ import com.tempus.gss.util.JsonUtil;
 public class HolOrderAOP {
 	protected final static Logger log = LoggerFactory.getLogger(HolOrderAOP.class);
 	
-	 @Pointcut("@annotation(com.tempus.gss.product.hol.utils.HolAnnotation)")
-	 //@Pointcut("execution(* com.tempus.gss.product.hol.service..*(..)) and @annotation(com.tempus.gss.product.hol.utils.HolAnnotation)")
+	// @Pointcut("@annotation(com.tempus.gss.product.hol.utils.HolAnnotation)")
+	 @Pointcut("execution(* com.tempus.gss.product.hol.service..*(..)) && @annotation(com.tempus.gss.product.hol.utils.HolAnnotation)")
 	 private void pointCutMethod(){}
 	 
 	 @Before("pointCutMethod()")
-	 public void repeatOrderPush(JoinPoint joinPoint, HolAnnotation holAnnotation) {
+	 public void repeatOrderPush(JoinPoint joinPoint) {
 		Object[] args = joinPoint.getArgs();
 		String aopTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 		
@@ -40,7 +40,7 @@ public class HolOrderAOP {
 		//int minuteOfHour = localTime.getMinuteOfHour();
 		//int second = localTime.getSecondOfMinute();
 		
-		System.out.println("拦截方法名: "+holAnnotation.remark()+" ,拦截的内容: "+JsonUtil.toJson(args)+", 拦截时间: "+aopTime);
+		System.out.println("拦截方法名: "+joinPoint+" ,拦截的内容: "+JsonUtil.toJson(args)+", 拦截时间: "+aopTime);
 	 }
 	 
 	 private List<String> getHolInfo(JoinPoint joinPoint) throws ClassNotFoundException {
