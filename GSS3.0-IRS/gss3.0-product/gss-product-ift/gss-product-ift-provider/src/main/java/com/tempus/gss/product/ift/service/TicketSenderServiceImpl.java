@@ -21,6 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -82,40 +84,41 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
             log.info("无此lockerID："+lockerId+" 出票员"+type+"值更新结束");
             return ;
         }
+        int count=0;
         User user = userService.selectById(agent,lockerId);
         if(user != null){
             TicketSender sender = getTicketSenderByLoginId(user.getLoginName());
             if(sender != null){
                 if("BUY_CHANGE_NUM".equals(type)){
                     //采购改签数量
-                    int count = saleChangeExtDao.queryChangeCountBylocker(null, lockerId);
+                    count = saleChangeExtDao.queryChangeCountBylocker(null, lockerId);
                     sender.setBuyChangeNum(count);
                 } else if("SALE_CHANGE_NUM".equals(type)){
                     //销售改签数量
-                    int count = saleChangeExtDao.querySaleChangeCountBylocker(null, lockerId);
+                    count = saleChangeExtDao.querySaleChangeCountBylocker(null, lockerId);
                     sender.setSaleChangeNum(count);
                 } else if("BUY_REFUSE_NUM".equals(type) || "BUY_DELETE_NUM".equals(type)){
                     //采购废票和退票数量
-                    int count = saleChangeExtDao.queryBuyRefundAndDelCountBylocker(null, lockerId);
+                    count = saleChangeExtDao.queryBuyRefundAndDelCountBylocker(null, lockerId);
                     sender.setBuyRefuseNum(count);
                 } else if("SALE_REFUSE_NUM".equals(type) || "SALE_DELTE_NUM".equals(type)){
                     //销售退票和销售废票数量
-                    int count = saleChangeExtDao.querySaleRefundAndDelCountBylocker(null, lockerId);
+                    count = saleChangeExtDao.querySaleRefundAndDelCountBylocker(null, lockerId);
                     sender.setSaleRefuseNum(count);
                 } else if("SALE_ORDER_NUM".equals(type)){
                     //核价单
-                    int count = saleOrderExtDao.querySaleCountByLocker(lockerId);
+                    count = saleOrderExtDao.querySaleCountByLocker(lockerId);
                     sender.setSaleOrderNum(count);
                 } else if("ORDERCOUNT".equals(type)){
                     //出票单
-                    int count = saleOrderExtDao.queryBuyCountByLocker(lockerId);
+                    count = saleOrderExtDao.queryBuyCountByLocker(lockerId);
                     sender.setOrdercount(count + 0l);
                 }
                 sender.setIds(sender.getId() + "");
                 update(sender);
             }
         }
-        log.info("更新lockerID："+lockerId+" 出票员"+type+"值更新结束");
+        log.info("更新lockerID:{},数量:{},type:{},值更新结束",lockerId,count,type);
     }
 
     /**
@@ -167,6 +170,7 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public int update(TicketSender ticketSender) {
         log.info("update更新国际机票业务员信息:"+ticketSender.toString());
         return ticketSenderDao.updateByIds(ticketSender);
