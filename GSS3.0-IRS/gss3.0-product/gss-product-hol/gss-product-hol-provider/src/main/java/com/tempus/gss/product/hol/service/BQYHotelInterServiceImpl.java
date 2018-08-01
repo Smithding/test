@@ -519,7 +519,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		createOrderReq.setToken(md5Encryption());
 		CreateOrderRespone createOrderRespone = null;
 		String paramJson = JsonUtil.toJson(createOrderReq);
+		logger.info("BQY酒店订单创建入参: " + paramJson);
 		String result = httpClientUtil.doJsonPost(BQY_HOTEL_CREATE_ORDER_URL, paramJson);
+		logger.info("BQY酒店订单创建结果: " + result);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<CreateOrderRespone> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<CreateOrderRespone>>(){});
 			if (responseResult != null) {
