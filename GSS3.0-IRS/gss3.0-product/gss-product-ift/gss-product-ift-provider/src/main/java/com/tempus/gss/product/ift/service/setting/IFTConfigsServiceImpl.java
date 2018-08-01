@@ -402,6 +402,7 @@ public class IFTConfigsServiceImpl implements IConfigsService {
             return false;
         }
         boolean isDistributeTicket = Boolean.parseBoolean((String) configs.getConfig().get("isDistributeTicket"));
+        logger.info("系统目前是自动分单："+isDistributeTicket);
         return isDistributeTicket;
     }
 

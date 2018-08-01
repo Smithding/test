@@ -253,11 +253,49 @@
       </if>
     </set>
     where BUY_CHANGE_NO = #{buyChangeNo,jdbcType=BIGINT}
-  </update><update id="updateBuyRemarkBySelectBuyChangeNo" parameterType="com.tempus.gss.product.ift.api.entity.BuyChangeExt">
+  </update>
+
+  <update id="updateBuyRemarkBySelectBuyChangeNo" parameterType="com.tempus.gss.product.ift.api.entity.BuyChangeExt">
     UPDATE IFT_BUY_CHANGE_EXT b
     <set>
+      <if test="owner != null" >
+        OWNER = #{owner,jdbcType=INTEGER},
+      </if>
+      <if test="office != null" >
+        OFFICE = #{office,jdbcType=VARCHAR},
+      </if>
+      <if test="ticketType != null" >
+        TICKET_TYPE = #{ticketType,jdbcType=VARCHAR},
+      </if>
+      <if test="creator != null" >
+        CREATOR = #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifier != null" >
+        MODIFIER = #{modifier,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="valid != null" >
+        VALID = #{valid,jdbcType=TINYINT},
+      </if>
+      <if test="status != null" >
+        STATUS = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="changeRemark != null" >
+        CHANGE_REMARK = #{changeRemark,jdbcType=VARCHAR},
+      </if>
       <if test="changeRemark != null">
         b.CHANGE_REMARK = #{changeRemark,jdbcType=VARCHAR}
+      </if>
+      <if test="airLineRefundStatus !=null">
+        AIRLINE_REFUND_STATUS = #{airLineRefundStatus},
+      </if>
+      <if test="buyLocker != null" >
+        BUY_LOCKER = #{buyLocker,jdbcType=BIGINT}
       </if>
     </set>
     WHERE b.BUY_CHANGE_NO= #{buyChangeNo,jdbcType=BIGINT}

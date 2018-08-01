@@ -1891,10 +1891,9 @@ public class RefundServiceImpl implements IRefundService {
 				} else {
 					//log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
 					/**锁单*/
-					log.info("第四步:满足条件的分配详细明细...1.将设置为出票中 .锁单,锁单人是被分配人...");
 					assingLockSaleChangeExt(saleChangeExt, peopleInfo, updateTime, agent);
 					/***增加出票人订单数*/
-					log.info("3.增加出票人的未处理采购单数量...");
+					log.info("增加出票人的未处理采购单数量...");
 					increaseBuyRefuseNum(agent, peopleInfo);
 					break;
 				}
