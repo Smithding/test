@@ -1845,10 +1845,7 @@ public class RefundServiceImpl implements IRefundService {
 			if(!isDistributeTicket){
 				//如果不是系统分单
 				assingLockSaleChangeExt(order,updateTime);
-				//order = configsService.setLockerAsAloneLocker(order);
-				//Long locker = order.getLocker();
-				//TicketSender ticketSender = iTicketSenderService.queryByUserId(locker);
-				//increaseBuyRefuseNum(agent, ticketSender);
+				iTicketSenderService.updateByLockerId(agent,order.getAloneLocker(),"BUY_REFUSE_NUM");
 			} else{
 				log.info("第三步：判断出票员手头出票订单数量...");
 				for (TicketSender peopleInfo : senders) {
@@ -1883,6 +1880,7 @@ public class RefundServiceImpl implements IRefundService {
 		if(!isDistributeTicket){
 			//如果不是系统分单
 			assingLockSaleChangeExt(saleChangeExt,updateTime);
+			iTicketSenderService.updateByLockerId(agent,saleChangeExt.getAloneLocker(),"BUY_REFUSE_NUM");
 		} else{
 			for (TicketSender peopleInfo : senders) {
 				log.info(peopleInfo.getName() + "未处理采购单数量：" + peopleInfo.getBuyRefuseNum());
