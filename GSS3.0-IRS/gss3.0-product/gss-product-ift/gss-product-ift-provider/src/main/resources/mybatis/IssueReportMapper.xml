@@ -3,33 +3,37 @@
 <mapper namespace="com.tempus.gss.product.ift.dao.IssueReportDao">
 
     <resultMap id="IftReportResultMap" type="com.tempus.gss.product.ift.api.entity.IFTIssueReport">
-        <result column="SUPPLIER_NAME" property="supplierName"/>
-        <result column="TYPE" property="type"/>
-        <result column="TICKET_DATE" property="ticketDate"/>
-        <result column="SALE_ORDER_NO" property="saleOrderNo"/>
+        <result column="SALE_DEPT" property="saleDept"/>
+        <result column="CUSTOMER_NAME" property="customerName"/>
+        <result column="CUSTOMER_NO" property="customerNo"/>
+        <result column="AIRLINE" property="airline"/>
+        <result column="TICKET_NO" property="ticketNo"/>
         <result column="ROUTING" property="routing"/>
         <result column="FLIGHT_NO" property="flightNo"/>
         <result column="CABIN" property="cabin"/>
+        <result column="TICKET_DATE" property="ticketDate"/>
         <result column="DEP_DATE" property="depDate"/>
-        <result column="TICKET_NUM" property="ticketNum"/>
-        <result column="RATE" property="rate"/>
-        <result column="CURRENCY" property="currency"/>
-        <result column="TRUE_PRICE" property="truePrice"/>
-        <result column="SETTLE_PRICE" property="settlePrice"/>
+        <result column="FARE_PRICE" property="farePrice"/>
         <result column="TAX" property="tax"/>
-        <result column="TOTAL_PRICE" property="totalPrice"/>
-        <result column="GROSS" property="gross"/>
-        <result column="SALE_PERSON" property="salePerson"/>
-        <result column="SALE_DEPT" property="saleDept"/>
-        <result column="TICKET_PERSON" property="ticketPerson"/>
-        <result column="MONTH_SETTLE" property="monthSettle"/>
-        <result column="COMPANY" property="company"/>
-        <result column="SETTLE_METHOD" property="settleMethod"/>
+        <result column="SALE_REBATE" property="saleRebate"/>
+        <result column="REBATE_PRICE" property="rebatePrice"/>
+        <result column="SALE_PRICE" property="salePrice"/>
+        <result column="SERVICE_CHARGE" property="serviceCharge"/>
         <result column="PASSENGER_NAME" property="passengerName"/>
-        <result column="GENDER" property="gender"/>
+        <result column="PNR" property="pnr"/>
+        <result column="TICKET_TYPE" property="ticketType"/>
+        <result column="SALE_PERSON" property="salePerson"/>
+        <result column="TICKET_PERSON" property="ticketPerson"/>
+        <result column="SUPPLIER_NAME" property="supplierName"/>
+        <result column="SALE_ORDER_NO" property="saleOrderNo"/>
+        <result column="PAY_WAY" property="payWay"/>
+        <result column="PAY_NO" property="payNo"/>
+        <result column="ITINERARY_NO" property="itineraryNo"/>
+        <result column="SETTLE_PRICE" property="settlePrice"/>
+        <result column="EXCHANGE_RATE" property="exchangeRate"/>
+        <result column="CURRENCY" property="currency"/>
+        <result column="COMPANY" property="company"/>
         <result column="SOURCE" property="source"/>
-        <result column="REMARK" property="remark"/>
-        <result column="CHANGE_TYPE" property="changeType"/>
     </resultMap>
 
     <select id="queryIFTIssueReport" parameterType="com.tempus.gss.product.ift.api.entity.IFTIssueReportParams" resultMap="IftReportResultMap">
@@ -47,12 +51,11 @@
         </if>
     </select>
     <sql id="queryIFTIssued">
-        SELECT ISOE.SALE_ORDER_NO AS SALE_ORDER_NO,
-        GROUP_CONCAT(DISTINCT ISOD.TICKET_NO) AS TICKET_NO,
-        SD.NAME AS SALE_DEPT,
+        SELECT SD.NAME AS SALE_DEPT,
         CC.NAME AS CUSTOMER_NAME,
         CC.CUSTOMER_NO AS CUSTOMER_NO,
         GROUP_CONCAT(DISTINCT IL.AIRLINE) AS AIRLINE,
+        GROUP_CONCAT(DISTINCT ISOD.TICKET_NO) AS TICKET_NO,
         GROUP_CONCAT(DISTINCT CONCAT(IL.DEP_AIRPORT, '-', IL.ARR_AIRPORT)) AS ROUTING,
         GROUP_CONCAT(DISTINCT IL.FLIGHT_NO) AS FLIGHT_NO,
         GROUP_CONCAT(DISTINCT IL.CABIN) AS CABIN,
@@ -61,22 +64,22 @@
         SELECT IL2.DEP_TIME FROM IFT_LEG IL2 WHERE IL2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO GROUP BY IL2.SALE_ORDER_NO, IL2.LEG_NO ORDER BY IL2.DEP_TIME LIMIT 1)
         AS DEP_DATE,
         (
-        SELECT sum(IP2.SALE_FARE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS TRUE_PRICE,
+        SELECT sum(IP2.SALE_FARE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS FARE_PRICE,
         (
         SELECT sum(IP2.SALE_TAX) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS TAX,
         (
         SELECT sum(IP2.SALE_BROKERAGE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS SALE_BROKERAGE,
-        round(100 * (1 - ((sum(IP.SALE_PRICE) - sum(IP.SALE_TAX) - sum(IP.SALE_BROKERAGE)) / (sum(IP.SALE_AWARD_PRICE) * (1 - sum(IP.SALE_AGENCY_FEE) / 100)) -
-        (sum(IP.SALE_FARE) - sum(IP.SALE_AWARD_PRICE)) / sum(IP.SALE_AWARD_PRICE))), 0) AS SALE_REBATE,
-        (
-        SELECT sum(IP2.SERVICE_CHARGE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS SERVICE_CHARGE,
+        group_concat(DISTINCT IP.SALE_REBATE) AS SALE_REBATE,
         (
         SELECT sum(IP2.SALE_PRICE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS SALE_PRICE,
+        (
+        SELECT sum(IP2.SERVICE_CHARGE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS SERVICE_CHARGE,
         CONCAT(IP.SURNAME, '/', IP.NAME) AS PASSENGER_NAME,
         PNR.PNR AS PNR,
         '出票' AS TICKET_TYPE,
         ISOE.CREATOR AS SALE_PERSON,
-        ISOE.DRAWER_LOGIN_NAME AS TICKET_PERSON,
+        CS.NAME AS SUPPLIER_NAME,
+        ISOE.SALE_ORDER_NO AS SALE_ORDER_NO,
         PPW.NAME AS PAY_WAY,
         PAPI.ALL_PAY_INFO_NO AS PAY_NO,
         (
@@ -84,6 +87,7 @@
         sum(IP.SALE_PRICE) AS SETTLE_PRICE,
         ISOE.EXCHANGE_RATE AS EXCHANGE_RATE,
         ISOE.CURRENCY AS CURRENCY,
+        SOI.SHORT_NAME AS COMPANY,
         CC.BUSINESS_LINE AS SOURCE
 
 
@@ -224,23 +228,25 @@
         ORDER BY ISOE.ISSUE_TIME DESC
     </sql>
     <sql id="queryIFTChanged">
-        SELECT ISCE.SALE_CHANGE_NO AS SALE_ORDER_NO,
-        ISOD.TICKET_NO AS TICKET_NO,
-        SD.NAME AS SALE_DEPT,
+
+        SELECT SD.NAME AS SALE_DEPT,
         CC.NAME AS CUSTOMER_NAME,
         CC.CUSTOMER_NO AS CUSTOMER_NO,
         GROUP_CONCAT(DISTINCT IL.AIRLINE) AS AIRLINE,
+        ISOD.TICKET_NO AS TICKET_NO,
         GROUP_CONCAT(DISTINCT CONCAT(IL.DEP_AIRPORT, '-', IL.ARR_AIRPORT)) AS ROUTING,
         GROUP_CONCAT(DISTINCT IL.FLIGHT_NO) AS FLIGHT_NO,
         GROUP_CONCAT(DISTINCT IL.CABIN) AS CABIN,
         ISOD.MODIFY_TIME AS TICKET_DATE,
-        GROUP_CONCAT(IL.DEP_TIME) AS DEP_DATE,
-        SUM(IP.SALE_FARE) AS TRUE_PRICE,
-        SUM(IPCP.SALE_TAX) AS TAX,
-        GROUP_CONCAT(DISTINCT IP.SALE_REBATE) AS SALE_REBATE,
         (
-        SELECT sum(IP2.SERVICE_CHARGE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISCE.SALE_CHANGE_NO) AS SERVICE_CHARGE,
+        SELECT IL2.DEP_TIME FROM IFT_LEG IL2 WHERE IL2.LEG_NO = ISOD.LEG_NO GROUP BY IL2.SALE_ORDER_NO, IL2.LEG_NO ORDER BY IL2.DEP_TIME LIMIT 1)
+        AS DEP_DATE,
+        SUM(IPCP.SALE_COUNT_PRICE) AS FARE_PRICE,
+        SUM(IPCP.SALE_TAX) AS TAX,
+        GROUP_CONCAT(DISTINCT IPCP.SALE_REBATE) AS SALE_REBATE,
         SUM(IPCP.SALE_COUNT_PRICE) AS SALE_PRICE,
+        (
+        SELECT sum(IPCP2.SALE_REST) FROM IFT_PASSENGER_CHANGE_PRICE IPCP2 WHERE IPCP2.SALE_CHANGE_NO = ISCE.SALE_CHANGE_NO) AS SERVICE_CHARGE,
         GROUP_CONCAT(DISTINCT CONCAT(IP.SURNAME, '/', IP.NAME)) AS PASSENGER_NAME,
         PNR.PNR AS PNR,
         CASE WHEN ISCE.TICKET_CHANGE_TYPE = 1
@@ -250,21 +256,19 @@
         WHEN ISCE.TICKET_CHANGE_TYPE = 3
         THEN '换开'
         END AS TICKET_TYPE,
+        ISCE.CREATOR AS SALE_PERSON,
+        SU.NAME AS TICKET_PERSON,
         CS.NAME AS SUPPLIER_NAME,
         ISCE.SALE_CHANGE_NO AS SALE_ORDER_NO,
-        COUNT(DISTINCT ISOD.PASSENGER_NO) AS TICKET_NUM,
+        PPW.NAME AS PAY_WAY,
+        PAPI.ALL_PAY_INFO_NO AS PAY_NO,
+        (
+        SELECT LDI.ITINERARY_NO FROM LS_DELIVERY_ITINERARY LDI WHERE LDI.TICKET_NO = ISOD.TICKET_NO LIMIT 1) AS ITINERARY_NO,
+        sum(IPCP.SALE_COUNT_PRICE) AS SETTLE_PRICE,
         ISCE.EXCHANGE_RATE AS EXCHANGE_RATE,
         ISCE.CURRENCY AS CURRENCY,
-        sum(IPCP.SALE_COUNT_PRICE) AS SETTLE_PRICE,
-        sum(IPCP.SALE_COUNT_PRICE) AS TOTAL_PRICE,
-        SUM(IPCP.PROFIT) AS GROSS,
-        ISCE.CREATOR AS SALE_PERSON,
         SOI.SHORT_NAME AS COMPANY,
-        CASE WHEN IP.GENDER = 1
-        THEN '男' ELSE '女' END AS GENDER,
-        CC.BUSINESS_LINE AS SOURCE,
-        ISCE.CHANGE_REMARK AS REMARK,
-        SU.NAME AS TICKET_PERSON
+        CC.BUSINESS_LINE AS SOURCE
         FROM IFT_SALE_CHANGE_EXT ISCE
         LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO = ISCE.SALE_CHANGE_NO
         LEFT JOIN IFT_PNR PNR ON PNR.PNR_NO = ISCE.PNR_NO
@@ -397,9 +401,9 @@
             </foreach>
         </if>
         <if test="orderStatusArray==null or orderStatusArray=='' ">
-            ISOD.STATUS BETWEEN 4 AND 10
+            ISOD.STATUS = 4
         </if>
-        AND ISOD.IS_CHANGE = 0
+        AND ISOD.IS_CHANGE = 1
         GROUP BY ISOD.SALE_ORDER_NO, ISOD.TICKET_NO
         ORDER BY ISOE.ISSUE_TIME DESC
     </sql>

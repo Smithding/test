@@ -7,140 +7,191 @@ public class IFTIssueReport implements Serializable {
     
     private static final long serialVersionUID = -6393082115652051244L;
     /**
-     * 供应商
-     */
-    private String supplierName;
-    /**
-     * 类型
-     */
-    private String type;
-    /**
-     * 出票日期
-     */
-    private String ticketDate;
-    /**
-     * 工单号
-     */
-    private String saleOrderNo;
-    /**
-     * 票号
-     */
-    private String ticketNo;
-    /**
-     * 航程
-     */
-    private String routing;
-    /**
-     * 航班号
-     */
-    private String flightNo;
-    /**
-     * 舱位
-     */
-    private String cabin;
-    /**
-     * 起飞日期
-     */
-    private String depDate;
-    /**
-     * 张数
-     */
-    private String ticketNum;
-    /**
-     * 汇率
-     */
-    private BigDecimal rate;
-    /**
-     * 币种
-     */
-    private String currency;
-    /**
-     * 实价
-     */
-    private BigDecimal truePrice;
-    /**
-     * 结算净价
-     */
-    private BigDecimal settlePrice;
-    /**
-     * 税金
-     */
-    private BigDecimal tax;
-    /**
-     * 净价合计
-     */
-    private BigDecimal totalPrice;
-    /**
-     * 毛利
-     */
-    private BigDecimal gross;
-    /**
-     * 售票员
-     */
-    private String salePerson;
-    /**
-     * 出票部门
+     * saleDept 销售部门
      */
     private String saleDept;
+    
     /**
-     * 出票员
+     * customerName 客户全称
      */
-    private String ticketPerson;
+    private String customerName;
+    
     /**
-     * 月结方
+     * customerNo 客户编号
      */
-    private String monthSettle;
+    private String customerNo;
+    
     /**
-     * 所属公司
+     * airline 承运人
      */
-    private String company;
+    private String airline;
+    
     /**
-     * 结算方式
+     * ticketNo 票号
      */
-    private String settleMethod;
+    private String ticketNo;
+    
     /**
-     * 旅客姓名
+     * routing 航程
+     */
+    private String routing;
+    
+    /**
+     * flightNo 航班
+     */
+    private String flightNo;
+    
+    /**
+     * cabin 舱位
+     */
+    private String cabin;
+    
+    /**
+     * ticketDate 出票日期
+     */
+    private String ticketDate;
+    
+    /**
+     * depDate 乘机日期
+     */
+    private String depDate;
+    
+    /**
+     * farePrice 票价
+     */
+    private BigDecimal farePrice;
+    
+    /**
+     * tax 税费
+     */
+    private BigDecimal tax;
+    
+    /**
+     * saleRebate 返点
+     */
+    private BigDecimal saleRebate;
+    /**
+     * rebatePrice 返利
+     */
+    private BigDecimal rebatePrice;
+    
+    /**
+     * salePrice 应收金额
+     */
+    private BigDecimal salePrice;
+    
+    /**
+     * serviceCharge 服务费
+     */
+    private BigDecimal serviceCharge;
+    
+    /**
+     * passengerName 乘机人
      */
     private String passengerName;
+    
     /**
-     * 性别
+     * pnr PNR
      */
-    private String gender;
+    private String pnr;
+    
     /**
-     * 订单来源
+     * ticketType 机票状态
+     */
+    private Integer ticketType;
+    
+    /**
+     * salePerson 订票人
+     */
+    private String salePerson;
+    
+    /**
+     * ticketPerson 出票人
+     */
+    private String ticketPerson;
+    
+    /**
+     * supplierName 出票渠道
+     */
+    private String supplierName;
+    
+    /**
+     * saleOrderNo 订单号
+     */
+    private String saleOrderNo;
+    
+    /**
+     * payWay 支付方式
+     */
+    private String payWay;
+    
+    /**
+     * payNo 支付流水号
+     */
+    private String payNo;
+    
+    /**
+     * itineraryNo 行程单号
+     */
+    private String itineraryNo;
+    
+    /**
+     * settlePrice 结算金额
+     */
+    private BigDecimal settlePrice;
+    
+    /**
+     * exchangeRate 汇率
+     */
+    private BigDecimal exchangeRate;
+    
+    /**
+     * currency 币种
+     */
+    private String currency;
+    
+    /**
+     * company 所属公司
+     */
+    private String company;
+    
+    /**
+     * source 订单来源
      */
     private String source;
-    /**
-     * 备注
-     */
-    private String remark;
-    /**
-     * 改签类型
-     */
-    private String changeType;
     
-    public String getCurrency() {
-        return currency;
+    //todo   （机票）返利金额           保险	    保单号	 类型	   全价金额Y	   服务费
+    
+    public String getSaleDept() {
+        return saleDept;
     }
     
-    public void setCurrency(String currency) {
-        this.currency = currency;
+    public void setSaleDept(String saleDept) {
+        this.saleDept = saleDept;
     }
     
-    public String getChangeType() {
-        return changeType;
+    public String getCustomerName() {
+        return customerName;
     }
     
-    public void setChangeType(String changeType) {
-        this.changeType = changeType;
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
     
-    public String getTicketPerson() {
-        return ticketPerson;
+    public String getCustomerNo() {
+        return customerNo;
     }
     
-    public void setTicketPerson(String ticketPerson) {
-        this.ticketPerson = ticketPerson;
+    public void setCustomerNo(String customerNo) {
+        this.customerNo = customerNo;
+    }
+    
+    public String getAirline() {
+        return airline;
+    }
+    
+    public void setAirline(String airline) {
+        this.airline = airline;
     }
     
     public String getTicketNo() {
@@ -149,38 +200,6 @@ public class IFTIssueReport implements Serializable {
     
     public void setTicketNo(String ticketNo) {
         this.ticketNo = ticketNo;
-    }
-    
-    public String getSupplierName() {
-        return supplierName;
-    }
-    
-    public void setSupplierName(String supplierName) {
-        this.supplierName = supplierName;
-    }
-    
-    public String getType() {
-        return type;
-    }
-    
-    public void setType(String type) {
-        this.type = type;
-    }
-    
-    public String getTicketDate() {
-        return ticketDate;
-    }
-    
-    public void setTicketDate(String ticketDate) {
-        this.ticketDate = ticketDate;
-    }
-    
-    public String getSaleOrderNo() {
-        return saleOrderNo;
-    }
-    
-    public void setSaleOrderNo(String saleOrderNo) {
-        this.saleOrderNo = saleOrderNo;
     }
     
     public String getRouting() {
@@ -207,6 +226,14 @@ public class IFTIssueReport implements Serializable {
         this.cabin = cabin;
     }
     
+    public String getTicketDate() {
+        return ticketDate;
+    }
+    
+    public void setTicketDate(String ticketDate) {
+        this.ticketDate = ticketDate;
+    }
+    
     public String getDepDate() {
         return depDate;
     }
@@ -215,36 +242,12 @@ public class IFTIssueReport implements Serializable {
         this.depDate = depDate;
     }
     
-    public String getTicketNum() {
-        return ticketNum;
+    public BigDecimal getFarePrice() {
+        return farePrice;
     }
     
-    public void setTicketNum(String ticketNum) {
-        this.ticketNum = ticketNum;
-    }
-    
-    public BigDecimal getRate() {
-        return rate;
-    }
-    
-    public void setRate(BigDecimal rate) {
-        this.rate = rate;
-    }
-    
-    public BigDecimal getTruePrice() {
-        return truePrice;
-    }
-    
-    public void setTruePrice(BigDecimal truePrice) {
-        this.truePrice = truePrice;
-    }
-    
-    public BigDecimal getSettlePrice() {
-        return settlePrice;
-    }
-    
-    public void setSettlePrice(BigDecimal settlePrice) {
-        this.settlePrice = settlePrice;
+    public void setFarePrice(BigDecimal farePrice) {
+        this.farePrice = farePrice;
     }
     
     public BigDecimal getTax() {
@@ -255,60 +258,28 @@ public class IFTIssueReport implements Serializable {
         this.tax = tax;
     }
     
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
+    public BigDecimal getSaleRebate() {
+        return saleRebate;
     }
     
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
+    public void setSaleRebate(BigDecimal saleRebate) {
+        this.saleRebate = saleRebate;
     }
     
-    public BigDecimal getGross() {
-        return gross;
+    public BigDecimal getSalePrice() {
+        return salePrice;
     }
     
-    public void setGross(BigDecimal gross) {
-        this.gross = gross;
+    public void setSalePrice(BigDecimal salePrice) {
+        this.salePrice = salePrice;
     }
     
-    public String getSalePerson() {
-        return salePerson;
+    public BigDecimal getServiceCharge() {
+        return serviceCharge;
     }
     
-    public void setSalePerson(String salePerson) {
-        this.salePerson = salePerson;
-    }
-    
-    public String getSaleDept() {
-        return saleDept;
-    }
-    
-    public void setSaleDept(String saleDept) {
-        this.saleDept = saleDept;
-    }
-    
-    public String getMonthSettle() {
-        return monthSettle;
-    }
-    
-    public void setMonthSettle(String monthSettle) {
-        this.monthSettle = monthSettle;
-    }
-    
-    public String getCompany() {
-        return company;
-    }
-    
-    public void setCompany(String company) {
-        this.company = company;
-    }
-    
-    public String getSettleMethod() {
-        return settleMethod;
-    }
-    
-    public void setSettleMethod(String settleMethod) {
-        this.settleMethod = settleMethod;
+    public void setServiceCharge(BigDecimal serviceCharge) {
+        this.serviceCharge = serviceCharge;
     }
     
     public String getPassengerName() {
@@ -319,12 +290,108 @@ public class IFTIssueReport implements Serializable {
         this.passengerName = passengerName;
     }
     
-    public String getGender() {
-        return gender;
+    public String getPnr() {
+        return pnr;
     }
     
-    public void setGender(String gender) {
-        this.gender = gender;
+    public void setPnr(String pnr) {
+        this.pnr = pnr;
+    }
+    
+    public Integer getTicketType() {
+        return ticketType;
+    }
+    
+    public void setTicketType(Integer ticketType) {
+        this.ticketType = ticketType;
+    }
+    
+    public String getSalePerson() {
+        return salePerson;
+    }
+    
+    public void setSalePerson(String salePerson) {
+        this.salePerson = salePerson;
+    }
+    
+    public String getTicketPerson() {
+        return ticketPerson;
+    }
+    
+    public void setTicketPerson(String ticketPerson) {
+        this.ticketPerson = ticketPerson;
+    }
+    
+    public String getSupplierName() {
+        return supplierName;
+    }
+    
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
+    }
+    
+    public String getSaleOrderNo() {
+        return saleOrderNo;
+    }
+    
+    public void setSaleOrderNo(String saleOrderNo) {
+        this.saleOrderNo = saleOrderNo;
+    }
+    
+    public String getPayWay() {
+        return payWay;
+    }
+    
+    public void setPayWay(String payWay) {
+        this.payWay = payWay;
+    }
+    
+    public String getPayNo() {
+        return payNo;
+    }
+    
+    public void setPayNo(String payNo) {
+        this.payNo = payNo;
+    }
+    
+    public String getItineraryNo() {
+        return itineraryNo;
+    }
+    
+    public void setItineraryNo(String itineraryNo) {
+        this.itineraryNo = itineraryNo;
+    }
+    
+    public BigDecimal getSettlePrice() {
+        return settlePrice;
+    }
+    
+    public void setSettlePrice(BigDecimal settlePrice) {
+        this.settlePrice = settlePrice;
+    }
+    
+    public BigDecimal getExchangeRate() {
+        return exchangeRate;
+    }
+    
+    public void setExchangeRate(BigDecimal exchangeRate) {
+        this.exchangeRate = exchangeRate;
+    }
+    
+    public String getCurrency() {
+        return currency;
+    }
+    
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+    
+    public String getCompany() {
+        return company;
+    }
+    
+    public void setCompany(String company) {
+        this.company = company;
     }
     
     public String getSource() {
@@ -335,11 +402,11 @@ public class IFTIssueReport implements Serializable {
         this.source = source;
     }
     
-    public String getRemark() {
-        return remark;
+    public BigDecimal getRebatePrice() {
+        return rebatePrice;
     }
     
-    public void setRemark(String remark) {
-        this.remark = remark;
+    public void setRebatePrice(BigDecimal rebatePrice) {
+        this.rebatePrice = rebatePrice;
     }
 }

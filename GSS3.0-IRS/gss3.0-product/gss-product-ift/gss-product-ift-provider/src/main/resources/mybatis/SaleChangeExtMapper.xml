@@ -24,6 +24,7 @@
         <result column="CREATOR" property="creator" jdbcType="VARCHAR"/>
         <!--将销售单锁定的用户的Id 有大于0的值，表示已被用户锁定，是该用户的Id.-->
         <result column="LOCKER" property="locker" jdbcType="BIGINT"/>
+        <result column="BUY_LOCKER" property="buyLocker" jdbcType="BIGINT"/>
         <!--锁定时间-->
         <result column="LOCK_TIME" property="lockTime" jdbcType="TIMESTAMP"/>
         <!--业务类型 1废 2退 3改(同SaleChange的 orderChangeType 属性)-->
@@ -154,7 +155,7 @@
             AND i. OWNER = #{owner}
         </if>
         AND i.CHANGE_TYPE = 1
-        AND i.LOCKER = #{locker}
+       /* AND i.LOCKER = #{locker}*/
         AND m.CHILD_STATUS = 1
         AND o.CHILD_STATUS IN (2)
         ORDER BY
@@ -212,7 +213,7 @@
         i.VALID = 1
         AND o.BUSINESS_SIGN_NO = m.BUSINESS_SIGN_NO
         AND i.CHANGE_TYPE in (1,2)
-        AND m.CHILD_STATUS = 1
+        AND m.CHILD_STATUS in(1,2)
         AND o.CHILD_STATUS IN (2,10)
         AND h.`AIRLINE_REFUND_STATUS` IN (0, - 1)
         <if test="owner != null">
@@ -717,7 +718,16 @@
         i.CUSTOMER_REMARK, i.REFUSE_REASON,i.TICKET_CHANGE_TYPE
         ,i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO,/*su.LOGIN_NAME,*/i.DRAWER_LOGIN_NAME,
         h.AIRLINE_REFUND_STATUS,i.ALONE_LOCKER,CC.`NAME` CUSTOMER_NAME,
-        (SELECT NAME FROM SM_USER where ID = i.LOCKER) as LOGIN_NAME
+        h.BUY_LOCKER,
+        <if test="locker !=null">
+            (SELECT NAME FROM SM_USER where ID = i.LOCKER) as LOGIN_NAME
+        </if>
+        <if test="buyLocker !=null">
+            (SELECT NAME FROM SM_USER where ID = h.BUY_LOCKER) as LOGIN_NAME
+        </if>
+        <if test="buyLocker ==null and locker==null">
+            (SELECT NAME FROM SM_USER where ID = i.LOCKER) as LOGIN_NAME
+        </if>
         FROM
         IFT_SALE_CHANGE_EXT i
         left join OS_SALECHANGE o on o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
@@ -810,9 +820,9 @@
             <if test="airline !=null and airline!=''">
                 AND a.AIRLINE = #{airline,jdbcType=VARCHAR}
             </if>
-            <!--<if test="changeType==0">
+            <if test="changeType==0">
                 AND (i.CHANGE_TYPE = 1 or i.CHANGE_TYPE =2)
-            </if>-->
+            </if>
             <if test="pgerName !=null and pgerName !=''">
                 AND CONCAT_WS('',p.SURNAME,p.`NAME`) like CONCAT('%',#{pgerName,jdbcType=VARCHAR},'%' )
             </if>
@@ -821,6 +831,13 @@
                     <when test="locker == 0">AND i.LOCKER = 0</when>
                     <when test="locker == 1">AND i.LOCKER != 0</when>
                     <otherwise>AND i.LOCKER = #{locker,jdbcType=BIGINT}</otherwise>
+                </choose>
+            </if>
+            <if test="buyLocker !=null">
+                <choose>
+                    <when test="buyLocker == 0">AND h.BUY_LOCKER = 0</when>
+                    <when test="buyLocker == 1">AND h.BUY_LOCKER != 0</when>
+                    <otherwise>AND h.BUY_LOCKER = #{buyLocker,jdbcType=BIGINT}</otherwise>
                 </choose>
             </if>
             <if test="ticketNo !=null and ticketNo !=''">
