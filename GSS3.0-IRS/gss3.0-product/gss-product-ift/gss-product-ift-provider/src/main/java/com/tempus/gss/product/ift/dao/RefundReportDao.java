@@ -1,6 +1,7 @@
 package com.tempus.gss.product.ift.dao;
 
 import com.baomidou.mybatisplus.mapper.AutoMapper;
+import com.tempus.gss.product.ift.api.entity.vo.IftReportRefundVo;
 import com.tempus.gss.product.ift.api.entity.vo.ReportRefundVo;
 import com.tempus.gss.product.ift.api.entity.vo.ReportVo;
 import org.apache.ibatis.session.RowBounds;
@@ -16,5 +17,5 @@ public interface RefundReportDao extends AutoMapper<ReportVo>{
 
    List<ReportVo> queryReportRecords(ReportVo reportIn);
 
-    List<ReportRefundVo> getAllRefundRecords(ReportVo reportIn);
+    List<IftReportRefundVo> getAllRefundRecords(ReportVo reportIn);
 }

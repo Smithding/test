@@ -31,7 +31,7 @@
         <result column="remark" property="remark" jdbcType="VARCHAR"/>
         <result column="refundType" property="refundType"/>
     </resultMap>
-   <resultMap id="reportVoResultMapWithList" type="com.tempus.gss.product.ift.api.entity.vo.ReportRefundVo" >
+    <resultMap id="reportVoResultMapWithList" type="com.tempus.gss.product.ift.api.entity.vo.ReportRefundVo" >
        <result column="supplierName" property="supplierName" jdbcType="VARCHAR"/>
        <result column="type" property="type" jdbcType="VARCHAR"/>
        <result column="issueTime" property="issueTime" jdbcType="TIMESTAMP"/>
@@ -62,7 +62,43 @@
        <!--一对多航程集合-->
        <collection property="legList" ofType="com.tempus.gss.product.ift.api.entity.Leg" column="saleOrderNo"
                    select="com.tempus.gss.product.ift.dao.LegDao.selectLegBySaleOrderNo"/>
-   </resultMap>
+    </resultMap>
+    <resultMap id="iftReportVoResultMapWithList" type="com.tempus.gss.product.ift.api.entity.vo.IftReportRefundVo" >
+         <result column="PNR" property="pnr" jdbcType="VARCHAR"/>
+         <result column="saleDept" property="saleDept" jdbcType="VARCHAR"/>
+         <result column="SALE_CHANGE_NO" property="saleChangeNo" jdbcType="BIGINT"/>
+         <result column="ORDER_CHANGE_TYPE" property="orderChangeType" jdbcType="INTEGER"/>
+         <result column="GOODS_TYPE" property="goodsType" jdbcType="INTEGER"/>
+         <result column="REFUND_REASON" property="refundReason" jdbcType="VARCHAR"/>
+         <result column="TICKET_NO" property="ticketNo" jdbcType="VARCHAR"/>
+         <result column="fltName" property="fltName" jdbcType="VARCHAR"/>
+         <result column="DEP_TIME" property="depTime" jdbcType="TIMESTAMP"/>
+         <result column="SALE_PRICE" property="salePrice" jdbcType="DECIMAL"/>
+         <result column="SALE_TAX" property="saleTax" jdbcType="DECIMAL"/>
+         <result column="SALE_REFUND_PRICE" property="saleRefundPrice" jdbcType="DECIMAL"/>
+         <result column="saleAccount" property="saleAccount" jdbcType="DECIMAL"/>
+         <result column="SALE_REFUND_ACCOUNT" property="saleRefundAccount" jdbcType="DECIMAL"/>
+         <result column="customerName" property="customerName" jdbcType="VARCHAR"/>
+         <result column="intTicketNo" property="intTicketNo" jdbcType="VARCHAR"/>
+         <result column="intTicketName" property="intTicketName" jdbcType="VARCHAR"/>
+         <result column="outTicketNo" property="outTicketNo" jdbcType="VARCHAR"/>
+         <result column="outTicketName" property="outTicketName" jdbcType="VARCHAR"/>
+         <result column="ISSUE_TIME" property="issueTime" jdbcType="TIMESTAMP"/>
+         <result column="refundTicketTime" property="refundTicketTime" jdbcType="TIMESTAMP"/>
+         <result column="refundTicketNo" property="refundTicketNo" jdbcType="VARCHAR"/>
+         <result column="refundTicketName" property="refundTicketName" jdbcType="VARCHAR"/>
+         <result column="refundPriceTime" property="refundPriceTime" jdbcType="TIMESTAMP"/>
+         <result column="saleAccountPrice" property="saleAccountPrice" jdbcType="DECIMAL"/>
+         <result column="refundPayName" property="refundPayName" jdbcType="VARCHAR"/>
+         <result column="refundAccount" property="refundAccount" jdbcType="VARCHAR"/>
+         <result column="CHANGE_REMARK" property="changeRemark" jdbcType="VARCHAR"/>
+         <result column="collectTicketPrice" property="collectTicketPrice" jdbcType="DECIMAL"/>
+         <result column="refundPriceDept" property="refundPriceDept" jdbcType="VARCHAR"/>
+         <result column="SALE_ORDER_NO" property="saleOrderNo" jdbcType="BIGINT"/>
+        <!--一对多航程集合-->
+        <collection property="legList" ofType="com.tempus.gss.product.ift.api.entity.Leg" column="saleOrderNo"
+                    select="com.tempus.gss.product.ift.dao.LegDao.selectLegBySaleOrderNo"/>
+    </resultMap>
    <select id="getAllWithList" resultMap="reportVoResultMapWithList" parameterType="com.tempus.gss.product.ift.api.entity.vo.ReportVo">
        SELECT
         OC.CHILD_STATUS AS childStatus,
@@ -392,129 +428,101 @@
          </if>
      </select>
 
-    <select id="getAllRefundRecords" resultMap="reportVoResultMapWithList" parameterType="com.tempus.gss.product.ift.api.entity.vo.ReportVo">
-        SELECT
-        OC.CHILD_STATUS AS childStatus,
-        CSP.`NAME` AS supplierName,
-        ICE.CHANGE_TYPE AS type,
-        ISOE.ISSUE_TIME AS issueTime,
-        OSO.SALE_ORDER_NO AS saleOrderNo,
-        OC.SALE_CHANGE_NO AS saleChangeNo,
-        OSO.MODIFIER AS saler,
-        OC.MODIFIER AS refunder,
-        DEPT1. NAME AS dep,
-        DEPT2. NAME AS ticketDep,
-        CUS. NAME AS customerName,
-        CUS.BALANCE_CORPORATION AS customerCompany,
-        OSO.SOURCE_CHANNEL_NO AS sourceChannel,
-        CER.PAY_WAY AS settleWay,
-        OSO.CUSTOMER_NO AS customerNo,
-        (
-        CASE CER.SETTLEMENT_STATUS
-        WHEN 0 THEN
-        "未结算"
-        WHEN 1 THEN
-        "已结算"
-        WHEN 2 THEN
-        "已审核"
-        ELSE
-        "---"
-        END
-        ) AS settleStatus,
-        OC.CHANGE_REASON AS reason,
-        ICE.CHANGE_REMARK AS remark,
-        OC.CREATE_TIME AS orderTime,
-        CASE
-        WHEN ICE.CHANGE_TYPE = 1 THEN
-        '废票'
-        ELSE
-        '退票'
-        END AS refundType
-        FROM
-        OS_SALECHANGE AS OC
-        LEFT JOIN OS_SALEORDER AS OSO ON (
-        OSO.SALE_ORDER_NO = OC.SALE_ORDER_NO
-        AND OSO.VALID = 1
-        )
-        LEFT JOIN OS_SALECHANGE_EXTEND AS OCE ON (
-        OCE.SALE_CHANGE_NO = OC.SALE_CHANGE_NO
-        )
-        LEFT JOIN OS_SALEORDER_EXTEND AS OSOEX ON (
-        OSOEX.SALE_ORDER_NO = OSO.SALE_ORDER_NO
-        )
-        LEFT JOIN OS_BUYORDER AS OBO ON (
-        OBO.BUSINESS_SIGN_NO = OSO.BUSINESS_SIGN_NO
-        AND OBO.VALID = 1
-        )
-        LEFT JOIN OS_BUYORDER_EXTEND AS OBOE ON (
-        OBO.BUY_ORDER_NO = OBOE.BUY_ORDER_NO
-        )
-        LEFT JOIN OS_CERTIFICATE AS CER ON (
-        CER.CERTIFICATE_NO = OCE.CERTIFICATE_NO
-        )
-        LEFT JOIN IFT_SALE_CHANGE_EXT AS ICE ON (
-        ICE.SALE_CHANGE_NO = OC.SALE_CHANGE_NO
-        )
-        LEFT JOIN IFT_SALE_ORDER_EXT AS ISOE ON (
-        ISOE.SALE_ORDER_NO = OC.SALE_ORDER_NO
-        )
-        LEFT JOIN CPS_CUSTOMER AS CUS ON (
-        OSO.CUSTOMER_NO = CUS.CUSTOMER_NO
-        )
-        LEFT JOIN CPS_SUPPLIER AS CSP ON (
-        OBO.SUPPLIER_NO = CSP.SUPPLIER_NO
-        )
-        LEFT JOIN SM_USER AS U1 ON (OSO.MODIFIER = U1.LOGIN_NAME)
-        LEFT JOIN SM_DEPT AS DEPT1 ON (DEPT1.ID = U1.DEPT_ID)
-        LEFT JOIN SM_USER AS U2 ON (OC.MODIFIER = U2.LOGIN_NAME)
-        LEFT JOIN SM_DEPT AS DEPT2 ON (DEPT2.ID = U2.DEPT_ID)
-        WHERE  OC.GOODS_TYPE = 2 AND OC.ORDER_CHANGE_TYPE IN ('1','2')
+    <select id="getAllRefundRecords" resultMap="iftReportVoResultMapWithList" parameterType="com.tempus.gss.product.ift.api.entity.vo.ReportVo">
+        SELECT DISTINCT
+          pnr.PNR,sd.NAME AS saleDept,
+          oc.SALE_CHANGE_NO,
+          oc.ORDER_CHANGE_TYPE,
+          oc.GOODS_TYPE,
+          sce.REFUSE_REASON,
+          sod.TICKET_NO,
+          CONCAT(iftpassenger.SURNAME,"/",iftpassenger.NAME) AS fltName,
+          leg.DEP_TIME,
+          iftpassenger.SALE_PRICE,
+          passenger.SALE_TAX,
+          passenger.SALE_REFUND_PRICE,
+          iftpassenger.SALE_PRICE AS saleAccount,
+          passenger.SALE_REFUND_ACCOUNT,
+          cus.NAME AS customerName,
+          soe.CREATOR AS intTicketNo,
+          (SELECT smu.name FROM SM_USER smu WHERE smu.LOGIN_NAME =soe.CREATOR) AS intTicketName,
+          soe.DRAWER_LOGIN_NAME AS outTicketNo,
+          (SELECT smu2.name FROM SM_USER smu2 WHERE smu2.LOGIN_NAME =soe.DRAWER_LOGIN_NAME) AS outTicketName,
+          soe.ISSUE_TIME,
+          oc.CREATE_TIME AS refundTicketTime,
+          oc.MODIFIER AS refundTicketNo,
+          (SELECT smu3.name FROM SM_USER smu3 WHERE smu3.LOGIN_NAME =oc.MODIFIER) AS refundTicketName,
+          pa.CREATE_TIME AS refundPriceTime,
+          passenger.SALE_REFUND_ACCOUNT AS saleAccountPrice,
+          ppw.NAME AS refundPayName,
+          pa.RECEIVABLE_ACCOUNT AS refundAccount,
+          sce.CHANGE_REMARK,
+          iftpassenger.SALE_PRICE AS collectTicketPrice,
+          sd2.NAME AS refundPriceDept,
+          oc.SALE_ORDER_NO
+        FROM OS_SALECHANGE oc
+        LEFT JOIN IFT_PNR pnr ON pnr.SOURCE_NO = oc.SALE_ORDER_NO
+        LEFT JOIN IFT_SALE_ORDER_EXT soe ON soe.SALE_ORDER_NO = oc.SALE_ORDER_NO
+        LEFT JOIN SM_USER su ON su.LOGIN_NAME = soe.CREATOR
+        LEFT JOIN SM_DEPT sd ON sd.ID = su.DEPT_ID
+        LEFT JOIN IFT_SALE_CHANGE_EXT sce ON sce.SALE_CHANGE_NO = oc.SALE_CHANGE_NO
+        LEFT JOIN IFT_PASSENGER iftpassenger ON iftpassenger.SALE_ORDER_NO = oc.SALE_ORDER_NO
+        LEFT JOIN OS_SALEORDER oso ON oso.SALE_ORDER_NO = oc.SALE_ORDER_NO
+        LEFT JOIN IFT_SALE_ORDER_DETAIL sod ON sod.SALE_ORDER_NO = oso.SALE_ORDER_NO
+        LEFT JOIN IFT_LEG AS leg ON leg.SALE_ORDER_NO = oso.SALE_ORDER_NO AND leg.PARENT_SECTION = 0
+        LEFT JOIN IFT_PASSENGER_REFUND_PRICE passenger ON passenger.SALE_CHANGE_NO = oc.SALE_CHANGE_NO
+        LEFT JOIN CPS_CUSTOMER AS cus ON cus.CUSTOMER_NO = oso.CUSTOMER_NO
+        LEFT JOIN OS_ACTUALAMOUNTRECORD oa ON oa.RECORD_NO = oc.SALE_CHANGE_NO
+        LEFT JOIN PS_ALL_PAY_INFO pa ON pa.ALL_PAY_INFO_NO = oa.PAY_NO
+        LEFT JOIN PS_PAY_WAY ppw ON ppw.CODE = pa.PAY_WAY_CODE
+        LEFT JOIN SM_USER su2 ON su2.LOGIN_NAME = pa.COMPLETER
+        LEFT JOIN SM_DEPT sd2 ON sd2.ID = su2.DEPT_ID
+        WHERE oc.ORDER_CHANGE_TYPE IN ('1','2') AND oc.GOODS_TYPE = 2
         <if test="exactlyQuery!=null and exactlyQuery!=''and exactlyQuery!='1'">
             <if test="refunder!=null and refunder!=''">
-                AND OC.MODIFIER=#{refunder,jdbcType=VARCHAR}
+                AND oc.MODIFIER=#{refunder,jdbcType=VARCHAR}
             </if>
             <if test="saler!=null and saler!=''">
-                AND OSO.MODIFIER=#{saler,jdbcType=VARCHAR}
+                AND oso.MODIFIER=#{saler,jdbcType=VARCHAR}
             </if>
         </if>
         <if test="exactlyQuery!=null and exactlyQuery!=''and exactlyQuery!='0'">
             <if test="refunder!=null and refunder!=''">
-                AND OC.MODIFIER LIKE CONCAT(CONCAT('%', #{refunder}), '%')
+                AND oc.MODIFIER LIKE CONCAT(CONCAT('%', #{refunder}), '%')
             </if>
             <if test="saler!=null and saler!=''">
-                AND OSO.MODIFIER LIKE CONCAT(CONCAT('%', #{saler}), '%')
+                AND oso.MODIFIER LIKE CONCAT(CONCAT('%', #{saler}), '%')
             </if>
         </if>
         <if test="exactlyQuery==null or exactlyQuery!=''">
             <if test="refunder!=null and refunder!=''">
-                AND OC.MODIFIER LIKE CONCAT(CONCAT('%', #{refunder}), '%')
+                AND oc.MODIFIER LIKE CONCAT(CONCAT('%', #{refunder}), '%')
             </if>
             <if test="saler!=null and saler!=''">
-                AND OSO.MODIFIER LIKE CONCAT(CONCAT('%', #{saler}), '%')
+                AND oso.MODIFIER LIKE CONCAT(CONCAT('%', #{saler}), '%')
             </if>
         </if>
         <if test="depId!=null and depId!=''">
-            AND DEPT1.ID=#{depId,jdbcType=VARCHAR}
+            AND sd.ID=#{depId,jdbcType=VARCHAR}
         </if>
         <if test="ticketDepId!=null and ticketDepId!=''">
-            AND DEPT2.ID=#{ticketDepId,jdbcType=VARCHAR}
+            AND sd2.ID=#{ticketDepId,jdbcType=VARCHAR}
         </if>
         <if test="sourceChannel!=null and sourceChannel!=''">
-            AND OSO.SOURCE_CHANNEL_NO=#{sourceChannel,jdbcType=VARCHAR}
+            AND oso.SOURCE_CHANNEL_NO=#{sourceChannel,jdbcType=VARCHAR}
         </if>
         <if test="startDate!=null and startDate!=''">
-
-            AND DATE_FORMAT(ISOE.ISSUE_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{startDate,jdbcType=TIMESTAMP}, '%Y-%m-%d')
+            AND DATE_FORMAT(soe.ISSUE_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{startDate,jdbcType=TIMESTAMP}, '%Y-%m-%d')
         </if>
         <if test="endDate!=null and endDate!=''">
             <![CDATA[
-           AND DATE_FORMAT(ISOE.ISSUE_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{endDate,jdbcType=TIMESTAMP}, '%Y-%m-%d')
+           AND DATE_FORMAT(soe.ISSUE_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{endDate,jdbcType=TIMESTAMP}, '%Y-%m-%d')
             ]]>
         </if>
         <if test="refundType!=null and refundType!=''">
-            AND ICE.CHANGE_TYPE =#{refundType,jdbcType=VARCHAR}
+            AND sce.CHANGE_TYPE =#{refundType,jdbcType=VARCHAR}
         </if>
-        ORDER BY orderTime DESC
+        ORDER BY oc.CREATE_TIME DESC
     </select>
 
 
