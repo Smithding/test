@@ -46,7 +46,7 @@ public class SaleChangeExtVo implements Serializable{
 	 * pnr
 	 */
 	private String pnr;
-	
+
 	/**
 	 * 销售单编号
 	 */
@@ -130,10 +130,10 @@ public class SaleChangeExtVo implements Serializable{
 
 	private String saleCurrency;
 
-	
+
 	/**(0表示非锁定状态)
-	 * 状态 1:待处理(订单子状态为：1,locker:0)  
-	 * 23已处理 (订单子状态为：10,11 locker:0) 
+	 * 状态 1:待处理(订单子状态为：1,locker:0)
+	 * 23已处理 (订单子状态为：10,11 locker:0)
 	 * 22处理中(订单子状态为：1,2 当子状态为1时locker为1  当子状态为2时locker为0 )
 	 * 24退票订单中的退款中有锁单操作(订单子状态为：1，2  当子状态为1时Locker为1  当子状态为2时Locker为1)只适用退票订单的退款中列表查询（因为该列表的子状态全部是2一开始没有点退票时locker为0，点击了退票又返回此时子状态为2locker为1所以22状态是查询不出来）
 	 */
@@ -159,7 +159,7 @@ public class SaleChangeExtVo implements Serializable{
 	 * audit=审核
 	 */
 	private String flag;
-	
+
 	/**
 	 * 操作人
 	 */
@@ -168,7 +168,7 @@ public class SaleChangeExtVo implements Serializable{
 	 * 废退方式：1：自愿、2：非自愿  0:全部(包括1 2 )
 	 */
 	private Integer refundWay;
-	
+
 	/**
 	 * locker
 	 */
@@ -180,16 +180,16 @@ public class SaleChangeExtVo implements Serializable{
 	 * 供应商
 	 */
 	private String  supplierShortName;
-	
+
 	/** 交易单编号 */
 	@JsonSerialize(using = LongSerializer.class)
 	private Long transationOrderNo;
-	
+
 	//乘客类型1：ADT:2：CHD，3：INF
 	//成人类型
 	private List<PassengerVo> adtCountList;
 	private List<PassengerVo> chdCountList;
-	
+
 	private List<PassengerVo> infCountList;
 
 	//审核人
@@ -227,17 +227,17 @@ public class SaleChangeExtVo implements Serializable{
 	 * 票号
 	 */
 	private String ticketNo;
-	
+
 	/**
-	 * 日期类型 1：申请日期  2：审核日期 
+	 * 日期类型 1：申请日期  2：审核日期
 	 */
 	private Integer dateType;
 	/**
-	 * 
+	 *
 	 *航程
 	 */
 	private String legArray;
-	
+
 	@JsonSerialize(using = LongSerializer.class)
 	private Long supplierNo;
 
@@ -247,18 +247,20 @@ public class SaleChangeExtVo implements Serializable{
 	private String auditTimeArray;
 
 	private String isNotRefund;
-	
+
+	private BigDecimal amount;
+
 	/**
 	 * 改签类型 改签类型 1升舱 2改期 3换开
 	 */
 	private Integer ticketChangeType;
-	
+
 	private String contactName;
-	
+
 	private String contactMobile;
-	
+
 	private Integer toDetailStatus;
-	
+
 	private String airline;
 	@JsonSerialize(using = LongSerializer.class)
 	private Long AgentId;
@@ -270,7 +272,7 @@ public class SaleChangeExtVo implements Serializable{
 	 * 用户备注
 	 */
 	private String customerRemark;
-	
+
 	private int curPage;// 当前页
 
 	private int rowNum;// 每页多少行
@@ -312,6 +314,14 @@ public class SaleChangeExtVo implements Serializable{
 
 	public List<Long> getLongList() {
 		return longList;
+	}
+
+	public BigDecimal getAmount() {
+		return amount;
+	}
+
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
 	}
 
 	public void setLongList(List<Long> longList) {
@@ -414,7 +424,7 @@ public class SaleChangeExtVo implements Serializable{
 	}
 
 	public String getFlightSpaceArray() {
-	
+
 		return flightSpaceArray;
 	}
 
@@ -439,17 +449,17 @@ public class SaleChangeExtVo implements Serializable{
 	}
 
 	public void setFlightSpaceArray(String flightSpaceArray) {
-	
+
 		this.flightSpaceArray = flightSpaceArray;
 	}
-	
+
 	public String getPgerName() {
-	
+
 		return pgerName;
 	}
-	
+
 	public void setPgerName(String pgerName) {
-	
+
 		this.pgerName = pgerName;
 	}
 
@@ -539,35 +549,35 @@ public class SaleChangeExtVo implements Serializable{
 	}
 
 	public String getSource() {
-	
+
 		return source;
 	}
-	
+
 	public void setSource(String source) {
-	
+
 		this.source = source;
 	}
 
-	
+
 	public String getSaleFare() {
-	
+
 		return saleFare;
 	}
 
-	
+
 	public void setSaleFare(String saleFare) {
-	
+
 		this.saleFare = saleFare;
 	}
 
-	
+
 	public String getSaleTax() {
-	
+
 		return saleTax;
 	}
 
 	public void setSaleTax(String saleTax) {
-	
+
 		this.saleTax = saleTax;
 	}
 
@@ -582,16 +592,16 @@ public class SaleChangeExtVo implements Serializable{
 	}
 
 	public String getModifier() {
-	
+
 		return modifier;
 	}
 
 	public void setModifier(String modifier) {
-	
+
 		this.modifier = modifier;
 	}
 
-	
+
 
 	public List<Leg> getOldLegList() {
 		return oldLegList;
@@ -610,16 +620,16 @@ public class SaleChangeExtVo implements Serializable{
 	}
 
 	public Set<PassengerVo> getPgerList() {
-	
+
 		return pgerList;
 	}
 
 	public void setPgerList(Set<PassengerVo> pgerList) {
-	
+
 		this.pgerList = pgerList;
 	}
 
-	
+
 
 	public Integer[] getPayStatus() {
 		return payStatus;
@@ -630,54 +640,54 @@ public class SaleChangeExtVo implements Serializable{
 	}
 
 	public List<LegVo> getLegList() {
-	
+
 		return legList;
 	}
-	
+
 	public void setLegList(List<LegVo> legList) {
-	
+
 		this.legList = legList;
 	}
-	
+
 	public String getSaleOrderNoArray() {
-	
+
 		return saleOrderNoArray;
 	}
-	
+
 	public void setSaleOrderNoArray(String saleOrderNoArray) {
-	
+
 		this.saleOrderNoArray = saleOrderNoArray;
 	}
 
-	
+
 	public List<PassengerVo> getAdtCountList() {
-	
+
 		return adtCountList;
 	}
 
-	
+
 	public void setAdtCountList(List<PassengerVo> adtCountList) {
-	
+
 		this.adtCountList = adtCountList;
 	}
 
 	public List<PassengerVo> getChdCountList() {
-	
+
 		return chdCountList;
 	}
 
 	public void setChdCountList(List<PassengerVo> chdCountList) {
-	
+
 		this.chdCountList = chdCountList;
 	}
-	
+
 	public List<PassengerVo> getInfCountList() {
-	
+
 		return infCountList;
 	}
 
 	public void setInfCountList(List<PassengerVo> infCountList) {
-	
+
 		this.infCountList = infCountList;
 	}
 
@@ -691,27 +701,27 @@ public class SaleChangeExtVo implements Serializable{
 		this.pnr = pnr;
 	}
 
-	
+
 	public Long getSaleChangeNo() {
-	
+
 		return saleChangeNo;
 	}
 
-	
+
 	public void setSaleChangeNo(Long saleChangeNo) {
-	
+
 		this.saleChangeNo = saleChangeNo;
 	}
 
-	
+
 	public String getFlag() {
-	
+
 		return flag;
 	}
 
-	
+
 	public void setFlag(String flag) {
-	
+
 		this.flag = flag;
 	}
 
@@ -748,14 +758,14 @@ public class SaleChangeExtVo implements Serializable{
 	public void setChildStatus(Integer[] childStatus) {
 		this.childStatus = childStatus;
 	}
-	
+
 	public String getCreator() {
-	
+
 		return creator;
 	}
-	
+
 	public void setCreator(String creator) {
-	
+
 		this.creator = creator;
 	}
 

@@ -5,8 +5,8 @@ import java.math.BigDecimal;
 
 /**
  * 支付的一些相关参数
- * @author hongqiaoxin
  *
+ * @author hongqiaoxin
  */
 public class PayDto implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -50,17 +50,88 @@ public class PayDto implements Serializable {
 	 * 支付账户编号
 	 */
 	private Long accountNo;
-	
+
 	/**
 	 * 客户编号
 	 */
 	private Long customerNo;
-	
+
 	/**
 	 * 客户类型
 	 */
 	private Long customerTypeNo;
-	
+
+	/**
+	 * 差异单号(只有差异单是传值)
+	 */
+	private Long differenceOrderNo;
+
+	/**
+	 * 差异单(判断是否为差异单Y是)
+	 */
+	private String differenceType;
+
+
+	private String receivableAccount;//收款账号
+
+	//补充说明
+	private String reason;
+
+	//第三方支付流水 多个以","隔开 (销售不用传)
+	private String thirdPayNo;
+
+	private String paymentAccount;//付款账号 额度用该字段
+
+
+
+	public String getReceivableAccount() {
+		return receivableAccount;
+	}
+
+	public void setReceivableAccount(String receivableAccount) {
+		this.receivableAccount = receivableAccount;
+	}
+
+	public String getReason() {
+		return reason;
+	}
+
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
+
+	public String getThirdPayNo() {
+		return thirdPayNo;
+	}
+
+	public void setThirdPayNo(String thirdPayNo) {
+		this.thirdPayNo = thirdPayNo;
+	}
+
+	public String getPaymentAccount() {
+		return paymentAccount;
+	}
+
+	public void setPaymentAccount(String paymentAccount) {
+		this.paymentAccount = paymentAccount;
+	}
+
+	public Long getDifferenceOrderNo() {
+		return differenceOrderNo;
+	}
+
+	public void setDifferenceOrderNo(Long differenceOrderNo) {
+		this.differenceOrderNo = differenceOrderNo;
+	}
+
+	public String getDifferenceType() {
+		return differenceType;
+	}
+
+	public void setDifferenceType(String differenceType) {
+		this.differenceType = differenceType;
+	}
+
 	public Long getBussinessNo() {
 		return bussinessNo;
 	}
@@ -120,23 +191,23 @@ public class PayDto implements Serializable {
 	public Long getAccountNo() {
 		return accountNo;
 	}
-	
+
 	public void setAccountNo(Long accountNo) {
 		this.accountNo = accountNo;
 	}
-	
+
 	public void setCustomerNo(Long customerNo) {
 		this.customerNo = customerNo;
 	}
-	
+
 	public Long getCustomerNo() {
 		return customerNo;
 	}
-	
+
 	public void setCustomerTypeNo(Long customerTypeNo) {
 		this.customerTypeNo = customerTypeNo;
 	}
-	
+
 	public Long getCustomerTypeNo() {
 		return customerTypeNo;
 	}
