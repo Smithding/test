@@ -1480,7 +1480,10 @@ public class OrderServiceImpl implements IOrderService {
                     buyOrderExt.setBuyLocker(0L);
                 }
                 buyOrderExt.setModifyTime(new Date());
-                buyOrderExtDao.updateByPrimaryKeySelective(buyOrderExt);
+                int num = buyOrderExtDao.updateByPrimaryKeySelective(buyOrderExt);
+                if(num == 1){
+                    flag = true;
+                }
             }
             /*SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(saleOrderNo.getEntity().longValue());
             if (saleOrderExt != null) {
