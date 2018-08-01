@@ -40,6 +40,8 @@ public class RoomInfo implements Serializable{
 
     private Integer breakfastCount; //早餐数量
 
+    private String bedTypeName;     //床型
+
     public String getHolMidId() {
         return holMidId;
     }
@@ -166,5 +168,13 @@ public class RoomInfo implements Serializable{
 
     public void setBreakfastCount(Integer breakfastCount) {
         this.breakfastCount = breakfastCount;
+    }
+
+    public String getBedTypeName() {
+        return bedTypeName;
+    }
+
+    public void setBedTypeName(String bedTypeName) {
+        this.bedTypeName = bedTypeName;
     }
 }

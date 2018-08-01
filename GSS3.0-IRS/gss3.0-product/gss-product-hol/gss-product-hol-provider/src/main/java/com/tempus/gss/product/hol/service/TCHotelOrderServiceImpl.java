@@ -793,6 +793,14 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				pageRequest.getEntity().setCreateEndTime(null);
 				pageRequest.getEntity().setCreateStartTime(null);
 			}
+			if(pageRequest.getEntity().getCreateEndTime() != null) {
+				Calendar da = Calendar.getInstance();
+				da.setTime(pageRequest.getEntity().getCreateEndTime());
+				da.set(Calendar.HOUR, 23);
+				da.set(Calendar.MINUTE, 59);
+				da.set(Calendar.SECOND, 59);
+				pageRequest.getEntity().setCreateEndTime(da.getTime());
+			}
 
 
 			List<HotelOrder> hotelOrderList = hotelOrderMapper.queryOrderList(page, pageRequest.getEntity());
