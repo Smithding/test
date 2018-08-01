@@ -181,7 +181,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		if(null == resDetail) {
 			resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), HolMidBaseInfo.class);
 			
-			redisService.set(perKey, resDetail, Long.valueOf(60 * 60 * 24 * 3));
+			redisService.set(perKey, resDetail, Long.valueOf(60 * 60 * 24));
 		}
 		
 		return resDetail;
