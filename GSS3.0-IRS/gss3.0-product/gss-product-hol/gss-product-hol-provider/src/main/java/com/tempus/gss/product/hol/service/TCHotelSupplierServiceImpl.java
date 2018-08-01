@@ -1445,8 +1445,6 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		if(null == list) {
 			list = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)),PaymentWay.class);
 			redisService.set(perKey, list);
-		}else {
-			System.out.println("list不为空");
 		}
 		return list;
 	}
