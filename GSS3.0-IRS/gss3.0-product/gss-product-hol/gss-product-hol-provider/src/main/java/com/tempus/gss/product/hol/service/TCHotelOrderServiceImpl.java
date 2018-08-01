@@ -5,6 +5,10 @@ import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -794,14 +798,11 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				pageRequest.getEntity().setCreateStartTime(null);
 			}
 			if(pageRequest.getEntity().getCreateEndTime() != null) {
-				Calendar da = Calendar.getInstance();
-				da.setTime(pageRequest.getEntity().getCreateEndTime());
-				da.set(Calendar.HOUR, 23);
-				da.set(Calendar.MINUTE, 59);
-				da.set(Calendar.SECOND, 59);
-				pageRequest.getEntity().setCreateEndTime(da.getTime());
+				LocalDate localDate = pageRequest.getEntity().getCreateEndTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+				LocalTime localTime = LocalTime.now();
+				LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
+				pageRequest.getEntity().setCreateEndTime(Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()));
 			}
-
 
 			List<HotelOrder> hotelOrderList = hotelOrderMapper.queryOrderList(page, pageRequest.getEntity());
 	        /**
