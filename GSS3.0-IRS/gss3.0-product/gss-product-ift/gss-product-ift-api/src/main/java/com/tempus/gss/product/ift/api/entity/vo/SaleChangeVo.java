@@ -97,7 +97,8 @@ public class SaleChangeVo implements Serializable{
 	 */
 	@JsonSerialize(using = LongSerializer.class)
 	private Long locker;
-
+	@JsonSerialize(using = LongSerializer.class)
+	private Long buyLocker;
 	/**
 	 * 审核人员
 	 */
@@ -414,5 +415,13 @@ public class SaleChangeVo implements Serializable{
 
 	public void setCustomerName(String customerName) {
 		this.customerName = customerName;
+	}
+
+	public Long getBuyLocker() {
+		return buyLocker;
+	}
+
+	public void setBuyLocker(Long buyLocker) {
+		this.buyLocker = buyLocker;
 	}
 }

@@ -212,6 +212,8 @@ public class SaleOrderExtVo implements Serializable {
 	 */
 	@JsonSerialize(using = LongSerializer.class)
 	private Long locker;
+	@JsonSerialize(using = LongSerializer.class)
+	private Long buyLocker;
 
 	/**
 	 * 锁定时间.
@@ -1270,6 +1272,14 @@ public class SaleOrderExtVo implements Serializable {
 
 	public void setCustomerName(String customerName) {
 		this.customerName = customerName;
+	}
+
+	public Long getBuyLocker() {
+		return buyLocker;
+	}
+
+	public void setBuyLocker(Long buyLocker) {
+		this.buyLocker = buyLocker;
 	}
 
 	@Override

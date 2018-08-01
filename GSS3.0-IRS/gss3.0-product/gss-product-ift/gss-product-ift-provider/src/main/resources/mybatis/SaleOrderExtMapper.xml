@@ -59,6 +59,7 @@
         <result column="HANDLERS" property="handlers" jdbcType="VARCHAR"/>
         <result column="OFFICE" property="office" jdbcType="VARCHAR"/>
         <result column="CUSTOMER_NAME" property="customerName" jdbcType="VARCHAR"/>
+        <result column="BUY_LOCKER" property="buyLocker" jdbcType="BIGINT"/>
         <!--不分单时所有操作步骤都是由这个字段的操作员操作-->
         <result column="ALONE_LOCKER" property="aloneLocker" jdbcType="BIGINT"/>
         <association property="saleOrder" column="SALE_ORDER_NO"
@@ -564,14 +565,24 @@
         f.SALE_ORDER_NO, f.ID, f.OWNER, f.DEMAND_NO, f.LEG_TYPE, f.CONTACT_NAME, f.CONTACT_PHONE, f.CONTACT_MOBILE,
         f.CONTACT_MAIL, f.SALE_REMARK, f.VALID, f.VERSION, f.LOCKER, f.LOCK_TIME, f.CREATE_TYPE, f.CREATE_TIME,
         f.MODIFY_TIME, (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as CREATOR ,f.ALONE_LOCKER,
-        CC.`NAME` CUSTOMER_NAME,
+        CC.`NAME` CUSTOMER_NAME,ab.BUY_LOCKER,
         <if test="orderSource == 'OP'">
             (select NAME from SM_USER where LOGIN_NAME =f.CREATOR) as MODIFIER,
         </if>
         <if test="orderSource != 'OP'">
             (select NAME from SM_USER where LOGIN_NAME =f.MODIFIER) as MODIFIER,
         </if>
-        o.ORDER_CHILD_STATUS,f.LINKTYPE,(SELECT NAME FROM SM_USER where ID = f.LOCKER) as HANDLERS,f.ORIGINAL_ORDER_NO
+        o.ORDER_CHILD_STATUS,f.LINKTYPE,
+        <if test="locker!=null">
+        (SELECT NAME FROM SM_USER where ID = f.LOCKER) as HANDLERS,
+        </if>
+        <if test="buyLocker!=null">
+            (SELECT NAME FROM SM_USER where ID = ab.BUY_LOCKER) as HANDLERS,
+        </if>
+        <if test="locker ==null and buyLocker==null">
+            (SELECT NAME FROM SM_USER where ID = f.LOCKER) as HANDLERS,
+        </if>
+        f.ORIGINAL_ORDER_NO
         FROM
         IFT_SALE_ORDER_EXT f
         left join OS_SALEORDER o on f.SALE_ORDER_NO = o.SALE_ORDER_NO

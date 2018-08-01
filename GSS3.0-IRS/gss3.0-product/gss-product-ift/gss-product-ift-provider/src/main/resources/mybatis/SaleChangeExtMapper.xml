@@ -24,6 +24,7 @@
         <result column="CREATOR" property="creator" jdbcType="VARCHAR"/>
         <!--将销售单锁定的用户的Id 有大于0的值，表示已被用户锁定，是该用户的Id.-->
         <result column="LOCKER" property="locker" jdbcType="BIGINT"/>
+        <result column="BUY_LOCKER" property="buyLocker" jdbcType="BIGINT"/>
         <!--锁定时间-->
         <result column="LOCK_TIME" property="lockTime" jdbcType="TIMESTAMP"/>
         <!--业务类型 1废 2退 3改(同SaleChange的 orderChangeType 属性)-->
@@ -717,7 +718,16 @@
         i.CUSTOMER_REMARK, i.REFUSE_REASON,i.TICKET_CHANGE_TYPE
         ,i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO,/*su.LOGIN_NAME,*/i.DRAWER_LOGIN_NAME,
         h.AIRLINE_REFUND_STATUS,i.ALONE_LOCKER,CC.`NAME` CUSTOMER_NAME,
-        (SELECT NAME FROM SM_USER where ID = i.LOCKER) as LOGIN_NAME
+        h.BUY_LOCKER,
+        <if test="locker !=null">
+            (SELECT NAME FROM SM_USER where ID = i.LOCKER) as LOGIN_NAME
+        </if>
+        <if test="buyLocker !=null">
+            (SELECT NAME FROM SM_USER where ID = h.BUY_LOCKER) as LOGIN_NAME
+        </if>
+        <if test="buyLocker ==null and locker==null">
+            (SELECT NAME FROM SM_USER where ID = i.LOCKER) as LOGIN_NAME
+        </if>
         FROM
         IFT_SALE_CHANGE_EXT i
         left join OS_SALECHANGE o on o.SALE_CHANGE_NO = i.SALE_CHANGE_NO

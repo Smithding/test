@@ -1360,6 +1360,7 @@ public class RefundServiceImpl implements IRefundService {
 					saleChangeVo.setSaleChangeNo(saleChangeExt.getSaleChangeNo());//
 					saleChangeVo.setAgentId(requestWithActor.getAgent().getId());
 					saleChangeVo.setLocker(saleChangeExt.getLocker());
+					saleChangeVo.setBuyLocker(saleChangeExt.getBuyLocker());
 					saleChangeVo.setCustomerName(saleChangeExt.getCustomerName());
 					//设置操作人
 					saleChangeVo.setHandlers(saleChangeExt.getHandlers());
