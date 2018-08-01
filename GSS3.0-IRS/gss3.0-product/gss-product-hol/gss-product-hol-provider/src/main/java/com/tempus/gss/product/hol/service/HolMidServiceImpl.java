@@ -223,7 +223,8 @@ public class HolMidServiceImpl implements IHolMidService {
        /* if(StringUtil.isNullOrEmpty(agent.getType())){
             throw new GSSException("获取酒店列表", "0102", "agentType为空");
         }*/
-       return mongoTemplate1.findOne(new Query(Criteria.where("_id").is(holMidId)), HolMidBaseInfo.class);
+        
+       return tcHotelSupplierService.queryMidListByResId(agent, holMidId);
 		
 	}
 
