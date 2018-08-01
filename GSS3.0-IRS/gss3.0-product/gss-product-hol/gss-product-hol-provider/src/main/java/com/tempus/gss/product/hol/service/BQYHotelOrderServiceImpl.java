@@ -12,6 +12,7 @@ import com.tempus.gss.order.entity.enums.GoodsBigType;
 import com.tempus.gss.order.entity.vo.ActualInfoSearchVO;
 import com.tempus.gss.order.entity.vo.CertificateCreateVO;
 import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -408,7 +409,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 	}
 
 	@Override
-	public HotelOrder createOrder(Agent agent, CreateOrderReq orderReq, OrderCreateReq orderCreateReq) {
+	public HotelOrder createOrder(Agent agent, CreateOrderReq orderReq, OrderCreateReq orderCreateReq, RoomInfo roomInfo) {
 		orderReq.setMobile(tempusMobile);
 		if (StringUtil.isNullOrEmpty(orderReq)) {
 			logger.error("orderReq查询条件为空");
@@ -501,6 +502,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 
 		HotelOrder hotelOrder = new HotelOrder();
 
+		/*
 		// 查询酒店房间价格
 		QueryHotelParam query = new QueryHotelParam();
 		query.setCheckInTime(orderReq.getCheckInTime());
@@ -508,19 +510,43 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		query.setCityCode(String.valueOf(orderReq.getCityId()));
 		query.setHotelId(orderReq.getHotelId());
 		List<RoomPriceItem> roomPriceList = bqyHotelInterService.queryHotelRoomPrice(query);
+		*/
+
 		// 房型ID
-		String roomTypeId = orderReq.getProductId();
-		//房间单价 (房间每天的价格相加)
-		BigDecimal unitPrice = null;
+		//String roomTypeId = orderReq.getProductId();
+		//房间单价
+		BigDecimal unitPrice = new BigDecimal(roomInfo.getPrice());
+		//供应商ID
+		String supplierId = roomInfo.getSupplierId();
+		//预定检查类型
+		String ratePlanCategory = roomInfo.getRatePlanCategory();
+		//政策类型
+		String policyType = roomInfo.getPolicyType();
+
 		// 每天的价格记录
 		String eachNightPrice = null;
-		//供应商ID
-		String supplierId = null;
-		//预定检查类型
-		String ratePlanCategory = null;
-		//政策类型
-		String policyType = "";
-		outer:
+		BigDecimal oneDayPrice = unitPrice.multiply(new BigDecimal(orderReq.getBookNumber()));
+
+		for (int i = 0; i < daysBetween; i++) {
+			if (eachNightPrice == null || "".equals(eachNightPrice)) {
+				eachNightPrice = oneDayPrice.toString();
+			} else {
+				eachNightPrice = eachNightPrice + "," + oneDayPrice.toString();
+			}
+		}
+
+		orderReq.setHotelRoomName(roomInfo.getRoomTypeName());
+		orderReq.setProductName(roomInfo.getRoomName());
+
+		// 产品名称
+		hotelOrder.setSupPriceName(roomInfo.getRoomTypeName());
+		hotelOrder.setProName(roomInfo.getRoomName());
+
+		orderCreateReq.setCancelPenalty(roomInfo.getLastCancelTime());
+
+		hotelOrder.setBedTypeName(roomInfo.getBedTypeName());
+
+		/*outer:
 		for (RoomPriceItem roomPriceItem : roomPriceList) {
 			BaseRoomInfo baseRoomInfo = roomPriceItem.getBaseRoomInfo();
 			if (roomTypeId.equals(baseRoomInfo.getRoomTypeID())) {// 判断房型是否一致
@@ -546,7 +572,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 						//平均价格
 						Double settleFee = roomPriceInfo.getAveragePrice().getSettleFee();
 						unitPrice = new BigDecimal(settleFee);
-						/*List<RoomPriceDetail> priceDetailList = roomPriceInfo.getRoomPriceDetail();
+						*//*List<RoomPriceDetail> priceDetailList = roomPriceInfo.getRoomPriceDetail();
 						for (RoomPriceDetail roomPriceDetail : priceDetailList) {
 							String oneDayPrice = roomPriceDetail.getPrice().getAmount();
 							// 计算一间房的价格
@@ -557,7 +583,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 							} else {
 								eachNightPrice = eachNightPrice + "," + oneDayPrice;
 							}
-						}*/
+						}*//*
 						for (int i = 0; i < daysBetween; i++) {
 							if (eachNightPrice == null || "".equals(eachNightPrice)) {
 								eachNightPrice = settleFee.toString();
@@ -582,14 +608,14 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 				}
 				break outer;
 			}
-		}
+		}*/
 		if (unitPrice == null) {
 			logger.error("酒店房间单价为空!");
 			throw new GSSException("创建酒店订单", "0107", "酒店单价为空！");
 		}
 		orderReq.setUnitPrice(unitPrice);
 		// 总价格
-		BigDecimal newTotalPrice = (unitPrice.multiply(new BigDecimal(daysBetween))).multiply(new BigDecimal(orderReq.getBookNumber()));
+		BigDecimal newTotalPrice = oneDayPrice.multiply(new BigDecimal(daysBetween));
 		hotelOrder.setEachNightPrice(eachNightPrice);
 
 		Long businessSignNo = IdWorker.getId();
@@ -725,7 +751,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		
 		if (beforeTotalPrice.compareTo(newTotalPrice) != 0) {
 			logger.error("传入的总价与最新的总价不一致");
-			throw new GSSException("创建酒店订单失败", "0132", "价格不一致");
+			throw new GSSException("创建酒店订单失败", String.valueOf(saleOrderNo), "价格不一致");
 		}
 		
 		if (StringUtils.isBlank(supplierId)) {
@@ -757,7 +783,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			hotelOrderMapper.updateById(hotelOrder);
 			return hotelOrder;
 		}else {
-			throw new GSSException("bqy酒店创建失败!", "10001", "bqy酒店创建失败!");
+			throw new GSSException("bqy酒店创建失败!", String.valueOf(saleOrderNo), "bqy酒店创建失败,返回结果为空或订单号小于等于0!");
 		}
 	}
 }
