@@ -1732,8 +1732,8 @@ public class RefundServiceImpl implements IRefundService {
 		SaleChangeExt saleChangeExt = refundService.getSaleChangeExtByNo(parameter);
 		if(saleChangeExt!=null) {
 			//更新当前操作员订单数量
-			Long lockerId = saleChangeExt.getLocker();
-			saleChangeExt.setLocker(0L);
+			//Long lockerId = saleChangeExt.getLocker();
+			//saleChangeExt.setLocker(0L);
 			//状态查看assist.js alineQuitSaleStatus方法状态 1,"待审核",2,"已审核",3,"已退废",4,"已拒单"
 			saleChangeExt.setAirlineStatus(3);//航司已审核
 			saleChangeExt.setModifier(agent.getAccount());
@@ -1744,9 +1744,9 @@ public class RefundServiceImpl implements IRefundService {
 			requestWithActor.setAgent(agent);
 			log.info("航司审核更新变更单号信息:"+saleChangeExt.toString());
 			refundService.updateSaleChangeExt(requestWithActor1);
-			if(lockerId!=null) {
+			/*if(lockerId!=null) {
 				iTicketSenderService.updateByLockerId(agent, lockerId, "BUY_REFUSE_NUM");
-			}
+			}*/
 		}else{
 			throw new GSSException("变更单为空", "0001", "查询废退改签单失败");
 		}
@@ -1767,6 +1767,8 @@ public class RefundServiceImpl implements IRefundService {
 					buyChangeExt.setModifyTime(modifyTime);
 					log.info("退废单航司退款审核通过时修改变更变信息："+buyChangeExt.toString());
 					buyChangeExtDao.updateByPrimaryKey(buyChangeExt);
+					//更新采购员订单数量
+					iTicketSenderService.updateByLockerId(agent, buyChangeExt.getBuyLocker(), "BUY_REFUSE_NUM");
 				}
 				BuyChange buyChange = buyChangeService.getBuyChangeByNo(agent,buyChangeNo);
 				if(buyChange!=null){//1 已退款
