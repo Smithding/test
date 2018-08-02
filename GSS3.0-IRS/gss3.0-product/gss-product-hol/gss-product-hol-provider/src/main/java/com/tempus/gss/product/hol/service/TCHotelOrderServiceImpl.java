@@ -101,6 +101,7 @@ import com.tempus.gss.product.hol.api.util.OrderStatusUtils;
 import com.tempus.gss.product.hol.dao.HolSupplierMapper;
 import com.tempus.gss.product.hol.dao.HotelErrorOrderMapper;
 import com.tempus.gss.product.hol.dao.HotelOrderMapper;
+import com.tempus.gss.product.hol.utils.CacheHolLock;
 import com.tempus.gss.product.hol.utils.HttpClientUtil;
 import com.tempus.gss.product.hol.utils.TrackTime;
 import com.tempus.gss.sms.SMSUtil;
@@ -1496,7 +1497,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		return replace;
 	}
 
-	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
+	@CacheHolLock(prefix = "tcPushOrderInfo")
 	@Override
 	public Boolean tcPushOrderInfo(Agent agent, TcPushOrderInfo tcPushOrderInfo) throws GSSException{
 		logger.info("推送更新订单状态:{}",JSON.toJSONString(tcPushOrderInfo));
@@ -1514,7 +1515,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 					hotelOrder.setModifier("供应商");
 					hotelOrder.setModifyTime(new Date());
 					if(tcPushOrderInfo.getOperateType().equals(StatusType.ORDER_CONFIRM.getKey())){
-						if(!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.ALREADY_CONRIRM.getKey())) {
+						if(hotelOrder.getOrderStatus().equals(OwnerOrderStatus.ALREADY_CONRIRM.getKey())){
+							throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
+						}else{
 							flag =1;
 							des = "订单号"+orderId +",订单状态由"+ OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus()).getValue()+"变成:"+ OwnerOrderStatus.ALREADY_CONRIRM.getValue();
 							//更新销售单和采购单状态
@@ -1574,7 +1577,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							//}
 						}
 					}else if(tcPushOrderInfo.getOperateType().equals(StatusType.CANCEL_ORDER_CONFIRM.getKey())){
-						if(!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.CANCEL_OK.getKey())) {
+						if(hotelOrder.getOrderStatus().equals(OwnerOrderStatus.CANCEL_OK.getKey())){
+							throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
+						}else{
 							flag =1;
 							des = "订单号"+orderId +",订单状态由"+OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus()).getValue()+"变成:"+ OwnerOrderStatus.CANCEL_OK.getValue();
 							//更新销售单和采购单状态
@@ -1588,11 +1593,14 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							mssReserveService.interHotelStatus(ag, hotelOrder.getSaleOrderNo(), OwnerOrderStatus.CANCEL_OK.getKey(), "酒店订单"+hotelOrder.getSaleOrderNo()+"已取消");
 						}
 					}else if(tcPushOrderInfo.getOperateType().equals(StatusType.CHECK_RESIDE.getKey())){
-						if( !hotelOrder.getOrderStatus().equals(OwnerOrderStatus.RESIDE_OK.getKey()) || 
-							!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.NO_RESIDE.getKey()) || 
-							!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.BEFORE_RESIDE.getKey()) || 
-							!hotelOrder.getOrderStatus().equals(OwnerOrderStatus.AFTER_RESIDE.getKey())
+						if( hotelOrder.getOrderStatus().equals(OwnerOrderStatus.RESIDE_OK.getKey()) || 
+							hotelOrder.getOrderStatus().equals(OwnerOrderStatus.NO_RESIDE.getKey()) || 
+							hotelOrder.getOrderStatus().equals(OwnerOrderStatus.BEFORE_RESIDE.getKey()) || 
+							hotelOrder.getOrderStatus().equals(OwnerOrderStatus.AFTER_RESIDE.getKey())
 							) {
+								throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
+							}
+							else{
 							flag =1;
 							OrderDetailInfoReq orderDetailInfoReq =new OrderDetailInfoReq();
 							orderDetailInfoReq.setOrderId(tcPushOrderInfo.getOrderId());
