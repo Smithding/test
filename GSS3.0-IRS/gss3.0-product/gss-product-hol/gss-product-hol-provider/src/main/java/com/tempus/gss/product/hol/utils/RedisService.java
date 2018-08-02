@@ -187,26 +187,6 @@ public class RedisService {
     
     
     /**
-     * 批量删除对应的value
-     * @param keys
-     */
-    public void remove(final String... keys) {
-        for (String key : keys) {
-            remove(key);
-        }
-    }
-    
-    /**
-     * 删除对应的value
-     * @param key
-     */
-    public void remove(final String key) {
-        if (exists(key)) {
-            redisTemplate1.delete(key);
-        }
-    }
-    
-    /**
      * 判断缓存中是否有对应的value
      * @param key
      * @return
