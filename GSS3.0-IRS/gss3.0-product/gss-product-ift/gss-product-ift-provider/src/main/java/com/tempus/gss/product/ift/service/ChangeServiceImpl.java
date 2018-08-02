@@ -306,6 +306,14 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeService.create(requestWithActor.getAgent(), saleChange);
 
             /*创建销售改签单拓展*/
+            //多次改签
+            //获取上次改签的pnr 编码 以及供应商
+            SaleChangeExt lastSaleChangeExt =saleChangeExtDao.selectLastChangeExtByPassengerNo(requestWithActor.getEntity().getOldPassengerNoList().get(0));
+            if (lastSaleChangeExt !=null){
+                saleChangeExt.setSupplierNo(lastSaleChangeExt.getSupplierNo());
+                saleChangeExt.setPnrNo(lastSaleChangeExt.getPnrNo());
+                saleChangeExt.setOffice(lastSaleChangeExt.getOffice());
+            }
             saleChangeExt.setSaleChangeNo(saleChangeNo);
             saleChangeExt.setChangeType(3);//3为改签,同saleChange的orderChangeType
             saleChangeExt.setContactName(requestWithActor.getEntity().getContactName());

@@ -302,6 +302,19 @@
 	    #{pnrNo,jdbcType=BIGINT}), #{changeRemark,jdbcType=VARCHAR},#{drawerLoginName,jdbcType=VARCHAR},#{aloneLocker,jdbcType=BIGINT})
         )
     </insert>
+    <select id="selectLastChangeExtByPassengerNo" resultType="com.tempus.gss.product.ift.api.entity.SaleChangeExt" parameterType="java.lang.Long">
+        SELECT
+        b.SUPPLIER_NO,b.OFFICE,b.PNR_NO
+        FROM
+        IFT_SALE_ORDER_DETAIL a
+        LEFT JOIN   IFT_SALE_CHANGE_EXT b ON a.SALE_ORDER_NO = b.SALE_CHANGE_NO
+        WHERE
+        a.PASSENGER_NO =#{passengerNo}
+        AND a.`STATUS` = "10"
+        ORDER BY
+        a.ID DESC
+        LIMIT 1;
+    </select>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.SaleChangeExt">
         insert into IFT_SALE_CHANGE_EXT
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -393,6 +406,9 @@
             <if test="aloneLocker !=null">
                 ALONE_LOCKER,
             </if>
+            <if test="supplierNo !=null">
+                SUPPLIER_NO,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="saleChangeNo != null">
@@ -482,6 +498,9 @@
             </if>
             <if test="aloneLocker !=null">
                 #{aloneLocker,jdbcType=BIGINT},
+            </if>
+            <if test="supplierNo !=null">
+                #{supplierNo,jdbcType=BIGINT},
             </if>
         </trim>
     </insert>
@@ -678,10 +697,16 @@
                 DRAWER_LOGIN_NAME =#{drawerLoginName,jdbcType=VARCHAR},
             </if>
             <if test="aloneLocker !=null">
-                ALONE_LOCKER = #{aloneLocker,jdbcType=BIGINT}
+                ALONE_LOCKER = #{aloneLocker,jdbcType=BIGINT},
+            </if>
+            <if test="supplierNo !=null">
+                SUPPLIER_NO = #{supplierNo,jdbcType=BIGINT},
+            </if>
+            <if test="office !=null">
+                OFFICE = #{office,jdbcType=BIGINT}
             </if>
         </set>
-        where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
+        where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=VARCHAR}
     </update>
     <select id="queryBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
         SELECT DISTINCT
