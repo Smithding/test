@@ -1703,6 +1703,11 @@ public class RefundServiceImpl implements IRefundService {
 				buyChangeService.update(agent, buyChange);
 			}
 		}
+		BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
+		if(buyChangeExt !=null &&  0 != buyChangeExt.getBuyLocker()){
+			//更新出票人信息
+			ticketSenderService.updateByLockerId(agent,buyChangeExt.getBuyLocker(),"BUY_REFUSE_NUM");
+		}
 		log.info("---航司退款拒单结束---");
 		//更新前一位采购人的订单处理数量
 	/*	User user = userService.findUserByLoginName(agent,agent.getAccount());
