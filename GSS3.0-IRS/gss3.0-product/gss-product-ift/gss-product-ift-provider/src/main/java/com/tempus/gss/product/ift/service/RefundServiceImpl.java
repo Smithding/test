@@ -149,6 +149,8 @@ public class RefundServiceImpl implements IRefundService {
 	IUserService userService;
 	@Reference
 	IPassengerRefundPriceService passengerRefundPriceService;
+	@Reference
+	IftBuyChangeExtService buyChangeExtService;
 
 	SimpleDateFormat simpleDate = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
 
@@ -1597,7 +1599,7 @@ public class RefundServiceImpl implements IRefundService {
 		buyChangeExt.setBuyLocker(order.getAloneLocker());
 		buyChangeExt.setModifyTime(date);
 		log.info("更新采购变更单扩展表所锁单人："+buyChangeExt.toString());
-		buyChangeExtDao.updateBuyRemarkBySelectBuyChangeNo(buyChangeExt);
+		buyChangeExtService.updateBuyChangeExt(buyChangeExt);
 	}
 
 	public void assingLockSaleChangeExt(SaleChangeExt order, TicketSender sender, Date date, Agent agent) {
@@ -1608,7 +1610,7 @@ public class RefundServiceImpl implements IRefundService {
 			buyChangeExt.setBuyLocker(user.getId());
 			buyChangeExt.setModifyTime(date);
 			log.info("自动分单更新采购变更单扩展表所锁单人："+buyChangeExt.toString());
-			buyChangeExtDao.updateBuyRemarkBySelectBuyChangeNo(buyChangeExt);
+			buyChangeExtService.updateBuyChangeExt(buyChangeExt);
 		}
 	}
 
@@ -1732,8 +1734,8 @@ public class RefundServiceImpl implements IRefundService {
 		SaleChangeExt saleChangeExt = refundService.getSaleChangeExtByNo(parameter);
 		if(saleChangeExt!=null) {
 			//更新当前操作员订单数量
-			Long lockerId = saleChangeExt.getLocker();
-			saleChangeExt.setLocker(0L);
+			//Long lockerId = saleChangeExt.getLocker();
+			//saleChangeExt.setLocker(0L);
 			//状态查看assist.js alineQuitSaleStatus方法状态 1,"待审核",2,"已审核",3,"已退废",4,"已拒单"
 			saleChangeExt.setAirlineStatus(3);//航司已审核
 			saleChangeExt.setModifier(agent.getAccount());
@@ -1744,9 +1746,9 @@ public class RefundServiceImpl implements IRefundService {
 			requestWithActor.setAgent(agent);
 			log.info("航司审核更新变更单号信息:"+saleChangeExt.toString());
 			refundService.updateSaleChangeExt(requestWithActor1);
-			if(lockerId!=null) {
+			/*if(lockerId!=null) {
 				iTicketSenderService.updateByLockerId(agent, lockerId, "BUY_REFUSE_NUM");
-			}
+			}*/
 		}else{
 			throw new GSSException("变更单为空", "0001", "查询废退改签单失败");
 		}
@@ -1767,6 +1769,8 @@ public class RefundServiceImpl implements IRefundService {
 					buyChangeExt.setModifyTime(modifyTime);
 					log.info("退废单航司退款审核通过时修改变更变信息："+buyChangeExt.toString());
 					buyChangeExtDao.updateByPrimaryKey(buyChangeExt);
+					//更新采购员订单数量
+					iTicketSenderService.updateByLockerId(agent, buyChangeExt.getBuyLocker(), "BUY_REFUSE_NUM");
 				}
 				BuyChange buyChange = buyChangeService.getBuyChangeByNo(agent,buyChangeNo);
 				if(buyChange!=null){//1 已退款
@@ -1843,10 +1847,7 @@ public class RefundServiceImpl implements IRefundService {
 			if(!isDistributeTicket){
 				//如果不是系统分单
 				assingLockSaleChangeExt(order,updateTime);
-				//order = configsService.setLockerAsAloneLocker(order);
-				//Long locker = order.getLocker();
-				//TicketSender ticketSender = iTicketSenderService.queryByUserId(locker);
-				//increaseBuyRefuseNum(agent, ticketSender);
+				iTicketSenderService.updateByLockerId(agent,order.getAloneLocker(),"BUY_REFUSE_NUM");
 			} else{
 				log.info("第三步：判断出票员手头出票订单数量...");
 				for (TicketSender peopleInfo : senders) {
@@ -1881,6 +1882,7 @@ public class RefundServiceImpl implements IRefundService {
 		if(!isDistributeTicket){
 			//如果不是系统分单
 			assingLockSaleChangeExt(saleChangeExt,updateTime);
+			iTicketSenderService.updateByLockerId(agent,saleChangeExt.getAloneLocker(),"BUY_REFUSE_NUM");
 		} else{
 			for (TicketSender peopleInfo : senders) {
 				log.info(peopleInfo.getName() + "未处理采购单数量：" + peopleInfo.getBuyRefuseNum());
@@ -1889,10 +1891,9 @@ public class RefundServiceImpl implements IRefundService {
 				} else {
 					//log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
 					/**锁单*/
-					log.info("第四步:满足条件的分配详细明细...1.将设置为出票中 .锁单,锁单人是被分配人...");
 					assingLockSaleChangeExt(saleChangeExt, peopleInfo, updateTime, agent);
 					/***增加出票人订单数*/
-					log.info("3.增加出票人的未处理采购单数量...");
+					log.info("增加出票人的未处理采购单数量...");
 					increaseBuyRefuseNum(agent, peopleInfo);
 					break;
 				}

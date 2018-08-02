@@ -181,7 +181,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		if(null == resDetail) {
 			resDetail= mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), HolMidBaseInfo.class);
 			
-			redisService.set(perKey, resDetail, Long.valueOf(60 * 60 * 24 * 3));
+			redisService.set(perKey, resDetail, Long.valueOf(60 * 60 * 24));
 		}
 		
 		return resDetail;
@@ -1445,8 +1445,6 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		if(null == list) {
 			list = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)),PaymentWay.class);
 			redisService.set(perKey, list);
-		}else {
-			System.out.println("list不为空");
 		}
 		return list;
 	}

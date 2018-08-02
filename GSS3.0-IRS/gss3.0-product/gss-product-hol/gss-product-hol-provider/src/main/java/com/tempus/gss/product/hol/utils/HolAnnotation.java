@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface HolOrderAnnotation {
+public @interface HolAnnotation {
 	String action() default "";
     String targetType() default "";
     String remark() default "";

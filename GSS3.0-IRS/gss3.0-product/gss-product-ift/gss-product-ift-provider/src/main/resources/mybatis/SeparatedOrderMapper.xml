@@ -11,6 +11,7 @@
         <result column="CUSTOMERNAME" property="customerName" jdbcType="VARCHAR"/>
         <result column="LOCKER" property="locker" jdbcType="BIGINT"/>
         <result column="STATUS" property="orderStatus" jdbcType="VARCHAR"/>
+        <result column="BUY_LOCKER" property="buyLockerName" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="sqlwhere">
@@ -53,12 +54,18 @@
                     <otherwise>AND ift.LOCKER = #{locker,jdbcType=BIGINT} </otherwise>
                 </choose>
             </if>
+            <if test="buyLocker!=null">
+                <choose>
+                    <when test="buyLocker == 1"></when>
+                    <otherwise>AND iftb.BUY_LOCKER = #{buyLocker,jdbcType=BIGINT} </otherwise>
+                </choose>
+            </if>
         </where>
     </sql>
 
     <select id="queryNoHandleByKey" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.SeparatedOrderVo">
         SELECT DISTINCT ift.ID,ift.SALE_ORDER_NO,ift.PNR_NO AS PNR,de.NAME AS DEPNAME,sm.NAME AS MODIFIERNAME,cps.NAME AS COMPNAME,
-        (SELECT NAME FROM SM_USER s WHERE s.LOGIN_NAME = ift.CREATOR) AS CUSTOMERNAME,ift.LOCKER,ISOD.`STATUS`
+        (SELECT NAME FROM SM_USER s WHERE s.LOGIN_NAME = ift.CREATOR) AS CUSTOMERNAME,ift.LOCKER,ISOD.`STATUS`,buyUser.NAME AS buyLockerName
         FROM IFT_SALE_ORDER_EXT ift
         LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ift.SALE_ORDER_NO = ISOD.SALE_ORDER_NO
         LEFT JOIN SM_USER sm ON sm.ID = ift.LOCKER
@@ -66,6 +73,8 @@
         LEFT JOIN CPS_CUSTOMER cps ON cps.CUSTOMER_NO = de.CUSTOMER_ID
         LEFT JOIN OS_SALEORDER o ON ift.SALE_ORDER_NO = o.SALE_ORDER_NO
         LEFT JOIN OS_BUYORDER aa ON ift.SALE_ORDER_NO = aa.SALE_ORDER_NO
+        LEFT JOIN IFT_BUY_ORDER_EXT iftb ON iftb.BUY_ORDER_NO = aa.BUY_ORDER_NO
+        LEFt JOIN SM_USER buyUser ON  iftb.BUY_LOCKER = buyUser.ID
         /*WHERE
 		ift.CREATE_TYPE IN (1, 2, 3, 4, 6)
 	    AND o.PAY_STATUS IN (3, 4)

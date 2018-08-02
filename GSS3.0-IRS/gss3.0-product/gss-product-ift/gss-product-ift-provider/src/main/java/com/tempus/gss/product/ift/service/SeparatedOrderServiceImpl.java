@@ -7,13 +7,15 @@ import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.*;
 import com.tempus.gss.product.ift.api.entity.vo.SeparatedOrderVo;
+import com.tempus.gss.product.ift.api.service.IBuyOrderExtService;
 import com.tempus.gss.product.ift.api.service.ISeparatedOrderService;
 import com.tempus.gss.product.ift.api.service.ITicketSenderService;
+import com.tempus.gss.product.ift.api.service.IftBuyChangeExtService;
+import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.SaleChangeExtDao;
 import com.tempus.gss.product.ift.dao.SaleOrderExtDao;
 import com.tempus.gss.product.ift.dao.SeparatedOrderDao;
 import com.tempus.gss.product.ift.dao.TicketSenderDao;
-import com.tempus.gss.security.AgentUtil;
 import com.tempus.gss.system.entity.User;
 import com.tempus.gss.system.service.IUserService;
 import com.tempus.gss.vo.Agent;
@@ -50,7 +52,12 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
     protected String ownerCode;
     @Reference
     private ITicketSenderService ticketSenderService;
-
+    @Reference
+    private IBuyOrderExtService buyOrderExtService;
+    @Reference
+    private IftBuyChangeExtService  buyChangeExtService;
+    @Reference
+    IConfigsService configsService;
     @Override
     public Page<SeparatedOrder> pageList(Page<SeparatedOrder> page, RequestWithActor<SeparatedOrderVo> requestWithActor) {
         log.info("查询订单分配列表开始");
@@ -69,11 +76,12 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
      * @param saleOrderNo
      * @param loginName
      * @param currentUserId  当前分单用户  用于记录是谁操作的分单
+     * @param saleOrBuyType
      * @return
      */
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public int updateSeparatedOrder(Long saleOrderNo,String loginName,String currentUserId) {
+    public int updateSeparatedOrder(Long saleOrderNo, String loginName, String currentUserId, String saleOrBuyType) {
         log.info("参数：saleOrderNo:{},loginName:{},currentUserId:{}",saleOrderNo,loginName,currentUserId);
         //查询订单，根据订单状态判定是那种情形下的重新分单
         String status = "1";//待核价
@@ -84,19 +92,51 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
                 status = details.get(0).getStatus();
             }
         }
-        //更新原被分配人员
-        Long lockerId = saleOrderExt.getLocker();
-        User user = userService.selectById(lockerId);
         //分给指定出票员后，订单被此人ID锁定
         Integer owner = Integer.valueOf(ownerCode);
         Agent agent = new Agent(owner);
         User tempUser = userService.findUserByLoginName(agent,loginName);
         Long tempUserId = tempUser.getId();
+        int num = 0 ;
+        //更新原被分配人员
+        Long lockerId = null;
         if(tempUser!=null) {
-            saleOrderExt.setLocker(tempUser.getId());
-            saleOrderExt.setAloneLocker(tempUser.getId());
+            boolean isDistributeTicket = configsService.getIsDistributeTicket(agent);
+            if(!isDistributeTicket){
+                //如果不是系统自动分单，那么把saleLocker和buyLocker和AloneLocker全部改成一个人
+                BuyOrderExt buyOrderExt=null;
+                try {
+                    buyOrderExt = buyOrderExtService.selectBySaleOrderNo(agent, saleOrderExt.getSaleOrderNo());
+                    lockerId = "buy".equals(saleOrBuyType)?buyOrderExt.getBuyLocker():null;
+                    buyOrderExt.setBuyLocker(tempUser.getId());
+                    buyOrderExtService.update(agent,buyOrderExt);
+                } catch (Exception e) {
+                    log.error("查询采购扩展单异常:",e);
+                }
+                lockerId = "buy".equals(saleOrBuyType)?lockerId:saleOrderExt.getLocker();
+                saleOrderExt.setLocker(tempUser.getId());
+                saleOrderExt.setAloneLocker(tempUser.getId());
+                num = saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
+            } else{
+                //如果是系统自动分单，就分采购和销售调度
+                if("buy".equals(saleOrBuyType)){
+                    try {
+                        BuyOrderExt buyOrderExt = buyOrderExtService.selectBySaleOrderNo(agent, saleOrderExt.getSaleOrderNo());
+                        lockerId = buyOrderExt.getBuyLocker();
+                        buyOrderExt.setBuyLocker(tempUser.getId());
+                        num = buyOrderExtService.update(agent,buyOrderExt);
+                    } catch (Exception e) {
+                        log.error("查询采购扩展单异常:",e);
+                    }
+                } else{
+                    lockerId = saleOrderExt.getLocker();
+                    saleOrderExt.setLocker(tempUser.getId());
+                    saleOrderExt.setAloneLocker(tempUser.getId());
+                    num = saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
+                }
+            }
         }
-        int num = saleOrderExtDao.updateByPrimaryKeySelective(saleOrderExt);
+        User user = userService.selectById(lockerId);
         //更新将被分单人员
         updateTicketSenderInfo(loginName, status, currentUserId, "add", 0, "",agent,tempUserId);
         if(user!=null) {
@@ -119,18 +159,50 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
             return 0;
         } else {
 
-            Long lockerId = saleChangeExt.getLocker();
-            User user = (User)this.userService.selectById(lockerId);
             Integer owner = Integer.valueOf(this.ownerCode);
             Agent agent = new Agent(owner);
             User tempUser = this.userService.findUserByLoginName(agent, loginName);
             Long tempUserId = tempUser.getId();
+            Long lockerId = null;
+            int num = 0;
             if (tempUser != null) {
-                saleChangeExt.setLocker(tempUser.getId());
-                saleChangeExt.setAloneLocker(tempUser.getId());
-                saleChangeExt.setLockTime(new Date());
+                boolean isDistributeTicket = configsService.getIsDistributeTicket(agent);
+                if(!isDistributeTicket){
+                    //如果不是系统自动分单，那么把saleLocker和buyLocker和AloneLocker全部改成一个人
+                     BuyChangeExt buyChangeExt = buyChangeExtService.queryBuyChgeExtByNo(saleChangeNo);
+                    try {
+                        lockerId = "buy".equals(saleOrBuyType)?buyChangeExt.getBuyLocker():null;
+                         buyChangeExt.setBuyLocker(tempUser.getId());
+                         buyChangeExtService.updateBuyChangeExt(buyChangeExt);
+                    } catch (Exception e) {
+                        log.error("查询采购变更扩展单异常:",e);
+                    }
+                    lockerId = "buy".equals(saleOrBuyType)?lockerId:saleChangeExt.getLocker();
+                    saleChangeExt.setLocker(tempUser.getId());
+                    saleChangeExt.setAloneLocker(tempUser.getId());
+                    saleChangeExt.setLockTime(new Date());
+                    num = this.saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
+                } else{
+                    //如果是系统自动分单，就分采购和销售调度
+                    if("buy".equals(saleOrBuyType)){
+                        try {
+                            BuyChangeExt buyChangeExt = buyChangeExtService.queryBuyChgeExtByNo(saleChangeNo);
+                            lockerId = buyChangeExt.getBuyLocker();
+                            buyChangeExt.setBuyLocker(tempUser.getId());
+                            num = buyChangeExtService.updateBuyChangeExt(buyChangeExt);
+                        } catch (Exception e) {
+                            log.error("查询采购变更扩展单异常:",e);
+                        }
+                    } else{
+                        lockerId = saleChangeExt.getLocker();
+                        saleChangeExt.setLocker(tempUser.getId());
+                        saleChangeExt.setAloneLocker(tempUser.getId());
+                        saleChangeExt.setLockTime(new Date());
+                        num = this.saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
+                    }
+                }
             }
-            int num = this.saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
+            User user = (User)this.userService.selectById(lockerId);
             this.updateTicketSenderInfo(loginName, "", currentUserId, "add", changeType, saleOrBuyType,agent,tempUserId);
             if (user != null) {
                 this.updateTicketSenderInfo(user.getLoginName(), "", currentUserId, "sub", changeType, saleOrBuyType,agent,lockerId);
@@ -140,13 +212,14 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
     }
 
     private TicketSender setNumberByStatus(TicketSender ticketSender, String status, String method, Agent agent, Long lockerId){
-        if (StringUtils.equals(status, "1")) {
+       /* if (StringUtils.equals(status, "1")) {*/
             ticketSenderService.updateByLockerId(agent,lockerId,"SALE_ORDER_NUM");
-            ticketSender.setSaleOrderNum(null);
-        } else {
             ticketSenderService.updateByLockerId(agent,lockerId,"ORDERCOUNT");
+            ticketSender.setSaleOrderNum(null);
             ticketSender.setOrdercount(null);
-        }
+        /*} else {*/
+          //  ticketSender.setOrdercount(null);
+        /*}*/
         /*if(StringUtils.equals("add",method)){
             if (StringUtils.equals(status, "1")) {
                 ticketSender.setSaleOrderNum(ticketSender.getSaleOrderNum() + 1);
@@ -192,27 +265,29 @@ public class SeparatedOrderServiceImpl implements ISeparatedOrderService {
     }
 
     private TicketSender setNumberByChangeType(TicketSender ticketSender, int changeType, String method, String saleOrBuyType, Agent agent, Long lockerId) {
-        if ("buy".equals(saleOrBuyType)) {
-            if (changeType != 2 && changeType != 1) {
-                if (changeType == 3) {
-                    ticketSenderService.updateByLockerId(agent,lockerId,"BUY_CHANGE_NUM");
-                    ticketSender.setBuyChangeNum(null);
-                }
-            } else {
-                ticketSenderService.updateByLockerId(agent,lockerId,"BUY_REFUSE_NUM");
-                ticketSender.setBuyRefuseNum(null);
+       /* if ("buy".equals(saleOrBuyType)) {*/
+        if (changeType != 2 && changeType != 1) {
+            if (changeType == 3) {
+                ticketSenderService.updateByLockerId(agent,lockerId,"BUY_CHANGE_NUM");
+                ticketSenderService.updateByLockerId(agent,lockerId,"SALE_CHANGE_NUM");
+                ticketSender.setBuyChangeNum(null);
+                ticketSender.setSaleChangeNum(null);
             }
-        } else  {
+        } else {
+            ticketSenderService.updateByLockerId(agent,lockerId,"BUY_REFUSE_NUM");
+            ticketSenderService.updateByLockerId(agent,lockerId,"SALE_REFUSE_NUM");
+            ticketSender.setBuyRefuseNum(null);
+            ticketSender.setSaleRefuseNum(null);
+        }
+       /* } else  {
             if (changeType != 2 && changeType != 1) {
                 if (changeType == 3) {
-                    ticketSenderService.updateByLockerId(agent,lockerId,"SALE_CHANGE_NUM");
                     ticketSender.setSaleChangeNum(null);
                 }
             } else {
-                ticketSenderService.updateByLockerId(agent,lockerId,"SALE_REFUSE_NUM");
                 ticketSender.setSaleRefuseNum(null);
             }
-        } /*else if (changeType != 2 && changeType != 1) {
+        }*/ /*else if (changeType != 2 && changeType != 1) {
             if (changeType == 3) {
                 ticketSender.setSaleChangeNum(ticketSender.getSaleChangeNum().intValue() - 1);
             }

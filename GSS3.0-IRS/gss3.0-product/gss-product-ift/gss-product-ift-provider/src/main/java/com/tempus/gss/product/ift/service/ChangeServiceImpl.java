@@ -112,6 +112,8 @@ public class ChangeServiceImpl implements IChangeService {
     IIftMessageService iftMessageService;
     @Reference
     ITicketSenderService iTicketSenderService;
+    @Reference
+    IftBuyChangeExtService buyChangeExtService;
     @Value("${dpsconfig.job.owner}")
     protected String owner;
 
@@ -864,7 +866,7 @@ public class ChangeServiceImpl implements IChangeService {
         try {
             //修改改签类型
             SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(requestWithActor.getEntity().getSaleChangeNo());
-            Long saleLocker = saleChangeExt.getLocker();
+            //Long saleLocker = saleChangeExt.getLocker();
             saleChangeExt = changeExtService.updateSaleChangeExt(requestWithActor, saleChangeExt);
             List<ChangePriceVo> adtList = requestWithActor.getEntity().getSaleAdtPriceList();
             List<ChangePriceVo> chdList = requestWithActor.getEntity().getSaleChdPriceList();
@@ -909,7 +911,7 @@ public class ChangeServiceImpl implements IChangeService {
            // BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(saleChangeNo);
             BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
             //出票员更新销售
-            ticketSenderService.updateByLockerId(requestWithActor.getAgent(),saleLocker,"SALE_CHANGE_NUM");
+            ticketSenderService.updateByLockerId(requestWithActor.getAgent(),saleChangeExt.getLocker(),"SALE_CHANGE_NUM");
             if(buyChangeExt != null){
                 log.info("修改审核备注" + buyChangeExt.getBuyChangeNo());
               //  buyChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
@@ -939,7 +941,7 @@ public class ChangeServiceImpl implements IChangeService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public SaleChangeExt updateSaleChangeExt(RequestWithActor<ChangePriceRequest> requestWithActor, SaleChangeExt saleChangeExt) {
         saleChangeExt.setTicketChangeType(requestWithActor.getEntity().getTicketChangeType());
-        saleChangeExt.setLocker(0L);
+        //saleChangeExt.setLocker(0L);
         saleChangeExt.setModifier(requestWithActor.getAgent().getAccount());
         saleChangeExt.setModifyTime(new Date());
         saleChangeExt.setCurrency(requestWithActor.getEntity().getCurrency());
@@ -970,15 +972,7 @@ public class ChangeServiceImpl implements IChangeService {
         try {
             //修改改签类型
             SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(requestWithActor.getEntity().getSaleChangeNo());
-            saleChangeExt.setTicketChangeType(requestWithActor.getEntity().getTicketChangeType());
-            saleChangeExt.setLocker(0L);
-            saleChangeExt.setModifier(requestWithActor.getAgent().getAccount());
-            saleChangeExt.setModifyTime(new Date());
-            saleChangeExt.setCurrency(requestWithActor.getEntity().getCurrency());
-            saleChangeExt.setExchangeRate(requestWithActor.getEntity().getSaleExchangeRate());
-            saleChangeExt.setSaleCurrency(requestWithActor.getEntity().getSaleCurrency());
-            log.info("保存采购数据" + saleChangeExt.toString());
-            saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
+            changeExtService.updateSaleChangeExt(requestWithActor, saleChangeExt);
             List<ChangePriceVo> adtList = requestWithActor.getEntity().getSaleAdtPriceList();
             List<ChangePriceVo> chdList = requestWithActor.getEntity().getSaleChdPriceList();
             List<ChangePriceVo> infList = requestWithActor.getEntity().getSaleInfPriceList();
@@ -1912,20 +1906,42 @@ public class ChangeServiceImpl implements IChangeService {
 
 
 
-    public void increaseBuyChangeNum(Agent agent, TicketSender sender) {
-        User user = userService.findUserByLoginName(agent, sender.getUserid());
-        int lockCount = changeExtService.queryChangeCountBylocker(user.getId());
-        sender.setBuyChangeNum(lockCount);
-        sender.setIds(sender.getId() + "");
-        iTicketSenderService.update(sender);
+    public void increaseBuyChangeNum(Agent agent, Long lockerId) {
+       // User user = userService.findUserByLoginName(agent, lockerId.getUserid());
+        ticketSenderService.updateByLockerId(agent,lockerId,"BUY_CHANGE_NUM");
+
+       /* int lockCount = changeExtService.queryChangeCountBylocker(user.getId());
+        lockerId.setBuyChangeNum(lockCount);
+        lockerId.setIds(lockerId.getId() + "");
+        iTicketSenderService.update(lockerId);*/
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void assingLockSaleChangeExt(SaleChangeExt order, TicketSender sender, Date date, Agent agent) {
+    public Long assingLockSaleChangeExt(SaleChangeExt order, TicketSender sender, Date date, Agent agent) {
         User user = userService.findUserByLoginName(agent, sender.getUserid());
-        order.setLocker(user.getId());
+        Long buyLockerId = null;
+        if(user != null){
+            buyLockerId = user.getId();
+            BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(order.getSaleChangeNo());
+            if(buyChangeExt != null){
+                buyChangeExt.setBuyLocker(buyLockerId);
+                buyChangeExt.setModifyTime(date);
+                buyChangeExtService.updateBuyChangeExt(buyChangeExt);
+            }
+        }
+        return buyLockerId;
+       /* order.setLocker(user.getId());
         order.setLockTime(date);
-        saleChangeExtDao.updateLocker(order);
+        saleChangeExtDao.updateLocker(order);*/
+    }
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void assingAloneLockSaleChangeExt(SaleChangeExt order, Date date, Agent agent) {
+        BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(order.getSaleChangeNo());
+        if(buyChangeExt != null){
+            buyChangeExt.setBuyLocker(order.getAloneLocker());
+            buyChangeExt.setModifyTime(date);
+            buyChangeExtService.updateBuyChangeExt(buyChangeExt);
+        }
     }
 
     /**
@@ -1941,10 +1957,9 @@ public class ChangeServiceImpl implements IChangeService {
         for (SaleChangeExt order : saleChangeExts) {
             if(!configsService.getIsDistributeTicket(agent)){
                 //如果不是系统分单
-                order = configsService.setLockerAsAloneLocker(order);
-                Long locker = order.getLocker();
-                TicketSender ticketSender = iTicketSenderService.queryByUserId(locker);
-                increaseBuyChangeNum(agent, ticketSender);
+                assingAloneLockSaleChangeExt(order,new Date(),agent);
+                //TicketSender ticketSender = iTicketSenderService.queryByUserId(order.getAloneLocker());
+                increaseBuyChangeNum(agent, order.getAloneLocker());
             } else{
                 for (TicketSender peopleInfo : senders) {
                     log.info(peopleInfo.getName() + "未处理采购改签单数量：" + peopleInfo.getBuyChangeNum());
@@ -1954,10 +1969,10 @@ public class ChangeServiceImpl implements IChangeService {
                         log.info("第四步:分单...");
                         /**锁单*/
                         log.info("1.锁单,锁单人是被分配人...");
-                        assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
+                        Long buyLockerId = assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
                         /***增加出票人订单数*/
                         log.info("2.增加出票人的未处理采购改签单数量...");
-                        increaseBuyChangeNum(agent, peopleInfo);
+                        increaseBuyChangeNum(agent, buyLockerId);
                         break;
                     }
                 }
@@ -1977,10 +1992,11 @@ public class ChangeServiceImpl implements IChangeService {
         log.info("第三步：判断出票员手头出票订单数量...");
         if(!configsService.getIsDistributeTicket(agent)){
             //如果不是系统分单
-            saleChangeExt = configsService.setLockerAsAloneLocker(saleChangeExt);
+            assingAloneLockSaleChangeExt(saleChangeExt,new Date(), agent);
+            /*saleChangeExt = configsService.setLockerAsAloneLocker(saleChangeExt);
             Long locker = saleChangeExt.getLocker();
-            TicketSender ticketSender = iTicketSenderService.queryByUserId(locker);
-            increaseBuyChangeNum(agent, ticketSender);
+            TicketSender ticketSender = iTicketSenderService.queryByUserId(locker);*/
+            increaseBuyChangeNum(agent, saleChangeExt.getAloneLocker());
         } else{
             for (TicketSender peopleInfo : senders) {
                 log.info(peopleInfo.getName() + "未处理采购改签单数量：" + peopleInfo.getBuyChangeNum());
@@ -1990,10 +2006,10 @@ public class ChangeServiceImpl implements IChangeService {
                     log.info("第四步:分单...");
                     /**锁单*/
                     log.info("1.锁单,锁单人是被分配人...");
-                    assingLockSaleChangeExt(saleChangeExt, peopleInfo, updateTime, agent);
+                    Long buyLockerId = assingLockSaleChangeExt(saleChangeExt, peopleInfo, updateTime, agent);
                     /***增加出票人订单数*/
                     log.info("2.增加出票人的未处理采购改签单数量...");
-                    increaseBuyChangeNum(agent, peopleInfo);
+                    increaseBuyChangeNum(agent, buyLockerId);
                     break;
                 }
             }

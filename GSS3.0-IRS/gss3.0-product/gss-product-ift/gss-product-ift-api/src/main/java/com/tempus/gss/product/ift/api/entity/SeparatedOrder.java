@@ -41,6 +41,16 @@ public class SeparatedOrder implements Serializable {
     //ticketsenderType
     private String ticketsenderType;
 
+    private String buyLockerName;
+
+    public String getBuyLockerName() {
+        return buyLockerName;
+    }
+
+    public void setBuyLockerName(String buyLockerName) {
+        this.buyLockerName = buyLockerName;
+    }
+
     public String getTicketsenderType() {
         return ticketsenderType;
     }

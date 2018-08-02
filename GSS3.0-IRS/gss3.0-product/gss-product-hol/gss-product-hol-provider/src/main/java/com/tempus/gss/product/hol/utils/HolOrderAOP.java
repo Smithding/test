@@ -2,6 +2,8 @@ package com.tempus.gss.product.hol.utils;
 
 import java.lang.reflect.Method;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,18 +27,20 @@ import com.tempus.gss.util.JsonUtil;
 public class HolOrderAOP {
 	protected final static Logger log = LoggerFactory.getLogger(HolOrderAOP.class);
 	
-	 @Pointcut("@annotation(com.tempus.gss.product.hol.utils.HolOrderAnnotation)")
-	 //@Pointcut("execution(* com.tempus.gss.product.hol.service..*(..)) and @annotation(com.tempus.gss.product.hol.utils.HolOrderAnnotation)")
+	// @Pointcut("@annotation(com.tempus.gss.product.hol.utils.HolAnnotation)")
+	 @Pointcut("execution(* com.tempus.gss.product.hol.service..*(..)) && @annotation(com.tempus.gss.product.hol.utils.HolAnnotation)")
 	 private void pointCutMethod(){}
 	 
 	 @Before("pointCutMethod()")
 	 public void repeatOrderPush(JoinPoint joinPoint) {
 		Object[] args = joinPoint.getArgs();
-		LocalTime localTime = LocalTime.now();
-		int minuteOfHour = localTime.getMinuteOfHour();
-		int second = localTime.getSecondOfMinute();
+		String aopTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 		
-		System.out.println("拦截的内容: "+JsonUtil.toJson(args)+", 分: "+minuteOfHour+", 秒: "+second);
+		//LocalTime localTime = LocalTime.now();
+		//int minuteOfHour = localTime.getMinuteOfHour();
+		//int second = localTime.getSecondOfMinute();
+		
+		System.out.println("拦截方法名: "+joinPoint+" ,拦截的内容: "+JsonUtil.toJson(args)+", 拦截时间: "+aopTime);
 	 }
 	 
 	 private List<String> getHolInfo(JoinPoint joinPoint) throws ClassNotFoundException {
@@ -47,7 +51,7 @@ public class HolOrderAOP {
 	        Method[] methods = targetClass.getMethods();
 	        for (Method method : methods){
 	            if(method.getName().equals(methodName)){
-	            	HolOrderAnnotation holAnnotation = method.getAnnotation(HolOrderAnnotation.class);
+	            	HolAnnotation holAnnotation = method.getAnnotation(HolAnnotation.class);
 	            	list.add(holAnnotation.action());
 	            	list.add(holAnnotation.targetType());
 	            	Object[] args = joinPoint.getArgs();

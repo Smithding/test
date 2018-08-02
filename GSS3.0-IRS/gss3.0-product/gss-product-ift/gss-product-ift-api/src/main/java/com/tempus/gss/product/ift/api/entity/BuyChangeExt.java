@@ -100,26 +100,26 @@ public class BuyChangeExt implements Serializable {
 
 	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer("BuyChangeExt{");
-		sb.append("id=").append(id);
-		sb.append(", buyChangeNo=").append(buyChangeNo);
-		sb.append(", buyChange=").append(buyChange);
-		sb.append(", orderChangeType=").append(orderChangeType);
-		sb.append(", owner=").append(owner);
-		sb.append(", office='").append(office).append('\'');
-		sb.append(", ticketType='").append(ticketType).append('\'');
-		sb.append(", refuseReason='").append(refuseReason).append('\'');
-		sb.append(", pnrList=").append(pnrList);
-		sb.append(", creator='").append(creator).append('\'');
-		sb.append(", createTime=").append(createTime);
-		sb.append(", modifier='").append(modifier).append('\'');
-		sb.append(", modifyTime=").append(modifyTime);
-		sb.append(", valid=").append(valid);
-		sb.append(", status='").append(status).append('\'');
-		sb.append(", changeRemark='").append(changeRemark).append('\'');
-		sb.append(", airLineRefundStatus=").append(airLineRefundStatus);
-		sb.append('}');
-		return sb.toString();
+		return "BuyChangeExt{" +
+				"id=" + id +
+				", buyChangeNo=" + buyChangeNo +
+				", buyChange=" + buyChange +
+				", orderChangeType=" + orderChangeType +
+				", owner=" + owner +
+				", office='" + office + '\'' +
+				", ticketType='" + ticketType + '\'' +
+				", refuseReason='" + refuseReason + '\'' +
+				", pnrList=" + pnrList +
+				", creator='" + creator + '\'' +
+				", createTime=" + createTime +
+				", modifier='" + modifier + '\'' +
+				", modifyTime=" + modifyTime +
+				", valid=" + valid +
+				", status='" + status + '\'' +
+				", changeRemark='" + changeRemark + '\'' +
+				", airLineRefundStatus=" + airLineRefundStatus +
+				", buyLocker=" + buyLocker +
+				'}';
 	}
 
 	public String getChangeRemark() {
