@@ -112,6 +112,8 @@ public class ChangeServiceImpl implements IChangeService {
     IIftMessageService iftMessageService;
     @Reference
     ITicketSenderService iTicketSenderService;
+    @Reference
+    IftBuyChangeExtService buyChangeExtService;
     @Value("${dpsconfig.job.owner}")
     protected String owner;
 
@@ -1924,7 +1926,7 @@ public class ChangeServiceImpl implements IChangeService {
             if(buyChangeExt != null){
                 buyChangeExt.setBuyLocker(buyLockerId);
                 buyChangeExt.setModifyTime(date);
-                buyChangeExtDao.updateBuyRemarkBySelectBuyChangeNo(buyChangeExt);
+                buyChangeExtService.updateBuyChangeExt(buyChangeExt);
             }
         }
         return buyLockerId;
@@ -1933,12 +1935,12 @@ public class ChangeServiceImpl implements IChangeService {
         saleChangeExtDao.updateLocker(order);*/
     }
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void assingAloneLockSaleChangeExt(SaleChangeExt order, Date date) {
+    public void assingAloneLockSaleChangeExt(SaleChangeExt order, Date date, Agent agent) {
         BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(order.getSaleChangeNo());
         if(buyChangeExt != null){
             buyChangeExt.setBuyLocker(order.getAloneLocker());
             buyChangeExt.setModifyTime(date);
-            buyChangeExtDao.updateBuyRemarkBySelectBuyChangeNo(buyChangeExt);
+            buyChangeExtService.updateBuyChangeExt(buyChangeExt);
         }
     }
 
@@ -1955,7 +1957,7 @@ public class ChangeServiceImpl implements IChangeService {
         for (SaleChangeExt order : saleChangeExts) {
             if(!configsService.getIsDistributeTicket(agent)){
                 //如果不是系统分单
-                assingAloneLockSaleChangeExt(order,new Date());
+                assingAloneLockSaleChangeExt(order,new Date(),agent);
                 //TicketSender ticketSender = iTicketSenderService.queryByUserId(order.getAloneLocker());
                 increaseBuyChangeNum(agent, order.getAloneLocker());
             } else{
@@ -1990,7 +1992,7 @@ public class ChangeServiceImpl implements IChangeService {
         log.info("第三步：判断出票员手头出票订单数量...");
         if(!configsService.getIsDistributeTicket(agent)){
             //如果不是系统分单
-            assingAloneLockSaleChangeExt(saleChangeExt,new Date());
+            assingAloneLockSaleChangeExt(saleChangeExt,new Date(), agent);
             /*saleChangeExt = configsService.setLockerAsAloneLocker(saleChangeExt);
             Long locker = saleChangeExt.getLocker();
             TicketSender ticketSender = iTicketSenderService.queryByUserId(locker);*/

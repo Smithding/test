@@ -149,6 +149,8 @@ public class RefundServiceImpl implements IRefundService {
 	IUserService userService;
 	@Reference
 	IPassengerRefundPriceService passengerRefundPriceService;
+	@Reference
+	IftBuyChangeExtService buyChangeExtService;
 
 	SimpleDateFormat simpleDate = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
 
@@ -1597,7 +1599,7 @@ public class RefundServiceImpl implements IRefundService {
 		buyChangeExt.setBuyLocker(order.getAloneLocker());
 		buyChangeExt.setModifyTime(date);
 		log.info("更新采购变更单扩展表所锁单人："+buyChangeExt.toString());
-		buyChangeExtDao.updateBuyRemarkBySelectBuyChangeNo(buyChangeExt);
+		buyChangeExtService.updateBuyChangeExt(buyChangeExt);
 	}
 
 	public void assingLockSaleChangeExt(SaleChangeExt order, TicketSender sender, Date date, Agent agent) {
@@ -1608,7 +1610,7 @@ public class RefundServiceImpl implements IRefundService {
 			buyChangeExt.setBuyLocker(user.getId());
 			buyChangeExt.setModifyTime(date);
 			log.info("自动分单更新采购变更单扩展表所锁单人："+buyChangeExt.toString());
-			buyChangeExtDao.updateBuyRemarkBySelectBuyChangeNo(buyChangeExt);
+			buyChangeExtService.updateBuyChangeExt(buyChangeExt);
 		}
 	}
 
