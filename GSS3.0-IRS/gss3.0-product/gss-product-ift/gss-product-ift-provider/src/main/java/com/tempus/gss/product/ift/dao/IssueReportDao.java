@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.ift.api.entity.IFTIssueReport;
 import com.tempus.gss.product.ift.api.entity.IFTIssueReportParams;
 import com.tempus.gss.product.ift.api.entity.IftBuyReport;
-import org.apache.ibatis.session.RowBounds;
 
 import java.util.List;
 
@@ -19,7 +18,9 @@ public interface IssueReportDao extends BaseDao<IFTIssueReport, IFTIssueReportPa
      *         IFTIssueReportParams 实体
      * @return list<IFTIssueReport>
      */
-    List<IFTIssueReport> queryIFTIssueReport(RowBounds page, IFTIssueReportParams params);
+    List<IFTIssueReport> queryIFTIssued(Page<IFTIssueReport> page, IFTIssueReportParams params);
+    
+    List<IFTIssueReport> queryIFTChanged(Page<IFTIssueReport> page, IFTIssueReportParams params);
     
     /**
      * @return list
@@ -30,12 +31,12 @@ public interface IssueReportDao extends BaseDao<IFTIssueReport, IFTIssueReportPa
      * @return list
      */
     List<String> queryIssueCabins();
-
+    
     /**
      * 采购单报表数据查询
      */
     List<IftBuyReport> iftBuyReport(Page<IftBuyReport> page, IFTIssueReportParams iftOutReportVo);
-
+    
     /**
      * 采购单报表数据查询  辅助查询  获取leg信息
      */

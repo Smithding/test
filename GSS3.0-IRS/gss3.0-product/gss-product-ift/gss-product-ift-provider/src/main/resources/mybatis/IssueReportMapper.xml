@@ -35,23 +35,9 @@
         <result column="COMPANY" property="company"/>
         <result column="SOURCE" property="source"/>
     </resultMap>
-
-    <select id="queryIFTIssueReport" parameterType="com.tempus.gss.product.ift.api.entity.IFTIssueReportParams" resultMap="IftReportResultMap">
-        <if test="type!=null and type==1">
-            <include refid="queryIFTIssued"/>
-        </if>
-        <if test="type!=null and type==2">
-            <include refid="queryIFTChanged"/>
-        </if>
-        <if test="type==null or (type!=2 and type!=1)">
-            <include refid="queryIFTIssued"/>
-            union(
-            <include refid="queryIFTChanged"/>
-            )
-        </if>
-    </select>
-    <sql id="queryIFTIssued">
-        SELECT SD.NAME AS SALE_DEPT,
+    <select id="queryIFTIssued" parameterType="com.tempus.gss.product.ift.api.entity.IFTIssueReportParams" resultMap="IftReportResultMap">
+        SELECT
+        SD.NAME AS SALE_DEPT,
         CC.NAME AS CUSTOMER_NAME,
         CC.CUSTOMER_NO AS CUSTOMER_NO,
         GROUP_CONCAT(DISTINCT IL.AIRLINE) AS AIRLINE,
@@ -61,36 +47,39 @@
         GROUP_CONCAT(DISTINCT IL.CABIN) AS CABIN,
         ISOE.ISSUE_TIME AS TICKET_DATE,
         (
-        SELECT IL2.DEP_TIME FROM IFT_LEG IL2 WHERE IL2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO GROUP BY IL2.SALE_ORDER_NO, IL2.LEG_NO ORDER BY IL2.DEP_TIME LIMIT 1)
+        SELECT IL2.DEP_TIME
+        FROM IFT_LEG IL2
+        WHERE IL2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
+        GROUP BY IL2.SALE_ORDER_NO, IL2.LEG_NO
+        ORDER BY IL2.DEP_TIME
+        LIMIT 1)
         AS DEP_DATE,
-        (
-        SELECT sum(IP2.SALE_FARE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS FARE_PRICE,
-        (
-        SELECT sum(IP2.SALE_TAX) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS TAX,
-        (
-        SELECT sum(IP2.SALE_BROKERAGE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS SALE_BROKERAGE,
-        group_concat(DISTINCT IP.SALE_REBATE) AS SALE_REBATE,
-        (
-        SELECT sum(IP2.SALE_PRICE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS SALE_PRICE,
-        (
-        SELECT sum(IP2.SERVICE_CHARGE) FROM IFT_PASSENGER IP2 WHERE IP2.SALE_ORDER_NO = ISOE.SALE_ORDER_NO) AS SERVICE_CHARGE,
-        CONCAT(IP.SURNAME, '/', IP.NAME) AS PASSENGER_NAME,
+        SUM(IP.SALE_FARE) AS FARE_PRICE,
+        SUM(IP.SALE_TAX) AS TAX,
+        SUM(IP.SALE_BROKERAGE) AS SALE_BROKERAGE,
+        GROUP_CONCAT(DISTINCT IP.SALE_REBATE) AS SALE_REBATE,
+        SUM(IP.SALE_AWARD_PRICE*IP.SALE_REBATE/100) AS REBATE_PRICE,
+        SUM(IP.SALE_PRICE) AS SALE_PRICE,
+        SUM(IP.SERVICE_CHARGE) AS SERVICE_CHARGE,
+        GROUP_CONCAT(DISTINCT CONCAT(IP.SURNAME, '/', IP.NAME)) AS PASSENGER_NAME,
         PNR.PNR AS PNR,
         '出票' AS TICKET_TYPE,
         ISOE.CREATOR AS SALE_PERSON,
+        SU.NAME AS TICKET_PERSON,
         CS.NAME AS SUPPLIER_NAME,
         ISOE.SALE_ORDER_NO AS SALE_ORDER_NO,
         PPW.NAME AS PAY_WAY,
         PAPI.ALL_PAY_INFO_NO AS PAY_NO,
         (
-        SELECT LDI.ITINERARY_NO FROM LS_DELIVERY_ITINERARY LDI WHERE LDI.TICKET_NO = ISOD.TICKET_NO LIMIT 1) AS ITINERARY_NO,
+        SELECT LDI.ITINERARY_NO
+        FROM LS_DELIVERY_ITINERARY LDI
+        WHERE LDI.TICKET_NO = ISOD.TICKET_NO
+        LIMIT 1) AS ITINERARY_NO,
         sum(IP.SALE_PRICE) AS SETTLE_PRICE,
         ISOE.EXCHANGE_RATE AS EXCHANGE_RATE,
         ISOE.CURRENCY AS CURRENCY,
         SOI.SHORT_NAME AS COMPANY,
         CC.BUSINESS_LINE AS SOURCE
-
-
         FROM IFT_SALE_ORDER_EXT ISOE
         LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
         LEFT JOIN IFT_PNR PNR ON PNR.PNR_NO = ISOE.PNR_NO
@@ -221,15 +210,16 @@
             </foreach>
         </if>
         <if test="orderStatusArray==null or orderStatusArray=='' ">
-            ISOD.STATUS BETWEEN 4 AND 10
+            AND   ISOD.STATUS BETWEEN 4 AND 10
         </if>
         AND ISOD.IS_CHANGE = 0
         GROUP BY ISOD.SALE_ORDER_NO, ISOD.TICKET_NO
         ORDER BY ISOE.ISSUE_TIME DESC
-    </sql>
-    <sql id="queryIFTChanged">
+    </select>
 
-        SELECT SD.NAME AS SALE_DEPT,
+    <select id="queryIFTChanged" parameterType="com.tempus.gss.product.ift.api.entity.IFTIssueReportParams" resultMap="IftReportResultMap">
+        SELECT
+        SD.NAME AS SALE_DEPT,
         CC.NAME AS CUSTOMER_NAME,
         CC.CUSTOMER_NO AS CUSTOMER_NO,
         GROUP_CONCAT(DISTINCT IL.AIRLINE) AS AIRLINE,
@@ -239,14 +229,20 @@
         GROUP_CONCAT(DISTINCT IL.CABIN) AS CABIN,
         ISOD.MODIFY_TIME AS TICKET_DATE,
         (
-        SELECT IL2.DEP_TIME FROM IFT_LEG IL2 WHERE IL2.LEG_NO = ISOD.LEG_NO GROUP BY IL2.SALE_ORDER_NO, IL2.LEG_NO ORDER BY IL2.DEP_TIME LIMIT 1)
+        SELECT IL2.DEP_TIME
+        FROM IFT_LEG IL2
+        WHERE IL2.LEG_NO = ISOD.LEG_NO
+        GROUP BY IL2.SALE_ORDER_NO, IL2.LEG_NO
+        ORDER BY IL2.DEP_TIME
+        LIMIT 1)
         AS DEP_DATE,
         SUM(IPCP.SALE_COUNT_PRICE) AS FARE_PRICE,
         SUM(IPCP.SALE_TAX) AS TAX,
         GROUP_CONCAT(DISTINCT IPCP.SALE_REBATE) AS SALE_REBATE,
+        SUM(IPCP.SALE_BROKERAGE) AS SALE_BROKERAGE,
+        SUM((IPCP.SALE_PRICE+IP.SALE_AWARD_PRICE)*IPCP.SALE_REBATE/100) AS REBATE_PRICE,
         SUM(IPCP.SALE_COUNT_PRICE) AS SALE_PRICE,
-        (
-        SELECT sum(IPCP2.SALE_REST) FROM IFT_PASSENGER_CHANGE_PRICE IPCP2 WHERE IPCP2.SALE_CHANGE_NO = ISCE.SALE_CHANGE_NO) AS SERVICE_CHARGE,
+        SUM(IPCP.SALE_REST) AS SERVICE_CHARGE,
         GROUP_CONCAT(DISTINCT CONCAT(IP.SURNAME, '/', IP.NAME)) AS PASSENGER_NAME,
         PNR.PNR AS PNR,
         CASE WHEN ISCE.TICKET_CHANGE_TYPE = 1
@@ -263,7 +259,10 @@
         PPW.NAME AS PAY_WAY,
         PAPI.ALL_PAY_INFO_NO AS PAY_NO,
         (
-        SELECT LDI.ITINERARY_NO FROM LS_DELIVERY_ITINERARY LDI WHERE LDI.TICKET_NO = ISOD.TICKET_NO LIMIT 1) AS ITINERARY_NO,
+        SELECT LDI.ITINERARY_NO
+        FROM LS_DELIVERY_ITINERARY LDI
+        WHERE LDI.TICKET_NO = ISOD.TICKET_NO
+        LIMIT 1) AS ITINERARY_NO,
         sum(IPCP.SALE_COUNT_PRICE) AS SETTLE_PRICE,
         ISCE.EXCHANGE_RATE AS EXCHANGE_RATE,
         ISCE.CURRENCY AS CURRENCY,
@@ -289,10 +288,10 @@
         LEFT JOIN IFT_PASSENGER_CHANGE_PRICE IPCP ON IPCP.PASSENGER_NO = ISOD.PASSENGER_NO
         WHERE 1=1
         <if test="ticketDateStart !=null and ticketDateStart != '' ">
-            AND ISOE.ISSUE_TIME<![CDATA[>=]]>DATE_FORMAT(#{ticketDateStart}, '%Y-%m-%d')
+            AND ISOD.MODIFY_TIME<![CDATA[>=]]>DATE_FORMAT(#{ticketDateStart}, '%Y-%m-%d')
         </if>
         <if test="ticketDateEnd !=null  and ticketDateEnd != ''">
-            AND ISOE.ISSUE_TIME<![CDATA[<=]]>DATE_FORMAT(STR_TO_DATE(#{ticketDateEnd}, '%Y-%m-%d')+1, '%Y-%m-%d')
+            AND ISOD.MODIFY_TIME<![CDATA[<=]]>DATE_FORMAT(STR_TO_DATE(#{ticketDateEnd}, '%Y-%m-%d')+1, '%Y-%m-%d')
         </if>
         <if test="depDateStart !=null and depDateStart != '' ">
             AND IL.DEP_TIME <![CDATA[>=]]>DATE_FORMAT(#{depDateStart}, '%Y-%m-%d')
@@ -401,30 +400,42 @@
             </foreach>
         </if>
         <if test="orderStatusArray==null or orderStatusArray=='' ">
-            ISOD.STATUS = 4
+            AND  ISOD.STATUS = 4
         </if>
         AND ISOD.IS_CHANGE = 1
         GROUP BY ISOD.SALE_ORDER_NO, ISOD.TICKET_NO
-        ORDER BY ISOE.ISSUE_TIME DESC
-    </sql>
-
+        ORDER BY ISOD.MODIFY_TIME DESC
+    </select>
 
     <select id="queryIssueDeptNameList" resultType="java.lang.String">
-        SELECT DISTINCT SD.NAME AS SALE_DEPT
-        FROM IFT_SALE_ORDER_EXT ISOE
-            LEFT JOIN SM_USER SU ON SU.LOGIN_NAME = ISOE.DRAWER_LOGIN_NAME
-            LEFT JOIN SM_DEPT SD ON SD.ID = SU.DEPT_ID
-        WHERE SD.NAME IS NOT NULL
+        (SELECT DISTINCT SD.NAME AS SALE_DEPT
+         FROM IFT_SALE_ORDER_EXT ISOE
+             LEFT JOIN SM_USER SU ON SU.LOGIN_NAME = ISOE.DRAWER_LOGIN_NAME
+             LEFT JOIN SM_DEPT SD ON SD.ID = SU.DEPT_ID
+         WHERE SD.NAME IS NOT NULL)
+        UNION (
+            SELECT DISTINCT SD.NAME AS SALE_DEPT
+            FROM IFT_SALE_CHANGE_EXT ISCE
+                LEFT JOIN SM_USER SU ON SU.LOGIN_NAME = ISCE.DRAWER_LOGIN_NAME
+                LEFT JOIN SM_DEPT SD ON SD.ID = SU.DEPT_ID
+            WHERE SD.NAME IS NOT NULL)
     </select>
 
     <select id="queryIssueCabins" resultType="java.lang.String">
-        SELECT
-            DISTINCT IL.CABIN AS CABIN
-        FROM IFT_SALE_ORDER_EXT ISOE LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
-            LEFT JOIN IFT_LEG IL ON IL.LEG_NO = ISOD.LEG_NO
-        WHERE IL.CABIN IS NOT NULL
+        (SELECT DISTINCT IL.CABIN AS CABIN
+         FROM IFT_SALE_ORDER_EXT ISOE
+             LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
+             LEFT JOIN IFT_LEG IL ON IL.LEG_NO = ISOD.LEG_NO
+         WHERE IL.CABIN IS NOT NULL)
+        UNION (
+            SELECT DISTINCT IL.CABIN AS CABIN
+            FROM IFT_SALE_CHANGE_EXT ISCE
+                LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO = ISCE.SALE_CHANGE_NO
+                LEFT JOIN IFT_LEG IL ON IL.LEG_NO = ISOD.LEG_NO
+            WHERE IL.CABIN IS NOT NULL)
 
     </select>
+
     <select id="iftBuyReport" resultType="com.tempus.gss.product.ift.api.entity.IftBuyReport">
         select
         obo.SALE_ORDER_NO as saleOrderNo,
@@ -468,10 +479,12 @@
         where
         obo.GOODS_TYPE = 2 and obo.PAY_STATUS in (3,4) and obo.BSIGN_TYPE = 1 and obo.BUY_STATUS = 5
         <if test="ticketDateStart != null and ticketDateStart != ''">
-            and <![CDATA[ obo.BUYING_TIME > str_to_date(#{ticketDateStart},'%Y-%m-%d') ]]>
+            and <![CDATA[ obo.BUYING_TIME > str_to_date(#{ticketDateStart}, '%Y-%m-%d')
+            ]]>
         </if>
         <if test="ticketDateEnd != null and ticketDateEnd != ''">
-            and <![CDATA[ obo.BUYING_TIME < date_add(STR_TO_DATE(#{ticketDateEnd}, '%Y-%m-%d'), interval 1 day) ]]>
+            and <![CDATA[ obo.BUYING_TIME < date_add(STR_TO_DATE(#{ticketDateEnd}, '%Y-%m-%d'), interval 1 day )
+            ]]>
         </if>
         group by isod.PASSENGER_NO
         order by obo.BUYING_TIME desc

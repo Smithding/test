@@ -6,17 +6,20 @@ import com.tempus.gss.product.ift.api.entity.*;
 import com.tempus.gss.product.ift.api.entity.vo.IftReportRefundVo;
 import com.tempus.gss.product.ift.api.entity.vo.ReportRefundVo;
 import com.tempus.gss.product.ift.api.entity.vo.ReportVo;
-import com.tempus.gss.product.ift.api.entity.IftBuyReport;
 import com.tempus.gss.product.ift.api.service.ReportService;
 import com.tempus.gss.product.ift.dao.IssueReportDao;
 import com.tempus.gss.product.ift.dao.RefundReportDao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class ReportServiceImpl implements ReportService {
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     RefundReportDao refundReportDao;
     
@@ -131,7 +134,30 @@ public class ReportServiceImpl implements ReportService {
     
     @Override
     public Page<IFTIssueReport> queryIssueRecords(Page<IFTIssueReport> page, IFTIssueReportParams params) {
-        List<IFTIssueReport> list = issueReportDao.queryIFTIssueReport(page, params);
+        List<IFTIssueReport> list = new ArrayList<>();
+        try {
+            Integer limit = page.getLimit();
+            if (params == null || params.getType() == null || (params.getType() != 1 && params.getType() != 2)) {
+                list = issueReportDao.queryIFTIssued(page, params);
+                int firstSize = list.size();
+                if (list.size() < limit) {
+                    //不可同时分页、补足出票不足一页的部分
+                    List<IFTIssueReport> change = issueReportDao.queryIFTChanged(new Page<>(1, Integer.MAX_VALUE), params);
+                    int secondSize = change.size();
+                    for (int i = 0; i < secondSize; i++) {
+                        if (i < limit - firstSize) {
+                            list.add(change.get(i));
+                        }
+                    }
+                }
+            } else if (params.getType() == 1) {
+                list = issueReportDao.queryIFTIssued(page, params);
+            } else {
+                list = issueReportDao.queryIFTChanged(page, params);
+            }
+        } catch (Exception e) {
+            logger.error("国际出票报表查询 ERROR  {}", e);
+        }
         page.setRecords(list);
         return page;
     }
@@ -145,6 +171,7 @@ public class ReportServiceImpl implements ReportService {
     public List<String> queryIssueCabins() {
         return issueReportDao.queryIssueCabins();
     }
+    
     @Override
     public Page<IftBuyReport> iftBuyReport(Page<IftBuyReport> page, IFTIssueReportParams iftOutReportVo) {
         List<IftBuyReport> list = issueReportDao.iftBuyReport(page, iftOutReportVo);
