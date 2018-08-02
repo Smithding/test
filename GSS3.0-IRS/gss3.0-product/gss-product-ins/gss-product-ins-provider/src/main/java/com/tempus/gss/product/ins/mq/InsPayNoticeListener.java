@@ -146,7 +146,9 @@ public class InsPayNoticeListener {
 									saleOrderDetailForBefore = (SaleOrderDetail)saleOrderDetailChange.clone();
 									saleOrderDetailForBefore.setStatus(saleOrderDetailChange.getStatus());*/
 									//saleOrderDetailChange.getCreateTime(new Date());
-									saleOrderDetailChange.setStatus(10);//10为已退款
+										if(saleOrderDetailChange.getStatus()==8||saleOrderDetailChange.getStatus()==5){
+											saleOrderDetailChange.setStatus(10);//10为已退款
+										}
 									//保存之前存储的那条投保记录
 								/*	saleOrderDetailChange.setCreateTime(new Date());
 									saleOrderDetailForBefore.setStatus(2);
