@@ -215,8 +215,10 @@
         WHERE
         i.VALID = 1
         AND o.BUSINESS_SIGN_NO = m.BUSINESS_SIGN_NO
+        AND i.REFUND_WAY BETWEEN 1
+        AND 2
         AND i.CHANGE_TYPE in (1,2)
-        AND m.CHILD_STATUS in(1,2)
+        AND m.CHILD_STATUS in(1)
         AND o.CHILD_STATUS IN (2,10)
         AND h.`AIRLINE_REFUND_STATUS` IN (0, - 1)
         <if test="owner != null">
