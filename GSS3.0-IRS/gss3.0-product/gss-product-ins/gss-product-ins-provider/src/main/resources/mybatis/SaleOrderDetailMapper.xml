@@ -350,7 +350,7 @@
         ISREPORT = #{isReport,jdbcType=INTEGER},
       </if>
     </set>
-    where INSURED_NO = #{insuredNo,jdbcType=BIGINT}
+    where INSURED_NO = #{insuredNo,jdbcType=BIGINT} AND ISREPORT='0'
   </update>
   <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.ins.api.entity.SaleOrderDetail" >
     update INS_SALE_ORDER_DETAIL
