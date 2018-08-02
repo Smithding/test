@@ -409,6 +409,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
 	public HotelOrder createOrder(Agent agent, CreateOrderReq orderReq, OrderCreateReq orderCreateReq, RoomInfo roomInfo) {
 		orderReq.setMobile(tempusMobile);
 		if (StringUtil.isNullOrEmpty(orderReq)) {

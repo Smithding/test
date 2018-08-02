@@ -41,27 +41,13 @@
     from IFT_BUY_CHANGE_EXT
     where BUY_CHANGE_NO = #{buyChangeNo,jdbcType=BIGINT}
   </select>
-  <select id="selectBySaleChangeNo" resultMap="BaseResultMap" parameterType="java.lang.Long" >
-    select
-    <include refid="Join_Column_List" />
-    from IFT_BUY_CHANGE_EXT h
-    left join OS_BUYCHANGE m on h.BUY_CHANGE_NO = m.BUY_CHANGE_NO
-    left join OS_BUYORDER k on m.BUY_ORDER_NO = k.BUY_ORDER_NO
-    left join OS_SALECHANGE o on k.SALE_ORDER_NO = o.SALE_ORDER_NO
-    left join IFT_SALE_CHANGE_EXT i on o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
-    where i.SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
-  </select>
   <select id="selectBySaleChangeNoFindOne" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select
     <include refid="Join_Column_List" />
     from IFT_BUY_CHANGE_EXT h
-    left join OS_BUYCHANGE m on h.BUY_CHANGE_NO = m.BUY_CHANGE_NO
-    left join OS_BUYORDER k on m.BUY_ORDER_NO = k.BUY_ORDER_NO
-    left join OS_SALECHANGE o on k.SALE_ORDER_NO = o.SALE_ORDER_NO
-    left join IFT_SALE_CHANGE_EXT i on o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
-    where i.SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
-    order by h.CREATE_TIME desc
-    limit 0,1
+    LEFT JOIN OS_BUYCHANGE ob ON h.BUY_CHANGE_NO = ob.BUY_CHANGE_NO
+    LEFT JOIN OS_SALECHANGE os ON os.BUSINESS_SIGN_NO = ob.BUSINESS_SIGN_NO
+    where os.SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
   </select>
   <!--<delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from IFT_BUY_CHANGE_EXT
@@ -253,11 +239,49 @@
       </if>
     </set>
     where BUY_CHANGE_NO = #{buyChangeNo,jdbcType=BIGINT}
-  </update><update id="updateBuyRemarkBySelectBuyChangeNo" parameterType="com.tempus.gss.product.ift.api.entity.BuyChangeExt">
+  </update>
+
+  <update id="updateBuyRemarkBySelectBuyChangeNo" parameterType="com.tempus.gss.product.ift.api.entity.BuyChangeExt">
     UPDATE IFT_BUY_CHANGE_EXT b
     <set>
+      <if test="owner != null" >
+        OWNER = #{owner,jdbcType=INTEGER},
+      </if>
+      <if test="office != null" >
+        OFFICE = #{office,jdbcType=VARCHAR},
+      </if>
+      <if test="ticketType != null" >
+        TICKET_TYPE = #{ticketType,jdbcType=VARCHAR},
+      </if>
+      <if test="creator != null" >
+        CREATOR = #{creator,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="modifier != null" >
+        MODIFIER = #{modifier,jdbcType=VARCHAR},
+      </if>
+      <if test="modifyTime != null" >
+        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="valid != null" >
+        VALID = #{valid,jdbcType=TINYINT},
+      </if>
+      <if test="status != null" >
+        STATUS = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="changeRemark != null" >
+        CHANGE_REMARK = #{changeRemark,jdbcType=VARCHAR},
+      </if>
       <if test="changeRemark != null">
         b.CHANGE_REMARK = #{changeRemark,jdbcType=VARCHAR}
+      </if>
+      <if test="airLineRefundStatus !=null">
+        AIRLINE_REFUND_STATUS = #{airLineRefundStatus},
+      </if>
+      <if test="buyLocker != null" >
+        BUY_LOCKER = #{buyLocker,jdbcType=BIGINT}
       </if>
     </set>
     WHERE b.BUY_CHANGE_NO= #{buyChangeNo,jdbcType=BIGINT}

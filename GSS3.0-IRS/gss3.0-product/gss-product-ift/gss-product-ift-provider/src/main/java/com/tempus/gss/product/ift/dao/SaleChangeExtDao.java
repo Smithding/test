@@ -60,4 +60,11 @@ public interface SaleChangeExtDao extends BaseDao<SaleChangeExt, SaleChangeExtVo
 	 */
 	int queryCountByLockerAndType(@Param("lockerId") Long lockerId, @Param("changeType") int changeType);
 
+	/*
+	 * 根据passengerNo 查询 最近一次改签的 saleChangeExt DE 信息
+	 *
+	 * */
+	SaleChangeExt selectLastChangeExtByPassengerNo(Long passengerNo);
+
+
 }

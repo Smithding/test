@@ -112,6 +112,8 @@ public class ChangeServiceImpl implements IChangeService {
     IIftMessageService iftMessageService;
     @Reference
     ITicketSenderService iTicketSenderService;
+    @Reference
+    IftBuyChangeExtService buyChangeExtService;
     @Value("${dpsconfig.job.owner}")
     protected String owner;
 
@@ -304,6 +306,14 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeService.create(requestWithActor.getAgent(), saleChange);
 
             /*创建销售改签单拓展*/
+            //多次改签
+            //获取上次改签的pnr 编码 以及供应商
+            SaleChangeExt lastSaleChangeExt =saleChangeExtDao.selectLastChangeExtByPassengerNo(requestWithActor.getEntity().getOldPassengerNoList().get(0));
+            if (lastSaleChangeExt !=null){
+                saleChangeExt.setSupplierNo(lastSaleChangeExt.getSupplierNo());
+                saleChangeExt.setPnrNo(lastSaleChangeExt.getPnrNo());
+                saleChangeExt.setOffice(lastSaleChangeExt.getOffice());
+            }
             saleChangeExt.setSaleChangeNo(saleChangeNo);
             saleChangeExt.setChangeType(3);//3为改签,同saleChange的orderChangeType
             saleChangeExt.setContactName(requestWithActor.getEntity().getContactName());
@@ -885,15 +895,6 @@ public class ChangeServiceImpl implements IChangeService {
                 //如果支付为0
                 saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 3);
                 log.info("修改采购支付状态" + saleChangeNo);
-                try{
-                    //直接将单分配给销售改签员
-                    RequestWithActor<Long> saleChangeRequest = new RequestWithActor<>();
-                    saleChangeRequest.setAgent(requestWithActor.getAgent());
-                    saleChangeRequest.setEntity(requestWithActor.getEntity().getSaleChangeNo());
-                    changeExtService.assignChange(saleChangeRequest);
-                }catch (Exception e){
-                    log.error("直接将改签单分给采购人员异常",e);
-                }
                /* saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 3);
                 log.info("修改采购支付状态" + saleChangeNo);*/
             } else{
@@ -914,6 +915,17 @@ public class ChangeServiceImpl implements IChangeService {
                 log.info("修改审核备注" + buyChangeExt.getBuyChangeNo());
               //  buyChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
                 buyChangeExtDao.updateByPrimaryKey(buyChangeExt);
+            }
+            if(isNoFee(requestWithActor.getEntity().getSaleAdtPriceList(),requestWithActor.getEntity().getSaleChdPriceList(),requestWithActor.getEntity().getSaleInfPriceList())) {
+                try {
+                    //直接将单分配给销售改签员
+                    RequestWithActor<Long> saleChangeRequest = new RequestWithActor<>();
+                    saleChangeRequest.setAgent(requestWithActor.getAgent());
+                    saleChangeRequest.setEntity(requestWithActor.getEntity().getSaleChangeNo());
+                    changeExtService.assignChange(saleChangeRequest);
+                } catch (Exception e) {
+                    log.error("直接将改签单分给采购人员异常", e);
+                }
             }
             if (legList != null && legList.size() > 0) {
                 for (Leg leg : legList) {
@@ -1920,11 +1932,11 @@ public class ChangeServiceImpl implements IChangeService {
         Long buyLockerId = null;
         if(user != null){
             buyLockerId = user.getId();
-            BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(order.getSaleChangeNo());
+            BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(order.getSaleChangeNo());
             if(buyChangeExt != null){
                 buyChangeExt.setBuyLocker(buyLockerId);
                 buyChangeExt.setModifyTime(date);
-                buyChangeExtDao.updateBuyRemarkBySelectBuyChangeNo(buyChangeExt);
+                buyChangeExtService.updateBuyChangeExt(buyChangeExt);
             }
         }
         return buyLockerId;
@@ -1933,12 +1945,12 @@ public class ChangeServiceImpl implements IChangeService {
         saleChangeExtDao.updateLocker(order);*/
     }
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void assingAloneLockSaleChangeExt(SaleChangeExt order, Date date) {
-        BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(order.getSaleChangeNo());
+    public void assingAloneLockSaleChangeExt(SaleChangeExt order, Date date, Agent agent) {
+        BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(order.getSaleChangeNo());
         if(buyChangeExt != null){
             buyChangeExt.setBuyLocker(order.getAloneLocker());
             buyChangeExt.setModifyTime(date);
-            buyChangeExtDao.updateBuyRemarkBySelectBuyChangeNo(buyChangeExt);
+            buyChangeExtService.updateBuyChangeExt(buyChangeExt);
         }
     }
 
@@ -1955,7 +1967,7 @@ public class ChangeServiceImpl implements IChangeService {
         for (SaleChangeExt order : saleChangeExts) {
             if(!configsService.getIsDistributeTicket(agent)){
                 //如果不是系统分单
-                assingAloneLockSaleChangeExt(order,new Date());
+                assingAloneLockSaleChangeExt(order,new Date(),agent);
                 //TicketSender ticketSender = iTicketSenderService.queryByUserId(order.getAloneLocker());
                 increaseBuyChangeNum(agent, order.getAloneLocker());
             } else{
@@ -1990,7 +2002,7 @@ public class ChangeServiceImpl implements IChangeService {
         log.info("第三步：判断出票员手头出票订单数量...");
         if(!configsService.getIsDistributeTicket(agent)){
             //如果不是系统分单
-            assingAloneLockSaleChangeExt(saleChangeExt,new Date());
+            assingAloneLockSaleChangeExt(saleChangeExt,new Date(), agent);
             /*saleChangeExt = configsService.setLockerAsAloneLocker(saleChangeExt);
             Long locker = saleChangeExt.getLocker();
             TicketSender ticketSender = iTicketSenderService.queryByUserId(locker);*/

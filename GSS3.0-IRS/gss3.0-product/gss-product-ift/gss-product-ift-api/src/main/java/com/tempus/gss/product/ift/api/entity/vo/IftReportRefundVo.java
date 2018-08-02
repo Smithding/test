@@ -136,6 +136,14 @@ public class IftReportRefundVo implements Serializable {
      */
     private Long saleOrderNo;
     /**
+     * 出发城市
+     */
+    private String depAirport;
+    //仓位
+    private String cabin;
+    //退款部门
+    private String refundDept;
+    /**
      * 航程集合
      */
     private List<Leg> legList;
@@ -394,5 +402,29 @@ public class IftReportRefundVo implements Serializable {
 
     public void setLegList(List<Leg> legList) {
         this.legList = legList;
+    }
+
+    public String getDepAirport() {
+        return depAirport;
+    }
+
+    public void setDepAirport(String depAirport) {
+        this.depAirport = depAirport;
+    }
+
+    public String getCabin() {
+        return cabin;
+    }
+
+    public void setCabin(String cabin) {
+        this.cabin = cabin;
+    }
+
+    public String getRefundDept() {
+        return refundDept;
+    }
+
+    public void setRefundDept(String refundDept) {
+        this.refundDept = refundDept;
     }
 }

@@ -1,7 +1,6 @@
 package com.tempus.gss.product.ift.api.entity;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 public class IFTIssueReport implements Serializable {
     
@@ -59,31 +58,31 @@ public class IFTIssueReport implements Serializable {
     /**
      * farePrice 票价
      */
-    private BigDecimal farePrice;
+    private String farePrice;
     
     /**
      * tax 税费
      */
-    private BigDecimal tax;
+    private String tax;
     
     /**
      * saleRebate 返点
      */
-    private BigDecimal saleRebate;
+    private String saleRebate;
     /**
      * rebatePrice 返利
      */
-    private BigDecimal rebatePrice;
+    private String rebatePrice;
     
     /**
      * salePrice 应收金额
      */
-    private BigDecimal salePrice;
+    private String salePrice;
     
     /**
      * serviceCharge 服务费
      */
-    private BigDecimal serviceCharge;
+    private String serviceCharge;
     
     /**
      * passengerName 乘机人
@@ -98,7 +97,7 @@ public class IFTIssueReport implements Serializable {
     /**
      * ticketType 机票状态
      */
-    private Integer ticketType;
+    private String ticketType;
     
     /**
      * salePerson 订票人
@@ -138,12 +137,12 @@ public class IFTIssueReport implements Serializable {
     /**
      * settlePrice 结算金额
      */
-    private BigDecimal settlePrice;
+    private String settlePrice;
     
     /**
      * exchangeRate 汇率
      */
-    private BigDecimal exchangeRate;
+    private String exchangeRate;
     
     /**
      * currency 币种
@@ -242,43 +241,43 @@ public class IFTIssueReport implements Serializable {
         this.depDate = depDate;
     }
     
-    public BigDecimal getFarePrice() {
+    public String getFarePrice() {
         return farePrice;
     }
     
-    public void setFarePrice(BigDecimal farePrice) {
+    public void setFarePrice(String farePrice) {
         this.farePrice = farePrice;
     }
     
-    public BigDecimal getTax() {
+    public String getTax() {
         return tax;
     }
     
-    public void setTax(BigDecimal tax) {
+    public void setTax(String tax) {
         this.tax = tax;
     }
     
-    public BigDecimal getSaleRebate() {
+    public String getSaleRebate() {
         return saleRebate;
     }
     
-    public void setSaleRebate(BigDecimal saleRebate) {
+    public void setSaleRebate(String saleRebate) {
         this.saleRebate = saleRebate;
     }
     
-    public BigDecimal getSalePrice() {
+    public String getSalePrice() {
         return salePrice;
     }
     
-    public void setSalePrice(BigDecimal salePrice) {
+    public void setSalePrice(String salePrice) {
         this.salePrice = salePrice;
     }
     
-    public BigDecimal getServiceCharge() {
+    public String getServiceCharge() {
         return serviceCharge;
     }
     
-    public void setServiceCharge(BigDecimal serviceCharge) {
+    public void setServiceCharge(String serviceCharge) {
         this.serviceCharge = serviceCharge;
     }
     
@@ -298,11 +297,11 @@ public class IFTIssueReport implements Serializable {
         this.pnr = pnr;
     }
     
-    public Integer getTicketType() {
+    public String getTicketType() {
         return ticketType;
     }
     
-    public void setTicketType(Integer ticketType) {
+    public void setTicketType(String ticketType) {
         this.ticketType = ticketType;
     }
     
@@ -362,19 +361,19 @@ public class IFTIssueReport implements Serializable {
         this.itineraryNo = itineraryNo;
     }
     
-    public BigDecimal getSettlePrice() {
+    public String getSettlePrice() {
         return settlePrice;
     }
     
-    public void setSettlePrice(BigDecimal settlePrice) {
+    public void setSettlePrice(String settlePrice) {
         this.settlePrice = settlePrice;
     }
     
-    public BigDecimal getExchangeRate() {
+    public String getExchangeRate() {
         return exchangeRate;
     }
     
-    public void setExchangeRate(BigDecimal exchangeRate) {
+    public void setExchangeRate(String exchangeRate) {
         this.exchangeRate = exchangeRate;
     }
     
@@ -402,11 +401,11 @@ public class IFTIssueReport implements Serializable {
         this.source = source;
     }
     
-    public BigDecimal getRebatePrice() {
+    public String getRebatePrice() {
         return rebatePrice;
     }
     
-    public void setRebatePrice(BigDecimal rebatePrice) {
+    public void setRebatePrice(String rebatePrice) {
         this.rebatePrice = rebatePrice;
     }
 }

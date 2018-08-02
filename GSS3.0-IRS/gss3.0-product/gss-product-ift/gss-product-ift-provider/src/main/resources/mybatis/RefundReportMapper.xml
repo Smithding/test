@@ -94,7 +94,7 @@
          <result column="CHANGE_REMARK" property="changeRemark" jdbcType="VARCHAR"/>
          <result column="collectTicketPrice" property="collectTicketPrice" jdbcType="DECIMAL"/>
          <result column="refundPriceDept" property="refundPriceDept" jdbcType="VARCHAR"/>
-         <result column="SALE_ORDER_NO" property="saleOrderNo" jdbcType="BIGINT"/>
+         <result column="saleOrderNo" property="saleOrderNo" jdbcType="BIGINT"/>
         <!--一对多航程集合-->
         <collection property="legList" ofType="com.tempus.gss.product.ift.api.entity.Leg" column="saleOrderNo"
                     select="com.tempus.gss.product.ift.dao.LegDao.selectLegBySaleOrderNo"/>
@@ -176,6 +176,7 @@
         LEFT JOIN SM_USER AS U2 ON (OC.MODIFIER = U2.LOGIN_NAME)
         LEFT JOIN SM_DEPT AS DEPT2 ON (DEPT2.ID = U2.DEPT_ID)
        WHERE  OC.GOODS_TYPE = 2 AND OC.ORDER_CHANGE_TYPE IN ('1','2')
+       AND OC.CHILD_STATUS=10
        <if test="exactlyQuery!=null and exactlyQuery!=''and exactlyQuery!='1'">
            <if test="refunder!=null and refunder!=''">
                AND OC.MODIFIER=#{refunder,jdbcType=VARCHAR}
@@ -434,7 +435,7 @@
           oc.SALE_CHANGE_NO,
           oc.ORDER_CHANGE_TYPE,
           oc.GOODS_TYPE,
-          sce.REFUSE_REASON,
+          oc.CHANGE_REASON as REFUND_REASON,
           sod.TICKET_NO,
           CONCAT(iftpassenger.SURNAME,"/",iftpassenger.NAME) AS fltName,
           leg.DEP_TIME,
@@ -459,7 +460,7 @@
           sce.CHANGE_REMARK,
           iftpassenger.SALE_PRICE AS collectTicketPrice,
           sd2.NAME AS refundPriceDept,
-          oc.SALE_ORDER_NO
+          oc.SALE_ORDER_NO AS saleOrderNo
         FROM OS_SALECHANGE oc
         LEFT JOIN IFT_PNR pnr ON pnr.SOURCE_NO = oc.SALE_ORDER_NO
         LEFT JOIN IFT_SALE_ORDER_EXT soe ON soe.SALE_ORDER_NO = oc.SALE_ORDER_NO
@@ -478,6 +479,7 @@
         LEFT JOIN SM_USER su2 ON su2.LOGIN_NAME = pa.COMPLETER
         LEFT JOIN SM_DEPT sd2 ON sd2.ID = su2.DEPT_ID
         WHERE oc.ORDER_CHANGE_TYPE IN ('1','2') AND oc.GOODS_TYPE = 2
+        AND oc.CHILD_STATUS=10
         <if test="exactlyQuery!=null and exactlyQuery!=''and exactlyQuery!='1'">
             <if test="refunder!=null and refunder!=''">
                 AND oc.MODIFIER=#{refunder,jdbcType=VARCHAR}
@@ -512,11 +514,11 @@
             AND oso.SOURCE_CHANNEL_NO=#{sourceChannel,jdbcType=VARCHAR}
         </if>
         <if test="startDate!=null and startDate!=''">
-            AND DATE_FORMAT(soe.ISSUE_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{startDate,jdbcType=TIMESTAMP}, '%Y-%m-%d')
+            AND DATE_FORMAT(soe.ISSUE_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{startDate}, '%Y-%m-%d')
         </if>
         <if test="endDate!=null and endDate!=''">
             <![CDATA[
-           AND DATE_FORMAT(soe.ISSUE_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{endDate,jdbcType=TIMESTAMP}, '%Y-%m-%d')
+           AND DATE_FORMAT(soe.ISSUE_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d')
             ]]>
         </if>
         <if test="refundType!=null and refundType!=''">
