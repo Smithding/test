@@ -895,15 +895,6 @@ public class ChangeServiceImpl implements IChangeService {
                 //如果支付为0
                 saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 3);
                 log.info("修改采购支付状态" + saleChangeNo);
-                try{
-                    //直接将单分配给销售改签员
-                    RequestWithActor<Long> saleChangeRequest = new RequestWithActor<>();
-                    saleChangeRequest.setAgent(requestWithActor.getAgent());
-                    saleChangeRequest.setEntity(requestWithActor.getEntity().getSaleChangeNo());
-                    changeExtService.assignChange(saleChangeRequest);
-                }catch (Exception e){
-                    log.error("直接将改签单分给采购人员异常",e);
-                }
                /* saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 3);
                 log.info("修改采购支付状态" + saleChangeNo);*/
             } else{
@@ -924,6 +915,17 @@ public class ChangeServiceImpl implements IChangeService {
                 log.info("修改审核备注" + buyChangeExt.getBuyChangeNo());
               //  buyChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
                 buyChangeExtDao.updateByPrimaryKey(buyChangeExt);
+            }
+            if(isNoFee(requestWithActor.getEntity().getSaleAdtPriceList(),requestWithActor.getEntity().getSaleChdPriceList(),requestWithActor.getEntity().getSaleInfPriceList())) {
+                try {
+                    //直接将单分配给销售改签员
+                    RequestWithActor<Long> saleChangeRequest = new RequestWithActor<>();
+                    saleChangeRequest.setAgent(requestWithActor.getAgent());
+                    saleChangeRequest.setEntity(requestWithActor.getEntity().getSaleChangeNo());
+                    changeExtService.assignChange(saleChangeRequest);
+                } catch (Exception e) {
+                    log.error("直接将改签单分给采购人员异常", e);
+                }
             }
             if (legList != null && legList.size() > 0) {
                 for (Leg leg : legList) {
@@ -1930,7 +1932,7 @@ public class ChangeServiceImpl implements IChangeService {
         Long buyLockerId = null;
         if(user != null){
             buyLockerId = user.getId();
-            BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(order.getSaleChangeNo());
+            BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(order.getSaleChangeNo());
             if(buyChangeExt != null){
                 buyChangeExt.setBuyLocker(buyLockerId);
                 buyChangeExt.setModifyTime(date);
@@ -1944,7 +1946,7 @@ public class ChangeServiceImpl implements IChangeService {
     }
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void assingAloneLockSaleChangeExt(SaleChangeExt order, Date date, Agent agent) {
-        BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(order.getSaleChangeNo());
+        BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(order.getSaleChangeNo());
         if(buyChangeExt != null){
             buyChangeExt.setBuyLocker(order.getAloneLocker());
             buyChangeExt.setModifyTime(date);

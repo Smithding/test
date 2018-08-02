@@ -738,6 +738,10 @@ public class OrderServiceImpl implements IOrderService {
 				if (companyName.contains(COMPANY_NAME_YATAI)) {
 					if (response.getMsg() != null) {
 						saleOrderDetail.setPolicyNo(response.getMsg());
+						//存储保单下载链接
+						if(saleOrderExtVo.getEleUrl()!=null){
+							saleOrderDetail.setEleUrl(saleOrderExtVo.getEleUrl());
+						}
 						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					}
 				}
@@ -1081,6 +1085,10 @@ public class OrderServiceImpl implements IOrderService {
 			         }
 					if (StringUtils.isNotBlank(saleOrderExtVo.getPolicyNo())) {
 						saleOrderDetail.setPolicyNo(saleOrderExtVo.getPolicyNo());
+						//存储保单下载链接
+						if(saleOrderExtVo.getEleUrl()!=null){
+							saleOrderDetail.setEleUrl(saleOrderExtVo.getEleUrl());
+						}
 						//投保时间
 /*						saleOrderDetail.setModifyTime(new Date());*/
 						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
@@ -1212,11 +1220,16 @@ public class OrderServiceImpl implements IOrderService {
 					// 设置子订单状态为2(已投保)
 					saleOrderDetail.setStatus(2);
 					saleOrderDetail.setInsureTime(new Date());
+					//saleOrderDetail.setEleUrl(response.get);
 					saleOrderExt.setTotalInsureTime(new Date());
 					// 更新销售单和采购单状态为2(已投保)
 					if (StringUtils.isNotBlank(saleOrderExtVo.getPolicyNo())) {
 						log.error("获取保险保单成功--------》"+saleOrderExtVo.getPolicyNo());
 						saleOrderDetail.setPolicyNo(saleOrderExtVo.getPolicyNo());
+						//存储保单下载链接
+						if(saleOrderExtVo.getEleUrl()!=null){
+							saleOrderDetail.setEleUrl(saleOrderExtVo.getEleUrl());
+						}
 						//投保时间
 /*						saleOrderDetail.setModifyTime(new Date());*/
 						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
@@ -1561,7 +1574,7 @@ public class OrderServiceImpl implements IOrderService {
 				log.info("保险经纪接口响应:"+JSONObject.toJSONString(response));
 
 				if (RESPONSE_SUCCESS.equals(response.getCode())||"该保单已退保，请不要重复操作".equals(response.getMsg())) {
-					// 设置子订单状态为3(已退保)
+					// 设置子订单状态为5(已退保)
 					if(isRefund==1){
 						// 采购改签
 						PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, saleOrderPlanAmountVO);
@@ -1576,7 +1589,6 @@ public class OrderServiceImpl implements IOrderService {
 							throw new GSSException("创建采购应收记录失败", "1010", "退保失败");
 						}
 						saleOrderDetail.setStatus(8);//退款中
-						int s = saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 			         	   SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 8);//退款中
 						// 创建销售退款单
 						this.saleRefund(agent, saleOrderNo,String.valueOf(saleOrderDetail.getInsuredNo()));
@@ -1595,9 +1607,23 @@ public class OrderServiceImpl implements IOrderService {
 			         	}else{
 			         	   SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 5);
 			         	}
-						saleOrderDetail.setStatus(5);
-						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
+						if(isRefund==1){
+							saleOrderDetail.setStatus(8);
+						}else{
+							saleOrderDetail.setStatus(5);
+						}
 					}
+					//生成另外一条投保记录 用于结算对账
+					Date time = saleOrderDetail.getCreateTime();
+					saleOrderDetail.setCreateTime(new Date());
+					saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
+					SaleOrderDetail saleOrderDetailForBefore = (SaleOrderDetail)saleOrderDetail.clone();
+					saleOrderDetailForBefore.setStatus(saleOrderDetail.getStatus());
+					saleOrderDetailForBefore.setStatus(2);
+					saleOrderDetailForBefore.setIsReport("1");
+					saleOrderDetailForBefore.setCreateTime(time);
+					saleOrderDetailDao.insertSelective(saleOrderDetailForBefore);
+					
 				} else {
 					return resultInsure;
 				}
@@ -1963,7 +1989,14 @@ public class OrderServiceImpl implements IOrderService {
 				}else{
 					saleOrderDetail.setStatus(3);
 				}
+				Date time = saleOrderDetail.getCreateTime();
+				saleOrderDetail.setCreateTime(new Date());
 				saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
+				SaleOrderDetail saleOrderDetailForBefore = (SaleOrderDetail)saleOrderDetail.clone();
+				saleOrderDetailForBefore.setStatus(2);
+				saleOrderDetailForBefore.setIsReport("1");
+				saleOrderDetailForBefore.setCreateTime(time);
+				saleOrderDetailDao.insertSelective(saleOrderDetailForBefore);
 				Insurance insurance = saleOrderExt.getInsurance();
 				Long businessSignNo = IdWorker.getId();
 				Long saleChangeNo = maxNoService.generateBizNo("INS_SALE_CHANGE_EXT_NO", 51);
@@ -3285,8 +3318,7 @@ public class OrderServiceImpl implements IOrderService {
 					// 设置子订单状态为3(已退保)
 					if(isRefund==1){
 						saleOrderDetail.setStatus(12);//退款中
-						int s = saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
-			         	   SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 12);//退款中
+			         	  SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 12);//退款中
 					}else{
 						isCancel = false;
 						for(SaleOrderDetail saleOrderDetailChange:saleOrderExt.getSaleOrderDetailList()){
@@ -3303,8 +3335,17 @@ public class OrderServiceImpl implements IOrderService {
 			         	   SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 5);
 			         	}
 						saleOrderDetail.setStatus(5);
-						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					}
+					//生成另外一条投保记录 用于结算对账
+					Date time = saleOrderDetail.getCreateTime();
+					saleOrderDetail.setCreateTime(new Date());
+					saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
+					SaleOrderDetail saleOrderDetailForBefore = (SaleOrderDetail)saleOrderDetail.clone();
+					saleOrderDetailForBefore.setStatus(saleOrderDetail.getStatus());
+					saleOrderDetailForBefore.setStatus(2);
+					saleOrderDetailForBefore.setIsReport("1");
+					saleOrderDetailForBefore.setCreateTime(time);
+					saleOrderDetailDao.insertSelective(saleOrderDetailForBefore);
 				} else {
 					return resultInsure;
 				}

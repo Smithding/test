@@ -56,18 +56,6 @@ private String flightNo;
 private String flightTime;
 /*投保时间*/
 private String insureTime;
-
-public String getPolicyNo() {
-	return policyNo;
-}
-
-public String getInsureTime() {
-	return insureTime;
-}
-public void setInsureTime(String insureTime) {
-	this.insureTime = insureTime;
-}
-
 /*客户类型*/
 private String customerType;
 /*客户名称*/
@@ -76,6 +64,19 @@ private String customerName;
 private String internatOrcivil;
 /*保单号*/
 private String policyNo;
+/*票号*/
+private String ticketNo;
+/*订票员*/
+private String bookingClerk;
+public String getPolicyNo() {
+	return policyNo;
+}
+public String getInsureTime() {
+	return insureTime;
+}
+public void setInsureTime(String insureTime) {
+	this.insureTime = insureTime;
+}
 public String getTicketNo() {
 	return ticketNo;
 }
@@ -88,10 +89,6 @@ public String getBookingClerk() {
 public void setBookingClerk(String bookingClerk) {
 	this.bookingClerk = bookingClerk;
 }
-/*票号*/
-private String ticketNo;
-/*订票员*/
-private String bookingClerk;
 public String getPnr() {
 	return pnr;
 }

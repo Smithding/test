@@ -96,7 +96,7 @@ public class SaleOrderExtVo implements Serializable {
 	/**
 	 * 保单下载地址
 	 */
-	private String policyUrl;
+	private String eleUrl;
 
 	/**
 	 * 保单号
@@ -373,6 +373,14 @@ public class SaleOrderExtVo implements Serializable {
 		return insureTimeEnd;
 	}
 
+	public String getEleUrl() {
+		return eleUrl;
+	}
+
+	public void setEleUrl(String eleUrl) {
+		this.eleUrl = eleUrl;
+	}
+	
 	public void setInsureTimeEnd(String insureTimeEnd) {
 		this.insureTimeEnd = insureTimeEnd;
 	}
@@ -610,15 +618,7 @@ public class SaleOrderExtVo implements Serializable {
 	public void setOrderType(Integer orderType) {
 		this.orderType = orderType;
 	}
-
-	public String getPolicyUrl() {
-		return policyUrl;
-	}
-
-	public void setPolicyUrl(String policyUrl) {
-		this.policyUrl = policyUrl;
-	}
-
+	
 	public String getPolicyNo() {
 		return policyNo;
 	}
