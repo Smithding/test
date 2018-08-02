@@ -142,17 +142,18 @@ public class InsPayNoticeListener {
 										}catch(Exception e){
 											Log.error("保险变更拓展单更新失败！！"+e);
 										}
-									SaleOrderDetail saleOrderDetailForBefore = null;
+									/*SaleOrderDetail saleOrderDetailForBefore = null;
 									saleOrderDetailForBefore = (SaleOrderDetail)saleOrderDetailChange.clone();
-									saleOrderDetailForBefore.setStatus(saleOrderDetailChange.getStatus());
+									saleOrderDetailForBefore.setStatus(saleOrderDetailChange.getStatus());*/
+									//saleOrderDetailChange.getCreateTime(new Date());
 									saleOrderDetailChange.setStatus(10);//10为已退款
 									//保存之前存储的那条投保记录
-									saleOrderDetailChange.setCreateTime(new Date());
+								/*	saleOrderDetailChange.setCreateTime(new Date());
 									saleOrderDetailForBefore.setStatus(2);
 									saleOrderDetailForBefore.setIsReport("1");
-									saleOrderDetailForBefore.setModifyTime(new Date());
+									saleOrderDetailForBefore.setModifyTime(new Date());*/
 									saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetailChange);
-									saleOrderDetailDao.insertSelective(saleOrderDetailForBefore);
+									//saleOrderDetailDao.insertSelective(saleOrderDetailForBefore);
 				         			isCancel = true;
 				         		}
 							}
