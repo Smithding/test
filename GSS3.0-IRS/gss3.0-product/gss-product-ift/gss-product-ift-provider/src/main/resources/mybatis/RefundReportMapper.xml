@@ -176,6 +176,7 @@
         LEFT JOIN SM_USER AS U2 ON (OC.MODIFIER = U2.LOGIN_NAME)
         LEFT JOIN SM_DEPT AS DEPT2 ON (DEPT2.ID = U2.DEPT_ID)
        WHERE  OC.GOODS_TYPE = 2 AND OC.ORDER_CHANGE_TYPE IN ('1','2')
+       AND OC.CHILD_STATUS=10
        <if test="exactlyQuery!=null and exactlyQuery!=''and exactlyQuery!='1'">
            <if test="refunder!=null and refunder!=''">
                AND OC.MODIFIER=#{refunder,jdbcType=VARCHAR}
@@ -478,6 +479,7 @@
         LEFT JOIN SM_USER su2 ON su2.LOGIN_NAME = pa.COMPLETER
         LEFT JOIN SM_DEPT sd2 ON sd2.ID = su2.DEPT_ID
         WHERE oc.ORDER_CHANGE_TYPE IN ('1','2') AND oc.GOODS_TYPE = 2
+        AND oc.CHILD_STATUS=10
         <if test="exactlyQuery!=null and exactlyQuery!=''and exactlyQuery!='1'">
             <if test="refunder!=null and refunder!=''">
                 AND oc.MODIFIER=#{refunder,jdbcType=VARCHAR}
@@ -512,11 +514,11 @@
             AND oso.SOURCE_CHANNEL_NO=#{sourceChannel,jdbcType=VARCHAR}
         </if>
         <if test="startDate!=null and startDate!=''">
-            AND DATE_FORMAT(soe.ISSUE_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{startDate,jdbcType=TIMESTAMP}, '%Y-%m-%d')
+            AND DATE_FORMAT(soe.ISSUE_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{startDate}, '%Y-%m-%d')
         </if>
         <if test="endDate!=null and endDate!=''">
             <![CDATA[
-           AND DATE_FORMAT(soe.ISSUE_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{endDate,jdbcType=TIMESTAMP}, '%Y-%m-%d')
+           AND DATE_FORMAT(soe.ISSUE_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{endDate}, '%Y-%m-%d')
             ]]>
         </if>
         <if test="refundType!=null and refundType!=''">
