@@ -185,6 +185,16 @@ public class OrderServiceImpl implements IOrderService {
     public void setPnr(Pnr pnr) {
         pnrDao.insertSelective(pnr);
     }
+    @Override
+    public String getChangeOrderPnr(Long pnrNo) {
+        //ift_pnr 表中 pnrNo是唯一的
+        Pnr pnr = pnrDao.selectByPrimaryKey(pnrNo);
+        if (pnr!=null) {
+            return pnr.getPnr();
+        }else {
+            return null;
+        }
+    }
 
     /**
      * 创建订单. 通过白屏查询、Pnr、需求单、手工方式创建订单.
