@@ -2832,8 +2832,12 @@ public class OrderServiceImpl implements IOrderService {
             List<BuyOrderExt> buyOrderExts = buyOrderExtDao.selectBuyOrderBySaleOrderNo(order.getSaleOrderNo());
             if(buyOrderExts != null && buyOrderExts.size()>0){
                 BuyOrderExt buyOrderExt = buyOrderExts.get(0);
-                buyOrderExt.setBuyLocker(lockerId);
-                orderService.updateBuyOrderExt(buyOrderExt);
+                if(buyOrderExt.getBuyLocker() == null || buyOrderExt.getBuyLocker() == 0l){
+                    buyOrderExt.setBuyLocker(lockerId);
+                    orderService.updateBuyOrderExt(buyOrderExt);
+                } else {
+                    lockerId = buyOrderExt.getBuyLocker();
+                }
             }
         }
         return lockerId;
