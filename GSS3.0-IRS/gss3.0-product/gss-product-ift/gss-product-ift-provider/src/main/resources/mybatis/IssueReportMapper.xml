@@ -472,10 +472,10 @@
         join IFT_SALE_ORDER_EXT isoe on isoe.SALE_ORDER_NO = obo.SALE_ORDER_NO
         join IFT_SALE_ORDER_DETAIL isod on isod.SALE_ORDER_DETAIL_NO = ibod.SALE_ORDER_DETAIL_NO
         join IFT_PASSENGER ip on ip.PASSENGER_NO = isod.PASSENGER_NO
-        left join premier.IFT_PNR ipnr on ipnr.PNR_NO = isoe.PNR_NO
-        left join premier.SM_USER sub on sub.LOGIN_NAME = obo.MODIFIER
-        left join premier.SM_DEPT sd on sd.ID = sub.DEPT_ID
-        left join premier.SM_OWNER_INFO soi on soi.OWNER = obo.OWNER
+        left join IFT_PNR ipnr on ipnr.PNR_NO = isoe.PNR_NO
+        left join SM_USER sub on sub.LOGIN_NAME = obo.MODIFIER
+        left join SM_DEPT sd on sd.ID = sub.DEPT_ID
+        left join SM_OWNER_INFO soi on soi.OWNER = obo.OWNER
         where
         obo.GOODS_TYPE = 2 and obo.PAY_STATUS in (3,4) and obo.BSIGN_TYPE = 1 and obo.BUY_STATUS = 5
         <if test="ticketDateStart != null and ticketDateStart != ''">
