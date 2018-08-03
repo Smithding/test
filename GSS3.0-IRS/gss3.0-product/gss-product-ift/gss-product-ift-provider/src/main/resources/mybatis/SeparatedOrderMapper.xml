@@ -56,7 +56,9 @@
             </if>
             <if test="buyLocker!=null">
                 <choose>
-                    <when test="buyLocker == 1"></when>
+                    <when test="buyLocker == -1"></when>
+                    <when test="buyLocker == 0">AND iftb.BUY_LOCKER = 0</when>
+                    <when test="buyLocker == 1">AND iftb.BUY_LOCKER != 0</when>
                     <otherwise>AND iftb.BUY_LOCKER = #{buyLocker,jdbcType=BIGINT} </otherwise>
                 </choose>
             </if>

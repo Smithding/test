@@ -124,13 +124,14 @@
         LEFT JOIN OS_SALECHANGE o ON o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
         LEFT JOIN OS_BUYORDER k ON k.SALE_ORDER_NO = o.SALE_ORDER_NO
         LEFT JOIN OS_BUYCHANGE m ON m.BUY_ORDER_NO = k.BUY_ORDER_NO
+        LEFT JOIN IFT_BUY_CHANGE_EXT bce ON m.BUY_CHANGE_NO = bce.BUY_CHANGE_NO
         WHERE
         i.VALID = 1
         <if test="owner != null">
             AND i. OWNER = #{owner}
         </if>
 
-        AND i.LOCKER = #{locker}
+        AND bce.BUY_LOCKER = #{locker}
         AND i.CHANGE_TYPE = 2
         AND m.CHILD_STATUS =1
         AND o.CHILD_STATUS IN (2)
@@ -149,13 +150,14 @@
         LEFT JOIN OS_SALECHANGE o ON o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
         LEFT JOIN OS_BUYORDER k ON k.SALE_ORDER_NO = o.SALE_ORDER_NO
         LEFT JOIN OS_BUYCHANGE m ON m.BUY_ORDER_NO = k.BUY_ORDER_NO
+        LEFT JOIN IFT_BUY_CHANGE_EXT bce ON m.BUY_CHANGE_NO = bce.BUY_CHANGE_NO
         WHERE
         i.VALID = 1
         <if test="owner != null">
             AND i. OWNER = #{owner}
         </if>
         AND i.CHANGE_TYPE = 1
-       /* AND i.LOCKER = #{locker}*/
+        AND bce.LOCKER = #{locker}
         AND m.CHILD_STATUS = 1
         AND o.CHILD_STATUS IN (2)
         ORDER BY
@@ -257,13 +259,15 @@
         FROM
         IFT_SALE_CHANGE_EXT i
         LEFT JOIN OS_SALECHANGE o ON o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
+        LEFT JOIN OS_BUYCHANGE bc ON bc.BUSINESS_SIGN_NO = o.BUSINESS_SIGN_NO
+        LEFT JOIN IFT_BUY_CHANGE_EXT bce ON bc.BUY_CHANGE_NO = bce.BUY_CHANGE_NO
         WHERE
         i.VALID = 1
         <if test="owner != null">
             AND i. OWNER = #{owner}
         </if>
 
-        AND i.LOCKER = #{locker}
+        AND bce.BUY_LOCKER = #{locker}
         AND i.CHANGE_TYPE = 3
         AND o.PAY_STATUS IN (3, 4)
         AND o.CHILD_STATUS IN (3)
