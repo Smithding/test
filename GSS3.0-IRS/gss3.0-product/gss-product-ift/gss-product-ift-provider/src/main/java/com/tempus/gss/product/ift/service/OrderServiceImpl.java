@@ -175,6 +175,8 @@ public class OrderServiceImpl implements IOrderService {
     SaleChangeExtDao saleChangeExtDao;
     @Reference
     protected ITicketSenderService ticketSenderService;
+    @Reference
+    IBuyOrderExtService buyOrderExtService;
     @Autowired
     IftMessageServiceImpl iftMessageServiceImpl;
     
@@ -1899,7 +1901,8 @@ public class OrderServiceImpl implements IOrderService {
                 if(buyOrderExts != null && buyOrderExts.size()>0){
                      BuyOrderExt buyOrderExt = buyOrderExts.get(0);
                      buyOrderExt.setBuyLocker(order.getAloneLocker());
-                     orderService.updateBuyOrderExt(buyOrderExt);
+                     //orderService.updateBuyOrderExt(buyOrderExt);
+                    buyOrderExtService.update(agent,buyOrderExt);
                 }
                 log.info("2.增加出票人的未出票订单数量...");
                 /*TicketSender ticketSender = ticketSenderService.queryByUserId(order.getAloneLocker());
@@ -1931,9 +1934,6 @@ public class OrderServiceImpl implements IOrderService {
                     if (peopleInfo.getOrdercount() >= maxOrderNum) {
                         continue;
                     } else {
-                        log.info("第五步:满足条件的分配详细明细...1.将设置为出票中");
-                        /***修改订单明细表*/
-                        updateSaleOrderDetail(order, peopleInfo, updateTime);
                         /**锁单*/
                         log.info("2.锁单,锁单人是被分配人...");
                         Long lockerId = assingLockOrder(order, peopleInfo, updateTime, agent);
@@ -2834,7 +2834,8 @@ public class OrderServiceImpl implements IOrderService {
                 BuyOrderExt buyOrderExt = buyOrderExts.get(0);
                 if(buyOrderExt.getBuyLocker() == null || buyOrderExt.getBuyLocker() == 0l){
                     buyOrderExt.setBuyLocker(lockerId);
-                    orderService.updateBuyOrderExt(buyOrderExt);
+                    //orderService.updateBuyOrderExt(buyOrderExt);
+                    buyOrderExtService.update(agent,buyOrderExt);
                 } else {
                     lockerId = buyOrderExt.getBuyLocker();
                 }
@@ -2890,11 +2891,11 @@ public class OrderServiceImpl implements IOrderService {
         return saleOrderExtList;
     }
 
-    @Override
+   /* @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateBuyOrderExt(BuyOrderExt buyOrderExt) {
         buyOrderExtDao.updateByPrimaryKeySelective(buyOrderExt);
-    }
+    }*/
 
     /**
      * 定时器获取待出票订单

@@ -288,6 +288,6 @@ public interface IOrderService {
 
 	public List<SaleOrderExt> getAssignedOrders(Integer[] createTypeArray);
 
-	public void updateBuyOrderExt(BuyOrderExt buyOrderExt);
+	//public void updateBuyOrderExt(BuyOrderExt buyOrderExt);
 
 }
