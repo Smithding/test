@@ -622,23 +622,38 @@ public class RefundServiceImpl implements IRefundService {
 
 			Long saleChangeNo = requestWithActor.getEntity().longValue();
 			SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(saleChangeNo);
+			SaleChange saleChangeByNo = saleChangeService.getSaleChangeByNo(requestWithActor.getAgent(), saleChangeNo);
 			long originLocker = saleChangeExt.getLocker();
-
-
-			saleChangeExt.setLocker(requestWithActor.getAgent().getId());
-			saleChangeExt.setAloneLocker(requestWithActor.getAgent().getId());
-			// 锁起状态为Id
-			//saleChangeExt.setLocker(1L);
-			saleChangeExt.setLockTime(new Date());
-			//int updateFlag = saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
-			int updateFlag = refundService.updateLocker(saleChangeExt);
+			long originBuyLocker = 0;
+			int updateFlag = 0 ;
+			if (1 == saleChangeByNo.getChildStatus() &&
+					(saleChangeExt.getLocker() == 0l||saleChangeExt.getLocker() == null)
+					) {
+				//销售的锁单
+				saleChangeExt.setLocker(requestWithActor.getAgent().getId());
+				saleChangeExt.setAloneLocker(requestWithActor.getAgent().getId());
+				// 锁起状态为Id
+				//saleChangeExt.setLocker(1L);
+				saleChangeExt.setLockTime(new Date());
+				//int updateFlag = saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
+				 updateFlag = refundService.updateLocker(saleChangeExt);
+			} else{
+				//采购的锁单
+				BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
+				if(buyChangeExt.getBuyLocker()==null || buyChangeExt.getBuyLocker() == 0l){
+					originBuyLocker = buyChangeExt.getBuyLocker();
+					buyChangeExt.setBuyLocker(requestWithActor.getAgent().getId());
+					buyChangeExt.setModifyTime(new Date());
+					updateFlag = buyChangeExtService.updateBuyChangeExt(buyChangeExt);
+				}
+			}
 
 			//锁定前先判断是否有locker
-			if(originLocker != 0l){
+			/*if(originLocker != 0l){
 				//对应locker出票员的num-1
 				iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),originLocker,"SALE_REFUSE_NUM");
 				iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),originLocker,"BUY_REFUSE_NUM");
-			}
+			}*/
 			if (updateFlag == 1) {
 				flag = true;
 				iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),requestWithActor.getAgent().getId(),"SALE_REFUSE_NUM");
@@ -1578,14 +1593,15 @@ public class RefundServiceImpl implements IRefundService {
 	}
 
 
-	private void increaseBuyRefuseNum(Agent agent, TicketSender sender) {
+	private void increaseBuyRefuseNum(Agent agent, Long buyLocker) {
 
 		//查询该种类型单被该业务员锁住的数量赋值给BuyRefuseNum字段
-		User user = userService.findUserByLoginName(agent, sender.getUserid());
-		int lockCount = refundService.queryBuyRefundAndDelCountBylocker(user.getId());
-		sender.setBuyRefuseNum(lockCount);
-		sender.setIds(sender.getId() + "");
-		iTicketSenderService.update(sender);
+//		User user = userService.findUserByLoginName(agent, buyLocker.getUserid());
+//		int lockCount = refundService.queryBuyRefundAndDelCountBylocker(user.getId());
+//		buyLocker.setBuyRefuseNum(lockCount);
+//		buyLocker.setIds(buyLocker.getId() + "");
+//		iTicketSenderService.update(buyLocker);
+		iTicketSenderService.updateByLockerId(agent,buyLocker,"BUY_REFUSE_NUM");
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -1602,16 +1618,19 @@ public class RefundServiceImpl implements IRefundService {
 		buyChangeExtService.updateBuyChangeExt(buyChangeExt);
 	}
 
-	public void assingLockSaleChangeExt(SaleChangeExt order, TicketSender sender, Date date, Agent agent) {
-		User user = userService.findUserByLoginName(agent, sender.getUserid());
+	public BuyChangeExt assingLockSaleChangeExt(SaleChangeExt order, TicketSender sender, Date date, Agent agent) {
 		Long saleChangeNo = order.getSaleChangeNo();
-		if (user!=null) {
-			BuyChangeExt buyChangeExt =buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
-			buyChangeExt.setBuyLocker(user.getId());
-			buyChangeExt.setModifyTime(date);
-			log.info("自动分单更新采购变更单扩展表所锁单人："+buyChangeExt.toString());
-			buyChangeExtService.updateBuyChangeExt(buyChangeExt);
+		BuyChangeExt buyChangeExt =buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
+		if(buyChangeExt.getBuyLocker() == null || buyChangeExt.getBuyLocker() == 0l){
+			User user = userService.findUserByLoginName(agent, sender.getUserid());
+			if (user!=null) {
+				buyChangeExt.setBuyLocker(user.getId());
+				buyChangeExt.setModifyTime(date);
+				log.info("自动分单更新采购变更单扩展表所锁单人："+buyChangeExt.toString());
+				buyChangeExtService.updateBuyChangeExt(buyChangeExt);
+			}
 		}
+		return buyChangeExt;
 	}
 
 
@@ -1862,11 +1881,11 @@ public class RefundServiceImpl implements IRefundService {
 					} else {
 						/**锁单*/
 						log.info("第四步:满足条件的分配明细1.锁单,锁单人是被分配人...");
-						assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
+						BuyChangeExt buyChangeExt = assingLockSaleChangeExt(order, peopleInfo, updateTime, agent);
 						/***增加出票人订单数*/
 						log.info("2.增加出票人的未处理采购废票单数量...");
 						peopleInfo.setUpdatetime(updateTime);
-						increaseBuyRefuseNum(agent, peopleInfo);
+						increaseBuyRefuseNum(agent, buyChangeExt.getBuyLocker());
 						break;
 					}
 				}
@@ -1896,10 +1915,10 @@ public class RefundServiceImpl implements IRefundService {
 				} else {
 					//log.info("第四步:满足条件的分配详细明细...1.将设置为出票中");
 					/**锁单*/
-					assingLockSaleChangeExt(saleChangeExt, peopleInfo, updateTime, agent);
+					BuyChangeExt buyChangeExt = assingLockSaleChangeExt(saleChangeExt, peopleInfo, updateTime, agent);
 					/***增加出票人订单数*/
 					log.info("增加出票人的未处理采购单数量...");
-					increaseBuyRefuseNum(agent, peopleInfo);
+					increaseBuyRefuseNum(agent, buyChangeExt.getBuyLocker());
 					break;
 				}
 			}

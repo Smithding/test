@@ -1930,16 +1930,18 @@ public class ChangeServiceImpl implements IChangeService {
     public Long assingLockSaleChangeExt(SaleChangeExt order, TicketSender sender, Date date, Agent agent) {
         User user = userService.findUserByLoginName(agent, sender.getUserid());
         Long buyLockerId = null;
+        BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(order.getSaleChangeNo());
         if(user != null){
             buyLockerId = user.getId();
-            BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(order.getSaleChangeNo());
             if(buyChangeExt != null){
-                buyChangeExt.setBuyLocker(buyLockerId);
-                buyChangeExt.setModifyTime(date);
-                buyChangeExtService.updateBuyChangeExt(buyChangeExt);
+                if(buyChangeExt.getBuyLocker() == null || buyChangeExt.getBuyLocker() == 0l){
+                    buyChangeExt.setBuyLocker(buyLockerId);
+                    buyChangeExt.setModifyTime(date);
+                    buyChangeExtService.updateBuyChangeExt(buyChangeExt);
+                }
             }
         }
-        return buyLockerId;
+        return buyChangeExt.getBuyLocker();
        /* order.setLocker(user.getId());
         order.setLockTime(date);
         saleChangeExtDao.updateLocker(order);*/
