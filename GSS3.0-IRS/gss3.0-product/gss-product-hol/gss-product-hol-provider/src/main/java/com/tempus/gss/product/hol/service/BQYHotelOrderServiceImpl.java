@@ -728,6 +728,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		hotelOrder.setGuestName(passengers);
 		hotelOrder.setGuestMobile(orderReq.getMobile());
 		hotelOrder.setDbCancelRule(policyType);			//取消政策类型
+		hotelOrder.setSupPriceName(roomInfo.getRoomTypeName()); //房型
 		if (StringUtil.isNotNullOrEmpty(orderCreateReq.getOrderRemark())) {
 			hotelOrder.setRemark(orderCreateReq.getOrderRemark());
 		}
