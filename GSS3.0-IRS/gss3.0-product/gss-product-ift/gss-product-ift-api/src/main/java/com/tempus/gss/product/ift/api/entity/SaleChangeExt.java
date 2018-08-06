@@ -247,6 +247,7 @@ public class SaleChangeExt implements Serializable {
 				", office='" + office + '\'' +
 				", drawerLoginName='" + drawerLoginName + '\'' +
 				", airLineRefundStatus=" + airLineRefundStatus +
+                ",supplierNo="+supplierNo+
 				'}';
 	}
 
