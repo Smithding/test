@@ -226,7 +226,8 @@ public class ChangeServiceImpl implements IChangeService {
             //			}
 
             /*新增改签航段*/
-            for (int i = 0; i < requestWithActor.getEntity().getLegList().size(); i++) {
+            int legLength = requestWithActor.getEntity().getLegList().size();
+            for (int i = 0; i < legLength; i++) {
                 Leg leg = requestWithActor.getEntity().getLegList().get(i);
                 leg.setSaleOrderNo(requestWithActor.getEntity().getSaleOrderNo());
                 leg.setParentSection(i);
