@@ -44,6 +44,7 @@ import com.tempus.gss.order.entity.SaleChange;
 import com.tempus.gss.order.entity.SaleOrder;
 import com.tempus.gss.order.entity.vo.CertificateCreateVO;
 import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
+import com.tempus.gss.order.entity.vo.UpdatePlanAmountVO;
 import com.tempus.gss.order.service.IBuyChangeService;
 import com.tempus.gss.order.service.IBuyOrderService;
 import com.tempus.gss.order.service.ICertificateService;
@@ -1576,17 +1577,11 @@ public class OrderServiceImpl implements IOrderService {
 				if (RESPONSE_SUCCESS.equals(response.getCode())||"该保单已退保，请不要重复操作".equals(response.getMsg())) {
 					// 设置子订单状态为5(已退保)
 					if(isRefund==1){
-						// 采购改签
+						// 创建应收
 						PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, saleOrderPlanAmountVO);
-						// 采购改签
-						PlanAmountRecord planAmountRecord1 = planAmountRecordService.create(agent, buyOrderPlanAmountVO);
 						if (planAmountRecord == null) {
 							log.info("创建销售应付记录失败");
 							throw new GSSException("创建销售应付记录失败", "1010", "退保失败");
-						}
-						if (planAmountRecord1 == null) {
-							log.info("创建采购应收记录失败");
-							throw new GSSException("创建采购应收记录失败", "1010", "退保失败");
 						}
 						saleOrderDetail.setStatus(8);//退款中
 			         	   SaleOrder saleorder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 8);//退款中
@@ -1890,7 +1885,12 @@ public class OrderServiceImpl implements IOrderService {
 					requestWithActorTwo.setEntity(saleOrderExt.getInsuranceNo());
 					// 更新子状态
 					SaleOrder saleOrder = saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 8);//退款zhogn
-					Insurance insurance =  insuranceService.getInsurance(requestWithActorTwo);
+					Insurance insurance;
+					try {
+						insurance = insuranceService.getInsurance(requestWithActorTwo);
+					} catch (Exception e) {
+						throw new GSSException("获取保险产品失败！", "003", "获取所有保险产品失败！");
+					}
 					salePrice = saleOrderDetail.getPremium();
 					if (salePrice == null) {
 						log.info("订单销售价salePrice为空");
@@ -2227,7 +2227,13 @@ public class OrderServiceImpl implements IOrderService {
 			requestWithActor.setEntity(saleOrderNo);
 			SaleOrderExt saleOrderExt = querySaleOrder(requestWithActor);
 			requestWithActorTwo.setEntity(saleOrderExt.getInsuranceNo());
-			Insurance insurance =  insuranceService.getInsurance(requestWithActorTwo);
+			Insurance insurance;
+			try {
+				insurance = insuranceService.getInsurance(requestWithActorTwo);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				throw new GSSException("获取保险失败", "003", "获取所有保险失败");
+			}
 			// 创建销售应付记录
 			CreatePlanAmountVO saleOrderPlanAmountVO = new CreatePlanAmountVO();
 			BigDecimal salePrice = null;
@@ -3492,5 +3498,30 @@ public class OrderServiceImpl implements IOrderService {
 		/*saleOrderExt.setSaleOrder(saleOrder);*/
 		log.info("查询保单结束==============");
 		return saleOrderExts;
+	}
+	@Override
+	public boolean cancelInsuranceOrder(RequestWithActor<Long> requestWithActor) throws Exception {
+		// TODO Auto-generated method stub
+		log.info("取消保险订单开始==============");
+		//查询订单
+		List<SaleOrderDetail> SaleOrderDetails = saleOrderDetailDao.selectBySaleOrderNo(requestWithActor.getEntity());
+		for(SaleOrderDetail saleOrderDetail:SaleOrderDetails){
+			saleOrderDetail.setStatus(3);
+			saleOrderDetailDao.updateByPrimaryKey(saleOrderDetail);
+			
+		}
+		//将总订单的保险设置为取消状态
+		saleOrderService.updateStatus(requestWithActor.getAgent(), requestWithActor.getEntity(), 3);
+		//查询应收款
+		List<PlanAmountRecord> PlanAmountRecords = planAmountRecordService.queryListByBusNo(requestWithActor.getAgent(),requestWithActor.getEntity(),(int)2);
+		for(PlanAmountRecord planAmountRecord:PlanAmountRecords){
+			UpdatePlanAmountVO planAmountRecordVO = new UpdatePlanAmountVO();
+			planAmountRecordVO.setId(planAmountRecord.getId());
+			planAmountRecordVO.setPlanAmount(new BigDecimal(0));
+			planAmountRecordVO.setIncomeExpenseType(1);
+			planAmountRecordVO.setRecordMovingType(1);
+			planAmountRecordService.update(requestWithActor.getAgent(),planAmountRecordVO);
+		}
+		return true;
 	}
 }
