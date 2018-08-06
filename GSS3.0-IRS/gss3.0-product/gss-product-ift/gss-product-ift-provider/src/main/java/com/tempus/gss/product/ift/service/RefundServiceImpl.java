@@ -637,7 +637,7 @@ public class RefundServiceImpl implements IRefundService {
 				saleChangeExt.setLockTime(new Date());
 				//int updateFlag = saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
 				 updateFlag = refundService.updateLocker(saleChangeExt);
-			} else{
+			} else if(2 == saleChangeByNo.getChildStatus()){
 				//采购的锁单
 				BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
 				if(buyChangeExt.getBuyLocker()==null || buyChangeExt.getBuyLocker() == 0l){
