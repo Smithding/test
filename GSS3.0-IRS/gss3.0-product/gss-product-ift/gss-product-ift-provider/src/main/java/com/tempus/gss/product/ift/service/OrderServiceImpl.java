@@ -2815,14 +2815,14 @@ public class OrderServiceImpl implements IOrderService {
         return page;
     }
     
-    private void updateSaleOrderDetail(SaleOrderExt order, TicketSender peopleInfo, Date date) {
+   /* private void updateSaleOrderDetail(SaleOrderExt order, TicketSender peopleInfo, Date date) {
         SaleOrderDetail saleOrderDetail = new SaleOrderDetail();
         saleOrderDetail.setStatus("3");//出票中
         saleOrderDetail.setSaleOrderNo(order.getSaleOrderNo());
         saleOrderDetail.setModifier(peopleInfo.getUserid() + "");
         saleOrderDetail.setModifyTime(date);
         saleOrderDetailDao.updateByOrderNo(saleOrderDetail);
-    }
+    }*/
     
     private Long assingLockOrder(SaleOrderExt order, TicketSender sender, Date date, Agent agent) {
         User user = userService.findUserByLoginName(agent, sender.getUserid());

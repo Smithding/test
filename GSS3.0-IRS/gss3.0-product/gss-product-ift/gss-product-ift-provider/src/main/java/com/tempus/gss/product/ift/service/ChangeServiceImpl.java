@@ -156,6 +156,7 @@ public class ChangeServiceImpl implements IChangeService {
         }
         SaleChangeExt saleChangeExt = new SaleChangeExt();
         try {
+            Date createTime = new Date();
             Long businessSignNo = IdWorker.getId();
             Agent agent = requestWithActor.getAgent();
             Long saleChangeNo = maxNoService.generateBizNo("IFT_SALE_CHANGE_EXT_NO", 38);
@@ -202,7 +203,7 @@ public class ChangeServiceImpl implements IChangeService {
                                     saleChangeDetail.setOwner(agent.getOwner());
                                     saleChangeDetail.setBuyChangeNo(buyChangeNo);
                                     saleChangeDetail.setSaleOrderDetailNo(saleOrderDetail.getSaleOrderDetailNo());
-                                    saleChangeDetail.setCreateTime(new Date());
+                                    saleChangeDetail.setCreateTime(createTime);
                                     saleChangeDetail.setCreator(agent.getAccount());
                                     saleChangeDetail.setValid((byte) 1);
                                     saleChangeDetail.setOrderDetailType(1);
@@ -231,7 +232,7 @@ public class ChangeServiceImpl implements IChangeService {
                 leg.setParentSection(i);
                 leg.setLegNo(maxNoService.generateBizNo("IFT_LEG_NO", 27));
                 leg.setOwner(agent.getOwner());
-                leg.setCreateTime(new Date());
+                leg.setCreateTime(createTime);
                 leg.setCreator(agent.getAccount());
                 leg.setStatus(String.valueOf(1));
                 leg.setValid((byte) 1);
@@ -250,7 +251,7 @@ public class ChangeServiceImpl implements IChangeService {
                     saleOrderDetail.setPassengerNo(passengerNo);
                     saleOrderDetail.setLegNo(leg.getLegNo());
                     saleOrderDetail.setOwner(agent.getOwner());
-                    saleOrderDetail.setCreateTime(new Date());
+                    saleOrderDetail.setCreateTime(createTime);
                     saleOrderDetail.setCreator(agent.getAccount());
                     saleOrderDetail.setValid((byte) 1);
                     saleOrderDetail.setStatus("1");
@@ -265,7 +266,7 @@ public class ChangeServiceImpl implements IChangeService {
                     saleChangeDetail.setOwner(agent.getOwner());
                     saleChangeDetail.setBuyChangeNo(buyChangeNo);
                     saleChangeDetail.setSaleOrderDetailNo(saleOrderDetail.getSaleOrderDetailNo());
-                    saleChangeDetail.setCreateTime(new Date());
+                    saleChangeDetail.setCreateTime(createTime);
                     saleChangeDetail.setCreator(agent.getAccount());
                     saleChangeDetail.setValid((byte) 1);
                     saleChangeDetail.setOrderDetailType(2);
@@ -295,7 +296,7 @@ public class ChangeServiceImpl implements IChangeService {
             saleChange.setBusinessSignNo(businessSignNo);
             saleChange.setBsignType(5);//1销采 2换票 3废 4退 5改签
             saleChange.setOwner(agent.getOwner());
-            saleChange.setCreateTime(new Date());
+            saleChange.setCreateTime(createTime);
             saleChange.setChildStatus(1);//1.待审核 2.已审核 3.退票中 废票中 改签中 10.已完成  11.已取消
             saleChange.setChangeReason(requestWithActor.getEntity().getChangeReason());
             saleChange.setGoodsType(2);//商品大类 2=国际机票
@@ -319,7 +320,7 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeExt.setContactName(requestWithActor.getEntity().getContactName());
             saleChangeExt.setContactMobile(requestWithActor.getEntity().getContactPhone());
             saleChangeExt.setStatus("1");//1待处理
-            saleChangeExt.setCreateTime(new Date());
+            saleChangeExt.setCreateTime(createTime);
             saleChangeExt.setCreator(agent.getAccount());
             saleChangeExt.setCustomerRemark(requestWithActor.getEntity().getChangeReason());//改签原因
             saleChangeExt.setValid((byte) 1);
@@ -343,7 +344,7 @@ public class ChangeServiceImpl implements IChangeService {
             buyChange.setBusinessSignNo(businessSignNo);
             buyChange.setBsignType(3);
             buyChange.setOwner(agent.getOwner());
-            buyChange.setCreateTime(new Date());
+            buyChange.setCreateTime(createTime);
             buyChange.setChildStatus(1);//1.待审核 2.已审核 3.处理中 10.已处理 11.已取消
             buyChange.setGoodsType(2);//商品大类 2=国际机票
             //OS-api\entity\EgoodsSubType
@@ -357,7 +358,7 @@ public class ChangeServiceImpl implements IChangeService {
             BuyChangeExt buyChangeExt = new BuyChangeExt();
             buyChangeExt.setBuyChangeNo(buyChangeNo);
             buyChangeExt.setOwner(agent.getOwner());
-            buyChangeExt.setCreateTime(new Date());
+            buyChangeExt.setCreateTime(createTime);
             buyChangeExt.setValid((byte) 1);
             buyChangeExt.setTicketType("BSP");
             buyChangeExtDao.insertSelective(buyChangeExt);
@@ -366,7 +367,7 @@ public class ChangeServiceImpl implements IChangeService {
             try {
                 String logstr ="用户"+agent.getAccount()+"申请改签："+"["+requestWithActor.getEntity().getSaleOrderNo()+"]";
                 LogRecord logRecord = new LogRecord();
-                logRecord.setCreateTime(new Date());
+                logRecord.setCreateTime(createTime);
                 logRecord.setTitle("创建国际改签单");
                 logRecord.setDesc(logstr);
                 logRecord.setOptLoginName(requestWithActor.getAgent().getAccount());
