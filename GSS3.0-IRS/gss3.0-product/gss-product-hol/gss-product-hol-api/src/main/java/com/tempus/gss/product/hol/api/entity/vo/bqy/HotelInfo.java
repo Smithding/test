@@ -114,16 +114,22 @@ public class HotelInfo implements Serializable {
 	
 	@JSONField(name="ServiceCode")
 	private String serviceCode;				//设施服务
+
+	@JSONField(name="ServiceName")
+	private String serviceName;				//设施服务名称
 	
 	@JSONField(name="LowPrice")
 	private BigDecimal lowPrice;			//房型最低价
+
+	@JSONField(name = "Policy")
+	private List<Policy> policy;			//政策
 	
 	private String supplierNo;				//供应商编号
 	
 	private String latestUpdateTime;		//数据最近更新时间
 	
 	private Integer saleStatus;				//酒店是否可售状态，默认为1可售， 0位不可售
-	
+
 	/**
 	 * 坐标类型
 	 */
@@ -482,5 +488,20 @@ public class HotelInfo implements Serializable {
 	public void setImgType(Integer imgType) {
 		this.imgType = imgType;
 	}
-	
+
+	public String getServiceName() {
+		return serviceName;
+	}
+
+	public void setServiceName(String serviceName) {
+		this.serviceName = serviceName;
+	}
+
+	public List<Policy> getPolicy() {
+		return policy;
+	}
+
+	public void setPolicy(List<Policy> policy) {
+		this.policy = policy;
+	}
 }
