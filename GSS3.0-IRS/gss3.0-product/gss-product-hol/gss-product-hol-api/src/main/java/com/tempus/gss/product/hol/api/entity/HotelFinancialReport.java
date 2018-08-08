@@ -13,7 +13,7 @@ public class HotelFinancialReport implements Serializable{
     //供应商订单号
     private String supplierOrderNo;
     //支付方式
-    private Integer payWay;
+    private String payWay;
     //支付方式-String
     private String payWayString;
     //预定人
@@ -108,11 +108,11 @@ public class HotelFinancialReport implements Serializable{
         this.supplierOrderNo = supplierOrderNo;
     }
 
-    public Integer getPayWay() {
+    public String getPayWay() {
         return payWay;
     }
 
-    public void setPayWay(Integer payWay) {
+    public void setPayWay(String payWay) {
         this.payWay = payWay;
     }
 
