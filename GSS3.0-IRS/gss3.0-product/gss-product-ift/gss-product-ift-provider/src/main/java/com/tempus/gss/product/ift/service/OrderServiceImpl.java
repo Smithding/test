@@ -233,6 +233,7 @@ public class OrderServiceImpl implements IOrderService {
             String creator = String.valueOf(agent.getAccount());
             /* 新增航程航段 */
             StringBuffer goodsName = new StringBuffer();
+            String airLine="";
             int legSize = requestWithActor.getEntity().getSaleOrderExt().getLegList().size();
             for (int i = 0; i < legSize; i++) {
                 Leg leg = requestWithActor.getEntity().getSaleOrderExt().getLegList().get(i);
@@ -252,6 +253,12 @@ public class OrderServiceImpl implements IOrderService {
                 goodsName.append("-");
                 if (i == legSize - 1) {
                     goodsName.append(leg.getArrAirport());
+                }
+                if(StringUtils.isEmpty(airLine)){
+                    airLine=airLine+leg.getAirline();
+                }
+                if(StringUtils.isNotEmpty(airLine)&&!airLine.contains(leg.getAirline())){
+                    airLine=airLine+","+leg.getAirline();
                 }
                 
             }
@@ -450,8 +457,9 @@ public class OrderServiceImpl implements IOrderService {
             buyOrderExt.setCreator(creator);
             buyOrderExt.setCreateTime(today);
             buyOrderExt.setValid((byte) 1);
+            buyOrderExt.setAirline(airLine);
             buyOrderExtDao.insertSelective(buyOrderExt);
-            log.info("创建国际订单成功=====saleOrderNo=" + saleOrderNo);
+            log.info("创建国际订单成功," + buyOrderExt.toString());
             // String logstr = "<p>" + String.format("创建国际订单成功=====", new Date()) + ":saleOrderNo=" + JsonUtil.toJson(saleOrderNo);
             
             /* 创建操作日志 */
