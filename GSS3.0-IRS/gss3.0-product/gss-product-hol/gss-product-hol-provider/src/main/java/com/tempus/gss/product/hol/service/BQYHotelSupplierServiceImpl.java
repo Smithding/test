@@ -607,10 +607,15 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 
 	@Override
 	public List<ImgInfo> listImgByHotelId(Agent agent, long hotelId) {
-		QueryHotelParam query = new QueryHotelParam();
-		query.setHotelId(hotelId);
-		//query.setHotelId(705260L);
-		List<ImageList> hotelImageList = bqyHotelInterService.queryHotelImage(query);
+		List<ImageList> hotelImageList = null;
+		HotelImage hotelImage = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(hotelId)), HotelImage.class);
+		if (null != hotelImage && null != hotelImage.getImageList() && hotelImage.getImageList().size() > 0) {
+			hotelImageList = hotelImage.getImageList();
+		}else {
+			QueryHotelParam query = new QueryHotelParam();
+			query.setHotelId(hotelId);
+			hotelImageList = bqyHotelInterService.queryHotelImage(query);
+		}
 		List<ImgInfo> imgList = bqyHotelConverService.convertTCImg(hotelImageList);
 		return imgList;
 	}
@@ -880,7 +885,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 		query.setCheckOutTime(checkOutDate);
 		query.setCityCode(cityCode);
 		query.setHotelId(bqyResId);
-		Future<HotelEntity> hotelEntityFu = bqyHotelInterService.queryHotelDetail(query);
+		/*Future<HotelEntity> hotelEntityFu = bqyHotelInterService.queryHotelDetail(query);
 
 		HotelEntity hotelEntity = hotelEntityFu.get();
 		//酒店政策
@@ -888,8 +893,12 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 		bqyHotelPolicyConver(resBaseInfo, policyList);
 		//酒店服务
 		String serviceNameStr = hotelEntity.getServiceName();
+		String bulitTime = hotelEntity.getBulitTime();*/
+		List<Policy> policyList = hotelInfo.getPolicy();
+		bqyHotelPolicyConver(resBaseInfo, policyList);
+		String serviceNameStr = hotelInfo.getServiceName();
 		setHotelServiceName(resBaseInfo, serviceNameStr);
-		String bulitTime = hotelEntity.getBulitTime();
+		String bulitTime = hotelInfo.getWhenBuilt();
 		String defaultTime = "0000-00-00 00:00:00";
 		if (StringUtils.isNoneBlank(bulitTime)) {
 			resBaseInfo.setWhenBuilt(bulitTime);

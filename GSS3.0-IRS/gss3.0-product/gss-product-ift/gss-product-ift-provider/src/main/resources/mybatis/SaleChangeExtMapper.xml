@@ -157,7 +157,7 @@
             AND i. OWNER = #{owner}
         </if>
         AND i.CHANGE_TYPE = 1
-        AND bce.LOCKER = #{locker}
+        AND bce.BUY_LOCKER = #{locker}
         AND m.CHILD_STATUS = 1
         AND o.CHILD_STATUS IN (2)
         ORDER BY

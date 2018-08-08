@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +120,14 @@ public class BuyOrderExtServiceImpl implements IBuyOrderExtService {
 	}
 
 	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public int update(Agent agent, BuyOrderExt buyOrderExt) {
 		return buyOrderExtDao.updateByPrimaryKeySelective(buyOrderExt);
 	}
+
+/*	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public void updateBuyOrderExt(BuyOrderExt buyOrderExt) {
+		buyOrderExtDao.updateByPrimaryKeySelective(buyOrderExt);
+	}*/
 }

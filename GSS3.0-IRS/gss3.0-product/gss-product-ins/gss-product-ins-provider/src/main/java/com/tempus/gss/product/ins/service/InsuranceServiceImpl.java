@@ -67,60 +67,64 @@ public class InsuranceServiceImpl  implements IInsuranceService {
 			throw new GSSException("参数条件为空", "0101", "获取默认的保险产品失败");
 		}
 		String insureType = requestWithActor.getEntity();
-		List<Insurance> insuranceList = insuranceDao.selectDefaultInsurance(insureType,insuranceKindType);
-		if(insuranceList==null||insuranceList.size()==0){
-			insuranceList = insuranceDao.chooseDefaultInsurance(insureType, insuranceKindType);
-		}
-		if(insuranceList.size()==0){
-			return null;
-		}
-		//一级控润处理
-		//截取客户类型前三个字符
-        String customerTypeNo = (requestWithActor.getAgent().getType()+"").substring(0, 3);
-		 List<ProfitControl> profitList = orderService.selectByInsuranceNo(insuranceList.get(0).getInsuranceNo());
-    	 for(ProfitControl pf : profitList) {
-    		 if(pf.getCustomerTypeNo() !=null ) {	
-    			 if(customerTypeNo.equals(pf.getCustomerTypeNo().toString())) {
-    				 insuranceList.get(0).setBuyPrice(pf.getSalePrice());
-        		 } 
-    		 }
-    	 }
-		//存储一级控润后的保险
-		List<Insurance> newinsuranceList = new ArrayList<Insurance>();
-		
-		for(Insurance insurance:insuranceList){
-			 //二级控润
-	        List<InsuranceProfit> insuranceProfitList = insuranceProfitService.queryInsuranceProfitByNo(requestWithActor.getAgent(), insurance.getInsuranceNo());
-	        BigDecimal a = new BigDecimal(100);
-	        insurance.setProfitPrice(insurance.getBuyPrice());
-	        for(InsuranceProfit insuranceProfit:insuranceProfitList){
-	        	 if(insuranceProfit.getProfitCount()!=null||insuranceProfit.getProfitMoney()!=null){
-	            	  //判断是控点还是固定控  1为控点    2为固定控          
-	                if(insuranceProfit.getProfitMode()==1){
-	                	/* if(insuranceProfit.getProfitCount()!=null){
-	                		 insurance.setBuyPrice((insurance.getBuyPrice().multiply(insuranceProfit.getProfitCount()).divide(a)).add(insurance.getBuyPrice()));    
-	              	   }else{
-	              		   Log.error("保险控点为空");
-	              	   }*/
-	               }else if(insuranceProfit.getProfitMode()==2){
-	            	   if(insuranceProfit.getProfitMoney()!=null){
-	            		   insurance.setBuyPrice(insurance.getBuyPrice().add(insuranceProfit.getProfitMoney()));    
-	            	   }else{
-	            		   Log.error("保险控现为空");
-	            	   }
-	            		   
-	               }
-	            }
-	        }
-           
-	           newinsuranceList.add(insurance);
-		}
-		
-		if (newinsuranceList.size() <= 0) {
-			log.info("查询到的默认的保险产品为空=====");
-		}
-		log.info("获取默认的保险产品结束=====");
-		return newinsuranceList.get(0);
+		List<Insurance> insuranceList = null;
+		try{
+			 insuranceList = insuranceDao.selectDefaultInsurance(insureType,insuranceKindType);
+			if(insuranceList==null||insuranceList.size()==0){
+				insuranceList = insuranceDao.chooseDefaultInsurance(insureType, insuranceKindType);
+			}
+			if(insuranceList.size()==0){
+				return null;
+			}
+			//一级控润处理
+			//截取客户类型前三个字符
+	        String customerTypeNo = (requestWithActor.getAgent().getType()+"").substring(0, 3);
+			 List<ProfitControl> profitList = orderService.selectByInsuranceNo(insuranceList.get(0).getInsuranceNo());
+	    	 for(ProfitControl pf : profitList) {
+	    		 if(pf.getCustomerTypeNo() !=null ) {	
+	    			 if(customerTypeNo.equals(pf.getCustomerTypeNo().toString())) {
+	    				 insuranceList.get(0).setBuyPrice(pf.getSalePrice());
+	        		 } 
+	    		 }
+	    	 }
+			//存储一级控润后的保险
+			List<Insurance> newinsuranceList = new ArrayList<Insurance>();
+			
+			for(Insurance insurance:insuranceList){
+				 //二级控润
+		        List<InsuranceProfit> insuranceProfitList = insuranceProfitService.queryInsuranceProfitByNo(requestWithActor.getAgent(), insurance.getInsuranceNo());
+		        BigDecimal a = new BigDecimal(100);
+		        insurance.setProfitPrice(insurance.getBuyPrice());
+		        for(InsuranceProfit insuranceProfit:insuranceProfitList){
+		        	 if(insuranceProfit.getProfitCount()!=null||insuranceProfit.getProfitMoney()!=null){
+		            	  //判断是控点还是固定控  1为控点    2为固定控          
+		                if(insuranceProfit.getProfitMode()==1){
+		                	/* if(insuranceProfit.getProfitCount()!=null){
+		                		 insurance.setBuyPrice((insurance.getBuyPrice().multiply(insuranceProfit.getProfitCount()).divide(a)).add(insurance.getBuyPrice()));    
+		              	   }else{
+		              		   Log.error("保险控点为空");
+		              	   }*/
+		               }else if(insuranceProfit.getProfitMode()==2){
+		            	   if(insuranceProfit.getProfitMoney()!=null){
+		            		   insurance.setBuyPrice(insurance.getBuyPrice().add(insuranceProfit.getProfitMoney()));    
+		            	   }else{
+		            		   Log.error("保险控现为空");
+		            	   }
+		            		   
+		               }
+		            }
+		        }
+	           
+		           newinsuranceList.add(insurance);
+			}
+			if (newinsuranceList.size() <= 0) {
+				log.info("查询到的默认的保险产品为空=====");
+			}
+			log.info("获取默认的保险产品结束=====");
+			return newinsuranceList.get(0);
+		}catch(Exception e){
+			throw new GSSException("获取空润失败", "003", "计算控润出现错误!") ;
+		}	
 	}
 
 	@Override
@@ -488,7 +492,7 @@ public class InsuranceServiceImpl  implements IInsuranceService {
 		}
 	}
 	@Override
-	public List<Insurance> getAllInsurance(RequestWithActor<InsuranceVo> requestWithActor) {
+	public List<Insurance> getAllInsurance(RequestWithActor<InsuranceVo> requestWithActor){
 		Agent agent = requestWithActor.getAgent();
 	       List<Insurance> tempInsuranceList = this.queryList(requestWithActor);
 	        List<Insurance> insuranceList = new ArrayList<>();

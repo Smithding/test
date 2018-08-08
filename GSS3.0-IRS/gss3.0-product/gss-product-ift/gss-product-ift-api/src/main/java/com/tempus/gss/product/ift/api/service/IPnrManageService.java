@@ -17,4 +17,9 @@ public interface IPnrManageService {
     List<Pnr> selectByOrderNo(RequestWithActor<Long> actor) throws Exception;
     
     Pnr selectByPnrNo(RequestWithActor<Long> actor) throws Exception;
+
+    //改签创建pnr
+    void setPnr(Pnr pnr);
+    //改签之后的pnr
+    String getChangeOrderPnr(  Long pnrNo);
 }

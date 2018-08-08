@@ -111,4 +111,21 @@ public class PnrManageServiceimpl implements IPnrManageService {
         }
         
     }
+
+    /*创建pnr*/
+    @Override
+    public void setPnr(Pnr pnr) {
+        pnrDao.insertSelective(pnr);
+    }
+
+    @Override
+    public String getChangeOrderPnr(Long pnrNo) {
+        //ift_pnr 表中 pnrNo是唯一的
+        Pnr pnr = pnrDao.selectByPrimaryKey(pnrNo);
+        if (pnr!=null) {
+            return pnr.getPnr();
+        }else {
+            return null;
+        }
+    }
 }

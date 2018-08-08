@@ -175,26 +175,13 @@ public class OrderServiceImpl implements IOrderService {
     SaleChangeExtDao saleChangeExtDao;
     @Reference
     protected ITicketSenderService ticketSenderService;
+    @Reference
+    IBuyOrderExtService buyOrderExtService;
     @Autowired
     IftMessageServiceImpl iftMessageServiceImpl;
     
     @Value("${dpsconfig.job.owner}")
     protected String owner;
-    /*创建pnr*/
-    @Override
-    public void setPnr(Pnr pnr) {
-        pnrDao.insertSelective(pnr);
-    }
-    @Override
-    public String getChangeOrderPnr(Long pnrNo) {
-        //ift_pnr 表中 pnrNo是唯一的
-        Pnr pnr = pnrDao.selectByPrimaryKey(pnrNo);
-        if (pnr!=null) {
-            return pnr.getPnr();
-        }else {
-            return null;
-        }
-    }
 
     /**
      * 创建订单. 通过白屏查询、Pnr、需求单、手工方式创建订单.
@@ -1899,7 +1886,8 @@ public class OrderServiceImpl implements IOrderService {
                 if(buyOrderExts != null && buyOrderExts.size()>0){
                      BuyOrderExt buyOrderExt = buyOrderExts.get(0);
                      buyOrderExt.setBuyLocker(order.getAloneLocker());
-                     orderService.updateBuyOrderExt(buyOrderExt);
+                     //orderService.updateBuyOrderExt(buyOrderExt);
+                    buyOrderExtService.update(agent,buyOrderExt);
                 }
                 log.info("2.增加出票人的未出票订单数量...");
                 /*TicketSender ticketSender = ticketSenderService.queryByUserId(order.getAloneLocker());
@@ -1931,9 +1919,6 @@ public class OrderServiceImpl implements IOrderService {
                     if (peopleInfo.getOrdercount() >= maxOrderNum) {
                         continue;
                     } else {
-                        log.info("第五步:满足条件的分配详细明细...1.将设置为出票中");
-                        /***修改订单明细表*/
-                        updateSaleOrderDetail(order, peopleInfo, updateTime);
                         /**锁单*/
                         log.info("2.锁单,锁单人是被分配人...");
                         Long lockerId = assingLockOrder(order, peopleInfo, updateTime, agent);
@@ -2815,14 +2800,14 @@ public class OrderServiceImpl implements IOrderService {
         return page;
     }
     
-    private void updateSaleOrderDetail(SaleOrderExt order, TicketSender peopleInfo, Date date) {
+   /* private void updateSaleOrderDetail(SaleOrderExt order, TicketSender peopleInfo, Date date) {
         SaleOrderDetail saleOrderDetail = new SaleOrderDetail();
         saleOrderDetail.setStatus("3");//出票中
         saleOrderDetail.setSaleOrderNo(order.getSaleOrderNo());
         saleOrderDetail.setModifier(peopleInfo.getUserid() + "");
         saleOrderDetail.setModifyTime(date);
         saleOrderDetailDao.updateByOrderNo(saleOrderDetail);
-    }
+    }*/
     
     private Long assingLockOrder(SaleOrderExt order, TicketSender sender, Date date, Agent agent) {
         User user = userService.findUserByLoginName(agent, sender.getUserid());
@@ -2834,7 +2819,8 @@ public class OrderServiceImpl implements IOrderService {
                 BuyOrderExt buyOrderExt = buyOrderExts.get(0);
                 if(buyOrderExt.getBuyLocker() == null || buyOrderExt.getBuyLocker() == 0l){
                     buyOrderExt.setBuyLocker(lockerId);
-                    orderService.updateBuyOrderExt(buyOrderExt);
+                    //orderService.updateBuyOrderExt(buyOrderExt);
+                    buyOrderExtService.update(agent,buyOrderExt);
                 } else {
                     lockerId = buyOrderExt.getBuyLocker();
                 }
@@ -2890,11 +2876,11 @@ public class OrderServiceImpl implements IOrderService {
         return saleOrderExtList;
     }
 
-    @Override
+   /* @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateBuyOrderExt(BuyOrderExt buyOrderExt) {
         buyOrderExtDao.updateByPrimaryKeySelective(buyOrderExt);
-    }
+    }*/
 
     /**
      * 定时器获取待出票订单

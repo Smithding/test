@@ -623,8 +623,8 @@ public class RefundServiceImpl implements IRefundService {
 			Long saleChangeNo = requestWithActor.getEntity().longValue();
 			SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(saleChangeNo);
 			SaleChange saleChangeByNo = saleChangeService.getSaleChangeByNo(requestWithActor.getAgent(), saleChangeNo);
-			long originLocker = saleChangeExt.getLocker();
-			long originBuyLocker = 0;
+			//long originLocker = saleChangeExt.getLocker();
+			//long originBuyLocker = 0;
 			int updateFlag = 0 ;
 			if (1 == saleChangeByNo.getChildStatus() &&
 					(saleChangeExt.getLocker() == 0l||saleChangeExt.getLocker() == null)
@@ -637,11 +637,11 @@ public class RefundServiceImpl implements IRefundService {
 				saleChangeExt.setLockTime(new Date());
 				//int updateFlag = saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
 				 updateFlag = refundService.updateLocker(saleChangeExt);
-			} else{
+			} else if(2 == saleChangeByNo.getChildStatus()){
 				//采购的锁单
 				BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
 				if(buyChangeExt.getBuyLocker()==null || buyChangeExt.getBuyLocker() == 0l){
-					originBuyLocker = buyChangeExt.getBuyLocker();
+					//originBuyLocker = buyChangeExt.getBuyLocker();
 					buyChangeExt.setBuyLocker(requestWithActor.getAgent().getId());
 					buyChangeExt.setModifyTime(new Date());
 					updateFlag = buyChangeExtService.updateBuyChangeExt(buyChangeExt);

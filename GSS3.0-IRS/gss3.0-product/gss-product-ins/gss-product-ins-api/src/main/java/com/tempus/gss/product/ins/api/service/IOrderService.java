@@ -148,7 +148,7 @@ public interface IOrderService {
 	 * @param requestWithActor
 	 * @return TRANSACTION_ID
 	 */
-	 List<SaleOrderExt> querySaleOrderForTranSaction(RequestWithActor<Long> requestWithActor);
+	 List<SaleOrderExt> querySaleOrderForTranSaction(RequestWithActor<Long> requestWithActor) ;
 	/**
 	 * 删除
 	 *
@@ -163,25 +163,25 @@ public interface IOrderService {
 	 * @param pageRequest
 	 * @return
 	 */
-	public Page<SaleOrderExt> querySaleOrderList(Page<SaleOrderExt> page,RequestWithActor<SaleOrderExtVo> pageRequest) ;
+	public Page<SaleOrderExt> querySaleOrderList(Page<SaleOrderExt> page,RequestWithActor<SaleOrderExtVo> pageRequest);
 	/**
 	 * 通过交易单号查询保险详情（多个销售单）
 	 * @param pageRequest
 	 * @return
 	 */
-	public List<SaleOrderExt> querySaleOrderListIntransactionNo(RequestWithActor<SaleOrderExtVo> pageRequest) ;
+	public List<SaleOrderExt> querySaleOrderListIntransactionNo(RequestWithActor<SaleOrderExtVo> pageRequest) throws Exception;
 	/**
 	 * 通过交易单号查询保险订单 b2b保险订单支付使用
 	 * @param pageRequest
 	 * @return
 	 */
-	public List<SaleOrderExt> queryInsuranceSaleOrderForTranSaction(RequestWithActor<Long> requestWithActor) ;
+	public List<SaleOrderExt> queryInsuranceSaleOrderForTranSaction(RequestWithActor<Long> requestWithActor) throws Exception;
 	/**
 	 * 通过条件查询报表数据
 	 * @param pageRequest
 	 * @return
 	 */
-	public Page<SaleOrderExt> queryReportOrderList(Page<SaleOrderExt> page,RequestWithActor<SaleOrderExtVo> pageRequest) ;
+	public Page<SaleOrderExt> queryReportOrderList(Page<SaleOrderExt> page,RequestWithActor<SaleOrderExtVo> pageRequest);
 	/**
 	 * 
 	 * selectByInsuranceNo:根据产品编号查询销售价
@@ -233,13 +233,13 @@ public interface IOrderService {
 	 * @throws 
 	 * @since  CodingExample　Ver 1.1
 	 */
-	void updateStatus4Offline(Agent agent, Long saleOrderNo, Integer orderChildStatus);
+	void updateStatus4Offline(Agent agent, Long saleOrderNo, Integer orderChildStatus) throws Exception;
 	/**
 	 * 更新保单号
 	 * @param requestWithActor
 	 * @return
 	 */
-	int updateStatusDetail(RequestWithActor<SaleOrderDetail> requestWithActor);
+	int updateStatusDetail(RequestWithActor<SaleOrderDetail> requestWithActor) throws Exception;
 
 	/**
 	 * 
@@ -263,7 +263,7 @@ public interface IOrderService {
 	 * @throws 
 	 * @since  CodingExample　Ver 1.1
 	 */
-	void updateStatus4OfflineForPerson(Agent agent, Long saleOrderNo, Integer orderChildStatus,Long insuredNo);
+	void updateStatus4OfflineForPerson(Agent agent, Long saleOrderNo, Integer orderChildStatus,Long insuredNo) throws Exception;
 	/**
 	 * 
 	 * refundForPersonDetail:为个人线下退款
@@ -276,7 +276,7 @@ public interface IOrderService {
 	 * @throws 
 	 * @since  CodingExample　Ver 1.1
 	 * 	 */
-	boolean refundForPersonDetail(SaleOrderExt saleOrderExt,SaleOrderDetail saleOrderDetail,Agent agent);
+	boolean refundForPersonDetail(SaleOrderExt saleOrderExt,SaleOrderDetail saleOrderDetail,Agent agent) throws Exception;
 	/**
 	 * 
 	 * refundForPersonDetail:为B2B个人退款
@@ -289,7 +289,7 @@ public interface IOrderService {
 	 * @throws 
 	 * @since  CodingExample　Ver 1.1
 	 * 	 */
-	boolean refundForB2BPersonDetail(SaleOrderExt saleOrderExt,SaleOrderDetail saleOrderDetail,Agent agent);
+	boolean refundForB2BPersonDetail(SaleOrderExt saleOrderExt,SaleOrderDetail saleOrderDetail,Agent agent) throws Exception;
 	/**
 	 * 
 	 * refundForPersonDetail:为B2B个人取消退款申请
@@ -302,7 +302,7 @@ public interface IOrderService {
 	 * @throws 
 	 * @since  CodingExample　Ver 1.1
 	 * 	 */
-	boolean cacelForB2BPersonDetail(SaleOrderExt saleOrderExt,SaleOrderDetail saleOrderDetail,Agent agent);
+	boolean cacelForB2BPersonDetail(SaleOrderExt saleOrderExt,SaleOrderDetail saleOrderDetail,Agent agent) throws Exception;
 	/**
 	 * 
 	 * refundForPersonDetail:为个人线上重新投保
@@ -316,6 +316,13 @@ public interface IOrderService {
 	 * @since  CodingExample　Ver 1.1
 	 * 	 */
 	ResultInsure buyInsureForPerson(RequestWithActor<Long> requestWithActor,Long insuredNo) throws Exception;
+	/**
+	 * cancelInsuranceOrder:取消保险订单
+	 * @param requestWithActor
+	 * @return
+	 * @throws Exception
+	 */
+	boolean cancelInsuranceOrder(RequestWithActor<Long> requestWithActor) throws Exception;
 
 }
 
