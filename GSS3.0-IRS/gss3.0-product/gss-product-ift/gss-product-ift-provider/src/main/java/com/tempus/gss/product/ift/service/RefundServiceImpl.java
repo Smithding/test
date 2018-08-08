@@ -1627,6 +1627,7 @@ public class RefundServiceImpl implements IRefundService {
 				buyChangeExt.setBuyLocker(user.getId());
 				buyChangeExt.setModifyTime(date);
 				log.info("自动分单更新采购变更单扩展表所锁单人："+buyChangeExt.toString());
+				sender.setBuyRefuseNum(sender.getBuyRefuseNum()+1);
 				buyChangeExtService.updateBuyChangeExt(buyChangeExt);
 			}
 		}

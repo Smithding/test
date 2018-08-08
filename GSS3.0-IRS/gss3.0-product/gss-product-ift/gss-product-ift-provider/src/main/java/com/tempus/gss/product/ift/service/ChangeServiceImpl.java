@@ -1940,6 +1940,7 @@ public class ChangeServiceImpl implements IChangeService {
                     buyChangeExt.setBuyLocker(buyLockerId);
                     buyChangeExt.setModifyTime(date);
                     buyChangeExtService.updateBuyChangeExt(buyChangeExt);
+                    sender.setBuyChangeNum(sender.getBuyChangeNum()+1);
                 }
             }
         }
