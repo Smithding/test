@@ -84,7 +84,7 @@ public class HttpClientUtil {
      * @return
      * @throws Exception
      */
-    public static String executeGet(String url){
+    public String executeGet(String url){
         BufferedReader in = null;
 
         String content = null;
@@ -126,7 +126,7 @@ public class HttpClientUtil {
      * @param <T>
      * @return
      */
-    public static <T> T doJsonPost(String url, String reqJsonStr, Class<T> c) {
+    public <T> T doJsonPost(String url, String reqJsonStr, Class<T> c) {
         T t = null;
         HttpClient client = null;
         try {
@@ -158,7 +158,7 @@ public class HttpClientUtil {
         return t;
     }
     
-    public static String doJsonPost(String url, String reqJsonStr) {
+    public String doJsonPost(String url, String reqJsonStr) {
         HttpClient client = null;
         String result = "";
         try {
@@ -189,7 +189,7 @@ public class HttpClientUtil {
     }
     
     
-    public static String doJsonPost(String url) {
+    public String doJsonPost(String url) {
         HttpClient client = null;
         String result = "";
         try {
@@ -229,7 +229,7 @@ public class HttpClientUtil {
      * @param c
      * @return
      */
-    public static <T> T doXMLPost(String url, String reqXmlStr, XStream xStream, String encoding, Class<T> c) {
+    public <T> T doXMLPost(String url, String reqXmlStr, XStream xStream, String encoding, Class<T> c) {
         T t = null;
         try {
             HttpClient client = null;
