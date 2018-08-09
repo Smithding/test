@@ -95,6 +95,7 @@ public class InsPayNoticeListener {
 				Long saleOrderNo = Long.valueOf(businessNo);
 				requestWithActor.setEntity(saleOrderNo);
 				SaleOrderExt saleOrderExt = orderService.querySaleOrder(requestWithActor);
+				logger.info("订单子状态为："+saleOrderExt.getSaleOrder().getOrderChildStatus());
 				if (payNoticeVO.getBusinessType() == 2 && payNoticeVO.getChangeType() == 0
 						&& payNoticeVO.getIncomeExpenseType() == 1) {
 					if (saleOrderExt == null) {
@@ -115,8 +116,12 @@ public class InsPayNoticeListener {
 					/* 判断是线上的单还是线下的单 1：线上 2：线下 */
 						if (buyWay == 1) {
 							logger.info("--------------------------------------------调用buyInsure------------------------------");
-							boolean flag = orderService.buyInsure(requestWithActor);
-							logger.info("投保是否成功,销售单号:" + payNoticeVO.getBusinessNo() + "->" + flag);
+							if(saleOrderExt.getSaleOrder().getOrderChildStatus()==3){
+								logger.info("该订单不能投保，订单为取消状态:"+saleOrderExt.getSaleOrderNo());
+							}else{
+								boolean flag = orderService.buyInsure(requestWithActor);
+								logger.info("投保是否成功,销售单号:" + payNoticeVO.getBusinessNo() + "->" + flag);
+							}
 						}
 				}
 					//退款状态处理

@@ -86,6 +86,20 @@ public class FlightInfoVo implements Serializable {
 	 */
 	private String planType;
 
+
+	/**
+	 *行程单保险存储票号（投保需要）
+	 */
+	private String billNo;
+
+	public String getBillNo() {
+		return billNo;
+	}
+
+	public void setBillNo(String billNo) {
+		this.billNo = billNo;
+	}
+
 	public String getPlanType() {
 		return planType;
 	}
