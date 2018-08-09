@@ -13,6 +13,7 @@ import com.tempus.gss.product.hol.api.service.IHolMidService;
 import com.tempus.gss.product.hol.api.syn.ISyncHotelInfo;
 import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
+import com.tempus.gss.product.hol.utils.TrackTime;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 import httl.util.StringUtils;
@@ -227,7 +228,8 @@ public class HolMidServiceImpl implements IHolMidService {
        return tcHotelSupplierService.queryMidListByResId(agent, holMidId);
 		
 	}
-
+	
+	@TrackTime(param = "查询所有酒店房型耗时")
 	@Override
 	public List<ProDetails> hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
 		Map<String, Object> resultMap = getHotelId(agent, holMidId);
