@@ -127,6 +127,7 @@
         LEFT JOIN IFT_BUY_CHANGE_EXT bce ON m.BUY_CHANGE_NO = bce.BUY_CHANGE_NO
         WHERE
         i.VALID = 1
+        AND o.BUSINESS_SIGN_NO = m.BUSINESS_SIGN_NO
         <if test="owner != null">
             AND i. OWNER = #{owner}
         </if>
@@ -134,7 +135,8 @@
         AND bce.BUY_LOCKER = #{locker}
         AND i.CHANGE_TYPE = 2
         AND m.CHILD_STATUS =1
-        AND o.CHILD_STATUS IN (2)
+        AND o.CHILD_STATUS IN (2,10)
+        AND bce.`AIRLINE_REFUND_STATUS` IN (0, - 1)
         ORDER BY
         i.MODIFY_TIME asc
     </select>
@@ -153,13 +155,15 @@
         LEFT JOIN IFT_BUY_CHANGE_EXT bce ON m.BUY_CHANGE_NO = bce.BUY_CHANGE_NO
         WHERE
         i.VALID = 1
+        AND o.BUSINESS_SIGN_NO = m.BUSINESS_SIGN_NO
         <if test="owner != null">
             AND i. OWNER = #{owner}
         </if>
         AND i.CHANGE_TYPE = 1
         AND bce.BUY_LOCKER = #{locker}
         AND m.CHILD_STATUS = 1
-        AND o.CHILD_STATUS IN (2)
+        AND o.CHILD_STATUS IN (2,10)
+        AND bce.`AIRLINE_REFUND_STATUS` IN (0, - 1)
         ORDER BY
         i.MODIFY_TIME DESC
     </select>

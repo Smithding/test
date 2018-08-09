@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import com.tempus.gss.product.hol.api.entity.vo.bqy.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
@@ -56,21 +57,6 @@ import com.tempus.gss.product.hol.api.entity.response.HotelOrder;
 import com.tempus.gss.product.hol.api.entity.response.tc.OwnerOrderStatus;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResBrandInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.TcOrderStatus;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.CityDetail;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.CityInfo;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelBrand;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelEntity;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelFacility;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelId;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelInfo;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelInfoListEntity;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelList;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelRoomFacility;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.ImageList;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.InfoShowlist;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.Information;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.ResponseResult;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomImageList;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.BookOrderParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.CreateOrderReq;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.OrderCancelParam;
@@ -1113,7 +1099,12 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	@Override
 	@Async
 	public Future<List<ImageList>> asyncHotelImage(QueryHotelParam query) {
-		List<ImageList> imageList = queryHotelImage(query);
+		List<ImageList> imageList = null;
+		HotelImage hotelImage = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(query.getHotelId())), HotelImage.class);
+		imageList = hotelImage.getImageList();
+		if (null == imageList || imageList.size() == 0) {
+			imageList = queryHotelImage(query);
+		}
 		return new AsyncResult<List<ImageList>>(imageList);
 	}
 

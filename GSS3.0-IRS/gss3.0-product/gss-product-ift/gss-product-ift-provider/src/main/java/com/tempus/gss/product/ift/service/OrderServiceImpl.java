@@ -2827,6 +2827,7 @@ public class OrderServiceImpl implements IOrderService {
                 BuyOrderExt buyOrderExt = buyOrderExts.get(0);
                 if(buyOrderExt.getBuyLocker() == null || buyOrderExt.getBuyLocker() == 0l){
                     buyOrderExt.setBuyLocker(lockerId);
+                    sender.setOrdercount(sender.getOrdercount()+1);
                     //orderService.updateBuyOrderExt(buyOrderExt);
                     buyOrderExtService.update(agent,buyOrderExt);
                 } else {
