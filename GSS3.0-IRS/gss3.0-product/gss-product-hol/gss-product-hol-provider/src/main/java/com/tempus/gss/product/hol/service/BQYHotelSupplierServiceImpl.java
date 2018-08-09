@@ -336,6 +336,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 							resProBaseInfo.setRoomFeature(roomPriceInfo.getRatePlanCategory()); //预付检查字段
 							List<RoomPriceDetail> roomPriceDetail = roomPriceInfo.getRoomPriceDetail();
 							resProBaseInfo.setFirPrice(averagePrice.getSettleFee().intValue());	//首日价
+							resProBaseInfo.setOtherDescription(roomPriceInfo.getIsJustifyConfirm());
 
 							//取消规则
 							CancelLimitInfo cancelLimitInfo = roomInfo.getCancelLimitInfo();
