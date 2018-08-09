@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -269,25 +270,15 @@ public class HolMongoQuery implements IHolMongoQuery {
 		public List<HolMidBaseInfo> queryAlikeHol(String lon, String lat, Set<String> phoneList) {
 			
 			List<HolMidBaseInfo> res = null;
-			Query query =new Query();
-			Criteria cr =new Criteria();
-			query.skip(0);
-			query.limit(3);
-			if(StringUtil.isNotNullOrEmpty(lon) && StringUtil.isNotNullOrEmpty(lat)) {
+			if(StringUtils.isNotEmpty(lon) && StringUtils.isNotEmpty(lat) && StringUtil.isNotNullOrEmpty(phoneList)) {
+				Query query =new Query();
+				Criteria cr =new Criteria();
+				query.skip(0);
+				query.limit(3);
+				
 				Point point =new Point(Double.valueOf(lon), Double.valueOf(lat));
-				cr.and("resPosition").near(point).maxDistance(0.0005D);//100000/6378137
-			}
-			/*if(StringUtil.isNotBlank(lon)) {
-				cr.and("lon").regex("^" + lon + ".*$");
-			}else {
-				throw new GSSException("参数经度为空", "0401", "匹配中间表失败,参数经度为空");
-			}
-			if(StringUtil.isNotBlank(lat)) {
-				cr.and("lat").regex("^" + lat + ".*$");
-			}else {
-				throw new GSSException("参数纬度", "0118", "匹配中间表失败,参数纬度为空");
-			}*/
-			if(StringUtil.isNotNullOrEmpty(phoneList)) {
+				cr.and("resPosition").near(point).maxDistance(0.005D);//100000/6378137
+				
 				List<Criteria> list = new ArrayList<Criteria>();
 				for(String sss : phoneList) {
 					Criteria c1 =new Criteria();
@@ -296,10 +287,12 @@ public class HolMongoQuery implements IHolMongoQuery {
 				}
 				Criteria[] array = list.toArray(new Criteria[list.size()]);
 				cr.orOperator(array);
+				
+				query.addCriteria(cr);
+				res = mongoTemplate1.find(query, HolMidBaseInfo.class);
+				//long e = System.currentTimeMillis();
+				//logger.info("耗时：" + (e - s) + "毫秒");
 			}
-			query.addCriteria(cr);
-			res = mongoTemplate1.find(query, HolMidBaseInfo.class);
-			
 			return res;
 		}
 	
