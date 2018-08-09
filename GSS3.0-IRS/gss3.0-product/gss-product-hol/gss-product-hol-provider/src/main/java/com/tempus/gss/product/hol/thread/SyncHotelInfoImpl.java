@@ -29,15 +29,22 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
+import com.tempus.gss.log.entity.LogRecord;
+import com.tempus.gss.log.query.LogRecordQuery;
+import com.tempus.gss.log.service.ILogService;
 import com.tempus.gss.product.hol.api.entity.ProfitPrice;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.AssignDateHotelReq;
+import com.tempus.gss.product.hol.api.entity.request.tc.OrderDetailInfoReq;
+import com.tempus.gss.product.hol.api.entity.response.HotelOrder;
 import com.tempus.gss.product.hol.api.entity.response.TCResponse;
 import com.tempus.gss.product.hol.api.entity.response.tc.AssignDateHotel;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ImgInfoSum;
+import com.tempus.gss.product.hol.api.entity.response.tc.OrderInfomationDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProDetails;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProInfoDetail;
 import com.tempus.gss.product.hol.api.entity.response.tc.ProSaleInfoDetail;
@@ -50,6 +57,7 @@ import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
 import com.tempus.gss.product.hol.api.service.IHolProfitService;
 import com.tempus.gss.product.hol.api.syn.ISyncHotelInfo;
 import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
+import com.tempus.gss.product.hol.api.syn.ITCHotelOrderService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
 import com.tempus.gss.product.hol.api.util.DateUtil;
 import com.tempus.gss.product.hol.service.TCHotelSupplierServiceImpl;
@@ -79,6 +87,12 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	
 	@Autowired
 	ITCHotelInterService hotelInterService;
+	
+	@Autowired
+	ITCHotelOrderService tcHotelOrderService;
+	
+	@Reference
+	private ILogService logService;
 	
 	@Value("${bqy.count}")
 	private int PAGE_SIZE;			//查询id数量
@@ -516,8 +530,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	}
 	
 	@Override
-	@Async
-	public Future<ResBaseInfo> queryProDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
+	public ResBaseInfo queryProDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
 				long start = System.currentTimeMillis();
 				if (StringUtil.isNullOrEmpty(agent)) {
 		            logger.error("agent对象为空");
@@ -719,8 +732,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 				}
 				long end = System.currentTimeMillis();  
 			    System.out.println("完成任务newQueryHotelDetail，耗时：" + (end - start) + "毫秒"); 
-				//return tcResBaseInfo;
-			    return new AsyncResult<ResBaseInfo>(tcResBaseInfo);
+				return tcResBaseInfo;
+			    //return new AsyncResult<ResBaseInfo>(tcResBaseInfo);
 	}
 	
 	@Override
@@ -950,10 +963,11 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			String checkoutDate) throws Exception{
 		long start = System.currentTimeMillis();
 		System.out.println("f2 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
-		Future<ResBaseInfo> hotelDetailFu = queryProDetail(agent, tcHotelId, checkinDate, checkoutDate);
+		//Future<ResBaseInfo> hotelDetailFu = queryProDetail(agent, tcHotelId, checkinDate, checkoutDate);
+		ResBaseInfo queryProDetail = queryProDetail(agent, tcHotelId, checkinDate, checkoutDate);
 		long end = System.currentTimeMillis();  
 		System.out.println("完成任务二，耗时：" + (end - start) + "毫秒"); 
-		return new AsyncResult<ResBaseInfo>(hotelDetailFu.get());
+		return new AsyncResult<ResBaseInfo>(queryProDetail);
 	}
 
 	@Override
@@ -964,38 +978,6 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	}
 	
 	
-	/*public void pullBQYHotelInfo() {
-		logger.info("BQY酒店信息拉取开始...");
-		//将MongoDB中数据清空
-		//bqyHotelInterService.deleteMongoDBData();
-		
-		bqyHotelInterService.pullHotelIdByCityCode();
-		
-		//拉取城市信息
-		bqyHotelInterService.pullCityDetail();
-		//拉取酒店ID并存储MongoDB
-		//获取BQY酒店ID
-		//List<HotelId> hotelIdList = bqyHotelInterService.queryHotelIdList();
-		//将获取的酒店ID保存到mongoDB中
-		//mongoTemplate1.insert(hotelIdList, HotelId.class);
-		List<HotelId> hotelIdList = null;
-		//获取ID数量
-		//long totalHotelIdNum = hotelIdList.size();
-		long totalHotelIdNum = mongoTemplate1.count(new Query(), HotelId.class);
-		long count = 1;
-		if ((totalHotelIdNum / PAGE_SIZE) > 1) {
-			count = totalHotelIdNum % PAGE_SIZE == 0 ? totalHotelIdNum / PAGE_SIZE : totalHotelIdNum / PAGE_SIZE + 1;
-		}
-		for (int i = 0; i < count; i++) {
-			int start = i * PAGE_SIZE;
-			//long lastIndex = (start + PAGE_SIZE) > totalHotelIdNum ? totalHotelIdNum : start + PAGE_SIZE;
-			Query query = new Query().skip(start).limit(PAGE_SIZE);
-			hotelIdList = mongoTemplate1.find(query, HotelId.class);
-			//开启线程拉去酒店数量
-			bqyHotelInterService.pullHotelInfoByIdList(hotelIdList);
-		}
-		logger.info("BQY酒店信息拉取结束...");
-	}*/
 	@Override
 	public void pullBQYHotelInfo() {
 		//将MongoDB中数据清空
@@ -1040,5 +1022,52 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			System.out.println("i最后的值为:" + i);
 			break;
 		}
+	}
+	
+	/**
+	 * 异步查询日志
+	 * @param hotelOrderNo
+	 * @return
+	 */
+	@Async
+	Future<List<LogRecord>> queryLogList(String hotelOrderNo){
+		LogRecordQuery query = new LogRecordQuery.Builder().bizCode("HOL-Order").bizNo(hotelOrderNo).build();
+		 List<LogRecord> logList = logService.query(query);
+		 return new AsyncResult<List<LogRecord>>(logList);
+	}
+
+	@Override
+	public Map<String, Object> queryBackOrderDetail(Agent agent,String hotelOrderNo, Long saleOrderNo) throws GSSException{
+		Map<String, Object> map = Maps.newConcurrentMap();
+		try {
+			 
+			OrderDetailInfoReq orderDetailInfoReq=new OrderDetailInfoReq();
+			orderDetailInfoReq.setOrderId(hotelOrderNo);
+			Future<OrderInfomationDetail> futureorderDetailInfo = tcHotelOrderService.futureorderDetailInfo(agent, orderDetailInfoReq);
+			Future<HotelOrder> futureOrderDetail = tcHotelOrderService.getFutureOrderDetail(agent, hotelOrderNo);
+			Future<List<LogRecord>> list = queryLogList(hotelOrderNo);
+			
+			
+			HotelOrder hotelOrder = futureOrderDetail.get();
+			OrderInfomationDetail orderInfomationDetail = futureorderDetailInfo.get();
+			List<LogRecord> logList = list.get();
+			
+			if(StringUtil.isNotNullOrEmpty(hotelOrder)) {
+				map.put("hotelOrder", hotelOrder);
+			}
+			if(StringUtil.isNotNullOrEmpty(hotelOrder)) {
+				map.put("orderInfomationDetail", orderInfomationDetail);
+			}
+			if(StringUtil.isNotNullOrEmpty(hotelOrder)) {
+				map.put("logList", logList);
+			}
+			
+			return map;
+			
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		return null;
 	}
 }	

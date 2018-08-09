@@ -313,8 +313,7 @@ public class HolMidServiceImpl implements IHolMidService {
 				bqyHotel = hotelDetail.get();
 			}
 			if (null != tcResId) {
-				Future<ResBaseInfo> fu = syncHotelInfo.queryProDetail(agent, tcResId, checkinDate, checkoutDate);
-				bqyHotel = fu.get();
+				bqyHotel = syncHotelInfo.queryProDetail(agent, tcResId, checkinDate, checkoutDate);
 			}
 		}
 		List<ProDetails> proDetailList = bqyHotel.getProDetails();

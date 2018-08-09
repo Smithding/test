@@ -3,6 +3,7 @@ package com.tempus.gss.product.hol.api.syn;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.exception.GSSException;
@@ -46,6 +47,8 @@ public interface ITCHotelOrderService {
 	 * @return
 	 */
 	public OrderInfomationDetail orderDetailInfo(Agent agent, OrderDetailInfoReq orderDetailInfoReq) throws GSSException;
+	
+	Future<OrderInfomationDetail> futureorderDetailInfo(Agent agent, OrderDetailInfoReq orderDetailInfoReq) throws GSSException;
 	/**
 	 * 创建报错订单表
 	 * @param agent
@@ -104,6 +107,10 @@ public interface ITCHotelOrderService {
 	 * @return
 	 */
 	public HotelOrder getHotelOrderDetail(Agent agent, Long saleOrderNo) throws GSSException;
+	
+	public Future<HotelOrder> getFutureOrderDetail(Agent agent, String hotelOrderNo) throws GSSException;
+	
+	
 	/**
 	 * 根据同程订单号查询酒店订单详情
 	 * @param agent

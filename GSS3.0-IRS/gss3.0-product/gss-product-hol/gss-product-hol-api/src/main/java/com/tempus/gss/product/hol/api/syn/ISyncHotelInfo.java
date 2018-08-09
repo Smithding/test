@@ -1,5 +1,6 @@
 package com.tempus.gss.product.hol.api.syn;
 
+import java.util.Map;
 import java.util.concurrent.Future;
 
 import com.tempus.gss.exception.GSSException;
@@ -14,7 +15,7 @@ public interface ISyncHotelInfo {
 	
 	public Future<ResBaseInfo> newQueryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException;
 	
-	public Future<ResBaseInfo> queryProDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException;
+	public ResBaseInfo queryProDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException;
 	
 	public ResBaseInfo newQueryHolProDetail(Agent agent, Long resId, String uniProId, String startTime, String endTime) throws GSSException;
 	
@@ -56,4 +57,6 @@ public interface ISyncHotelInfo {
 	 * 拉取bqy城市酒店信息
 	 */
 	void pullBQYHotelInfo();
+	
+	Map<String, Object> queryBackOrderDetail(Agent agent,String hotelOrderNo , Long saleOrderNo) throws GSSException;
 }
