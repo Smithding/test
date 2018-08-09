@@ -61,6 +61,8 @@ import com.tempus.gss.product.hol.api.syn.ITCHotelOrderService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
 import com.tempus.gss.product.hol.api.util.DateUtil;
 import com.tempus.gss.product.hol.service.TCHotelSupplierServiceImpl;
+import com.tempus.gss.product.hol.utils.HolAnnotation;
+import com.tempus.gss.product.hol.utils.TrackTime;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 
@@ -725,6 +727,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 							}
 							tcResBaseInfo.setProDetails(ProInfoDetaisList);
 						}
+					}else {
+						logger.info("查询酒店价格库存为空, 酒店ID为: "+resId+", 返回值: "+JsonUtil.toJson(assignDateHotel));
 					}
 					
 				} catch (Exception e) {
@@ -947,26 +951,21 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 
 	@Override
 	@Async
+	@TrackTime(param = "查询BYQ酒店房型耗时")
 	public Future<ResBaseInfo> queryBQYHotelListForAsync(Agent agent, Long bqyHotelId, String checkinDate,
 			String checkoutDate, String cityCode) throws Exception {
-		long start = System.currentTimeMillis();
-	    System.out.println("f1 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
 	    Future<ResBaseInfo> hotelDetail = bqyHotelSupplierService.singleHotelDetail(agent,String.valueOf(bqyHotelId), checkinDate, checkoutDate, cityCode);
-		long end = System.currentTimeMillis();  
-        System.out.println("完成任务一，耗时：" + (end - start) + "毫秒"); 
 		return new AsyncResult<ResBaseInfo>(hotelDetail.get());
 	}
 
 	@Override
 	@Async
+	@HolAnnotation
+	@TrackTime(param = "查询TC酒店房型耗时")
 	public Future<ResBaseInfo> queryTCHelListForAsync(Agent agent, Long tcHotelId, String checkinDate,
 			String checkoutDate) throws Exception{
-		long start = System.currentTimeMillis();
-		System.out.println("f2 : " + Thread.currentThread().getName() + "   " + UUID.randomUUID().toString());
 		//Future<ResBaseInfo> hotelDetailFu = queryProDetail(agent, tcHotelId, checkinDate, checkoutDate);
 		ResBaseInfo queryProDetail = queryProDetail(agent, tcHotelId, checkinDate, checkoutDate);
-		long end = System.currentTimeMillis();  
-		System.out.println("完成任务二，耗时：" + (end - start) + "毫秒"); 
 		return new AsyncResult<ResBaseInfo>(queryProDetail);
 	}
 
