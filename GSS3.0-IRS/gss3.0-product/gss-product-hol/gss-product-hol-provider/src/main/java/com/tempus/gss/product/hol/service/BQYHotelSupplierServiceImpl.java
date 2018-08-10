@@ -249,7 +249,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 			//Future<ResBaseInfo> asyncResBaseInfo = bqyHotelConverService.asyncConvertTcHotelEntity(Long.valueOf(hotelId));
 			Future<List<RoomPriceItem>> asynRoomPrice = bqyHotelInterService.asyncRoomPrice(query);
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-            computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+            computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(), "bqy");
 			/*while (asyncHotelImage.isDone() && asyncHotelDetail.isDone() && asyncResBaseInfo.isDone()) {
 				break;
 			}*/
