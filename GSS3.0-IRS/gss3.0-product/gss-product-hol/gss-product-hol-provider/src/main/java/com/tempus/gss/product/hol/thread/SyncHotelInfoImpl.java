@@ -363,7 +363,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryResBaseInfo(resId);
 					Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryImgInfoSum(resId);
 					Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+					String supplierSource = "tc";
+					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(),supplierSource);
 					
 					tcResBaseInfo = resBaseInfoFuture.get();
 					ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
@@ -574,7 +575,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryResProBaseInfos(resId);
 					Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryImgInfoSum(resId);
 					Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+					String supplierSource = "tc";
+					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(), supplierSource);
 					
 					ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
 					ImgInfoSum imgInfoSum = imgInfoSumFuture.get();
@@ -780,7 +782,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryResProBaseInfos(resId);
 			Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryResBaseInfo(resId);
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-			computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+			String supplierSource = "tc";
+			computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(),supplierSource);
 			
 			tcResBaseInfo = resBaseInfoFuture.get();
 			ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
