@@ -70,14 +70,6 @@ public class HttpClientUtil {
 
     protected final static Logger log = LoggerFactory.getLogger(HttpClientUtil.class);
    
-    
-    /*public HttpClientUtil(@Value("${tc.customHeader.access}")String accessq, @Value("${tc.accessId}")String accessIdq, @Value("${tc.customHeader.security}")String securityq, @Value("${tc.securityId}")String securityIdq){
-    	access = accessq;
-    	accessId =accessIdq;
-    	security = securityq;
-    	securityId = securityIdq;
-    }*/
-    
     /**
      * get请求
      * @param url
@@ -273,10 +265,6 @@ public class HttpClientUtil {
      * @return
      */
     public String doTCJsonPost(String url, String reqJsonStr) {
-    	/*ApplicationContext pp=new GenericApplicationContext();
-    	Environment environment = pp.getEnvironment();
-    	String property = environment.getProperty("tc.customHeader.access");
-    	System.out.println("property: "+property);*/
     	HttpClient client =null;
     	HttpPost httpPost = null;
     	HttpResponse res = null;
@@ -295,19 +283,6 @@ public class HttpClientUtil {
             httpPost.setConfig(requestConfig);
             httpPost.setHeader("Content-type","application/x-www-form-urlencoded");
             
-          /*  String accessId = "DZSSZSTBGJSYFWGFYXGSTDI";
-            String securityId = "a76ec9bf-ba68-40f5-8cf2-6fd90453001e";
-		    httpPost.setHeader("X-ACCESS-ID",accessId);*/
-		/*    
-		    String access = PropertyUtil.getProperty("tc.customHeader.access");
-		    String accessId = PropertyUtil.getProperty("tc.accessId");
-           
-            
-            String security = PropertyUtil.getProperty("tc.customHeader.security");
-            String securityId = PropertyUtil.getProperty("tc.securityId");*/
-            
-		   /* client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 120000);
-		    client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 120000);*/
              httpPost.setHeader(access,accessId);
 		     TreeMap<String, String> tmp = new TreeMap<String, String>(); 
 		     
@@ -344,44 +319,17 @@ public class HttpClientUtil {
 			    httpPost.setHeader(security,stringPwd);
 			    
 	            res = client.execute(httpPost);// 发送请求
-	           /*if(res!=null)
-	           {
-	        	   log.debug("请求同程酒店接口请求返回结果:"+res.getEntity());
-	           }*/
-	            
 	            
 	            if (res.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
 	               String result = EntityUtils.toString(res.getEntity(),"UTF-8");
 	                //log.info("接口请求返回结果:"+result);
 	                return result;
-	            	/*HttpEntity entity = res.getEntity();
-	            	StringBuffer returnMessage = new StringBuffer();
-	            	if (entity != null) {
-	            		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(entity.getContent()));
-	            		String lineMessage;
-	            		while ((lineMessage = bufferedReader.readLine()) != null) {
-	            			returnMessage.append(lineMessage);
-	            		}
-	            		bufferedReader.close();
-	            	}
-	            	String result = returnMessage.toString();
-	            	log.info("接口请求返回结果:"+result);
-	            	return result;*/
 	            }
 	        }catch(ConnectionClosedException e){
-	        	 try {
-					res = client.execute(httpPost);  // 发送请求
-					if (res.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-			               String result = EntityUtils.toString(res.getEntity(),"UTF-8");
-			               // log.info("接口请求返回结果:"+result);
-			                return result;
-					}
-				} catch (ClientProtocolException e1) {
-					log.error("doJsonPost请求异常",e1);
-				} catch (IOException e1) {
-					log.error("doJsonPost请求异常",e1);
-				}
+	        		httpPost.abort();
+					log.error("ConnectionClosedException请求异常",e);
 	        }catch (Exception e) {
+	        	httpPost.abort();
 	            log.error("doJsonPost请求异常",e);
 	        }
         	finally {

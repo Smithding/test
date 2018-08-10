@@ -133,4 +133,21 @@ public class PassengerListVo implements Serializable {
     public void setBuyRemarke(String buyRemarke) {
         this.buyRemarke = buyRemarke;
     }
+
+    @Override
+    public String toString() {
+        return "PassengerListVo{" +
+                "supplierNo=" + supplierNo +
+                ", ticketType='" + ticketType + '\'' +
+                ", pnr='" + pnr + '\'' +
+                ", pnrNo=" + pnrNo +
+                ", bigPnr='" + bigPnr + '\'' +
+                ", rows=" + rows +
+                ", pVoList=" + pVoList +
+                ", accountNo=" + accountNo +
+                ", dealNo='" + dealNo + '\'' +
+                ", buyRemarke='" + buyRemarke + '\'' +
+                ", office='" + office + '\'' +
+                '}';
+    }
 }

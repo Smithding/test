@@ -205,10 +205,11 @@ public class HolMidServiceImpl implements IHolMidService {
 		        	 }*/
 		        	 brandNameList.add(brandName);
 				}
-				
 				criatira.and("brandInfo.resBrandName").in(brandNameList);
 			}
 		}
+		criatira.orOperator(Criteria.where("supplierNo").is("0"), Criteria.where("supplierNo").is("1"));
+		logger.info("酒店列表查询条件:" + JsonUtil.toJson(criatira));
 	}
 
 	@Override
@@ -233,7 +234,8 @@ public class HolMidServiceImpl implements IHolMidService {
 	@Override
 	public List<ProDetails> hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
 		Map<String, Object> resultMap = getHotelId(agent, holMidId);
-		Long bqyResId = (Long)resultMap.get("bqyResId");
+		//Long bqyResId = (Long)resultMap.get("bqyResId");
+		Long bqyResId = null;
 		Long tcResId = (Long)resultMap.get("tcResId");
 		String bqyCityCode = (String) resultMap.get("bqyCityCode");
 		ResBaseInfo bqyHotel = null;
@@ -483,7 +485,8 @@ public class HolMidServiceImpl implements IHolMidService {
 		}
 		ResBaseInfo resBaseInfo = null;
 		Map<String, Object> resultMap = getHotelId(agent, holMidId);
-		Long bqyResId = (Long)resultMap.get("bqyResId");
+		//Long bqyResId = (Long)resultMap.get("bqyResId");
+		Long bqyResId = null;
 		Long tcResId = (Long)resultMap.get("tcResId");
 		String cityCode = (String) resultMap.get("bqyCityCode");
 		if (null != tcResId) {
