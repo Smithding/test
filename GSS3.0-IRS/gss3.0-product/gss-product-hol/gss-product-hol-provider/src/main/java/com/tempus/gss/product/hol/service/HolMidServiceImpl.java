@@ -497,6 +497,13 @@ public class HolMidServiceImpl implements IHolMidService {
 		return resBaseInfo;
 	}
 
+	@Override
+	public void addClickCount(Agent agent, String holMidId) {
+		Query query = new Query(Criteria.where("_id").is(holMidId));
+		HolMidBaseInfo holMidBaseInfo = mongoTemplate1.findOne(query, HolMidBaseInfo.class);
+		mongoTemplate1.upsert(query, new Update().set("bookTimes", null == holMidBaseInfo.getBookTimes() ? 1 : holMidBaseInfo.getBookTimes() + 1L), HolMidBaseInfo.class);
+	}
+
 	/**
 	 * 酒店ID,城市编号
 	 * @param agent

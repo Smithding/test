@@ -72,4 +72,11 @@ public interface IHolMidService {
 	 * @return
 	 */
 	ResBaseInfo hotelBaseInfo(Agent agent, String holMidId, String checkInDate, String checkOutDate) throws Exception;
+
+	/**
+	 * 增加用户浏览次数
+	 * @param agent
+	 * @param holMidId
+	 */
+	void addClickCount(Agent agent, String holMidId);
 }
