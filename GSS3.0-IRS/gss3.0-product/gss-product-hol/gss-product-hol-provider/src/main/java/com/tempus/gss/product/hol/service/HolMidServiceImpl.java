@@ -103,15 +103,12 @@ public class HolMidServiceImpl implements IHolMidService {
         	return null;
         }
         List<Criteria> listCriteria = new ArrayList<Criteria>();
-  		Criteria criteria1 = Criteria.where("supplierNo").is("0");
-  		listCriteria.add(criteria1);
+  		listCriteria.add(Criteria.where("supplierNo").is("0"));
 		for(String ss : pullHotel) {
 			if(ss.contains("tc")) {
-				Criteria criteria2  = Criteria.where("supplierNo").is("1");
-				listCriteria.add(criteria2);
+				listCriteria.add(Criteria.where("supplierNo").is("1"));
 			}else if(ss.contains("bqy")){
-				Criteria criteria2 = Criteria.where("supplierNo").is("2");
-				listCriteria.add(criteria2);
+				listCriteria.add(Criteria.where("supplierNo").is("2"));
 			}
 		}
 		criatira.orOperator(listCriteria.toArray(new Criteria[listCriteria.size()]));
@@ -140,6 +137,7 @@ public class HolMidServiceImpl implements IHolMidService {
 	 * @param criatira
 	 */
 	private void addSearchCriteria(HotelListSearchReq hotelSearchReq, Query query, Criteria criatira) {
+		//关键字
 		if(StringUtils.isNotEmpty(hotelSearchReq.getKeyword())){
 			String keyword = hotelSearchReq.getKeyword().trim();
 			String escapeHtml = StringEscapeUtils.unescapeHtml(keyword);
