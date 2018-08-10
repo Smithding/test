@@ -57,6 +57,8 @@ public class QueryProfitPrice implements Serializable {
 	private BigDecimal price;
 	
 	private Long customerTypeNo;
+	
+	private String supplierSource;
 
 	/** 有效, 0:无效,已删除; 1:有效,正常(默认) */
 	private Integer valid;
@@ -188,6 +190,14 @@ public class QueryProfitPrice implements Serializable {
 
 	public void setCustomerTypeNo(Long customerTypeNo) {
 		this.customerTypeNo = customerTypeNo;
+	}
+
+	public String getSupplierSource() {
+		return supplierSource;
+	}
+
+	public void setSupplierSource(String supplierSource) {
+		this.supplierSource = supplierSource;
 	}
 	
 }
