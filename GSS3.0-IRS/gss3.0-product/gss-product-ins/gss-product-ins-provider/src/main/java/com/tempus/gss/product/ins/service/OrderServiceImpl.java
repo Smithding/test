@@ -8,6 +8,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.tempus.gss.system.service.GSSException;
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.util.Log;
 import org.slf4j.Logger;
@@ -314,7 +315,7 @@ public class OrderServiceImpl implements IOrderService {
 		String source = paramService.getValueByKey("INS_SOURCE_NAME");
 		if(source == null){
 			log.info("渠道名INS_SOURCE_NAME不存在!");
-			throw new GSSException("渠道名INS_SOURCE_NAME不存在,无法创建订单!");
+			throw new GSSException("渠道名INS_SOURCE_NAME不存在,无法创建订单!","0","创建保险订单失败");
 		}
 		saleOrder.setSourceChannelNo(source);
 		Long transactionOrderNo = saleOrder.getTransationOrderNo();
