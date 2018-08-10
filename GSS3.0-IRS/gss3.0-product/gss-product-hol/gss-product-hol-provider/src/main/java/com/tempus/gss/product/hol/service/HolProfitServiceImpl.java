@@ -639,13 +639,13 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 	
 	@Override
 	@Async
-	public Future<List<ProfitPrice>> computeProfitByAgentNum(Agent agent, Long customerTypeNo) {
-		return new AsyncResult<List<ProfitPrice>>(computeProfitByAgent(agent, customerTypeNo));
+	public Future<List<ProfitPrice>> computeProfitByAgentNum(Agent agent, Long customerTypeNo, String supplierSource) {
+		return new AsyncResult<List<ProfitPrice>>(computeProfitByAgent(agent, customerTypeNo,supplierSource));
 	}
 	
 	
 	@Override
-	public List<ProfitPrice> computeProfitByAgent(Agent agent, Long customerTypeNo) {
+	public List<ProfitPrice> computeProfitByAgent(Agent agent, Long customerTypeNo, String supplierSource) {
 		log.info("酒店控润查询开始, 入参: customerTypeNo: "+customerTypeNo);
 		List<ProfitPrice> profitPriceList = null;
 		try {
