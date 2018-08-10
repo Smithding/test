@@ -533,7 +533,11 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 
 	@Override
 	public CityDetail getCityDetailByCityCode(Agent agent, String cityName) {
-		List<CityDetail> cityDeatil = mongoTemplate1.find(new Query(Criteria.where("cityName").regex("^.*"+cityName+".*$")), CityDetail.class);
+		Criteria criteria = new Criteria();
+		Criteria criteria0 = Criteria.where("cityName").regex("^.*" + cityName + ".*$").and("supplierNo").is("0");
+		Criteria criteria1 = Criteria.where("cityName").regex("^.*" + cityName + ".*$").and("supplierNo").is("1");
+		criteria.orOperator(criteria0, criteria1);
+		List<CityDetail> cityDeatil = mongoTemplate1.find(new Query(criteria), CityDetail.class);
 		if (null != cityDeatil && cityDeatil.size() > 0) {
 			return cityDeatil.get(0);
 		}
