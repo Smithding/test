@@ -311,7 +311,12 @@ public class OrderServiceImpl implements IOrderService {
 		if (customerNo == null) {
 			saleOrder.setCustomerNo(1L);
 		}
-		saleOrder.setSourceChannelNo("ins");
+		String source = paramService.getValueByKey("INS_SOURCE_NAME");
+		if(source == null){
+			log.info("渠道名INS_SOURCE_NAME不存在!");
+			throw new GSSException("渠道名INS_SOURCE_NAME不存在,无法创建订单!");
+		}
+		saleOrder.setSourceChannelNo(source);
 		Long transactionOrderNo = saleOrder.getTransationOrderNo();
 		if (transactionOrderNo != null) {
 			saleOrder.setTransationOrderNo(transactionOrderNo);
