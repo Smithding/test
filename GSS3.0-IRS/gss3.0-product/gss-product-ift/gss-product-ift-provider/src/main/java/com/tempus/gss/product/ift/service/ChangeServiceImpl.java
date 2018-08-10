@@ -1884,7 +1884,8 @@ public class ChangeServiceImpl implements IChangeService {
             log.info("直接将采购改签单分给在线业务员员，单号:{}", changeOrderNo);
             saleChangeExt = this.getSaleChangeExtByNo(requestWithActor);
         }
-        if(!configsService.getIsDistributeTicket(requestWithActor.getAgent())){
+        Agent agent = new Agent(Integer.valueOf(owner));
+        if(!configsService.getIsDistributeTicket(agent)){
             //如果不是系统分单
             if ((changeOrderNo == null || changeOrderNo == 0L) && saleChangeExts != null) {
                 taskAssign(saleChangeExts,null,null,requestWithActor.getAgent(),null);
@@ -1898,7 +1899,7 @@ public class ChangeServiceImpl implements IChangeService {
         List<TicketSender> senders = ticketSenderService.getSpecTypeOnLineTicketSender("buysman-change");  //采购改签员
         log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
-            Agent agent = new Agent(Integer.valueOf(owner));
+
             IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
             Map config = configs.getConfig();
             String str_maxOrderNum = (String) config.get("maxOrderNum");
