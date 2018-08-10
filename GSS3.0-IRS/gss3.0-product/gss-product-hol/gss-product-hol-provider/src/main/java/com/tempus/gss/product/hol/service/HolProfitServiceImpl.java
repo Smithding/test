@@ -654,6 +654,7 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 			}
 			QueryProfitPrice query=new QueryProfitPrice();
 			query.setCustomerTypeNo(customerTypeNo);
+			query.setSupplierSource(supplierSource);
 			profitPriceList=profitPriceMapper.queryProfitPriceList(query);
 			if(StringUtil.isNullOrEmpty(profitPriceList)){
 				List<Channel> channelList=channelService.getTree(agent, customerTypeNo, 4);
