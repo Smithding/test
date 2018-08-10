@@ -1004,7 +1004,7 @@ public class OrderServiceImpl implements IOrderService {
     public boolean issuing(RequestWithActor<PassengerListVo> requestWithActor) throws GSSException {
         
         Agent agent = requestWithActor.getAgent();
-        log.info("出单开始");
+        log.info("出单开始PassengerListVo:"+requestWithActor.getEntity().toString());
         if (agent == null) {
             log.error("当前用户为空");
             throw new GSSException("当前用户为空", "0101", "拒单操作失败!");

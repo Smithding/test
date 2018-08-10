@@ -119,7 +119,7 @@ public class OrderServiceImpl implements IOrderService {
 
 	private static final String COMPANY_NAME_HEZONG = "合众";
 	
-	private static final String COMPANY_NAME_SHIDAI = "史带";	
+	private static final String COMPANY_NAME_SHIDAI = "史带";
 	
 	private static final String COMPANY_NAME_TAIPING = "太平";
 	
@@ -169,7 +169,7 @@ public class OrderServiceImpl implements IOrderService {
 
 	@Autowired
 	SaleChangeExtDao saleChangeExtDao;
-    
+ 
 	@Autowired
 	OrderServiceReportDao orderServiceReportDao;
 	
@@ -217,6 +217,7 @@ public class OrderServiceImpl implements IOrderService {
 	SimpleDateFormat simple = new SimpleDateFormat("yyyy-MM-dd");
 	SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	@Override
+	
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
 	public Long createOrder(RequestWithActor<OrderCreateVo> requestWithActor) throws Exception {
 		log.info("创建保险订单开始==========");
@@ -311,7 +312,12 @@ public class OrderServiceImpl implements IOrderService {
 		if (customerNo == null) {
 			saleOrder.setCustomerNo(1L);
 		}
-		saleOrder.setSourceChannelNo("ins");
+		String source = paramService.getValueByKey("INS_SOURCE_NAME");
+		if(source == null){
+			log.info("渠道名INS_SOURCE_NAME不存在!");
+			throw new GSSException("渠道名INS_SOURCE_NAME不存在,无法创建订单!","0","创建保险订单失败");
+		}
+		saleOrder.setSourceChannelNo(source);
 		Long transactionOrderNo = saleOrder.getTransationOrderNo();
 		if (transactionOrderNo != null) {
 			saleOrder.setTransationOrderNo(transactionOrderNo);
@@ -453,14 +459,14 @@ public class OrderServiceImpl implements IOrderService {
         BigDecimal a = new BigDecimal(100);
         for(InsuranceProfit insuranceProfit:insuranceProfitList){
             if(insuranceProfit.getProfitCount()!=null||insuranceProfit.getProfitMoney()!=null){
-          	  //判断是控点还是固定控  1为控点    2为固定控          
+          	  //判断是控点还是固定控  1为控点    2为固定控
               if(insuranceProfit.getProfitMode()==1){
              }else if(insuranceProfit.getProfitMode()==2){
           	   if(insuranceProfit.getProfitMoney()!=null){
           		   premiums = premiums.add(insuranceProfit.getProfitMoney());
           	   }else{
           		   Log.error("保险控现为空");
-          	   } 
+          	   }
              }
           }
         }
@@ -629,12 +635,12 @@ public class OrderServiceImpl implements IOrderService {
 		this.buyInsure4Back(buyInsureRequest);
 	}
 	/**
-	 * 
+	 *
 	 * buyInsureForWeb:前台投保
 	 *
 	 * @param  @param requestWithActor    设定文件
 	 * @return void    DOM对象
-	 * @throws 
+	 * @throws
 	 * @since  CodingExample　Ver 1.1
 	 */
 	//	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
@@ -792,7 +798,7 @@ public class OrderServiceImpl implements IOrderService {
 		//君龙保险要求 投保人必须与被保人一致
 		if(insurance.getCompanyName().contains(COMPANY_NAME_JUNLONG)){
 			if(saleOrderExt.getSaleOrderDetailList().get(0)!=null){
-				Calendar calendar = Calendar.getInstance();    
+				Calendar calendar = Calendar.getInstance();
 			    calendar.setTime(saleOrderExt.getExpireDate());
 /*			    calendar.add(Calendar.SECOND, -1);*/
 				try {
@@ -942,20 +948,20 @@ public class OrderServiceImpl implements IOrderService {
 		return insureRequestVo;
 	}
 	 //计算两个日期差值
-    public static int daysBetween(Date smdate,Date bdate) throws ParseException    
-    {    
-        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");  
-        smdate=sdf.parse(sdf.format(smdate));  
-        bdate=sdf.parse(sdf.format(bdate));  
-        Calendar cal = Calendar.getInstance();    
-        cal.setTime(smdate);    
-        long time1 = cal.getTimeInMillis();                 
-        cal.setTime(bdate);    
-        long time2 = cal.getTimeInMillis();         
-        long between_days=(time2-time1)/(1000*3600*24);  
-            
-       return Integer.parseInt(String.valueOf(between_days));           
-    } 
+    public static int daysBetween(Date smdate,Date bdate) throws ParseException
+    {
+        SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+        smdate=sdf.parse(sdf.format(smdate));
+        bdate=sdf.parse(sdf.format(bdate));
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(smdate);
+        long time1 = cal.getTimeInMillis();
+        cal.setTime(bdate);
+        long time2 = cal.getTimeInMillis();
+        long between_days=(time2-time1)/(1000*3600*24);
+        
+       return Integer.parseInt(String.valueOf(between_days));
+    }
     /**
      * 个人单独投保接口
      */
@@ -1082,7 +1088,7 @@ public class OrderServiceImpl implements IOrderService {
 						buyOrderService.updateStatus(agent,buyOrderNo,7);
 			         }else{
 			        	 	saleOrderService.updateStatus(agent, saleOrderNo, 2);
-							buyOrderService.updateStatus(agent,buyOrderNo,2); 
+							buyOrderService.updateStatus(agent,buyOrderNo,2);
 			         }
 					if (StringUtils.isNotBlank(saleOrderExtVo.getPolicyNo())) {
 						saleOrderDetail.setPolicyNo(saleOrderExtVo.getPolicyNo());
@@ -1278,18 +1284,18 @@ public class OrderServiceImpl implements IOrderService {
 			throw new GSSException("调用保险经纪接口出错", "1010", "投保失败");
 		}finally{
 			log.info("退出投保接口==============");
-			return true;	
+			return true;
 		}
 	}
 
 	/**
-	 * 
+	 *
 	 * toInsureRequestVo4Back:转换成投保请求vo
 	 *
 	 * @param  @param saleOrderExt
 	 * @param  @return    设定文件
 	 * @return InsureRequestVo    DOM对象
-	 * @throws 
+	 * @throws
 	 * @since  CodingExample　Ver 1.1
 	 */
 	private InsureRequestVo toInsureRequestVo4Back(SaleOrderExt saleOrderExt) {
@@ -1349,13 +1355,13 @@ public class OrderServiceImpl implements IOrderService {
 		return insureRequestVo;
 	}
 	/**
-	 * 
+	 *
 	 * cancelSaleOrder:线上产品退保开始
 	 *
 	 * @param  @param requestWithActor isRefund
 	 * @param  @return    设定文件
 	 * @return InsureRequestVo    DOM对象
-	 * @throws 
+	 * @throws
 	 * @since  CodingExample　Ver 1.1
 	 */
 	@Override
@@ -1407,7 +1413,7 @@ public class OrderServiceImpl implements IOrderService {
 				throw new GSSException("订单的保险产品insurance为空", "1010", "退保失败");
 			}
 			Insurance insurance = saleOrderExt.getInsurance();
-        
+   
 			try {
 				Long businessSignNo = IdWorker.getId();
 				Long saleChangeNo = maxNoService.generateBizNo("INS_SALE_CHANGE_EXT_NO", 51);
@@ -1506,7 +1512,7 @@ public class OrderServiceImpl implements IOrderService {
 				saleChangeExt.setInsuredNo(saleOrderDetail.getInsuredNo());
 				int saleChangeExtNum = saleChangeExtDao.insertSelective(saleChangeExt);
 				if (saleChangeExtNum == 0) {
-					log.error("创建保险变更扩展单失败"); 
+					log.error("创建保险变更扩展单失败");
 					throw new GSSException("创建保险变更扩展单失败", "1010", "退保失败");
 				}
 				Long insuranceNo = insurance.getInsuranceNo();
@@ -1569,7 +1575,7 @@ public class OrderServiceImpl implements IOrderService {
 						Response.class);
 				if(response!=null){
 					error = response.getMsg();
-					resultInsure.setCode(response.getCode()); 
+					resultInsure.setCode(response.getCode());
 					resultInsure.setMessage(response.getMsg());
 				}
 				log.info("保险经纪接口响应:"+JSONObject.toJSONString(response));
@@ -1727,7 +1733,7 @@ public class OrderServiceImpl implements IOrderService {
 			throw new GSSException("当前操作用户不能为空", "1010", "当前操作用户不能为空");
 		}
 		//如果是运营平台账号，可查看全部订单，否则只能查看当前账号自己创建的订单
-		if(agent.getType() != null && agent.getType() != 0L){ //不是运营平台账号			
+		if(agent.getType() != null && agent.getType() != 0L){ //不是运营平台账号
 				if(pageRequest.getEntity().isLowerLevel()==true){
 					Date start1 = new Date();
 					lowerCustomers = customerService.getSubCustomerByCno(agent, agent.getNum());
@@ -1796,7 +1802,7 @@ public class OrderServiceImpl implements IOrderService {
 			for(SaleOrderExt order: tempList) {
 				BigDecimal prise = new BigDecimal(order.getSaleOrderDetailList().size());
 				SaleOrder saleOrder = saleOrderService.getSOrderByNo(pageRequest.getAgent(), order.getSaleOrderNo());
-				order.setSaleOrder(saleOrder);			
+				order.setSaleOrder(saleOrder);
 				order.setLowerCustomers(lowerCustomers);
 				saleOrderExtList.add(order);
 			}
@@ -2381,7 +2387,7 @@ public class OrderServiceImpl implements IOrderService {
 
 	/**
 	 * 创建采购付款单
-	 * 
+	 *
 	 * payWay 支付方式(代扣，代缴必传)
 	 * payType 支付类型
 	 * accoutNo 付款账号(代扣，代缴传 付款账号，BSP账期传开账账号)
@@ -2507,12 +2513,12 @@ public class OrderServiceImpl implements IOrderService {
 		}
 		SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleOrderNo);
 		//当支付状态为已支付（1）时创建销售退款单
-		if (saleOrder != null) {		
+		if (saleOrder != null) {
 			if (saleOrder.getPayStatus() ==1) {
 				try {
 					CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
 					certificateCreateVO.setIncomeExpenseType(2); //收支类型 1 收，2 为支
-					/*		certificateCreateVO.setPayType(2); //支付类型（1 在线支付 2 帐期或代付 3 线下支付）*/	
+					/*		certificateCreateVO.setPayType(2); //支付类型（1 在线支付 2 帐期或代付 3 线下支付）*/
 				certificateCreateVO.setReason("销售退款单信息"); //补充说明
 					certificateCreateVO.setSubBusinessType(1); //业务小类 1.销采 2.补收退 3.废退 4.变更 5.错误修改
 					List<BusinessOrderInfo> orderInfoList = new ArrayList<>(); //支付订单
@@ -2554,12 +2560,12 @@ public class OrderServiceImpl implements IOrderService {
 		}
 		SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleOrderNo);
 		//当支付状态为已支付（1）时创建销售退款单
-		if (saleOrder != null) {		
+		if (saleOrder != null) {
 			if (saleOrder.getPayStatus() ==1) {
 				try {
 					CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
 					certificateCreateVO.setIncomeExpenseType(2); //收支类型 1 收，2 为支
-					/*		certificateCreateVO.setPayType(2); //支付类型（1 在线支付 2 帐期或代付 3 线下支付）*/	
+					/*		certificateCreateVO.setPayType(2); //支付类型（1 在线支付 2 帐期或代付 3 线下支付）*/
 				certificateCreateVO.setReason("销售退款单信息"); //补充说明
 					certificateCreateVO.setSubBusinessType(1); //业务小类 1.销采 2.补收退 3.废退 4.变更 5.错误修改
 					List<BusinessOrderInfo> orderInfoList = new ArrayList<>(); //支付订单
@@ -3252,7 +3258,7 @@ public class OrderServiceImpl implements IOrderService {
 				saleChangeExt.setInsuredNo(saleOrderDetail.getInsuredNo());
 				int saleChangeExtNum = saleChangeExtDao.insertSelective(saleChangeExt);
 				if (saleChangeExtNum == 0) {
-					log.error("创建保险变更扩展单失败"); 
+					log.error("创建保险变更扩展单失败");
 					throw new GSSException("创建保险变更扩展单失败", "1010", "退保失败");
 				}
 				Long insuranceNo = insurance.getInsuranceNo();
@@ -3435,7 +3441,7 @@ public class OrderServiceImpl implements IOrderService {
 			throw new GSSException("当前操作用户不能为空", "1010", "当前操作用户不能为空");
 		}
 		//如果是运营平台账号，可查看全部订单，否则只能查看当前账号自己创建的订单
-		if(agent.getType() != null && agent.getType() != 0L){ //不是运营平台账号			
+		if(agent.getType() != null && agent.getType() != 0L){ //不是运营平台账号
 				if(pageRequest.getEntity().isLowerLevel()==true){
 					Date start1 = new Date();
 					lowerCustomers = customerService.getSubCustomerByCno(agent, agent.getNum());
