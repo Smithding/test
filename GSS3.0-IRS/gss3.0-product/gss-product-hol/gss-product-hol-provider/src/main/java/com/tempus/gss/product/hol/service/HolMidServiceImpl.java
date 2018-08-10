@@ -1,5 +1,6 @@
 package com.tempus.gss.product.hol.service;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
@@ -14,6 +15,8 @@ import com.tempus.gss.product.hol.api.syn.ISyncHotelInfo;
 import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
 import com.tempus.gss.product.hol.utils.TrackTime;
+import com.tempus.gss.system.entity.Param;
+import com.tempus.gss.system.service.IParamService;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 import httl.util.StringUtils;
@@ -54,6 +57,9 @@ public class HolMidServiceImpl implements IHolMidService {
 	
 	@Autowired
 	private ISyncHotelInfo syncHotelInfo;
+	
+	@Reference
+	IParamService paramService;
 	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -234,8 +240,7 @@ public class HolMidServiceImpl implements IHolMidService {
 	@Override
 	public List<ProDetails> hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
 		Map<String, Object> resultMap = getHotelId(agent, holMidId);
-		//Long bqyResId = (Long)resultMap.get("bqyResId");
-		Long bqyResId = null;
+		Long bqyResId = (Long)resultMap.get("bqyResId");
 		Long tcResId = (Long)resultMap.get("tcResId");
 		String bqyCityCode = (String) resultMap.get("bqyCityCode");
 		ResBaseInfo bqyHotel = null;
@@ -244,20 +249,11 @@ public class HolMidServiceImpl implements IHolMidService {
 		//tc和bqy酒店ID都不为空则开启异步查询,否则执行同步
 		if (null != bqyResId && null != tcResId) {
 			try {
-				long start = System.currentTimeMillis();
 				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate, bqyCityCode);
 				Future<ResBaseInfo> tcResponse = syncHotelInfo.queryTCHelListForAsync(agent, tcResId, checkinDate, checkoutDate);
-				/*while (bqyResponse.isDone() && tcResponse.isDone()) {
-						break;
-					}
-				if (null != bqyResponse) {*/
-					bqyHotel = bqyResponse.get();
-				//}
-				//if (null != tcResponse) {
-					tcHotel = tcResponse.get();
-				//}
+				bqyHotel = bqyResponse.get();
+				tcHotel = tcResponse.get();
 					
-				System.out.println("111111111: " + (System.currentTimeMillis() - start));
 				long start1 = System.currentTimeMillis();
 				List<ProDetails> bqyProDetailList = null;
 				List<ProDetails> tcProDetailList = null;
@@ -526,6 +522,21 @@ public class HolMidServiceImpl implements IHolMidService {
 						bqyResId = resNameSum.getResId();
 						bqyCityCode = resNameSum.getCityCode();
 						break;
+				}
+			}
+		}
+		Param param=new Param();
+		param.setTypeId(3);
+		param.setParamValue("888");
+		List<Param> query = paramService.query(param);
+		for(Param p : query) {
+			if(p.getParamKey().equals("tc_hol_pull")) {
+				if(p.getStatus().equals(0)) {
+					tcResId = null;
+				}
+			}else if(p.getParamKey().equals("bqy_hol_pull")){
+				if(p.getStatus().equals(0)) {
+					bqyResId = null;
 				}
 			}
 		}
