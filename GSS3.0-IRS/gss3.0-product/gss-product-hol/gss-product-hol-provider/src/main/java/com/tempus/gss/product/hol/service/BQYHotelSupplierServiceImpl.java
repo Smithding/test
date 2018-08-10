@@ -642,7 +642,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 			
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
 			if(!agent.getNum().equals(401803070321014723L)) {
-				computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+				computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(), "bqy");
 			}
 			
 			Double oneDayPrice = null;
@@ -811,7 +811,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 			int diff  = DateUtil.daysBetween(checkInDate, checkOutDate);
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
 			if(!agent.getNum().equals(401803070321014723L)) {
-				computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+				computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(), "bqy");
 			}
 			//设置控润
 			if(computeProfitByAgentFu!=null) {
