@@ -2,11 +2,14 @@ package com.tempus.gss.product.hol.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Future;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.AsyncResult;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.framework.service.impl.SuperServiceImpl;
@@ -207,6 +210,13 @@ public class HolSupplierServiceImpl extends SuperServiceImpl<HolSupplierMapper, 
 	public HolSupplier queryBySupplierCode(String supplierCode) {
 		
 		return supplierMapper.queryBySupplierCode(supplierCode);
+	}
+	
+	@Override
+	@Async
+	public Future<HolSupplier> queryFuBySupplierCode(String supplierCode) {
+		HolSupplier holSupplier =  queryBySupplierCode(supplierCode);
+		return new AsyncResult<HolSupplier>(holSupplier);
 	}
 	
 }
