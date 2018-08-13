@@ -255,7 +255,7 @@ public class HolMidServiceImpl implements IHolMidService {
 		String bqyCityCode = (String) resultMap.get("bqyCityCode");
 		ResBaseInfo bqyHotel = null;
 		ResBaseInfo tcHotel = null;
-		logger.info("异步查询酒店ID, TC_ID:"+tcHotel+", BQY_ID: "+bqyHotel);
+		logger.info("异步查询酒店ID, TC_ID:"+tcResId+", BQY_ID: "+bqyResId);
 		//tc和bqy酒店ID都不为空则开启异步查询,否则执行同步
 		if (null != bqyResId && null != tcResId) {
 			try {
