@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.service;
 
 import java.util.List;
+import java.util.concurrent.Future;
 
 import com.baomidou.framework.service.ISuperService;
 import com.baomidou.mybatisplus.plugins.Page;
@@ -59,4 +60,6 @@ public interface IHolSupplierService extends ISuperService<HolSupplier> {
 	public List<HolSupplier> selectSupplierList();
 	
 	public HolSupplier queryBySupplierCode(String supplierCode);
+	
+	public Future<HolSupplier> queryFuBySupplierCode(String supplierCode);
 }
