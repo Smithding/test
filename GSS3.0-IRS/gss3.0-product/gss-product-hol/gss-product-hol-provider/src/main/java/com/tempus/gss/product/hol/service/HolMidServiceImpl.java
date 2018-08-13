@@ -580,6 +580,9 @@ public class HolMidServiceImpl implements IHolMidService {
 		param.setParamValue("888");
 		param.setStatus(1);
 		List<Param> query = paramService.query(param);
+		if(query == null || query.isEmpty()) {
+			return null;
+		}
 		for(Param p : query) {
 			list.add(p.getParamKey());
 		}
