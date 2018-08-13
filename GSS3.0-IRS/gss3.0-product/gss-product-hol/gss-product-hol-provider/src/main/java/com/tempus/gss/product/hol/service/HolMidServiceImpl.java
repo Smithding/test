@@ -570,7 +570,7 @@ public class HolMidServiceImpl implements IHolMidService {
 		return map;
 	}
 	/**
-	 * 如果被禁用，对应的ParamKey会存在list
+	 * 如果被启用，对应的ParamKey会存在list
 	 * @return
 	 */
 	public List<String> getPullHotel(){
