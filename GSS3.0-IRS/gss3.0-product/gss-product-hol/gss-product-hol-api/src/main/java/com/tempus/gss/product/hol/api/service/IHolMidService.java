@@ -36,9 +36,10 @@ public interface IHolMidService {
 	 * 酒店详情
 	 * @param agent
 	 * @param holMidId
+	 * @param searchHotelType
 	 * @return
 	 */
-	List<ProDetails> hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception;
+	List<ProDetails> hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate, String searchHotelType) throws Exception;
 	
 	/**
 	 * 酒店详情后台查询
@@ -54,7 +55,7 @@ public interface IHolMidService {
 	 * @param holMidId
 	 * @return
 	 */
-	List<ImgInfo> listImgByHotelId(Agent agent, String holMidId);
+	List<ImgInfo> listImgByHotelId(Agent agent, String holMidId, String searchHotelType);
 	
 	/**
 	 * 修改酒店状态

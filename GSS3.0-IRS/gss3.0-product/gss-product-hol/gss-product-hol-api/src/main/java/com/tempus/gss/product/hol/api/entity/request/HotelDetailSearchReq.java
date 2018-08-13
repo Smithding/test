@@ -50,6 +50,11 @@ public class HotelDetailSearchReq extends BaseRequest {
 	 */
 	private String supplierId;
 
+	/**
+	 * 搜索酒店类型
+	 */
+	private String searchHotelType;
+
     public static long getSerialVersionUID() {
         return serialVersionUID;
     }
@@ -109,5 +114,12 @@ public class HotelDetailSearchReq extends BaseRequest {
 	public void setProductUniqueId(String productUniqueId) {
 		this.productUniqueId = productUniqueId;
 	}
-    
+
+	public String getSearchHotelType() {
+		return searchHotelType;
+	}
+
+	public void setSearchHotelType(String searchHotelType) {
+		this.searchHotelType = searchHotelType;
+	}
 }

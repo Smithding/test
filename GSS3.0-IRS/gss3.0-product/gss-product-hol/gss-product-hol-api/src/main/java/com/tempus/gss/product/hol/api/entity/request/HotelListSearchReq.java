@@ -95,6 +95,11 @@ public class HotelListSearchReq implements Serializable {
     private String bookRes;
     
     private ResGPSInfo resGPSInfo;
+
+    /**
+     * 酒店搜索类型
+     */
+    private String searchHotelType;
     
     public SearchCondition getSearchCondition() {
         return searchCondition;
@@ -240,5 +245,12 @@ public class HotelListSearchReq implements Serializable {
 	public void setResGPSInfo(ResGPSInfo resGPSInfo) {
 		this.resGPSInfo = resGPSInfo;
 	}
-	
+
+    public String getSearchHotelType() {
+        return searchHotelType;
+    }
+
+    public void setSearchHotelType(String searchHotelType) {
+        this.searchHotelType = searchHotelType;
+    }
 }

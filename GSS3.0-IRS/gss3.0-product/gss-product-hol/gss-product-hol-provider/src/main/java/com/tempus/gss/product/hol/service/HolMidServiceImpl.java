@@ -99,7 +99,8 @@ public class HolMidServiceImpl implements IHolMidService {
         Criteria criatira = new Criteria();
         
         List<String> pullHotel = getPullHotel();
-        if(pullHotel == null || pullHotel.isEmpty()) {
+
+		if(pullHotel == null || pullHotel.isEmpty()) {
         	return null;
         }
         List<Criteria> listCriteria = new ArrayList<Criteria>();
@@ -112,7 +113,7 @@ public class HolMidServiceImpl implements IHolMidService {
 			}
 		}
 		criatira.orOperator(listCriteria.toArray(new Criteria[listCriteria.size()]));
-		
+
 		addSearchCriteria(hotelSearchReq, query, criatira);
   		
         int skip= (hotelSearchReq.getPageCount()-1)* (hotelSearchReq.getRowCount());
@@ -124,9 +125,15 @@ public class HolMidServiceImpl implements IHolMidService {
   		int count= (int)mongoTemplate1.count(query, HolMidBaseInfo.class);
   		//总页数
   		int totalPage= (int)(count/hotelSearchReq.getRowCount()+1);
-  		response.setTotalPatge(Integer.valueOf(totalPage));
-  		response.setTotalCount(Integer.valueOf(count));
-  		response.setResponseResult(holList);
+
+  		//搜索酒店类型
+		if (null != pullHotel && pullHotel.size() > 0) {
+			String searchHotelType = pullHotel.stream().filter(str -> !str.isEmpty()).collect(Collectors.joining(","));
+			response.setSearchHotelType(searchHotelType);
+		}
+		response.setTotalPatge(Integer.valueOf(totalPage));
+		response.setTotalCount(Integer.valueOf(count));
+		response.setResponseResult(holList);
 		return response;
 	}
 
@@ -238,8 +245,8 @@ public class HolMidServiceImpl implements IHolMidService {
 	
 	@TrackTime(param = "查询所有酒店房型耗时")
 	@Override
-	public List<ProDetails> hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
-		Map<String, Object> resultMap = getHotelId(agent, holMidId);
+	public List<ProDetails> hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate, String searchHotelType) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
+		Map<String, Object> resultMap = getHotelId(agent, holMidId, searchHotelType);
 		if(resultMap == null || resultMap.isEmpty()) {
 			return null;
 		}
@@ -335,7 +342,7 @@ public class HolMidServiceImpl implements IHolMidService {
 	@Override
 	public ResBaseInfo hotelDetailForBack(Agent agent, String holMidId, String checkinDate, String checkoutDate)
 			throws Exception {
-		Map<String, Object> resultMap = getHotelId(agent, holMidId);
+		Map<String, Object> resultMap = getHotelId(agent, holMidId, null);
 		Long bqyResId = (Long)resultMap.get("bqyResId");
 		Long tcResId = (Long)resultMap.get("tcResId");
 		String bqyCityCode = (String) resultMap.get("bqyCityCode");
@@ -435,9 +442,9 @@ public class HolMidServiceImpl implements IHolMidService {
 	}
 	
 	@Override
-	public List<ImgInfo> listImgByHotelId(Agent agent, String holMidId) {
+	public List<ImgInfo> listImgByHotelId(Agent agent, String holMidId, String searchHotelType) {
 		List<ImgInfo> imgList = null;
-		Map<String, Object> resultMap = getHotelId(agent, holMidId);
+		Map<String, Object> resultMap = getHotelId(agent, holMidId, searchHotelType);
 		Long bqyResId = (Long) resultMap.get("bqyResId");
 		Long tcResId = (Long) resultMap.get("tcResId");
 		if (null != bqyResId && bqyResId != 0) {
@@ -483,7 +490,7 @@ public class HolMidServiceImpl implements IHolMidService {
 			throw new GSSException("修改酒店可售状态", "0118", "传入中间表ID为空");
 		}
 		ResBaseInfo resBaseInfo = null;
-		Map<String, Object> resultMap = getHotelId(agent, holMidId);
+		Map<String, Object> resultMap = getHotelId(agent, holMidId, null);
 		//Long bqyResId = (Long)resultMap.get("bqyResId");
 		Long bqyResId = null;
 		Long tcResId = (Long)resultMap.get("tcResId");
@@ -509,17 +516,28 @@ public class HolMidServiceImpl implements IHolMidService {
 	 * @param holMidId
 	 * @return
 	 */
-	private Map<String, Object> getHotelId(Agent agent, String holMidId) {
+	private Map<String, Object> getHotelId(Agent agent, String holMidId, String searchHotelType) {
 		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
 		Long bqyResId = null;
 		Boolean bqyFlag = false;
 		Long tcResId = null;
 		Boolean tcFlag = false;
 		String bqyCityCode = null;
-		List<String> pullHotel = getPullHotel();
+
+		List<String> pullHotel = null;
+
+		Map<String, Object> map = new HashMap<>();
+
+		if (StringUtil.isNotNullOrEmpty(searchHotelType)) {
+			pullHotel = Arrays.stream(searchHotelType.split(",")).filter(s -> !s.isEmpty()).map(s -> s.trim()).collect(Collectors.toList());
+		}else {
+			pullHotel = getPullHotel();
+			String collect = pullHotel.stream().filter(s -> !s.isEmpty()).collect(Collectors.joining(","));
+			map.put("searchHotelType", collect);
+		}
 		if(pullHotel == null || pullHotel.isEmpty()) {
-        	return null;
-        }
+			return null;
+		}
 		for(String ss : pullHotel) {
 			if(ss.contains("tc")) {
 				tcFlag = true;
@@ -527,6 +545,7 @@ public class HolMidServiceImpl implements IHolMidService {
 				bqyFlag = true;
 			}
 		}
+
 		List<ResNameSum> listHol = holMid.getResNameSum();
 		if (null != listHol && listHol.size() > 0) {
 			for (ResNameSum resNameSum : listHol) {
@@ -545,7 +564,6 @@ public class HolMidServiceImpl implements IHolMidService {
 				}
 			}
 		}
-		Map<String, Object> map = new HashMap<>();
 		map.put("bqyResId", bqyResId);
 		map.put("tcResId", tcResId);
 		map.put("bqyCityCode", bqyCityCode);
