@@ -35,6 +35,7 @@ import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.log.entity.LogRecord;
 import com.tempus.gss.log.query.LogRecordQuery;
 import com.tempus.gss.log.service.ILogService;
+import com.tempus.gss.product.hol.api.entity.HolSupplier;
 import com.tempus.gss.product.hol.api.entity.ProfitPrice;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.AssignDateHotelReq;
@@ -55,6 +56,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelId;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
 import com.tempus.gss.product.hol.api.service.IHolProfitService;
+import com.tempus.gss.product.hol.api.service.IHolSupplierService;
 import com.tempus.gss.product.hol.api.syn.ISyncHotelInfo;
 import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelOrderService;
@@ -92,6 +94,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	
 	@Autowired
 	ITCHotelOrderService tcHotelOrderService;
+	
+	@Autowired
+	IHolSupplierService holSupplierService;
 	
 	@Reference
 	private ILogService logService;
@@ -1045,11 +1050,13 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			Future<OrderInfomationDetail> futureorderDetailInfo = tcHotelOrderService.futureorderDetailInfo(agent, orderDetailInfoReq);
 			Future<HotelOrder> futureOrderDetail = tcHotelOrderService.getFutureOrderDetail(agent, hotelOrderNo);
 			Future<List<LogRecord>> list = queryLogList(hotelOrderNo);
-			
+			String supplierCode = "tc";
+			Future<HolSupplier> holSupplierFu = holSupplierService.queryFuBySupplierCode(supplierCode);
 			
 			HotelOrder hotelOrder = futureOrderDetail.get();
 			OrderInfomationDetail orderInfomationDetail = futureorderDetailInfo.get();
 			List<LogRecord> logList = list.get();
+			HolSupplier holSupplier = holSupplierFu.get();
 			
 			if(StringUtil.isNotNullOrEmpty(hotelOrder)) {
 				map.put("hotelOrder", hotelOrder);
@@ -1059,6 +1066,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			}
 			if(StringUtil.isNotNullOrEmpty(hotelOrder)) {
 				map.put("logList", logList);
+			}
+			if(StringUtil.isNotNullOrEmpty(holSupplier)) {
+				map.put("holSupplier", holSupplier);
 			}
 			
 			return map;
