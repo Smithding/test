@@ -264,7 +264,6 @@ public class HolMidServiceImpl implements IHolMidService {
 				bqyHotel = bqyResponse.get();
 				tcHotel = tcResponse.get();
 					
-				long start1 = System.currentTimeMillis();
 				List<ProDetails> bqyProDetailList = null;
 				List<ProDetails> tcProDetailList = null;
 				if (null != bqyHotel) {
@@ -313,7 +312,6 @@ public class HolMidServiceImpl implements IHolMidService {
 				}
 				newProDetailList = map.entrySet().stream().map(et ->et.getValue()).collect(Collectors.toList());
 				bqyHotel.setProDetails(newProDetailList);
-				System.out.println("222222: " + (System.currentTimeMillis() - start1));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -491,8 +489,7 @@ public class HolMidServiceImpl implements IHolMidService {
 		}
 		ResBaseInfo resBaseInfo = null;
 		Map<String, Object> resultMap = getHotelId(agent, holMidId, null);
-		//Long bqyResId = (Long)resultMap.get("bqyResId");
-		Long bqyResId = null;
+		Long bqyResId = (Long)resultMap.get("bqyResId");
 		Long tcResId = (Long)resultMap.get("tcResId");
 		String cityCode = (String) resultMap.get("bqyCityCode");
 		if (null != tcResId) {
@@ -517,6 +514,7 @@ public class HolMidServiceImpl implements IHolMidService {
 	 * @return
 	 */
 	private Map<String, Object> getHotelId(Agent agent, String holMidId, String searchHotelType) {
+		//long start1 = System.currentTimeMillis();
 		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
 		Long bqyResId = null;
 		Boolean bqyFlag = false;
@@ -527,13 +525,12 @@ public class HolMidServiceImpl implements IHolMidService {
 		List<String> pullHotel = null;
 
 		Map<String, Object> map = new HashMap<>();
-
 		if (StringUtil.isNotNullOrEmpty(searchHotelType)) {
 			pullHotel = Arrays.stream(searchHotelType.split(",")).filter(s -> !s.isEmpty()).map(s -> s.trim()).collect(Collectors.toList());
 		}else {
 			pullHotel = getPullHotel();
-			String collect = pullHotel.stream().filter(s -> !s.isEmpty()).collect(Collectors.joining(","));
-			map.put("searchHotelType", collect);
+			//String collect = pullHotel.stream().filter(s -> !s.isEmpty()).collect(Collectors.joining(","));
+			//map.put("searchHotelType", collect);
 		}
 		if(pullHotel == null || pullHotel.isEmpty()) {
 			return null;
@@ -567,6 +564,7 @@ public class HolMidServiceImpl implements IHolMidService {
 		map.put("bqyResId", bqyResId);
 		map.put("tcResId", tcResId);
 		map.put("bqyCityCode", bqyCityCode);
+		//System.out.println("酒店可用: " + (System.currentTimeMillis() - start1));
 		return map;
 	}
 	/**
