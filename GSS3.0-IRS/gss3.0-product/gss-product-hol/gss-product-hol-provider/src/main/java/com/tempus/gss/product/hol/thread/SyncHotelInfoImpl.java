@@ -268,9 +268,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		         	    	        							firstPrice = entry.getValue().getDistributionSalePrice();
 		         	    	        						}
 		         	    	        					}
-		         	    	        					if(kk == days.intValue()) {
+		         	    	        					/*if(kk == days.intValue()) {
 	         	    	        							break;
-	         	    	        						}
+	         	    	        						}*/
 		         	            					}
 		     	    	        					pro.setProSaleInfoDetailsTarget(mapPro);
 		     	    	        					pro.setFirPrice(firstPrice);
@@ -457,9 +457,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		 	    	        							firstPrice = entry.getValue().getDistributionSalePrice();
 		 	    	        						}
 		 	    	        					}
-		 	    	        					if(kk == days.intValue()) {
+		 	    	        					/*if(kk == days.intValue()) {
 			    	        							break;
-			    	        						}
+			    	        						}*/
 		 	            					}
 			    	        					pro.setProSaleInfoDetailsTarget(mapPro);
 			    	        					pro.setFirPrice(firstPrice);
@@ -665,9 +665,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		 	    	        							firstPrice = entry.getValue().getDistributionSalePrice();
 		 	    	        						}
 		 	    	        					}
-		 	    	        					if(kk == days.intValue()) {
+		 	    	        					/*if(kk == days.intValue()) {
 			    	        							break;
-			    	        						}
+			    	        						}*/
 		 	            					}
 			    	        					pro.setProSaleInfoDetailsTarget(mapPro);
 			    	        					pro.setFirPrice(firstPrice);
@@ -881,9 +881,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
  	    	        							firstPrice = entry.getValue().getDistributionSalePrice();
  	    	        						}
  	    	        					}
- 	    	        					if(kk == days.intValue()) {
+ 	    	        					/*if(kk == days.intValue()) {
 	    	        							break;
-	    	        						}
+	    	        						}*/
  	            					}
 	    	        					pro.setProSaleInfoDetailsTarget(mapPro);
 	    	        					pro.setFirPrice(firstPrice);
