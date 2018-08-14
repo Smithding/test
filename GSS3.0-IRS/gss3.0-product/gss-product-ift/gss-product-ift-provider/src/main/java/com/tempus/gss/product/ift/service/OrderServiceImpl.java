@@ -2941,7 +2941,10 @@ public class OrderServiceImpl implements IOrderService {
         if (buyOrderExt != null) {
             buyOrderExt.setTicketType(listVo.getTicketType());
             buyOrderExt.setBuyRemarke(listVo.getBuyRemarke());
+            buyOrderExt.setSupplierNo(supplier.getSupplierNo());
+            buyOrderExt.setSupplierTypeNo(supplier.getCustomerTypeNo());
         }
+        log.info("出票更新采购扩展表"+buyOrderExt.toString());
         buyOrderExtDao.updateByPrimaryKeySelective(buyOrderExt);
         //}
     }
