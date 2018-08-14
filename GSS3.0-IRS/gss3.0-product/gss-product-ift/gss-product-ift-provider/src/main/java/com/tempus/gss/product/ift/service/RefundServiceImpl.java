@@ -1560,7 +1560,8 @@ public class RefundServiceImpl implements IRefundService {
 			log.info("直接将采购废票单分给在线业务员员，单号:{}", wasteOrderNo);
 			saleChangeExt = this.getSaleChangeExtByNo(requestWithActor);
 		}
-		boolean isDistributeTicket = configsService.getIsDistributeTicket(requestWithActor.getAgent());
+		Agent agent = new Agent(Integer.valueOf(owner));
+		boolean isDistributeTicket = configsService.getIsDistributeTicket(agent);
 		if(!isDistributeTicket){
 			//如果不是系统分单
 			if ((wasteOrderNo == null || wasteOrderNo == 0L) && saleChangeExts != null) {
@@ -1576,7 +1577,7 @@ public class RefundServiceImpl implements IRefundService {
 		List<TicketSender> senders = ticketSenderService.getSpecTypeOnLineTicketSender("buysman-waste"); //采购废票人员
 		log.info("是否有在线出票员:" + (senders != null));
 		if (senders != null && senders.size() > 0) {
-			Agent agent = new Agent(Integer.valueOf(owner));
+
 			Long maxOrderNum = getMaxAbleAssignNum(agent);
 			log.info("在线出票员人数:" + (senders.size()) + "获得配置最大分单数：" + maxOrderNum);
 			Date updateTime = new Date();
@@ -1657,7 +1658,8 @@ public class RefundServiceImpl implements IRefundService {
 			log.info("直接将采购退票单分给在线业务员，单号:{}", refundOrderNo);
 			saleChangeExt = this.getSaleChangeExtByNo(requestWithActor);
 		}
-		Boolean isDistribute = configsService.getIsDistributeTicket(requestWithActor.getAgent());
+		Agent agent = new Agent(Integer.valueOf(owner));
+		Boolean isDistribute = configsService.getIsDistributeTicket(agent);
 		if(!isDistribute){
 			//如果不是系统分单
 			if ((refundOrderNo == null || refundOrderNo == 0L) && saleChangeExts != null) {
@@ -1672,7 +1674,7 @@ public class RefundServiceImpl implements IRefundService {
 		List<TicketSender> senders = ticketSenderService.getSpecTypeOnLineTicketSender("buysman-refund"); //采购退票人员
 		log.info("是否有在线出票员:" + (senders != null));
 		if (senders != null && senders.size() > 0) {
-			Agent agent = new Agent(Integer.valueOf(owner));
+
 			Long maxOrderNum = getMaxAbleAssignNum(agent);
 			log.info("有在线出业务员人数:" + (senders.size()) + "获得配置最大分单数：" + maxOrderNum);
 			Date updateTime = new Date();

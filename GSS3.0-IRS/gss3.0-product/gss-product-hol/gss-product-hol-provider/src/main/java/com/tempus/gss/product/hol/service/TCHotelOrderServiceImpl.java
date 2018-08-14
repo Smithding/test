@@ -443,9 +443,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            hotelOrder.setTotalRefund(orderCreateReq.getTotalRebateRateProfit());
 	            hotelOrder.setFactTotalRefund(new BigDecimal(0));
 	            String guestName = null;
-	            String requestCode = null;
-	            String requestText = null;
-	            String requestName = null;
 	            for (TravlePassengerInfo guest : orderCreateReq.getOrderPassengerDetails()) {
 	            	guest.setNationality("中国");
 	            	guest.setMobile(GUEST_NO);
@@ -457,34 +454,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	                    }
 	                }
 	            }
-	           /* if(orderCreateReq.getSpecialRequestOption() != null){
-	            	for(SpecialRequest request : orderCreateReq.getSpecialRequestOption()){
-		            	if (requestCode == null || "".equals(requestCode)) {
-		            		requestCode = request.getRequestCode();
-		                } else {
-		                    if (request.getRequestCode() != null && !"".equals(request.getRequestCode())) {
-		                    	requestCode = requestCode + "," + request.getRequestCode();
-		                    }
-		                }
-		            	if (requestText == null || "".equals(requestText)) {
-		            		requestText = request.getRequestText();
-		                } else {
-		                    if (request.getRequestText() != null && !"".equals(request.getRequestText())) {
-		                    	requestText = requestText + "," + request.getRequestText();
-		                    }
-		                }
-		            	if (requestName == null || "".equals(requestName)) {
-		            		requestName = request.getRequestName();
-		                } else {
-		                    if (request.getRequestName() != null && !"".equals(request.getRequestName())) {
-		                    	requestName = requestName + "," + request.getRequestName();
-		                    }
-		                }
-		            }
-	            	hotelOrder.setRequestCode(requestCode);
-		            hotelOrder.setRequestText(requestText);
-		            hotelOrder.setRequestName(requestName);
-	            }*/
 	            hotelOrder.setGuestName(guestName);
 	            //hotelOrder.setGuestMobile(orderCreateReq.getOrderPassengerDetails().get(0).getMobile());
 	            if(StringUtil.isNotNullOrEmpty(orderCreateReq.getOrderRemark())){
@@ -1211,15 +1180,17 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 									        }
 											hotelOrder.setFactNightCount(factNight);
 											Integer roomCount = orderInfoModel.getCounts().getRoomCount();
+											hotelOrder.setRequestName(roomCount.toString());
 											
-											
-											BigDecimal hoteelDivide = hotelOrder.getTotalPrice().divide(new BigDecimal(hotelOrder.getNightCount()*hotelOrder.getBookCount()), 2, BigDecimal.ROUND_HALF_UP);
+											/*BigDecimal hoteelDivide = hotelOrder.getTotalPrice().divide(new BigDecimal(hotelOrder.getNightCount()*hotelOrder.getBookCount()), 2, BigDecimal.ROUND_HALF_UP);
 											BigDecimal tcInfoDivide = (orderInfoModel.getOrigin()).divide(new BigDecimal(roomCount),2, BigDecimal.ROUND_HALF_UP);
 											int compareToPrice = hoteelDivide.compareTo(tcInfoDivide);
 											if(compareToPrice == 0){
 												BigDecimal multiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
 												hotelOrder.setFactTotalRefund(multiply);
-											}
+											}*/
+											BigDecimal factmultiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
+											hotelOrder.setFactTotalRefund(factmultiply);
 											hotelOrder.setFactTotalPrice(orderInfoModel.getOrigin());
 											Integer factProCo = 0;
 											if(StringUtil.isNotNullOrEmpty(orderInfoModel.getResources())){
@@ -1609,13 +1580,15 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								Integer roomCount = orderInfoModel.getCounts().getRoomCount();
 								hotelOrder.setRequestName(roomCount.toString());
 								
-								BigDecimal hoteelDivide = hotelOrder.getTotalPrice().divide(new BigDecimal(hotelOrder.getNightCount()*hotelOrder.getBookCount()), 2, BigDecimal.ROUND_HALF_UP);
+								/*BigDecimal hoteelDivide = hotelOrder.getTotalPrice().divide(new BigDecimal(hotelOrder.getNightCount()*hotelOrder.getBookCount()), 2, BigDecimal.ROUND_HALF_UP);
 								BigDecimal tcInfoDivide = (orderInfoModel.getOrigin()).divide(new BigDecimal(roomCount),2, BigDecimal.ROUND_HALF_UP);
 								int compareToPrice = hoteelDivide.compareTo(tcInfoDivide);
 								if(compareToPrice == 0){
 									BigDecimal multiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
 									hotelOrder.setFactTotalRefund(multiply);
-								}
+								}*/
+								BigDecimal factmultiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
+								hotelOrder.setFactTotalRefund(factmultiply);
 								hotelOrder.setFactTotalPrice(orderInfoModel.getOrigin());
 								Integer factProCo = 0;
 								if(StringUtil.isNotNullOrEmpty(orderInfoModel.getResources())){
@@ -1930,14 +1903,11 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 									
 									newHotelOrder.setFactNightCount(factNight);
 									newHotelOrder.setFactProCount(priceFraction);
+									newHotelOrder.setRequestName(orderInfoModel.getCounts().getRoomCount().toString());
 									
-									/*BigDecimal hoteelDivide = hotelOrder.getTotalPrice().divide(new BigDecimal(hotelOrder.getNightCount()*hotelOrder.getBookCount()), 2, BigDecimal.ROUND_HALF_UP);
-									BigDecimal tcInfoDivide = (orderInfoModel.getOrigin()).divide(new BigDecimal(roomCount),2, BigDecimal.ROUND_HALF_UP);
-									int compareToPrice = hoteelDivide.compareTo(tcInfoDivide);*/
-									//if(compareToPrice == 0){
-										BigDecimal factmultiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
-										newHotelOrder.setFactTotalRefund(factmultiply);
-									//}
+									
+									BigDecimal factmultiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
+									newHotelOrder.setFactTotalRefund(factmultiply);
 									newHotelOrder.setFactTotalPrice(orderInfoModel.getOrigin());
 									
 									saleOrderService.create(agent, saleOrder);
@@ -2103,7 +2073,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						}
 					}
 					
-					if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_TO_ROOM.getKey()) || orderInfoModel.getOrderStatus().equals(TcOrderStatus.ORDER_FINISH.getKey())){
+					if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.ORDER_FINISH.getKey()) || orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_TO_ROOM.getKey())){
 						Integer factNight = 0;
 						try{
 							factNight = DateUtil.daysBetween(orderInfoModel.getStartTime(), orderInfoModel.getEndTime());
@@ -2111,16 +2081,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				        	e.printStackTrace();
 				        	throw new GSSException("更新状态信息异常", "0192", "根据消费日期计算天数异常");
 				        }
-						Integer roomCount = orderInfoModel.getCounts().getRoomCount();
-						/*Integer days = orderInfoModel.getCounts().getDays();
-						Integer proCount = roomCount/days;
-						Integer factProCount = roomCount/factNight;*/
-						/*if(hotelOrder.getOrderStatus().equals(OwnerOrderStatus.ORDER_ONGOING.getKey()) 
-								|| hotelOrder.getOrderStatus().equals(OwnerOrderStatus.ALREADY_CONRIRM.getKey()) 
-								|| hotelOrder.getOrderStatus().equals(OwnerOrderStatus.BOOK_OK.getKey())
-								|| (!(new Date().before(hotelOrder.getDepartureDate())) &&  hotelOrder.getOrderStatus().equals(OwnerOrderStatus.RESIDE_ONGOING.getKey()))
-								|| (!proCount.equals(factProCount))
-						){*/
+						
 							int startTime = simple.format(hotelOrder.getArrivalDate()).compareTo(orderInfoModel.getStartTime());
 							int endTime   = simple.format(hotelOrder.getDepartureDate()).compareTo(orderInfoModel.getEndTime());
 							if(endTime > 0){
@@ -2169,14 +2130,18 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 							hotelOrder.setFactArriveTime(simple.parse(orderInfoModel.getStartTime()));
 							hotelOrder.setFactLeaveTime(simple.parse(orderInfoModel.getEndTime()));
 							hotelOrder.setFactNightCount(factNight);
+							Integer roomCount = orderInfoModel.getCounts().getRoomCount();
+							hotelOrder.setRequestName(roomCount.toString());
 							
-							BigDecimal hoteelDivide = hotelOrder.getTotalPrice().divide(new BigDecimal(hotelOrder.getNightCount()*hotelOrder.getBookCount()), 2, BigDecimal.ROUND_HALF_UP);
+							/*BigDecimal hoteelDivide = hotelOrder.getTotalPrice().divide(new BigDecimal(hotelOrder.getNightCount()*hotelOrder.getBookCount()), 2, BigDecimal.ROUND_HALF_UP);
 							BigDecimal tcInfoDivide = (orderInfoModel.getOrigin()).divide(new BigDecimal(roomCount),2, BigDecimal.ROUND_HALF_UP);
 							int compareToPrice = hoteelDivide.compareTo(tcInfoDivide);
 							if(compareToPrice == 0){
 								BigDecimal multiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
 								hotelOrder.setFactTotalRefund(multiply);
-							}
+							}*/
+							BigDecimal factmultiply = orderInfoModel.getOrigin().multiply(hotelOrder.getTotalRefund().divide(hotelOrder.getTotalPrice(), 2, BigDecimal.ROUND_HALF_UP));
+							hotelOrder.setFactTotalRefund(factmultiply);
 							
 							hotelOrder.setFactTotalPrice(orderInfoModel.getOrigin());
 							Integer priceFraction = 0;
@@ -2244,7 +2209,6 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								}
 							}
 							flag = true;
-						//}
 					}
 					
 					if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.ALREADY_CANCEL.getKey())){

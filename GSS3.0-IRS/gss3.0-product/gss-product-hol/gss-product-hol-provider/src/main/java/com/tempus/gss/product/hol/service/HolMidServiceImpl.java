@@ -1,5 +1,6 @@
 package com.tempus.gss.product.hol.service;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
@@ -14,10 +15,13 @@ import com.tempus.gss.product.hol.api.syn.ISyncHotelInfo;
 import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
 import com.tempus.gss.product.hol.utils.TrackTime;
+import com.tempus.gss.system.entity.Param;
+import com.tempus.gss.system.service.IParamService;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 import httl.util.StringUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.assertj.core.util.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +59,9 @@ public class HolMidServiceImpl implements IHolMidService {
 	@Autowired
 	private ISyncHotelInfo syncHotelInfo;
 	
+	@Reference
+	IParamService paramService;
+	
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Override
@@ -91,29 +98,23 @@ public class HolMidServiceImpl implements IHolMidService {
         Query query=new Query();
         Criteria criatira = new Criteria();
         
-        //关键字
-		if(StringUtils.isNotEmpty(hotelSearchReq.getKeyword())){
-			String keyword = hotelSearchReq.getKeyword().trim();
-			String escapeHtml = StringEscapeUtils.unescapeHtml(keyword);
-			String[] fbsArr = { "(", ")" };  //  "\\", "$", "(", ")", "*", "+", ".", "[", "]", "?", "^", "{", "}", "|" 
-	        	 for (String key : fbsArr) { 
-	        		 if(escapeHtml.contains(key)){
-	        			escapeHtml = escapeHtml.replace(key, "\\" + key);
-	        		 }
-	        	 }
-	        /*Criteria bqyCriteria = new Criteria();
-	        bqyCriteria.and("bqyResName").regex("^.*"+escapeHtml+".*$");//"^.*"+hotelName+".*$"
-	        addSearchCriteria(hotelSearchReq, query, bqyCriteria);*/
-	        Criteria criteria = new Criteria();
-	        criteria.and("resName").regex("^.*"+escapeHtml+".*$");//"^.*"+hotelName+".*$"
-	        addSearchCriteria(hotelSearchReq, query, criteria);
-			//criatira.and("bqyResName").regex("^.*"+escapeHtml+".*$");//"^.*"+hotelName+".*$"
-	        criatira.orOperator(criteria);
-		}else {
-			addSearchCriteria(hotelSearchReq, query, criatira);
+        List<String> pullHotel = getPullHotel();
+
+		if(pullHotel == null || pullHotel.isEmpty()) {
+        	return null;
+        }
+        List<Criteria> listCriteria = new ArrayList<Criteria>();
+  		listCriteria.add(Criteria.where("supplierNo").is("0"));
+		for(String ss : pullHotel) {
+			if(ss.contains("tc")) {
+				listCriteria.add(Criteria.where("supplierNo").is("1"));
+			}else if(ss.contains("bqy")){
+				listCriteria.add(Criteria.where("supplierNo").is("2"));
+			}
 		}
-		
-		
+		criatira.orOperator(listCriteria.toArray(new Criteria[listCriteria.size()]));
+
+		addSearchCriteria(hotelSearchReq, query, criatira);
   		
         int skip= (hotelSearchReq.getPageCount()-1)* (hotelSearchReq.getRowCount());
   		query.skip(skip);
@@ -124,9 +125,15 @@ public class HolMidServiceImpl implements IHolMidService {
   		int count= (int)mongoTemplate1.count(query, HolMidBaseInfo.class);
   		//总页数
   		int totalPage= (int)(count/hotelSearchReq.getRowCount()+1);
-  		response.setTotalPatge(Integer.valueOf(totalPage));
-  		response.setTotalCount(Integer.valueOf(count));
-  		response.setResponseResult(holList);
+
+  		//搜索酒店类型
+		if (null != pullHotel && pullHotel.size() > 0) {
+			String searchHotelType = pullHotel.stream().filter(str -> !str.isEmpty()).collect(Collectors.joining(","));
+			response.setSearchHotelType(searchHotelType);
+		}
+		response.setTotalPatge(Integer.valueOf(totalPage));
+		response.setTotalCount(Integer.valueOf(count));
+		response.setResponseResult(holList);
 		return response;
 	}
 
@@ -137,9 +144,17 @@ public class HolMidServiceImpl implements IHolMidService {
 	 * @param criatira
 	 */
 	private void addSearchCriteria(HotelListSearchReq hotelSearchReq, Query query, Criteria criatira) {
-		//ID
-		if (StringUtil.isNotBlank(hotelSearchReq.getResId())) {
-			criatira.and("_id").is(hotelSearchReq.getResId());
+		//关键字
+		if(StringUtils.isNotEmpty(hotelSearchReq.getKeyword())){
+			String keyword = hotelSearchReq.getKeyword().trim();
+			String escapeHtml = StringEscapeUtils.unescapeHtml(keyword);
+			String[] fbsArr = { "(", ")" };  //  "\\", "$", "(", ")", "*", "+", ".", "[", "]", "?", "^", "{", "}", "|" 
+	        	 for (String key : fbsArr) { 
+	        		 if(escapeHtml.contains(key)){
+	        			escapeHtml = escapeHtml.replace(key, "\\" + key);
+	        		 }
+	        	 }
+	        	 criatira.and("resName").regex("^.*"+escapeHtml+".*$");//"^.*"+hotelName+".*$"
 		}
 		//酒店等级
 		if (StringUtil.isNotBlank(hotelSearchReq.getResGradeId())) {
@@ -208,8 +223,6 @@ public class HolMidServiceImpl implements IHolMidService {
 				criatira.and("brandInfo.resBrandName").in(brandNameList);
 			}
 		}
-		criatira.orOperator(Criteria.where("supplierNo").is("0"), Criteria.where("supplierNo").is("1"));
-		logger.info("酒店列表查询条件:" + JsonUtil.toJson(criatira));
 	}
 
 	@Override
@@ -232,33 +245,25 @@ public class HolMidServiceImpl implements IHolMidService {
 	
 	@TrackTime(param = "查询所有酒店房型耗时")
 	@Override
-	public List<ProDetails> hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
-		Map<String, Object> resultMap = getHotelId(agent, holMidId);
-		//Long bqyResId = (Long)resultMap.get("bqyResId");
-		Long bqyResId = null;
+	public List<ProDetails> hotelDetail(Agent agent, String holMidId, String checkinDate, String checkoutDate, String searchHotelType) throws Exception {//, hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate()
+		Map<String, Object> resultMap = getHotelId(agent, holMidId, searchHotelType);
+		if(resultMap == null || resultMap.isEmpty()) {
+			return null;
+		}
+		Long bqyResId = (Long)resultMap.get("bqyResId");
 		Long tcResId = (Long)resultMap.get("tcResId");
 		String bqyCityCode = (String) resultMap.get("bqyCityCode");
 		ResBaseInfo bqyHotel = null;
 		ResBaseInfo tcHotel = null;
-		
+		logger.info("异步查询酒店ID, TC_ID:"+tcResId+", BQY_ID: "+bqyResId);
 		//tc和bqy酒店ID都不为空则开启异步查询,否则执行同步
 		if (null != bqyResId && null != tcResId) {
 			try {
-				long start = System.currentTimeMillis();
 				Future<ResBaseInfo> bqyResponse = syncHotelInfo.queryBQYHotelListForAsync(agent, bqyResId, checkinDate, checkoutDate, bqyCityCode);
 				Future<ResBaseInfo> tcResponse = syncHotelInfo.queryTCHelListForAsync(agent, tcResId, checkinDate, checkoutDate);
-				/*while (bqyResponse.isDone() && tcResponse.isDone()) {
-						break;
-					}
-				if (null != bqyResponse) {*/
-					bqyHotel = bqyResponse.get();
-				//}
-				//if (null != tcResponse) {
-					tcHotel = tcResponse.get();
-				//}
+				bqyHotel = bqyResponse.get();
+				tcHotel = tcResponse.get();
 					
-				System.out.println("111111111: " + (System.currentTimeMillis() - start));
-				long start1 = System.currentTimeMillis();
 				List<ProDetails> bqyProDetailList = null;
 				List<ProDetails> tcProDetailList = null;
 				if (null != bqyHotel) {
@@ -307,7 +312,6 @@ public class HolMidServiceImpl implements IHolMidService {
 				}
 				newProDetailList = map.entrySet().stream().map(et ->et.getValue()).collect(Collectors.toList());
 				bqyHotel.setProDetails(newProDetailList);
-				System.out.println("222222: " + (System.currentTimeMillis() - start1));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -336,7 +340,7 @@ public class HolMidServiceImpl implements IHolMidService {
 	@Override
 	public ResBaseInfo hotelDetailForBack(Agent agent, String holMidId, String checkinDate, String checkoutDate)
 			throws Exception {
-		Map<String, Object> resultMap = getHotelId(agent, holMidId);
+		Map<String, Object> resultMap = getHotelId(agent, holMidId, null);
 		Long bqyResId = (Long)resultMap.get("bqyResId");
 		Long tcResId = (Long)resultMap.get("tcResId");
 		String bqyCityCode = (String) resultMap.get("bqyCityCode");
@@ -436,9 +440,9 @@ public class HolMidServiceImpl implements IHolMidService {
 	}
 	
 	@Override
-	public List<ImgInfo> listImgByHotelId(Agent agent, String holMidId) {
+	public List<ImgInfo> listImgByHotelId(Agent agent, String holMidId, String searchHotelType) {
 		List<ImgInfo> imgList = null;
-		Map<String, Object> resultMap = getHotelId(agent, holMidId);
+		Map<String, Object> resultMap = getHotelId(agent, holMidId, searchHotelType);
 		Long bqyResId = (Long) resultMap.get("bqyResId");
 		Long tcResId = (Long) resultMap.get("tcResId");
 		if (null != bqyResId && bqyResId != 0) {
@@ -484,9 +488,8 @@ public class HolMidServiceImpl implements IHolMidService {
 			throw new GSSException("修改酒店可售状态", "0118", "传入中间表ID为空");
 		}
 		ResBaseInfo resBaseInfo = null;
-		Map<String, Object> resultMap = getHotelId(agent, holMidId);
-		//Long bqyResId = (Long)resultMap.get("bqyResId");
-		Long bqyResId = null;
+		Map<String, Object> resultMap = getHotelId(agent, holMidId, null);
+		Long bqyResId = (Long)resultMap.get("bqyResId");
 		Long tcResId = (Long)resultMap.get("tcResId");
 		String cityCode = (String) resultMap.get("bqyCityCode");
 		if (null != tcResId) {
@@ -497,35 +500,90 @@ public class HolMidServiceImpl implements IHolMidService {
 		return resBaseInfo;
 	}
 
+	@Override
+	public void addClickCount(Agent agent, String holMidId) {
+		Query query = new Query(Criteria.where("_id").is(holMidId));
+		HolMidBaseInfo holMidBaseInfo = mongoTemplate1.findOne(query, HolMidBaseInfo.class);
+		mongoTemplate1.upsert(query, new Update().set("bookTimes", null == holMidBaseInfo.getBookTimes() ? 1 : holMidBaseInfo.getBookTimes() + 1L), HolMidBaseInfo.class);
+	}
+
 	/**
 	 * 酒店ID,城市编号
 	 * @param agent
 	 * @param holMidId
 	 * @return
 	 */
-	private Map<String, Object> getHotelId(Agent agent, String holMidId) {
+	private Map<String, Object> getHotelId(Agent agent, String holMidId, String searchHotelType) {
+		//long start1 = System.currentTimeMillis();
 		HolMidBaseInfo holMid = queryHolMidById(agent, holMidId);
 		Long bqyResId = null;
+		Boolean bqyFlag = false;
 		Long tcResId = null;
+		Boolean tcFlag = false;
 		String bqyCityCode = null;
+
+		List<String> pullHotel = null;
+
+		Map<String, Object> map = new HashMap<>();
+		if (StringUtil.isNotNullOrEmpty(searchHotelType)) {
+			pullHotel = Arrays.stream(searchHotelType.split(",")).filter(s -> !s.isEmpty()).map(s -> s.trim()).collect(Collectors.toList());
+		}else {
+			pullHotel = getPullHotel();
+			//String collect = pullHotel.stream().filter(s -> !s.isEmpty()).collect(Collectors.joining(","));
+			//map.put("searchHotelType", collect);
+		}
+		if(pullHotel == null || pullHotel.isEmpty()) {
+			return null;
+		}
+		for(String ss : pullHotel) {
+			if(ss.contains("tc")) {
+				tcFlag = true;
+			}else if(ss.contains("bqy")){
+				bqyFlag = true;
+			}
+		}
+
 		List<ResNameSum> listHol = holMid.getResNameSum();
 		if (null != listHol && listHol.size() > 0) {
 			for (ResNameSum resNameSum : listHol) {
 				switch (resNameSum.getResType()) {
 					case 1:
-						tcResId = resNameSum.getResId();
+						if(tcFlag) {
+							tcResId = resNameSum.getResId();
+						}
 						break;
 					case 2:
-						bqyResId = resNameSum.getResId();
-						bqyCityCode = resNameSum.getCityCode();
+						if(bqyFlag) {
+							bqyResId = resNameSum.getResId();
+							bqyCityCode = resNameSum.getCityCode();
+						}
 						break;
 				}
 			}
 		}
-		Map<String, Object> map = new HashMap<>();
 		map.put("bqyResId", bqyResId);
 		map.put("tcResId", tcResId);
 		map.put("bqyCityCode", bqyCityCode);
+		//System.out.println("酒店可用: " + (System.currentTimeMillis() - start1));
 		return map;
+	}
+	/**
+	 * 如果被启用，对应的ParamKey会存在list
+	 * @return
+	 */
+	public List<String> getPullHotel(){
+		List<String> list = Lists.newArrayList();
+		Param param=new Param();
+		param.setTypeId(3);
+		param.setParamValue("888");
+		param.setStatus(1);
+		List<Param> query = paramService.query(param);
+		if(query == null || query.isEmpty()) {
+			return null;
+		}
+		for(Param p : query) {
+			list.add(p.getParamKey());
+		}
+		return list;
 	}
 }

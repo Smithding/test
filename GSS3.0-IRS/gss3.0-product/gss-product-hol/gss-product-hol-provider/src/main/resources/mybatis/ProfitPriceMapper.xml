@@ -94,6 +94,9 @@
             <if test="modifyTime !=null and modifyTime !=''">
                AND  price.MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP} 
             </if>
+            <if test="supplierSource !=null and supplierSource !=''">
+               AND  profit.SUPPLIER_SOURCE = #{supplierSource,jdbcType=VARCHAR} 
+            </if>
         </trim>
         order by CREATE_TIME desc
     </select>

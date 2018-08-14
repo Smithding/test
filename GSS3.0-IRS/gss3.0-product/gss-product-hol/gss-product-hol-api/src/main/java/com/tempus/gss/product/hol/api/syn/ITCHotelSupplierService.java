@@ -214,14 +214,14 @@ public interface ITCHotelSupplierService {
 	 * @return
 	 * @throws IOException
 	 */
-	public Boolean updateLuceneDate(Agent agent,List<HotelName> list) throws IOException;
+	public Boolean updateLuceneDate(Agent agent,List<HolMidBaseInfo> list) throws IOException;
 	/**
 	 * 查询索引
 	 * @param agent
 	 * @param name
 	 * @return
 	 */
-	public List<HotelName> queryHotelNamesByLucene(Agent agent,String name);
+	public List<HotelName> queryHotelNamesByLucene(Agent agent,String name, String city);
 	/**
 	 * 修改更新索引
 	 * @param resId

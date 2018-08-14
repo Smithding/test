@@ -32,6 +32,11 @@ public class TCResponse <T> implements Serializable {
      */
     @JSONField(name = "ResponseResult")
     private List<T> responseResult;
+
+    /**
+     * 搜索酒店类型
+     */
+    private String searchHotelType;
     public Integer getTotalPatge() {
         return totalPatge;
     }
@@ -63,5 +68,12 @@ public class TCResponse <T> implements Serializable {
     public void setResponseResult(List<T> responseResult) {
         this.responseResult = responseResult;
     }
-	
+
+    public String getSearchHotelType() {
+        return searchHotelType;
+    }
+
+    public void setSearchHotelType(String searchHotelType) {
+        this.searchHotelType = searchHotelType;
+    }
 }

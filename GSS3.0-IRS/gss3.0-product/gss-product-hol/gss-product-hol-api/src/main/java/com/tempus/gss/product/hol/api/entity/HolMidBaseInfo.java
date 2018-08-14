@@ -126,7 +126,7 @@ public class HolMidBaseInfo implements Serializable{
 	private Long bookTimes;
 	
 	/**
-	 * 预定备注(预留字段)
+	 * 预定备注(存储bqy中的roadCross)
 	 */
 	private String bookRemark;
 	

@@ -41,8 +41,11 @@ import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.BooleanClause.Occur;
+import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.highlight.Highlighter;
 import org.apache.lucene.search.highlight.QueryScorer;
@@ -1267,35 +1270,26 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	}
 
 	@Override
-	public Boolean updateLuceneDate(Agent agent,List<HotelName> list) throws IOException {
-		//List<HotelName> list = mongoTemplate1.find(new Query(Criteria.where("_id").ne("").ne(null)), HotelName.class);
-		//try {
+	public Boolean updateLuceneDate(Agent agent,List<HolMidBaseInfo> list) throws IOException {
+		try {
 			Directory directory = FSDirectory.open(Paths.get("./index"));
-	    	//Version version = Version.LUCENE_7_1_0;
 	    	
-	    		Analyzer analyzer = new IKAnalyzer();
-		    	//创建索引写入配置
-		    	IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);
+    		Analyzer analyzer = new IKAnalyzer();
+	    	//创建索引写入配置
+	    	IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);
 		    	  
-		    	//创建索引写入对象
-		    	IndexWriter indexWriter = new IndexWriter(directory, indexWriterConfig);
-			//System.out.println(i);
-			/*Query query = Query.query(Criteria.where("_id").ne("").ne(null));
-			query.skip(i);
-			query.limit(100);
-			List<HotelName> list = mongoTemplate1.find(query,HotelName.class);*/
+	    	//创建索引写入对象
+	    	IndexWriter indexWriter = new IndexWriter(directory, indexWriterConfig);
 			if(StringUtil.isNotNullOrEmpty(list)) {
 				System.out.println(list.size());
 				for (int j = 0; j < list.size(); j++) {
 					Document doc = new Document();
-			    	doc.add(new LongPoint("id", list.get(j).getId()));
-			    	doc.add(new StoredField("id", list.get(j).getId()));
-			    	doc.add(new TextField("name", list.get(j).getName(), Field.Store.YES));
-			    	doc.add(new StringField("city", list.get(j).getCity(), Field.Store.YES));
-					//doc.add(new IntPoint("saleStatus", list.get(j).getSaleStatus()));
-					//doc.add(new StoredField("saleStatus", list.get(j).getSaleStatus()));
-					doc.add(new LongPoint("checkTimes", list.get(j).getCheckTimes()));
-			    	doc.add(new StoredField("checkTimes", list.get(j).getCheckTimes()));
+					
+					doc.add(new StringField("id", list.get(j).getId(), Field.Store.YES));
+			    	doc.add(new TextField("name", list.get(j).getResName(), Field.Store.YES));
+			    	doc.add(new StringField("city", list.get(j).getCityName(), Field.Store.YES));
+					doc.add(new LongPoint("checkTimes", list.get(j).getBookTimes()));
+			    	doc.add(new StoredField("checkTimes", list.get(j).getBookTimes()));
 					indexWriter.addDocument(doc);
 				}     
 				indexWriter.commit();
@@ -1304,16 +1298,16 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	    	directory.close();
 	    	log.info("添加全文检索结束");
 	    	
-		/*} catch (Exception e) {
+		} catch (Exception e) {
 			log.error("添加全文检索失败");
 			throw new GSSException("添加全文检索", "0218", "添加全文检索失败"+e.getMessage());
-		}*/
+		}
 		return true;
 	}
 
 	@Override
-	public List<HotelName> queryHotelNamesByLucene(Agent agent,String name) {
-		log.info("查询索引关键字入参: "+name);
+	public List<HotelName> queryHotelNamesByLucene(Agent agent,String name, String city) {
+		log.info("查询索引关键字入参: "+name+", 城市: "+city);
 		List<HotelName> hns = new ArrayList<HotelName>();
 		try {
 			Analyzer analyzer = new IKAnalyzer();
@@ -1325,24 +1319,15 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	    	//String checkTimes = "checkTimes";
 	    	//String[] filedStr = new String[]{searchField, checkTimes};
 	    	//QueryParser parser = new MultiFieldQueryParser(filedStr, analyzer);
+	    	org.apache.lucene.search.Query query1 = new TermQuery(new Term("city",city));
 	    	QueryParser parser = new QueryParser(searchField, analyzer);
-	    	org.apache.lucene.search.Query query = parser.parse(name);
-	    	//org.apache.lucene.search.Query query = new MultiFieldQueryParser(filedStr, analyzer).parse(name);
-	    	/*Term term = new Term(searchField, "上海");
-	    	query = new PrefixQuery(term);*/
-	    	/*TokenStream tokenStream = analyzer.tokenStream("name", new StringReader(name));
-	        CharTermAttribute charTermAttribute = tokenStream.addAttribute(CharTermAttribute.class);
-	        tokenStream.reset();
-	        while (tokenStream.incrementToken()) {
-	            System.out.println("分词后: "+charTermAttribute.toString());
-	        }
-	        tokenStream.end();*/
-	    	//org.apache.lucene.search.Sort sort = new org.apache.lucene.search.Sort(new SortField[]{new SortField(checkTimes, SortField.Type.LONG,true),SortField.FIELD_SCORE});
-	    	/*Term term = new Term(searchField, name);
-	    	query = new WildcardQuery(term);*/
-	        //SortField sortField = new SortField("checkTimes", SortField.Type.STRING,true);
-	       // org.apache.lucene.search.Sort sort = new org.apache.lucene.search.Sort(sortField);
-	    	//TopDocs topDocs = indexSearcher.search(query, 20, sort);
+	    	org.apache.lucene.search.Query query2 = parser.parse(name);
+	    	BooleanQuery.Builder builder = new BooleanQuery.Builder();
+	    	builder.add(query1, Occur.MUST);
+	        builder.add(query2, Occur.MUST);
+	        
+	        BooleanQuery query = builder.build();
+	    	
 	    	TopDocs topDocs = indexSearcher.search(query, 20);
 	    	SimpleHTMLFormatter simpleHTMLFormatter = new SimpleHTMLFormatter("<span style='color:red'>", "</span>");
 	    	Highlighter highlighter = new Highlighter(simpleHTMLFormatter, new QueryScorer(query));
@@ -1355,17 +1340,14 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 	    		String beResName = document.get("name");
 	    		//String checkTimess = document.get("checkTimes");
 	    		String noResName = document.get("name");
-	    		String city = document.get("city");
+	    		String cityRes = document.get("city");
 	    		// 内容增加高亮显示
 	    		TokenStream tokenStream1 = analyzer.tokenStream("name", new StringReader(beResName));
 	    	    String resName = highlighter.getBestFragment(tokenStream1, beResName);
 	    	    HotelName hn = new HotelName();
-	    		/*System.out.println("resId: "+resId);
-	    		System.out.println("resName: "+resName);
-	    		System.out.println("checkTimes: "+checkTimess);
-	    		System.out.println("noResName: "+noResName);*/
+	    		
 	    	    hn.setId(Long.valueOf(resId));
-	    	    hn.setCity(city);
+	    	    hn.setCity(cityRes);
 	    	    hn.setLabel(resName);
 	    	    hn.setName(noResName);
 	    	    hns.add(hn);
@@ -1378,6 +1360,7 @@ public class TCHotelSupplierServiceImpl implements ITCHotelSupplierService{
 		} catch (Exception e) {
 			// TODO: handle exception
 		}
+			//System.out.println("查询结果: "+JsonUtil.toJson(hns));
 			return hns;
 	}
 

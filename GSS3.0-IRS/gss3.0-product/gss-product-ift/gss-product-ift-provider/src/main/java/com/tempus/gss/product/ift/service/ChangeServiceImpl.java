@@ -910,14 +910,14 @@ public class ChangeServiceImpl implements IChangeService {
                 saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 1);
                 log.info("修改采购支付状态" + saleChangeNo);*/
            // BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(saleChangeNo);
-            BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
+            //BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
             //出票员更新销售
             ticketSenderService.updateByLockerId(requestWithActor.getAgent(),saleChangeExt.getLocker(),"SALE_CHANGE_NUM");
-            if(buyChangeExt != null){
+            /*if(buyChangeExt != null){
                 log.info("修改审核备注" + buyChangeExt.getBuyChangeNo());
               //  buyChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
                 buyChangeExtDao.updateByPrimaryKey(buyChangeExt);
-            }
+            }*/
             if(isNoFee(requestWithActor.getEntity().getSaleAdtPriceList(),requestWithActor.getEntity().getSaleChdPriceList(),requestWithActor.getEntity().getSaleInfPriceList())) {
                 try {
                     //直接将单分配给销售改签员
@@ -1884,7 +1884,8 @@ public class ChangeServiceImpl implements IChangeService {
             log.info("直接将采购改签单分给在线业务员员，单号:{}", changeOrderNo);
             saleChangeExt = this.getSaleChangeExtByNo(requestWithActor);
         }
-        if(!configsService.getIsDistributeTicket(requestWithActor.getAgent())){
+        Agent agent = new Agent(Integer.valueOf(owner));
+        if(!configsService.getIsDistributeTicket(agent)){
             //如果不是系统分单
             if ((changeOrderNo == null || changeOrderNo == 0L) && saleChangeExts != null) {
                 taskAssign(saleChangeExts,null,null,requestWithActor.getAgent(),null);
@@ -1898,7 +1899,7 @@ public class ChangeServiceImpl implements IChangeService {
         List<TicketSender> senders = ticketSenderService.getSpecTypeOnLineTicketSender("buysman-change");  //采购改签员
         log.info("是否有在线出票员:" + (senders != null));
         if (senders != null && senders.size() > 0) {
-            Agent agent = new Agent(Integer.valueOf(owner));
+
             IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
             Map config = configs.getConfig();
             String str_maxOrderNum = (String) config.get("maxOrderNum");
@@ -1949,6 +1950,7 @@ public class ChangeServiceImpl implements IChangeService {
         order.setLockTime(date);
         saleChangeExtDao.updateLocker(order);*/
     }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void assingAloneLockSaleChangeExt(SaleChangeExt order, Date date, Agent agent) {
         BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(order.getSaleChangeNo());

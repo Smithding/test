@@ -35,6 +35,7 @@ import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.log.entity.LogRecord;
 import com.tempus.gss.log.query.LogRecordQuery;
 import com.tempus.gss.log.service.ILogService;
+import com.tempus.gss.product.hol.api.entity.HolSupplier;
 import com.tempus.gss.product.hol.api.entity.ProfitPrice;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.AssignDateHotelReq;
@@ -55,6 +56,7 @@ import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelId;
 import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
 import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
 import com.tempus.gss.product.hol.api.service.IHolProfitService;
+import com.tempus.gss.product.hol.api.service.IHolSupplierService;
 import com.tempus.gss.product.hol.api.syn.ISyncHotelInfo;
 import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelOrderService;
@@ -92,6 +94,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	
 	@Autowired
 	ITCHotelOrderService tcHotelOrderService;
+	
+	@Autowired
+	IHolSupplierService holSupplierService;
 	
 	@Reference
 	private ILogService logService;
@@ -268,9 +273,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		         	    	        							firstPrice = entry.getValue().getDistributionSalePrice();
 		         	    	        						}
 		         	    	        					}
-		         	    	        					if(kk == days.intValue()) {
+		         	    	        					/*if(kk == days.intValue()) {
 	         	    	        							break;
-	         	    	        						}
+	         	    	        						}*/
 		         	            					}
 		     	    	        					pro.setProSaleInfoDetailsTarget(mapPro);
 		     	    	        					pro.setFirPrice(firstPrice);
@@ -363,7 +368,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryResBaseInfo(resId);
 					Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryImgInfoSum(resId);
 					Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+					String supplierSource = "tc";
+					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(),supplierSource);
 					
 					tcResBaseInfo = resBaseInfoFuture.get();
 					ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
@@ -456,9 +462,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		 	    	        							firstPrice = entry.getValue().getDistributionSalePrice();
 		 	    	        						}
 		 	    	        					}
-		 	    	        					if(kk == days.intValue()) {
+		 	    	        					/*if(kk == days.intValue()) {
 			    	        							break;
-			    	        						}
+			    	        						}*/
 		 	            					}
 			    	        					pro.setProSaleInfoDetailsTarget(mapPro);
 			    	        					pro.setFirPrice(firstPrice);
@@ -533,7 +539,6 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	
 	@Override
 	public ResBaseInfo queryProDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
-				long start = System.currentTimeMillis();
 				if (StringUtil.isNullOrEmpty(agent)) {
 		            logger.error("agent对象为空");
 		            throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
@@ -575,7 +580,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryResProBaseInfos(resId);
 					Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryImgInfoSum(resId);
 					Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+					String supplierSource = "tc";
+					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(), supplierSource);
 					
 					ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
 					ImgInfoSum imgInfoSum = imgInfoSumFuture.get();
@@ -664,9 +670,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		 	    	        							firstPrice = entry.getValue().getDistributionSalePrice();
 		 	    	        						}
 		 	    	        					}
-		 	    	        					if(kk == days.intValue()) {
+		 	    	        					/*if(kk == days.intValue()) {
 			    	        							break;
-			    	        						}
+			    	        						}*/
 		 	            					}
 			    	        					pro.setProSaleInfoDetailsTarget(mapPro);
 			    	        					pro.setFirPrice(firstPrice);
@@ -734,8 +740,6 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				long end = System.currentTimeMillis();  
-			    System.out.println("完成任务newQueryHotelDetail，耗时：" + (end - start) + "毫秒"); 
 				return tcResBaseInfo;
 			    //return new AsyncResult<ResBaseInfo>(tcResBaseInfo);
 	}
@@ -783,7 +787,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			Future<ResProBaseInfos> resProBaseInfosFuture = tcHotelSupplierService.queryResProBaseInfos(resId);
 			Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryResBaseInfo(resId);
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-			computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType());
+			String supplierSource = "tc";
+			computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(),supplierSource);
 			
 			tcResBaseInfo = resBaseInfoFuture.get();
 			ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
@@ -881,9 +886,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
  	    	        							firstPrice = entry.getValue().getDistributionSalePrice();
  	    	        						}
  	    	        					}
- 	    	        					if(kk == days.intValue()) {
+ 	    	        					/*if(kk == days.intValue()) {
 	    	        							break;
-	    	        						}
+	    	        						}*/
  	            					}
 	    	        					pro.setProSaleInfoDetailsTarget(mapPro);
 	    	        					pro.setFirPrice(firstPrice);
@@ -1045,11 +1050,13 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			Future<OrderInfomationDetail> futureorderDetailInfo = tcHotelOrderService.futureorderDetailInfo(agent, orderDetailInfoReq);
 			Future<HotelOrder> futureOrderDetail = tcHotelOrderService.getFutureOrderDetail(agent, hotelOrderNo);
 			Future<List<LogRecord>> list = queryLogList(hotelOrderNo);
-			
+			String supplierCode = "tc";
+			Future<HolSupplier> holSupplierFu = holSupplierService.queryFuBySupplierCode(supplierCode);
 			
 			HotelOrder hotelOrder = futureOrderDetail.get();
 			OrderInfomationDetail orderInfomationDetail = futureorderDetailInfo.get();
 			List<LogRecord> logList = list.get();
+			HolSupplier holSupplier = holSupplierFu.get();
 			
 			if(StringUtil.isNotNullOrEmpty(hotelOrder)) {
 				map.put("hotelOrder", hotelOrder);
@@ -1059,6 +1066,9 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			}
 			if(StringUtil.isNotNullOrEmpty(hotelOrder)) {
 				map.put("logList", logList);
+			}
+			if(StringUtil.isNotNullOrEmpty(holSupplier)) {
+				map.put("holSupplier", holSupplier);
 			}
 			
 			return map;

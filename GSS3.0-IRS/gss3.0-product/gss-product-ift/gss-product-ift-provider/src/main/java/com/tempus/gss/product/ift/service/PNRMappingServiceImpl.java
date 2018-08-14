@@ -51,6 +51,8 @@ public class PNRMappingServiceImpl implements PNRMappingService {
     private String iataNo;
     @Value("${ift.office}")
     private String office;
+    @Value("${dpsconfig.job.owner}")
+    private String owner;
     protected final transient Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
@@ -67,7 +69,9 @@ public class PNRMappingServiceImpl implements PNRMappingService {
             log.info("国际机票PNR预定返回原始信息：" + JsonUtil.toJson(pnr));
             queryIBEDetail = getPnrByQueryIBEDetail(pnr);
             getFSI(queryIBEDetail);
-            queryService.mappingPriceSpec(queryIBEDetail, customerType, agent);
+            if(!StringUtils.equals("8532",owner)) {
+                queryService.mappingPriceSpec(queryIBEDetail, customerType, agent);
+            }
         } catch (Exception e) {
             log.error("pnr匹配出错", e);
             return queryIBEDetail;

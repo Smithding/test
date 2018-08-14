@@ -68,9 +68,9 @@ public interface IHolProfitService extends ISuperService<Profit> {
 	 */
 	public BigDecimal computeTcProfitPrice(Agent agent, Integer price, Long customerTypeNo);
 	
-	public Future<List<ProfitPrice>> computeProfitByAgentNum(Agent agent, Long customerTypeNo);
+	public Future<List<ProfitPrice>> computeProfitByAgentNum(Agent agent, Long customerTypeNo, String supplierSource);
 	
-	public List<ProfitPrice> computeProfitByAgent(Agent agent, Long customerTypeNo);
+	public List<ProfitPrice> computeProfitByAgent(Agent agent, Long customerTypeNo, String supplierSource);
 	
 	
 	
