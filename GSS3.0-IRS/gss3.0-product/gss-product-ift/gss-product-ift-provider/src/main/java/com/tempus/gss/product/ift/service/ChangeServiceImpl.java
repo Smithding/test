@@ -910,14 +910,14 @@ public class ChangeServiceImpl implements IChangeService {
                 saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 1);
                 log.info("修改采购支付状态" + saleChangeNo);*/
            // BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(saleChangeNo);
-            BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
+            //BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
             //出票员更新销售
             ticketSenderService.updateByLockerId(requestWithActor.getAgent(),saleChangeExt.getLocker(),"SALE_CHANGE_NUM");
-            if(buyChangeExt != null){
+            /*if(buyChangeExt != null){
                 log.info("修改审核备注" + buyChangeExt.getBuyChangeNo());
               //  buyChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
                 buyChangeExtDao.updateByPrimaryKey(buyChangeExt);
-            }
+            }*/
             if(isNoFee(requestWithActor.getEntity().getSaleAdtPriceList(),requestWithActor.getEntity().getSaleChdPriceList(),requestWithActor.getEntity().getSaleInfPriceList())) {
                 try {
                     //直接将单分配给销售改签员
@@ -1950,6 +1950,7 @@ public class ChangeServiceImpl implements IChangeService {
         order.setLockTime(date);
         saleChangeExtDao.updateLocker(order);*/
     }
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void assingAloneLockSaleChangeExt(SaleChangeExt order, Date date, Agent agent) {
         BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(order.getSaleChangeNo());
