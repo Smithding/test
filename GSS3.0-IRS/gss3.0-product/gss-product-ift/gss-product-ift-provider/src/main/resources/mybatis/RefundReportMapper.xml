@@ -437,7 +437,7 @@
           oc.GOODS_TYPE,
           oc.CHANGE_REASON as REFUND_REASON,
           sod.TICKET_NO,
-          CONCAT(iftpassenger.SURNAME,"/",iftpassenger.NAME) AS fltName,
+          CONCAT(iftpassenger.SURNAME,'/',iftpassenger.NAME) AS fltName,
           leg.DEP_TIME,
           iftpassenger.SALE_PRICE,
           passenger.SALE_TAX,
@@ -467,11 +467,12 @@
         LEFT JOIN SM_USER su ON su.LOGIN_NAME = soe.CREATOR
         LEFT JOIN SM_DEPT sd ON sd.ID = su.DEPT_ID
         LEFT JOIN IFT_SALE_CHANGE_EXT sce ON sce.SALE_CHANGE_NO = oc.SALE_CHANGE_NO
-        LEFT JOIN IFT_PASSENGER iftpassenger ON iftpassenger.SALE_ORDER_NO = oc.SALE_ORDER_NO
         LEFT JOIN OS_SALEORDER oso ON oso.SALE_ORDER_NO = oc.SALE_ORDER_NO
-        LEFT JOIN IFT_SALE_ORDER_DETAIL sod ON sod.SALE_ORDER_NO = oso.SALE_ORDER_NO
+        left join IFT_SALE_CHANGE_DETAIL iscd on iscd.SALE_CHANGE_NO = oc.SALE_CHANGE_NO
+        LEFT JOIN IFT_SALE_ORDER_DETAIL sod ON sod.SALE_ORDER_DETAIL_NO=iscd.SALE_ORDER_DETAIL_NO
         LEFT JOIN IFT_LEG AS leg ON leg.SALE_ORDER_NO = oso.SALE_ORDER_NO AND leg.PARENT_SECTION = 0
-        LEFT JOIN IFT_PASSENGER_REFUND_PRICE passenger ON passenger.SALE_CHANGE_NO = oc.SALE_CHANGE_NO
+        LEFT JOIN IFT_PASSENGER iftpassenger ON iftpassenger.PASSENGER_NO = sod.PASSENGER_NO
+        LEFT JOIN IFT_PASSENGER_REFUND_PRICE passenger ON passenger.PASSENGER_NO = iftpassenger.PASSENGER_NO
         LEFT JOIN CPS_CUSTOMER AS cus ON cus.CUSTOMER_NO = oso.CUSTOMER_NO
         LEFT JOIN OS_ACTUALAMOUNTRECORD oa ON oa.RECORD_NO = oc.SALE_CHANGE_NO
         LEFT JOIN PS_ALL_PAY_INFO pa ON pa.ALL_PAY_INFO_NO = oa.PAY_NO

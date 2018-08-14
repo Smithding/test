@@ -891,7 +891,8 @@ public class ChangeServiceImpl implements IChangeService {
             handle(requestWithActor, infList);
             Long saleChangeNo = requestWithActor.getEntity().getSaleChangeNo();
             //判断费用是否为0
-            if(isNoFee(requestWithActor.getEntity().getSaleAdtPriceList(),requestWithActor.getEntity().getSaleChdPriceList(),requestWithActor.getEntity().getSaleInfPriceList())){
+            boolean isNoFeeB = isNoFee(requestWithActor.getEntity().getSaleAdtPriceList(), requestWithActor.getEntity().getSaleChdPriceList(), requestWithActor.getEntity().getSaleInfPriceList());
+            if(isNoFeeB){
                 saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 3);
                 log.info("修改采购状态" + saleChangeNo);
                 //如果支付为0
@@ -910,15 +911,15 @@ public class ChangeServiceImpl implements IChangeService {
                 saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 1);
                 log.info("修改采购支付状态" + saleChangeNo);*/
            // BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNo(saleChangeNo);
-            BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
+            //BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
             //出票员更新销售
             ticketSenderService.updateByLockerId(requestWithActor.getAgent(),saleChangeExt.getLocker(),"SALE_CHANGE_NUM");
-            if(buyChangeExt != null){
+            /*if(buyChangeExt != null){
                 log.info("修改审核备注" + buyChangeExt.getBuyChangeNo());
-              //  buyChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
+                buyChangeExt.setChangeRemark(requestWithActor.getEntity().getChangeRemark());
                 buyChangeExtDao.updateByPrimaryKey(buyChangeExt);
-            }
-            if(isNoFee(requestWithActor.getEntity().getSaleAdtPriceList(),requestWithActor.getEntity().getSaleChdPriceList(),requestWithActor.getEntity().getSaleInfPriceList())) {
+            }*/
+            if(isNoFeeB) {
                 try {
                     //直接将单分配给销售改签员
                     RequestWithActor<Long> saleChangeRequest = new RequestWithActor<>();
@@ -1040,9 +1041,34 @@ public class ChangeServiceImpl implements IChangeService {
 
         boolean isNoFee = false;
         BigDecimal all = new BigDecimal(0);
+        BigDecimal zore = new BigDecimal("0");
 
-        if(saleAdtPriceList != null && saleAdtPriceList.get(0) != null){
-            ChangePriceVo changePriceVo = saleAdtPriceList.get(0);
+        all = getBigDecimal(saleAdtPriceList, all);
+
+        if(all.compareTo(zore) <= 0){
+            isNoFee = true;
+            return isNoFee;
+        }
+
+        all = getBigDecimal(saleChdPriceList, all);
+
+        if(all.compareTo(zore) <= 0){
+            isNoFee = true;
+            return isNoFee;
+        }
+
+        all = getBigDecimal(saleInfPriceList, all);
+
+        if(all.compareTo(zore) <= 0){
+            isNoFee = true;
+        }
+
+        return isNoFee;
+    }
+
+    private BigDecimal getBigDecimal(List<ChangePriceVo> changePriceVoList, BigDecimal all) {
+        if(changePriceVoList != null && changePriceVoList.get(0) != null){
+            ChangePriceVo changePriceVo = changePriceVoList.get(0);
             if(changePriceVo.getSalePrice() != null){
                 all = all.add(changePriceVo.getSalePrice());
             }
@@ -1059,60 +1085,65 @@ public class ChangeServiceImpl implements IChangeService {
                 all = all.add(changePriceVo.getCountPrice());
             }
         }
-
-        if (saleChdPriceList !=null && saleChdPriceList.get(0) != null) {
-            ChangePriceVo changePriceVo2 = saleChdPriceList.get(0);
-            if(changePriceVo2.getSalePrice() != null){
-                all = all.add(changePriceVo2.getSalePrice());
-            }
-            if(changePriceVo2.getSaleTax() != null){
-                all = all.add(changePriceVo2.getSaleTax());
-            }
-            if(changePriceVo2.getSaleBrokerage() != null){
-                all = all.add(changePriceVo2.getSaleBrokerage());
-            }
-            if(changePriceVo2.getSaleRest() != null){
-                all = all.add(changePriceVo2.getSaleRest());
-            }
-            if(changePriceVo2.getCountPrice() != null){
-                all = all.add(changePriceVo2.getCountPrice());
-            }
-        }
-
-        if (saleInfPriceList != null && saleInfPriceList.get(0) != null) {
-            ChangePriceVo changePriceVo3 = saleInfPriceList.get(0);
-            if(changePriceVo3.getSalePrice() != null){
-                all = all.add(changePriceVo3.getSalePrice());
-            }
-            if(changePriceVo3.getSaleTax() != null){
-                all = all.add(changePriceVo3.getSaleTax());
-            }
-            if(changePriceVo3.getSaleBrokerage() != null){
-                all = all.add(changePriceVo3.getSaleBrokerage());
-            }
-            if(changePriceVo3.getSaleRest() != null){
-                all = all.add(changePriceVo3.getSaleRest());
-            }
-            if(changePriceVo3.getCountPrice() != null){
-                all = all.add(changePriceVo3.getCountPrice());
-            }
-        }
-
-        BigDecimal zore = new BigDecimal("0");
-        if(all.compareTo(zore) <= 0){
-            isNoFee = true;
-        }
-        return isNoFee;
+        return all;
     }
 
     public boolean handle(RequestWithActor<ChangePriceRequest> requestWithActor, List<ChangePriceVo> voList) {
         boolean flag = false;
-        if (voList == null) {
+        if (voList == null || voList.size() == 0) {
             return false;
         }
-        for (int i = 0; i < voList.size(); i++) {
-            ChangePriceVo priceVo = new ChangePriceVo();
-            if (i > 0) {
+        int size = voList.size();
+        Date date = new Date();
+        ChangePriceVo priceVo = null;
+        BigDecimal salePrice = null;
+        BigDecimal countPrice = null;
+        BigDecimal saleBrokerage = null;
+        BigDecimal saleTax = null;
+        BigDecimal saleRest = null;
+        BigDecimal saleAgencyFee = null;
+        BigDecimal saleRebate = null;
+        BigDecimal buyPrice = null;
+        BigDecimal buyCountPrice = null;
+        BigDecimal buyBrokerage = null;
+        BigDecimal buyAgencyFee = null;
+        BigDecimal buyRebate = null;
+        BigDecimal buyTax = null;
+        BigDecimal buyRest = null;
+        BigDecimal allSalePrice = null;
+        BigDecimal allBuyPrice = null;
+        BigDecimal profit = null;
+        Long saleChangeNo = null;
+        Long saleOrderNo = null;
+        Integer owner = requestWithActor.getAgent().getOwner();
+        String account = requestWithActor.getAgent().getAccount();
+        for (int i = 0; i < size; i++) {
+            if(i == 0){
+                //同一种乘客类型价格信息都一样
+                ChangePriceVo temp = voList.get(0);
+                salePrice = temp.getSalePrice();
+                countPrice = temp.getCountPrice();
+                saleBrokerage = temp.getSaleBrokerage();
+                saleTax = temp.getSaleTax();
+                saleRest = temp.getSaleRest();
+                saleAgencyFee = temp.getSaleAgencyFee();
+                saleRebate = temp.getSaleRebate();
+                buyPrice = temp.getBuyPrice();
+                buyCountPrice = temp.getBuyCountPrice();
+                buyBrokerage = temp.getBuyBrokerage();
+                buyAgencyFee = temp.getBuyAgencyFee();
+                buyRebate = temp.getBuyRebate();
+                buyTax = temp.getBuyTax();
+                buyRest = temp.getBuyRest();
+                allSalePrice = temp.getAllSalePrice();
+                allBuyPrice = temp.getAllBuyPrice();
+                profit = temp.getProfit();
+                saleChangeNo = temp.getSaleChangeNo();
+                saleOrderNo = temp.getSaleOrderNo();
+            }
+            //priceVo = new ChangePriceVo();
+            priceVo = voList.get(i);
+            /*if (i > 0) {
                 ChangePriceVo temp = voList.get(0);
                 priceVo = voList.get(i);
                 //同一种乘客类型价格信息都一样
@@ -1135,40 +1166,40 @@ public class ChangeServiceImpl implements IChangeService {
                 priceVo.setProfit(temp.getProfit());
             } else {
                 priceVo = voList.get(i);
-            }
+            }*/
             PassengerChangePrice priceChange = new PassengerChangePrice();
             Long passengerChangePriceNo = maxNoService.generateBizNo("IFT_PASSENGER_CHANGE_PRICE_NO", 30);
-            priceChange.setAllBuyPrice(priceVo.getAllBuyPrice().add(priceVo.getBuyCountPrice()));
-            priceChange.setAllSalePrice(priceVo.getAllSalePrice().add(priceVo.getCountPrice()));
+            priceChange.setAllBuyPrice(allBuyPrice.add(buyCountPrice));
+            priceChange.setAllSalePrice(allSalePrice.add(countPrice));
             priceChange.setChangePriceNo(passengerChangePriceNo);
-            priceChange.setSaleChangeNo(priceVo.getSaleChangeNo());
+            priceChange.setSaleChangeNo(saleChangeNo);
             priceChange.setPassengerNo(priceVo.getPassengerNo());
-            priceChange.setSaleOrderNo(priceVo.getSaleOrderNo());
+            priceChange.setSaleOrderNo(saleOrderNo);
             priceChange.setPassengerType(priceVo.getPassengerType());
-            priceChange.setSaleCountPrice(priceVo.getCountPrice());
-            priceChange.setSalePrice(priceVo.getSalePrice());
-            priceChange.setSaleAgencyFee(priceVo.getSaleAgencyFee());
-            priceChange.setSaleRebate(priceVo.getSaleRebate());
-            priceChange.setSaleRest(priceVo.getSaleRest());
-            priceChange.setSaleTax(priceVo.getSaleTax());
-            priceChange.setSaleBrokerage(priceVo.getSaleBrokerage());
-            priceChange.setBuyCountPrice(priceVo.getBuyCountPrice());
-            priceChange.setBuyPrice(priceVo.getBuyPrice());
-            priceChange.setBuyRest(priceVo.getBuyRest());
-            priceChange.setBuyTax(priceVo.getBuyTax());
-            priceChange.setBuyAgencyFee(priceVo.getBuyAgencyFee());
-            priceChange.setBuyRebate(priceVo.getBuyRebate());
-            priceChange.setBuyBrokerage(priceVo.getBuyBrokerage());
-            priceChange.setCreateTime(new Date());
-            priceChange.setModifyTime(new Date());
-            priceChange.setOwner(requestWithActor.getAgent().getOwner());
+            priceChange.setSaleCountPrice(countPrice);
+            priceChange.setSalePrice(salePrice);
+            priceChange.setSaleAgencyFee(saleAgencyFee);
+            priceChange.setSaleRebate(saleRebate);
+            priceChange.setSaleRest(saleRest);
+            priceChange.setSaleTax(saleTax);
+            priceChange.setSaleBrokerage(saleBrokerage);
+            priceChange.setBuyCountPrice(buyCountPrice);
+            priceChange.setBuyPrice(buyPrice);
+            priceChange.setBuyRest(buyRest);
+            priceChange.setBuyTax(buyTax);
+            priceChange.setBuyAgencyFee(buyAgencyFee);
+            priceChange.setBuyRebate(buyRebate);
+            priceChange.setBuyBrokerage(buyBrokerage);
+            priceChange.setCreateTime(date);
+            priceChange.setModifyTime(date);
+            priceChange.setOwner(owner);
             priceChange.setValid((byte) 1);
             priceChange.setStatus("1");
-            priceChange.setCreator(requestWithActor.getAgent().getAccount());
-            priceChange.setModifier(requestWithActor.getAgent().getAccount());
+            priceChange.setCreator(account);
+            priceChange.setModifier(account);
             priceChange.setBuyCurrency(priceVo.getBuyCurrency());
             priceChange.setBuyExchangeRate(priceVo.getBuyExchangeRate());
-            priceChange.setProfit(priceVo.getProfit());
+            priceChange.setProfit(profit);
             int result = passengerChangePriceDao.insert(priceChange);
             if (result == 0) {
                 flag = false;
@@ -1177,7 +1208,7 @@ public class ChangeServiceImpl implements IChangeService {
             flag = true;
             /*创建新增操作日志*/
             try {
-                String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"国际创建审核改签单："+"["+requestWithActor.getEntity().getSaleOrderNo()+"]";
+                String logstr ="用户"+ account +"国际创建审核改签单："+"["+requestWithActor.getEntity().getSaleOrderNo()+"]";
                 String title ="国际创建审核改签单";
                 IftLogHelper.logger(requestWithActor.getAgent(),requestWithActor.getEntity().getSaleOrderNo(),title,logstr);
             } catch (Exception e) {
@@ -1885,12 +1916,14 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeExt = this.getSaleChangeExtByNo(requestWithActor);
         }
         Agent agent = new Agent(Integer.valueOf(owner));
-        if(!configsService.getIsDistributeTicket(agent)){
+        boolean isDistributeTicket = configsService.getIsDistributeTicket(agent);
+        if(!isDistributeTicket){
+            Date updateTime = new Date();
             //如果不是系统分单
             if ((changeOrderNo == null || changeOrderNo == 0L) && saleChangeExts != null) {
-                taskAssign(saleChangeExts,null,null,requestWithActor.getAgent(),null);
+                taskAssign(saleChangeExts,null,null,requestWithActor.getAgent(),updateTime,isDistributeTicket);
             }else{
-                derectAssign(saleChangeExt, null, null, requestWithActor.getAgent(), null);
+                derectAssign(saleChangeExt, null, null, requestWithActor.getAgent(), updateTime,isDistributeTicket);
             }
             log.info("此次分单结束...");
             return ;
@@ -1907,9 +1940,9 @@ public class ChangeServiceImpl implements IChangeService {
             Long maxOrderNum = Long.valueOf(str_maxOrderNum);
             Date updateTime = new Date();
             if ((changeOrderNo == null || changeOrderNo == 0L) && saleChangeExts != null) {
-                taskAssign(saleChangeExts, senders, maxOrderNum, agent, updateTime);
+                taskAssign(saleChangeExts, senders, maxOrderNum, agent, updateTime, isDistributeTicket);
             } else {
-                derectAssign(saleChangeExt, senders, maxOrderNum, agent, updateTime);
+                derectAssign(saleChangeExt, senders, maxOrderNum, agent, updateTime, isDistributeTicket);
             }
             log.info("此次分单结束...");
         } else {
@@ -1950,7 +1983,7 @@ public class ChangeServiceImpl implements IChangeService {
         order.setLockTime(date);
         saleChangeExtDao.updateLocker(order);*/
     }
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+
     public void assingAloneLockSaleChangeExt(SaleChangeExt order, Date date, Agent agent) {
         BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(order.getSaleChangeNo());
         if(buyChangeExt != null){
@@ -1967,13 +2000,14 @@ public class ChangeServiceImpl implements IChangeService {
      * @param maxOrderNum
      * @param agent
      * @param updateTime
+     * @param isDistributeTicket
      */
-    private void taskAssign(List<SaleChangeExt> saleChangeExts, List<TicketSender> senders, Long maxOrderNum,Agent agent,Date updateTime){
+    private void taskAssign(List<SaleChangeExt> saleChangeExts, List<TicketSender> senders, Long maxOrderNum, Agent agent, Date updateTime, boolean isDistributeTicket){
         log.info("第三步：判断出票员手头出票订单数量...");
         for (SaleChangeExt order : saleChangeExts) {
-            if(!configsService.getIsDistributeTicket(agent)){
+            if(!isDistributeTicket){
                 //如果不是系统分单
-                assingAloneLockSaleChangeExt(order,new Date(),agent);
+                assingAloneLockSaleChangeExt(order, updateTime,agent);
                 //TicketSender ticketSender = iTicketSenderService.queryByUserId(order.getAloneLocker());
                 increaseBuyChangeNum(agent, order.getAloneLocker());
             } else{
@@ -2003,12 +2037,13 @@ public class ChangeServiceImpl implements IChangeService {
      * @param maxOrderNum
      * @param agent
      * @param updateTime
+     * @param isDistributeTicket
      */
-    private void derectAssign(SaleChangeExt saleChangeExt,List<TicketSender> senders, Long maxOrderNum,Agent agent,Date updateTime){
+    private void derectAssign(SaleChangeExt saleChangeExt, List<TicketSender> senders, Long maxOrderNum, Agent agent, Date updateTime, boolean isDistributeTicket){
         log.info("第三步：判断出票员手头出票订单数量...");
-        if(!configsService.getIsDistributeTicket(agent)){
+        if(!isDistributeTicket){
             //如果不是系统分单
-            assingAloneLockSaleChangeExt(saleChangeExt,new Date(), agent);
+            assingAloneLockSaleChangeExt(saleChangeExt, updateTime, agent);
             /*saleChangeExt = configsService.setLockerAsAloneLocker(saleChangeExt);
             Long locker = saleChangeExt.getLocker();
             TicketSender ticketSender = iTicketSenderService.queryByUserId(locker);*/
