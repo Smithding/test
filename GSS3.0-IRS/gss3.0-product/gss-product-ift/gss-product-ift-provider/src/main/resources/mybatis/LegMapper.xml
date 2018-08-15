@@ -362,7 +362,7 @@
     </select>
 
     <select id="selectLegsBySaleChangeOrderNo"  resultMap="BaseResultMap" parameterType="java.lang.Long">
-        select
+        select distinct
                il.LEG_NO,
                il.ID,
                il.OWNER,
