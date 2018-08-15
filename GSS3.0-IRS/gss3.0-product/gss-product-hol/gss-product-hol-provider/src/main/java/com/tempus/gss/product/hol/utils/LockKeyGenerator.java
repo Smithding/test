@@ -52,7 +52,7 @@ public class LockKeyGenerator{
                 }
             }
         }
-        System.out.println("key: "+(lockAnnotation.prefix() + builder.toString()));
+        //System.out.println("key: "+(lockAnnotation.prefix() + builder.toString()));
         return lockAnnotation.prefix() + builder.toString();
 	}
 	
