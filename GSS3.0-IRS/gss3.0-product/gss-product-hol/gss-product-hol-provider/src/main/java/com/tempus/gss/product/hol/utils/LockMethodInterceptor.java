@@ -52,7 +52,7 @@ public class LockMethodInterceptor {
             }
         }
         finally {
-        	//redisLockHol.unlock(lockKey, value);
+        	redisLockHol.unlock(lockKey, value);
         }
     }
     
