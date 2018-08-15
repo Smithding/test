@@ -163,7 +163,7 @@ public class PriceSpecServiceImpl implements IPriceSpecService {
      * @return 返回航司总则，如果没有就返回*号的航司，都没有则返回空.
      */
     @Override
-    @Cacheable(value = "priceSpec", key = "#airline.entity")
+//    @Cacheable(value = "priceSpec", key = "#airline.entity")
     public PriceSpec getPriceSpec(RequestWithActor<String> airline) {
         
         if (airline.getEntity() == null) {
