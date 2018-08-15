@@ -326,7 +326,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 				
 			}else if (pushOrderStatus.getKey().equals(TcOrderStatus.CANCEL_ING.getKey())) {		//退订中
 				if (!orderStatus.equals(OwnerOrderStatus.CANCEL_ONGOING.getKey())) {
-					if (OwnerOrderStatus.PAY_OK.equals(orderStatus) || OwnerOrderStatus.ALREADY_CONRIRM.equals(orderStatus)) {
+					if (OwnerOrderStatus.PAY_OK.getKey().equals(orderStatus) || OwnerOrderStatus.ALREADY_CONRIRM.getKey().equals(orderStatus)) {
 						des = changeOrderStatus(agent, orderId, hotelOrder, orderStatus, OwnerOrderStatus.CANCEL_ONGOING, TcOrderStatus.CANCEL_ING);
 						hotelOrderMapper.updateById(hotelOrder);
 					}else {
@@ -338,7 +338,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			}else if (pushOrderStatus.getKey().equals(TcOrderStatus.CANCEL_FINISH.getKey())) {	//已退订
 				if (!orderStatus.equals(OwnerOrderStatus.CANCEL_OK.getKey())) {
 					des = "订单号"+orderId +",订单状态由"+ OwnerOrderStatus.keyOf(orderStatus).getValue()+"变成:"+ OwnerOrderStatus.CANCEL_OK.getValue();
-					if (OwnerOrderStatus.PAY_OK.equals(orderStatus) || OwnerOrderStatus.CANCEL_ONGOING.equals(orderStatus) || OwnerOrderStatus.ALREADY_CONRIRM.equals(orderStatus)) {
+					if (OwnerOrderStatus.PAY_OK.getKey().equals(orderStatus) || OwnerOrderStatus.CANCEL_ONGOING.getKey().equals(orderStatus) || OwnerOrderStatus.ALREADY_CONRIRM.getKey().equals(orderStatus)) {
 						try {
 							BigDecimal saleRefund = saleRefund(AgentUtil.getAgent(), hotelOrder);
 							if (null != saleRefund && saleRefund.compareTo(BigDecimal.ZERO) == 1) {	//退款成功
@@ -353,7 +353,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 						    hotelOrderMapper.updateById(hotelOrder);
 						    return false;
 						}
-					}else if (OwnerOrderStatus.WAIT_PAY.equals(orderStatus)){
+					}else if (OwnerOrderStatus.WAIT_PAY.getKey().equals(orderStatus)){
 						des = changeOrderStatus(agent, orderId, hotelOrder, orderStatus, OwnerOrderStatus.CANCEL_OK, TcOrderStatus.ALREADY_CANCEL);
 						hotelOrderMapper.updateById(hotelOrder);
 					}else {
@@ -363,7 +363,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 				}
 
 			}else if (pushOrderStatus.getKey().equals(TcOrderStatus.ALREADY_CANCEL.getKey())) { //已取消(bqy用户下单未支付,超时自动取消)
-				if (!orderStatus.equals(OwnerOrderStatus.CANCEL_OK.getKey())) {
+				if (!OwnerOrderStatus.CANCEL_OK.getKey().equals(orderStatus)) {
 					//改变订单状态
 					des = changeOrderStatus(agent, orderId, hotelOrder, orderStatus, OwnerOrderStatus.CANCEL_OK, TcOrderStatus.ALREADY_CANCEL);
 					//更新数据库
