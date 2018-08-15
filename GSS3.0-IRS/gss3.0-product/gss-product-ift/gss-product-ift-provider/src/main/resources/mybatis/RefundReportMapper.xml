@@ -72,7 +72,6 @@
          <result column="REFUND_REASON" property="refundReason" jdbcType="VARCHAR"/>
          <result column="TICKET_NO" property="ticketNo" jdbcType="VARCHAR"/>
          <result column="fltName" property="fltName" jdbcType="VARCHAR"/>
-         <result column="DEP_TIME" property="depTime" jdbcType="TIMESTAMP"/>
          <result column="SALE_PRICE" property="salePrice" jdbcType="DECIMAL"/>
          <result column="SALE_TAX" property="saleTax" jdbcType="DECIMAL"/>
          <result column="SALE_REFUND_PRICE" property="saleRefundPrice" jdbcType="DECIMAL"/>
@@ -96,8 +95,8 @@
          <result column="refundPriceDept" property="refundPriceDept" jdbcType="VARCHAR"/>
          <result column="saleOrderNo" property="saleOrderNo" jdbcType="BIGINT"/>
         <!--一对多航程集合-->
-        <collection property="legList" ofType="com.tempus.gss.product.ift.api.entity.Leg" column="saleOrderNo"
-                    select="com.tempus.gss.product.ift.dao.LegDao.selectLegBySaleOrderNo"/>
+        <collection property="legList" ofType="com.tempus.gss.product.ift.api.entity.Leg" column="SALE_CHANGE_NO"
+                    select="com.tempus.gss.product.ift.dao.LegDao.selectLegsBySaleChangeOrderNo"/>
     </resultMap>
    <select id="getAllWithList" resultMap="reportVoResultMapWithList" parameterType="com.tempus.gss.product.ift.api.entity.vo.ReportVo">
        SELECT
@@ -438,7 +437,6 @@
           oc.CHANGE_REASON as REFUND_REASON,
           sod.TICKET_NO,
           CONCAT(iftpassenger.SURNAME,'/',iftpassenger.NAME) AS fltName,
-          leg.DEP_TIME,
           iftpassenger.SALE_PRICE,
           passenger.SALE_TAX,
           passenger.SALE_REFUND_PRICE,
@@ -470,7 +468,6 @@
         LEFT JOIN OS_SALEORDER oso ON oso.SALE_ORDER_NO = oc.SALE_ORDER_NO
         left join IFT_SALE_CHANGE_DETAIL iscd on iscd.SALE_CHANGE_NO = oc.SALE_CHANGE_NO
         LEFT JOIN IFT_SALE_ORDER_DETAIL sod ON sod.SALE_ORDER_DETAIL_NO=iscd.SALE_ORDER_DETAIL_NO
-        LEFT JOIN IFT_LEG AS leg ON leg.SALE_ORDER_NO = oso.SALE_ORDER_NO AND leg.PARENT_SECTION = 0
         LEFT JOIN IFT_PASSENGER iftpassenger ON iftpassenger.PASSENGER_NO = sod.PASSENGER_NO and iftpassenger.SALE_ORDER_NO = oc.SALE_ORDER_NO
         LEFT JOIN IFT_PASSENGER_REFUND_PRICE passenger ON passenger.PASSENGER_NO = sod.PASSENGER_NO and passenger.SALE_CHANGE_NO = oc.SALE_CHANGE_NO
         LEFT JOIN CPS_CUSTOMER AS cus ON cus.CUSTOMER_NO = oso.CUSTOMER_NO

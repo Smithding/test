@@ -360,4 +360,37 @@
         from IFT_LEG
         where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
     </select>
+
+    <select id="selectLegsBySaleChangeOrderNo"  resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+               il.LEG_NO,
+               il.ID,
+               il.OWNER,
+               il.SALE_ORDER_NO,
+               il.AIRLINE,
+               il.FLIGHT_NO,
+               il.DEP_AIRPORT,
+               il.STOP_AIRPORT,
+               il.STOP_TIME,
+               il.ARR_AIRPORT,
+               il.DEP_TIME,
+               il.ARR_TIME,
+               il.PARENT_SECTION,
+               il.CHILD_SECTION,
+               il.TERMINAL,
+               il.AIRPORT_MODEL,
+               il.GO_BACK,
+               il.VALID,
+               il.STATUS,
+               il.MODIFIER,
+               il.CREATOR,
+               il.CREATE_TIME,
+               il.MODIFY_TIME,
+               il.CABIN,
+               il.FSI
+        from IFT_SALE_CHANGE_DETAIL iscd
+             join IFT_SALE_ORDER_DETAIL isod on iscd.SALE_ORDER_DETAIL_NO = isod.SALE_ORDER_DETAIL_NO
+             join IFT_LEG il on il.LEG_NO = isod.LEG_NO
+        where iscd.SALE_CHANGE_NO = #{saleChangeNo} order by il.PARENT_SECTION,il.CHILD_SECTION
+    </select>
 </mapper>

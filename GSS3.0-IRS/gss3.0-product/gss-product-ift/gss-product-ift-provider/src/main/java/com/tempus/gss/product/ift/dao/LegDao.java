@@ -14,4 +14,6 @@ public interface LegDao extends BaseDao<Leg, LegVo> {
 	* 通过订单编号获取航程集合
 	* */
 	public List<Leg> selectLegBySaleOrderNo(Long saleOrderNo);
+
+	List<Leg> selectLegsBySaleChangeOrderNo(Long saleChangeNo);
 }
