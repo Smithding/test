@@ -168,7 +168,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
             		    cancelOrderRes.setLasestCancelTime(hotelOrder.getCancelPenalty());
             		}
             		
-            	}else if (TcOrderStatus.WAIT_TC_CONFIRM.getKey().equals(orderStatus) || TcOrderStatus.ALREADY_TC_CONFIRM.getKey().equals(orderStatus)) {//待BQY确认 || BQY已确认
+            	}else if (TcOrderStatus.ALREADY_PAY.getKey().equals(orderStatus) || TcOrderStatus.WAIT_TC_CONFIRM.getKey().equals(orderStatus) || TcOrderStatus.ALREADY_TC_CONFIRM.getKey().equals(orderStatus)) {// 已支付 ||待BQY确认 || BQY已确认
             		String policyType = hotelOrder.getDbCancelRule();	//政策类型 cancelOrderRes
             		if("0".equals(policyType) || "8".equals(policyType)) {
             			cancelOrderRes.setResult(false);

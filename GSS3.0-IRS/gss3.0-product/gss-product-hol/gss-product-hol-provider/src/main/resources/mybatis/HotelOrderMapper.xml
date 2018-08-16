@@ -335,9 +335,10 @@
         hho.BREAKFAST_COUNT,
         hho.SUPPLIER_NUMBER,
         CASE
-            WHEN TIMESTAMPDIFF(MINUTE, hho.CREATE_ORDER_TIME, NOW()) <![CDATA[ < ]]> 5 AND hho.order_status = '666'  THEN 0
-            WHEN TIMESTAMPDIFF(MINUTE, hho.CREATE_ORDER_TIME, NOW()) <![CDATA[ < ]]> 10 AND hho.order_status = '666'  THEN 1
-            WHEN TIMESTAMPDIFF(MINUTE, hho.CREATE_ORDER_TIME, NOW()) <![CDATA[ >= ]]> 10 AND hho.order_status = '666' THEN 2
+            WHEN TIMESTAMPDIFF(MINUTE, hho.CREATE_ORDER_TIME, NOW()) <![CDATA[ >= ]]> 5 AND hho.order_status = '100'  THEN 1
+            WHEN TIMESTAMPDIFF(MINUTE, hho.CREATE_ORDER_TIME, NOW()) <![CDATA[ >= ]]> 5 AND hho.order_status = '111'  THEN 1
+            WHEN TIMESTAMPDIFF(MINUTE, hho.CREATE_ORDER_TIME, NOW()) <![CDATA[ >= ]]> 5 AND hho.order_status = '101'  THEN 1
+            WHEN TIMESTAMPDIFF(MINUTE, hho.CREATE_ORDER_TIME, NOW()) <![CDATA[ >= ]]> 5 AND hho.order_status = '666'  THEN 1
         ELSE 0
         END as BED_TYPE_NAME
 
