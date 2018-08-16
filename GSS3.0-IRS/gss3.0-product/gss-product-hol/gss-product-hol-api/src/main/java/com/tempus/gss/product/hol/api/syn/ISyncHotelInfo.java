@@ -13,7 +13,7 @@ public interface ISyncHotelInfo {
 	
 	public ResBaseInfo queryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException;
 	
-	public Future<ResBaseInfo> newQueryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException;
+	public ResBaseInfo newQueryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException;
 	
 	public ResBaseInfo queryProDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException;
 	
