@@ -1097,6 +1097,12 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 								for(ResourceModel resource : orderInfoModel.getResources()){
 									if(StringUtils.isNotEmpty(resource.getSupplierConfirmNumber())){
 										hotelOrder.setSupplierNumber(resource.getSupplierConfirmNumber());
+										LogRecord logRecordSuppNo=new LogRecord();
+										logRecordSuppNo.setAppCode("GSS");
+										logRecordSuppNo.setBizNo(hotelOrder.getHotelOrderNo());
+										logRecordSuppNo.setOptName("供应商订单号");
+										logRecordSuppNo.setDesc(resource.getSupplierConfirmNumber());
+										iLogService.insert(logRecordSuppNo);
 									}
 								}
 							}
