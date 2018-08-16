@@ -5,12 +5,15 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.common.entity.RequestWithActor;
+import com.tempus.gss.product.ift.api.entity.BuyChangeExt;
 import com.tempus.gss.product.ift.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ift.api.entity.TicketSender;
 import com.tempus.gss.product.ift.api.entity.iftVo.IftUserVo;
 import com.tempus.gss.product.ift.api.entity.vo.TicketSenderVo;
 import com.tempus.gss.product.ift.api.service.IChangeService;
 import com.tempus.gss.product.ift.api.service.ITicketSenderService;
+import com.tempus.gss.product.ift.api.service.IftBuyChangeExtService;
+import com.tempus.gss.product.ift.dao.BuyChangeExtDao;
 import com.tempus.gss.product.ift.dao.SaleChangeExtDao;
 import com.tempus.gss.product.ift.dao.SaleOrderExtDao;
 import com.tempus.gss.product.ift.dao.TicketSenderDao;
@@ -44,6 +47,8 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
     SaleChangeExtDao saleChangeExtDao;
     @Autowired
     SaleOrderExtDao saleOrderExtDao;
+    @Autowired
+    BuyChangeExtDao buyChangeExtDao;
     @Override
     public void decreaseBySaleChangeExt(Agent agent, SaleChangeExt salechangeExt, int type) {
 
@@ -119,6 +124,23 @@ public class TicketSenderServiceImpl implements ITicketSenderService {
             }
         }
         log.info("更新lockerID:{},数量:{},type:{},值更新结束",lockerId,count,type);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public void asynUpdateByLockerId(Agent agent, Long lockerId, String type) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(1000);//为了让调用该方法的方法结束事务先说一秒，仍然存在风险
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                updateByLockerId(agent,lockerId,type);
+            }
+        },"asynUpdateByLockerIdThread").start();
+
     }
 
     /**
