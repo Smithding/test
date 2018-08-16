@@ -322,8 +322,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	}
 	
 	@Override
-	@Async
-	public Future<ResBaseInfo> newQueryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
+	public ResBaseInfo newQueryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
 				long start = System.currentTimeMillis();
 				if (StringUtil.isNullOrEmpty(agent)) {
 		            logger.error("agent对象为空");
@@ -531,8 +530,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 				}
 				long end = System.currentTimeMillis();  
 			    System.out.println("完成任务newQueryHotelDetail，耗时：" + (end - start) + "毫秒"); 
-				//return tcResBaseInfo;
-			    return new AsyncResult<ResBaseInfo>(tcResBaseInfo);
+				return tcResBaseInfo;
+			    //return new AsyncResult<ResBaseInfo>(tcResBaseInfo);
 	}
 	
 	@Override
