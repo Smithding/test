@@ -109,7 +109,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 
 	@Override
 	public ResBaseInfo queryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
-		 long start = System.currentTimeMillis();
+		 //long start = System.currentTimeMillis();
 		if (StringUtil.isNullOrEmpty(agent)) {
             logger.error("agent对象为空");
             throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
@@ -314,16 +314,16 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			}
 			
 		} catch (Exception e) {
-			// TODO: handle exception
+			throw new GSSException("查询酒店所有房型异常", "0202", "查询酒店所有房型异常");
 		}
-		long end = System.currentTimeMillis();  
-	    System.out.println("完成任务queryHotelDetail，耗时：" + (end - start) + "毫秒"); 
+		//long end = System.currentTimeMillis();  
+	   // System.out.println("完成任务queryHotelDetail，耗时：" + (end - start) + "毫秒"); 
 		return tcResBaseInfo;
 	}
 	
 	@Override
 	public ResBaseInfo newQueryHotelDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException {
-				long start = System.currentTimeMillis();
+				//long start = System.currentTimeMillis();
 				if (StringUtil.isNullOrEmpty(agent)) {
 		            logger.error("agent对象为空");
 		            throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
@@ -526,10 +526,10 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					}
 					
 				} catch (Exception e) {
-					// TODO: handle exception
+					throw new GSSException("查询酒店所有房型异常", "0202", "查询酒店所有房型异常");
 				}
-				long end = System.currentTimeMillis();  
-			    System.out.println("完成任务newQueryHotelDetail，耗时：" + (end - start) + "毫秒"); 
+				//long end = System.currentTimeMillis();  
+			   // System.out.println("完成任务newQueryHotelDetail，耗时：" + (end - start) + "毫秒"); 
 				return tcResBaseInfo;
 			    //return new AsyncResult<ResBaseInfo>(tcResBaseInfo);
 	}
@@ -735,7 +735,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					}
 					
 				} catch (Exception e) {
-					e.printStackTrace();
+					throw new GSSException("查询酒店所有房型异常", "0202", "查询酒店所有房型异常");
 				}
 				return tcResBaseInfo;
 			    //return new AsyncResult<ResBaseInfo>(tcResBaseInfo);
@@ -743,7 +743,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	
 	@Override
 	public ResBaseInfo newQueryHolProDetail(Agent agent, Long resId, String uniProId, String startTime, String endTime) throws GSSException {
-		long start = System.currentTimeMillis();
+		//long start = System.currentTimeMillis();
 		if (StringUtil.isNullOrEmpty(agent)) {
             logger.error("agent对象为空");
             throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
@@ -942,10 +942,10 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			}
 			
 		} catch (Exception e) {
-			// TODO: handle exception
+			throw new GSSException("查询酒店所有房型异常", "0202", "查询酒店所有房型异常");
 		}
-		long end = System.currentTimeMillis();  
-	    System.out.println("完成任务newQueryHotelDetail，耗时：" + (end - start) + "毫秒"); 
+		//long end = System.currentTimeMillis();  
+	    //System.out.println("完成任务newQueryHotelDetail，耗时：" + (end - start) + "毫秒"); 
 		return tcResBaseInfo;
 		
 	}
@@ -1020,7 +1020,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 				mongoTemplate1.insert(hotelIdList, HotelId.class);
 				continue;
 			}
-			System.out.println("i最后的值为:" + i);
+			//System.out.println("i最后的值为:" + i);
 			break;
 		}
 	}
