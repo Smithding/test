@@ -936,16 +936,23 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
             throw new GSSException("取消酒店订单", "0103", "订单信息不存在");
         } else {
         	LogRecord LogRecord=new LogRecord();
+        	LogRecord.setBizCode("HOL-Order");
+    		LogRecord.setTitle("申请取消订单");
+    		LogRecord.setBizNo(hotelOrder.getHotelOrderNo());
+    		LogRecord.setCreateTime(new Date());
+    		if(StringUtils.isNotEmpty(agent.getAccount())){
+				LogRecord.setOptName(agent.getAccount());
+			}
         	String des = "";
             	try{
             		if(hotelOrder.getTcOrderStatus().equals(TcOrderStatus.WAIT_TC_CONFIRM.getKey())){
             			String reqJson = JSONObject.toJSONString(orderCancelBeforePayReq);
                         String result = httpClientUtil.doTCJsonPost(CANCEL_ORDER_URL, reqJson);
                         logger.info("订单取消请求酒店返回:" + result);
-                        if (result != null) {
+                        if (StringUtils.isNotEmpty(result)) {
                          	ResultTc<CancelTcOrderBeforePay> cancelTcOrderBeforePayBase= JsonUtil.toBean(result, new TypeReference<ResultTc<CancelTcOrderBeforePay>>(){});
                          	if(cancelTcOrderBeforePayBase != null && cancelTcOrderBeforePayBase.getResult() != null){
-                         		if(cancelTcOrderBeforePayBase.getResult().getIsSuccessed() == true){
+                         		if(cancelTcOrderBeforePayBase.getResult().getIsSuccessed()){
                          			cancelOrderRes.setResult(true);
                         			cancelOrderRes.setMsg(cancelTcOrderBeforePayBase.getResult().getMsg());
                         			des = "订单号"+hotelOrder.getHotelOrderNo() +",订单状态由"+ OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus()).getValue()+"变成:"+ OwnerOrderStatus.CANCEL_OK.getValue();
@@ -956,11 +963,11 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
                                      hotelOrder.setTcOrderStatus(TcOrderStatus.ALREADY_CANCEL.getKey());
                                      hotelOrder.setCancelTime(new Date());
                                      hotelOrderMapper.updateById(hotelOrder); 
-                                     return cancelOrderRes;
+                                    // return cancelOrderRes;
                          		}else{
                          			cancelOrderRes.setResult(false);
                         			cancelOrderRes.setMsg(cancelTcOrderBeforePayBase.getResult().getMsg());
-                        			return cancelOrderRes;
+                        			//return cancelOrderRes;
                          		}
                          	}
                          }else {
@@ -980,7 +987,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
                 			if(info.getLasestCancelTime().compareTo("01/01/1900 00:00:00") == 0 || info.getLasestCancelTime().compareTo("01/01/1900") == 0){
                     			cancelOrderRes.setResult(false);
                     			cancelOrderRes.setMsg("当前订单不能取消");
-                    			return cancelOrderRes;
+                    			//return cancelOrderRes;
                     		}
                     		if(info.getLasestCancelTime().compareTo(sim.format(new Date())) >= 0 || info.getLasestCancelTime().compareTo(sim1.format(new Date())) >= 0){
                     			String reqJson = JSONObject.toJSONString(orderCancelBeforePayReq);
@@ -1011,7 +1018,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
                     		}else{
                     			cancelOrderRes.setResult(false);
                     			cancelOrderRes.setMsg("取消时间已过, 不能取消");
-                    			return cancelOrderRes;
+                    			//return cancelOrderRes;
                     		}
                     	}
             		}
@@ -1019,15 +1026,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
                    logger.error("取消酒店订单请求出错"+e);
                    throw new GSSException("取消酒店订单请求出错", "0106", "取消酒店订单请求出错");
                }
-                LogRecord.setBizCode("HOL-Order");
-        		LogRecord.setTitle("申请取消订单");
-        		LogRecord.setBizNo(hotelOrder.getHotelOrderNo());
-        		LogRecord.setCreateTime(new Date());
-				LogRecord.setDesc(des);
-				if(StringUtils.isNotEmpty(agent.getAccount())){
-					LogRecord.setOptName(agent.getAccount());
-				}
-				iLogService.insert(LogRecord);
+            	LogRecord.setDesc(des);
+        		iLogService.insert(LogRecord);
         }
         return cancelOrderRes;
 	}
