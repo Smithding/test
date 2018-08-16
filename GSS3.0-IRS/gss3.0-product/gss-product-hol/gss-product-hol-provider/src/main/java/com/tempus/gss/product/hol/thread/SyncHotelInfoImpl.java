@@ -114,8 +114,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
             logger.error("agent对象为空");
             throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
         }else{
-        	if(StringUtil.isNullOrEmpty(agent.getType())){
-        		throw new GSSException("获取某一酒店详细信息", "0102", "agentType为空");
+        	if(StringUtil.isNullOrEmpty(agent.getNum())){
+        		throw new GSSException("获取某一酒店详细信息", "0102", "agentNum为空");
         	}
         }
 		if (StringUtil.isNullOrEmpty(resId)) {
@@ -232,12 +232,10 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	                   			 				if(proSaleInfoDetails.containsKey(DateUtil.stringToLonString(startTime))) {
 		                   			 				Integer firProPrice = proSaleInfoDetails.get(DateUtil.stringToLonString(startTime)).getDistributionSalePrice();
 		                   			 				if(StringUtil.isNotNullOrEmpty(firProPrice)) {
-		                   			 					if(!agent.getNum().equals(401803070321014723L)) {
-			                   			 					BigDecimal profitPrice = holProfitService.computeTcProfitPrice(agent, firProPrice, agent.getType());
-				         	                				if(StringUtil.isNotNullOrEmpty(profitPrice)){
-				         	                					pro.setRebateRateProfit(profitPrice);
-				         	                				}
-		                   			 					}
+		                   			 					BigDecimal profitPrice = holProfitService.computeTcProfitPrice(agent, firProPrice, agent.getNum());
+			         	                				if(StringUtil.isNotNullOrEmpty(profitPrice)){
+			         	                					pro.setRebateRateProfit(profitPrice);
+			         	                				}
 		                   			 				}
 	                   			 				}
 		                   			 			int kk = 0;
@@ -331,8 +329,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		            logger.error("agent对象为空");
 		            throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
 		        }else{
-		        	if(StringUtil.isNullOrEmpty(agent.getType())){
-		        		throw new GSSException("获取某一酒店详细信息", "0102", "agentType为空");
+		        	if(StringUtil.isNullOrEmpty(agent.getNum())){
+		        		throw new GSSException("获取某一酒店详细信息", "0102", "agentNum为空");
 		        	}
 		        }
 				if (StringUtil.isNullOrEmpty(resId)) {
@@ -369,7 +367,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryImgInfoSum(resId);
 					Future<List<ProfitPrice>> computeProfitByAgentFu = null;
 					String supplierSource = "tc";
-					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(),supplierSource);
+					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getNum(),supplierSource);
 					
 					tcResBaseInfo = resBaseInfoFuture.get();
 					ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
@@ -543,8 +541,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 		            logger.error("agent对象为空");
 		            throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
 		        }else{
-		        	if(StringUtil.isNullOrEmpty(agent.getType())){
-		        		throw new GSSException("获取某一酒店详细信息", "0102", "agentType为空");
+		        	if(StringUtil.isNullOrEmpty(agent.getNum())){
+		        		throw new GSSException("获取某一酒店详细信息", "0102", "agentNum为空");
 		        	}
 		        }
 				if (StringUtil.isNullOrEmpty(resId)) {
@@ -581,7 +579,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 					Future<ImgInfoSum> imgInfoSumFuture = tcHotelSupplierService.queryImgInfoSum(resId);
 					Future<List<ProfitPrice>> computeProfitByAgentFu = null;
 					String supplierSource = "tc";
-					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(), supplierSource);
+					computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getNum(), supplierSource);
 					
 					ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
 					ImgInfoSum imgInfoSum = imgInfoSumFuture.get();
@@ -751,8 +749,8 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
             logger.error("agent对象为空");
             throw new GSSException("获取某一酒店详细信息", "0102", "agent对象为空");
         }else{
-        	if(StringUtil.isNullOrEmpty(agent.getType())){
-        		throw new GSSException("获取某一酒店详细信息", "0102", "agentType为空");
+        	if(StringUtil.isNullOrEmpty(agent.getNum())){
+        		throw new GSSException("获取某一酒店详细信息", "0102", "agentNum为空");
         	}
         }
 		if (StringUtil.isNullOrEmpty(resId)) {
@@ -788,7 +786,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			Future<ResBaseInfo> resBaseInfoFuture = tcHotelSupplierService.queryResBaseInfo(resId);
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
 			String supplierSource = "tc";
-			computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(),supplierSource);
+			computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getNum(),supplierSource);
 			
 			tcResBaseInfo = resBaseInfoFuture.get();
 			ResProBaseInfos resProBaseInfos = resProBaseInfosFuture.get();
