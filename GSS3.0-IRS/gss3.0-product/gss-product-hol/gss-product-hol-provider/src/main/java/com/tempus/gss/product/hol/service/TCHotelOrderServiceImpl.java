@@ -1075,7 +1075,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 					hotelOrder.setModifyTime(new Date());
 					if(tcPushOrderInfo.getOperateType().equals(StatusType.ORDER_CONFIRM.getKey())){
 						if(hotelOrder.getOrderStatus().equals(OwnerOrderStatus.ALREADY_CONRIRM.getKey())){
-							throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
+							return false;
+							//throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
 						}else{
 							flag =1;
 							des = "订单号"+orderId +",订单状态由"+ OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus()).getValue()+"变成:"+ OwnerOrderStatus.ALREADY_CONRIRM.getValue();
@@ -1144,7 +1145,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						}
 					}else if(tcPushOrderInfo.getOperateType().equals(StatusType.CANCEL_ORDER_CONFIRM.getKey())){
 						if(hotelOrder.getOrderStatus().equals(OwnerOrderStatus.CANCEL_OK.getKey())){
-							throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
+							return false;
+							//throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
 						}else{
 							flag =1;
 							des = "订单号"+orderId +",订单状态由"+OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus()).getValue()+"变成:"+ OwnerOrderStatus.CANCEL_OK.getValue();
@@ -1171,7 +1173,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						OrderInfoModel orderInfoModel = orderInfomationDetail.getOrderInfos().get(0);
 						if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_TO_ROOM.getKey())) {
 							if(hotelOrder.getOrderStatus().equals(OwnerOrderStatus.RESIDE_ONGOING.getKey())) {
-								throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
+								return false;
+								//throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
 							}else {
 								flag =1;
 								des = "订单号"+orderId +",订单状态由"+OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus()).getValue()+"变成:"+ OwnerOrderStatus.RESIDE_ONGOING.getValue();
@@ -1192,7 +1195,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 									hotelOrder.getOrderStatus().equals(OwnerOrderStatus.BEFORE_RESIDE.getKey()) || 
 									hotelOrder.getOrderStatus().equals(OwnerOrderStatus.AFTER_RESIDE.getKey())
 									) {
-										throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
+										return false;
+										//throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
 									}else{
 									flag =1;
 									int startTime = simple.format(hotelOrder.getArrivalDate()).compareTo(orderInfoModel.getStartTime());
