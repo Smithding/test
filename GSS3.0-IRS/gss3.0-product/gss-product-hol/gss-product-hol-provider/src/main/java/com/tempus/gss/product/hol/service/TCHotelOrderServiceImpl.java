@@ -1075,6 +1075,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 					hotelOrder.setModifyTime(new Date());
 					if(tcPushOrderInfo.getOperateType().equals(StatusType.ORDER_CONFIRM.getKey())){
 						if(hotelOrder.getOrderStatus().equals(OwnerOrderStatus.ALREADY_CONRIRM.getKey())){
+							logger.info("推送更新订单状态异常, 订单重复更新: ",JSON.toJSONString(tcPushOrderInfo));
 							return false;
 							//throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
 						}else{
@@ -1145,6 +1146,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						}
 					}else if(tcPushOrderInfo.getOperateType().equals(StatusType.CANCEL_ORDER_CONFIRM.getKey())){
 						if(hotelOrder.getOrderStatus().equals(OwnerOrderStatus.CANCEL_OK.getKey())){
+							logger.info("推送更新订单状态异常, 订单重复更新: ",JSON.toJSONString(tcPushOrderInfo));
 							return false;
 							//throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
 						}else{
@@ -1173,6 +1175,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 						OrderInfoModel orderInfoModel = orderInfomationDetail.getOrderInfos().get(0);
 						if(orderInfoModel.getOrderStatus().equals(TcOrderStatus.CONFIRM_TO_ROOM.getKey())) {
 							if(hotelOrder.getOrderStatus().equals(OwnerOrderStatus.RESIDE_ONGOING.getKey())) {
+								logger.info("推送更新订单状态异常, 订单重复更新: ",JSON.toJSONString(tcPushOrderInfo));
 								return false;
 								//throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
 							}else {
@@ -1195,6 +1198,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 									hotelOrder.getOrderStatus().equals(OwnerOrderStatus.BEFORE_RESIDE.getKey()) || 
 									hotelOrder.getOrderStatus().equals(OwnerOrderStatus.AFTER_RESIDE.getKey())
 									) {
+										logger.info("推送更新订单状态异常, 订单重复更新: ",JSON.toJSONString(tcPushOrderInfo));
 										return false;
 										//throw new GSSException("更新状态信息异常", "0911", "[重复更新]");
 									}else{
