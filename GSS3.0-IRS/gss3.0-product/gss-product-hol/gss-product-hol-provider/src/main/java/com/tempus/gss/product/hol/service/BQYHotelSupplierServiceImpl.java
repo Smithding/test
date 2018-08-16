@@ -249,7 +249,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 			//Future<ResBaseInfo> asyncResBaseInfo = bqyHotelConverService.asyncConvertTcHotelEntity(Long.valueOf(hotelId));
 			Future<List<RoomPriceItem>> asynRoomPrice = bqyHotelInterService.asyncRoomPrice(query);
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-            computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(), "bqy");
+            computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getNum(), "bqy");
 			/*while (asyncHotelImage.isDone() && asyncHotelDetail.isDone() && asyncResBaseInfo.isDone()) {
 				break;
 			}*/
@@ -641,9 +641,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 			int diff = DateUtil.daysBetween(hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate());
 			
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-			if(!agent.getNum().equals(401803070321014723L)) {
-				computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(), "bqy");
-			}
+			computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getNum(), "bqy");
 			
 			Double oneDayPrice = null;
 			int roomNum = 0;
@@ -810,9 +808,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 
 			int diff  = DateUtil.daysBetween(checkInDate, checkOutDate);
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-			if(!agent.getNum().equals(401803070321014723L)) {
-				computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getType(), "bqy");
-			}
+			computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getNum(), "bqy");
 			//设置控润
 			if(computeProfitByAgentFu!=null) {
 				List<ProfitPrice> computeProfitByAgent  = computeProfitByAgentFu.get();
