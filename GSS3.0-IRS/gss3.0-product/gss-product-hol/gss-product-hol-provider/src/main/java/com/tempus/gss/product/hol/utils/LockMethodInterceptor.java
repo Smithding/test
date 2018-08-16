@@ -41,13 +41,11 @@ public class LockMethodInterceptor {
             // 假设上锁成功，但是设置过期时间失效，以后拿到的都是 false
             final boolean success = redisLockHol.lock(lockKey, value, lock.expire(), lock.timeUnit());
             if (!success) {
-            	logger.info("推送酒店订单状态变更为重复提交, 重复提交参数为: "+lockKey);
                 throw new RuntimeException("重复提交");
             }
             try {
                 return pjp.proceed();
             } catch (Throwable throwable) {
-            	logger.info("推送酒店订单状态变更为重复提交, 重复提交参数为: "+lockKey);
                 throw new RuntimeException(throwable.getMessage());
             }
         }
