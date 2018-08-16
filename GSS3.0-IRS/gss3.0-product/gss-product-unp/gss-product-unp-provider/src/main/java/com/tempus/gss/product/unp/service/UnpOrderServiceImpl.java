@@ -13,20 +13,6 @@
 
 package com.tempus.gss.product.unp.service;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.assertj.core.util.Lists;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
@@ -36,17 +22,10 @@ import com.tempus.gss.order.entity.BusinessOrderInfo;
 import com.tempus.gss.order.entity.BuyOrder;
 import com.tempus.gss.order.entity.SaleOrder;
 import com.tempus.gss.order.entity.TransationOrder;
-import com.tempus.gss.order.entity.enums.BusinessType;
-import com.tempus.gss.order.entity.enums.CostType;
-import com.tempus.gss.order.entity.enums.GoodsBigType;
-import com.tempus.gss.order.entity.enums.IncomeExpenseType;
+import com.tempus.gss.order.entity.enums.*;
 import com.tempus.gss.order.entity.vo.CertificateCreateVO;
 import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
-import com.tempus.gss.order.service.IBuyOrderService;
-import com.tempus.gss.order.service.ICertificateService;
-import com.tempus.gss.order.service.IPlanAmountRecordService;
-import com.tempus.gss.order.service.ISaleOrderService;
-import com.tempus.gss.order.service.ITransationOrderService;
+import com.tempus.gss.order.service.*;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.unp.api.entity.UnpOrder;
 import com.tempus.gss.product.unp.api.entity.vo.OrderCreateVo;
@@ -55,6 +34,18 @@ import com.tempus.gss.product.unp.api.service.IUnpOrderService;
 import com.tempus.gss.product.unp.dao.OrderDao;
 import com.tempus.gss.system.service.IMaxNoService;
 import com.tempus.gss.vo.Agent;
+import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.util.Lists;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 /**
  * ClassName:UnpOrderServiceImpl
@@ -66,7 +57,6 @@ import com.tempus.gss.vo.Agent;
  * @since Ver 1.1
  */
 @Service
-@EnableAutoConfiguration
 public class UnpOrderServiceImpl implements IUnpOrderService {
     
     protected final transient Logger log = LoggerFactory.getLogger(getClass());
@@ -86,7 +76,7 @@ public class UnpOrderServiceImpl implements IUnpOrderService {
     @Reference
     IPlanAmountRecordService planAmountRecordService;
     @Reference
-    ICertificateService certificateService; //实收service
+    ICertificateService certificateService;
     
     @Reference
     ITransationOrderService tranOrderService;
@@ -123,7 +113,7 @@ public class UnpOrderServiceImpl implements IUnpOrderService {
             tr.setOrderingLoginName(agent.getAccount());
             tr.setOwner(agent.getOwner());
             tr.setSourceChannelNo(agent.getDevice());
-            tr.setPayStatus(1);
+            tr.setPayStatus(PayStatus.NO_PAYMENT.getKey());
             tr.setTransationOrderNo(transactionId);
             tr.setValid(1);
             tranOrderService.create(agent, tr);
@@ -139,33 +129,32 @@ public class UnpOrderServiceImpl implements IUnpOrderService {
         //如果有销售信息，那么生成销售单
         SaleOrder saleOrder = new SaleOrder();
         CreatePlanAmountVO planAmountVO = new CreatePlanAmountVO();
-        Boolean createSale = false;
-        Boolean createBuy = false;
+        boolean createSale = false;
+        boolean createBuy = false;
         if (null != unpOrder.getChannelId()) {
             //待支付
             unpOrder.setPayStatus(1);
             /*创建销售单*/
             saleOrder = new SaleOrder();
-            saleOrder.setOrderType(1);
+            saleOrder.setOrderType(OrderType.SALEORDER.getKey());
             saleOrder.setSaleOrderNo(orderNo);
             saleOrder.setBusinessSignNo(businessSignNo);
-            saleOrder.setBsignType(1);
+            saleOrder.setBsignType(BSignType.SALEBUY.getKey());
             saleOrder.setCustomerNo(unpOrder.getChannelId());
             saleOrder.setCustomerTypeNo(unpOrder.getChannelType());
-            saleOrder.setSourceChannelNo("unp");
+            saleOrder.setSourceChannelNo("UNP");
             saleOrder.setTransationOrderNo(unpOrder.getTradeNo());
             saleOrder.setOrderingLoginName(agent.getAccount());
             //通用产品
             saleOrder.setGoodsType(GoodsBigType.GENERAL.getKey());
             //通用商品 代码
-//            saleOrder.setGoodsSubType(subType);
+            saleOrder.setGoodsSubType(EgoodsSubType.SALE.getKey());
             saleOrder.setGoodsName(StringUtils.isBlank(unpOrder.getRemark()) ? "通用产品" : unpOrder.getRemark());
             // 待支付
-            saleOrder.setPayStatus(1);
+            saleOrder.setPayStatus(PayStatus.NO_PAYMENT.getKey());
             saleOrder.setOrderChildStatus(1);
             // 创建销售应收记录
             planAmountVO.setRecordNo(unpOrder.getOrderNo());
-            //记录编号   自动生成
             planAmountVO.setBusinessType(BusinessType.SALEORDER.getKey());
             //业务类型 2，销售单，3，采购单，4 ，变更单（可以根据变更表设计情况将废退改分开）
             planAmountVO.setGoodsType(GoodsBigType.GENERAL.getKey());
@@ -194,7 +183,7 @@ public class UnpOrderServiceImpl implements IUnpOrderService {
             //通用产品
             buyOrder.setGoodsType(GoodsBigType.GENERAL.getKey());
             //subType填入的是 dict表对应的产品的id
-            //buyOrder.setGoodsSubType(subType);
+            buyOrder.setGoodsSubType(EgoodsSubType.BUY.getKey());
             buyOrder.setGoodsName(StringUtils.isBlank(unpOrder.getRemark()) ? "通用产品" : unpOrder.getRemark());
             buyOrder.setBuyChannelNo("unp");
             buyOrder.setSupplierNo(unpOrder.getBuyChannelId());
