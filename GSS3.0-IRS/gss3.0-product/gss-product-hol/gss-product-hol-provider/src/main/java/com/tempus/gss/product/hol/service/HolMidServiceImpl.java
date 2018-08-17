@@ -526,7 +526,8 @@ public class HolMidServiceImpl implements IHolMidService {
 
 		Map<String, Object> map = new HashMap<>();
 		if (StringUtil.isNotNullOrEmpty(searchHotelType)) {
-			pullHotel = Arrays.stream(searchHotelType.split(",")).filter(s -> !s.isEmpty()).map(s -> s.trim()).collect(Collectors.toList());
+			//pullHotel = Arrays.stream(searchHotelType.split(",")).filter(s -> !s.isEmpty()).map(s -> s.trim()).collect(Collectors.toList());
+			pullHotel = Arrays.asList(searchHotelType.split(","));
 		}else {
 			pullHotel = getPullHotel();
 			//String collect = pullHotel.stream().filter(s -> !s.isEmpty()).collect(Collectors.joining(","));
