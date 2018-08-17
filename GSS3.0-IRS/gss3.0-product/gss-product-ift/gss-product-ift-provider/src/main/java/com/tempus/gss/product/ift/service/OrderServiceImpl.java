@@ -538,16 +538,6 @@ public class OrderServiceImpl implements IOrderService {
                 logstr = "用户" + saleOrderExt.getAgent().getAccount() + "修改国际销售单：" + "[" + saleOrderExt.getEntity().getSaleOrderNo() + "]";
             }
             IftLogHelper.logger(saleOrderExt.getAgent(), saleOrderExt.getEntity().getSaleOrderNo(), title, logstr);
-            /*LogRecord logRecord = new LogRecord();
-            logRecord.setAppCode("UBP");
-            logRecord.setCreateTime(new Date());
-            logRecord.setTitle("修改国际销售单");
-            logRecord.setDesc(logstr);
-            logRecord.setOptLoginName(saleOrderExt.getAgent().getAccount());
-            logRecord.setRequestIp(saleOrderExt.getAgent().getIp());
-            logRecord.setBizCode("IFT");
-            logRecord.setBizNo(String.valueOf(saleOrderExt.getEntity().getSaleOrderNo()));
-            logService.insert(logRecord);*/
         } catch (Exception e) {
             log.error("添加操作日志异常===", e);
         }
@@ -594,17 +584,6 @@ public class OrderServiceImpl implements IOrderService {
                 String logstr = "用户" + agent.getAccount() + "国际订单核价：" + "[" + orderExt.getSaleOrderNo() + "]成功";
                 String title = "国际订单核价";
                 IftLogHelper.logger(agent, orderExt.getSaleOrderNo(), title, logstr);
-
-               /* LogRecord logRecord = new LogRecord();
-                logRecord.setAppCode("UBP");
-                logRecord.setCreateTime(new Date());
-                logRecord.setTitle("国际订单核价");
-                logRecord.setDesc(logstr);
-                logRecord.setOptLoginName(saleOrderExt.getAgent().getAccount());
-                logRecord.setRequestIp(saleOrderExt.getAgent().getIp());
-                logRecord.setBizCode("IFT");
-                logRecord.setBizNo(String.valueOf(orderExt.getSaleOrderNo()));
-                logService.insert(logRecord);*/
             } catch (Exception e) {
                 log.error("添加操作日志异常===" + e);
             }
@@ -2266,19 +2245,6 @@ public class OrderServiceImpl implements IOrderService {
                     String logstr = "用户" + agent1.getAccount() + "创建国际销售单：" + "[" + saleOrderNo1 + "]";
                     String title = "创建国际销售单";
                     IftLogHelper.logger(agent1, saleOrderNo1, title, logstr);
-                  /*  LogRecord logRecord = new LogRecord();
-                    logRecord.setAppCode("UBP");
-                    logRecord.setCreateTime(new Date());
-                    logRecord.setTitle("创建国际销售单");
-                    logRecord.setDesc(logstr);
-                    logRecord.setOptLoginName(agent1.getAccount());
-                    logRecord.setRequestIp(agent1.getIp());
-                    logRecord.setBizCode("IFT");
-                    logRecord.setBizNo(String.valueOf(saleOrderNo1));
-                    Map<String, Object> otherOpts = new HashMap<String, Object>();
-                    otherOpts.put("transationOrderNo", saleOrder1.getTransationOrderNo());
-                    logRecord.setOtherOpts(otherOpts);
-                    logService.insert(logRecord);*/
                 } catch (Exception e) {
                     log.error("添加操作日志异常===" + e);
                 }
