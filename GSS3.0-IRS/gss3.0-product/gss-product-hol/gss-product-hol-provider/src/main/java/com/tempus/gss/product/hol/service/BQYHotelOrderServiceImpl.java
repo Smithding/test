@@ -12,12 +12,16 @@ import com.tempus.gss.order.entity.enums.GoodsBigType;
 import com.tempus.gss.order.entity.vo.ActualInfoSearchVO;
 import com.tempus.gss.order.entity.vo.CertificateCreateVO;
 import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
+import com.tempus.gss.product.hol.api.entity.WhiteListPhone;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -114,6 +118,9 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 	
 	@Reference
 	private IActualAmountRecorService actualAmountRecorService;
+
+	@Autowired
+	private MongoTemplate mongoTemplate1;
 	
 	@Reference
 	private ISmsTemplateDetailService smsTemplateDetailService;
@@ -420,7 +427,16 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
 	public HotelOrder createOrder(Agent agent, CreateOrderReq orderReq, OrderCreateReq orderCreateReq, RoomInfo roomInfo) {
-		orderReq.setMobile(tempusMobile);
+		if (tempusMobile.equals(orderCreateReq.getLinkManMobile())) {
+			orderReq.setMobile(tempusMobile);
+		}else {
+			WhiteListPhone phone = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(orderCreateReq.getLinkManMobile())), WhiteListPhone.class);
+			if (null != phone) {
+				orderReq.setMobile(orderCreateReq.getLinkManMobile());
+			}else {
+				orderReq.setMobile(tempusMobile);
+			}
+		}
 		if (StringUtil.isNullOrEmpty(orderReq)) {
 			logger.error("orderReq查询条件为空");
 			throw new GSSException("创建订单信息", "0101", "orderReq查询条件为空");
