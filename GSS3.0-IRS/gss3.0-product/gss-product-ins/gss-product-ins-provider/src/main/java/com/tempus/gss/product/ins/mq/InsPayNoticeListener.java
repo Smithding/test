@@ -215,8 +215,9 @@ public class InsPayNoticeListener {
 						}
 //						saleService.pay(agent, businessNo);
 					}
-			}else if(payNoticeVO.getGoodsType() == 3){
+			}else if(1==payNoticeVO.getGoodsType().intValue()){
 				logger.info("-------机票拒单保险退款-----收到拒单消息--交易单:"+payNoticeVO.getTraNo());
+				System.out.println(payNoticeVO.getGoodsType().equals("1"));
 				RequestWithActor<Long> requestWithActor = new RequestWithActor<Long>();
 				requestWithActor.setEntity(payNoticeVO.getTraNo());
 				requestWithActor.setAgent(AgentUtil.getAgent());
@@ -251,6 +252,7 @@ public class InsPayNoticeListener {
 			}
 
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			logger.error("消费队列异常 ：", ex);
 		}
 
