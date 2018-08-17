@@ -774,7 +774,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 	            }
 	        }
             //直接用订单号查询时,不受日期限制
-			if(StringUtil.isNotNullOrEmpty(pageRequest.getEntity().getSaleOrderNo())){
+			/*if(StringUtil.isNotNullOrEmpty(pageRequest.getEntity().getSaleOrderNo())){
 				pageRequest.getEntity().setCreateEndTime(null);
 				pageRequest.getEntity().setCreateStartTime(null);
 			}
@@ -783,7 +783,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				LocalTime localTime = LocalTime.now();
 				LocalDateTime localDateTime = LocalDateTime.of(localDate, localTime);
 				pageRequest.getEntity().setCreateEndTime(Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()));
-			}
+			}*/
 
 			List<HotelOrder> hotelOrderList = hotelOrderMapper.queryOrderList(page, pageRequest.getEntity());
 	        /**
