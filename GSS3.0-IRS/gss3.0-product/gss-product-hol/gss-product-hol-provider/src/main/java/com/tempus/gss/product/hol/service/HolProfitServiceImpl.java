@@ -8,10 +8,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Future;
 
+import com.tempus.gss.product.hol.api.entity.WhiteListPhone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 
@@ -59,6 +63,9 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
     IMaxNoService maxNoService;
 	@Reference
 	protected IChannelService channelService;
+
+	@Autowired
+	MongoTemplate mongoTemplate1;
 	@Override
 	public Page<Profit> queryProfitList(Page<Profit> page, Agent agent, ProfitVo vo) {
 		log.info("酒店政策查询开始");
@@ -739,15 +746,51 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 		
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+    @Override
+    public void saveWhiteListPhone(Agent agent, WhiteListPhone phone) {
+		if(agent==null){
+			log.error("agent为空");
+			throw new GSSException("电话白名单保存失败", "0101", "agent为空");
+		}
+		if (StringUtil.isNotNullOrEmpty(phone.getId())) {
+			deletePhoneById(agent, phone.getId());
+		}
+		phone.setId(phone.getId());
+		mongoTemplate1.save(phone);
+    }
+
+    @Override
+    public Page<?> queryPhoneList(Agent agent, Page<WhiteListPhone> page) {
+		if(agent==null){
+			log.error("agent为空");
+			throw new GSSException("电话白名单查询失败", "0101", "agent为空");
+		}
+		Query query = new Query();
+		Long totalCount = mongoTemplate1.count(query, WhiteListPhone.class);
+		int skip= (page.getCurrent()-1)* (page.getSize());
+		query.skip(skip);
+		query.limit(page.getSize());
+		List<WhiteListPhone> phoneList = mongoTemplate1.find(query, WhiteListPhone.class);
+		page.setTotal(totalCount.intValue());
+		page.setRecords(phoneList);
+		return page;
+	}
+
+    @Override
+    public WhiteListPhone getPhoneById(Agent agent, String id) {
+		if(agent==null){
+			log.error("agent为空");
+			throw new GSSException("电话查询失败", "0101", "agent为空");
+		}
+		return mongoTemplate1.findOne(new Query(Criteria.where("_id").is(id)), WhiteListPhone.class);
+    }
+
+	@Override
+	public void deletePhoneById(Agent agent, String id) {
+		if(agent==null){
+			log.error("agent为空");
+			throw new GSSException("电话删除失败", "0101", "agent为空");
+		}
+		mongoTemplate1.remove(new Query(Criteria.where("_id").is(id)), WhiteListPhone.class);
+	}
 }
