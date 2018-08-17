@@ -57,7 +57,7 @@ public interface IOrderService {
 
 	/**
 	 *
-	 * buyInsure:投保
+	 * buyInsure:投保(根据销售单进行全部投保操作)
 	 *
 	 * @param @param
 	 *            requestBean
