@@ -13,6 +13,8 @@ import com.tempus.gss.order.entity.vo.PlanInfoSearchVO;
 import com.tempus.gss.order.entity.vo.UpdatePlanAmountVO;
 import com.tempus.gss.order.service.ICertificateService;
 import com.tempus.gss.order.service.IPlanAmountRecordService;
+import com.tempus.gss.pay.dict.DetailPayWay;
+import com.tempus.gss.pay.dict.ProductType;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.SaleOrderExt;
 import com.tempus.gss.product.ift.api.entity.iftVo.IftRepayVo;
@@ -88,6 +90,8 @@ public class IftOrderRePayServiceImpl implements IIftOrderRePayService {
         certificateCreateVO.setPayType(2);//1 在线支付 2 帐期或代付 3 线下支付
         certificateCreateVO.setChannel("SALE");
         certificateCreateVO.setServiceLine("1");
+        certificateCreateVO.setProductType(ProductType.IFT_TICKET);
+        certificateCreateVO.setDetailPayWay(DetailPayWay.NORMAL);
         if (planInfoSearchVO != null) {
             //更新销售应收应付
             UpdatePlanAmountVO updatePlanAmountVO = new UpdatePlanAmountVO();
@@ -111,7 +115,7 @@ public class IftOrderRePayServiceImpl implements IIftOrderRePayService {
             businessOrderInfo.setActualAmount(result);
             certificateCreateVO.setOrderInfoList(orderInfoList);
             try {
-                OSResultType payResult = certificateService.__createCertificateAndPay(agent, certificateCreateVO);
+                OSResultType payResult = certificateService.createCertificateAndPay(agent, certificateCreateVO);
                 logger.info("{}", payResult.getMessage());
             } catch (Exception e) {
                 logger.error("shibai", e);
@@ -128,7 +132,7 @@ public class IftOrderRePayServiceImpl implements IIftOrderRePayService {
                 logger.info("{}", refundAmount);
                 if (refundAmount.doubleValue()>0){
                     certificateCreateVO.setIncomeExpenseType(1);
-                    OSResultType payResult = certificateService.__createCertificateAndPay(agent, certificateCreateVO);
+                    OSResultType payResult = certificateService.createCertificateAndPay(agent, certificateCreateVO);
                     logger.info("{}", payResult.getMessage());
                 }
             } catch (GSSException e) {
