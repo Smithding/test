@@ -58,6 +58,7 @@ import com.tempus.gss.order.entity.SaleOrder;
 import com.tempus.gss.order.service.IBuyOrderService;
 import com.tempus.gss.order.service.ISaleOrderService;
 import com.tempus.gss.product.common.entity.RequestWithActor;
+import com.tempus.gss.product.hol.api.entity.WhiteListPhone;
 import com.tempus.gss.product.hol.api.entity.request.tc.AssignDateHotelReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.CancelOrderBeforePayReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.CardSupportReq;
@@ -305,6 +306,11 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 					}
 				}
 			}
+		}
+		
+		WhiteListPhone phone = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(orderCreateReq.getLinkManMobile())), WhiteListPhone.class);
+		if (null != phone) {
+			GUEST_NO = phone.getPhone();
 		}
 		
 		BigDecimal totalPrice = new BigDecimal(Double.toString(0));
