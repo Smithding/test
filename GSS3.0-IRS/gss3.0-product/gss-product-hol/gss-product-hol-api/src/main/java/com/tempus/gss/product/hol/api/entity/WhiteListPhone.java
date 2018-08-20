@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.entity;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * 电话白名单
@@ -16,6 +17,8 @@ public class WhiteListPhone implements Serializable {
     private String phone;   //电话
 
     private String remark;  //备注
+
+    private Date updateTime;//更新时间
 
     public String getId() {
         return id;
@@ -47,5 +50,13 @@ public class WhiteListPhone implements Serializable {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public Date getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Date updateTime) {
+        this.updateTime = updateTime;
     }
 }

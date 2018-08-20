@@ -756,6 +756,7 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 			deletePhoneById(agent, phone.getId());
 		}
 		phone.setId(phone.getId());
+		phone.setUpdateTime(new Date());
 		mongoTemplate1.save(phone);
     }
 
