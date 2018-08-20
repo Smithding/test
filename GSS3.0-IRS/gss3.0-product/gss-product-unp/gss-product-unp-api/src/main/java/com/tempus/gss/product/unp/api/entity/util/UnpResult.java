@@ -36,7 +36,19 @@ public class UnpResult<T> {
         this.entity = entity;
     }
     
-    UnpResult() {
+    public void success(String msg, T t) {
+        this.setMsg(msg);
+        this.setCode(SUCCESS);
+        this.setEntity(t);
+    }
+    
+    public void failed(String msg, T t) {
+        this.setMsg(msg);
+        this.setCode(FAILED);
+        this.setEntity(t);
+    }
+    
+    public UnpResult() {
         this.code = FAILED;
         this.msg = "Failed By Default!";
         this.entity = null;

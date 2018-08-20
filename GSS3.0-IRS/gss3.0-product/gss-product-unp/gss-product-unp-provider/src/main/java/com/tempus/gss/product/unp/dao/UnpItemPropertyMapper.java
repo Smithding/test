@@ -1,7 +1,9 @@
 package com.tempus.gss.product.unp.dao;
 
 import com.tempus.gss.product.unp.api.entity.UnpItemProperty;
+import org.springframework.stereotype.Component;
 
+@Component
 public interface UnpItemPropertyMapper {
     int deleteByPrimaryKey(Long id);
     
