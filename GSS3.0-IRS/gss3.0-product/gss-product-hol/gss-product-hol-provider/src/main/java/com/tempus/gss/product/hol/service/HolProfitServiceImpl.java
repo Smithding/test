@@ -552,7 +552,7 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 										}
 									}
 								}
-							}
+							}else
 							if(chanss.getLevel().equals(3L)){
 								if(chanss.getChilds().size() > 0){
 									query.setCustomerTypeNo(chanss.getChilds().get(0).getTwoType());
@@ -565,7 +565,7 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 										}
 									}
 								}
-							}
+							}else
 							if(chanss.getLevel().equals(2L)){
 								if(chanss.getChilds().size() > 0){
 									query.setCustomerTypeNo(chanss.getChilds().get(0).getOneType());
@@ -574,7 +574,7 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 										throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo无对应策略组 ");
 									}
 								}
-							}
+							}else
 							if(chanss.getLevel().equals(1L)){
 								throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo为最高组级无对应控润");
 							}
@@ -683,7 +683,7 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 										}
 									}
 								}
-							}
+							}else
 							if(chanss.getLevel().equals(3L)){
 								if(chanss.getChilds().size() > 0){
 									query.setCustomerTypeNo(chanss.getChilds().get(0).getTwoType());
@@ -696,7 +696,7 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 										}
 									}
 								}
-							}
+							}else
 							if(chanss.getLevel().equals(2L)){
 								if(chanss.getChilds().size() > 0){
 									query.setCustomerTypeNo(chanss.getChilds().get(0).getOneType());
@@ -705,7 +705,7 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 										throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo无对应策略组 ");
 									}
 								}
-							}
+							}else
 							if(chanss.getLevel().equals(1L)){
 								throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo为最高组级无对应控润");
 							}
