@@ -100,6 +100,7 @@ public class IftOrderRePayServiceImpl implements IIftOrderRePayService {
             planAmountRecordService.update(agent, updatePlanAmountVO);
         }
         BigDecimal result = repayVo.getAmount().subtract(plantTotalAmount);
+        certificateCreateVO.setSaleOrderNo(repayVo.getBussinessNo().toString());//销售单号
         logger.info("比较新应收总和和就应收总和结果：" + result.doubleValue());
         //  this.createBuyCertificate(AgentUtil.getAgent(), buychange.getBuyChangeNo(), buychange.getPlanAmount().doubleValue(), changePrice.getAccountNo(), supplier.getSupplierNo(), supplier.getCustomerTypeNo(), 3, 2000003, "BUY", thirdBusNo, changePrice.getDealNo());
         //(Agent agent, long buyOrderNo, double payAmount, long payAccount, long customerNo, long customerTypeNo, int payType, int payWay, String channel, String thirdBusNo, String thirdPayNo) {
@@ -118,16 +119,22 @@ public class IftOrderRePayServiceImpl implements IIftOrderRePayService {
         }
         if (result.doubleValue() < 0) {
             certificateCreateVO.setIncomeExpenseType(2);//收支类型 1 收，2 为支
-            //金额变小 调用退款接口 金额原路退还
+            //金额变小 调用退款接口 金额原路退还 退款不能部分退款  退款 先退全部 在重新支付一次
             BigDecimal refundAmount = new BigDecimal(0);
+            businessOrderInfo.setActualAmount(new BigDecimal(0).subtract(result));
+            certificateCreateVO.setOrderInfoList(orderInfoList);
             try {
                 refundAmount = certificateService.saleRefundCert(agent, certificateCreateVO);
                 logger.info("{}", refundAmount);
+                if (refundAmount.doubleValue()>0){
+                    certificateCreateVO.setIncomeExpenseType(1);
+                    OSResultType payResult = certificateService.__createCertificateAndPay(agent, certificateCreateVO);
+                    logger.info("{}", payResult.getMessage());
+                }
             } catch (GSSException e) {
                 logger.info("", e);
             }
-            businessOrderInfo.setActualAmount(result);
-            certificateCreateVO.setOrderInfoList(orderInfoList);
+
         }
 
 
