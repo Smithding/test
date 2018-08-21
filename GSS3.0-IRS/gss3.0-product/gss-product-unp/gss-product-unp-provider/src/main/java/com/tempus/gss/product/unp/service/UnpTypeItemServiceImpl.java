@@ -11,11 +11,16 @@ import com.tempus.gss.vo.Agent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * @author ZhangBro
+ */
+@Service
 public class UnpTypeItemServiceImpl extends BaseUnpService implements UnpTypeItemService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
@@ -34,7 +39,7 @@ public class UnpTypeItemServiceImpl extends BaseUnpService implements UnpTypeIte
         UnpResult<UnpGroupType> result = new UnpResult<>();
         try {
             if (groupTypeMapper.insertSelective(group) > 0) {
-                result.success("OK", group);
+                result.success("Add Group : OK", group);
             } else {
                 result.failed("Error", null);
             }
@@ -61,7 +66,7 @@ public class UnpTypeItemServiceImpl extends BaseUnpService implements UnpTypeIte
         UnpResult<UnpItemType> result = new UnpResult<>();
         try {
             if (itemTypeMapper.insertSelective(item) > 0) {
-                result.success("OK", item);
+                result.success("Add Item : OK", item);
             } else {
                 result.failed("Error", null);
             }
@@ -79,7 +84,69 @@ public class UnpTypeItemServiceImpl extends BaseUnpService implements UnpTypeIte
     }
     
     @Override
+    public UnpResult<UnpItemType> delete(Agent agent, Long itemNo) {
+        UnpItemType updateEntity = new UnpItemType();
+        updateEntity.setValid(0);
+        updateEntity.setItemTypeNo(itemNo);
+        return this.update(agent, updateEntity);
+        
+    }
+    
+    @Override
+    public UnpResult<UnpItemType> reuse(Agent agent, Long itemNo) {
+        UnpItemType updateEntity = new UnpItemType();
+        updateEntity.setValid(1);
+        updateEntity.setItemTypeNo(itemNo);
+        return this.update(agent, updateEntity);
+    }
+    
+    @Override
     public UnpResult<UnpItemType> delete(Agent agent, UnpItemType item) {
-        return null;
+        UnpResult<UnpItemType> result = new UnpResult<>();
+        if (null == item) {
+            result.setCode(UnpResult.FAILED);
+            result.setMsg("要删除的item不能为空");
+            return result;
+        }
+        item.setValid(0);
+        return this.update(agent, item);
+    }
+    
+    @Override
+    public UnpResult<UnpItemType> reuse(Agent agent, UnpItemType item) {
+        UnpResult<UnpItemType> result = new UnpResult<>();
+        if (null == item) {
+            result.setCode(UnpResult.FAILED);
+            result.setMsg("要删除的item不能为空");
+            return result;
+        }
+        item.setValid(1);
+        return this.update(agent, item);
+    }
+    
+    @Override
+    public UnpResult<UnpItemType> update(Agent agent, UnpItemType item) {
+        UnpResult<UnpItemType> result = new UnpResult<>();
+        try {
+            if (null == item) {
+                result.setCode(UnpResult.FAILED);
+                result.setMsg("要删除的item不能为空");
+                return result;
+            }
+            if (itemTypeMapper.updateByPrimaryKeySelective(item) > 0) {
+                result.setCode(UnpResult.SUCCESS);
+                result.setMsg("SUCCESS");
+                return result;
+            } else {
+                result.setCode(UnpResult.FAILED);
+                result.setMsg("无数据变更");
+                return result;
+            }
+        } catch (Exception e) {
+            logger.error("Error", e);
+            result.setCode(UnpResult.FAILED);
+            result.setMsg("Error : " + e.getMessage());
+            return result;
+        }
     }
 }

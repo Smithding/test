@@ -72,11 +72,51 @@ public interface UnpTypeItemService {
     /**
      * @param agent
      *         agent
+     * @param itemNo
+     *         itemNo
+     *         删除特定的某个小类（逻辑删除）
+     * @return UnpResult
+     */
+    UnpResult<UnpItemType> delete(Agent agent, Long itemNo);
+    
+    /**
+     * @param agent
+     *         agent
+     * @param itemNo
+     *         itemNo
+     *         重用特定的某个小类（逻辑删除）
+     * @return UnpResult
+     */
+    UnpResult<UnpItemType> reuse(Agent agent, Long itemNo);
+    
+    /**
+     * @param agent
+     *         agent
      * @param item
      *         item
      *         删除特定的某个小类（逻辑删除）
      * @return UnpResult
      */
     UnpResult<UnpItemType> delete(Agent agent, UnpItemType item);
+    
+    /**
+     * @param agent
+     *         agent
+     * @param item
+     *         item
+     *         重用特定的某个小类（逻辑删除）
+     * @return UnpResult
+     */
+    UnpResult<UnpItemType> reuse(Agent agent, UnpItemType item);
+    
+    /**
+     * @param agent
+     *         agent
+     * @param item
+     *         item
+     *         删除特定的某个小类（逻辑删除）
+     * @return UnpResult
+     */
+    UnpResult<UnpItemType> update(Agent agent, UnpItemType item);
     
 }
