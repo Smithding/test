@@ -15,6 +15,7 @@ import java.util.concurrent.Future;
 
 import com.tempus.gss.product.hol.api.entity.vo.bqy.*;
 import com.tempus.gss.security.AgentUtil;
+import com.tempus.gss.util.MathUtil;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -245,270 +246,237 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 			
 			//异步请求酒店图片和酒店详细信息
 			Future<List<ImageList>> asyncHotelImage = bqyHotelInterService.asyncHotelImage(query);
-			//Future<HotelEntity> asyncHotelDetail = bqyHotelInterService.asyncHotelDetail(query);
-			//Future<ResBaseInfo> asyncResBaseInfo = bqyHotelConverService.asyncConvertTcHotelEntity(Long.valueOf(hotelId));
 			Future<List<RoomPriceItem>> asynRoomPrice = bqyHotelInterService.asyncRoomPrice(query);
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
             computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getNum(), "bqy");
-			/*while (asyncHotelImage.isDone() && asyncHotelDetail.isDone() && asyncResBaseInfo.isDone()) {
-				break;
-			}*/
 			while (asynRoomPrice.isDone() && asyncHotelImage.isDone()) {
 				break;
 			}
 
 			List<ImageList> bqyHotelImgList = asyncHotelImage.get();
 			List<RoomPriceItem> roomPriceItemList = asynRoomPrice.get();
-			//HotelEntity hotelEntity = asyncHotelDetail.get();
-			//ResBaseInfo resBaseInfo = asyncResBaseInfo.get();
-			//List<ImgInfo> tcHotelImgList = convertTCImg(bqyHotelImgList);
-			//resBaseInfo.setImgInfoList(bqyHotelImgList);
-			
-			//List<RoomPriceItem> roomPriceItemList = bqyHotelInterService.queryHotelRoomPrice(query);
-			
-			//if (null != hotelEntity) {
-				//List<RoomPriceItem> roomPriceItemList = hotelEntity.getRoomPriceItem();
-			
-				List<ProDetails> proDetails = new ArrayList<>();
-				if (null != roomPriceItemList && roomPriceItemList.size() > 0) {
-					
-					for (RoomPriceItem roomPriceItem : roomPriceItemList) {
-						ProDetails proDetail = new ProDetails();
-						BaseRoomInfo baseRoomInfo = roomPriceItem.getBaseRoomInfo();
-						proDetail.setProId(baseRoomInfo.getRoomTypeID());
-						proDetail.setResProName(baseRoomInfo.getRoomName().replaceAll("\\s*", "").replaceAll("（", "(").replaceAll("）", ")"));
-						proDetail.setRoomFloor(baseRoomInfo.getFloorRange());
-						proDetail.setRoomSize(baseRoomInfo.getAreaRange());
-						
-						//房型图片
-						if (null != bqyHotelImgList && bqyHotelImgList.size() > 0) {
-							for (int i = 0, len = bqyHotelImgList.size(); i < len; i++) {
-								ImageList image = bqyHotelImgList.get(i);
-								if (baseRoomInfo.getRoomTypeID().equals(image.getRoomTypeId())) {
-									proDetail.setImgUrl(image.getImageUrl());
-									break;
-								}
+			List<ProDetails> proDetails = new ArrayList<>();
+			if (null != roomPriceItemList && roomPriceItemList.size() > 0) {
+				for (RoomPriceItem roomPriceItem : roomPriceItemList) {  //房型
+					ProDetails proDetail = new ProDetails();
+					BaseRoomInfo baseRoomInfo = roomPriceItem.getBaseRoomInfo();
+					proDetail.setProId(baseRoomInfo.getRoomTypeID());
+					proDetail.setResProName(baseRoomInfo.getRoomName().replaceAll("\\s*", "").replaceAll("（", "(").replaceAll("）", ")"));
+					proDetail.setRoomFloor(baseRoomInfo.getFloorRange());
+					proDetail.setRoomSize(baseRoomInfo.getAreaRange());
+
+					//房型图片
+					if (null != bqyHotelImgList && bqyHotelImgList.size() > 0) {
+						for (int i = 0, len = bqyHotelImgList.size(); i < len; i++) {
+							ImageList image = bqyHotelImgList.get(i);
+							if (baseRoomInfo.getRoomTypeID().equals(image.getRoomTypeId())) {
+								proDetail.setImgUrl(image.getImageUrl());
+								break;
 							}
 						}
-						
-						List<RoomInfoItem> roomInfoList = roomPriceItem.getRoomInfo();
-						List<ResProBaseInfo> resProBaseInfos = new ArrayList<>();
-						for (RoomInfoItem roomInfo : roomInfoList) {
-							ResProBaseInfo resProBaseInfo = new ResProBaseInfo();
-							resProBaseInfo.setResId(Long.parseLong(hotelId));
-							resProBaseInfo.setProId(baseRoomInfo.getRoomTypeID());
-							resProBaseInfo.setCustomerType(roomInfo.getSupplierId());	//用来存储酒店代理人Id
-							resProBaseInfo.setPaymnetType(2);							//0：All-全部；1：SelfPay-现付；2：Prepay-预付
-							resProBaseInfo.setSupplierType(2);
-							List<BedTypeInfo> bedTypeInfo = baseRoomInfo.getBedTypeInfo();
-							if (null != bedTypeInfo && bedTypeInfo.size() > 0) {
-								String bedWidth = "";
-								for (int i =0, len = bedTypeInfo.size(); i < len; i++) {
-									if (i == 0) {
-										bedWidth =  bedTypeInfo.get(i).getBedWidth();
-										continue;
-									}
-									if (!bedWidth.contains(bedTypeInfo.get(i).getBedWidth())) {
-										bedWidth = bedWidth + "," + bedTypeInfo.get(i).getBedWidth();
-									}
-								}
-								resProBaseInfo.setBedSize(bedWidth);
-								proDetail.setBedSize(bedWidth);
-							}
-							//产品名称
-							resProBaseInfo.setSupPriceName(roomInfo.getRoomName());
-							
-							//床型
-							RoomBedTypeInfo roomBedTypeInfo = roomInfo.getRoomBedTypeInfo();
-							if ("T".equals(roomBedTypeInfo.getHasKingBed())) {
-								resProBaseInfo.setBedTypeName("大床");
-							}else if ("T".equals(roomBedTypeInfo.getHasTwinBed())) {
-								resProBaseInfo.setBedTypeName("双床");
-							}else if ("T".equals(roomBedTypeInfo.getHasSingleBed())) {
-								resProBaseInfo.setBedTypeName("单人床");
-							}
-							//价格
-							RoomPriceInfo roomPriceInfo = roomInfo.getRoomPriceInfo();
-							AveragePrice averagePrice = roomPriceInfo.getAveragePrice();
-							resProBaseInfo.setConPrice(averagePrice.getSettleFee().intValue());
-							resProBaseInfo.setRoomFeature(roomPriceInfo.getRatePlanCategory()); //预付检查字段
-							List<RoomPriceDetail> roomPriceDetail = roomPriceInfo.getRoomPriceDetail();
-							resProBaseInfo.setFirPrice(averagePrice.getSettleFee().intValue());	//首日价
-							resProBaseInfo.setOtherDescription(roomPriceInfo.getIsJustifyConfirm());
-
-							//取消规则
-							CancelLimitInfo cancelLimitInfo = roomInfo.getCancelLimitInfo();
-							if (null != cancelLimitInfo) {
-								resProBaseInfo.setBookingNotes(cancelLimitInfo.getCancelPolicyInfo());
-								resProBaseInfo.setPolicyRemark(cancelLimitInfo.getLastCancelTime());
-								resProBaseInfo.setSourceFrom(Long.valueOf(cancelLimitInfo.getPolicyType()));
-							}
-							//入住人数
-							resProBaseInfo.setAdultCount(Integer.valueOf(roomInfo.getPerson()));
-
-							//预定检查类型
-							resProBaseInfo.setRoomFeature(roomPriceInfo.getRatePlanCategory());
-							//供应商ID
-							resProBaseInfo.setCustomerType(roomInfo.getSupplierId());
-
-							//房间数
-							String roomNumStr = roomPriceInfo.getRemainingRooms();
-							if (roomNumStr.contains("+")) {
-								roomNumStr = roomNumStr.substring(0, roomNumStr.indexOf("+"));
-							}else if ("true".equalsIgnoreCase(roomNumStr)) {
-								roomNumStr = "10";
-							}
-							if (StringUtils.isNotBlank(roomNumStr)) {
-								resProBaseInfo.setProMinInventory(Integer.valueOf(roomNumStr));
-							}else {
-								resProBaseInfo.setProMinInventory(1);
-							}
-
-							//价格弹窗
-							TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
-							int daysBetween = DateUtil.daysBetween(checkinDate, checkoutDate);
-							for (int i = 0; i < daysBetween; i++) {
-								Date checkIn = sdf.parse(checkinDate);
-								String checkInFormat = sdf.format(DateUtil.offsiteDay(checkIn, i));
-								ProSaleInfoDetail pid = new ProSaleInfoDetail();
-								pid.setDistributionSalePrice(averagePrice.getSettleFee().intValue());
-								mapPro.put(checkInFormat, pid);
-							}
-							
-							
-							/*int dayNum = 0;
-							if (null != roomPriceDetail && roomPriceDetail.size() > 0) {
-								int index = 0;
-								Long minDate = 0L;
-								for (int i = 0; i < roomPriceDetail.size(); i++) {
-									Price roomPrice = roomPriceDetail.get(i).getPrice();
-									String effectDate = roomPriceDetail.get(i).getEffectDate();
-									if (effectDate.contains("T")) {
-										effectDate = effectDate.replace("T", " ");
-									}
-									if (i == 0) {
-										minDate = Long.valueOf(effectDate.replaceAll("[-\\s:]",""));
-									}else {
-										Long temp = Long.valueOf(effectDate.replaceAll("[-\\s:]",""));
-										if ((temp-minDate) < 0) {
-											minDate = temp;
-											index = i;
-										}
-									}
-									String dateStr = effectDate.substring(0, effectDate.indexOf(" "));
-									if (mapPro.containsKey(dateStr)) {
-										ProSaleInfoDetail pid = mapPro.get(dateStr);
-										if (null != roomPrice) {
-											dayNum++;
-											pid.setDistributionSalePrice(Integer.valueOf(roomPrice.getAmount()));
-											mapPro.put(dateStr, pid);
-										}
-									}
-								}
-								RoomPriceDetail roomPrice = roomPriceDetail.get(index);
-								Price price = roomPrice.getPrice();
-								if (null != price) {
-									resProBaseInfo.setFirPrice(Integer.valueOf(price.getAmount()));
-								}
-							}
-							if (daysBetween != dayNum) {
-								resProBaseInfo.setBookStatus(0);
-							}*/
-							resProBaseInfo.setProSaleInfoDetailsTarget(mapPro);
-							//房间ID
-							resProBaseInfo.setProductUniqueId(roomInfo.getRoomID());
-							//是否无烟
-							if (null != roomInfo.getSmokeInfo()) {
-				                  String hasRoomInNonSmokeArea = roomInfo.getSmokeInfo().getHasRoomInNonSmokeArea();
-				                  if ("T".equals(hasRoomInNonSmokeArea)) {
-				                      resProBaseInfo.setNonSmoking((byte) 1);
-				                  }else {
-				                      resProBaseInfo.setNonSmoking((byte) 0);
-				                  }
-				              }
-							//设置控润
-							if(computeProfitByAgentFu!=null) {
-			 						List<ProfitPrice> computeProfitByAgent = computeProfitByAgentFu.get();
-   			 					if(computeProfitByAgent != null && computeProfitByAgent.size() > 0) {
-       			 					for(ProfitPrice profit : computeProfitByAgent) {
-       			 						BigDecimal lowerPrice = profit.getPriceFrom();
-       			 						BigDecimal upPrice = profit.getPriceTo();
-       			 						BigDecimal firPrice = new BigDecimal(resProBaseInfo.getConPrice());
-       			 						if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
-       			 							BigDecimal rate = profit.getRate();
-       			 							rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
-       			 							resProBaseInfo.setRebateRateProfit(rate);
-       			 						}
-       			 					}
-   			 					}
-			 				}
-							
-							//是否有宽带
-							BroadNetInfo broadNetInfo = roomInfo.getBroadNetInfo();
-							if (null != broadNetInfo) {
-							    String hasBroadnet = broadNetInfo.getHasBroadnet();
-							    if (!"0".equals(hasBroadnet)) {
-							        String hasWirelessBroadnet = broadNetInfo.getHasWirelessBroadnet();
-							        List<String> hasBroadband = new ArrayList<>();
-							        if ("T".equals(hasWirelessBroadnet)) {
-							            if ("0".equals(broadNetInfo.getWirelessBroadnetFee())) {
-							            	//免费无线
-							            	hasBroadband.add("FreeWifi");
-							            }else{
-							            	//收费无线
-							            	hasBroadband.add("ChargeWifi");
-							            }
-							        }
-							        String hasWiredBroadnet = broadNetInfo.getHasWiredBroadnet();
-							        if ("T".equals(hasWiredBroadnet)) {
-							        	String wiredBroadnetFee = broadNetInfo.getWiredBroadnetFee();
-							        	if ("0".equals(wiredBroadnetFee)) {
-							        		//免费有线
-							        		hasBroadband.add("FreeWiredBroadband");
-							        	}else {
-							        		//收费有线
-							        		hasBroadband.add("ChargeWiredBroadband");
-							        	}
-							        }
-							        resProBaseInfo.setHasBroadband(hasBroadband);
-							    }
-							}
-							//是否有早餐
-							if (null != roomPriceDetail && roomPriceDetail.size() > 0) {
-								//早餐(0.无早;1.一份; 2.双份; 3.三份…)
-								String hasBreakfast = roomPriceDetail.get(0).getBreakfast();
-								resProBaseInfo.setBreakfastCount(Integer.parseInt(hasBreakfast));
-							}else {
-								resProBaseInfo.setBreakfastCount(0);
-							}
-							
-							//是否有窗bqy(0.无窗; 1.部分有窗; 2.有窗;)
-							//	   TC(0.无窗;  1.有窗;   2.部分有窗)
-							String hasWindow = roomInfo.getHasWindow();
-							if ("1".equals(hasWindow)) {
-								resProBaseInfo.setHasWindows((byte)2);
-							}else if ("2".equals(hasWindow)) {
-								resProBaseInfo.setHasWindows((byte)1);
-							}else {
-								resProBaseInfo.setHasWindows((byte)0);
-							}
-							resProBaseInfos.add(resProBaseInfo);
-						}
-						proDetail.setResProBaseInfoList(resProBaseInfos);
-						proDetails.add(proDetail);
 					}
+
+					List<RoomInfoItem> roomInfoList = roomPriceItem.getRoomInfo();
+					List<ResProBaseInfo> resProBaseInfos = new ArrayList<>();
+					for (RoomInfoItem roomInfo : roomInfoList) {		//房间
+						ResProBaseInfo resProBaseInfo = new ResProBaseInfo();
+						resProBaseInfo.setResId(Long.parseLong(hotelId));
+						resProBaseInfo.setProId(baseRoomInfo.getRoomTypeID());
+						resProBaseInfo.setCustomerType(roomInfo.getSupplierId());	//用来存储酒店代理人Id
+						resProBaseInfo.setPaymnetType(2);							//0：All-全部；1：SelfPay-现付；2：Prepay-预付
+						resProBaseInfo.setSupplierType(2);
+						List<BedTypeInfo> bedTypeInfo = baseRoomInfo.getBedTypeInfo();
+						if (null != bedTypeInfo && bedTypeInfo.size() > 0) {
+							String bedWidth = "";
+							for (int i =0, len = bedTypeInfo.size(); i < len; i++) {
+								if (i == 0) {
+									bedWidth =  bedTypeInfo.get(i).getBedWidth();
+									continue;
+								}
+								if (!bedWidth.contains(bedTypeInfo.get(i).getBedWidth())) {
+									bedWidth = bedWidth + "," + bedTypeInfo.get(i).getBedWidth();
+								}
+							}
+							resProBaseInfo.setBedSize(bedWidth);
+							proDetail.setBedSize(bedWidth);
+						}
+						//产品名称
+						resProBaseInfo.setSupPriceName(roomInfo.getRoomName());
+
+						//床型
+						RoomBedTypeInfo roomBedTypeInfo = roomInfo.getRoomBedTypeInfo();
+						if ("T".equals(roomBedTypeInfo.getHasKingBed())) {
+							resProBaseInfo.setBedTypeName("大床");
+						}else if ("T".equals(roomBedTypeInfo.getHasTwinBed())) {
+							resProBaseInfo.setBedTypeName("双床");
+						}else if ("T".equals(roomBedTypeInfo.getHasSingleBed())) {
+							resProBaseInfo.setBedTypeName("单人床");
+						}
+						//价格
+						RoomPriceInfo roomPriceInfo = roomInfo.getRoomPriceInfo();
+						AveragePrice averagePrice = roomPriceInfo.getAveragePrice();
+						resProBaseInfo.setRoomFeature(roomPriceInfo.getRatePlanCategory()); //预付检查字段
+						List<RoomPriceDetail> roomPriceDetail = roomPriceInfo.getRoomPriceDetail();
+						resProBaseInfo.setOtherDescription(roomPriceInfo.getIsJustifyConfirm());	//是否即时确认
+
+						//取消规则
+						CancelLimitInfo cancelLimitInfo = roomInfo.getCancelLimitInfo();
+						if (null != cancelLimitInfo) {
+							resProBaseInfo.setBookingNotes(cancelLimitInfo.getCancelPolicyInfo());
+							resProBaseInfo.setPolicyRemark(cancelLimitInfo.getLastCancelTime());
+							resProBaseInfo.setSourceFrom(Long.valueOf(cancelLimitInfo.getPolicyType()));
+						}
+						//入住人数
+						resProBaseInfo.setAdultCount(Integer.valueOf(roomInfo.getPerson()));
+
+						//预定检查类型
+						resProBaseInfo.setRoomFeature(roomPriceInfo.getRatePlanCategory());
+						//供应商ID
+						resProBaseInfo.setCustomerType(roomInfo.getSupplierId());
+
+						//房间数
+						String roomNumStr = roomPriceInfo.getRemainingRooms();
+						if (roomNumStr.contains("+")) {
+							roomNumStr = roomNumStr.substring(0, roomNumStr.indexOf("+"));
+						}else if ("true".equalsIgnoreCase(roomNumStr)) {
+							roomNumStr = "10";
+						}
+						if (StringUtils.isNotBlank(roomNumStr)) {
+							resProBaseInfo.setProMinInventory(Integer.valueOf(roomNumStr));
+						}else {
+							resProBaseInfo.setProMinInventory(1);
+						}
+
+						//房间ID
+						resProBaseInfo.setProductUniqueId(roomInfo.getRoomID());
+						//是否无烟
+						if (null != roomInfo.getSmokeInfo()) {
+							  String hasRoomInNonSmokeArea = roomInfo.getSmokeInfo().getHasRoomInNonSmokeArea();
+							  if ("T".equals(hasRoomInNonSmokeArea)) {
+								  resProBaseInfo.setNonSmoking((byte) 1);
+							  }else {
+								  resProBaseInfo.setNonSmoking((byte) 0);
+							  }
+						  }
+						//设置控润
+						if(computeProfitByAgentFu!=null) {
+								List<ProfitPrice> computeProfitByAgent = computeProfitByAgentFu.get();
+							if(computeProfitByAgent != null && computeProfitByAgent.size() > 0) {
+								String status = computeProfitByAgent.get(0).getStatus();
+								if (StringUtil.isNullOrEmpty(status) || "1".equals(status)) {	//启用
+									for(ProfitPrice profit : computeProfitByAgent) {
+										BigDecimal lowerPrice = profit.getPriceFrom();
+										BigDecimal upPrice = profit.getPriceTo();
+										BigDecimal firPrice = new BigDecimal(averagePrice.getSettleFee());
+										if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
+											BigDecimal rate = profit.getRate();
+											rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
+											resProBaseInfo.setRebateRateProfit(rate);
+											resProBaseInfo.setConPrice(averagePrice.getSettleFee().intValue());	//平均价
+											resProBaseInfo.setFirPrice(averagePrice.getSettleFee().intValue());	//首日价
+											//价格弹窗
+											TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
+											int daysBetween = DateUtil.daysBetween(checkinDate, checkoutDate);
+											for (int i = 0; i < daysBetween; i++) {
+												Date checkIn = sdf.parse(checkinDate);
+												String checkInFormat = sdf.format(DateUtil.offsiteDay(checkIn, i));
+												ProSaleInfoDetail pid = new ProSaleInfoDetail();
+												pid.setDistributionSalePrice(averagePrice.getSettleFee().intValue());
+												mapPro.put(checkInFormat, pid);
+											}
+											resProBaseInfo.setProSaleInfoDetailsTarget(mapPro);
+										}
+									}
+
+								}else if("0".equals(status)) {	//禁用(返佣为0,将返佣价格减去)
+									for(ProfitPrice profit : computeProfitByAgent) {
+										BigDecimal lowerPrice = profit.getPriceFrom();
+										BigDecimal upPrice = profit.getPriceTo();
+										BigDecimal firPrice = new BigDecimal(averagePrice.getSettleFee());
+										if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
+											BigDecimal rate = profit.getRate();
+											rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
+											resProBaseInfo.setRebateRateProfit(BigDecimal.ZERO);
+											BigDecimal endPrice = firPrice.subtract(firPrice.multiply(rate));
+											endPrice = endPrice.setScale(0, BigDecimal.ROUND_UP);
+											resProBaseInfo.setConPrice(endPrice.intValue());	//平均价
+											resProBaseInfo.setFirPrice(endPrice.intValue());	//首日价
+											//价格弹窗
+											TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
+											int daysBetween = DateUtil.daysBetween(checkinDate, checkoutDate);
+											for (int i = 0; i < daysBetween; i++) {
+												Date checkIn = sdf.parse(checkinDate);
+												String checkInFormat = sdf.format(DateUtil.offsiteDay(checkIn, i));
+												ProSaleInfoDetail pid = new ProSaleInfoDetail();
+												pid.setDistributionSalePrice(endPrice.intValue());
+												mapPro.put(checkInFormat, pid);
+											}
+											resProBaseInfo.setProSaleInfoDetailsTarget(mapPro);
+										}
+									}
+								}
+
+							}
+						}
+
+						//是否有宽带
+						BroadNetInfo broadNetInfo = roomInfo.getBroadNetInfo();
+						if (null != broadNetInfo) {
+							String hasBroadnet = broadNetInfo.getHasBroadnet();
+							if (!"0".equals(hasBroadnet)) {
+								String hasWirelessBroadnet = broadNetInfo.getHasWirelessBroadnet();
+								List<String> hasBroadband = new ArrayList<>();
+								if ("T".equals(hasWirelessBroadnet)) {
+									if ("0".equals(broadNetInfo.getWirelessBroadnetFee())) {
+										//免费无线
+										hasBroadband.add("FreeWifi");
+									}else{
+										//收费无线
+										hasBroadband.add("ChargeWifi");
+									}
+								}
+								String hasWiredBroadnet = broadNetInfo.getHasWiredBroadnet();
+								if ("T".equals(hasWiredBroadnet)) {
+									String wiredBroadnetFee = broadNetInfo.getWiredBroadnetFee();
+									if ("0".equals(wiredBroadnetFee)) {
+										//免费有线
+										hasBroadband.add("FreeWiredBroadband");
+									}else {
+										//收费有线
+										hasBroadband.add("ChargeWiredBroadband");
+									}
+								}
+								resProBaseInfo.setHasBroadband(hasBroadband);
+							}
+						}
+						//是否有早餐
+						if (null != roomPriceDetail && roomPriceDetail.size() > 0) {
+							//早餐(0.无早;1.一份; 2.双份; 3.三份…)
+							String hasBreakfast = roomPriceDetail.get(0).getBreakfast();
+							resProBaseInfo.setBreakfastCount(Integer.parseInt(hasBreakfast));
+						}else {
+							resProBaseInfo.setBreakfastCount(0);
+						}
+
+						//是否有窗bqy(0.无窗; 1.部分有窗; 2.有窗;)
+						//	   TC(0.无窗;  1.有窗;   2.部分有窗)
+						String hasWindow = roomInfo.getHasWindow();
+						if ("1".equals(hasWindow)) {
+							resProBaseInfo.setHasWindows((byte)2);
+						}else if ("2".equals(hasWindow)) {
+							resProBaseInfo.setHasWindows((byte)1);
+						}else {
+							resProBaseInfo.setHasWindows((byte)0);
+						}
+						resProBaseInfos.add(resProBaseInfo);
+					}
+					proDetail.setResProBaseInfoList(resProBaseInfos);
+					proDetails.add(proDetail);
 				}
-				ResBaseInfo resBaseInfo = new ResBaseInfo();
-				resBaseInfo.setProDetails(proDetails);
-				//酒店政策
-				//List<Policy> policyList = hotelEntity.getPolicy();
-				//bqyHotelPolicyConver(resBaseInfo, policyList);
-				//酒店服务
-				//String serviceNameStr = hotelEntity.getServiceName();
-				//setHotelServiceName(resBaseInfo, serviceNameStr);
-				//return resBaseInfo;
-				return new AsyncResult<ResBaseInfo>(resBaseInfo);
-			//}
+			}
+			ResBaseInfo resBaseInfo = new ResBaseInfo();
+			resBaseInfo.setProDetails(proDetails);
+			return new AsyncResult<ResBaseInfo>(resBaseInfo);
 		} catch (ParseException e) {
 			e.printStackTrace();
 			logger.error("酒店详情页面错误");
@@ -640,8 +608,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 			String planCode = hotelDetailSearchReq.getProductUniqueId();
 			int diff = DateUtil.daysBetween(hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate());
 			
-			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-			computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getNum(), "bqy");
+			Future<List<ProfitPrice>> computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getNum(), "bqy");
 			
 			Double oneDayPrice = null;
 			int roomNum = 0;
@@ -807,25 +774,28 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 			String checkOutDate = roomInfo.getCheckOutDate();
 
 			int diff  = DateUtil.daysBetween(checkInDate, checkOutDate);
-			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
-			computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getNum(), "bqy");
+			Future<List<ProfitPrice>> computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getNum(), "bqy");
 			//设置控润
 			if(computeProfitByAgentFu!=null) {
 				List<ProfitPrice> computeProfitByAgent  = computeProfitByAgentFu.get();
-				if(computeProfitByAgent != null && computeProfitByAgent.size() > 0) {
-					for(ProfitPrice profit : computeProfitByAgent) {
-						BigDecimal lowerPrice = profit.getPriceFrom();
-						BigDecimal upPrice = profit.getPriceTo();
-						BigDecimal firPrice = new BigDecimal(roomInfo.getPrice());
-						if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
-							BigDecimal rate = profit.getRate();
-							rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
-							useRoom.setRebateRateProfit(rate);
+				String status = computeProfitByAgent.get(0).getStatus();
+				if (StringUtil.isNullOrEmpty(status) || "1".equals(status)) {
+					if(computeProfitByAgent != null && computeProfitByAgent.size() > 0) {
+						for(ProfitPrice profit : computeProfitByAgent) {
+							BigDecimal lowerPrice = profit.getPriceFrom();
+							BigDecimal upPrice = profit.getPriceTo();
+							BigDecimal firPrice = new BigDecimal(roomInfo.getPrice());
+							if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
+								BigDecimal rate = profit.getRate();
+								rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
+								useRoom.setRebateRateProfit(rate);
+							}
 						}
 					}
+				}else if ("0".equals(status)){
+					useRoom.setRebateRateProfit(BigDecimal.ZERO);
 				}
 			}
-
 			useRoom.setUserSumPrice(oneDayPrice * diff);
 			useRoom.setTotalRebateRateProfit(new BigDecimal(oneDayPrice).multiply(useRoom.getRebateRateProfit()));
 			useRoom.setConPrice(roomInfo.getPrice());

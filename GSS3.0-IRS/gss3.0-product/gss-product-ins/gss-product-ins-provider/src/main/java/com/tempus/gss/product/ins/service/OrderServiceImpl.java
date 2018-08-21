@@ -1624,7 +1624,11 @@ public class OrderServiceImpl implements IOrderService {
 					saleOrderDetailForBefore.setIsReport("1");
 					saleOrderDetailForBefore.setCreateTime(time);
 					saleOrderDetailDao.insertSelective(saleOrderDetailForBefore);
-					
+					//更新订单表的退款时间
+					SaleOrderExt saleOrderExtForTime = new SaleOrderExt();
+					saleOrderExtForTime.setModifyTime(new Date());
+					saleOrderExtForTime.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
+					orderServiceDao.updateByPrimaryKeySelective(saleOrderExtForTime);
 				} else {
 					return resultInsure;
 				}
@@ -2003,6 +2007,11 @@ public class OrderServiceImpl implements IOrderService {
 				saleOrderDetailForBefore.setIsReport("1");
 				saleOrderDetailForBefore.setCreateTime(time);
 				saleOrderDetailDao.insertSelective(saleOrderDetailForBefore);
+				//更新订单的退款/退保时间
+				SaleOrderExt saleOrderExtForTime = new SaleOrderExt();
+				saleOrderExtForTime.setModifyTime(new Date());
+				saleOrderExtForTime.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
+				orderServiceDao.updateByPrimaryKeySelective(saleOrderExtForTime);
 				Insurance insurance = saleOrderExt.getInsurance();
 				Long businessSignNo = IdWorker.getId();
 				Long saleChangeNo = maxNoService.generateBizNo("INS_SALE_CHANGE_EXT_NO", 51);
@@ -3358,6 +3367,11 @@ public class OrderServiceImpl implements IOrderService {
 					saleOrderDetailForBefore.setIsReport("1");
 					saleOrderDetailForBefore.setCreateTime(time);
 					saleOrderDetailDao.insertSelective(saleOrderDetailForBefore);
+					//更新订单的退款/退保时间
+					SaleOrderExt saleOrderExtForTime = new SaleOrderExt();
+					saleOrderExtForTime.setModifyTime(new Date());
+					saleOrderExtForTime.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
+					orderServiceDao.updateByPrimaryKeySelective(saleOrderExtForTime);
 				} else {
 					return resultInsure;
 				}

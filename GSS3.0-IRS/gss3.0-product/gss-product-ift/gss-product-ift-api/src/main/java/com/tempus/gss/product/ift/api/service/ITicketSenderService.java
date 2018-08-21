@@ -32,6 +32,8 @@ public interface ITicketSenderService {
      */
     void updateByLockerId(Agent agent,Long lockerId,String type);
 
+    public void asynUpdateByLockerId(Agent agent, Long lockerId, String type);
+
     Page<TicketSender> pageList(Page<TicketSender> page, RequestWithActor<TicketSenderVo> requestWithActor);
 
     TicketSender queryById(Long id);

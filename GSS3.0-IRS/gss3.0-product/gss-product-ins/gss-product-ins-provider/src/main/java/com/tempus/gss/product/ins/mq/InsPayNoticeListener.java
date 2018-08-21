@@ -13,9 +13,13 @@
 
 package com.tempus.gss.product.ins.mq;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.tempus.gss.product.ins.api.entity.vo.OrderCancelVo;
+import com.tempus.gss.security.AgentUtil;
+import com.tempus.gss.system.service.IParamService;
 import org.jfree.util.Log;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.Exchange;
@@ -71,6 +75,8 @@ public class InsPayNoticeListener {
 	SaleChangeExtDao saleChangeExtDao;
 	@Autowired
 	OrderServiceDao orderServiceDao;
+	@Reference
+	private IParamService paramService;
 	@RabbitHandler
 	public void onMessage(PayNoticeVO payNoticeVO) {
 		Integer owner = payNoticeVO.getOwner();
@@ -118,6 +124,8 @@ public class InsPayNoticeListener {
 							logger.info("--------------------------------------------调用buyInsure------------------------------");
 							if(saleOrderExt.getSaleOrder().getOrderChildStatus()==3){
 								logger.info("该订单不能投保，订单为取消状态:"+saleOrderExt.getSaleOrderNo());
+							}else if(saleOrderExt.getIsBind() == 2){
+								logger.info("该订单不能投保，该订单绑定机票,需要等待机票出票后才可投保，订单销售单:"+saleOrderExt.getSaleOrderNo());
 							}else{
 								boolean flag = orderService.buyInsure(requestWithActor);
 								logger.info("投保是否成功,销售单号:" + payNoticeVO.getBusinessNo() + "->" + flag);
@@ -127,6 +135,10 @@ public class InsPayNoticeListener {
 					//退款状态处理
 					if (2 == businessType && 2 == incomeExpenseType) { // 2.销售单退款
 						logger.info("支付退单状态------>"+businessType);
+						//如果为收款 直接跳过
+						if(incomeExpenseType != 2){
+							return;
+						}
 						//1:退款成功2：退款失败
 						if(payStatus==1){
 							boolean isCancel = true;
@@ -175,10 +187,10 @@ public class InsPayNoticeListener {
 				         		saleOrderService.updateStatus(agent, saleOrderExt.getSaleOrderNo(), 9);//部分退款
 				         	}
 							//存储退款时间
-				         	SaleOrderExt saleOrderExtForTime = new SaleOrderExt();
+/*				         	SaleOrderExt saleOrderExtForTime = new SaleOrderExt();
 				         	saleOrderExtForTime.setModifyTime(new Date());
 				         	saleOrderExtForTime.setSaleOrderNo(saleOrderExt.getSaleOrderNo());
-				         	orderServiceDao.updateByPrimaryKeySelective(saleOrderExtForTime);
+				         	orderServiceDao.updateByPrimaryKeySelective(saleOrderExtForTime);*/
 				         	logger.info("退款成功------>");
 						}
 						if(payStatus==2){
@@ -203,9 +215,44 @@ public class InsPayNoticeListener {
 						}
 //						saleService.pay(agent, businessNo);
 					}
+			}else if(1==payNoticeVO.getGoodsType().intValue()){
+				logger.info("-------机票拒单保险退款-----收到拒单消息--交易单:"+payNoticeVO.getTraNo());
+				System.out.println(payNoticeVO.getGoodsType().equals("1"));
+				RequestWithActor<Long> requestWithActor = new RequestWithActor<Long>();
+				requestWithActor.setEntity(payNoticeVO.getTraNo());
+				requestWithActor.setAgent(AgentUtil.getAgent());
+				List<SaleOrderExt> saleOrderExtList =  orderService.querySaleOrderForTranSaction(requestWithActor);
+				//获取后台配置
+				String isRefund = paramService.getValueByKey("refund_or_cancel");
+				for(SaleOrderExt saleOrderExt:saleOrderExtList){
+					for (SaleOrderDetail saleOrderDetail : saleOrderExt.getSaleOrderDetailList()) {
+						String policyNo = saleOrderDetail.getPolicyNo();
+						RequestWithActor<OrderCancelVo> requestWithActor2 = new RequestWithActor<>();
+						OrderCancelVo orderCancelVo = new OrderCancelVo();
+						List<String> policyNoList = new ArrayList<String>();
+						policyNoList.add(policyNo);
+						orderCancelVo.setPolicyNoList(policyNoList);
+						requestWithActor2.setEntity(orderCancelVo);
+						requestWithActor2.setAgent(AgentUtil.getAgent());
+						Boolean cancelResult = false;
+
+						try {
+							if(saleOrderExt.getOrderType()==1){
+								orderService.cancelSaleOrder(requestWithActor2,Integer.parseInt(isRefund));
+							} else{
+								orderService.cancelSaleOrderOffline(requestWithActor2,Integer.parseInt(isRefund));
+							}
+
+							logger.info("cancelInsure end!");
+						} catch (Exception e) {
+							logger.error(e.getMessage());
+						}
+					}
+				}
 			}
 
 		} catch (Exception ex) {
+			ex.printStackTrace();
 			logger.error("消费队列异常 ：", ex);
 		}
 
