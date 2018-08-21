@@ -528,20 +528,12 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 
 		HotelOrder hotelOrder = new HotelOrder();
 
-		/*
-		// 查询酒店房间价格
-		QueryHotelParam query = new QueryHotelParam();
-		query.setCheckInTime(orderReq.getCheckInTime());
-		query.setCheckOutTime(orderReq.getCheckOutTime());
-		query.setCityCode(String.valueOf(orderReq.getCityId()));
-		query.setHotelId(orderReq.getHotelId());
-		List<RoomPriceItem> roomPriceList = bqyHotelInterService.queryHotelRoomPrice(query);
-		*/
-
 		// 房型ID
 		//String roomTypeId = orderReq.getProductId();
 		//房间单价
 		BigDecimal unitPrice = new BigDecimal(roomInfo.getPrice());
+		//房间原单价
+		BigDecimal oldUnitPrice = new BigDecimal(roomInfo.getOldPrice());
 		//供应商ID
 		String supplierId = roomInfo.getSupplierId();
 		//预定检查类型
@@ -551,7 +543,14 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 
 		// 每天的价格记录
 		String eachNightPrice = null;
+		// 每天价格
 		BigDecimal oneDayPrice = unitPrice.multiply(new BigDecimal(orderReq.getBookNumber()));
+		// 总价格
+		BigDecimal newTotalPrice = oneDayPrice.multiply(new BigDecimal(daysBetween));
+		//未减佣金每天的价格
+		BigDecimal oldOneDayPrice = oldUnitPrice.multiply(new BigDecimal(orderReq.getBookNumber()));
+		//未减佣金总价
+		BigDecimal oldTotalPrice = oldUnitPrice.multiply(new BigDecimal(daysBetween));
 
 		for (int i = 0; i < daysBetween; i++) {
 			if (eachNightPrice == null || "".equals(eachNightPrice)) {
@@ -572,76 +571,12 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 
 		hotelOrder.setBedTypeName(roomInfo.getBedTypeName());
 
-		/*outer:
-		for (RoomPriceItem roomPriceItem : roomPriceList) {
-			BaseRoomInfo baseRoomInfo = roomPriceItem.getBaseRoomInfo();
-			if (roomTypeId.equals(baseRoomInfo.getRoomTypeID())) {// 判断房型是否一致
-				List<RoomInfoItem> roomInfoList = roomPriceItem.getRoomInfo();
-				for (RoomInfoItem roomInfoItem : roomInfoList) {
-					if (orderReq.getHotelRoomId().equals(Long.valueOf(roomInfoItem.getRoomID()))) {// 判断房间ID是否一致
-						orderReq.setHotelRoomName(baseRoomInfo.getRoomName());
-						orderReq.setProductName(roomInfoItem.getRoomName());
-						CancelLimitInfo cancelLimitInfo = roomInfoItem.getCancelLimitInfo();
-						if (null != cancelLimitInfo) {
-							//政策类型
-							policyType = cancelLimitInfo.getPolicyType();
-							orderCreateReq.setCancelPenalty(cancelLimitInfo.getLastCancelTime());
-						}else {
-							logger.error("酒店订单创建,酒店政策为空 !");
-							throw new GSSException("bqy酒店订单创建", "1001", "酒店政策为空!");
-						}
-						RoomPriceInfo roomPriceInfo = roomInfoItem.getRoomPriceInfo();
-						//预定检查类型
-						ratePlanCategory = roomPriceInfo.getRatePlanCategory();
-						//供应商ID
-						supplierId = roomInfoItem.getSupplierId();
-						//平均价格
-						Double settleFee = roomPriceInfo.getAveragePrice().getSettleFee();
-						unitPrice = new BigDecimal(settleFee);
-						*//*List<RoomPriceDetail> priceDetailList = roomPriceInfo.getRoomPriceDetail();
-						for (RoomPriceDetail roomPriceDetail : priceDetailList) {
-							String oneDayPrice = roomPriceDetail.getPrice().getAmount();
-							// 计算一间房的价格
-							newTotalPrice = newTotalPrice.add(new BigDecimal(oneDayPrice));
-							// 记录每天的价格
-							if (eachNightPrice == null || "".equals(eachNightPrice)) {
-								eachNightPrice = oneDayPrice;
-							} else {
-								eachNightPrice = eachNightPrice + "," + oneDayPrice;
-							}
-						}*//*
-						for (int i = 0; i < daysBetween; i++) {
-							if (eachNightPrice == null || "".equals(eachNightPrice)) {
-								eachNightPrice = settleFee.toString();
-							} else {
-								eachNightPrice = eachNightPrice + "," + settleFee.toString();
-							}
-						}
-						// 产品名称
-						hotelOrder.setSupPriceName(roomInfoItem.getRoomName());
-						hotelOrder.setProName(roomInfoItem.getRoomName());
-						// 床型
-						RoomBedTypeInfo roomBedTypeInfo = roomInfoItem.getRoomBedTypeInfo();
-						if ("T".equals(roomBedTypeInfo.getHasKingBed())) {
-							hotelOrder.setBedTypeName("大床");
-						} else if ("T".equals(roomBedTypeInfo.getHasTwinBed())) {
-							hotelOrder.setBedTypeName("双床");
-						} else if ("T".equals(roomBedTypeInfo.getHasSingleBed())) {
-							hotelOrder.setBedTypeName("单人床");
-						}
-						break;
-					}
-				}
-				break outer;
-			}
-		}*/
 		if (unitPrice == null) {
 			logger.error("酒店房间单价为空!");
 			throw new GSSException("创建酒店订单", "0107", "酒店单价为空！");
 		}
-		orderReq.setUnitPrice(unitPrice);
-		// 总价格
-		BigDecimal newTotalPrice = oneDayPrice.multiply(new BigDecimal(daysBetween));
+		//orderReq.setUnitPrice(unitPrice);
+
 		hotelOrder.setEachNightPrice(eachNightPrice);
 
 		Long businessSignNo = IdWorker.getId();
@@ -736,10 +671,12 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		hotelOrder.setContactNumber(orderCreateReq.getLinkManMobile());
 		hotelOrder.setArrivalDate(dateStartDate);
 		hotelOrder.setDepartureDate(departureDate);
-		hotelOrder.setTotalPrice(newTotalPrice);
+		hotelOrder.setFactTotalPrice(newTotalPrice);	//分销商支付总价
+		hotelOrder.setTotalPrice(oldTotalPrice);		//未减佣金总价
 		hotelOrder.setNightCount(daysBetween);
 		hotelOrder.setTransationOrderNo(orderCreateReq.getSaleOrder().getTransationOrderNo());
-		hotelOrder.setTotalRefund(orderCreateReq.getTotalRebateRateProfit());
+		hotelOrder.setTotalRefund(orderCreateReq.getTotalRebateRateProfit());		//佣金
+		hotelOrder.setFactTotalRefund(orderCreateReq.getTotalRebateRateProfit());	//实际佣金
 		hotelOrder.setFactTotalRefund(new BigDecimal(0));
 		hotelOrder.setGuestName(passengers);
 		hotelOrder.setGuestMobile(orderReq.getMobile());
@@ -792,6 +729,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		}
 		orderReq.setSupplierId(supplierId);
 		orderReq.setRatePlanCategory(ratePlanCategory);
+		orderReq.setUnitPrice(oldUnitPrice);
 		//可以不传
 		orderReq.setChannelType(2);
 		logger.info("创建8000YI酒店订单入参"+JsonUtil.toJson(orderReq));
@@ -802,11 +740,9 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		if (null != createOrderRespone && orderNo > 0) {
 			//订单创建成功更新订单表中数据
 			hotelOrder.setHotelOrderNo(orderNo.toString());
-			//0=>下单失败，1=>下单成功，2=>下单成功，支付失败，3=>下单成功，支付成功
-			hotelOrder.setResultCode("1");
 			hotelOrder.setTcOrderStatus(TcOrderStatus.WAIT_PAY.getKey());
 			hotelOrder.setOrderStatus(OwnerOrderStatus.WAIT_PAY.getKey());
-			hotelOrder.setFactTotalPrice(createOrderRespone.getPayPrice());
+			hotelOrder.setResultCode(createOrderRespone.getPayPrice().toString());
 			hotelOrderMapper.updateById(hotelOrder);
 			return hotelOrder;
 		}else {
