@@ -15,6 +15,7 @@ import java.util.concurrent.Future;
 
 import com.tempus.gss.product.hol.api.entity.vo.bqy.*;
 import com.tempus.gss.security.AgentUtil;
+import com.tempus.gss.util.MathUtil;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -397,6 +398,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 											rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
 											resProBaseInfo.setRebateRateProfit(BigDecimal.ZERO);
 											BigDecimal endPrice = firPrice.subtract(firPrice.multiply(rate));
+											endPrice = endPrice.setScale(0, BigDecimal.ROUND_UP);
 											resProBaseInfo.setConPrice(endPrice.intValue());	//平均价
 											resProBaseInfo.setFirPrice(endPrice.intValue());	//首日价
 											//价格弹窗
