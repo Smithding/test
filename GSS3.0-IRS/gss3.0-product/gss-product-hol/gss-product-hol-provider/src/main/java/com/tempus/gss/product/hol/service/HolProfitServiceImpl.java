@@ -752,10 +752,10 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 			log.error("agent为空");
 			throw new GSSException("电话白名单保存失败", "0101", "agent为空");
 		}
-		if (StringUtil.isNotNullOrEmpty(phone.getId())) {
+		if (StringUtil.isNotNullOrEmpty(phone.getId()) && !phone.getId().equals(phone.getPhone())) {
 			deletePhoneById(agent, phone.getId());
 		}
-		phone.setId(phone.getId());
+		phone.setId(phone.getPhone());
 		phone.setUpdateTime(new Date());
 		mongoTemplate1.save(phone);
     }
