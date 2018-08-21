@@ -327,6 +327,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		query.setToken(md5Encryption());
 		HotelEntity hotelEntity = null;
 		String paramJson = JsonUtil.toJson(query);
+		logger.info("bqy酒店详情查询入参:" + paramJson);
 		String result = httpClientUtil.doJsonPost(BQY_HOTEL_DETAIL_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			// 将返回数据转换成json对象
@@ -336,9 +337,11 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
 					hotelEntity = responseResult.getResult();
 				}
-			} 
+			} else {
+				logger.info("BQY酒店详情请求返回空值,酒店id为:" + query.getHotelId());
+			}
 		} else {
-			throw new GSSException("获取TC酒店详情", "0111", "BQY酒店详情请求返回空值");
+			throw new GSSException("获取TC酒店详情", "0111", "BQY酒店详情请求返回空值,酒店id为:" + query.getHotelId());
 		}
 		return new AsyncResult<HotelEntity>(hotelEntity);
 		//return hotelEntity;
@@ -350,19 +353,16 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		query.setToken(md5Encryption());
 		CityInfo cityInfo = null;
 		String paramJson = JsonUtil.toJson(query);
+		logger.info("bqy城市详情查询入参:" + paramJson);
 		String result = httpClientUtil.doJsonPost(BQY_CITY_INFO_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<CityInfo> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<CityInfo>>(){});
 			if (responseResult != null) {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
-					logger.info("BQY城市信息获取成功!");
 					cityInfo = responseResult.getResult();
-				} else {
-					logger.info("BQY城市信息获取失败!");
-					throw new GSSException("获取BQY城市信息", "0112", "城市信息为空!");
 				}
 			}else {
-				logger.info("BQY城市信息json转换实体失败!");
+				logger.info("BQY城市信息返回为空!");
 			}
 		}else {
 			throw new GSSException("获取BQY城市信息失败!", "0111", "BQY城市信息返回空值");
@@ -376,6 +376,7 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		query.setToken(md5Encryption());
 		List<HotelRoomFacility> roomFacilityList = null;
 		String paramJson = JsonUtil.toJson(query);
+		logger.info("bqy酒店房间设施查询入参:" + paramJson);
 		String result = httpClientUtil.doJsonPost(BQY_HOTEL_FACILITY_URL, paramJson);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<List<HotelRoomFacility>> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<List<HotelRoomFacility>>>(){});
@@ -383,6 +384,8 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
 					roomFacilityList = responseResult.getResult();
 				}
+			}else {
+				logger.info("bqy酒店房间设施查询返回为空!");
 			}
 		}else {
 			throw new GSSException("获取BQY酒店房间设施信息失败!", "0111", "BQY酒店房间设施信息返回空值");
@@ -442,16 +445,17 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		String paramJson = JsonUtil.toJson(query);
 		logger.info("bqy酒店房型查询入参:" + paramJson);
 		String result = httpClientUtil.doJsonPost(BQY_HOTEL_ROOM_PRICE_URL, paramJson);
-		logger.info("bqy酒店房型查询结果:" + result);
 		if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<List<RoomPriceItem>> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<List<RoomPriceItem>>>(){});
 			if (responseResult != null) {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
 					roomPriceList = responseResult.getResult();
 				} 
+			}else {
+				logger.info("BQY酒店房型查询结果为空,酒店id为:" + query.getHotelId());
 			}
 		}else {
-			throw new GSSException("获取BQY酒店房型图片失败!", "0111", "BQY酒店房型图片返回空值");
+			throw new GSSException("获取BQY酒店房型失败!", "0111", "BQY酒店房型返回空值,酒店id为:" + query.getHotelId());
 		}
 		return roomPriceList;
 	}
