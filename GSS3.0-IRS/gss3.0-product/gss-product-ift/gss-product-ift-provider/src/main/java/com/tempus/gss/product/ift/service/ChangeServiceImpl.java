@@ -116,7 +116,6 @@ public class ChangeServiceImpl implements IChangeService {
     IftBuyChangeExtService buyChangeExtService;
     @Value("${dpsconfig.job.owner}")
     protected String owner;
-
     @Override
     @Transactional
     public SaleChangeExt apiCreateChange(RequestWithActor<ChangeCreateVo> requestWithActor) {
@@ -334,8 +333,7 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeExtDao.insertSelective(saleChangeExt);
             //销售改签分单（如果该单不是OP下单才会执行分单）
             iftMessageService.sendChangeMessage(saleOrderExt.getSaleOrderNo(),agent.getOwner()+"","salesman-change");
-            //如果在setChangeOrderLocker方法中设置了locker那么在sendChangeMessage则查询不到该订单，所以需要在跟新一次该出票员的销售改签数量
-            setTicketSenderNum(saleChangeExt,agent,saleOrder);
+
             /*通过销售单编号获取采购单*/
             List<BuyOrderExt> buyOrderExtList = buyOrderExtDao.selectBuyOrderBySaleOrderNo(requestWithActor.getEntity().getSaleOrderNo());
             /*创建采购改签单*/
@@ -382,7 +380,8 @@ public class ChangeServiceImpl implements IChangeService {
             } catch (Exception e) {
                 log.error("添加(title=创建国际改签单)操作日志异常===" + e);
             }
-
+            //如果在setChangeOrderLocker方法中设置了locker那么在sendChangeMessage则查询不到该订单，所以需要在跟新一次该出票员的销售改签数量
+            setTicketSenderNum(saleChangeExt,agent,saleOrder);
         } catch (GSSException ubp) {
             log.error("创建改签单失败", ubp);
             throw ubp;
@@ -399,7 +398,7 @@ public class ChangeServiceImpl implements IChangeService {
         if(StringUtils.isNotBlank(saleOrder.getSourceChannelNo()) && StringUtils.equals("OP",saleOrder.getSourceChannelNo())){
             User user = userService.findUserByLoginName(agent,agent.getAccount());
             if(user!=null) {
-                ticketSenderService.updateByLockerId(agent,user.getId(),"SALE_CHANGE_NUM");
+                ticketSenderService.asynUpdateByLockerId(agent,user.getId(),"SALE_CHANGE_NUM");
             }
         }
     }
@@ -1316,7 +1315,9 @@ public class ChangeServiceImpl implements IChangeService {
 
         //将saleOrderDetail的订单详情的状态改为已取消
         SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(saleChangeNo);
+        Long locker = null;
         if (saleChangeExt != null) {
+            locker = saleChangeExt.getLocker();
             if (saleChangeExt.getSaleChangeDetailList() != null) {
                 for (SaleChangeDetail saleChangeDetail : saleChangeExt.getSaleChangeDetailList()) {
                     SaleOrderDetail saleOrderDetail = saleOrderDetailDao.selectByPrimaryKey(saleChangeDetail.getSaleOrderDetailNo());
@@ -1356,6 +1357,8 @@ public class ChangeServiceImpl implements IChangeService {
                 }
             }
         }
+        //更新出票员数量
+        ticketSenderService.updateByLockerId(agent,locker,"SALE_CHANGE_NUM");
         /*创建新增操作日志*/
         try {
             String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"取消改签："+"["+saleChange.getSaleOrderNo()+"]";
@@ -1589,60 +1592,131 @@ public class ChangeServiceImpl implements IChangeService {
      * @return
      */
     @Transactional
-    public boolean locker(RequestWithActor<SaleChangeExtVo> saleChange,String type) {
+    public boolean locker(RequestWithActor<SaleChangeExtVo> saleChange) {
+        SaleChangeExtVo changeExtVo = saleChange.getEntity();
+        if(changeExtVo.getLocker() == 1){
+            return lockerMethod(saleChange);
+        } else{
+            return unLockerMethod(saleChange);
+        }
+    }
+
+    private boolean lockerMethod(RequestWithActor<SaleChangeExtVo> saleChange) {
         log.info("锁住订单开始");
         boolean flag = false;
+        Agent agent = saleChange.getAgent();
         SaleChangeExtVo changeVo = saleChange.getEntity();
+        Long saleChangeNo = changeVo.getSaleChangeNo();
         if (changeVo == null || changeVo.getSaleChangeNo() == null) {
             log.error("传入参数为空");
             throw new GSSException("锁住销售改签单", "0202", "传入参数为空");
         }
-        SaleChangeExt changeExt = saleChangeExtDao.selectByPrimaryKey(changeVo.getSaleChangeNo());
-        long originLocker = changeExt.getLocker();
-        long afterLocker = 0l;
+        SaleChangeExt changeExt = saleChangeExtDao.selectByPrimaryKey(saleChangeNo);
+        int updateLocker = 0;
         try {
+            Long LockerId = agent.getId();
             if (changeExt != null) {
-                //locker 为0表示解锁  大于0表示锁定
-                if (changeExt.getLocker() == null || changeVo.getLocker() == 1) {
-                    afterLocker = saleChange.getAgent().getId();
-                    changeExt.setLocker(afterLocker);
-                    changeExt.setAloneLocker(afterLocker);
-                    changeExt.setModifier(saleChange.getAgent().getAccount());
-                    changeExt.setLockTime(new Date());
-                    changeExt.setModifyTime(new Date());
-
-                } else {
-                    changeExt.setLocker(0L);
-                    changeExt.setAloneLocker(0l);
-                    changeExt.setModifier(saleChange.getAgent().getAccount());
-                    changeExt.setLockTime(new Date());
-                    changeExt.setModifyTime(new Date());
+                Date date = new Date();
+                SaleChange saleChange1 = saleChangeService.getSaleChangeByNo(agent,saleChangeNo);
+                if(saleChange1.getPayStatus() == 1 && saleChange1.getChildStatus() == 1
+                        && (changeExt.getLocker() == null || changeExt.getLocker() == 0l)
+                        ){
+                    //销售锁单
+                    changeExt.setLocker(LockerId);
+                    changeExt.setAloneLocker(LockerId);
+                    changeExt.setModifier(agent.getAccount());
+                    changeExt.setLockTime(date);
+                    changeExt.setModifyTime(date);
+                     updateLocker = changeExtService.updateLocker(changeExt);
+                } else if(saleChange1.getPayStatus() == 3 && saleChange1.getChildStatus() == 3){
+                    //采购锁单
+                    BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
+                    if (buyChangeExt.getBuyLocker() == null || buyChangeExt.getBuyLocker() == 0l) {
+                        buyChangeExt.setBuyLocker(LockerId);
+                        buyChangeExt.setModifyTime(date);
+                        updateLocker = buyChangeExtService.updateBuyChangeExt(buyChangeExt);
+                    }
                 }
-                int updateLocker = changeExtService.updateLocker(changeExt);
-                //更新锁定前出票员
-                ticketSenderService.updateByLockerId(saleChange.getAgent(),originLocker,"SALE_CHANGE_NUM");
-                ticketSenderService.updateByLockerId(saleChange.getAgent(),originLocker,"BUY_CHANGE_NUM");
-                //更新锁定后的出票员
-                ticketSenderService.updateByLockerId(saleChange.getAgent(),afterLocker,"SALE_CHANGE_NUM");
-                ticketSenderService.updateByLockerId(saleChange.getAgent(),afterLocker,"BUY_CHANGE_NUM");
+
                 if (updateLocker == 1) {
                     flag = true;
+                    //更新锁定前出票员
+                    ticketSenderService.updateByLockerId(agent,LockerId,"SALE_CHANGE_NUM");
+                    ticketSenderService.updateByLockerId(agent,LockerId,"BUY_CHANGE_NUM");
                 }
             }
             log.info("锁住订单结束");
             /*创建新增操作日志*/
             try {
-                SaleOrder saleOrder = saleOrderService.getSOrderByNo(saleChange.getAgent(), changeVo.getSaleChangeNo());
+                SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, changeVo.getSaleChangeNo());
                 Long saleOrderNo = changeVo.getSaleChangeNo();
-                String logstr ="用户"+ saleChange.getAgent().getAccount()+"国际改签单锁定："+"["+saleOrderNo+"]";
+                String logstr ="用户"+ agent.getAccount()+"国际改签单锁定："+"["+saleOrderNo+"]";
                 String title = "国际改签单锁定";
-                IftLogHelper.logger(saleChange.getAgent(),saleOrderNo,title,logstr);
+                IftLogHelper.logger(agent,saleOrderNo,title,logstr);
             } catch (Exception e) {
                 log.error("添加(title=国际改签单锁定)操作日志异常===", e);
             }
         } catch (Exception e) {
             log.error("锁住销售改签单异常", e);
             throw new GSSException("锁住销售改签单异常", "0202", "锁住销售改签单异常");
+        }
+        return flag;
+    }
+
+    public boolean unLockerMethod(RequestWithActor<SaleChangeExtVo> saleChange) {
+        log.info("解锁订单开始");
+        boolean flag = false;
+        if (saleChange == null || saleChange.getEntity() == null) {
+            log.error("传入参数为空");
+            throw new GSSException("锁住销售改签单", "0202", "传入参数为空");
+        }
+        Agent agent = saleChange.getAgent();
+        Long saleChangeNo = saleChange.getEntity().getSaleChangeNo();
+        SaleChangeExt changeExt = saleChangeExtDao.selectByPrimaryKey(saleChangeNo);
+        int updateLocker = 0;
+        try {
+            if (changeExt != null) {
+                Date date = new Date();
+                SaleChange saleChange1 = saleChangeService.getSaleChangeByNo(agent,saleChangeNo);
+                Long lockerId = null;
+                if(saleChange1.getPayStatus() == 1 && saleChange1.getChildStatus() == 1){
+                    //销售锁单
+                    lockerId = changeExt.getLocker();
+                    changeExt.setLocker(0l);
+                    changeExt.setModifier(agent.getAccount());
+                    changeExt.setLockTime(date);
+                    changeExt.setModifyTime(date);
+                    updateLocker = changeExtService.updateLocker(changeExt);
+                } else if(saleChange1.getPayStatus() == 3 && saleChange1.getChildStatus() == 3){
+                    //采购锁单
+                    BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
+                    lockerId = buyChangeExt.getBuyLocker();
+                    buyChangeExt.setBuyLocker(0l);
+                    buyChangeExt.setModifyTime(date);
+                    updateLocker = buyChangeExtService.updateBuyChangeExt(buyChangeExt);
+                }
+
+                if (updateLocker == 1) {
+                    flag = true;
+                    //更新锁定前出票员
+                    ticketSenderService.updateByLockerId(agent,lockerId,"SALE_CHANGE_NUM");
+                    ticketSenderService.updateByLockerId(agent,lockerId,"BUY_CHANGE_NUM");
+                }
+            }
+            log.info("解锁订单结束");
+            /*创建新增操作日志*/
+            try {
+                SaleOrder saleOrder = saleOrderService.getSOrderByNo(agent, saleChangeNo);
+                Long saleOrderNo = saleChangeNo;
+                String logstr ="用户"+ agent.getAccount()+"国际改签单解锁："+"["+saleOrderNo+"]";
+                String title = "国际改签单解锁";
+                IftLogHelper.logger(agent,saleOrderNo,title,logstr);
+            } catch (Exception e) {
+                log.error("添加(title=国际改签单解锁)操作日志异常===", e);
+            }
+        } catch (Exception e) {
+            log.error("解锁销售改签单异常", e);
+            throw new GSSException("解锁销售改签单异常", "0202", "解锁销售改签单异常");
         }
         return flag;
     }

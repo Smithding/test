@@ -8,6 +8,7 @@ import com.baomidou.framework.service.ISuperService;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.hol.api.entity.Profit;
 import com.tempus.gss.product.hol.api.entity.ProfitPrice;
+import com.tempus.gss.product.hol.api.entity.WhiteListPhone;
 import com.tempus.gss.product.hol.api.entity.response.QTPrice;
 import com.tempus.gss.product.hol.api.entity.vo.ProfitVo;
 import com.tempus.gss.vo.Agent;
@@ -75,5 +76,34 @@ public interface IHolProfitService extends ISuperService<Profit> {
 	
 	
 	public int cancelByProfitNo(Agent agent, Long id);
-	
+
+	/**
+	 * 保存白名单电话
+	 * @param phone
+	 */
+    void saveWhiteListPhone(Agent agent, WhiteListPhone phone);
+
+	/**
+	 * 查询电话白名单
+	 * @param agent
+	 * @param page
+	 * @return
+	 */
+	Page<?> queryPhoneList(Agent agent, Page<WhiteListPhone> page);
+
+	/**
+	 * 查询
+	 * @param agent
+	 * @param id
+	 * @return
+	 */
+    WhiteListPhone getPhoneById(Agent agent, String id);
+
+	/**
+	 * 删除
+	 * @param agent
+	 * @param id
+	 * @return
+	 */
+	void deletePhoneById(Agent agent, String id);
 }

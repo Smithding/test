@@ -679,6 +679,7 @@ public class RefundServiceImpl implements IRefundService {
 	@Transactional
 	public boolean unLock(RequestWithActor<Long> requestWithActor) {
 
+		boolean flag = false;
 		log.info("审核废退单解锁开始=========");
 		try {
 			if (requestWithActor.getEntity().longValue() == 0) {
@@ -687,12 +688,28 @@ public class RefundServiceImpl implements IRefundService {
 			}
 			Long saleChangeNo = requestWithActor.getEntity().longValue();
 			SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(saleChangeNo);
-			long locker = saleChangeExt.getLocker();
-			saleChangeExt.setLocker(0L);
-			refundService.updateLocker(saleChangeExt);
-			//对应出票员num-1
-			iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),locker,"SALE_REFUSE_NUM");
-			iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),locker,"BUY_REFUSE_NUM");
+			SaleChange saleChangeByNo = saleChangeService.getSaleChangeByNo(requestWithActor.getAgent(), saleChangeNo);
+			int updateFlag = 0 ;
+			Long locker = null;
+			if (1 == saleChangeByNo.getChildStatus() ) {
+				locker = saleChangeExt.getLocker();
+				saleChangeExt.setLocker(0L);
+				updateFlag = refundService.updateLocker(saleChangeExt);
+			}else if(2 == saleChangeByNo.getChildStatus()){
+				//采购的解锁
+				BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
+				locker = buyChangeExt.getBuyLocker();
+				buyChangeExt.setBuyLocker(0l);
+				buyChangeExt.setModifyTime(new Date());
+				updateFlag = buyChangeExtService.updateBuyChangeExt(buyChangeExt);
+			}
+
+			if(updateFlag == 1){
+				flag = true;
+				//对应出票员num-1
+				iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),locker,"SALE_REFUSE_NUM");
+				iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),locker,"BUY_REFUSE_NUM");
+			}
 			/*创建操作日志*/
 			try {
 				String logstr ="用户"+ requestWithActor.getAgent().getAccount()+"国际废/退解锁："+"["+saleChangeExt.getSaleChangeDetailList().get(0).getSaleOrderDetail().getSaleOrderNo()+"]";
@@ -706,7 +723,7 @@ public class RefundServiceImpl implements IRefundService {
 			log.error("锁定废退单失败", e);
 			throw new GSSException("锁定废退单失败", "0002", "锁定废退单失败");
 		}
-		return true;
+		return flag;
 	}
 
 	@Override
@@ -1112,7 +1129,9 @@ public class RefundServiceImpl implements IRefundService {
             Date modifyTime = new Date();
 			//修改销售单明细
 			SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(saleChange.getSaleChangeNo());
+			Long locker = null;
 			if (saleChangeExt != null) {
+				locker = saleChangeExt.getLocker();
 				if (saleChangeExt.getSaleChangeDetailList() != null) {
 					for (SaleChangeDetail saleChangeDetail : saleChangeExt.getSaleChangeDetailList()) {
 						SaleOrderDetail saleOrderDetail = saleOrderDetailDao
@@ -1142,7 +1161,7 @@ public class RefundServiceImpl implements IRefundService {
 					}
 				}
 			}
-			
+			ticketSenderService.updateByLockerId(agent,locker,"SALE_REFUSE_NUM");
 			/*创建操作日志*/
 			try {
 				String logstr= null;
@@ -1197,10 +1216,10 @@ public class RefundServiceImpl implements IRefundService {
 			SaleChangeExt saleChangeExt = this.getSaleChangeExtByNo(saleChangeNo);
 			if(saleChangeExt!=null){
 				Long locker = saleChangeExt.getLocker();
-				saleChangeExt.setLocker(0L);
-				saleChangeExt.setModifier(agent.getAccount());
-				saleChangeExt.setModifyTime(modifyTime);
-                saleChangeExtDao.updateLocker(saleChangeExt);
+//				saleChangeExt.setLocker(0L);
+//				saleChangeExt.setModifier(agent.getAccount());
+//				saleChangeExt.setModifyTime(modifyTime);
+//                saleChangeExtDao.updateLocker(saleChangeExt);
                 //Long saleOrderNo = saleChangeExt.getSaleChange().getSaleOrderNo();
                 //只修改被拒单的航段+乘机人detail的状态，不能全部修改为4
 				List<SaleChangeDetail> saleChangeDetailList = saleChangeExt.getSaleChangeDetailList();

@@ -40,7 +40,7 @@
 		price.RATE,
 		price.PRICE_TYPE,
 		price.REMARK,
-		price.STATUS,
+		profit.STATUS,
 		price.CREATOR,
 		price.CREATE_TIME,
 		price.MODIFIER,
