@@ -116,9 +116,9 @@ public class IftOrderRePayServiceImpl implements IIftOrderRePayService {
             certificateCreateVO.setOrderInfoList(orderInfoList);
             try {
                 OSResultType payResult = certificateService.createCertificateAndPay(agent, certificateCreateVO);
-                logger.info("{}", payResult.getMessage());
+                logger.info("message:{}", payResult.getMessage());
             } catch (Exception e) {
-                logger.error("shibai", e);
+                logger.error("重复支付失败,异常", e);
             }
         }
         if (result.doubleValue() < 0) {
@@ -129,14 +129,14 @@ public class IftOrderRePayServiceImpl implements IIftOrderRePayService {
             certificateCreateVO.setOrderInfoList(orderInfoList);
             try {
                 refundAmount = certificateService.saleRefundCert(agent, certificateCreateVO);
-                logger.info("{}", refundAmount);
+                logger.info("refundAmount:{}", refundAmount);
                 if (refundAmount.doubleValue()>0){
                     certificateCreateVO.setIncomeExpenseType(1);
                     OSResultType payResult = certificateService.createCertificateAndPay(agent, certificateCreateVO);
-                    logger.info("{}", payResult.getMessage());
+                    logger.info("message:{}", payResult.getMessage());
                 }
             } catch (GSSException e) {
-                logger.info("", e);
+                logger.error("重复支付退款失败,异常", e);
             }
 
         }
