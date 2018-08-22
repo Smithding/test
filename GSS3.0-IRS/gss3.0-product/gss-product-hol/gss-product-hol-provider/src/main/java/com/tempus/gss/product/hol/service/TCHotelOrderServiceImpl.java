@@ -309,8 +309,9 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		}
 		
 		WhiteListPhone phone = mongoTemplate1.findOne(new Query(Criteria.where("_id").is(orderCreateReq.getLinkManMobile())), WhiteListPhone.class);
-		if (null != phone) {
-			GUEST_NO = phone.getPhone();
+		String linkPhone = CONTACT_NO;
+		if(phone != null) {
+			linkPhone = phone.getPhone();
 		}
 		
 		BigDecimal totalPrice = new BigDecimal(Double.toString(0));
@@ -514,7 +515,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
         		}
 				if(totalPrice.compareTo(new BigDecimal(newTotalPrice)) == 0){
 					orderCreateReq.setOutSideOrderId("newordertc_"+buyOrderNo);
-					orderCreateReq.setLinkManMobile(CONTACT_NO);
+					orderCreateReq.setLinkManMobile(linkPhone);
 					/*for (TravlePassengerInfo guest : orderCreateReq.getOrderPassengerDetails()) {
 						guest.setMobile(GUEST_NO);
 					}*/
