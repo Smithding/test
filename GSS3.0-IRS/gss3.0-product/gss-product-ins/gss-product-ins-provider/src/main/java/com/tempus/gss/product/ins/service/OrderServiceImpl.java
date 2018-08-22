@@ -221,6 +221,7 @@ public class OrderServiceImpl implements IOrderService {
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
 	public Long createOrder(RequestWithActor<OrderCreateVo> requestWithActor) throws Exception {
 		log.info("创建保险订单开始==========");
+		Long beginTime = System.currentTimeMillis();
 		if (requestWithActor.getAgent() == null || requestWithActor.getEntity() == null) {
 			log.info("创建保险订单参数为空");
 			throw new GSSException("创建保险订单参数为空", "1010", "创建保险订单失败");
@@ -624,6 +625,8 @@ public class OrderServiceImpl implements IOrderService {
 													// 采购补单 13 补付 14 采购废退，15
 													// 采购改签
 		planAmountRecordService.create(requestWithActor.getAgent(), buyOrderPlanAmountVO);
+		Long endTime = System.currentTimeMillis();
+        log.info("创建保险订单总共耗时----------------------"+(endTime-beginTime));
 		log.info("创建保险订单结束==========");
 		return saleOrderExt.getSaleOrderNo();
 	}
