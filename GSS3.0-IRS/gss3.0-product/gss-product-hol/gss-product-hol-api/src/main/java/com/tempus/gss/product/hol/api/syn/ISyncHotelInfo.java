@@ -17,7 +17,7 @@ public interface ISyncHotelInfo {
 	
 	public ResBaseInfo queryProDetail(Agent agent, Long resId, String startTime, String endTime) throws GSSException;
 	
-	public ResBaseInfo newQueryHolProDetail(Agent agent, Long resId, String uniProId, String startTime, String endTime) throws GSSException;
+	public ResBaseInfo querySingleProDetail(Agent agent, Long resId, String uniProId, String startTime, String endTime) throws GSSException;
 	
 	
 	/**
