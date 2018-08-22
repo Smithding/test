@@ -198,7 +198,9 @@ public class IftMessageServiceImpl implements IIftMessageService {
                     break;
                 }
             }
-            log.info("被分配人员信息:"+ticketSender.toString());
+            if (ticketSender != null) {
+                log.info("被分配人员信息:"+ticketSender.toString());
+            }
         }
         return ticketSender;
     }
