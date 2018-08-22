@@ -20,6 +20,7 @@ import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
 import com.tempus.gss.order.service.*;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.*;
+import com.tempus.gss.product.ift.api.entity.iftVo.IftRepayVo;
 import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
 import com.tempus.gss.product.ift.api.entity.vo.*;
 import com.tempus.gss.product.ift.api.service.*;
@@ -114,6 +115,8 @@ public class ChangeServiceImpl implements IChangeService {
     ITicketSenderService iTicketSenderService;
     @Reference
     IftBuyChangeExtService buyChangeExtService;
+    @Reference
+    IIftOrderRePayService orderRePayService;
     @Value("${dpsconfig.job.owner}")
     protected String owner;
     @Override
@@ -1021,7 +1024,28 @@ public class ChangeServiceImpl implements IChangeService {
             reHandle(requestWithActor, chdList);
             reHandle(requestWithActor, infList);
             Long saleChangeNo = requestWithActor.getEntity().getSaleChangeNo();
-
+            //价格变化 进行支付或者退款
+            BigDecimal bigDecimalCount = new BigDecimal(0);
+            if (adtList !=null ){
+                BigDecimal bigDecimalAdt = new BigDecimal(adtList.size());
+                bigDecimalCount = bigDecimalCount.add(adtList.get(0).getCountPrice().multiply(bigDecimalAdt));
+            }
+            if (chdList !=null){
+                BigDecimal bigDecimalChd = new BigDecimal(chdList.size());
+                bigDecimalCount= bigDecimalCount.add(adtList.get(0).getCountPrice().multiply(bigDecimalChd));
+            }
+            if (infList !=null){
+                BigDecimal bigDecimalInf= new BigDecimal(infList.size());
+                bigDecimalCount=bigDecimalCount.add(adtList.get(0).getCountPrice().multiply(bigDecimalInf));
+            }
+            RequestWithActor<IftRepayVo> rePayParameter = new RequestWithActor();
+            IftRepayVo repayVo = new IftRepayVo();
+            repayVo.setAmount(bigDecimalCount);
+            repayVo.setBussinessNo(requestWithActor.getEntity().getSaleChangeNo());
+            repayVo.setBusinessType(4);
+            rePayParameter.setEntity(repayVo);
+            rePayParameter.setAgent(requestWithActor.getAgent());
+            orderRePayService.rePay(rePayParameter);
             saleChangeService.updateStatus(requestWithActor.getAgent(), saleChangeNo, 3);
             log.info("修改采购状态" + saleChangeNo);
             try{

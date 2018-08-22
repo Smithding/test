@@ -16,14 +16,19 @@ import com.tempus.gss.order.service.IPlanAmountRecordService;
 import com.tempus.gss.pay.dict.DetailPayWay;
 import com.tempus.gss.pay.dict.ProductType;
 import com.tempus.gss.product.common.entity.RequestWithActor;
+import com.tempus.gss.product.hol.api.service.ISaleChangeExtService;
+import com.tempus.gss.product.ift.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ift.api.entity.SaleOrderExt;
 import com.tempus.gss.product.ift.api.entity.iftVo.IftRepayVo;
+import com.tempus.gss.product.ift.api.entity.iftVo.IftSaleChangeExt;
+import com.tempus.gss.product.ift.api.service.IChangeService;
 import com.tempus.gss.product.ift.api.service.IIftOrderRePayService;
 import com.tempus.gss.product.ift.api.service.IOrderService;
 import com.tempus.gss.security.AgentUtil;
 import com.tempus.gss.vo.Agent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -40,8 +45,8 @@ public class IftOrderRePayServiceImpl implements IIftOrderRePayService {
     private ICertificateService certificateService;
     @Reference
     private IOrderService iftOrderService;
-
-
+    @Reference
+   private IChangeService changeService;
     @Override
     public void rePay(RequestWithActor<IftRepayVo> requestWithActor) {
         Agent agent = requestWithActor.getAgent();
@@ -73,18 +78,43 @@ public class IftOrderRePayServiceImpl implements IIftOrderRePayService {
                     }
                 }
             }
+            
             List<BusinessOrderInfo> orderInfoList = new ArrayList<BusinessOrderInfo>();// 业务单信息列表
 
             BusinessOrderInfo businessOrder = new BusinessOrderInfo();
             businessOrder.setRecordNo(bussinessNo);// 业务单号
-            businessOrder.setBusinessType(2);// 业务类型(1.交易单,2.销售单,3.采购单,4.销售变更单,5.采购变更单)
+            businessOrder.setBusinessType(repayVo.getBusinessType());// 业务类型(1.交易单,2.销售单,3.采购单,4.销售变更单,5.采购变更单)
             orderInfoList.add(businessOrder);
         }
+        SaleChangeExt saleChangeExt = changeService.getSaleChange(orderParam);
+        if (saleChangeExt != null) {
+            certificateCreateVO.setSubBusinessType(1);
+            certificateCreateVO.setCustomerNo(saleChangeExt.getCustomerNo());
+            certificateCreateVO.setCustomerTypeNo(saleChangeExt.getCustomerTypeNo());
+            certificateCreateVO.setTransationOrderNo(String.valueOf(saleChangeExt.getSaleChange().getTransationOrderNo()));
+            ActualInfoSearchVO actualInfoSearchVO = certificateService.queryListByTONo(agent, saleChangeExt.getSaleChange().getTransationOrderNo());
+            List<ActualAmountRecord> actualAmountRecords = actualInfoSearchVO.getActualAmountRecordList();
+            if (actualAmountRecords.size() > 0) {//todo 添加实收判断 actualAmountRecords.getAuditStatus()=2 支付成功的  取这个记录的信息
+                for (ActualAmountRecord record : actualAmountRecords) {
+                    if (record.getAuditStatus()==2){
+                        certificateCreateVO.setAccoutNo(record.getCapitalAccountNo());
+                        certificateCreateVO.setPayWay(Integer.valueOf(record.getPayWay()));
+                        break;
+                    }
+                }
+            }
 
+            List<BusinessOrderInfo> orderInfoList = new ArrayList<BusinessOrderInfo>();// 业务单信息列表
+
+            BusinessOrderInfo businessOrder = new BusinessOrderInfo();
+            businessOrder.setRecordNo(bussinessNo);// 业务单号
+            businessOrder.setBusinessType(repayVo.getBusinessType());// 业务类型(1.交易单,2.销售单,3.采购单,4.销售变更单,5.采购变更单)
+            orderInfoList.add(businessOrder);
+        }
         //重新支付
         List<BusinessOrderInfo> orderInfoList = new ArrayList<BusinessOrderInfo>();// 业务单信息列表
         BusinessOrderInfo businessOrderInfo = new BusinessOrderInfo();
-        businessOrderInfo.setBusinessType(2);// 业务类型(1.交易单，2.销售单，3.采购单，4.销售变更单（可以根据变更表设计情况将废退改分开），5.采购变更单)
+        businessOrderInfo.setBusinessType(repayVo.getBusinessType());// 业务类型(1.交易单，2.销售单，3.采购单，4.销售变更单（可以根据变更表设计情况将废退改分开），5.采购变更单)
         businessOrderInfo.setRecordNo(bussinessNo);
         orderInfoList.add(businessOrderInfo);
         certificateCreateVO.setPayType(2);//1 在线支付 2 帐期或代付 3 线下支付
@@ -100,11 +130,19 @@ public class IftOrderRePayServiceImpl implements IIftOrderRePayService {
             }
             updatePlanAmountVO.setIncomeExpenseType(1);//收
             updatePlanAmountVO.setPlanAmount(repayVo.getAmount());
-            updatePlanAmountVO.setRecordMovingType(1);//1.销售
+            if(repayVo.getBusinessType()==4){
+                updatePlanAmountVO.setRecordMovingType(5);//5.销售改签
+            }else{
+                updatePlanAmountVO.setRecordMovingType(1);//1.销售
+            }
             planAmountRecordService.update(agent, updatePlanAmountVO);
         }
         BigDecimal result = repayVo.getAmount().subtract(plantTotalAmount);
+        if (saleOrderExt!=null){
         certificateCreateVO.setSaleOrderNo(repayVo.getBussinessNo().toString());//销售单号
+        }else {
+            certificateCreateVO.setSaleOrderNo(saleChangeExt.getSaleChange().getSaleOrderNo().toString());//销售单号
+        }
         logger.info("比较新应收总和和就应收总和结果：" + result.doubleValue());
         //  this.createBuyCertificate(AgentUtil.getAgent(), buychange.getBuyChangeNo(), buychange.getPlanAmount().doubleValue(), changePrice.getAccountNo(), supplier.getSupplierNo(), supplier.getCustomerTypeNo(), 3, 2000003, "BUY", thirdBusNo, changePrice.getDealNo());
         //(Agent agent, long buyOrderNo, double payAmount, long payAccount, long customerNo, long customerTypeNo, int payType, int payWay, String channel, String thirdBusNo, String thirdPayNo) {
