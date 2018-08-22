@@ -1,9 +1,10 @@
 package com.tempus.gss.product.unp.api.service;
 
-import com.tempus.gss.product.common.entity.RequestWithActor;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.unp.api.entity.UnpSale;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderCreateVo;
+import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
 import com.tempus.gss.vo.Agent;
 
 /**
@@ -20,7 +21,7 @@ public interface UnpOrderService {
      *         UnpOrderCreateVo
      * @return UnpResult
      */
-    UnpResult<UnpSale> createOrder(Agent agent, RequestWithActor<UnpOrderCreateVo> request);
+    UnpResult<UnpSale> createOrder(Agent agent, UnpOrderCreateVo request);
     
     /**
      * @param agent
@@ -29,7 +30,7 @@ public interface UnpOrderService {
      *         UnpOrderCreateVo
      * @return UnpResult
      */
-    UnpResult<UnpSale> createSale(Agent agent, RequestWithActor<UnpOrderCreateVo> request);
+    UnpResult<UnpSale> createSale(Agent agent, UnpOrderCreateVo request);
     
     /**
      * @param agent
@@ -38,7 +39,7 @@ public interface UnpOrderService {
      *         UnpOrderCreateVo
      * @return UnpResult
      */
-    UnpResult<UnpSale> createBuy(Agent agent, RequestWithActor<UnpOrderCreateVo> request);
+    UnpResult<UnpSale> createBuy(Agent agent, UnpOrderCreateVo request);
     
     /**
      * @param agent
@@ -47,7 +48,7 @@ public interface UnpOrderService {
      *         UnpOrderCreateVo
      * @return UnpResult
      */
-    UnpResult<UnpSale> createSaleRefund(Agent agent, RequestWithActor<UnpOrderCreateVo> request);
+    UnpResult<UnpSale> createSaleRefund(Agent agent, UnpOrderCreateVo request);
     
     /**
      * @param agent
@@ -56,6 +57,14 @@ public interface UnpOrderService {
      *         UnpOrderCreateVo
      * @return UnpResult
      */
-    UnpResult<UnpSale> createBuyRefund(Agent agent, RequestWithActor<UnpOrderCreateVo> request);
+    UnpResult<UnpSale> createBuyRefund(Agent agent, UnpOrderCreateVo request);
     
+    /**
+     * @param wrapper
+     *         wrapper
+     * @param param
+     *         param
+     * @return Page
+     */
+    Page<UnpSale> querySaleOrderList(Page<UnpSale> wrapper, UnpOrderVo param);
 }

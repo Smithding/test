@@ -57,7 +57,7 @@ public class UnpSale implements Serializable {
     /**
      * 状态:1待处理;2处理中;3已完成;4已取消;5变更中;
      */
-    private Boolean status;
+    private Integer status;
     /**
      * 创建者
      */
@@ -167,11 +167,11 @@ public class UnpSale implements Serializable {
         this.payTime = payTime;
     }
     
-    public Boolean getStatus() {
+    public Integer getStatus() {
         return status;
     }
     
-    public void setStatus(Boolean status) {
+    public void setStatus(Integer status) {
         this.status = status;
     }
     
@@ -214,4 +214,5 @@ public class UnpSale implements Serializable {
     public void setValid(Integer valid) {
         this.valid = valid;
     }
+    
 }
