@@ -742,7 +742,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	}
 	
 	@Override
-	public ResBaseInfo newQueryHolProDetail(Agent agent, Long resId, String uniProId, String startTime, String endTime) throws GSSException {
+	public ResBaseInfo querySingleProDetail(Agent agent, Long resId, String uniProId, String startTime, String endTime) throws GSSException {
 		//long start = System.currentTimeMillis();
 		if (StringUtil.isNullOrEmpty(agent)) {
             logger.error("agent对象为空");
