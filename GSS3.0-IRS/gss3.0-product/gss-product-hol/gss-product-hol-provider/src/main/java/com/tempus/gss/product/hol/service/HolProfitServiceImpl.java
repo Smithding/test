@@ -657,59 +657,67 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 		List<ProfitPrice> profitPriceList = null;
 		try {
 			if(agent == null || customerTypeNo==null){
-				throw new GSSException("根据customerTypeNo获取政策错误", "0302", "agent/传入参数为空");
+				throw new GSSException("根据customerTypeNo获取政策错误", "0302", "agentNum传入参数为空");
 			}
 			QueryProfitPrice query=new QueryProfitPrice();
 			query.setCustomerTypeNo(customerTypeNo);
 			query.setSupplierSource(supplierSource);
 			profitPriceList=profitPriceMapper.queryProfitPriceList(query);
 			if(StringUtil.isNullOrEmpty(profitPriceList)){
-				List<Channel> channelList=channelService.getTree(agent, customerTypeNo, 4);
-				if(StringUtil.isNotNullOrEmpty(channelList)){
-						for(Channel chanss : channelList){
-							if(chanss.getLevel().equals(4L)){
-								if(chanss.getChilds().size() > 0){
-									query.setCustomerTypeNo(chanss.getChilds().get(0).getThreeType());
-									profitPriceList=profitPriceMapper.queryProfitPriceList(query);
-									if(StringUtil.isNullOrEmpty(profitPriceList)){
-										query.setCustomerTypeNo(chanss.getChilds().get(0).getTwoType());
-										profitPriceList=profitPriceMapper.queryProfitPriceList(query);
-										if(StringUtil.isNullOrEmpty(profitPriceList)){
+				if(StringUtil.isNotNullOrEmpty(agent.getType())) {
+					query.setCustomerTypeNo(agent.getType());
+					profitPriceList=profitPriceMapper.queryProfitPriceList(query);
+					if(StringUtil.isNullOrEmpty(profitPriceList)) {
+						List<Channel> channelList=channelService.getTree(agent, customerTypeNo, 4);
+						if(StringUtil.isNotNullOrEmpty(channelList)){
+								for(Channel chanss : channelList){
+									if(chanss.getLevel().equals(4L)){
+										if(chanss.getChilds().size() > 0){
+											query.setCustomerTypeNo(chanss.getChilds().get(0).getThreeType());
+											profitPriceList=profitPriceMapper.queryProfitPriceList(query);
+											if(StringUtil.isNullOrEmpty(profitPriceList)){
+												query.setCustomerTypeNo(chanss.getChilds().get(0).getTwoType());
+												profitPriceList=profitPriceMapper.queryProfitPriceList(query);
+												if(StringUtil.isNullOrEmpty(profitPriceList)){
+													query.setCustomerTypeNo(chanss.getChilds().get(0).getOneType());
+													profitPriceList=profitPriceMapper.queryProfitPriceList(query);
+													if(StringUtil.isNullOrEmpty(profitPriceList)){
+														throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo无对应策略组 ");
+													}
+												}
+											}
+										}
+									}else
+									if(chanss.getLevel().equals(3L)){
+										if(chanss.getChilds().size() > 0){
+											query.setCustomerTypeNo(chanss.getChilds().get(0).getTwoType());
+											profitPriceList=profitPriceMapper.queryProfitPriceList(query);
+											if(StringUtil.isNullOrEmpty(profitPriceList)){
+												query.setCustomerTypeNo(chanss.getChilds().get(0).getOneType());
+												profitPriceList=profitPriceMapper.queryProfitPriceList(query);
+												if(StringUtil.isNullOrEmpty(profitPriceList)){
+													throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo无对应策略组 ");
+												}
+											}
+										}
+									}else
+									if(chanss.getLevel().equals(2L)){
+										if(chanss.getChilds().size() > 0){
 											query.setCustomerTypeNo(chanss.getChilds().get(0).getOneType());
 											profitPriceList=profitPriceMapper.queryProfitPriceList(query);
 											if(StringUtil.isNullOrEmpty(profitPriceList)){
 												throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo无对应策略组 ");
 											}
 										}
+									}else
+									if(chanss.getLevel().equals(1L)){
+										throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo为最高组级无对应控润");
 									}
 								}
-							}else
-							if(chanss.getLevel().equals(3L)){
-								if(chanss.getChilds().size() > 0){
-									query.setCustomerTypeNo(chanss.getChilds().get(0).getTwoType());
-									profitPriceList=profitPriceMapper.queryProfitPriceList(query);
-									if(StringUtil.isNullOrEmpty(profitPriceList)){
-										query.setCustomerTypeNo(chanss.getChilds().get(0).getOneType());
-										profitPriceList=profitPriceMapper.queryProfitPriceList(query);
-										if(StringUtil.isNullOrEmpty(profitPriceList)){
-											throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo无对应策略组 ");
-										}
-									}
-								}
-							}else
-							if(chanss.getLevel().equals(2L)){
-								if(chanss.getChilds().size() > 0){
-									query.setCustomerTypeNo(chanss.getChilds().get(0).getOneType());
-									profitPriceList=profitPriceMapper.queryProfitPriceList(query);
-									if(StringUtil.isNullOrEmpty(profitPriceList)){
-										throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo无对应策略组 ");
-									}
-								}
-							}else
-							if(chanss.getLevel().equals(1L)){
-								throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,该customerTypeNo为最高组级无对应控润");
-							}
 						}
+					}
+				}else {
+					throw new GSSException("根据customerTypeNo获取政策错误", "0302", "agentType传入参数为空");
 				}
 			}
 		} catch (Exception e) {
