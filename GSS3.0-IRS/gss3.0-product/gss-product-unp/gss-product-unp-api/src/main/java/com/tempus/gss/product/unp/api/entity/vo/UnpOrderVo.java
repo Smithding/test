@@ -48,6 +48,7 @@ public class UnpOrderVo implements Serializable {
      * 数据归属单位
      */
     private Integer owner;
+    private Integer unpType;
     
     /**
      * 销售单号
@@ -197,6 +198,14 @@ public class UnpOrderVo implements Serializable {
     private Long buyAccount;//供应商收款账号
     private Long capitalAccount;//收/付款账号(自己)
     private String payAmountTransactionNo;//付款流水号
+    
+    public Integer getUnpType() {
+        return unpType;
+    }
+    
+    public void setUnpType(Integer unpType) {
+        this.unpType = unpType;
+    }
     
     public Long getOfflinePayNo() {
         return offlinePayNo;
