@@ -171,7 +171,7 @@ public class QueryServiceImpl implements IQueryService {
         } catch (ParseException e) {
             log.error("开始调用shopping数据转换", e);
         }
-        log.info("开始匹配政策");
+        /*log.info("开始匹配政策");
         ThreadPoolTaskExecutor threadPoolTaskExecutor = taskExecutor();
         for (QueryIBEDetail queryIBEDetail : queryIBEDetailList) {
             threadPoolTaskExecutor.execute(new Runnable() {
@@ -192,7 +192,7 @@ public class QueryServiceImpl implements IQueryService {
             }
         } catch (InterruptedException e) {
             log.error("政策匹配",e);
-        }
+        }*/
         log.info("开始组装数据");
         queryIBEDetailList = combineQueryIBEDetails(queryIBEDetailList, flightQueryRequest.getAgent().getDevice(),agent);
         log.info("完成组装数据");
@@ -220,6 +220,7 @@ public class QueryServiceImpl implements IQueryService {
             stringRequestWithActor.setEntity("*");
             priceSpec = priceSpecService.getPriceSpec(stringRequestWithActor);
         }
+        if(priceSpec==null) return;
         Formula formula = JsonUtil.toBean(priceSpec.getFormulaData(), Formula.class);
         priceSpec.setFormula(formula);
         queryIBEDetail.setPriceSpecNo(priceSpec.getPriceSpecNo());
@@ -873,6 +874,7 @@ public class QueryServiceImpl implements IQueryService {
             int abinsCount = 0;
             String cabins = "";
             String ticketType = "";
+            BigDecimal salePrice = new BigDecimal(shoppingFare.getTotalFare().getAmount());
             List<PassengerTypePricesTotal> passengerTypePricesTotals = new ArrayList<PassengerTypePricesTotal>();
             for (PsgerFare psgerFare : shoppingFare.getPsgerFares()) {
                 PassengerTypePricesTotal passengerTypePricesTotal = new PassengerTypePricesTotal();
@@ -883,6 +885,8 @@ public class QueryServiceImpl implements IQueryService {
                 }
                 passengerTypePricesTotal.setPassengerType(psgerFare.getPsgerInfo().getCode());
                 passengerTypePricesTotal.setFareBasis(psgerFare.getFareBasis());
+                //解决空指针异常  将总金额赋值售价
+                passengerTypePricesTotal.setSalePrice(salePrice);
                 BigDecimal taxs = new BigDecimal(0);
                 BigDecimal taxxt = new BigDecimal(0);
                 if (null != psgerFare.getTaxs()) {
@@ -1858,7 +1862,7 @@ public class QueryServiceImpl implements IQueryService {
                     for (PassengerTypePricesTotal minpassengerTypePricesTotal : minqueryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals()) {
                         for (PassengerTypePricesTotal passengerTypePricesTotal : minqueryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals()) {
                             if ("ADT".equals(passengerTypePricesTotal.getPassengerType()) && "ADT".equals(minpassengerTypePricesTotal.getPassengerType())) {
-                                if (passengerTypePricesTotal.getSalePrice().compareTo(minpassengerTypePricesTotal.getSalePrice()) < 0) {
+                                if (passengerTypePricesTotal.getSalePrice()!=null &&minpassengerTypePricesTotal.getSalePrice()!=null && passengerTypePricesTotal.getSalePrice().compareTo(minpassengerTypePricesTotal.getSalePrice()) < 0) {
                                     minqueryIBEDetail = queryIBEDetail;
                                 }
                             }
