@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 public class PayListener {
     
     private Logger logger = LoggerFactory.getLogger(PayListener.class);
-    @Reference(version = "2.2")
+    @Reference
     IUnpOrderService unpOrderService;
     
     @RabbitHandler
