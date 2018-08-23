@@ -350,8 +350,24 @@ public class SaleOrderExtVo implements Serializable {
 	private Date issueTime;
 	
 	private Demand demand;
-	
-	/**
+	/*
+	部门毛利 页面展示为利润
+	* */
+	private BigDecimal deptProfit;
+
+	public BigDecimal getDeptProfit() {
+		return deptProfit;
+	}
+
+	public static long getSerialVersionUID() {
+		return serialVersionUID;
+	}
+
+    public void setDeptProfit(BigDecimal deptProfit) {
+        this.deptProfit = deptProfit;
+    }
+
+    /**
 	 * 12（已挂起).13.(已解挂)
 	 */
 	private String status;
