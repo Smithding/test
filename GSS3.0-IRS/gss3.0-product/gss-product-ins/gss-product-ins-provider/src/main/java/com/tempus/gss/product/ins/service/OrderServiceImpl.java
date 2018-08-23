@@ -1183,7 +1183,7 @@ public class OrderServiceImpl implements IOrderService {
 			StringBuffer insureNoArray = new StringBuffer();
 			// 对被保人循环进行投保操作
 			for (SaleOrderDetail saleOrderDetail : saleOrderDetailList){
-				if(saleOrderDetail.getStatus()==2){
+				if(saleOrderDetail.getStatus()==2 || saleOrderDetail.getStatus()==3){
 					continue;
 				}
 					List<SaleOrderDetail> saleOrderDetails = new ArrayList<SaleOrderDetail>();

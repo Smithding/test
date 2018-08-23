@@ -14,6 +14,7 @@ import com.tempus.gss.product.ins.api.entity.SaleOrderExt;
 import com.tempus.gss.product.ins.api.entity.vo.SaleOrderExtVo;
 import com.tempus.gss.product.ins.api.service.IOrderService;
 import com.tempus.gss.security.AgentUtil;
+import com.tempus.gss.vo.Agent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.amqp.core.ExchangeTypes;
@@ -45,6 +46,7 @@ public class InsureTicketListenter {
         public void processLogRecord(TicketMessage ticketMessage){
                 logger.info("-------保险订单投保-----收到出票消息:"+ticketMessage.getOwner()+","+ticketMessage.getOrderNo()+","+ticketMessage.getTradeNo());
                 boolean result  = false;
+                Agent agent = new Agent(ticketMessage.getOwner(), "sys");
                 try{
                         RequestWithActor<Long> requestWithActor = new RequestWithActor<Long>();
                         requestWithActor.setEntity(ticketMessage.getTradeNo());
