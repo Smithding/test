@@ -247,39 +247,6 @@ public class SaleOrderExt implements Serializable {
      * @return
      */
     private String bookingClerk;
-    public String getBookingClerk() {
-		return bookingClerk;
-	}
-
-	public void setBookingClerk(String bookingClerk) {
-		this.bookingClerk = bookingClerk;
-	}
-
-	public String getCustomerType() {
-		return customerType;
-	}
-
-	public void setCustomerType(String customerType) {
-		this.customerType = customerType;
-	}
-
-	public String getCustomerName() {
-		return customerName;
-	}
-
-	public void setCustomerName(String customerName) {
-		this.customerName = customerName;
-	}
-
-	private String customerName;
-	public String getOwnerName() {
-		return ownerName;
-	}
-
-	public void setOwnerName(String ownerName) {
-		this.ownerName = ownerName;
-	}
-
 	/**
 	 * 保险扩展字段对象
 	 */
@@ -296,15 +263,6 @@ public class SaleOrderExt implements Serializable {
 	 * @return
 	 */
 	private List<Customer> lowerCustomers;
-
-
-	public List<Customer> getLowerCustomers() {
-		return lowerCustomers;
-	}
-
-	public void setLowerCustomers(List<Customer> lowerCustomers) {
-		this.lowerCustomers = lowerCustomers;
-	}
 
 	/**
 	 * PNR,关联机票信息
@@ -412,7 +370,38 @@ public class SaleOrderExt implements Serializable {
 		this.insureExtVo = insureExtVo;
 	}
 
+	public String getBookingClerk() {
+		return bookingClerk;
+	}
 
+	public void setBookingClerk(String bookingClerk) {
+		this.bookingClerk = bookingClerk;
+	}
+
+	public String getCustomerType() {
+		return customerType;
+	}
+
+	public void setCustomerType(String customerType) {
+		this.customerType = customerType;
+	}
+
+	public String getCustomerName() {
+		return customerName;
+	}
+
+	public void setCustomerName(String customerName) {
+		this.customerName = customerName;
+	}
+
+	private String customerName;
+	public String getOwnerName() {
+		return ownerName;
+	}
+
+	public void setOwnerName(String ownerName) {
+		this.ownerName = ownerName;
+	}
 	public void setSaleOrderNo(Long saleOrderNo) {
 		this.saleOrderNo = saleOrderNo;
 	}
@@ -463,6 +452,14 @@ public class SaleOrderExt implements Serializable {
 
 	public void setOrderNo(String orderNo) {
 		this.orderNo = orderNo;
+	}
+
+	public List<Customer> getLowerCustomers() {
+		return lowerCustomers;
+	}
+
+	public void setLowerCustomers(List<Customer> lowerCustomers) {
+		this.lowerCustomers = lowerCustomers;
 	}
 
 	public Integer getOrderType() {

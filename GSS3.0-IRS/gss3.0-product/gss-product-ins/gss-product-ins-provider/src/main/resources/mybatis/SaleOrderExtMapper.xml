@@ -88,6 +88,8 @@
     <result column="CUSTOMER_NAME" property="customerName" jdbcType="VARCHAR" />
      <!--客户类型-->
     <result column="CUSTOMER_TYPE_NAME" property="customerType" jdbcType="VARCHAR" />
+    <!--是否绑定下单  1未绑定 2为绑定下单-->
+    <result column="ISBIND" property="isBind" jdbcType="INTEGER" />
      <!--总投保时间-->
     <result column="TOTAL_INSURE_TIME" property="totalInsureTime" jdbcType="TIMESTAMP" />
     <!-- 一对一 保险产品-->
@@ -104,7 +106,7 @@
     ISSUE_DATE, HOLDER_TYPE, HOLDER_NAME, HOLDER_CERTI_TYPE, HOLDER_CERTI_NO, HOLDER_SEX,
     HOLDER_BIRTHDAY, HOLDER_EMAIL, HOLDER_PHONE, CUSTOMER_TYPE_NO, SALE_PRICE, BUY_PRICE, TOTAL_PREMIUM,
     TRAVEL_DAY, INSURED_COUNT, REMARK, IS_TEAM, SOURCE_NAME, EXTENDED_FIELDS_JSON, PNR, CREATE_TIME,
-    MODIFY_TIME, CREATOR, MODIFIER, VALID,INTERNAT_ORCIVIL,SUM_COPIES,TOTAL_INSURE_TIME
+    MODIFY_TIME, CREATOR, MODIFIER, VALID,INTERNAT_ORCIVIL,SUM_COPIES,ISBIND,TOTAL_INSURE_TIME
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select

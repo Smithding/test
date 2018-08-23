@@ -55,6 +55,8 @@
     <!-- 投保时间  -->
     <result column="INSURE_TIME" property="insureTime" jdbcType="TIMESTAMP" />
     <result column="ERROR_MESSAGE" property="errorMessage" jdbcType="VARCHAR" />
+    <!-- 机票票号  -->
+    <result column="BILL_NO" property="billNo" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Base_Column_List" >
     INSURED_NO, ID, OWNER, SALE_ORDER_NO, INSURED_NAME, INSURED_CERTI_TYPE, INSURED_CERTI_NO, 
@@ -189,6 +191,9 @@
       <if test="insureTime != null" >
         INSURE_TIME,
       </if>
+      <if test="billNo != null" >
+        BILL_NO,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="insuredNo != null" >
@@ -269,6 +274,9 @@
        <if test="insureTime != null" >
         #{insureTime,jdbcType=TIMESTAMP},
       </if>
+      <if test="billNo != null" >
+        #{billNo,jdbcType=VARCHAR},
+      </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ins.api.entity.SaleOrderDetail" >
@@ -348,6 +356,9 @@
       </if>
       <if test="isReport != null" >
         ISREPORT = #{isReport,jdbcType=INTEGER},
+      </if>
+      <if test="billNo != null" >
+        BILL_NO = #{billNo,jdbcType=VARCHAR},
       </if>
     </set>
     where INSURED_NO = #{insuredNo,jdbcType=BIGINT} AND ISREPORT='0'

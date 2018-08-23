@@ -382,6 +382,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 												String checkInFormat = sdf.format(DateUtil.offsiteDay(checkIn, i));
 												ProSaleInfoDetail pid = new ProSaleInfoDetail();
 												pid.setDistributionSalePrice(averagePrice.getSettleFee().intValue());
+												pid.setTcDirectPrice(averagePrice.getSettleFee().intValue());	//实际价格
 												mapPro.put(checkInFormat, pid);
 											}
 											resProBaseInfo.setProSaleInfoDetailsTarget(mapPro);
@@ -409,6 +410,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 												String checkInFormat = sdf.format(DateUtil.offsiteDay(checkIn, i));
 												ProSaleInfoDetail pid = new ProSaleInfoDetail();
 												pid.setDistributionSalePrice(endPrice.intValue());
+												pid.setTcDirectPrice(firPrice.intValue());
 												mapPro.put(checkInFormat, pid);
 											}
 											resProBaseInfo.setProSaleInfoDetailsTarget(mapPro);
@@ -499,10 +501,11 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 
 	@Override
 	public CityDetail getCityDetailByCityCode(Agent agent, String cityName) {
-		Criteria criteria = new Criteria();
+		/*Criteria criteria = new Criteria();
 		Criteria criteria0 = Criteria.where("cityName").regex("^.*" + cityName + ".*$").and("supplierNo").is("0");
 		Criteria criteria1 = Criteria.where("cityName").regex("^.*" + cityName + ".*$").and("supplierNo").is("1");
-		criteria.orOperator(criteria0, criteria1);
+		criteria.orOperator(criteria0, criteria1);*/
+		Criteria criteria = Criteria.where("cityName").regex("^.*" + cityName + ".*$");
 		List<CityDetail> cityDeatil = mongoTemplate1.find(new Query(criteria), CityDetail.class);
 		if (null != cityDeatil && cityDeatil.size() > 0) {
 			return cityDeatil.get(0);

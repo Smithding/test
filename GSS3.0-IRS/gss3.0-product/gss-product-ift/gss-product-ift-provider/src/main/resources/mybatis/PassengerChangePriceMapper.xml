@@ -103,6 +103,17 @@
         from IFT_PASSENGER_CHANGE_PRICE
         where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} AND PASSENGER_NO = #{passengerNo,jdbcType=BIGINT} AND VALID=1 ORDER BY CREATE_TIME DESC limit 0,1
     </select>
+    <select id="getChangePassgerByPgerNo" resultMap="BaseResultMap" >
+       SELECT pp.* FROM IFT_PASSENGER_CHANGE_PRICE pp
+       LEFT JOIN OS_SALECHANGE os ON pp.sale_change_no = os.sale_change_no
+       WHERE pp.SALE_ORDER_NO =#{saleOrderNo,jdbcType=BIGINT} AND pp.passenger_no =#{passengerNo,jdbcType=BIGINT} AND os.pay_status in(3,4) ORDER BY os.create_time desc LIMIT 0,1
+    </select>
+    <select id="getAllChangePriceAndChangeTax" resultType="java.util.Map" >
+        SELECT SUM(pp.SALE_PRICE) AS allSalePrice,SUM(pp.SALE_TAX) AS allSaleTax ,SUM(pp.BUY_PRICE) AS allBuyPrice,SUM(pp.BUY_TAX) AS allBuyTax
+        FROM IFT_PASSENGER_CHANGE_PRICE pp
+        LEFT JOIN OS_SALECHANGE os ON pp.sale_change_no = os.sale_change_no
+        WHERE pp.sale_order_no = #{saleOrderNo,jdbcType=BIGINT} and  passenger_no =#{passengerNo,jdbcType=BIGINT} AND os.pay_status in(3,4)
+    </select>
 
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from IFT_PASSENGER_CHANGE_PRICE

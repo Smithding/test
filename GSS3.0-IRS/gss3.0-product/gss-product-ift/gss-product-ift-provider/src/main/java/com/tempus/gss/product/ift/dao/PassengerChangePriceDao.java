@@ -1,6 +1,8 @@
 package com.tempus.gss.product.ift.dao;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Component;
@@ -35,4 +37,20 @@ public interface PassengerChangePriceDao extends BaseDao<PassengerChangePrice,Pa
 	PassengerChangePrice selectPricerByChangeNoAndPassengerNo(@Param("saleChangeNo") Long saleChangeNo, @Param("passengerNo") Long passengerNo);
 
     PassengerChangePrice selectByPgerNoAndSaleOrderNo(@Param("passengerNo")Long passengerNo, @Param("saleOrderNo")Long saleOrderNo);
+
+	/**
+	 * 获取该乘客最新的已改签成功的信息
+	 * @param passengerNo
+	 * @param saleOrderNo
+	 * @return
+	 */
+	PassengerChangePrice getChangePassgerByPgerNo(@Param("passengerNo")Long passengerNo, @Param("saleOrderNo")Long saleOrderNo);
+
+	/**
+	 * 获取该乘客所有的改签差价和改签税的累积总和（多次改签的总和）
+	 * @param passengerNo
+	 * @param saleOrderNo
+	 * @return
+	 */
+    Map<String,BigDecimal> getAllChangePriceAndChangeTax(@Param("passengerNo")Long passengerNo, @Param("saleOrderNo")Long saleOrderNo);
 }

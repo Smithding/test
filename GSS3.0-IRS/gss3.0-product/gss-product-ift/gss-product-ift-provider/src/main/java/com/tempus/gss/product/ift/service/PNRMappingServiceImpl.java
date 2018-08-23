@@ -69,13 +69,13 @@ public class PNRMappingServiceImpl implements PNRMappingService {
             log.info("国际机票PNR预定返回原始信息：" + JsonUtil.toJson(pnr));
             queryIBEDetail = getPnrByQueryIBEDetail(pnr);
             getFSI(queryIBEDetail);
-            if(!StringUtils.equals("8532",owner)) {//青岛无需匹配政策
+           /* if(!StringUtils.equals("8532",owner)) {//青岛无需匹配政策
                 try {
                     queryService.mappingPriceSpec(queryIBEDetail, customerType, agent);
                 }catch (Exception e){
                     log.error("pnr匹配政策异常", e);
                 }
-            }
+            }*/
         } catch (Exception e) {
             log.error("pnr匹配出错", e);
             return queryIBEDetail;
@@ -100,7 +100,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
         } catch (Exception e) {
             log.info("pnr内容匹配出错", e);
         }
-        queryService.mappingPriceSpec(queryIBEDetail, customerType, agent);
+       // queryService.mappingPriceSpec(queryIBEDetail, customerType, agent);
         return queryIBEDetail;
     }
 

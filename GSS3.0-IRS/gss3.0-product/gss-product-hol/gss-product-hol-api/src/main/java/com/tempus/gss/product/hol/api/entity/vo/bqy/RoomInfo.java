@@ -42,6 +42,8 @@ public class RoomInfo implements Serializable{
 
     private String bedTypeName;     //床型
 
+    private String oldPrice;        //原价格
+
     public String getHolMidId() {
         return holMidId;
     }
@@ -176,5 +178,13 @@ public class RoomInfo implements Serializable{
 
     public void setBedTypeName(String bedTypeName) {
         this.bedTypeName = bedTypeName;
+    }
+
+    public String getOldPrice() {
+        return oldPrice;
+    }
+
+    public void setOldPrice(String oldPrice) {
+        this.oldPrice = oldPrice;
     }
 }

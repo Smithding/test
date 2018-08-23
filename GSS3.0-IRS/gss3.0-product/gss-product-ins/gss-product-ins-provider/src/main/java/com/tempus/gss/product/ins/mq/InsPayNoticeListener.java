@@ -61,11 +61,11 @@ import com.tempus.gss.vo.Agent;
  */
 @Component
 @RabbitListener(bindings = @QueueBinding(value = @Queue(value = "ins.payNoticeQue", durable = "true"), exchange = @Exchange(value = "gss-pay-exchange", type = ExchangeTypes.FANOUT, ignoreDeclarationExceptions = "true", durable = "true"), key = "pay"))
-/*@RabbitListener(queues = "SettleRequest2.2")*/
+//@RabbitListener(queues = "SettleRequest2.2")
 public class InsPayNoticeListener {
 	protected static final Logger logger = LoggerFactory.getLogger(InsPayNoticeListener.class);
 
-	@Reference
+	@Reference(version="LL")
 	IOrderService orderService;
 	@Reference
 	ISaleOrderService saleOrderService;
@@ -92,9 +92,10 @@ public class InsPayNoticeListener {
 		Integer payStatus = payNoticeVO.getPayStatus();
 		try {
 			logger.info("监听到支付消息队列" + payNoticeVO.toString());
+			Agent agent = new Agent(payNoticeVO.getOwner(), "sys");
 			// 商品类型 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
 			if (payNoticeVO.getGoodsType() == 3) {
-				Agent agent = new Agent(payNoticeVO.getOwner(), "sys");
+
 				RequestWithActor<Long> requestWithActor = new RequestWithActor<>();
 				requestWithActor.setAgent(agent);
 				long businessNo = payNoticeVO.getBusinessNo();
@@ -215,12 +216,15 @@ public class InsPayNoticeListener {
 						}
 //						saleService.pay(agent, businessNo);
 					}
-			}else if(1==payNoticeVO.getGoodsType().intValue()){
-				logger.info("-------机票拒单保险退款-----收到拒单消息--交易单:"+payNoticeVO.getTraNo());
-				System.out.println(payNoticeVO.getGoodsType().equals("1"));
+			}else if(payNoticeVO.getGoodsType() == 1){
+				logger.info("-------机票发生退款保险也退款-----收到消息--交易单:"+payNoticeVO.getTraNo());
+				//如果为机票付款信息则不进行处理
+				if("1".equals(incomeExpenseType)){
+					return;
+				}
 				RequestWithActor<Long> requestWithActor = new RequestWithActor<Long>();
 				requestWithActor.setEntity(payNoticeVO.getTraNo());
-				requestWithActor.setAgent(AgentUtil.getAgent());
+				requestWithActor.setAgent(agent);
 				List<SaleOrderExt> saleOrderExtList =  orderService.querySaleOrderForTranSaction(requestWithActor);
 				//获取后台配置
 				String isRefund = paramService.getValueByKey("refund_or_cancel");

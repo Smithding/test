@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.exception.GSSException;
+import com.tempus.gss.order.entity.SaleChange;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.BuyChangeExt;
 import com.tempus.gss.product.ift.api.entity.PassengerChangePrice;
@@ -196,4 +197,11 @@ public interface IChangeService {
 
 	 SaleChangeExt updateSaleChangeExt(RequestWithActor<ChangePriceRequest> requestWithActor, SaleChangeExt saleChangeExt);
 
+	/**
+	 * 根据原单号获取所有的改签单（不包括退废）
+	 * @param agent
+	 * @param saleOrderNo
+	 * @return
+	 */
+    List<SaleChange> getSaleChangeBySONo(Agent agent, Long saleOrderNo);
 }

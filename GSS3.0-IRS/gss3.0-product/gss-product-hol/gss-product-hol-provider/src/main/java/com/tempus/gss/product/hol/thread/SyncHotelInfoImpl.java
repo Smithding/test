@@ -232,7 +232,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	                   			 				if(proSaleInfoDetails.containsKey(DateUtil.stringToLonString(startTime))) {
 		                   			 				Integer firProPrice = proSaleInfoDetails.get(DateUtil.stringToLonString(startTime)).getDistributionSalePrice();
 		                   			 				if(StringUtil.isNotNullOrEmpty(firProPrice)) {
-		                   			 					BigDecimal profitPrice = holProfitService.computeTcProfitPrice(agent, firProPrice, agent.getNum());
+		                   			 					BigDecimal profitPrice = holProfitService.computeTcProfitPrice(agent, firProPrice, agent.getType());
 			         	                				if(StringUtil.isNotNullOrEmpty(profitPrice)){
 			         	                					pro.setRebateRateProfit(profitPrice);
 			         	                				}
@@ -742,7 +742,7 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	}
 	
 	@Override
-	public ResBaseInfo newQueryHolProDetail(Agent agent, Long resId, String uniProId, String startTime, String endTime) throws GSSException {
+	public ResBaseInfo querySingleProDetail(Agent agent, Long resId, String uniProId, String startTime, String endTime) throws GSSException {
 		//long start = System.currentTimeMillis();
 		if (StringUtil.isNullOrEmpty(agent)) {
             logger.error("agent对象为空");
@@ -792,7 +792,6 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 			AssignDateHotel assignDateHotel = assignDateHotelFu.get();
 			
 			if(StringUtil.isNotNullOrEmpty(assignDateHotel) && StringUtil.isNotNullOrEmpty(assignDateHotel.getProInfoDetailList())) {
-				Integer firstPrice = 999999;
 				List<ProInfoDetail> proInfoDetailList= assignDateHotel.getProInfoDetailList();
 				List<ResProBaseInfo> resProBaseInfoListBeFore= resProBaseInfos.getResProBaseInfos();
 				
@@ -805,7 +804,6 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 						if(filterList != null && filterList.size() >0) {
 							ResProBaseInfo pro = filterList.get(0);
 							TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
-							List<Integer> pppRice = new ArrayList<Integer>();
  	            			Calendar da = Calendar.getInstance(); 
                    			 for (int i = 0; i < days; i++) {
                    				 ProSaleInfoDetail ProSaleInfoDetail=new ProSaleInfoDetail();
@@ -817,25 +815,6 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 							TreeMap<String, ProSaleInfoDetail> proSaleInfoDetails = proSaleKey.getProSaleInfoDetails();
        			 			if(StringUtil.isNotNullOrEmpty(proSaleInfoDetails)) {
        			 			List<ProfitPrice> computeProfitByAgent = computeProfitByAgentFu.get();
-       			 				if(proSaleInfoDetails.containsKey(DateUtil.stringToLonString(startTime))) {
-           			 				Integer firProPrice = proSaleInfoDetails.get(DateUtil.stringToLonString(startTime)).getDistributionSalePrice();
-           			 				if(StringUtil.isNotNullOrEmpty(firProPrice)) {
-           			 					if(computeProfitByAgentFu!=null) {
-	           			 					if(computeProfitByAgent != null && computeProfitByAgent.size() > 0) {
-	               			 					for(ProfitPrice profit : computeProfitByAgent) {
-	               			 						BigDecimal lowerPrice = profit.getPriceFrom();
-	               			 						BigDecimal upPrice = profit.getPriceTo();
-	               			 						BigDecimal firPrice = new BigDecimal(firProPrice);
-	               			 						if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
-	               			 							BigDecimal rate = profit.getRate();
-	               			 							rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
-	               			 							pro.setRebateRateProfit(rate);
-	               			 						}
-	               			 					}
-	           			 					}
-           			 					}
-           			 				}
-       			 				}
            			 			int kk = 0;
  	    	        			for (Map.Entry<String, ProSaleInfoDetail> entry : proSaleInfoDetails.entrySet()) {
  	    	        				int begincompare = DateUtil.stringToSimpleString(entry.getKey()).compareTo(startTime);
@@ -857,48 +836,11 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	               			 					}
 	           			 					}
  	    	        						
- 	    	        						pppRice.add(price);
- 	    	        						if(!entry.getValue().getInventoryStats().equals(4)) {
- 	    	        							SimpleDateFormat newsdf=new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
- 	    	        							String nowTime = newsdf.format(new Date());
- 	    	        							int startDate = entry.getValue().getStartDate().compareTo(nowTime);
- 	    	        							int endDate = entry.getValue().getEndDate().compareTo(nowTime);
- 	    	        							if(startDate > 0 || endDate < 0) {
- 	    	        								pro.setBookStatus(0);
- 	    	        							}
- 	    	        						}else {
- 	    	        							pro.setBookStatus(0);
- 	    	        						}
-	    	        							if(days.equals(1) && (sdf.format(new Date()).equals(startTime))) {
-	    	        								Date startTime1 = DateUtil.stringToSimpleDate(entry.getValue().getStartTime());
- 	    	        							Date endTime1 = DateUtil.stringToSimpleDate(entry.getValue().getEndTime());
- 	    	        							Date nowDate = new Date();
- 	    	        							if(nowDate.before(startTime1) || endTime1.before(nowDate)) {
- 	    	        								pro.setBookStatus(0);
- 	    	        							}
-	    	        							}
  	    	        						sumPrice += price;
  	    	        						kk += 1;
- 	    	        						if(kk == 1) {
- 	    	        							firstPrice = entry.getValue().getDistributionSalePrice();
- 	    	        						}
  	    	        					}
- 	    	        					/*if(kk == days.intValue()) {
-	    	        							break;
-	    	        						}*/
  	            					}
 	    	        					pro.setProSaleInfoDetailsTarget(mapPro);
-	    	        					pro.setFirPrice(firstPrice);
-	    	        					if(pppRice.size() == 1){
-	    	        						pro.setAdvancedLimitDays(pppRice.get(0));
-	    	        					}else if(pppRice.size() >= 2){
-	    	        						pro.setAdvancedLimitDays(Collections.min(pppRice));
-	    	        					}else {
-	    	        						pro.setBookStatus(0);
-	    	        					}
-	    	        					if(kk < days.intValue()) {
-	    	        						pro.setBookStatus(0);
-	    	        					}
 	    	        					if(kk != 0){
 	    	        					pro.setConPrice(sumPrice/kk);
 	    	        				}
@@ -906,9 +848,6 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	    	    					pro.setUserSumPrice(sumPrice);
 	    	        				kk = 0;
 	    	        				sumPrice =0;
-       			 			}else {
-       			 				pro.setBookStatus(0);
-       			 				pro.setFirPrice(firstPrice);
        			 			}
        			 			pro.setTotalRebateRateProfit(totalProfitPrice);
 							resProBaseInfoList.add(pro);

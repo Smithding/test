@@ -52,6 +52,18 @@ public class InsureExtVo implements Serializable {
 	@JsonProperty("flightInfo")
 	private FlightInfoVo flightInfoVo;
 
+	/**
+
+	 *票号
+	 */
+	private String billNo;
+	public String getBillNo() {
+		return billNo;
+	}
+
+	public void setBillNo(String billNo) {
+		this.billNo = billNo;
+	}
 	public FlightInfoVo getFlightInfoVo() {
 
 		return flightInfoVo;
