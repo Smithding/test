@@ -899,7 +899,7 @@ public class ChangeServiceImpl implements IChangeService {
                 log.info("修改采购状态" + saleChangeNo);
                 //如果支付为0
                 saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 3);
-                log.info("修改采购支付状态" + saleChangeNo);
+               // log.info("修改采购支付状态" + saleChangeNo);
                /* saleChangeService.updatePayStatus(requestWithActor.getAgent(), saleChangeNo, 3);
                 log.info("修改采购支付状态" + saleChangeNo);*/
             } else{

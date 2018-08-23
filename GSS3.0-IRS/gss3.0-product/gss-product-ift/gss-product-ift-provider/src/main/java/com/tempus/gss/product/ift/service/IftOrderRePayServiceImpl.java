@@ -120,7 +120,7 @@ public class IftOrderRePayServiceImpl implements IIftOrderRePayService {
         certificateCreateVO.setPayType(2);//1 在线支付 2 帐期或代付 3 线下支付
         certificateCreateVO.setChannel("SALE");
         certificateCreateVO.setServiceLine("1");
-        certificateCreateVO.setProductType(ProductType.IFT_TICKET);
+        certificateCreateVO.setProductType(ProductType.INTERNATIONAL_AIR_TICKET);
         certificateCreateVO.setDetailPayWay(DetailPayWay.NORMAL);
         if (planInfoSearchVO != null) {
             //更新销售应收应付
