@@ -50,7 +50,7 @@ public class InsureTicketListenter {
                 try{
                         RequestWithActor<Long> requestWithActor = new RequestWithActor<Long>();
                         requestWithActor.setEntity(ticketMessage.getTradeNo());
-                        requestWithActor.setAgent(AgentUtil.getAgent());
+                        requestWithActor.setAgent(agent);
                         List<SaleOrderExt> saleOrderExtList =  orderService.querySaleOrderForTranSaction(requestWithActor);
                         if(saleOrderExtList==null){
                                 logger.error("----------------查询保险订单出错！");
