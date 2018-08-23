@@ -930,6 +930,9 @@ public class OrderServiceImpl implements IOrderService {
 				}else{
 					flightInfoVo.setFlightNo(InsureExtVo.getFlightInfoVo().getFlightNo());
 				}
+				if(insurance.getBuyWay() == 1&&insurance.getIsCivilServant() == 1){
+					insureRequestVo.setPolicyType((short)2);//设置为行程单保险
+				}
 				int day = daysBetween(saleOrderExt.getEffectDate(),saleOrderExt.getExpireDate());
 				insureRequestVo.setTravelDay(day);
 				insureRequestVo.setDestination(InsureExtVo.getFlightInfoVo().getDestinationCity());

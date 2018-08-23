@@ -112,7 +112,11 @@ public class InsureRequestVo implements Serializable {
 	 * 航班号
 	 */
 	private String transNum;
-	
+	/*
+	 * 航班号
+
+	 */
+	private short policyType;
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private Date dptTime;
 	
@@ -213,6 +217,14 @@ public class InsureRequestVo implements Serializable {
 	public void setIsTeam(Short isTeam) {
 
 		this.isTeam = isTeam;
+	}
+
+	public short getPolicyType() {
+		return policyType;
+	}
+
+	public void setPolicyType(short policyType) {
+		this.policyType = policyType;
 	}
 
 	public String getSourceName() {

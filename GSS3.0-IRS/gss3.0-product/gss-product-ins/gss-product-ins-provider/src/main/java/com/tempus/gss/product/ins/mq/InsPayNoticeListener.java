@@ -65,7 +65,7 @@ import com.tempus.gss.vo.Agent;
 public class InsPayNoticeListener {
 	protected static final Logger logger = LoggerFactory.getLogger(InsPayNoticeListener.class);
 
-	@Reference
+	@Reference(version="LL")
 	IOrderService orderService;
 	@Reference
 	ISaleOrderService saleOrderService;
