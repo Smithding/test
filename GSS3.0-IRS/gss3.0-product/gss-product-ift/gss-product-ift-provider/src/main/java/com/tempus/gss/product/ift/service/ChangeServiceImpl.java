@@ -787,13 +787,13 @@ public class ChangeServiceImpl implements IChangeService {
             SaleChangeExt changeExt = changeExtService.getSaleChange(saleChangeExtRequest);
             if (saleChange != null) {
                 List<BuyChange> buyChangeList = buyChangeService.getBuyChangesByBONo(agent, saleChangeNo);
-                if(isSaleChangeRefund(saleChange,buyChangeList)){
+              /*  if(isSaleChangeRefund(saleChange,buyChangeList)){
                     //采购改签打回销售退费
                     saleChangeService.updateStatus(agent, saleChange.getSaleChangeNo(), 11);// 将销售状态改为销售审核
                     for (BuyChange buyChange : buyChangeList) {
                         buyOrderService.updateStatus(agent, buyChange.getBuyChangeNo(), 11);//将采购单状态改为待出票
                     }
-                } else{
+                } else{*/
                     if (null != changeExt) {
                         Integer ticketChangeType = changeExt.getTicketChangeType();
                         if (null != ticketChangeType) {
@@ -818,7 +818,7 @@ public class ChangeServiceImpl implements IChangeService {
                         }
                     }
                 }
-            }
+           // }
             /* 创建操作日志 */
             try {
                 String logstr=null;
