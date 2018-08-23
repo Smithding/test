@@ -1,9 +1,11 @@
 package com.tempus.gss.product.ift.service;
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,6 +115,23 @@ public class PassengerChangePriceServiceImpl implements IPassengerChangePriceSer
     @Override
     public PassengerChangePrice getLastChangeByPgerNoAndSaleOrderNo(Long passengerNo, Long saleOrderNo) {
         return passengerChangePriceDao.selectByPgerNoAndSaleOrderNo(passengerNo,saleOrderNo);
+    }
+
+    @Override
+    public PassengerChangePrice getChangePassgerByPgerNo(Long passengerNo, Long saleOrderNo) {
+        if(passengerNo == null || passengerNo == 0l){
+            return  null;
+        }
+        PassengerChangePrice passengerChangePrice= passengerChangePriceDao.getChangePassgerByPgerNo(passengerNo,saleOrderNo);
+        return passengerChangePrice;
+    }
+
+    @Override
+    public Map<String, BigDecimal> getAllChangePriceAndChangeTax(Long passengerNo, Long saleOrderNo) {
+        if(passengerNo == null || passengerNo == 0l){
+            return  null;
+        }
+        return passengerChangePriceDao.getAllChangePriceAndChangeTax(passengerNo,saleOrderNo);
     }
 
 

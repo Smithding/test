@@ -797,11 +797,11 @@ public class ChangeServiceImpl implements IChangeService {
                             String type = ticketChangeType.toString();
                             if (changeAfterTicketer) {
                                 //需要审核
-                                if ("2".equals(type)) {// 2 改期 ---> 销售
+                               /* if ("2".equals(type)) {// 2 改期 ---> 销售
                                     saleChangeService.updateStatus(agent, saleChange.getSaleChangeNo(), 6);// 将销售状态改为销售审核
-                                } else {// 3 换开---> 出票
+                                } else {// 3 换开---> 出票*/
                                     saleChangeService.updateStatus(agent, saleChange.getSaleChangeNo(), 3);// 将销售状态改为改签中
-                                }
+                               // }
                             } else {
                                 //不需要审核
                                 saleChangeService.updateStatus(agent, saleChange.getSaleChangeNo(), 3);// 将销售状态改为改签中
@@ -968,6 +968,30 @@ public class ChangeServiceImpl implements IChangeService {
         log.info("保存采购数据" + saleChangeExt.toString());
         saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
         return saleChangeExt;
+    }
+
+    @Override
+    public List<SaleChange> getSaleChangeBySONo(Agent agent, Long saleOrderNo) {
+
+        if(agent == null || saleOrderNo == null || saleOrderNo == 0l){
+            return null;
+        }
+        List<SaleChange> saleChangesBySONo = saleChangeService.getSaleChangesBySONo(agent, saleOrderNo);
+        if(saleChangesBySONo == null || saleChangesBySONo.size() == 0){
+            return null;
+        }
+        Iterator<SaleChange> it = saleChangesBySONo.iterator();
+        while (it.hasNext()) {
+            SaleChange saleChange = it.next();
+            if(saleChange.getOrderChangeType() != 3){
+                it.remove();
+            }
+        }
+        if (saleChangesBySONo.size() == 0) {
+            return null;
+        }
+        return saleChangesBySONo;
+
     }
 
     /**

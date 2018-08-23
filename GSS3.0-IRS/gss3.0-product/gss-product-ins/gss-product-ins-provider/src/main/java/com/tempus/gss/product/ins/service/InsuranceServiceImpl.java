@@ -493,6 +493,8 @@ public class InsuranceServiceImpl  implements IInsuranceService {
 	}
 	@Override
 	public List<Insurance> getAllInsurance(RequestWithActor<InsuranceVo> requestWithActor){
+		log.info("开始查询所有保险产品-------------------------------");
+		Long beginTime = System.currentTimeMillis();
 		Agent agent = requestWithActor.getAgent();
 	       List<Insurance> tempInsuranceList = this.queryList(requestWithActor);
 	        List<Insurance> insuranceList = new ArrayList<>();
@@ -543,8 +545,10 @@ public class InsuranceServiceImpl  implements IInsuranceService {
 	        	
 	         }
 	         insuranceList.add(ins);
-	        
 	        }
+			Long endTime = System.currentTimeMillis();
+		log.info("查询所有保险产品总耗时----------------------------------"+(endTime-beginTime));
+	        log.info("查询所有保险产品结束----------------------------------");
 	        return insuranceList;
 	}
 

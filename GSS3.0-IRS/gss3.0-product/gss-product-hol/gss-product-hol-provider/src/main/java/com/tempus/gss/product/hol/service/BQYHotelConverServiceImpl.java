@@ -118,6 +118,7 @@ public class BQYHotelConverServiceImpl implements IBQYHotelConverService {
 		resBaseInfo.setShortIntro(hotel.getDescription());
 		resBaseInfo.setIntro(hotel.getDescription());
 		resBaseInfo.setSupplierNo(hotel.getSupplierNo());
+		resBaseInfo.setImgUrl(hotel.getImgURL());
 		return resBaseInfo;
 	
 	}
