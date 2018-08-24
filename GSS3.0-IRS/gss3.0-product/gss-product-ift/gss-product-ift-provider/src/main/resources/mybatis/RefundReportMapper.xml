@@ -437,7 +437,7 @@
           oc.CHANGE_REASON as REFUND_REASON,
           sod.TICKET_NO,
           CONCAT(iftpassenger.SURNAME,'/',iftpassenger.NAME) AS fltName,
-          iftpassenger.SALE_PRICE,
+          passenger.SALE_PRICE AS SALE_PRICE,
           passenger.SALE_TAX,
           passenger.SALE_REFUND_PRICE,
           iftpassenger.SALE_PRICE AS saleAccount,
