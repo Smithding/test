@@ -1302,6 +1302,7 @@ public class RefundServiceImpl implements IRefundService {
 				throw new GSSException("废退单查询对象为空", "0001", "查询废退改签单失败");
 			}
 			String sourceChannelNo = null;
+			handleTicketNo(requestWithActor);
 			log.info("获取费退改签单的数据,查询条件为："+ JsonUtil.toJson(requestWithActor.getEntity()));
 
 			List<SaleChangeExt> list = saleChangeExtDao.queryObjByKey(page, requestWithActor.getEntity());
@@ -1438,6 +1439,19 @@ public class RefundServiceImpl implements IRefundService {
 		return page;
 	}
 
+	private void handleTicketNo(RequestWithActor<SaleChangeExtVo> saleOrderQueryRequest) {
+		String ticketNo = saleOrderQueryRequest.getEntity().getTicketNo();
+		if(StringUtils.isNotEmpty(ticketNo)){
+			if(!ticketNo.contains("-")){
+				//如果没有“-”的话在第四个位置加上“-”
+				StringBuilder sb = new StringBuilder(ticketNo);
+				sb.insert(3,"-");
+				saleOrderQueryRequest.getEntity().setTicketNo(sb.toString());
+			}
+		}
+	}
+
+
 	@Override
 	@Transactional
 	public Page<SaleChangeExt> queryListByVo(Page<SaleChangeExt> page, RequestWithActor<SaleChangeExtVo> requestWithActor)
@@ -1458,14 +1472,13 @@ public class RefundServiceImpl implements IRefundService {
 				List<Customer> customers = customerService.getSubCustomerByCno(requestWithActor.getAgent(), requestWithActor.getAgent().getNum());
 				List<Long> longList=new ArrayList<>();
 				if(null!=customers&&customers.size()>0) {
-
 					for (Customer customer : customers) {
 						longList.add(customer.getCustomerNo());
 					}
 				}
 				requestWithActor.getEntity().setLongList(longList);
-
 			}
+			handleTicketNo(requestWithActor);
 			List<SaleChangeExt> list = saleChangeExtDao.queryObjByKey(page, requestWithActor.getEntity());
 			if(null!=list) {
 				for (SaleChangeExt saleChangeExt : list) {
