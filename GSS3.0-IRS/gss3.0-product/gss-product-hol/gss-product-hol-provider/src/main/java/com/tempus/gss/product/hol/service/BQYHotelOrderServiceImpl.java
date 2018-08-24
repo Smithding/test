@@ -528,12 +528,12 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 
 		HotelOrder hotelOrder = new HotelOrder();
 
-		// 房型ID
-		//String roomTypeId = orderReq.getProductId();
 		//房间单价
-		BigDecimal unitPrice = new BigDecimal(roomInfo.getPrice());
+		BigDecimal unitPrice = roomInfo.getPrice();
 		//房间原单价
-		BigDecimal oldUnitPrice = new BigDecimal(roomInfo.getOldPrice());
+		BigDecimal oldUnitPrice = roomInfo.getOldPrice();
+		//房间挂牌价
+		BigDecimal settleFee = roomInfo.getSettleFee();
 		//供应商ID
 		String supplierId = roomInfo.getSupplierId();
 		//预定检查类型
@@ -543,14 +543,14 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 
 		// 每天的价格记录
 		String eachNightPrice = null;
-		// 每天价格
+		// 实际每天价格
 		BigDecimal oneDayPrice = unitPrice.multiply(new BigDecimal(orderReq.getBookNumber()));
-		// 总价格
+		// 实际总价格
 		BigDecimal newTotalPrice = oneDayPrice.multiply(new BigDecimal(daysBetween));
 		//未减佣金每天的价格
 		BigDecimal oldOneDayPrice = oldUnitPrice.multiply(new BigDecimal(orderReq.getBookNumber()));
 		//未减佣金总价
-		BigDecimal oldTotalPrice = oldUnitPrice.multiply(new BigDecimal(daysBetween));
+		BigDecimal oldTotalPrice = oldOneDayPrice.multiply(new BigDecimal(daysBetween));
 
 		for (int i = 0; i < daysBetween; i++) {
 			if (eachNightPrice == null || "".equals(eachNightPrice)) {
@@ -729,12 +729,10 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		}
 		orderReq.setSupplierId(supplierId);
 		orderReq.setRatePlanCategory(ratePlanCategory);
-		orderReq.setUnitPrice(oldUnitPrice);
+		orderReq.setUnitPrice(settleFee);
 		//可以不传
 		orderReq.setChannelType(2);
-		logger.info("创建8000YI酒店订单入参"+JsonUtil.toJson(orderReq));
 		CreateOrderRespone createOrderRespone = bqyHotelInterService.createOrder(orderReq);
-		logger.info("创建8000YI酒店订单返回结果:"+ JsonUtil.toJson(createOrderRespone));
 		Long orderNo = createOrderRespone.getOrderNumber();
 		// 判断条件返回0订单创建失败
 		if (null != createOrderRespone && orderNo > 0) {

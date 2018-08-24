@@ -507,8 +507,6 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	
 	@Override
 	public CreateOrderRespone createOrder(CreateOrderReq createOrderReq) {
-		//BQY_HOTEL_CREATE_ORDER_URL
-		logger.info("BQY酒店订单创建开始...");
 		createOrderReq.setAgentId(Long.parseLong(BQY_AGENTID));
 		createOrderReq.setBookingUserId(BQY_AGENTID);
 		createOrderReq.setToken(md5Encryption());
