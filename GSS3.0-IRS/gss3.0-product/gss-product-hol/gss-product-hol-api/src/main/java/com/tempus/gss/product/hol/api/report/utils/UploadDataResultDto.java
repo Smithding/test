@@ -6,7 +6,6 @@ import java.util.List;
 
 /**
  * Excel导入工具类~~导入返回信息
- * @author huangjinhui
  *
  */
 public class UploadDataResultDto<T> {

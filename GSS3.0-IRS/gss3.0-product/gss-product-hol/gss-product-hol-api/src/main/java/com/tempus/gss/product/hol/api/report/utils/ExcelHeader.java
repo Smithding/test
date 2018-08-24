@@ -6,7 +6,6 @@ package com.tempus.gss.product.hol.api.report.utils;
  * order:用于记录标题在列的顺序
  * fieldName：用于记录在哪个属性使用的注解方便反射赋值
  * 
- * @author huangjinhui
  */
 public class ExcelHeader implements Comparable<ExcelHeader>{
 

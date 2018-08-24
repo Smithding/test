@@ -31,7 +31,6 @@ import java.util.regex.Pattern;
 
 /**
  * EXCEL操作工具类
- * @author huangjinhui
  *
  */
 @SuppressWarnings("resource")

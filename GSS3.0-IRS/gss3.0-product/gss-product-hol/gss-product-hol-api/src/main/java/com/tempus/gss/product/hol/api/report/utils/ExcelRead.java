@@ -18,7 +18,6 @@ import java.util.List;
 /**
  * 读取Excel
  *
- * @author lp
  */
 public class ExcelRead {
     public int totalRows; //sheet中总行数
