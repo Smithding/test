@@ -39,6 +39,14 @@ public class IftSupplier implements Serializable {
      * 创建时间
      */
     private Date createTime;
+    /**
+     * officeNO
+     */
+    private String officeNo;
+    /**
+     * 客商类型
+     */
+    private Long channelType;
 
     /**
      * 排序编号
@@ -46,7 +54,23 @@ public class IftSupplier implements Serializable {
     @JsonSerialize(using = LongSerializer.class)
     private Long sort;
 
-    private static final long serialVersionUID = 1L;
+    public String getOfficeNo() {
+		return officeNo;
+	}
+
+	public void setOfficeNo(String officeNo) {
+		this.officeNo = officeNo;
+	}
+
+	public Long getChannelType() {
+		return channelType;
+	}
+
+	public void setChannelType(Long channelType) {
+		this.channelType = channelType;
+	}
+
+	private static final long serialVersionUID = 1L;
 
     public Long getSupplierNo() {
         return supplierNo;

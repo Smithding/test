@@ -91,6 +91,8 @@ public class IftSupplierServiceImpl implements IftSupplierService{
 			for(IftSupplier iftsup:policyList){
 				for(Supplier sup:list){
 					if(iftsup.getSupplierNo().equals(sup.getSupplierNo())){
+						iftsup.setChannelType(sup.getGroupNo());
+						iftsup.setOfficeNo(sup.getOfficeNo());
 						iftsup.setName(sup.getName());
 					}
 				}
