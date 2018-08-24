@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.service;
 
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -35,7 +36,10 @@ import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.log.service.ILogService;
 import com.tempus.gss.product.hol.api.entity.FormDate;
+import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
 import com.tempus.gss.product.hol.api.entity.LogRecordHol;
+import com.tempus.gss.product.hol.api.entity.ResNameSum;
+import com.tempus.gss.product.hol.api.entity.ResToMinPrice;
 import com.tempus.gss.product.hol.api.entity.request.tc.AllHotelListReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.AssignDateHotelReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.GetOrderLogInfoReq;
@@ -63,9 +67,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ResultTc;
 import com.tempus.gss.product.hol.api.entity.response.tc.TCHotelDetailResult;
 import com.tempus.gss.product.hol.api.entity.response.tc.TcOrderCancelReasonList;
 import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
-import com.tempus.gss.product.hol.api.syn.ITCHotelSupplierService;
 import com.tempus.gss.product.hol.api.util.DateUtil;
-import com.tempus.gss.product.hol.dao.HotelOrderMapper;
 import com.tempus.gss.product.hol.utils.HttpClientUtil;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
@@ -81,13 +83,7 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 	HttpClientUtil httpClientUtil;
 	
 	@Autowired
-    HotelOrderMapper hotelOrderMapper;
-	
-	@Autowired
 	MongoTemplate mongoTemplate1;
-	
-	@Reference
-	ITCHotelSupplierService hotelFind;
 	
 	@Reference
 	ILogService iLogService;
@@ -272,15 +268,6 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 		return orderLogInfo;
 	}
 
-	@Override
-	public Boolean updateSingleHotelDetail(Agent agent, Long resId) {
-		Boolean flag = doIncrInventoryWithResId(agent, resId);
-		if(flag == true){
-		doIncrHotelDetail(resId);
-			return true;
-		}
-		return false;
-	}
 	
 	@Override
 	public Boolean doIncrInventoryWithResId(Agent agent, Long resId){
@@ -320,87 +307,12 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 		return true;
 	}
 	
-	@Override
-	public void doIncrHotelDetail(Long resId){
-		try {
-			SingleHotelDetailReq singleHotelDetailReq=new SingleHotelDetailReq();
-			singleHotelDetailReq.setResId(String.valueOf(resId));
-			singleHotelDetailReq.setSourceForm("-1");
-			singleHotelDetailReq.setRequestContent("res,rimg");
-			TCHotelDetailResult hotelDetail=queryTCHotelDetail(singleHotelDetailReq);
-			List<ResBaseInfo> resBaseInfos = hotelDetail.getResBaseInfos();
-			List<ImgInfo> resImages = hotelDetail.getResImages();
-			ResBaseInfo resBaseInfo = null;
-			if(StringUtil.isNotNullOrEmpty(resBaseInfos)) {
-				resBaseInfo = resBaseInfos.get(0);
-				Integer minPrice = new Random().nextInt(800) + 100;
-				resBaseInfo.setMinPrice(minPrice);
-				resBaseInfo.setResCommonPrice(minPrice);
-				resBaseInfo.setSaleStatus(1);
-				resBaseInfo.setId(resId);
-				resBaseInfo.setSupplierNo("411709261204150108");
-				resBaseInfo.setLatestUpdateTime(sdfupdate.format(new Date()));
-				if(StringUtil.isNotNullOrEmpty(resBaseInfo.getResGPS())) {
-					Double[] resGpsLocation = new Double[2];
-					for(ResGPSInfo gps : resBaseInfo.getResGPS()) {
-						if(gps.getType().equals(1)) {
-							resGpsLocation[0] = Double.valueOf(gps.getLon());
-		 					resGpsLocation[1] = Double.valueOf(gps.getLat());
-		 					resBaseInfo.setResGpsLocation(resGpsLocation);
-		 					break;
-						}
-					}
-				}
-			}
-			
-			if(StringUtil.isNotNullOrEmpty(resImages)) {
-				ImgInfoSum imgInfoSum =new ImgInfoSum();
-				imgInfoSum.setId(resId);
-				imgInfoSum.setImgInfoList(resImages);
-				for(ImgInfo img : resImages) {
-					if(img.getIsResDefault().equals(1)) {
-						resBaseInfo.setImgUrl(img.getImageUrl());
-						break;
-					}
-				}
-				imgInfoSum.setLatestUpdateTime(sdfupdate.format(new Date()));
-				mongoTemplate1.save(imgInfoSum, "imgInfoSum");
-				mongoTemplate1.save(resBaseInfo, "resBaseInfo");
-			}
-			
-			SingleHotelDetailReq singleHotelDetailReq2=new SingleHotelDetailReq();
-			singleHotelDetailReq2.setResId(String.valueOf(resId));
-			singleHotelDetailReq2.setSourceForm("-1");
-			singleHotelDetailReq2.setRequestContent("respro");
-			TCHotelDetailResult hotelDetail2=queryTCHotelDetail(singleHotelDetailReq2);
-			if(StringUtil.isNotNullOrEmpty(hotelDetail2) && StringUtil.isNotNullOrEmpty(hotelDetail2.getResProBaseInfos())) {
-				List<ResProBaseInfo> resProBaseInfo = hotelDetail2.getResProBaseInfos();
-				
-				if(StringUtil.isNotNullOrEmpty(resProBaseInfo)) {
-					ResProBaseInfos resProBaseInfos=new ResProBaseInfos();
-					resProBaseInfos.setId(resId);
-					resProBaseInfos.setResProBaseInfos(resProBaseInfo);
-					resProBaseInfos.setLatestUpdateTime(sdfupdate.format(new Date()));
-					mongoTemplate1.save(resProBaseInfos, "resProBaseInfos");
-				}
-			}
-			
-			
-		} catch (Exception e) {
-			LogRecordHol logRecordHol=new LogRecordHol();
-			logRecordHol.setBizCode("HOL-resInfo");
-			logRecordHol.setCreateTime(new Date());
-			logRecordHol.setTitle("更新酒店基本信息");
-			logRecordHol.setDesc("同步更新酒店基本信息,酒店ID为："+String.valueOf(resId)+","+e.getMessage());
-			logRecordHol.setResId(resId);
-			mongoTemplate1.save(logRecordHol, "logRecordHol");
-		}
-	}
+	
 
 	@Override
 	public ResBaseInfo updateSingleResDetail(Agent agent, String resId) {
 		ResBaseInfo resBaseInfo = null;
-		Integer minPrice = new Random().nextInt(200) + 100;
+		Integer minPrice = new Random().nextInt(500) + 100;
 		Integer flag = 0;
 		try {
 			Calendar cal = Calendar.getInstance();  
@@ -600,9 +512,11 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 		    	        							int startDate = entry.getValue().getStartDate().compareTo(nowTime);
 		    	        							int endDate = entry.getValue().getEndDate().compareTo(nowTime);
 		    	        							if(startDate > 0 || endDate < 0) {
+		    	        								fd.setPrice(0);
 		    	        								fd.setPrice2(0);
 		    	        							}
 		    	        						}else {
+		    	        							fd.setPrice(0);
 		    	        							fd.setPrice2(0);
 		    	        						}
 							 			}
@@ -693,8 +607,42 @@ public class TCHotelInterServiceImpl implements ITCHotelInterService{
 		}
 		return true;
 	}
-	
-	
+
+	@Override
+	public ResBaseInfo queryHolDetailForBack(Long resId) {
+		ResBaseInfo resBaseInfo = null;
+		SingleHotelDetailReq singleHotelDetailReq=new SingleHotelDetailReq();
+		singleHotelDetailReq.setResId(String.valueOf(resId));
+		singleHotelDetailReq.setSourceForm("-1");
+		singleHotelDetailReq.setRequestContent("res,respro");
+		TCHotelDetailResult queryTCHotelDetail = queryTCHotelDetail(singleHotelDetailReq);
+		if(StringUtil.isNotNullOrEmpty(queryTCHotelDetail)) {
+			List<ResBaseInfo> resBaseInfos = queryTCHotelDetail.getResBaseInfos();
+			//List<ImgInfo> resImages = queryTCHotelDetail.getResImages();
+			resBaseInfo = resBaseInfos.get(0);
+			List<ResProBaseInfo> resProBaseInfos = queryTCHotelDetail.getResProBaseInfos();
+			
+			Map<String, List<ResProBaseInfo>> proMap = resProBaseInfos.stream().collect(Collectors.groupingBy(ResProBaseInfo::getProId));
+			
+			List<ProDetails> ProInfoDetaisList=new ArrayList<ProDetails>();
+			if(StringUtil.isNotNullOrEmpty(proMap)){
+				for (Map.Entry<String, List<ResProBaseInfo>> baseList : proMap.entrySet()) {
+					ProDetails proInfoDetai=new ProDetails();
+					proInfoDetai.setProId(baseList.getKey());
+					proInfoDetai.setResProName(proMap.get(baseList.getKey()).get(0).getResProName());
+					proInfoDetai.setRoomSize(proMap.get(baseList.getKey()).get(0).getRoomSize());
+					proInfoDetai.setRoomFloor(proMap.get(baseList.getKey()).get(0).getRoomFloor());
+					proInfoDetai.setRoomFacilities(proMap.get(baseList.getKey()).get(0).getRoomFacilities());
+					proInfoDetai.setBedSize(proMap.get(baseList.getKey()).get(0).getBedSize());
+					List<ResProBaseInfo> valueList = baseList.getValue();
+					proInfoDetai.setResProBaseInfoList(valueList);
+					ProInfoDetaisList.add(proInfoDetai);
+				}
+			}
+			resBaseInfo.setProDetails(ProInfoDetaisList);
+		}
+		return resBaseInfo;
+	}
 	
 	
 }
