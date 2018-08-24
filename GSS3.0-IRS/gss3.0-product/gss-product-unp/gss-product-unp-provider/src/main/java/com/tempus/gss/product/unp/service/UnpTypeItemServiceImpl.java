@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.unp.api.entity.UnpGroupType;
 import com.tempus.gss.product.unp.api.entity.UnpItemType;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
+import com.tempus.gss.product.unp.api.entity.vo.UnpGroupItemVo;
 import com.tempus.gss.product.unp.api.service.UnpTypeItemService;
 import com.tempus.gss.product.unp.dao.UnpGroupTypeMapper;
 import com.tempus.gss.product.unp.dao.UnpItemTypeMapper;
@@ -29,8 +30,20 @@ public class UnpTypeItemServiceImpl extends BaseUnpService implements UnpTypeIte
     private UnpGroupTypeMapper groupTypeMapper;
     
     @Override
-    public UnpResult<List<UnpGroupType>> getGroups(Agent agent, Page<UnpGroupType> param) {
-        return null;
+    public Page<UnpGroupType> getGroups(Page<UnpGroupType> page, UnpGroupItemVo param) {
+        try {
+            if (null == page) {
+                page = new Page<>();
+            }
+            if (null == param) {
+                param = new UnpGroupItemVo();
+            }
+            List<UnpGroupType> list = groupTypeMapper.queryGroups(page, param);
+            page.setRecords(list);
+        } catch (Exception e) {
+            logger.error("getGroups  Error", e);
+        }
+        return page;
     }
     
     @Override
@@ -43,12 +56,11 @@ public class UnpTypeItemServiceImpl extends BaseUnpService implements UnpTypeIte
             } else {
                 result.failed("Error", null);
             }
-            return result;
         } catch (Exception e) {
-            logger.error("Error", e);
+            logger.error("addGroup Error", e);
             result.failed(e.getMessage(), null);
-            return result;
         }
+        return result;
     }
     
     @Override
@@ -57,8 +69,15 @@ public class UnpTypeItemServiceImpl extends BaseUnpService implements UnpTypeIte
     }
     
     @Override
-    public UnpResult<List<UnpItemType>> getItems(Agent agent, Page<UnpItemType> param) {
-        return null;
+    public Page<UnpItemType> getItems(Page<UnpItemType> page, UnpGroupItemVo param) {
+        try {
+            List<UnpItemType> list = itemTypeMapper.queryItems(page, param);
+            page.setRecords(list);
+        } catch (Exception e) {
+            logger.error("getItems  Error", e);
+        }
+        
+        return page;
     }
     
     @Override
@@ -84,69 +103,39 @@ public class UnpTypeItemServiceImpl extends BaseUnpService implements UnpTypeIte
     }
     
     @Override
-    public UnpResult<UnpItemType> delete(Agent agent, Long itemNo) {
-        UnpItemType updateEntity = new UnpItemType();
-        updateEntity.setValid(0);
-        updateEntity.setItemTypeNo(itemNo);
-        return this.update(agent, updateEntity);
-        
+    public UnpResult<String> delete(Agent agent, Boolean group, Long... itemNo) {
+        return null;
     }
     
     @Override
-    public UnpResult<UnpItemType> reuse(Agent agent, Long itemNo) {
-        UnpItemType updateEntity = new UnpItemType();
-        updateEntity.setValid(1);
-        updateEntity.setItemTypeNo(itemNo);
-        return this.update(agent, updateEntity);
+    public UnpResult<String> delete(Agent agent, Boolean group, String... itemNo) {
+        return null;
     }
     
     @Override
-    public UnpResult<UnpItemType> delete(Agent agent, UnpItemType item) {
-        UnpResult<UnpItemType> result = new UnpResult<>();
-        if (null == item) {
-            result.setCode(UnpResult.FAILED);
-            result.setMsg("要删除的item不能为空");
-            return result;
+    public UnpResult<String> reuse(Agent agent, Boolean group, Long... itemNo) {
+        return null;
+    }
+    
+    @Override
+    public UnpResult<String> reuse(Agent agent, Boolean group, String... itemNo) {
+        return null;
+    }
+    
+    @Override
+    public <T> UnpResult<T> update(Agent agent, T... entities) {
+        if (null == entities || entities.length == 0) {
+            UnpResult
         }
-        item.setValid(0);
-        return this.update(agent, item);
-    }
-    
-    @Override
-    public UnpResult<UnpItemType> reuse(Agent agent, UnpItemType item) {
-        UnpResult<UnpItemType> result = new UnpResult<>();
-        if (null == item) {
-            result.setCode(UnpResult.FAILED);
-            result.setMsg("要删除的item不能为空");
-            return result;
-        }
-        item.setValid(1);
-        return this.update(agent, item);
-    }
-    
-    @Override
-    public UnpResult<UnpItemType> update(Agent agent, UnpItemType item) {
-        UnpResult<UnpItemType> result = new UnpResult<>();
-        try {
-            if (null == item) {
-                result.setCode(UnpResult.FAILED);
-                result.setMsg("要删除的item不能为空");
-                return result;
-            }
-            if (itemTypeMapper.updateByPrimaryKeySelective(item) > 0) {
-                result.setCode(UnpResult.SUCCESS);
-                result.setMsg("SUCCESS");
-                return result;
+        for (T entity : entities) {
+            if (entity instanceof UnpGroupType) {
+            
+            } else if (entity instanceof UnpItemType) {
+            
             } else {
-                result.setCode(UnpResult.FAILED);
-                result.setMsg("无数据变更");
-                return result;
+            
             }
-        } catch (Exception e) {
-            logger.error("Error", e);
-            result.setCode(UnpResult.FAILED);
-            result.setMsg("Error : " + e.getMessage());
-            return result;
         }
     }
+    
 }

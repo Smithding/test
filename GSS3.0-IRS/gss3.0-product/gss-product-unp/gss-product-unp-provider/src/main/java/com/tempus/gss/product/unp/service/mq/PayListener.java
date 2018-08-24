@@ -31,8 +31,9 @@ public class PayListener {
     @RabbitHandler
     public void processLogRecord(PayNoticeVO payNoticeVO) {
         try {
-            logger.info("监听到支付消息队列" + JSON.toJSONString(payNoticeVO));
+//            logger.info("监听到支付消息队列" + JSON.toJSONString(payNoticeVO));
             // 商品类型 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送 9通用产品
+
             if (GoodsBigType.GENERAL.getKey() == payNoticeVO.getGoodsType() && PayReceiveVO.PS_PAY_STATUS_SUCCESS == payNoticeVO.getPayStatus()) {
                 Agent agent = payNoticeVO.getAgent();
             }

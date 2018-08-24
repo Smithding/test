@@ -1,12 +1,13 @@
 package com.tempus.gss.product.unp.api.entity.vo;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * @author ZhangBro
  * 查询条件
  */
-public class UnpOrderVo {
+public class UnpOrderVo implements Serializable {
     /**
      * 销售单号
      */

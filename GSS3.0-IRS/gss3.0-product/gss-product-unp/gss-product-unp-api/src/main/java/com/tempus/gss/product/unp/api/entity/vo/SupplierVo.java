@@ -1,12 +1,13 @@
 package com.tempus.gss.product.unp.api.entity.vo;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
 /**
  * @author ZhangBro
  */
-public class SupplierVo {
+public class SupplierVo implements Serializable {
     
     /** 供应商编号 */
     private Long supplierNo;

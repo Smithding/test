@@ -9,7 +9,7 @@ import java.util.Date;
 public class UnpGroupType implements Serializable {
     private static final long serialVersionUID = -1807482867107972503L;
     /**
-     * 小类ID
+     * 大类ID
      */
     private Long typeNo;
     /**

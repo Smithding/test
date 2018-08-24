@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.unp.api.entity.UnpGroupType;
 import com.tempus.gss.product.unp.api.entity.UnpItemType;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
+import com.tempus.gss.product.unp.api.entity.vo.UnpGroupItemVo;
 import com.tempus.gss.vo.Agent;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -13,15 +15,16 @@ import java.util.List;
  * <p>
  * unp产品大小类管理
  */
+@Service
 public interface UnpTypeItemService {
     /**
-     * @param agent
+     * @param page
      *         agent
      * @param param
      *         param
      * @return
      */
-    UnpResult<List<UnpGroupType>> getGroups(Agent agent, Page<UnpGroupType> param);
+    Page<UnpGroupType> getGroups(Page<UnpGroupType> page, UnpGroupItemVo param);
     
     /**
      * @param agent
@@ -42,13 +45,13 @@ public interface UnpTypeItemService {
     UnpResult<List<UnpGroupType>> addGroups(Agent agent, List<UnpGroupType> groups);
     
     /**
-     * @param agent
-     *         agent
+     * @param page
+     *         page
      * @param param
      *         param
      * @return UnpResult
      */
-    UnpResult<List<UnpItemType>> getItems(Agent agent, Page<UnpItemType> param);
+    Page<UnpItemType> getItems(Page<UnpItemType> page, UnpGroupItemVo param);
     
     /**
      * @param agent
@@ -60,63 +63,56 @@ public interface UnpTypeItemService {
     UnpResult<UnpItemType> addItem(Agent agent, UnpItemType item);
     
     /**
+     * 批量添加小类
+     *
      * @param agent
      *         agent
      * @param items
      *         items
-     *         批量添加小类
      * @return UnpResult
      */
     UnpResult<List<UnpItemType>> addItems(Agent agent, List<UnpItemType> items);
     
     /**
+     * 是否更新 group 为否时更新小类
+     * 删除特定的小类（逻辑删除）
+     *
      * @param agent
      *         agent
      * @param itemNo
      *         itemNo
-     *         删除特定的某个小类（逻辑删除）
+     * @param group
      * @return UnpResult
      */
-    UnpResult<UnpItemType> delete(Agent agent, Long itemNo);
+    UnpResult<String> delete(Agent agent, Boolean group, Long... itemNo);
+    
+    UnpResult<String> delete(Agent agent, Boolean group, String... itemNo);
     
     /**
+     * 是否更新 group 为否时更新小类No
+     * 重用特定的小类
+     *
      * @param agent
      *         agent
      * @param itemNo
      *         itemNo
-     *         重用特定的某个小类（逻辑删除）
+     * @param group
      * @return UnpResult
      */
-    UnpResult<UnpItemType> reuse(Agent agent, Long itemNo);
+    UnpResult<String> reuse(Agent agent, Boolean group, Long... itemNo);
+    
+    UnpResult<String> reuse(Agent agent, Boolean group, String... itemNo);
     
     /**
+     * 自动判断类型并更新
+     * 删除特定的 类（逻辑删除）
+     *
      * @param agent
      *         agent
-     * @param item
-     *         item
-     *         删除特定的某个小类（逻辑删除）
+     * @param entities
+     *         entities
      * @return UnpResult
      */
-    UnpResult<UnpItemType> delete(Agent agent, UnpItemType item);
-    
-    /**
-     * @param agent
-     *         agent
-     * @param item
-     *         item
-     *         重用特定的某个小类（逻辑删除）
-     * @return UnpResult
-     */
-    UnpResult<UnpItemType> reuse(Agent agent, UnpItemType item);
-    
-    /**
-     * @param agent
-     *         agent
-     * @param item
-     *         item
-     *         删除特定的某个小类（逻辑删除）
-     * @return UnpResult
-     */
-    UnpResult<UnpItemType> update(Agent agent, UnpItemType item);
+    <T> UnpResult<T> update(Agent agent, T... entities);
     
 }
