@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.entity.vo.bqy;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 /**
  * BQY酒店预订及订单创建所需参数
@@ -24,7 +25,11 @@ public class RoomInfo implements Serializable{
 
     private Integer person;         //入住人数
 
-    private Integer price;           //价格
+    private BigDecimal price;           //价格 (是否去除返佣的价格)
+
+    private BigDecimal oldPrice;        //原价格 (未做任何处理的挂牌价)
+
+    private BigDecimal settleFee;       //结算价 (与bqy的结算价格)
 
     private Long roomTypeId ;       //房型ID
 
@@ -41,8 +46,6 @@ public class RoomInfo implements Serializable{
     private Integer breakfastCount; //早餐数量
 
     private String bedTypeName;     //床型
-
-    private String oldPrice;        //原价格
 
     public String getHolMidId() {
         return holMidId;
@@ -90,14 +93,6 @@ public class RoomInfo implements Serializable{
 
     public void setPerson(Integer person) {
         this.person = person;
-    }
-
-    public Integer getPrice() {
-        return price;
-    }
-
-    public void setPrice(Integer price) {
-        this.price = price;
     }
 
     public Long getRoomTypeId() {
@@ -180,11 +175,27 @@ public class RoomInfo implements Serializable{
         this.bedTypeName = bedTypeName;
     }
 
-    public String getOldPrice() {
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public BigDecimal getOldPrice() {
         return oldPrice;
     }
 
-    public void setOldPrice(String oldPrice) {
+    public void setOldPrice(BigDecimal oldPrice) {
         this.oldPrice = oldPrice;
+    }
+
+    public BigDecimal getSettleFee() {
+        return settleFee;
+    }
+
+    public void setSettleFee(BigDecimal settleFee) {
+        this.settleFee = settleFee;
     }
 }
