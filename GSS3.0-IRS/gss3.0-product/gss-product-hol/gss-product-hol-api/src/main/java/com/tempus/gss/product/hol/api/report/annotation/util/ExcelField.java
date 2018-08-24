@@ -7,7 +7,6 @@ import java.lang.annotation.*;
  * 这里是导出对象的annoation
  * 所有需要导出的字段需要使用该注解
  * 
- * @author huangjinhui
  */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)

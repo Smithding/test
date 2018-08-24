@@ -4,7 +4,6 @@ import java.lang.annotation.*;
 
 /**
  * 电话
- * @author huangjinhui
  *
  */
 @Target({ElementType.FIELD})

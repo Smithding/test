@@ -4,7 +4,6 @@ import java.lang.annotation.*;
 
 /**
  * 范围
- * @author huangjinhui
  *
  */
 @Target({ElementType.FIELD})

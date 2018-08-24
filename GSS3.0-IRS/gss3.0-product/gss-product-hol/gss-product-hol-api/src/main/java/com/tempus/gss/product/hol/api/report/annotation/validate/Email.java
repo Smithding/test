@@ -4,7 +4,6 @@ import java.lang.annotation.*;
 
 /**
  * 邮箱
- * @author huangjinhui
  *
  */
 @Target({ElementType.FIELD})

@@ -4,7 +4,6 @@ import java.lang.annotation.*;
 
 /**
  * 最大值
- * @author huangjinhui
  *
  */
 @Target({ElementType.FIELD})

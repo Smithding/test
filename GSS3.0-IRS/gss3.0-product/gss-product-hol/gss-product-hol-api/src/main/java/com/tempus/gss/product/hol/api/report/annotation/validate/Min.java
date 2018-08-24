@@ -4,7 +4,6 @@ import java.lang.annotation.*;
 
 /**
  * 最小值
- * @author huangjinhui
  *
  */
 @Target({ElementType.FIELD})

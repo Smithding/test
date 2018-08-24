@@ -4,7 +4,6 @@ import java.lang.annotation.*;
 
 /**
  * 自定义注解。regex为自定义正则表达式
- * @author huangjinhui
  *
  */
 @Target({ElementType.FIELD})

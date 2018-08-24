@@ -4,7 +4,6 @@ import java.lang.annotation.*;
 
 /**
  * 配合 Alias使用。source指的是 excel的数据。target指的是 对应的结果
- * @author huangjinhui
  *
  */
 @Target({ElementType.FIELD})
