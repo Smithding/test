@@ -248,10 +248,10 @@ public class IftPolicy implements Serializable {
 	private Integer shareRewardType;
 
 	/** 存在共享航班时全程指定奖励 */
-	private Double shareAssignReward;
+	private BigDecimal shareAssignReward;
 
 	/** 共享航班航段指定奖励 */
-	private Double shareLegReward;
+	private BigDecimal shareLegReward;
 
 	/** 共享是否勾选仅和以下航司间共享时给全部奖励 ，0否（默认），1是 */
 	private Boolean shareIsSuitAirline;
@@ -985,19 +985,19 @@ public class IftPolicy implements Serializable {
 		this.shareRewardType = shareRewardType;
 	}
 
-	public Double getShareAssignReward() {
-		return this.shareAssignReward;
+	public BigDecimal getShareAssignReward() {
+		return shareAssignReward;
 	}
 
-	public void setShareAssignReward(Double shareAssignReward) {
+	public void setShareAssignReward(BigDecimal shareAssignReward) {
 		this.shareAssignReward = shareAssignReward;
 	}
 
-	public Double getShareLegReward() {
-		return this.shareLegReward;
+	public BigDecimal getShareLegReward() {
+		return shareLegReward;
 	}
 
-	public void setShareLegReward(Double shareLegReward) {
+	public void setShareLegReward(BigDecimal shareLegReward) {
 		this.shareLegReward = shareLegReward;
 	}
 

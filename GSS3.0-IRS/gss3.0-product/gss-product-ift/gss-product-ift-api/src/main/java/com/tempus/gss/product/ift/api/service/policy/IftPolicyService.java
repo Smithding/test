@@ -26,7 +26,7 @@ public interface IftPolicyService {
 	 * 
 	 * @param agent 用户信息
 	 * @param iftPolicy 政策信息
-	 * @return boolean 是否成功
+	 * @return long 政策ID
 	 */
-	boolean create(Agent agent, IftPolicy iftPolicy);
+	long create(Agent agent, IftPolicy iftPolicy);
 }
