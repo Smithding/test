@@ -147,7 +147,7 @@ public class IftOrderRePayServiceImpl implements IIftOrderRePayService {
         //  this.createBuyCertificate(AgentUtil.getAgent(), buychange.getBuyChangeNo(), buychange.getPlanAmount().doubleValue(), changePrice.getAccountNo(), supplier.getSupplierNo(), supplier.getCustomerTypeNo(), 3, 2000003, "BUY", thirdBusNo, changePrice.getDealNo());
         //(Agent agent, long buyOrderNo, double payAmount, long payAccount, long customerNo, long customerTypeNo, int payType, int payWay, String channel, String thirdBusNo, String thirdPayNo) {
         //重新合计金额变大 重新支付金额
-        if (result.doubleValue() > 0) {
+        if (result.doubleValue() >= 0) {
             certificateCreateVO.setIncomeExpenseType(1);//收支类型 1 收，2 为支
             logger.info("销售审核后再次支付:" + certificateCreateVO.toString());
             businessOrderInfo.setActualAmount(result);
