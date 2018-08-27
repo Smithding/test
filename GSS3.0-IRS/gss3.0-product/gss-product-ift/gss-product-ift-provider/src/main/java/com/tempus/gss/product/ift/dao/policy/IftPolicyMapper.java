@@ -1,5 +1,7 @@
 package com.tempus.gss.product.ift.dao.policy;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.baomidou.mybatisplus.mapper.AutoMapper;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 
@@ -28,4 +30,13 @@ public interface IftPolicyMapper extends AutoMapper<IftPolicy> {
 	 * @return int 保存记录数
 	 */
 	int insert(IftPolicy iftPolicy);
+	
+	/**
+	 * 根据ID获取政策详情信息
+	 * 
+	 * @param owner 归集单位
+	 * @param policyId 政策ID
+	 * @return IftPolicy 政策详情
+	 */
+	IftPolicy find(@Param("owner") int owner,  @Param("policyId") long policyId);
 }
