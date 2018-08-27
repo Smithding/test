@@ -70,7 +70,7 @@ import com.tempus.gss.vo.Agent;
 
 @Service
 public class SyncHotelInfoImpl implements ISyncHotelInfo {
-	protected final transient Logger logger = LogManager.getLogger(TCHotelSupplierServiceImpl.class);
+	protected final transient Logger logger = LogManager.getLogger(SyncHotelInfoImpl.class);
 	@Autowired
 	private ITCHotelSupplierService tcHotelSupplierService;
 	
