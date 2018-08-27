@@ -28,6 +28,12 @@
         from UNP_ITEM_TYPE
         where ITEM_TYPE_NO = #{itemTypeNo,jdbcType=BIGINT}
     </select>
+    <select id="selectByCode" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_ITEM_TYPE
+        where CODE = #{code,jdbcType=VARCHAR}
+    </select>
     <select id="queryItems" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpGroupItemVo" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
@@ -69,8 +75,8 @@
         <if test="modifyTimeStart!=null and ''!=modifyTimeStart">
             AND MODIFY_TIME <![CDATA[>=]]> #{modifyTimeStart,jdbcType=TIMESTAMP}
         </if>
-        <if test="modifyTimeStart!=null and ''!=modifyTimeStart">
-            AND MODIFY_TIME <![CDATA[<=]]> #{modifyTimeStart,jdbcType=TIMESTAMP}
+        <if test="modifyTimeEnd!=null and ''!=modifyTimeEnd">
+            AND MODIFY_TIME <![CDATA[<=]]> #{modifyTimeEnd,jdbcType=TIMESTAMP}
         </if>
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
@@ -221,5 +227,89 @@
             </if>
         </set>
         where ITEM_TYPE_NO = #{itemTypeNo,jdbcType=BIGINT}
+    </update>
+    <update id="updateSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpItemType">
+        update UNP_ITEM_TYPE
+        <set>
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="groupCode != null">
+                GROUP_CODE = #{groupCode,jdbcType=VARCHAR},
+            </if>
+            <if test="groupName != null">
+                GROUP_NAME = #{groupName,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null">
+                CODE = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                NAME = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="img != null">
+                IMG = #{img,jdbcType=VARCHAR},
+            </if>
+            <if test="baseAmount != null">
+                BASE_AMOUNT = #{baseAmount,jdbcType=VARCHAR},
+            </if>
+            <if test="sortNo != null">
+                SORT_NO = #{sortNo,jdbcType=INTEGER},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null">
+                REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="creator != null">
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifier != null">
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where 1=1
+        <if test="groupCode != null">
+            AND GROUP_CODE = #{groupCode,jdbcType=VARCHAR}
+        </if>
+        <if test="groupCode != null">
+            AND ITEM_TYPE_NO = #{itemTypeNo,jdbcType=BIGINT}
+        </if>
+        <if test="groupName != null">
+            AND GROUP_NAME = #{groupName,jdbcType=VARCHAR}
+        </if>
+        <if test="code != null">
+            AND CODE = #{code,jdbcType=VARCHAR}
+        </if>
+        <if test="name != null">
+            AND NAME = #{name,jdbcType=VARCHAR}
+        </if>
+        <if test="valid != null">
+            AND VALID = #{valid,jdbcType=INTEGER}
+        </if>
+        <if test="creator != null">
+            AND CREATOR = #{creator,jdbcType=VARCHAR}
+        </if>
+        <if test="createTimeStart!=null and ''!=createTimeStart">
+            AND CREATE_TIME <![CDATA[>=]]> #{createTimeStart,jdbcType=TIMESTAMP}
+        </if>
+        <if test="createTimeEnd!=null and ''!=createTimeEnd">
+            AND CREATE_TIME  <![CDATA[<=]]> #{createTimeEnd,jdbcType=TIMESTAMP}
+        </if>
+        <if test="modifier!=null and ''!=modifier">
+            AND MODIFIER = #{modifier,jdbcType=VARCHAR}
+        </if>
+        <if test="modifyTimeStart!=null and ''!=modifyTimeStart">
+            AND MODIFY_TIME <![CDATA[>=]]> #{modifyTimeStart,jdbcType=TIMESTAMP}
+        </if>
+        <if test="modifyTimeEnd!=null and ''!=modifyTimeEnd">
+            AND MODIFY_TIME <![CDATA[<=]]> #{modifyTimeEnd,jdbcType=TIMESTAMP}
+        </if>
     </update>
 </mapper>

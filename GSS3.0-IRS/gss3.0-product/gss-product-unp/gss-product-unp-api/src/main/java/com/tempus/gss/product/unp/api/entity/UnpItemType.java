@@ -60,6 +60,8 @@ public class UnpItemType implements Serializable {
      * 创建时间
      */
     private Date createTime;
+    private String createTimeStart;
+    private String createTimeEnd;
     /**
      * 执行更新操作的用户
      */
@@ -68,8 +70,46 @@ public class UnpItemType implements Serializable {
      * 更新时间
      */
     private Date modifyTime;
+    private String modifyTimeEnd;
+    private String modifyTimeStart;
     
     private static final long serialVersionUID = 4891123559980662463L;
+    
+    public String getCreateTimeStart() {
+        return createTimeStart;
+    }
+    
+    public UnpItemType setCreateTimeStart(String createTimeStart) {
+        this.createTimeStart = createTimeStart;
+        return this;
+    }
+    
+    public String getCreateTimeEnd() {
+        return createTimeEnd;
+    }
+    
+    public UnpItemType setCreateTimeEnd(String createTimeEnd) {
+        this.createTimeEnd = createTimeEnd;
+        return this;
+    }
+    
+    public String getModifyTimeEnd() {
+        return modifyTimeEnd;
+    }
+    
+    public UnpItemType setModifyTimeEnd(String modifyTimeEnd) {
+        this.modifyTimeEnd = modifyTimeEnd;
+        return this;
+    }
+    
+    public String getModifyTimeStart() {
+        return modifyTimeStart;
+    }
+    
+    public UnpItemType setModifyTimeStart(String modifyTimeStart) {
+        this.modifyTimeStart = modifyTimeStart;
+        return this;
+    }
     
     public Long getItemTypeNo() {
         return itemTypeNo;

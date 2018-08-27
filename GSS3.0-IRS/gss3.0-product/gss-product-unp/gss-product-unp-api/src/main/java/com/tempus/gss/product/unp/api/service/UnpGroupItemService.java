@@ -16,7 +16,7 @@ import java.util.List;
  * unp产品大小类管理
  */
 @Service
-public interface UnpTypeItemService {
+public interface UnpGroupItemService {
     /**
      * @param page
      *         agent
@@ -74,7 +74,21 @@ public interface UnpTypeItemService {
     UnpResult<List<UnpItemType>> addItems(Agent agent, List<UnpItemType> items);
     
     /**
-     * 是否更新 group 为否时更新小类
+     * 修改记录可见性
+     *
+     * @param agent
+     *         agent
+     * @param group
+     *         group
+     * @param valid
+     *         valid
+     * @param itemNos
+     *         itemNos
+     * @return
+     */
+    <T> UnpResult<String> valid(Agent agent, Boolean group, int valid, T... itemNos);
+    
+    /**
      * 删除特定的小类（逻辑删除）
      *
      * @param agent
@@ -82,6 +96,7 @@ public interface UnpTypeItemService {
      * @param itemNo
      *         itemNo
      * @param group
+     *         是否更新 group 为否时更新小类
      * @return UnpResult
      */
     UnpResult<String> delete(Agent agent, Boolean group, Long... itemNo);
@@ -97,6 +112,7 @@ public interface UnpTypeItemService {
      * @param itemNo
      *         itemNo
      * @param group
+     *         是否更新 group 为否时更新小类s
      * @return UnpResult
      */
     UnpResult<String> reuse(Agent agent, Boolean group, Long... itemNo);

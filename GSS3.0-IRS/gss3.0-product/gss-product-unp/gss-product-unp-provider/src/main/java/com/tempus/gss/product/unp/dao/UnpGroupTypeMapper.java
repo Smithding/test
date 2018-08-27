@@ -13,6 +13,8 @@ public interface UnpGroupTypeMapper {
     
     UnpGroupType selectByPrimaryKey(Long typeNo);
     
+    UnpGroupType selectByCode(Long typeNo);
+    
     List<UnpGroupType> queryGroups(Page<UnpGroupType> page, UnpGroupItemVo param);
     
     int updateByPrimaryKeySelective(UnpGroupType record);

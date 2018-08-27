@@ -25,7 +25,7 @@ public class UnpGroupType implements Serializable {
      */
     private String name;
     /**
-     * 状态（0，停用；1，启用）
+     * 状态
      */
     private Integer status;
     /**
@@ -40,21 +40,62 @@ public class UnpGroupType implements Serializable {
      * 创建时间
      */
     private Date createTime;
+    private String createTimeStart;
+    private String createTimeEnd;
     /**
      * 执行更新操作的用户
      */
     private String modifier;
+    
     /**
      * 更新时间
      */
     private Date modifyTime;
+    private String modifyTimeEnd;
+    private String modifyTimeStart;
     /**
-     * 删除标志 0 无效 已删除 1 有效
+     * 删除标志 0 无效 已删除 1 有效 （0，停用；1，启用）
      */
     private Integer valid;
     
     public Long getTypeNo() {
         return typeNo;
+    }
+    
+    public String getCreateTimeStart() {
+        return createTimeStart;
+    }
+    
+    public UnpGroupType setCreateTimeStart(String createTimeStart) {
+        this.createTimeStart = createTimeStart;
+        return this;
+    }
+    
+    public String getCreateTimeEnd() {
+        return createTimeEnd;
+    }
+    
+    public UnpGroupType setCreateTimeEnd(String createTimeEnd) {
+        this.createTimeEnd = createTimeEnd;
+        return this;
+    }
+    
+    public String getModifyTimeEnd() {
+        return modifyTimeEnd;
+    }
+    
+    public UnpGroupType setModifyTimeEnd(String modifyTimeEnd) {
+        this.modifyTimeEnd = modifyTimeEnd;
+        return this;
+    }
+    
+    public String getModifyTimeStart() {
+        return modifyTimeStart;
+    }
+    
+    public UnpGroupType setModifyTimeStart(String modifyTimeStart) {
+        this.modifyTimeStart = modifyTimeStart;
+        return this;
     }
     
     public void setTypeNo(Long typeNo) {

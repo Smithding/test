@@ -23,10 +23,17 @@
         from UNP_GROUP_TYPE
         where TYPE_NO = #{typeNo,jdbcType=BIGINT}
     </select>
+    <select id="selectByCode" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_GROUP_TYPE
+        where CODE = #{code,jdbcType=VARCHAR}
+    </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from UNP_GROUP_TYPE
     where TYPE_NO = #{typeNo,jdbcType=BIGINT}
   </delete>
+
     <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpGroupType">
         insert into UNP_GROUP_TYPE
         <trim prefix="(" suffix=")" suffixOverrides=",">

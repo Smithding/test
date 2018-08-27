@@ -15,6 +15,10 @@ public interface UnpItemTypeMapper {
     
     UnpItemType selectByPrimaryKey(Long itemTypeNo);
     
+    UnpItemType selectByCode(String itemTypeNo);
+    
     int updateByPrimaryKeySelective(UnpItemType record);
+    
+    int updateSelective(UnpItemType record, UnpItemType param);
     
 }
