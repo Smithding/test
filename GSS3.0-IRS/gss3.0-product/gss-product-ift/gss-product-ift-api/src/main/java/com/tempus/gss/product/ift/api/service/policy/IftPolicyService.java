@@ -1,4 +1,4 @@
-package com.tempus.gss.product.ift.api.service;
+package com.tempus.gss.product.ift.api.service.policy;
 
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.vo.Agent;
