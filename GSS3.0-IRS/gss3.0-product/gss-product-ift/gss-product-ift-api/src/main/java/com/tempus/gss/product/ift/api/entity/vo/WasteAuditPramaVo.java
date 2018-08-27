@@ -11,8 +11,20 @@ import java.io.Serializable;
 public class WasteAuditPramaVo implements Serializable{
 
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 退废单号
+     */
     private Long saleChangeNo;
+
+    /**
+     * 乘客废退明细，表示乘客废退是的销售价格和采购价格。
+     */
     private PassengerRefundPriceVo passengerRefundPriceVo;
+
+    /**
+     * 退废销售审核备注
+     */
     private String changeRemark;
 
     @Override
