@@ -8,7 +8,7 @@ package com.tempus.gss.product.ift.api.entity.vo;
 
 import java.io.Serializable;
 
-public class wasteAuditPramaVo implements Serializable{
+public class WasteAuditPramaVo implements Serializable{
 
     private static final long serialVersionUID = 1L;
     private Long saleChangeNo;
@@ -17,7 +17,7 @@ public class wasteAuditPramaVo implements Serializable{
 
     @Override
     public String toString() {
-        return "wasteAuditPramaVo{" +
+        return "WasteAuditPramaVo{" +
                 "saleChangeNo=" + saleChangeNo +
                 ", passengerRefundPriceVo=" + passengerRefundPriceVo +
                 ", changeRemark='" + changeRemark + '\'' +
