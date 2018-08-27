@@ -12,6 +12,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.dubbo.config.annotation.Service;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
 import com.tempus.gss.product.hol.api.entity.LogRecordHol;
@@ -29,6 +30,7 @@ import com.tempus.gss.product.hol.api.entity.response.tc.TCHotelDetailResult;
 import com.tempus.gss.product.hol.api.syn.IAsyncHolDoTask;
 import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 
+@Service
 public class AsyncHolDoTaskImpl implements IAsyncHolDoTask {
 	
 	@Autowired
