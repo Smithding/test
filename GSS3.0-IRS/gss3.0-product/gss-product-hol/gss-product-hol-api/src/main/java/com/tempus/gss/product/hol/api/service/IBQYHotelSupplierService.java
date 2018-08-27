@@ -83,13 +83,6 @@ public interface IBQYHotelSupplierService {
 	 * @return
 	 */
 	List<ImgInfo> listImgByHotelId(Agent agent, long hotelId);
-	
-	/**
-	 * 酒店房间
-	 * @param hotelDetailSearchReq
-	 * @return
-	 */
-	Map<String, Object> getProByRoomCode(Agent agent, HotelDetailSearchReq hotelDetailSearchReq, Long resId);
 
 	/**
 	 * 酒店房间

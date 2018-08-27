@@ -74,16 +74,7 @@ public interface ITCHotelInterService {
 	 * @return
 	 */
 	public List<OrderLogModel> LogInfoOfOrderFromTc(Agent agent, GetOrderLogInfoReq getOrderLogInfoReq) throws GSSException;
-	/**
-	 * 单个酒店更新
-	 * @return
-	 */
-	public Boolean updateSingleHotelDetail(Agent agent, Long resId) throws GSSException;
-	/**
-	 * 同步更新出库存价格外的酒店信息
-	 * @param resId
-	 */
-	public void doIncrHotelDetail(Long resId) throws GSSException;
+	
 	/**
 	 * 同步更新某一个酒店的库存价格信息
 	 * @param resId
@@ -94,6 +85,8 @@ public interface ITCHotelInterService {
 	 * @param resId
 	 */
 	public Boolean doIncrInventoryWithProductUnique(Agent agent, Long resId, String productUniqueId);
+	
+	public ResBaseInfo queryHolDetailForBack(Long resId);
 	/**
 	 * 实时获取同程单个酒店信息
 	 * @return

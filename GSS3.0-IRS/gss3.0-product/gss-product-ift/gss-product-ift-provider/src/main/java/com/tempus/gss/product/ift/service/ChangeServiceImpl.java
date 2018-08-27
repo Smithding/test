@@ -1560,6 +1560,7 @@ public class ChangeServiceImpl implements IChangeService {
                 }
                 saleChangeQueryRequest.getEntity().setLongList(longList);
             }
+            handleTicketNo(saleChangeQueryRequest);
             List<SaleChangeExt> tempList = saleChangeExtDao.queryObjByKey(page, saleChangeQueryRequest.getEntity());
             if (null != tempList) {
                 for (SaleChangeExt changeExt : tempList) {
@@ -1575,6 +1576,18 @@ public class ChangeServiceImpl implements IChangeService {
         }
         log.info("改签单查询结束");
         return page;
+    }
+
+    private void handleTicketNo(RequestWithActor<SaleChangeExtVo> saleOrderQueryRequest) {
+        String ticketNo = saleOrderQueryRequest.getEntity().getTicketNo();
+        if(StringUtils.isNotEmpty(ticketNo)){
+            if(!ticketNo.contains("-")){
+                //如果没有“-”的话在第四个位置加上“-”
+                StringBuilder sb = new StringBuilder(ticketNo);
+                sb.insert(3,"-");
+                saleOrderQueryRequest.getEntity().setTicketNo(sb.toString());
+            }
+        }
     }
 
     /**

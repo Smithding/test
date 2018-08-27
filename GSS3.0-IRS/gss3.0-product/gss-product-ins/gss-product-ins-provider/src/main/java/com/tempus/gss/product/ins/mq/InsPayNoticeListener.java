@@ -65,7 +65,7 @@ import com.tempus.gss.vo.Agent;
 public class InsPayNoticeListener {
 	protected static final Logger logger = LoggerFactory.getLogger(InsPayNoticeListener.class);
 
-	@Reference(version="LL")
+	@Reference
 	IOrderService orderService;
 	@Reference
 	ISaleOrderService saleOrderService;
@@ -228,6 +228,10 @@ public class InsPayNoticeListener {
 				List<SaleOrderExt> saleOrderExtList =  orderService.querySaleOrderForTranSaction(requestWithActor);
 				//获取后台配置
 				String isRefund = paramService.getValueByKey("refund_or_cancel");
+				//如果后台没有设置refund_or_cancel  默认退保退款
+				if(isRefund == null){
+					isRefund = "1";
+				}
 				for(SaleOrderExt saleOrderExt:saleOrderExtList){
 					for (SaleOrderDetail saleOrderDetail : saleOrderExt.getSaleOrderDetailList()) {
 						String policyNo = saleOrderDetail.getPolicyNo();
@@ -237,7 +241,7 @@ public class InsPayNoticeListener {
 						policyNoList.add(policyNo);
 						orderCancelVo.setPolicyNoList(policyNoList);
 						requestWithActor2.setEntity(orderCancelVo);
-						requestWithActor2.setAgent(AgentUtil.getAgent());
+						requestWithActor2.setAgent(agent);
 						Boolean cancelResult = false;
 
 						try {
