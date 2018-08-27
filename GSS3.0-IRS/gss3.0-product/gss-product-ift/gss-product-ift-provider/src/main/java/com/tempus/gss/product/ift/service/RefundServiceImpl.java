@@ -1919,9 +1919,9 @@ public class RefundServiceImpl implements IRefundService {
 	}
 
 	@Override
-	public void auditWasteTicket(RequestWithActor<wasteAuditPramaVo> request) throws GSSException {
+	public void auditWasteTicket(RequestWithActor<WasteAuditPramaVo> request) throws GSSException {
 		Agent agent = request.getAgent();
-		wasteAuditPramaVo entity = request.getEntity();
+		WasteAuditPramaVo entity = request.getEntity();
 		String changeRemark = entity.getChangeRemark();
 		PassengerRefundPriceVo passengerRefundPriceVo = entity.getPassengerRefundPriceVo();
 		Long saleChangeNo = entity.getSaleChangeNo();
@@ -2001,9 +2001,9 @@ public class RefundServiceImpl implements IRefundService {
 	}
 
 	@Override
-	public void auditRefundTicket(RequestWithActor<wasteAuditPramaVo> request) throws GSSException {
+	public void auditRefundTicket(RequestWithActor<WasteAuditPramaVo> request) throws GSSException {
 		Agent agent = request.getAgent();
-		wasteAuditPramaVo entity = request.getEntity();
+		WasteAuditPramaVo entity = request.getEntity();
 		String changeRemark = entity.getChangeRemark();
 		PassengerRefundPriceVo passengerRefundPriceVo = entity.getPassengerRefundPriceVo();
 		Long saleChangeNo = entity.getSaleChangeNo();
