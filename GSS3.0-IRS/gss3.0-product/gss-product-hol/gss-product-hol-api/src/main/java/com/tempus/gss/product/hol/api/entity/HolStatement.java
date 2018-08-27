@@ -1,6 +1,10 @@
 package com.tempus.gss.product.hol.api.entity;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.baomidou.mybatisplus.annotations.IdType;
+import com.baomidou.mybatisplus.annotations.TableField;
+import com.baomidou.mybatisplus.annotations.TableId;
+import com.baomidou.mybatisplus.annotations.TableName;
 import com.tempus.gss.product.hol.api.report.annotation.util.ExcelImportField;
 import com.tempus.gss.product.hol.api.report.annotation.validate.IsDate;
 import com.tempus.gss.product.hol.api.report.annotation.validate.IsNum;
@@ -17,10 +21,13 @@ import java.util.Date;
  */
 @Setter
 @Getter
+@TableName("HOL_STATEMENT")
 public class HolStatement implements Serializable {
 
+    @TableField(exist = false)
     private static final long serialVersionUID = 206759349277506723L;
 
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
