@@ -2,6 +2,7 @@ package com.tempus.gss.product.ins.mq;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.tempus.gss.dps.order.entity.sale.Sale;
+import com.tempus.gss.dps.order.entity.sale.SaleItem;
 import com.tempus.gss.dps.order.entity.vo.TicketMessage;
 import com.tempus.gss.dps.order.service.SaleService;
 import com.tempus.gss.exception.GSSException;
@@ -13,12 +14,14 @@ import com.tempus.gss.product.ins.api.entity.SaleOrderDetail;
 import com.tempus.gss.product.ins.api.entity.SaleOrderExt;
 import com.tempus.gss.product.ins.api.entity.vo.SaleOrderExtVo;
 import com.tempus.gss.product.ins.api.service.IOrderService;
+import com.tempus.gss.product.ins.dao.SaleOrderDetailDao;
 import com.tempus.gss.security.AgentUtil;
 import com.tempus.gss.vo.Agent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.amqp.core.ExchangeTypes;
 import org.springframework.amqp.rabbit.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -39,6 +42,8 @@ public class InsureTicketListenter {
         IActualAmountRecorService actualAmountRecorService;
         @Reference
         SaleService saleService;
+        @Autowired
+        SaleOrderDetailDao saleOrderDetailDao;
         @RabbitHandler
         public void processLogRecord(TicketMessage ticketMessage){
                 logger.info("-------保险订单投保-----收到出票消息:"+ticketMessage.getOwner()+","+ticketMessage.getOrderNo()+","+ticketMessage.getTradeNo());
@@ -63,6 +68,19 @@ public class InsureTicketListenter {
                                 if(ispay){
                                        // List<Sale> sales = saleService.getByTradeNo(AgentUtil.getAgent(),ticketMessage.getTradeNo());
                                         requestWithActor.setEntity(saleOrderExt.getSaleOrderNo());
+                                        List<Sale> sales = saleService.getByTradeNo(agent,ticketMessage.getTradeNo());
+                                        for(SaleOrderExt saleOrderExtTwo:saleOrderExtList){
+                                                for(SaleOrderDetail saleOrderDetail:saleOrderExtTwo.getSaleOrderDetailList()){
+                                                        for(Sale sale:sales){
+                                                                for(SaleItem saleItem:sale.getItems()){
+                                                                        if(saleOrderExtTwo.getExtendedFieldsJson().contains(saleItem.getFlightNo())&&saleOrderDetail.getInsuredName().equals(saleItem.getName())){
+                                                                                saleOrderDetail.setBillNo(saleItem.getTicketNo());
+                                                                                saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }
                                         result = orderService.buyInsure(requestWithActor);
                                 }else{
                                         logger.info("-------------------该订单没有进行付款无法投保！订单号为:"+saleOrderExt.getSaleOrderNo());
