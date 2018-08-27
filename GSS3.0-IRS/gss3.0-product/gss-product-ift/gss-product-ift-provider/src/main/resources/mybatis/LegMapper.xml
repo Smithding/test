@@ -393,4 +393,13 @@
              join IFT_LEG il on il.LEG_NO = isod.LEG_NO
         where iscd.SALE_CHANGE_NO = #{saleChangeNo} order by il.PARENT_SECTION,il.CHILD_SECTION
     </select>
+    <select id="selectLegListByLegNoList" parameterType="java.util.List"  resultMap="BaseResultMap" >
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_LEG
+        WHERE
+        LEG_NO  IN <foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                  </foreach>
+    </select>
 </mapper>
