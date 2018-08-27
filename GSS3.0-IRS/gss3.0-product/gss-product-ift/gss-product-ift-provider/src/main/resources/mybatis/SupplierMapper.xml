@@ -4,7 +4,11 @@
   <resultMap id="BaseResultMap" type="com.tempus.gss.product.ift.api.entity.IftSupplier" >
     <!--供应商编号-->
     <id column="SUPPLIER_NO" property="supplierNo" jdbcType="BIGINT" />
-    <result column="ID" property="id" jdbcType="BIGINT" />
+    <!-- 客商类型 -->
+    <result column="CHANNEL_TYPE" property="channelType" jdbcType="BIGINT" />
+    <!--officNo  -->
+    <result column="OFFICENO" property="officeNo" jdbcType="VARCHAR" />
+    <result column="CREATOR" property="creator" jdbcType="VARCHAR" />
     <!--是否有效-->
     <result column="VALID" property="valid" jdbcType="TINYINT" />
     <!--状态-->
@@ -17,7 +21,7 @@
     <result column="SORT" property="sort" jdbcType="BIGINT" />
   </resultMap>
   <sql id="Base_Column_List" >
-    SUPPLIER_NO, ID, VALID, STATUS, CREATOR, CREATE_TIME, SORT
+    SUPPLIER_NO, ID, VALID, STATUS, CREATOR, CREATE_TIME, SORT,OFFICENO,CHANNEL_TYPE
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
@@ -37,10 +41,10 @@
   <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.IftSupplier" >
     insert into IFT_SUPPLIER (SUPPLIER_NO, ID, VALID, 
       STATUS, CREATOR, CREATE_TIME, 
-      SORT)
+      SORT,OFFICENO,CHANNEL_TYPE)
     values (#{supplierNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{valid,jdbcType=TINYINT}, 
       #{status,jdbcType=INTEGER}, #{creator,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
-      #{sort,jdbcType=BIGINT})
+      #{sort,jdbcType=BIGINT},#{officeNo,jdbcType=VARCHAR},#{channelType,jdbcType=BIGINT})
   </insert>
   <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.IftSupplier" >
     insert into IFT_SUPPLIER
@@ -66,6 +70,12 @@
       <if test="sort != null" >
         SORT,
       </if>
+      <if test="officeNo != null" >
+        OFFICENO,
+      </if>
+      <if test="channelType != null" >
+        CHANNEL_TYPE,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="supplierNo != null" >
@@ -89,6 +99,13 @@
       <if test="sort != null" >
         #{sort,jdbcType=BIGINT},
       </if>
+       <if test="officeNo != null" >
+        OFFICENO=#{officeNo,jdbcType=VARCHAR},
+      </if>
+       <if test="channelType != null" >
+       CHANNEL_TYPE= #{channelType,jdbcType=BIGINT},
+      </if>
+      
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.IftSupplier" >
@@ -112,6 +129,12 @@
       <if test="sort != null" >
         SORT = #{sort,jdbcType=BIGINT},
       </if>
+       <if test="officeNo != null" >
+        OFFICENO=#{officeNo,jdbcType=VARCHAR},
+      </if>
+       <if test="channelType != null" >
+       CHANNEL_TYPE= #{channelType,jdbcType=BIGINT},
+      </if>
     </set>
     where SUPPLIER_NO = #{supplierNo,jdbcType=BIGINT}
   </update>
@@ -122,7 +145,9 @@
       STATUS = #{status,jdbcType=INTEGER},
       CREATOR = #{creator,jdbcType=VARCHAR},
       CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
-      SORT = #{sort,jdbcType=BIGINT}
+      SORT = #{sort,jdbcType=BIGINT},
+      OFFICENO=#{officeNo,jdbcType=VARCHAR},
+      CHANNEL_TYPE= #{channelType,jdbcType=BIGINT}
     where SUPPLIER_NO = #{supplierNo,jdbcType=BIGINT}
   </update>
   <select id="queryObjByKey" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.IftSupplier" >
@@ -140,9 +165,16 @@
       	<if test="creator != null and creator != ''" >
        		AND CREATOR = #{creator,jdbcType=VARCHAR}
       	</if>
+      	 <if test="officeNo != null and officeNo != ''" >
+        OFFICENO=#{officeNo,jdbcType=VARCHAR},
+      </if>
+       <if test="channelType != null and channelType != ''" >
+       CHANNEL_TYPE= #{channelType,jdbcType=BIGINT},
+      </if>
      	<if test="createTime != null and createTime != ''" >
        	AND CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
      	</if>
+     	
   	 </trim>
   	 	ORDER BY SORT ASC
   </select>

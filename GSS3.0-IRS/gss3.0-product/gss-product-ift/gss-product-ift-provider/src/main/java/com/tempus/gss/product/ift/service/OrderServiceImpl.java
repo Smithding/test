@@ -627,6 +627,7 @@ public class OrderServiceImpl implements IOrderService {
                 }
                 saleOrderQueryRequest.getEntity().setLongList(longList);
             }
+            handleTicketNo(saleOrderQueryRequest);
             saleOrderExtList = saleOrderExtDao.queryFromSaleQueryOrderVo(page, saleOrderQueryRequest.getEntity());
             
             //long endTime = System.currentTimeMillis();
@@ -650,7 +651,20 @@ public class OrderServiceImpl implements IOrderService {
         }
         return page;
     }
-    
+
+    private void handleTicketNo(RequestWithActor<SaleQueryOrderVo> saleOrderQueryRequest) {
+        String ticketNo = saleOrderQueryRequest.getEntity().getTicketNo();
+        if(StringUtils.isNotEmpty(ticketNo)){
+            if(!ticketNo.contains("-")){
+                //如果没有“-”的话在第四个位置加上“-”
+                StringBuilder sb = new StringBuilder(ticketNo);
+                sb.insert(3,"-");
+                saleOrderQueryRequest.getEntity().setTicketNo(sb.toString());
+            }
+        }
+
+    }
+
     /**
      * 根据业务情况接收出票消息，修改采购单状态为待出票
      *

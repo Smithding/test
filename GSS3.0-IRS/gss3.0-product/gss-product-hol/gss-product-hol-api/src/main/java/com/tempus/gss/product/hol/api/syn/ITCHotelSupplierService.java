@@ -175,6 +175,12 @@ public interface ITCHotelSupplierService {
 	 * @return
 	 */
 	public List<String> getCityNames(Agent agent,String keyword, String city);
+	
+	/**
+	 * 同步更新出库存价格外的酒店信息
+	 * @param resId
+	 */
+	public void doUpdateHotelDetail(Long resId) throws GSSException;
 	/**
 	 * 可销售状态更新
 	 * @param agent

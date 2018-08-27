@@ -25,16 +25,13 @@ import java.util.List;
 
 @Component
 @RabbitListener(bindings = {
-        @QueueBinding(value = @Queue(value = "mss.listenerDpsTicketedQue", durable = "true"),
+        @QueueBinding(value = @Queue(value = "ins.listenerDpsTicketedQue", durable = "true"),
                 exchange = @Exchange(value = "gss-dps-order-callback", type = ExchangeTypes.FANOUT, ignoreDeclarationExceptions = "true", durable = "true")
                 , key = "apiticketed"
         ) }
 )
 public class InsureTicketListenter {
         protected static final Logger logger = LogManager.getLogger(InsureTicketListenter.class);
-        /**
-         * 1:国内;2:国际
-         */
         public static final String TICKET_TYPE = "1";
         @Reference
         private IOrderService orderService;
@@ -57,7 +54,7 @@ public class InsureTicketListenter {
                         }
                         boolean ispay = false;
                         for(SaleOrderExt saleOrderExt:saleOrderExtList){
-                                ActualInfoSearchVO actualInfoSearchVO = actualAmountRecorService.queryActualInfoByBusNo(AgentUtil.getAgent(),saleOrderExt.getSaleOrderNo(),2);
+                                ActualInfoSearchVO actualInfoSearchVO = actualAmountRecorService.queryActualInfoByBusNo(agent,saleOrderExt.getSaleOrderNo(),2);
                                 for(ActualAmountRecord actualAmountRecord:actualInfoSearchVO.getActualAmountRecordList()){
                                         if(actualAmountRecord.getIncomeExpenseType() == 1&&actualAmountRecord.getGoodsType() == 3&&actualAmountRecord.getActualStatus() == 1){
                                                 ispay = true;
