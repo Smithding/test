@@ -156,6 +156,19 @@ public class Leg implements Serializable, Comparable<Leg> {
 
 	private String fsi;
 
+	private String ticketNo;
+
+	public String getTicketNo() {
+		return ticketNo;
+	}
+
+	public void setTicketNo(String ticketNo) {
+		this.ticketNo = ticketNo;
+	}
+
+	public static long getSerialVersionUID() {
+		return serialVersionUID;
+	}
 
 	private static final long serialVersionUID = 1L;
 
