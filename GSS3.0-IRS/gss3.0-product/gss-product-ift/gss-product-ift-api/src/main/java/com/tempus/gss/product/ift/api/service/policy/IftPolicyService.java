@@ -29,4 +29,13 @@ public interface IftPolicyService {
 	 * @return long 政策ID
 	 */
 	long create(Agent agent, IftPolicy iftPolicy);
+	
+	/**
+	 *  根据政策ID获取政策信息
+	 *  
+	 * @param agent 用户信息
+	 * @param policyId 政策ID
+	 * @return IftPolicy 国际政策
+	 */
+	IftPolicy find(Agent agent, long policyId);
 }

@@ -1,6 +1,143 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.tempus.gss.product.ift.dao.policy.IftPolicyMapper">
+	<resultMap id="detail" type="com.tempus.gss.product.ift.api.entity.policy.IftPolicy">
+		<id column="ID" property="id"  />
+	    <result column="OWNER" property="owner"  />
+	    <result column="NAME" property="name"  />
+	    <result column="SOURCE" property="source"  />
+	    <result column="VOYAGE_TYPE" property="voyageType"  />
+	    <result column="TICKET_WAY" property="ticketWay"  />
+	    <result column="AIRLINE" property="airline"  />
+	    <result column="SUIT_AIRLINE" property="suitAirline"  />
+	    <result column="SUPPLIERS" property="suppliers"  />
+	    <result column="SUPPLIER_OFFICE" property="supplierOffice"  />
+	    <result column="TICKET_OFFICE" property="ticketOffice"  />
+	    <result column="ORIGINAL_AGENCY_FEE" property="originalAgencyFee"  />
+	    <result column="ORIGINAL_REWARD_FEE" property="originalRewardFee"  />
+	    <result column="AGENCY_FEE" property="agencyFee"  />
+	    <result column="REWARD_FEE" property="rewardFee"  />
+	    <result column="ONE_WAY_PRIVILEGE" property="oneWayPrivilege"  />
+	    <result column="ROUND_TRIP_PRIVILEGE" property="roundTripPrivilege"  />
+	    <result column="OPEN_TICKET_FEE" property="openTicketFee"  />
+	    <result column="AUTO_TICKET" property="autoTicket"  />
+	    <result column="IS_GDS" property="isGds"  />
+	    <result column="TICKET_RANGE" property="ticketRange"  />
+	    <result column="FLY_START_DATE" property="flyStartDate"  />
+	    <result column="FLY_END_DATE" property="flyEndDate"  />
+	    <result column="RTN_START_DATE" property="rtnStartDate"  />
+	    <result column="RTN_END_DATE" property="rtnEndDate"  />
+	    <result column="TICKET_VALID_START_DATE" property="ticketValidStartDate"  />
+	    <result column="TICKET_VALID_END_DATE" property="ticketValidEndDate"  />
+	    <result column="TICKET_DATE" property="ticketDate"  />
+	    <result column="SAT_IS_TICKET" property="satIsTicket"  />
+	    <result column="SAT_TICKET_DATE" property="satTicketDate"  />
+	    <result column="SUN_IS_TICKET" property="sunIsTicket"  />
+	    <result column="SUN_TICKET_DATE" property="sunTicketDate"  />
+	    <result column="FLIGHT_TYPE" property="flightType"  />
+	    <result column="DEPART_CABIN" property="departCabin"  />
+	    <result column="TRANSIT_CABIN" property="transitCabin"  />
+	    <result column="ROUND_TRIP_AIRPORT_TYPE" property="roundTripAirportType"  />
+	    <result column="ROUND_TRIP_AIRPORT" property="roundTripAirport"  />
+	    <result column="IS_NOTSUIT_TRANSFER_AIRPORT" property="isNotsuitTransferAirport"  />
+	    <result column="NOTSUIT_TRANSFER_AIRPORT" property="notsuitTransferAirport"  />
+	    <result column="SUIT_AGE" property="suitAge"  />
+	    <result column="SUIT_PEOPLE_NUMBER" property="suitPeopleNumber"  />
+	    <result column="SUIT_DOUBLE_PEOPLE" property="suitDoublePeople"  />
+	    <result column="CHANGE_AND_REFUND" property="changeAndRefund"  />
+	    <result column="CHD_REWARD_TYPE" property="chdRewardType"  />
+	    <result column="CHD_ASSIGN_REWARD_FEE" property="chdAssignRewardFee"  />
+	    <result column="CHD_IS_ADD_HANDLING_FEE" property="chdIsAddHandlingFee"  />
+	    <result column="CHD_ADD_HANDLING_FEE" property="chdAddHandlingFee"  />
+	    <result column="CHD_TICKET_NO_AGENCY_FEE" property="chdTicketNoAgencyFee"  />
+	    <result column="CHD_NOT_ALONE_TICKET" property="chdNotAloneTicket"  />
+	    <result column="CHD_PRIVILEGE" property="chdPrivilege"  />
+	    <result column="INF_TICKET" property="infTicket"  />
+	    <result column="INF_IS_ADD_HANDLING_FEE" property="infIsAddHandlingFee"  />
+	    <result column="INF_ADD_HANDLING_FEE" property="infAddHandlingFee"  />
+	    <result column="PNR_TICKET_TYPE" property="pnrTicketType"  />
+	    <result column="AUTO_CHANGE_PNR" property="autoChangePnr"  />
+	    <result column="MAKE_NULL_PNR" property="makeNullPnr"  />
+	    <result column="CHANGE_PNR_NOT_AUTH" property="changePnrNotAuth"  />
+	    <result column="ASSIGN_BOOK_OFFICE" property="assignBookOffice"  />
+	    <result column="BOOK_OFFICE" property="bookOffice"  />
+	    <result column="ASSIGN_BOOK_OFFICE_TYPE" property="assignBookOfficeType"  />
+	    <result column="NOTSUIT_PASSENGER_TYPE" property="notsuitPassengerType"  />
+	    <result column="ARNK_TYPE" property="arnkType"  />
+	    <result column="ARNK_SUIT_COUNTRY" property="arnkSuitCountry"  />
+	    <result column="SHARE_REWARD_TYPE" property="shareRewardType"  />
+	    <result column="SHARE_ASSIGN_REWARD" property="shareAssignReward"  />
+	    <result column="SHARE_LEG_REWARD" property="shareLegReward"  />
+	    <result column="SHARE_IS_SUIT_AIRLINE" property="shareIsSuitAirline"  />
+	    <result column="SHARE_SUIT_AIRLINE" property="shareSuitAirline"  />
+	    <result column="IS_MIX_CABIN" property="isMixCabin"  />
+	    <result column="MIX_CABIN_TYPE" property="mixCabinType"  />
+	    <result column="IS_TOUR_CODE_INCLUDE_TEXT" property="isTourCodeIncludeText"  />
+	    <result column="TOUR_CODE_INCLUDE_TEXT" property="tourCodeIncludeText"  />
+	    <result column="TOUR_CODE_NO_AGENCY" property="tourCodeNoAgency"  />
+	    <result column="TOUR_CODE_NO_REWARD" property="tourCodeNoReward"  />
+	    <result column="TOUR_CODE_CONTENT" property="tourCodeContent"  />
+	    <result column="IS_ROUND_TRIP_INCLUDE_CABIN" property="isRoundTripIncludeCabin"  />
+	    <result column="ROUND_TRIP_INCLUDE_CABIN" property="roundTripIncludeCabin"  />
+	    <result column="IS_PAR_LIMIT" property="isParLimit"  />
+	    <result column="PAR_LIMIT" property="parLimit"  />
+	    <result column="FARE_Q_AGENCY" property="fareQAgency"  />
+	    <result column="FARE_Q_REWARD" property="fareQReward"  />
+	    <result column="FARE_S_AGENCY" property="fareSAgency"  />
+	    <result column="FARE_S_REWARD" property="fareSReward"  />
+	    <result column="IS_FARE_INCLUDE_TEXT" property="isFareIncludeText"  />
+	    <result column="FARE_INCLUDE_TEXT" property="fareIncludeText"  />
+	    <result column="FARE_INCLUDE_TYPE" property="fareIncludeType"  />
+	    <result column="IS_SUIT_FARE_BASE" property="isSuitFareBase"  />
+	    <result column="SUIT_FARE_BASE" property="suitFareBase"  />
+	    <result column="IS_FLY_SUIT_FLIGHT" property="isFlySuitFlight"  />
+	    <result column="FLY_SUIT_FLIGHT" property="flySuitFlight"  />
+	    <result column="IS_RTN_SUIT_FLIGHT" property="isRtnSuitFlight"  />
+	    <result column="RTN_SUIT_FLIGHT" property="rtnSuitFlight"  />
+	    <result column="IS_NOT_SUIT_FLIGHT" property="isNotSuitFlight"  />
+	    <result column="NOT_SUIT_FLIGHT" property="notSuitFlight"  />
+	    <result column="IS_NOT_SUIT_ROUTE" property="isNotSuitRoute"  />
+	    <result column="NOT_SUIT_ROUTE" property="notSuitRoute"  />
+	    <result column="FLY_NOTSUIT_CYCLE" property="flyNotsuitCycle"  />
+	    <result column="RTN_NOTSUIT_CYCLE" property="rtnNotsuitCycle"  />
+	    <result column="FLY_NOTSUIT_DATE" property="flyNotsuitDate"  />
+	    <result column="RTN_NOTSUIT_DATE" property="rtnNotsuitDate"  />
+	    <result column="REMARK" property="remark"  />
+	    <result column="STATUS" property="status"  />
+	    <result column="CREATOR" property="creator"  />
+	    <result column="CREATE_TIME" property="createTime"  />
+	    <result column="MODIFIER" property="modifier"  />
+	    <result column="MODIFY_TIME" property="modifyTime"  />
+	    <result column="VALID" property="valid"  />
+	</resultMap>
+
+	<sql id="Base_Column_List" >
+	    ID, OWNER, NAME, SOURCE, VOYAGE_TYPE, TICKET_WAY, AIRLINE, SUIT_AIRLINE, SUPPLIERS, 
+	    SUPPLIER_OFFICE, TICKET_OFFICE, ORIGINAL_AGENCY_FEE, ORIGINAL_REWARD_FEE, AGENCY_FEE, 
+	    REWARD_FEE, ONE_WAY_PRIVILEGE, ROUND_TRIP_PRIVILEGE, OPEN_TICKET_FEE, AUTO_TICKET, 
+	    IS_GDS, TICKET_RANGE, FLY_START_DATE, FLY_END_DATE, RTN_START_DATE, RTN_END_DATE, 
+	    TICKET_VALID_START_DATE, TICKET_VALID_END_DATE, TICKET_DATE, SAT_IS_TICKET, SAT_TICKET_DATE, 
+	    SUN_IS_TICKET, SUN_TICKET_DATE, FLIGHT_TYPE, DEPART_CABIN, TRANSIT_CABIN, ROUND_TRIP_AIRPORT_TYPE, 
+	    ROUND_TRIP_AIRPORT, IS_NOTSUIT_TRANSFER_AIRPORT, NOTSUIT_TRANSFER_AIRPORT, SUIT_AGE, 
+	    SUIT_PEOPLE_NUMBER, SUIT_DOUBLE_PEOPLE, CHANGE_AND_REFUND, CHD_REWARD_TYPE, CHD_ASSIGN_REWARD_FEE, 
+	    CHD_IS_ADD_HANDLING_FEE, CHD_ADD_HANDLING_FEE, CHD_TICKET_NO_AGENCY_FEE, CHD_NOT_ALONE_TICKET, 
+	    CHD_PRIVILEGE, INF_TICKET, INF_IS_ADD_HANDLING_FEE, INF_ADD_HANDLING_FEE, PNR_TICKET_TYPE, 
+	    AUTO_CHANGE_PNR, MAKE_NULL_PNR, CHANGE_PNR_NOT_AUTH, ASSIGN_BOOK_OFFICE, BOOK_OFFICE, 
+	    ASSIGN_BOOK_OFFICE_TYPE, NOTSUIT_PASSENGER_TYPE, ARNK_TYPE, ARNK_SUIT_COUNTRY, SHARE_REWARD_TYPE, 
+	    SHARE_ASSIGN_REWARD, SHARE_LEG_REWARD, SHARE_IS_SUIT_AIRLINE, SHARE_SUIT_AIRLINE, 
+	    IS_MIX_CABIN, MIX_CABIN_TYPE, IS_TOUR_CODE_INCLUDE_TEXT, TOUR_CODE_INCLUDE_TEXT, 
+	    TOUR_CODE_NO_AGENCY, TOUR_CODE_NO_REWARD, TOUR_CODE_CONTENT, IS_ROUND_TRIP_INCLUDE_CABIN, 
+	    ROUND_TRIP_INCLUDE_CABIN, IS_PAR_LIMIT, PAR_LIMIT, FARE_Q_AGENCY, FARE_Q_REWARD,
+	    DEPART_COUNTRY, DEPART_EXCLUDE_COUNTRY, DEPART_AIRPORT, DEPART_EXCLUDE_AIRPORT, TRANSIT_COUNTRY, 
+	    TRANSIT_EXCLUDE_COUNTRY, TRANSIT_AIRPORT, TRANSIT_EXCLUDE_AIRPORT, ARRIVE_COUNTRY, 
+	    ARRIVE_EXCLUDE_COUNTRY, ARRIVE_AIRPORT, ARRIVE_EXCLUDE_AIRPORT,  
+	    FARE_S_AGENCY, FARE_S_REWARD, IS_FARE_INCLUDE_TEXT, FARE_INCLUDE_TEXT, FARE_INCLUDE_TYPE, 
+	    IS_SUIT_FARE_BASE, SUIT_FARE_BASE, IS_FLY_SUIT_FLIGHT, FLY_SUIT_FLIGHT, IS_RTN_SUIT_FLIGHT, 
+	    RTN_SUIT_FLIGHT, IS_NOT_SUIT_FLIGHT, NOT_SUIT_FLIGHT, IS_NOT_SUIT_ROUTE, NOT_SUIT_ROUTE, 
+	    FLY_NOTSUIT_CYCLE, RTN_NOTSUIT_CYCLE, FLY_NOTSUIT_DATE, RTN_NOTSUIT_DATE, REMARK, 
+	    STATUS, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME, VALID
+  </sql>
+
     <insert id="insert">
 	    insert into IFT_POLICY_NEW (ID, OWNER, NAME, 
 	      SOURCE, VOYAGE_TYPE, TICKET_WAY, 
@@ -91,4 +228,10 @@
 	      #{arriveAirport}, #{arriveExcludeAirport}
 	      )
     </insert>
+    
+    <select id="find" resultMap="detail">
+    	SELECT 
+    	<include refid="Base_Column_List" /> 
+    	FROM IFT_POLICY_NEW WHERE ID = #{policyId} AND OWNER = #{owner} AND VALID = 1
+    </select>
 </mapper>

@@ -40,5 +40,10 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 		iftPolicyMapper.insert(iftPolicy);
 		return policyId;
 	}
+
+	@Override
+	public IftPolicy find(Agent agent, long policyId) {
+		return iftPolicyMapper.find(agent.getOwner(), policyId);
+	}
 	
 }
