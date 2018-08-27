@@ -1653,6 +1653,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				}else{
 					throw new GSSException("更新状态信息异常", "0191", "查询订单号为空");
 				}
+			}else{
+				throw new GSSException("更新状态信息异常", "0191", "入参为空或订单号为空");
 			}
 		} catch (Exception e) {			
 			logger.error("更新订单状态异常：",e);
