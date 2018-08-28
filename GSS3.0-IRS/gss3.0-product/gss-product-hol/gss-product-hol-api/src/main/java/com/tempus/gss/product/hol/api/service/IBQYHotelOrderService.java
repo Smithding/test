@@ -5,10 +5,13 @@ import com.tempus.gss.product.hol.api.entity.request.tc.CancelOrderBeforePayReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.OrderCreateReq;
 import com.tempus.gss.product.hol.api.entity.response.HotelOrder;
 import com.tempus.gss.product.hol.api.entity.response.tc.CancelOrderRes;
+import com.tempus.gss.product.hol.api.entity.response.tc.OrderInfomationDetail;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.BQYPushOrderInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.CreateOrderReq;
 import com.tempus.gss.vo.Agent;
+
+import java.util.concurrent.Future;
 
 /**
  * BQY酒店订单接口
@@ -38,4 +41,12 @@ public interface IBQYHotelOrderService {
 	 * @return
 	 */
 	Boolean bqyPushOrderInfo(Agent agent, BQYPushOrderInfo bqyPushOrderInfo) throws GSSException;
+
+	/**
+	 * 异步获取bqy酒店详情
+	 * @param agent
+	 * @param hotelOrderNo
+	 * @return
+	 */
+    Future<OrderInfomationDetail> futureOrderDetailInfo(Agent agent, String hotelOrderNo);
 }
