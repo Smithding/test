@@ -450,6 +450,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			if (responseResult != null) {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
 					roomPriceList = responseResult.getResult();
+					if (roomPriceList == null || roomPriceList.isEmpty()) {
+						logger.info("BQY酒店房型查询结果为空,酒店id为:" + query.getHotelId());
+					}
 				} 
 			}else {
 				logger.info("BQY酒店房型查询结果为空,酒店id为:" + query.getHotelId());
