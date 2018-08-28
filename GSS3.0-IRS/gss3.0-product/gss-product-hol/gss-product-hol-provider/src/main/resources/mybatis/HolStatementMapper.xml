@@ -43,6 +43,7 @@
         <result column="REMARK" property="remark" jdbcType="VARCHAR" />
         <result column="COMMISSION" property="commission" jdbcType="DECIMAL" />
         <result column="REBATE_PRICE" property="rebatePrice" jdbcType="DECIMAL" />
+        <result column="UPDATE_DATE" property="updateDate" jdbcType="TIMESTAMP" />
     </resultMap>
 
     <sql id="base_column">
@@ -84,7 +85,8 @@
         SUPPLIER_PAY_WATER,
         REMARK,
         COMMISSION,
-        REBATE_PRICE
+        REBATE_PRICE,
+        UPDATE_DATE
     </sql>
 
     <select id="queryList" resultMap="baseResultMap" parameterType="com.tempus.gss.product.hol.api.entity.vo.QueryStatementVo">
