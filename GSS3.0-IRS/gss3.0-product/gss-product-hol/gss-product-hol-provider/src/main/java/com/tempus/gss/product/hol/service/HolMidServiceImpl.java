@@ -274,30 +274,11 @@ public class HolMidServiceImpl implements IHolMidService {
 				}
 				if (bqyProDetailList == null && tcProDetailList == null) {
 					return null;
-				}else if (bqyProDetailList == null || bqyProDetailList.size() == 0) {
-					return tcHotel.getProDetails();
-				}else if (tcProDetailList == null || tcProDetailList.size() == 0) {
-					return bqyHotel.getProDetails();
+				}else if (tcProDetailList != null && !tcProDetailList.isEmpty()) {
+					bqyProDetailList.addAll(tcProDetailList);
 				}
 				List<ProDetails> newProDetailList = new ArrayList<ProDetails>();
-				bqyProDetailList.addAll(tcProDetailList);
-				
-				/*Map<String, List<ProDetails>> collect = bqyProDetailList.stream().collect(Collectors.groupingBy(ProDetails::getResProName));
-				for(Map.Entry<String, List<ProDetails>> entry : collect.entrySet()) {
-					List<ProDetails> value = entry.getValue();
-					if(value!= null && value.size() > 0) {
-						if(value.size() >= 2) {
-							for (int i = 1; i < value.size(); i++) {
-								List<ResProBaseInfo> resProBaseInfoList = value.get(0).getResProBaseInfoList();
-								resProBaseInfoList.addAll(value.get(i).getResProBaseInfoList());
-							}
-						}
-						newProDetailList.add(value.get(0));
-					}
-				}
-				bqyHotel.setProDetails(newProDetailList);*/
-				
-				
+
 				Map<String, ProDetails> map = new HashMap<String, ProDetails>();
 				for(ProDetails pro : bqyProDetailList) {
 					if(map.containsKey(pro.getResProName())) {
