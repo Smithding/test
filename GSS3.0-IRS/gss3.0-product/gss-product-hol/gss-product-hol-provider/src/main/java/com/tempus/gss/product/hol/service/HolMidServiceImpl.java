@@ -272,11 +272,11 @@ public class HolMidServiceImpl implements IHolMidService {
 				if (null != tcHotel) {
 					tcProDetailList = tcHotel.getProDetails();
 				}
-				
-				if (bqyProDetailList == null || bqyProDetailList.size() == 0) {
+				if (bqyProDetailList == null && tcProDetailList == null) {
+					return null;
+				}else if (bqyProDetailList == null || bqyProDetailList.size() == 0) {
 					return tcHotel.getProDetails();
-				}
-				if (tcProDetailList == null || tcProDetailList.size() == 0) {
+				}else if (tcProDetailList == null || tcProDetailList.size() == 0) {
 					return bqyHotel.getProDetails();
 				}
 				List<ProDetails> newProDetailList = new ArrayList<ProDetails>();
