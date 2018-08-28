@@ -578,6 +578,9 @@ public class OrderServiceImpl implements IOrderService {
 				saleOrderDetail.setOwner(agent.getOwner());
 				saleOrderDetail.setCreateTime(new Date());
 				saleOrderDetail.setCreator(agent.getId().toString());
+				if(saleOrderDetail.getPremium().compareTo(BigDecimal.ZERO)==0){
+                    saleOrderDetail.setPremium(salePrice.multiply(new BigDecimal(saleOrderDetail.getInsuranceNum())));
+                }
 				saleOrderDetail.setIsReport("0");
 				saleOrderDetailDao.insertSelective(saleOrderDetail);
 			}
@@ -1194,7 +1197,7 @@ public class OrderServiceImpl implements IOrderService {
 			StringBuffer insureNoArray = new StringBuffer();
 			// 对被保人循环进行投保操作
 			for (SaleOrderDetail saleOrderDetail : saleOrderDetailList){
-				if(saleOrderDetail.getStatus()==2 || saleOrderDetail.getStatus()==3){
+				if(saleOrderDetail.getStatus()==2 || saleOrderDetail.getStatus()==3 || saleOrderDetail.getStatus()==10){
 					continue;
 				}
 					List<SaleOrderDetail> saleOrderDetails = new ArrayList<SaleOrderDetail>();
