@@ -132,7 +132,7 @@ public class OrderServiceImpl implements IOrderService {
 	private static final String COMPANY_NAME_HUAXIA = "华夏";
 
 	private static final String COMPANY_NAME_JUNLONG = "君龙";
-	private static final String COMPANY_NAME_QIANHAICAI = "前海财";
+	private static final String COMPANY_NAME_QIANHAICAI = "前海";
 	private static final String RESPONSE_SUCCESS = "0000";
 	private static final String RETURN_ERROR_REFUND = "该订单已退款！不能重复此操作";
 	private static final String RETURN_ERROR_SURRENDER = "该订单已退保！不能重复此操作";
@@ -933,7 +933,7 @@ public class OrderServiceImpl implements IOrderService {
 				}else{
 					flightInfoVo.setFlightNo(InsureExtVo.getFlightInfoVo().getFlightNo());
 				}
-				if(insurance.getBuyWay() == 1&&insurance.getIsCivilServant() == 1&&(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo()!=null||"".equals(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo()))){
+				if(insurance.getBuyWay() == 1&&insurance.getIsCivilServant() == 1&&!"".equals(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo())){
 					insureRequestVo.setPolicyType((short)2);//设置为行程单保险
 					flightInfoVo.setBillNo(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo());
 				}else{
