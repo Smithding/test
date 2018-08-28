@@ -252,7 +252,6 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 					String hotelIdJson = jsonObject.getString("Items");
 					hotelIdList = JsonUtil.toList(hotelIdJson, HotelId.class);
 					System.out.println(hotelIdJson);
-					//hotelIdList = JsonUtil.toBean(resultStr, new TypeReference<List<HotelId>>(){});
 				}
 			}
 		}else {
@@ -383,6 +382,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			if (responseResult != null) {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
 					roomFacilityList = responseResult.getResult();
+					if (roomFacilityList == null || roomFacilityList.size() == 0) {
+						logger.info("bqy酒店房间设施查询返回为空!");
+					}
 				}
 			}else {
 				logger.info("bqy酒店房间设施查询返回为空!");
@@ -407,6 +409,9 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 			if (responseResult != null) {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
 					imageList = responseResult.getResult();
+					if (imageList == null || imageList.size() == 0) {
+						logger.info("bqy酒店图片查询返回为空!");
+					}
 				}
 			}
 		}else {
