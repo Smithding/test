@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.hol.dao.HolStatementMapper">
+    <resultMap id="baseResultMap" type="com.tempus.gss.product.hol.api.entity.HolStatement">
+        <id column="ID" property="id" jdbcType="BIGINT" />
+        <result column="SALE_CORPORATION" property="saleCorporation" jdbcType="VARCHAR"/>
+        <result column="BALANCE_CORPORATION" property="balanceCorporation" jdbcType="VARCHAR"/>
+        <result column="PRODUCT_TYPE" property="productType" jdbcType="VARCHAR" />
+        <result column="BUSINESS_LINE" property="businessLine" jdbcType="VARCHAR" />
+        <result column="SALE_DEPARTMENT" property="saleDepartment" jdbcType="VARCHAR" />
+        <result column="CUSTOMER_NAME" property="customerName" jdbcType="VARCHAR" />
+        <result column="CUSTOMER_NO" property="customerNo" jdbcType="VARCHAR" />
+        <result column="BILL_NO" property="billNo" jdbcType="VARCHAR" />
+        <result column="ORDER_SOURCE" property="orderSource" jdbcType="VARCHAR" />
+        <result column="SALE_ORDER_NO" property="saleOrderNo" jdbcType="BIGINT" />
+        <result column="PRODUCT_ORDER_NO" property="productOrderNo" jdbcType="BIGINT" />
+        <result column="CITY" property="city" jdbcType="VARCHAR" />
+        <result column="HOTEL_NAME" property="hotelName" jdbcType="VARCHAR" />
+        <result column="DEAL_DATE" property="dealDate" jdbcType="TIMESTAMP" />
+        <result column="CHECKIN_PERSON" property="checkinPerson" jdbcType="VARCHAR" />
+        <result column="CHECKIN_ROOM_CODE" property="checkinRoomCode" jdbcType="VARCHAR" />
+        <result column="CHECKIN_DATE" property="checkinDate" jdbcType="TIMESTAMP" />
+        <result column="CHECKOUT_DATE" property="checkoutDate" jdbcType="TIMESTAMP" />
+        <result column="NIGHT_NUM" property="nightNum" jdbcType="INTEGER" />
+        <result column="ROOM_NUM" property="roomNum" jdbcType="INTEGER" />
+        <result column="ROOM_NIGHT_NUM" property="roomNightNum" jdbcType="INTEGER" />
+        <result column="ROOM_TYPE" property="roomType" jdbcType="VARCHAR" />
+        <result column="OTHER" property="other" jdbcType="VARCHAR" />
+        <result column="OTHER_PRICE" property="otherPrice" jdbcType="DECIMAL" />
+        <result column="PURCHASE_UNIT_PRICE" property="purchaseUnitPrice" jdbcType="DECIMAL" />
+        <result column="AMOUNT_PAYABLE" property="amountPayable" jdbcType="DECIMAL" />
+        <result column="FACT_AMOUNT_PAYABLE" property="factAmountPayable" jdbcType="DECIMAL" />
+        <result column="SALE_UNIT_PRICE" property="saleUnitPrice" jdbcType="DECIMAL" />
+        <result column="AMOUNT_RECEIVABLE" property="amountReceivable" jdbcType="DECIMAL" />
+        <result column="FACT_AMOUNT_RECEIVABLE" property="factAmountReceivable" jdbcType="DECIMAL" />
+        <result column="GROSS_MARGIN" property="grossMargin" jdbcType="DECIMAL" />
+        <result column="SUPPLIER_ORDER_NO" property="supplierOrderNo" jdbcType="VARCHAR" />
+        <result column="SUPPLIER_SETTLE_TYPE" property="supplierSettleType" jdbcType="VARCHAR" />
+        <result column="SUPPLIER_PAY_TYPE" property="supplierPayType" jdbcType="VARCHAR" />
+        <result column="SUPPLIER_PAY_WATER" property="supplierPayWater" jdbcType="VARCHAR" />
+        <result column="REMARK" property="remark" jdbcType="VARCHAR" />
+        <result column="COMMISSION" property="commission" jdbcType="DECIMAL" />
+        <result column="REBATE_PRICE" property="rebatePrice" jdbcType="DECIMAL" />
+    </resultMap>
+
+    <sql id="base_column">
+        ID,
+        SALE_CORPORATION,
+        BALANCE_CORPORATION,
+        PRODUCT_TYPE,
+        BUSINESS_LINE,
+        SALE_DEPARTMENT,
+        CUSTOMER_NAME,
+        CUSTOMER_NO,
+        BILL_NO,
+        ORDER_SOURCE,
+        SALE_ORDER_NO,
+        PRODUCT_ORDER_NO,
+        CITY,
+        HOTEL_NAME,
+        DEAL_DATE,
+        CHECKIN_PERSON,
+        CHECKIN_ROOM_CODE,
+        CHECKIN_DATE,
+        CHECKOUT_DATE,
+        NIGHT_NUM,
+        ROOM_NUM,
+        ROOM_NIGHT_NUM,
+        ROOM_TYPE,
+        OTHER,
+        OTHER_PRICE,
+        PURCHASE_UNIT_PRICE,
+        AMOUNT_PAYABLE,
+        FACT_AMOUNT_PAYABLE,
+        SALE_UNIT_PRICE,
+        AMOUNT_RECEIVABLE,
+        FACT_AMOUNT_RECEIVABLE,
+        GROSS_MARGIN,
+        SUPPLIER_ORDER_NO,
+        SUPPLIER_SETTLE_TYPE,
+        SUPPLIER_PAY_TYPE,
+        SUPPLIER_PAY_WATER,
+        REMARK,
+        COMMISSION,
+        REBATE_PRICE
+    </sql>
+
+    <select id="queryList" resultMap="baseResultMap" parameterType="com.tempus.gss.product.hol.api.entity.vo.QueryStatementVo">
+        SELECT <include refid="base_column" />
+          FROM HOL_STATEMENT hs
+        <trim prefix="WHERE " prefixOverrides="AND | OR" >
+            <if test="saleOrderNo != null and saleOrderNo > 0">
+                AND hs.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+            </if>
+            <if test="supplierOrderNo != null and supplierOrderNo.length() > 0">
+                AND hs.SUPPLIER_ORDER_NO = #{supplierOrderNo,jdbcType=VARCHAR}
+            </if>
+            <if test="checkinPerson != null and checkinPerson.length() > 0">
+                AND hs.CHECKIN_PERSON = #{checkinPerson,jdbcType=VARCHAR}
+            </if>
+            <if test="hotelName != null and hotelName.length() > 0">
+                AND hs.HOTEL_NAME = #{hotelName,jdbcType=VARCHAR}
+            </if>
+            <if test="startDate != null and startDate.length > 0 and endDate != null and endDate.length > 0">
+                <if test="dateChange != null and dateChange == 1" >
+                    AND hs.CHECKIN_DATE BETWEEN #{startDate} AND #{endDate}
+                </if>
+                <if test="dateChange != null and dateChange == 2" >
+                    AND hs.DEAL_DATE BETWEEN #{startDate} AND #{endDate}
+                </if>
+                <if test="dateChange != null and dateChange == 3" >
+                    AND hs.CHECKOUT_DATE BETWEEN #{startDate} AND #{endDate}
+                </if>
+            </if>
+        </trim>
+    </select>
+
+</mapper>

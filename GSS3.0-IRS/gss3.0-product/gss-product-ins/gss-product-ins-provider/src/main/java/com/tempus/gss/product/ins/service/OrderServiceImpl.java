@@ -711,6 +711,9 @@ public class OrderServiceImpl implements IOrderService {
 				detail.setInsuredPhone(saleOrderDetail.getInsuredPhone());
 				detail.setInsuredBirthday(saleOrderDetail.getInsuredBirthday()); // yyyyMMdd
 				detail.setInsuredSex(saleOrderDetail.getInsuredSex());
+				if(saleOrderDetail.getBillNo()!=null){
+					detail.setBillNo(saleOrderDetail.getBillNo());
+				}
 				saleOrderDetails.add(detail);
 				saleOrderExt.setSaleOrderDetailList(saleOrderDetails);
 				/* 调用保险经纪的接口进行投保，请求是json串 */
@@ -930,8 +933,11 @@ public class OrderServiceImpl implements IOrderService {
 				}else{
 					flightInfoVo.setFlightNo(InsureExtVo.getFlightInfoVo().getFlightNo());
 				}
-				if(insurance.getBuyWay() == 1&&insurance.getIsCivilServant() == 1){
+				if(insurance.getBuyWay() == 1&&insurance.getIsCivilServant() == 1&&(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo()!=null||"".equals(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo()))){
 					insureRequestVo.setPolicyType((short)2);//设置为行程单保险
+					flightInfoVo.setBillNo(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo());
+				}else{
+					insureRequestVo.setPolicyType((short)0);//设置为普通保险
 				}
 				int day = daysBetween(saleOrderExt.getEffectDate(),saleOrderExt.getExpireDate());
 				insureRequestVo.setTravelDay(day);
@@ -941,6 +947,8 @@ public class OrderServiceImpl implements IOrderService {
 		}catch(Exception e){
 			log.error("json转对象，对象转json异常"+e,1);
 		}
+		//将票号设置为0 以免投保失败
+		saleOrderDetailList.get(0).setBillNo(null);
 		insureRequestVo.setExtendedFieldSJson(extendedFieldsJson);
 		insureRequestVo.setSaleOrderDetailList(null);
 		insureRequestVo.setInsuredList(saleOrderDetailList);
@@ -1042,6 +1050,9 @@ public class OrderServiceImpl implements IOrderService {
 						detail.setInsuredSex(saleOrderDetail.getInsuredSex());
 						detail.setInsuranceNum(saleOrderDetail.getInsuranceNum());
 						detail.setPremium(saleOrderDetail.getPremium());
+						if(saleOrderDetail.getBillNo()!=null){
+							detail.setBillNo(saleOrderDetail.getBillNo());
+						}
 						if(insurance.getCompanyName().contains(COMPANY_NAME_JUNLONG)||	insurance.getCompanyName().contains(COMPANY_NAME_QIANHAICAI)){
 							detail.setPremium(insurance.getFacePrice().multiply( new BigDecimal(saleOrderDetail.getInsuranceNum())));
 						}
@@ -1196,6 +1207,9 @@ public class OrderServiceImpl implements IOrderService {
 					detail.setInsuredSex(saleOrderDetail.getInsuredSex());
 					detail.setInsuranceNum(saleOrderDetail.getInsuranceNum());
 					detail.setPremium(saleOrderDetail.getPremium());
+					if(saleOrderDetail.getBillNo()!=null){
+						detail.setBillNo(saleOrderDetail.getBillNo());
+					}
 					if(insurance.getCompanyName().contains(COMPANY_NAME_JUNLONG)||	insurance.getCompanyName().contains(COMPANY_NAME_QIANHAICAI)){
 						detail.setPremium(insurance.getFacePrice().multiply( new BigDecimal(saleOrderDetail.getInsuranceNum())));
 					}

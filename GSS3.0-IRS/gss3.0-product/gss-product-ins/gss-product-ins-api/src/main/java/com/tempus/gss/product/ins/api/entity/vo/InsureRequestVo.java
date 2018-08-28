@@ -113,8 +113,7 @@ public class InsureRequestVo implements Serializable {
 	 */
 	private String transNum;
 	/*
-	 * 航班号
-
+	 *保单类型 0=电子保单，1=纸质保单 2=行程单
 	 */
 	private short policyType;
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

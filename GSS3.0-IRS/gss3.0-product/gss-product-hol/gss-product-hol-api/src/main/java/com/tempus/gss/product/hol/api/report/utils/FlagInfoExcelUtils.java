@@ -609,7 +609,7 @@ public class FlagInfoExcelUtils{
 		    currRowIndex++;
 	    }
 	    
-	    if(uploadDataResultDto.getDatas().size() != 0){
+	    if(uploadDataResultDto.getResultMsg().size() != 0){
 	    	uploadDataResultDto.setResultCode("500");
 	    }else{
 	    	uploadDataResultDto.setResultCode("200");
@@ -737,7 +737,7 @@ public class FlagInfoExcelUtils{
 	 * @return
 	 */
 	private String addErrMsg(int rowNum,int colNum,String mess){
-		return "第"+rowNum+"行第"+colNum+"列存在异常，异常信息："+mess;
+		return "第"+rowNum+"行第"+colNum+"列，"+mess;
 	}
 	
 	
