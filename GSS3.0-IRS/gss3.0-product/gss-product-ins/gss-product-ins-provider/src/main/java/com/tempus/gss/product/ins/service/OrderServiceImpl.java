@@ -936,7 +936,7 @@ public class OrderServiceImpl implements IOrderService {
 				}else{
 					flightInfoVo.setFlightNo(InsureExtVo.getFlightInfoVo().getFlightNo());
 				}
-				if(insurance.getBuyWay() == 1&&insurance.getIsCivilServant() == 1&&!"".equals(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo())){
+				if(insurance.getBuyWay() == 1&&insurance.getIsCivilServant() == 1&&!"".equals(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo())&&saleOrderExt.getSaleOrderDetailList().get(0).getBillNo()!=null){
 					insureRequestVo.setPolicyType((short)2);//设置为行程单保险
 					flightInfoVo.setBillNo(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo());
 				}else{
