@@ -3,10 +3,7 @@ package com.tempus.gss.product.hol.service;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Future;
 
 import com.tempus.gss.order.entity.enums.GoodsBigType;
@@ -14,7 +11,7 @@ import com.tempus.gss.order.entity.vo.ActualInfoSearchVO;
 import com.tempus.gss.order.entity.vo.CertificateCreateVO;
 import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
 import com.tempus.gss.product.hol.api.entity.WhiteListPhone;
-import com.tempus.gss.product.hol.api.entity.response.tc.OrderInfomationDetail;
+import com.tempus.gss.product.hol.api.entity.response.tc.*;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomInfo;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.request.*;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelOrderInfo;
@@ -56,9 +53,6 @@ import com.tempus.gss.order.service.ITransationOrderService;
 import com.tempus.gss.product.hol.api.entity.request.tc.CancelOrderBeforePayReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.OrderCreateReq;
 import com.tempus.gss.product.hol.api.entity.response.HotelOrder;
-import com.tempus.gss.product.hol.api.entity.response.tc.CancelOrderRes;
-import com.tempus.gss.product.hol.api.entity.response.tc.OwnerOrderStatus;
-import com.tempus.gss.product.hol.api.entity.response.tc.TcOrderStatus;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.CreateOrderRespone;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderCancelResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BaseRoomInfo;
@@ -402,8 +396,56 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		orderReq.setOrderNumber(Long.valueOf(hotelOrderNo));
 		HotelOrderInfo hotelOrderInfo = bqyHotelInterService.orderDetail(orderReq);
 		if (hotelOrderInfo != null) {
-			//TODO 未完成
 			OrderInfomationDetail orderInfomationDetail = new OrderInfomationDetail();
+			orderInfomationDetail.setIsSuccess(true);
+			List<OrderInfoModel> orderInfoList = new ArrayList<>();
+			OrderInfoModel orderInfo = new OrderInfoModel();
+			orderInfo.setCusOrderId(hotelOrderInfo.getHotelOrderId().toString());
+			orderInfo.setProductTitle(hotelOrderInfo.getHotelName());
+			PassengerModel passengerModel = new PassengerModel();
+			passengerModel.setName(hotelOrderInfo.getGuestName());
+			orderInfo.setPassengers(Arrays.asList(passengerModel));//Arrays.asList(hotelOrderInfo.getGuestName())
+			orderInfo.setStartTime(sdf.format(hotelOrderInfo.getCheckInDate()));
+			orderInfo.setEndTime(sdf.format(hotelOrderInfo.getCheckOutDate()));
+
+			ResourceModel resourceModel = new ResourceModel();
+			resourceModel.setResourceId(hotelOrderInfo.getHotelId());
+			resourceModel.setName(hotelOrderInfo.getHotelName());
+			resourceModel.setProductName(hotelOrderInfo.getProductName());
+			resourceModel.setType("0");
+
+			//resourceModel.setArrivalTime(hotelOrderInfo.getArriveDate()); //到店时间
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			orderInfo.setLasestCancelTime(format.format(hotelOrderInfo.getArriveDate())); //到店时间
+
+
+			CountModel countModel = new CountModel();
+			countModel.setRoomCount(hotelOrderInfo.getBookNumber());
+			orderInfo.setCounts(countModel);
+
+			orderInfo.setOrigin(hotelOrderInfo.getPayPrice());
+
+			Integer orderStatus = hotelOrderInfo.getStatus(); //订单状态
+			if (null != orderStatus) {
+				orderInfo.setOrderStatus(String.valueOf(orderStatus));
+				switch (orderStatus) {
+					case 1:
+						orderInfo.setOrderFlag("待支付");
+					case 2:
+						orderInfo.setOrderFlag("待确认");
+					case 3:
+						orderInfo.setOrderFlag("已确认");
+					case 5:
+						orderInfo.setOrderFlag("退订中");
+					case 508:
+						orderInfo.setOrderFlag("已退订");
+					case 9:
+						orderInfo.setOrderFlag("已取消");
+				}
+			}
+
+			orderInfoList.add(orderInfo);
+			orderInfomationDetail.setOrderInfos(orderInfoList);
 			return new AsyncResult<>(orderInfomationDetail);
 		}else {
 			logger.info("bqy酒店订单查询为空!");
