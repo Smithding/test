@@ -1,6 +1,11 @@
 package com.tempus.gss.product.ift.service.policy;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
@@ -49,9 +54,46 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 	}
 
 	@Override
-	public Page<IftPolicy> search(Agent agent, IftPolicyQuery query) {
+	public Page<IftPolicy> search(Agent agent, Page<IftPolicy> page, IftPolicyQuery query) {
+		// 调用底层先分页查询出符合国际政策ID列表
+		List<Long> ids = iftPolicyMapper.query(page, query);
+		// 根据国际政策ID列表循环拉取国际政策的详细
+		List<IftPolicy> list = new ArrayList<>();
+		for (Long id : ids) {
+			// 通过ID拉取国际政策的信息
+			IftPolicy detail = this.find(agent, id);
+			list.add(detail);
+		}
 		
-		return null;
+		// 设置分页分页查询的国际政策详情列表
+		page.setRecords(list);
+		return page;
+	}
+	
+	@Override
+	@Transactional
+	public long update(Agent agent, IftPolicy iftPolicy) {
+		
+		/* 第一步设置原政策无效 */
+		this.setInvalid(agent, iftPolicy.getId());
+		/* 第二步新增一条政策 */
+		long policyId = this.create(agent, iftPolicy);
+		
+		return policyId;
+	}
+
+	@Override
+	public boolean setInvalid(Agent agent, long policyId) {
+		Date modifyTime = new Date(System.currentTimeMillis());
+		int count = iftPolicyMapper.setInvalid(agent.getOwner(), policyId, agent.getAccount(), modifyTime);
+		return count > 0 ? true:false;
+	}
+	
+	@Override
+	public boolean changeStatus(Agent agent, Integer status, Long... policyIds) {
+		Date modifyTime = new Date(System.currentTimeMillis());
+		int count = iftPolicyMapper.changeStatus(agent.getOwner(), policyIds, status, agent.getAccount(), modifyTime);
+		return count > 0 ? true:false;
 	}
 	
 	public static void main(String[] args) {
@@ -82,5 +124,5 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 		String[] b = a.split(",");
 		System.out.println(b.length);
 	}
-	
+
 }

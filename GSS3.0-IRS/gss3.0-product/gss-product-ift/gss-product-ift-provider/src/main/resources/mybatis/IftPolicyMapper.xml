@@ -249,4 +249,48 @@
     	<include refid="Base_Column_List" /> 
     	FROM IFT_POLICY_NEW WHERE ID = #{policyId} AND OWNER = #{owner} AND VALID = 1
     </select>
+    
+    <sql id="queryWhere">
+    	<if test="null != policyId">	AND T1.ID=#{policyId} </if>
+    	<if test="null != flightType">	AND T1.FLIGHT_TYPE=#{flightType} </if>
+    	<if test="null != airline &amp;&amp; '' != airline">	AND T1.AIRLINE=#{airline} </if>
+    	<if test="null != departAirport &amp;&amp; '' != departAirport">	AND T1.DEPART_AIRPORT like '%${departAirport}%' </if>
+    	<if test="null != arriveAirport &amp;&amp; '' != arriveAirport">	AND T1.ARRIVE_AIRPORT like '%${arriveAirport}%' </if>
+    	<if test="null != source &amp;&amp; '' != source">	AND T1.SOURCE=#{source} </if>
+    	<if test="null != voyageType &amp;&amp; '' != voyageType">	AND T1.VOYAGE_TYPE=#{voyageType} </if>
+    	<if test="null != status ">	AND T1.STATUS=#{status} </if>
+    	<if test="null != cabin &amp;&amp; '' != cabin">	AND T1.DEPART_CABIN like '%${cabin}%' </if>
+    	<if test="null != ticketOffice &amp;&amp; '' != ticketOffice">	AND T1.TICKET_OFFICE like '%${ticketOffice}%' </if>
+    	<if test="null != autoTicket">	AND T1.AUTO_TICKET=#{autoTicket} </if>
+    	<if test="null != ticketWay &amp;&amp; '' != ticketWay">	AND T1.TICKET_WAY=#{ticketWay} </if>
+    	<if test="null != name &amp;&amp; '' != name">	AND T1.NAME=#{name} </if>
+    	<if test="null != pnrTicketType">	AND T1.PNR_TICKET_TYPE=#{pnrTicketType} </if>
+    	<if test=" null != policyStartDate">
+			AND T1.FLY_START_DATE &gt;= #{policyStartDate}
+		</if>
+		<if test=" null != policyEndDate">
+			AND T1.FLY_END_DATE &lt;= #{policyEndDate}
+		</if>
+    </sql>
+    
+    <select id="query" parameterType="com.tempus.gss.product.ift.api.entity.policy.IftPolicyQuery" resultType="java.lang.Long">
+		SELECT DISTINCT T1.ID
+		FROM IFT_POLICY_NEW T1 WHERE T1.VALID=1 AND T1.OWNER= #{owner} 
+		<include refid="queryWhere"/>
+		ORDER BY T1.CREATE_TIME DESC
+	</select>
+	
+	<update id="setInvalid">
+		UPDATE IFT_POLICY_NEW
+			SET VALID=0, MODIFIER=#{modifier}, MODIFY_TIME=#{modifyTime}
+		WHERE ID=#{policyId} AND OWNER=#{owner} AND VALID=1
+	</update>
+	
+	<update id="changeStatus">
+		UPDATE IFT_POLICY_NEW
+			SET STATUS=#{status}, MODIFIER=#{modifier}, MODIFY_TIME=#{modifyTime}
+		WHERE ID IN
+		<foreach collection="policyIds" item="policyId" index="index" open="( " separator=", " close=" ) ">${policyId}</foreach>
+		AND OWNER=#{owner} AND VALID=1
+	</update>
 </mapper>
