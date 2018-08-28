@@ -119,6 +119,9 @@
         <if test="name!=null and ''!=name">
             AND NAME like concat('%',concat(#{name,jdbcType=VARCHAR},'%'))
         </if>
+        <if test="valid!=null and ''!=valid">
+            AND VALID=#{valid,jdbcType=INTEGER}
+        </if>
         <if test="status!=null and ''!=status">
             AND STATUS=#{status,jdbcType=INTEGER}
         </if>

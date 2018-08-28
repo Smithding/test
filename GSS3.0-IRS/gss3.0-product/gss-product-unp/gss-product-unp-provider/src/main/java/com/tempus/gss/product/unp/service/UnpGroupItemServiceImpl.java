@@ -1,6 +1,8 @@
 package com.tempus.gss.product.unp.service;
 
+import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.product.unp.api.entity.UnpGroupType;
 import com.tempus.gss.product.unp.api.entity.UnpItemType;
@@ -13,10 +15,10 @@ import com.tempus.gss.vo.Agent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -49,15 +51,55 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
     }
     
     @Override
+    public UnpGroupType getGroupByCode(String code) {
+        try {
+            if (StringUtil.isBlank(code)) {
+                return null;
+            }
+            return this.groupTypeMapper.selectByCode(code);
+        } catch (Exception e) {
+            logger.error("getGroups  Error", e);
+            return null;
+        }
+    }
+    
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public UnpResult<UnpGroupType> addGroup(Agent agent, UnpGroupType group) {
-        if (!StringUtil.isNotBlank(group.getCode())) {
-        
-        }
         UnpResult<UnpGroupType> result = new UnpResult<>();
         try {
-            if (groupTypeMapper.insertSelective(group) > 0) {
-                result.success("Add Group : OK", group);
+            if (agent == null || group == null) {
+                result.failed("参数 不能为空", null);
+                return result;
+            }
+            if (StringUtil.isBlank(group.getCode())) {
+                result.failed("产品代码 不能为空", null);
+                return result;
+            }
+            if (StringUtil.isBlank(group.getName())) {
+                result.failed("产品名称 不能为空", null);
+                return result;
+            }
+            Long groupNo = IdWorker.getId();
+            String creator = agent.getAccount();
+            UnpGroupType groupToAdd = null;
+            groupToAdd = this.getGroupByCode(group.getCode());
+            if (null != groupToAdd) {
+                result.failed("分类代码已经存在", groupToAdd);
+                return result;
+            }
+            groupToAdd = new UnpGroupType();
+            groupToAdd.setTypeNo(groupNo);
+            groupToAdd.setCode(group.getCode());
+            groupToAdd.setName(group.getName());
+            groupToAdd.setOwner(agent.getOwner());
+            groupToAdd.setRemark(group.getRemark());
+            groupToAdd.setStatus(group.getStatus());
+            groupToAdd.setValid(VALID);
+            groupToAdd.setCreator(creator);
+            groupToAdd.setCreateTime(new Date());
+            if (groupTypeMapper.insertSelective(groupToAdd) > 0) {
+                result.success("Add Group : OK", groupToAdd);
             } else {
                 result.failed("Error", null);
             }
@@ -81,14 +123,78 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
         } catch (Exception e) {
             logger.error("getItems  Error", e);
         }
-        
         return page;
+    }
+    
+    @Override
+    public UnpItemType getItemByCode(String code) {
+        try {
+            if (StringUtil.isBlank(code)) {
+                return null;
+            }
+            return this.itemTypeMapper.selectByCode(code);
+        } catch (Exception e) {
+            logger.error("getGroups  Error", e);
+            return null;
+        }
     }
     
     @Override
     public UnpResult<UnpItemType> addItem(Agent agent, UnpItemType item) {
         UnpResult<UnpItemType> result = new UnpResult<>();
         try {
+            if (agent == null || item == null) {
+                result.failed("参数 不能为空", null);
+                return result;
+            }
+            if (StringUtil.isBlank(item.getGroupCode())) {
+                result.failed("大类代码 不能为空", null);
+                return result;
+            }
+            if (StringUtil.isBlank(item.getCode())) {
+                result.failed("参数 不能为空", null);
+                return result;
+            }
+            if (StringUtil.isBlank(item.getName())) {
+                result.failed("参数 不能为空", null);
+                return result;
+            }
+            String groupName = "";
+            Long itemNo = IdWorker.getId();
+            BigDecimal baseAmount = new BigDecimal(0);
+            if (null != item.getBaseAmount()) {
+                baseAmount = item.getBaseAmount();
+            }
+            if (StringUtil.isBlank(item.getGroupName())) {
+                UnpGroupType group = this.getGroupByCode(item.getCode());
+                if (group == null) {
+                    result.failed("分类不存在", null);
+                    return result;
+                } else {
+                    groupName = group.getName();
+                }
+            }
+            UnpItemType itemToAdd = null;
+            itemToAdd = this.getItemByCode(item.getCode());
+            if (itemToAdd != null) {
+                result.failed("要添加的产品代码已存在", itemToAdd);
+                return result;
+            }
+            itemToAdd = new UnpItemType();
+            itemToAdd.setItemTypeNo(itemNo);
+            itemToAdd.setOwner(agent.getOwner());
+            itemToAdd.setCode(item.getCode());
+            itemToAdd.setName(item.getName());
+            itemToAdd.setRemark(item.getRemark());
+            itemToAdd.setBaseAmount(baseAmount);
+            itemToAdd.setGroupCode(item.getGroupCode());
+            itemToAdd.setGroupName(groupName);
+            itemToAdd.setImg(item.getImg());
+            itemToAdd.setCreator(agent.getAccount());
+            itemToAdd.setCreateTime(new Date());
+            itemToAdd.setSortNo(item.getSortNo());
+            itemToAdd.setValid(VALID);
+            
             if (itemTypeMapper.insertSelective(item) > 0) {
                 result.success("Add Item : OK", item);
             } else {
@@ -107,8 +213,9 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
         return null;
     }
     
+    @SafeVarargs
     @Override
-    public <T> UnpResult<String> valid(Agent agent, Boolean group, int valid, T... params) {
+    public final <T> UnpResult<String> valid(Agent agent, Boolean group, Integer valid, T... params) {
         UnpResult<String> result = new UnpResult<String>();
         if (null == params || params.length == 0) {
             result.failed("参数为空", null);
@@ -179,8 +286,9 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
         return this.valid(agent, group, VALID, codes);
     }
     
+    @SafeVarargs
     @Override
-    public <T> UnpResult<T> update(Agent agent, T... entities) {
+    public final <T> UnpResult<T> update(Agent agent, T... entities) {
         UnpResult<T> result = new UnpResult<T>();
         if (null == entities || entities.length == 0) {
             result.failed("参数为空", null);
@@ -193,7 +301,7 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
                 if (entity instanceof UnpGroupType) {
                     ((UnpGroupType) entity).setModifier(agent.getAccount());
                     ((UnpGroupType) entity).setModifyTime(new Date());
-                    UnpGroupType beforeUpdate = groupTypeMapper.selectByCode(((UnpGroupType) entity).getTypeNo());
+                    UnpGroupType beforeUpdate = groupTypeMapper.selectByCode(((UnpGroupType) entity).getCode());
                     if (null == beforeUpdate) {
                         continue;
                     }

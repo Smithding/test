@@ -58,7 +58,7 @@
             AND BASE_AMOUNT = #{baseAmount,jdbcType=DECIMAL}
         </if>
         <if test="valid!=null and valid!=''">
-            AND VALID = #{baseAmount,jdbcType=INTEGER}
+            AND VALID = #{valid,jdbcType=INTEGER}
         </if>
         <if test="creator!=null and ''!=creator">
             AND CREATOR like concat('%',concat(#{creator,jdbcType=VARCHAR},'%'))

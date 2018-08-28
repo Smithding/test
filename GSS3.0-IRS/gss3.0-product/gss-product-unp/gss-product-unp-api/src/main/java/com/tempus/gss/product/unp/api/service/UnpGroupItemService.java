@@ -6,7 +6,6 @@ import com.tempus.gss.product.unp.api.entity.UnpItemType;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
 import com.tempus.gss.product.unp.api.entity.vo.UnpGroupItemVo;
 import com.tempus.gss.vo.Agent;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -15,7 +14,6 @@ import java.util.List;
  * <p>
  * unp产品大小类管理
  */
-@Service
 public interface UnpGroupItemService {
     /**
      * @param page
@@ -25,6 +23,8 @@ public interface UnpGroupItemService {
      * @return
      */
     Page<UnpGroupType> getGroups(Page<UnpGroupType> page, UnpGroupItemVo param);
+    
+    UnpGroupType getGroupByCode(String code);
     
     /**
      * @param agent
@@ -52,6 +52,8 @@ public interface UnpGroupItemService {
      * @return UnpResult
      */
     Page<UnpItemType> getItems(Page<UnpItemType> page, UnpGroupItemVo param);
+    
+    UnpItemType getItemByCode(String code);
     
     /**
      * @param agent
@@ -86,7 +88,7 @@ public interface UnpGroupItemService {
      *         itemNos
      * @return
      */
-    <T> UnpResult<String> valid(Agent agent, Boolean group, int valid, T... itemNos);
+    <T> UnpResult<String> valid(Agent agent, Boolean group, Integer valid, T... itemNos);
     
     /**
      * 删除特定的小类（逻辑删除）
