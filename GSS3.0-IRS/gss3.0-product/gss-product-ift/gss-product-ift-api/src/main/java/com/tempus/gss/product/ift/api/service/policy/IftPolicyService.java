@@ -1,6 +1,8 @@
 package com.tempus.gss.product.ift.api.service.policy;
 
+import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
+import com.tempus.gss.product.ift.api.entity.policy.IftPolicyQuery;
 import com.tempus.gss.vo.Agent;
 
 /**
@@ -38,4 +40,13 @@ public interface IftPolicyService {
 	 * @return IftPolicy 国际政策
 	 */
 	IftPolicy find(Agent agent, long policyId);
+	
+	/**
+	 *  分页查询国际政策信息
+	 * 
+	 * @param agent 用户信息
+	 * @param query 查询条件实体
+	 * @return Page<IftPolicy> 分页国际政策数据
+	 */
+	Page<IftPolicy> search(Agent agent, IftPolicyQuery query);
 }
