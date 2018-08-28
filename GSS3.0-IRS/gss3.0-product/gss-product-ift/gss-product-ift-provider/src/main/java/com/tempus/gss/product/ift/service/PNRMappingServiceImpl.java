@@ -96,11 +96,32 @@ public class PNRMappingServiceImpl implements PNRMappingService {
             PnrOutPut pnr = getPnrService.getInfoByPnrRawI(office, CommenUtil.decodeHtml(flightQuery));
             log.info("国际机票PNR内容预定返回原始信息：" + JsonUtil.toJson(pnr));
             queryIBEDetail = getPnrByQueryIBEDetail(pnr);
-            getFSI( queryIBEDetail);
+            getFSI(queryIBEDetail);
         } catch (Exception e) {
             log.info("pnr内容匹配出错", e);
         }
        // queryService.mappingPriceSpec(queryIBEDetail, customerType, agent);
+        return queryIBEDetail;
+    }
+
+    //外采pnr内容解析
+    @Override
+    public QueryIBEDetail outSourcePnrMapping(RequestWithActor<String> flightQueryRequest, String customerType) {
+        String flightQuery = flightQueryRequest.getEntity();
+        log.info("查询参数：" + JsonUtil.toJson(flightQuery));
+        Agent agent = flightQueryRequest.getAgent();
+        if (null == agent) {
+            return null;
+        }
+        QueryIBEDetail queryIBEDetail = null;
+        try{
+            PnrOutPut pnr = getPnrService.getOutsourceRaw(office,CommenUtil.decodeHtml(flightQuery));
+            log.info("国际机票外采PNR内容预定返回原始信息：" + JsonUtil.toJson(pnr));
+            queryIBEDetail = getPnrByQueryIBEDetail(pnr);
+            getFSI(queryIBEDetail);
+        }catch (Exception e){
+            log.info("外采pnr内容匹配出错", e);
+        }
         return queryIBEDetail;
     }
 

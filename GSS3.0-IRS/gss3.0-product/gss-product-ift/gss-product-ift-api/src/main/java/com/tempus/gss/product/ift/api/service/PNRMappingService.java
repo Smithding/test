@@ -13,6 +13,8 @@ public interface PNRMappingService {
     QueryIBEDetail pnrMapping(RequestWithActor<String> flightQueryRequest, String customerType);
     
     QueryIBEDetail contentPnrMapping(RequestWithActor<String> flightQueryRequest, String customerType);
+    //外采pnr内容解析
+    QueryIBEDetail outSourcePnrMapping(RequestWithActor<String> flightQueryRequest, String customerType);
     
     /**
      * 验证PNR是否可用
