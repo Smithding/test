@@ -105,7 +105,7 @@ public class HolPayNoticeListener {
     		        		  OrderPayResult orderPay = bqyHotelInterService.orderPay(new OrderPayReq(Long.valueOf(hotelOrder.getHotelOrderNo())));
     		        		  logger.info("酒店订单8000Yi支付接口,返回值{}" + JSON.toJSONString(orderPay)); 
     		        		  if (orderPay.getReseult()) {		//bqy接口调用支付成功
-    		                    	//hotelOrder.setOrderStatus(OwnerOrderStatus.PAY_OK.getKey());
+    		                    	hotelOrder.setOrderStatus(OwnerOrderStatus.PAY_OK.getKey());
     	    		        		//hotelOrder.setResultCode("3");
     	    		        		//hotelOrder.setFactTotalPrice(new BigDecimal(orderPay.getPayPrice()));
     	    		        		hotelOrder.setTcOrderStatus(TcOrderStatus.ALREADY_PAY.getKey());
