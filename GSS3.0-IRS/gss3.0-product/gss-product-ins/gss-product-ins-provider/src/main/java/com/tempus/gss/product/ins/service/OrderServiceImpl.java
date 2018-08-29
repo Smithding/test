@@ -132,7 +132,7 @@ public class OrderServiceImpl implements IOrderService {
 	private static final String COMPANY_NAME_HUAXIA = "华夏";
 
 	private static final String COMPANY_NAME_JUNLONG = "君龙";
-	private static final String COMPANY_NAME_QIANHAICAI = "前海财";
+	private static final String COMPANY_NAME_QIANHAICAI = "前海";
 	private static final String RESPONSE_SUCCESS = "0000";
 	private static final String RETURN_ERROR_REFUND = "该订单已退款！不能重复此操作";
 	private static final String RETURN_ERROR_SURRENDER = "该订单已退保！不能重复此操作";
@@ -578,6 +578,9 @@ public class OrderServiceImpl implements IOrderService {
 				saleOrderDetail.setOwner(agent.getOwner());
 				saleOrderDetail.setCreateTime(new Date());
 				saleOrderDetail.setCreator(agent.getId().toString());
+				if(saleOrderDetail.getPremium().compareTo(BigDecimal.ZERO)==0){
+                    saleOrderDetail.setPremium(salePrice.multiply(new BigDecimal(saleOrderDetail.getInsuranceNum())));
+                }
 				saleOrderDetail.setIsReport("0");
 				saleOrderDetailDao.insertSelective(saleOrderDetail);
 			}
@@ -933,7 +936,7 @@ public class OrderServiceImpl implements IOrderService {
 				}else{
 					flightInfoVo.setFlightNo(InsureExtVo.getFlightInfoVo().getFlightNo());
 				}
-				if(insurance.getBuyWay() == 1&&insurance.getIsCivilServant() == 1&&(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo()!=null||"".equals(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo()))){
+				if(insurance.getBuyWay() == 1&&insurance.getIsCivilServant() == 1&&!"".equals(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo())&&saleOrderExt.getSaleOrderDetailList().get(0).getBillNo()!=null){
 					insureRequestVo.setPolicyType((short)2);//设置为行程单保险
 					flightInfoVo.setBillNo(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo());
 				}else{
@@ -1194,7 +1197,7 @@ public class OrderServiceImpl implements IOrderService {
 			StringBuffer insureNoArray = new StringBuffer();
 			// 对被保人循环进行投保操作
 			for (SaleOrderDetail saleOrderDetail : saleOrderDetailList){
-				if(saleOrderDetail.getStatus()==2 || saleOrderDetail.getStatus()==3){
+				if(saleOrderDetail.getStatus()==2 || saleOrderDetail.getStatus()==3 || saleOrderDetail.getStatus()==10){
 					continue;
 				}
 					List<SaleOrderDetail> saleOrderDetails = new ArrayList<SaleOrderDetail>();

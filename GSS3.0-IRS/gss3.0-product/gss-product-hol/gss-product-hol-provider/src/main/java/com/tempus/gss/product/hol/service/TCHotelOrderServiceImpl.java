@@ -2038,6 +2038,23 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		hotelErrorOrderMapper.insertSelective(holErrorOrder);
 	}
 
-
+	@Override
+	public Boolean updateBQYPayOrderStatus(Agent agent, Long saleOrderNo)throws GSSException{
+		logger.info("BQY酒店订单支付成功后修改本地订单状态入参："+saleOrderNo);
+		HotelOrder hotelOrder = null;
+		try {
+			hotelOrder = getHotelOrderDetail(agent, saleOrderNo);
+			if (hotelOrder != null) {
+				hotelOrder.setOrderStatus(OwnerOrderStatus.PAY_OK.getKey());
+				hotelOrderMapper.updateById(hotelOrder);
+				logger.info("BQY酒店订单支付成功后修改本地订单状态成功："+saleOrderNo);
+			}else{
+				throw new GSSException("支付成功修改订单", "0399", "支付成功修改订单异常");
+			}
+		} catch (GSSException e) {
+			throw new GSSException("支付成功修改订单", "0399", "支付成功修改订单异常"+e.getMessage());
+		}
+		return true;
+	}
 	
 }

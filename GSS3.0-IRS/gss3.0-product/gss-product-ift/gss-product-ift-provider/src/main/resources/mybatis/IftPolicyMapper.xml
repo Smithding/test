@@ -102,6 +102,21 @@
 	    <result column="RTN_NOTSUIT_CYCLE" property="rtnNotsuitCycle"  />
 	    <result column="FLY_NOTSUIT_DATE" property="flyNotsuitDate"  />
 	    <result column="RTN_NOTSUIT_DATE" property="rtnNotsuitDate"  />
+	    <result column="DEPART_CONTINENT" property="departContinent"  />
+	    <result column="DEPART_COUNTRY" property="departCountry"  />
+    	<result column="DEPART_EXCLUDE_COUNTRY" property="departExcludeCountry"  />
+    	<result column="DEPART_AIRPORT" property="departAirport"  />
+    	<result column="DEPART_EXCLUDE_AIRPORT" property="departExcludeAirport"  />
+    	<result column="TRANSIT_CONTINENT" property="transitContinent"  />
+    	<result column="TRANSIT_COUNTRY" property="transitCountry"  />
+    	<result column="TRANSIT_EXCLUDE_COUNTRY" property="transitExcludeCountry"  />
+    	<result column="TRANSIT_AIRPORT" property="transitAirport"  />
+    	<result column="TRANSIT_EXCLUDE_AIRPORT" property="transitExcludeAirport"  />
+    	<result column="ARRIVE_CONTINENT" property="arriveContinent"  />
+    	<result column="ARRIVE_COUNTRY" property="arriveCountry"  />
+    	<result column="ARRIVE_EXCLUDE_COUNTRY" property="arriveExcludeCountry"  />
+    	<result column="ARRIVE_AIRPORT" property="arriveAirport"  />
+    	<result column="ARRIVE_EXCLUDE_AIRPORT" property="arriveExcludeAirport"  />
 	    <result column="REMARK" property="remark"  />
 	    <result column="STATUS" property="status"  />
 	    <result column="CREATOR" property="creator"  />
@@ -127,9 +142,9 @@
 	    SHARE_ASSIGN_REWARD, SHARE_LEG_REWARD, SHARE_IS_SUIT_AIRLINE, SHARE_SUIT_AIRLINE, 
 	    IS_MIX_CABIN, MIX_CABIN_TYPE, IS_TOUR_CODE_INCLUDE_TEXT, TOUR_CODE_INCLUDE_TEXT, 
 	    TOUR_CODE_NO_AGENCY, TOUR_CODE_NO_REWARD, TOUR_CODE_CONTENT, IS_ROUND_TRIP_INCLUDE_CABIN, 
-	    ROUND_TRIP_INCLUDE_CABIN, IS_PAR_LIMIT, PAR_LIMIT, FARE_Q_AGENCY, FARE_Q_REWARD,
-	    DEPART_COUNTRY, DEPART_EXCLUDE_COUNTRY, DEPART_AIRPORT, DEPART_EXCLUDE_AIRPORT, TRANSIT_COUNTRY, 
-	    TRANSIT_EXCLUDE_COUNTRY, TRANSIT_AIRPORT, TRANSIT_EXCLUDE_AIRPORT, ARRIVE_COUNTRY, 
+	    ROUND_TRIP_INCLUDE_CABIN, IS_PAR_LIMIT, PAR_LIMIT, FARE_Q_AGENCY, FARE_Q_REWARD, DEPART_CONTINENT,
+	    DEPART_COUNTRY, DEPART_EXCLUDE_COUNTRY, DEPART_AIRPORT, DEPART_EXCLUDE_AIRPORT, TRANSIT_CONTINENT, TRANSIT_COUNTRY, 
+	    TRANSIT_EXCLUDE_COUNTRY, TRANSIT_AIRPORT, TRANSIT_EXCLUDE_AIRPORT, ARRIVE_CONTINENT, ARRIVE_COUNTRY, 
 	    ARRIVE_EXCLUDE_COUNTRY, ARRIVE_AIRPORT, ARRIVE_EXCLUDE_AIRPORT,  
 	    FARE_S_AGENCY, FARE_S_REWARD, IS_FARE_INCLUDE_TEXT, FARE_INCLUDE_TEXT, FARE_INCLUDE_TYPE, 
 	    IS_SUIT_FARE_BASE, SUIT_FARE_BASE, IS_FLY_SUIT_FLIGHT, FLY_SUIT_FLIGHT, IS_RTN_SUIT_FLIGHT, 
@@ -176,11 +191,11 @@
 	      FLY_NOTSUIT_DATE, RTN_NOTSUIT_DATE, REMARK, 
 	      STATUS, CREATOR, CREATE_TIME, 
 	      MODIFIER, MODIFY_TIME, VALID, 
-	      DEPART_COUNTRY, DEPART_EXCLUDE_COUNTRY, 
+	      DEPART_CONTINENT, DEPART_COUNTRY, DEPART_EXCLUDE_COUNTRY, 
 	      DEPART_AIRPORT, DEPART_EXCLUDE_AIRPORT, 
-	      TRANSIT_COUNTRY, TRANSIT_EXCLUDE_COUNTRY, 
+	      TRANSIT_CONTINENT, TRANSIT_COUNTRY, TRANSIT_EXCLUDE_COUNTRY, 
 	      TRANSIT_AIRPORT, TRANSIT_EXCLUDE_AIRPORT, 
-	      ARRIVE_COUNTRY, ARRIVE_EXCLUDE_COUNTRY, 
+	      ARRIVE_CONTINENT, ARRIVE_COUNTRY, ARRIVE_EXCLUDE_COUNTRY, 
 	      ARRIVE_AIRPORT, ARRIVE_EXCLUDE_AIRPORT
 	      )
 	    values (#{id}, #{owner}, #{name}, 
@@ -220,11 +235,11 @@
 	      #{flyNotsuitDate}, #{rtnNotsuitDate}, #{remark}, 
 	      #{status}, #{creator}, #{createTime}, 
 	      #{modifier}, #{modifyTime}, 1, 
-	      #{departCountry}, #{departExcludeCountry}, 
+	      #{departContinent}, #{departCountry}, #{departExcludeCountry}, 
 	      #{departAirport}, #{departExcludeAirport}, 
-	      #{transitCountry}, #{transitExcludeCountry}, 
+	      #{transitContinent}, #{transitCountry}, #{transitExcludeCountry}, 
 	      #{transitAirport}, #{transitExcludeAirport}, 
-	      #{arriveCountry}, #{arriveExcludeCountry}, 
+	      #{arriveContinent}, #{arriveCountry}, #{arriveExcludeCountry}, 
 	      #{arriveAirport}, #{arriveExcludeAirport}
 	      )
     </insert>
@@ -234,4 +249,48 @@
     	<include refid="Base_Column_List" /> 
     	FROM IFT_POLICY_NEW WHERE ID = #{policyId} AND OWNER = #{owner} AND VALID = 1
     </select>
+    
+    <sql id="queryWhere">
+    	<if test="null != policyId">	AND T1.ID=#{policyId} </if>
+    	<if test="null != flightType">	AND T1.FLIGHT_TYPE=#{flightType} </if>
+    	<if test="null != airline &amp;&amp; '' != airline">	AND T1.AIRLINE=#{airline} </if>
+    	<if test="null != departAirport &amp;&amp; '' != departAirport">	AND T1.DEPART_AIRPORT like '%${departAirport}%' </if>
+    	<if test="null != arriveAirport &amp;&amp; '' != arriveAirport">	AND T1.ARRIVE_AIRPORT like '%${arriveAirport}%' </if>
+    	<if test="null != source &amp;&amp; '' != source">	AND T1.SOURCE=#{source} </if>
+    	<if test="null != voyageType &amp;&amp; '' != voyageType">	AND T1.VOYAGE_TYPE=#{voyageType} </if>
+    	<if test="null != status ">	AND T1.STATUS=#{status} </if>
+    	<if test="null != cabin &amp;&amp; '' != cabin">	AND T1.DEPART_CABIN like '%${cabin}%' </if>
+    	<if test="null != ticketOffice &amp;&amp; '' != ticketOffice">	AND T1.TICKET_OFFICE like '%${ticketOffice}%' </if>
+    	<if test="null != autoTicket">	AND T1.AUTO_TICKET=#{autoTicket} </if>
+    	<if test="null != ticketWay &amp;&amp; '' != ticketWay">	AND T1.TICKET_WAY=#{ticketWay} </if>
+    	<if test="null != name &amp;&amp; '' != name">	AND T1.NAME=#{name} </if>
+    	<if test="null != pnrTicketType">	AND T1.PNR_TICKET_TYPE=#{pnrTicketType} </if>
+    	<if test=" null != policyStartDate">
+			AND T1.FLY_START_DATE &gt;= #{policyStartDate}
+		</if>
+		<if test=" null != policyEndDate">
+			AND T1.FLY_END_DATE &lt;= #{policyEndDate}
+		</if>
+    </sql>
+    
+    <select id="query" parameterType="com.tempus.gss.product.ift.api.entity.policy.IftPolicyQuery" resultType="java.lang.Long">
+		SELECT DISTINCT T1.ID
+		FROM IFT_POLICY_NEW T1 WHERE T1.VALID=1 AND T1.OWNER= #{owner} 
+		<include refid="queryWhere"/>
+		ORDER BY T1.CREATE_TIME DESC
+	</select>
+	
+	<update id="setInvalid">
+		UPDATE IFT_POLICY_NEW
+			SET VALID=0, MODIFIER=#{modifier}, MODIFY_TIME=#{modifyTime}
+		WHERE ID=#{policyId} AND OWNER=#{owner} AND VALID=1
+	</update>
+	
+	<update id="changeStatus">
+		UPDATE IFT_POLICY_NEW
+			SET STATUS=#{status}, MODIFIER=#{modifier}, MODIFY_TIME=#{modifyTime}
+		WHERE ID IN
+		<foreach collection="policyIds" item="policyId" index="index" open="( " separator=", " close=" ) ">${policyId}</foreach>
+		AND OWNER=#{owner} AND VALID=1
+	</update>
 </mapper>

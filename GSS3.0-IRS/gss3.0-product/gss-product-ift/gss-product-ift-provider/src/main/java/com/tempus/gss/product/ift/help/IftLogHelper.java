@@ -1,5 +1,15 @@
 package com.tempus.gss.product.ift.help;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.tempus.gss.log.entity.LogRecord;
@@ -7,14 +17,6 @@ import com.tempus.gss.log.service.ILogService;
 import com.tempus.gss.system.entity.User;
 import com.tempus.gss.system.service.IUserService;
 import com.tempus.gss.vo.Agent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service(value = "ift.IftLogHelper")
 public class IftLogHelper {
@@ -63,7 +65,7 @@ public class IftLogHelper {
         log.setTitle(title);
         log.setDesc(desc);
         log.setCreateTime(new Date());
-        log.setOptLoginName(agent.getAccount());
+        log.setOptLoginName(user==null?"sys":user.getName());
         log.setRequestIp(agent.getIp());
         try {
             logService.insert(log);
@@ -92,6 +94,41 @@ public class IftLogHelper {
             logger.error("记录操作日志异常",e);
         }
     }
+    
+    /**
+	 * 批量记录操作日志
+	 * 
+	 * @param agent 终端信息
+	 * @param no 订单ID或NO
+	 * @param title 操作标题
+	 * @param desc 操作内容
+	 */
+	public static void loggerList(Agent agent, String title, String desc, Long... ids) {
+		User user = null;
+        try{
+            user = userService.findUserByLoginName(agent, agent.getAccount());
+        }catch(Exception e){
+        }
+		if (null != ids && ids.length > 0) {
+			for (Long id : ids) {
+				LogRecord log = new LogRecord();
+				log.setId(IdWorker.getId());
+				log.setAppCode(APPCODE);
+				log.setBizCode(BIZCODE);
+				log.setBizNo(String.valueOf(id));
+				log.setTitle(title);
+				log.setDesc(desc);
+				log.setCreateTime(new Date());
+				log.setOptLoginName(user==null?"sys":user.getName());
+				log.setOptType("create");
+				try {
+					logService.insert(log);
+				} catch (Exception e) {
+					logger.info(id + "记录操作日志异常");
+				}
+			}
+		}
+	}
 
 }
 

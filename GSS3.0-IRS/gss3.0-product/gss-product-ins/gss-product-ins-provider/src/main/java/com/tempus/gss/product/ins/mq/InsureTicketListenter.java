@@ -26,6 +26,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * 保险收到机票出票通知 进行投保操作
+ */
 @Component
 @RabbitListener(bindings = {
         @QueueBinding(value = @Queue(value = "ins.listenerDpsTicketedQue", durable = "true"),

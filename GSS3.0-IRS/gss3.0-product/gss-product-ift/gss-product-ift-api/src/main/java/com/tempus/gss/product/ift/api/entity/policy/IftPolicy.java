@@ -118,6 +118,9 @@ public class IftPolicy implements Serializable {
 	/** 行程类型：1国内始发，2直飞soto程，3国内始发Add-on，4国外始发Add-on，5境外到境外，6国内始发中转，7国外始发中转，8境外境外境外，9境外境内境外，10全球到全球，11全球中转全球 */
 	private Integer flightType;
 
+	/** 出发所属洲 */
+	private String departContinent;
+	
 	/** 出发国家，A00代表全球，CN0代表境内，CN1代表境外，国家多个以"/"分割 */
 	private String departCountry;
 
@@ -133,6 +136,9 @@ public class IftPolicy implements Serializable {
 	/** 出发舱位 */
 	private String departCabin;
 
+	/** 中转所属洲 */
+	private String transitContinent;
+	
 	/** 中转国家，A00代表全球，CN0代表境内，CN1代表境外，国家多个以"/"分割 */
 	private String transitCountry;
 
@@ -148,6 +154,9 @@ public class IftPolicy implements Serializable {
 	/** 中转舱位 */
 	private String transitCabin;
 
+	/** 到达所属洲 */
+	private String arriveContinent;
+	
 	/** 到达国家，A00代表全球，CN0代表境内，CN1代表境外，国家多个以"/"分割 */
 	private String arriveCountry;
 
@@ -639,6 +648,30 @@ public class IftPolicy implements Serializable {
 
 	public void setFlightType(Integer flightType) {
 		this.flightType = flightType;
+	}
+
+	public String getDepartContinent() {
+		return departContinent;
+	}
+
+	public void setDepartContinent(String departContinent) {
+		this.departContinent = departContinent;
+	}
+
+	public String getTransitContinent() {
+		return transitContinent;
+	}
+
+	public void setTransitContinent(String transitContinent) {
+		this.transitContinent = transitContinent;
+	}
+
+	public String getArriveContinent() {
+		return arriveContinent;
+	}
+
+	public void setArriveContinent(String arriveContinent) {
+		this.arriveContinent = arriveContinent;
 	}
 
 	public String getDepartCountry() {

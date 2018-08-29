@@ -317,5 +317,10 @@ public class HolStatement implements Serializable {
     @IsNum
     private BigDecimal rebatePrice;
 
+    /**
+     * 更新时间
+     */
+    private Date updateDate;
+
 }
 

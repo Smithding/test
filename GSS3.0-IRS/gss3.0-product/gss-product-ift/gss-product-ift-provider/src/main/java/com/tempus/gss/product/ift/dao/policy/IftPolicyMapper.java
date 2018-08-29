@@ -1,9 +1,14 @@
 package com.tempus.gss.product.ift.dao.policy;
 
+import java.util.Date;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.session.RowBounds;
 
 import com.baomidou.mybatisplus.mapper.AutoMapper;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
+import com.tempus.gss.product.ift.api.entity.policy.IftPolicyQuery;
 
 /**
  * 
@@ -39,4 +44,32 @@ public interface IftPolicyMapper extends AutoMapper<IftPolicy> {
 	 * @return IftPolicy 政策详情
 	 */
 	IftPolicy find(@Param("owner") int owner,  @Param("policyId") long policyId);
+	
+	/**
+	 *  分页查询国际政策数据
+	 * 
+	 * @param page 分页信息
+	 * @param query 查询条件
+	 * @return List<Long> 国际政策ID集合
+	 */
+	List<Long> query(RowBounds page, IftPolicyQuery query);
+	
+	/**
+	 * 设置国际政策为无效
+	 * 
+	 * @param owner 归集信息
+	 * @param policyId 国际政策ID
+	 * @return int 修改行数记录
+	 */
+	int setInvalid(@Param("owner") int owner, @Param("policyId") long policyId, @Param("modifier") String modifier, @Param("modifyTime") Date modifyTime);
+	
+	/**
+	 * 	修改国际政策状态
+	 * 
+	 * @param owner 归集信息
+	 * @param policyIds 国际政策ID集合
+	 * @param status 状态
+	 * @return int 修改行数记录 
+	 */
+	int changeStatus(@Param("owner") int owner,  @Param("policyIds") Long[] policyIds, @Param("status") int status, @Param("modifier") String modifier, @Param("modifyTime") Date modifyTime);
 }

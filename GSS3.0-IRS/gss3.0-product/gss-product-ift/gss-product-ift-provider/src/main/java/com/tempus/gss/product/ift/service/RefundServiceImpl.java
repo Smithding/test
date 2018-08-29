@@ -1922,6 +1922,7 @@ public class RefundServiceImpl implements IRefundService {
 	public void auditWasteTicket(RequestWithActor<WasteAuditPramaVo> request) throws GSSException {
 		Agent agent = request.getAgent();
 		WasteAuditPramaVo entity = request.getEntity();
+		log.info("销售废票审核开始："+entity.toString());
 		String changeRemark = entity.getChangeRemark();
 		PassengerRefundPriceVo passengerRefundPriceVo = entity.getPassengerRefundPriceVo();
 		Long saleChangeNo = entity.getSaleChangeNo();
@@ -1994,6 +1995,7 @@ public class RefundServiceImpl implements IRefundService {
 					refundService.assignBuyWaste(saleChangeRequest);
 				}
 			}
+			log.info("废票销售审核结束。");
 		} catch (Exception e){
 			log.error("废票销售审核异常："+e);
 			throw new GSSException("废票销售审核异常:" + e, "0002", "废票销售审核异常");
@@ -2004,6 +2006,7 @@ public class RefundServiceImpl implements IRefundService {
 	public void auditRefundTicket(RequestWithActor<WasteAuditPramaVo> request) throws GSSException {
 		Agent agent = request.getAgent();
 		WasteAuditPramaVo entity = request.getEntity();
+		log.info("销售退票审核开始："+entity.toString());
 		String changeRemark = entity.getChangeRemark();
 		PassengerRefundPriceVo passengerRefundPriceVo = entity.getPassengerRefundPriceVo();
 		Long saleChangeNo = entity.getSaleChangeNo();
@@ -2092,6 +2095,7 @@ public class RefundServiceImpl implements IRefundService {
 					ticketSenderService.updateByLockerId(agent,locker,"SALE_REFUSE_NUM");
 				}
 			}
+			log.info("退票销售审核结束。");
 		} catch (Exception e) {
 			log.error("退票销售审核异常",e);
 			throw new GSSException("退票销售审核异常:" + e, "0002", "退票销售审核异常");

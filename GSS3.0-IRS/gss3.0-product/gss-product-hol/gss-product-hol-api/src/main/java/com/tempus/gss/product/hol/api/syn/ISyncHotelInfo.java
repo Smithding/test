@@ -58,5 +58,5 @@ public interface ISyncHotelInfo {
 	 */
 	void pullBQYHotelInfo();
 	
-	Map<String, Object> queryBackOrderDetail(Agent agent,String hotelOrderNo , Long saleOrderNo) throws GSSException;
+	Map<String, Object> queryBackOrderDetail(Agent agent,String hotelOrderNo , Long saleOrderNo, Long supplierNo) throws GSSException;
 }
