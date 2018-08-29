@@ -292,7 +292,10 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			}
 			//子订单号
 			Long orderId = bqyPushOrderInfo.getOrderId();
-			HotelOrder hotelOrder = hotelOrderMapper.getOrderByNo(String.valueOf(orderNumber));
+			//HotelOrder hotelOrder = hotelOrderMapper.getOrderByNo(String.valueOf(orderNumber));
+			HotelOrder queryHotelOrder = new HotelOrder();
+			queryHotelOrder.setHotelOrderNo(String.valueOf(orderNumber));
+			HotelOrder hotelOrder = hotelOrderMapper.selectOne(queryHotelOrder);
 			if (null == hotelOrder) {
 				logger.info("bqy订单推送,查询订单为空,没有该订单!");
 				throw new GSSException("更新状态信息异常", "0200", "查询订单为空,没有该订单!");
@@ -309,7 +312,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 	 		TcOrderStatus pushOrderStatus = bqyPushOrderInfo.getChangeStatus();
 			if (pushOrderStatus.getKey().equals(TcOrderStatus.ALREADY_TC_CONFIRM.getKey())) {	//订单确认
 				if(!orderStatus.equals(OwnerOrderStatus.ALREADY_CONRIRM.getKey())) {
-					if (OwnerOrderStatus.PAY_OK.equals(orderStatus)) {
+					if (OwnerOrderStatus.PAY_OK.getKey().equals(orderStatus)) {
 						//改变订单状态
 						des = changeOrderStatus(agent, orderId, hotelOrder, orderStatus, OwnerOrderStatus.ALREADY_CONRIRM, TcOrderStatus.ALREADY_TC_CONFIRM);
 						//更新数据库
@@ -749,7 +752,8 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		hotelOrder.setGuestName(passengers);
 		hotelOrder.setGuestMobile(orderReq.getMobile());
 		hotelOrder.setDbCancelRule(policyType);			//取消政策类型
-		hotelOrder.setSupPriceName(roomInfo.getRoomTypeName()); //房型
+		hotelOrder.setSupPriceName(roomInfo.getRoomName()); //房间名称
+		hotelOrder.setProName(roomInfo.getRoomTypeName()); //房型名称
 		if (StringUtil.isNotNullOrEmpty(orderCreateReq.getOrderRemark())) {
 			hotelOrder.setRemark(orderCreateReq.getOrderRemark());
 		}
