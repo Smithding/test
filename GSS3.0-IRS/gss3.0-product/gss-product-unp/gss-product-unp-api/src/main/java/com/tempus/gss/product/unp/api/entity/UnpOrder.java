@@ -107,6 +107,14 @@ public class UnpOrder implements Serializable {
     
     /** 创建者 */
     private String creator;
+    /**
+     * 采购支付账号
+     */
+    private String buyAccount;
+    /**
+     * 采购支付方式
+     */
+    private String buyPayWay;
     
     /** 创建时间 */
     private Date createTime;
@@ -153,6 +161,24 @@ public class UnpOrder implements Serializable {
     
     public String getOfflinePayer() {
         return offlinePayer;
+    }
+    
+    public String getBuyAccount() {
+        return buyAccount;
+    }
+    
+    public UnpOrder setBuyAccount(String buyAccount) {
+        this.buyAccount = buyAccount;
+        return this;
+    }
+    
+    public String getBuyPayWay() {
+        return buyPayWay;
+    }
+    
+    public UnpOrder setBuyPayWay(String buyPayWay) {
+        this.buyPayWay = buyPayWay;
+        return this;
     }
     
     public void setOfflinePayer(String offlinePayer) {
