@@ -162,7 +162,7 @@ public class NewIftPolicyDataServiceImpl implements NewIftPolicyDataService {
 		for (AreaInfo areaInfo : areaInfos) {
 			// 封装州的数据实体类
 			States states = new States();
-			states.setKey(areaInfo.getAreaCode());
+			states.setKey(areaInfo.getAreaCode().replaceAll(" ",""));
 			states.setLabel(areaInfo.getAreaName());
 			listStates.add(states);
 			// 获取所有的区集合
