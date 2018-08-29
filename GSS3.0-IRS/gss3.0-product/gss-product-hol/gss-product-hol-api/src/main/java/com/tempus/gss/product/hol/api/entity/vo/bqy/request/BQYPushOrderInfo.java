@@ -2,8 +2,10 @@ package com.tempus.gss.product.hol.api.entity.vo.bqy.request;
 
 import java.io.Serializable;
 
-import com.alibaba.fastjson.annotation.JSONField;
+//import com.alibaba.fastjson.annotation.JSONField;
 import com.tempus.gss.product.hol.api.entity.response.tc.TcOrderStatus;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * 
@@ -17,22 +19,22 @@ public class BQYPushOrderInfo implements Serializable {
 	/**
 	 * 酒店订单号
 	 */
-	@JSONField(name="OrderNumber")
+	@JsonProperty(value="OrderNumber")
 	private Long orderNumber;
 
 	/**
 	 * 总订单号
 	 */
-	@JSONField(name="OrderId")
+	@JsonProperty(value="OrderId")
 	private Long orderId;
 	
-	@JSONField(name="ChangeStatus")
+	@JsonProperty(value="ChangeStatus")
 	private Integer changeStatus;
 
 	/**
 	 * 订单类型 (2.酒店订单)
 	 */
-	@JSONField(name="OrderType")
+	@JsonProperty(value="OrderType")
 	private Integer orderType;
 
 	public Long getOrderId() {
