@@ -20,6 +20,8 @@
        UO.BUY_CHANNEL_TYPE AS buyChannelType,
        UO.BUY_PRICE        AS buyPrice,
        UO.BUY_PAY_STATUS   AS buyPayStatus,
+       UO.BUY_ACCOUNT   AS buyAccount,
+       UO.BUY_PAYWAY   AS buyPayWay,
        UO.BUY_PAY_AMOUNT   AS buyPayAmount,
        UO.BUY_PAY_TIME     AS buyPayTime,
        UO.STATUS AS status,
