@@ -63,6 +63,8 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 
 	@Override
 	public Page<IftPolicy> search(Agent agent, Page<IftPolicy> page, IftPolicyQuery query) {
+		
+		query.setOwner(agent.getOwner());
 		// 调用底层先分页查询出符合国际政策ID列表
 		List<Long> ids = iftPolicyMapper.query(page, query);
 		// 根据国际政策ID列表循环拉取国际政策的详细
@@ -104,6 +106,13 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 	public boolean changeStatus(Agent agent, Integer status, Long... policyIds) {
 		Date modifyTime = new Date(System.currentTimeMillis());
 		int count = iftPolicyMapper.changeStatus(agent.getOwner(), policyIds, status, agent.getAccount(), modifyTime);
+		return count > 0 ? true:false;
+	}
+	
+	@Override
+	public boolean delete(Agent agent, Long... policyIds) {
+		Date modifyTime = new Date(System.currentTimeMillis());
+		int count = iftPolicyMapper.delete(agent.getOwner(), policyIds, agent.getAccount(), modifyTime);
 		return count > 0 ? true:false;
 	}
 	
