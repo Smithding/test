@@ -45,7 +45,7 @@ public class HotelOrderInfo implements Serializable {
 	@JSONField(name="BedType")
 	private String bedType;					//床型
 	
-	@JSONField(name="BookingTime")
+	@JSONField(name="BookingTime", format = "yyyy-MM-dd HH:mm:ss")
 	private Date bookingTime;				//预定时间
 	
 	@JSONField(name="BookingUserId")
@@ -66,10 +66,10 @@ public class HotelOrderInfo implements Serializable {
 	@JSONField(name="CancelNotice")
 	private String cancelNotice;			//取消政策
 	
-	@JSONField(name="CheckInDate")
+	@JSONField(name="CheckInDate", format = "yyyy-MM-dd HH:mm:ss")
 	private Date checkInDate;				//入住时间
 	
-	@JSONField(name="CheckOutDate")
+	@JSONField(name="CheckOutDate", format = "yyyy-MM-dd HH:mm:ss")
 	private Date checkOutDate;				//离店时间
 	
 	@JSONField(name="CityId")

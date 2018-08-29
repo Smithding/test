@@ -393,8 +393,8 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		return true;
 	}
 
-    @Override
-    public Future<OrderInfomationDetail> futureOrderDetailInfo(Agent agent, String hotelOrderNo) {
+	@Override
+	public Future<OrderInfomationDetail> futureOrderDetailInfo(Agent agent, String hotelOrderNo) {
 		OrderPayReq orderReq = new OrderPayReq();
 		orderReq.setOrderNumber(Long.valueOf(hotelOrderNo));
 		HotelOrderInfo hotelOrderInfo = bqyHotelInterService.orderDetail(orderReq);
@@ -408,24 +408,40 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			PassengerModel passengerModel = new PassengerModel();
 			passengerModel.setName(hotelOrderInfo.getGuestName());
 			orderInfo.setPassengers(Arrays.asList(passengerModel));//Arrays.asList(hotelOrderInfo.getGuestName())
-			orderInfo.setStartTime(sdf.format(hotelOrderInfo.getCheckInDate()));
-			orderInfo.setEndTime(sdf.format(hotelOrderInfo.getCheckOutDate()));
+
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			/*orderInfo.setStartTime(format.format(hotelOrderInfo.getCheckInDate()));
+			orderInfo.setEndTime(format.format(hotelOrderInfo.getCheckOutDate()));*/
+			/*String checkInDate = hotelOrderInfo.getCheckInDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+			String checkOutDate = hotelOrderInfo.getCheckOutDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));*/
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+			String checkInDate = simpleDateFormat.format(hotelOrderInfo.getCheckInDate());
+			String checkOutDate = simpleDateFormat.format(hotelOrderInfo.getCheckOutDate());
+			orderInfo.setStartTime(checkInDate);
+			orderInfo.setEndTime(checkOutDate);
 
 			ResourceModel resourceModel = new ResourceModel();
 			resourceModel.setResourceId(hotelOrderInfo.getHotelId());
 			resourceModel.setName(hotelOrderInfo.getHotelName());
 			resourceModel.setProductName(hotelOrderInfo.getProductName());
 			resourceModel.setType("0");
+			resourceModel.setPriceFraction(hotelOrderInfo.getBookNumber());
+			resourceModel.setRemark(hotelOrderInfo.getSpecial());
+			orderInfo.setResources(Arrays.asList(resourceModel));
 
 			//resourceModel.setArrivalTime(hotelOrderInfo.getArriveDate()); //到店时间
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			orderInfo.setLasestCancelTime(format.format(hotelOrderInfo.getArriveDate())); //到店时间
 
 
-			CountModel countModel = new CountModel();
-			countModel.setRoomCount(hotelOrderInfo.getBookNumber());
-			orderInfo.setCounts(countModel);
-
+			try {
+				CountModel countModel = new CountModel();
+				int daysBetween = com.tempus.gss.product.hol.api.util.DateUtil.daysBetween2(checkInDate, checkOutDate);
+				countModel.setRoomCount(hotelOrderInfo.getBookNumber() * daysBetween);
+				orderInfo.setCounts(countModel);
+			} catch (ParseException e) {
+				logger.error("计算两日期天数出错!");
+				throw new GSSException("计算日期天数","0112", "计算两日期天数出错!");
+			}
 			orderInfo.setOrigin(hotelOrderInfo.getPayPrice());
 
 			Integer orderStatus = hotelOrderInfo.getStatus(); //订单状态
