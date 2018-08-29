@@ -20,5 +20,6 @@ public interface UnpItemTypeMapper {
     int updateByPrimaryKeySelective(UnpItemType record);
     
     int updateSelective(UnpItemType record, UnpItemType param);
-    
+
+    List<UnpItemType> queryAllItems();
 }
