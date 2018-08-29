@@ -14,22 +14,26 @@ public class BQYPushOrderInfo implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@JSONField(name="Ordernumber")
-	private Long ordernumber;
-	
+	/**
+	 * 酒店订单号
+	 */
+	@JSONField(name="OrderNumber")
+	private Long orderNumber;
+
+	/**
+	 * 总订单号
+	 */
 	@JSONField(name="OrderId")
 	private Long orderId;
 	
-	@JSONField(name="OrderStatus")
-	private Integer orderStatus;
+	@JSONField(name="ChangeStatus")
+	private Integer changeStatus;
 
-	public Long getOrdernumber() {
-		return ordernumber;
-	}
-
-	public void setOrdernumber(Long ordernumber) {
-		this.ordernumber = ordernumber;
-	}
+	/**
+	 * 订单类型 (2.酒店订单)
+	 */
+	@JSONField(name="OrderType")
+	private Integer orderType;
 
 	public Long getOrderId() {
 		return orderId;
@@ -39,13 +43,28 @@ public class BQYPushOrderInfo implements Serializable {
 		this.orderId = orderId;
 	}
 
-	public TcOrderStatus getOrderStatus() {
-		return TcOrderStatus.bqyKey(String.valueOf(this.orderStatus));
-		//return orderStatus;
+	public TcOrderStatus getChangeStatus() {
+		return TcOrderStatus.bqyKey(String.valueOf(this.changeStatus));
 	}
 
-	public void setOrderStatus(Integer orderStatus) {
-		this.orderStatus = orderStatus;
+	public void setChangeStatus(Integer changeStatus) {
+		this.changeStatus = changeStatus;
 	}
-	
+
+	public Long getOrderNumber() {
+		return orderNumber;
+	}
+
+	public void setOrderNumber(Long orderNumber) {
+		this.orderNumber = orderNumber;
+	}
+
+	public Integer getOrderType() {
+		return orderType;
+	}
+
+	public void setOrderType(Integer orderType) {
+		this.orderType = orderType;
+	}
+
 }

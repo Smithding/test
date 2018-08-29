@@ -120,7 +120,7 @@ public class IftOrderRePayServiceImpl implements IIftOrderRePayService {
         certificateCreateVO.setPayType(2);//1 在线支付 2 帐期或代付 3 线下支付
         certificateCreateVO.setChannel("SALE");
         certificateCreateVO.setServiceLine("1");
-        certificateCreateVO.setProductType(ProductType.IFT_TICKET);
+        certificateCreateVO.setProductType(ProductType.INTERNATIONAL_AIR_TICKET);
         certificateCreateVO.setDetailPayWay(DetailPayWay.NORMAL);
         if (planInfoSearchVO != null) {
             //更新销售应收应付
@@ -147,7 +147,7 @@ public class IftOrderRePayServiceImpl implements IIftOrderRePayService {
         //  this.createBuyCertificate(AgentUtil.getAgent(), buychange.getBuyChangeNo(), buychange.getPlanAmount().doubleValue(), changePrice.getAccountNo(), supplier.getSupplierNo(), supplier.getCustomerTypeNo(), 3, 2000003, "BUY", thirdBusNo, changePrice.getDealNo());
         //(Agent agent, long buyOrderNo, double payAmount, long payAccount, long customerNo, long customerTypeNo, int payType, int payWay, String channel, String thirdBusNo, String thirdPayNo) {
         //重新合计金额变大 重新支付金额
-        if (result.doubleValue() > 0) {
+        if (result.doubleValue() >= 0) {
             certificateCreateVO.setIncomeExpenseType(1);//收支类型 1 收，2 为支
             logger.info("销售审核后再次支付:" + certificateCreateVO.toString());
             businessOrderInfo.setActualAmount(result);

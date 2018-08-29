@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import com.tempus.gss.product.hol.api.service.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,10 +54,6 @@ import com.tempus.gss.product.hol.api.entity.response.tc.ResBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfo;
 import com.tempus.gss.product.hol.api.entity.response.tc.ResProBaseInfos;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.HotelId;
-import com.tempus.gss.product.hol.api.service.IBQYHotelInterService;
-import com.tempus.gss.product.hol.api.service.IBQYHotelSupplierService;
-import com.tempus.gss.product.hol.api.service.IHolProfitService;
-import com.tempus.gss.product.hol.api.service.IHolSupplierService;
 import com.tempus.gss.product.hol.api.syn.ISyncHotelInfo;
 import com.tempus.gss.product.hol.api.syn.ITCHotelInterService;
 import com.tempus.gss.product.hol.api.syn.ITCHotelOrderService;
@@ -70,7 +67,7 @@ import com.tempus.gss.vo.Agent;
 
 @Service
 public class SyncHotelInfoImpl implements ISyncHotelInfo {
-	protected final transient Logger logger = LogManager.getLogger(TCHotelSupplierServiceImpl.class);
+	protected final transient Logger logger = LogManager.getLogger(SyncHotelInfoImpl.class);
 	@Autowired
 	private ITCHotelSupplierService tcHotelSupplierService;
 	
@@ -82,7 +79,10 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	
 	@Autowired
 	private IBQYHotelInterService bqyHotelInterService;
-	
+
+	@Autowired
+	private IBQYHotelOrderService bqyHotelOrderService;
+
 	@Autowired
 	private MongoTemplate mongoTemplate1;
 	
@@ -977,16 +977,23 @@ public class SyncHotelInfoImpl implements ISyncHotelInfo {
 	}
 
 	@Override
-	public Map<String, Object> queryBackOrderDetail(Agent agent,String hotelOrderNo, Long saleOrderNo) throws GSSException{
+	public Map<String, Object> queryBackOrderDetail(Agent agent,String hotelOrderNo, Long saleOrderNo, Long supplierNo) throws GSSException{
 		Map<String, Object> map = Maps.newConcurrentMap();
 		try {
 			 
 			OrderDetailInfoReq orderDetailInfoReq=new OrderDetailInfoReq();
 			orderDetailInfoReq.setOrderId(hotelOrderNo);
-			Future<OrderInfomationDetail> futureorderDetailInfo = tcHotelOrderService.futureorderDetailInfo(agent, orderDetailInfoReq);
+			//判断供应商
+			Future<OrderInfomationDetail> futureorderDetailInfo = null;
+			String supplierCode = "tc";
+			if (411709261204150108L == supplierNo) {
+				futureorderDetailInfo = tcHotelOrderService.futureorderDetailInfo(agent, orderDetailInfoReq);
+			}else if (411805040103290132L == supplierNo) {
+				supplierCode = "bqy";
+				futureorderDetailInfo = bqyHotelOrderService.futureOrderDetailInfo(agent, hotelOrderNo);
+			}
 			Future<HotelOrder> futureOrderDetail = tcHotelOrderService.getFutureOrderDetail(agent, hotelOrderNo);
 			Future<List<LogRecord>> list = queryLogList(hotelOrderNo);
-			String supplierCode = "tc";
 			Future<HolSupplier> holSupplierFu = holSupplierService.queryFuBySupplierCode(supplierCode);
 			
 			HotelOrder hotelOrder = futureOrderDetail.get();

@@ -180,4 +180,11 @@ public interface ITCHotelOrderService {
 	 * @return
 	 */
 	public Boolean pushToBeforeShow(Agent agent, String orderNo);
+
+	/**
+	 * 支付成功后更新订单状态
+	 * @param saleOrderNo
+	 * @return
+	 */
+	public Boolean updateBQYPayOrderStatus(Agent agent, Long saleOrderNo) throws GSSException;
 }

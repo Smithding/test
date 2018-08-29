@@ -179,6 +179,12 @@ public class ResProBaseInfo implements Serializable{
 	 */
 	@JSONField(name = "FirPrice")
 	private Integer firPrice;
+
+	/**
+	 * 	与bqy的结算价
+	 */
+	@JSONField(serialize = false)
+	private BigDecimal settleFee;
 	/**
 	 * 用户输入的天数
 	 */
@@ -476,6 +482,12 @@ public class ResProBaseInfo implements Serializable{
 	public void setProMinInventory(Integer proMinInventory) {
 		this.proMinInventory = proMinInventory;
 	}
-	
-	
+
+	public BigDecimal getSettleFee() {
+		return settleFee;
+	}
+
+	public void setSettleFee(BigDecimal settleFee) {
+		this.settleFee = settleFee;
+	}
 }

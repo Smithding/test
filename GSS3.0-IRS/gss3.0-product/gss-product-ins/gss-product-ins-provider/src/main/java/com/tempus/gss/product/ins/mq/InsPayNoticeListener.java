@@ -156,7 +156,6 @@ public class InsPayNoticeListener {
 											}else{
 												Log.error("根据保单号查询保险变更拓展单失败！！");
 											}
-											
 										}catch(Exception e){
 											Log.error("保险变更拓展单更新失败！！"+e);
 										}
@@ -216,7 +215,7 @@ public class InsPayNoticeListener {
 						}
 //						saleService.pay(agent, businessNo);
 					}
-			}else if(payNoticeVO.getGoodsType() == 1){
+			}/*else if(payNoticeVO.getGoodsType() == 1){
 				logger.info("-------机票发生退款保险也退款-----收到消息--交易单:"+payNoticeVO.getTraNo());
 				//如果为机票付款信息则不进行处理
 				if("1".equals(incomeExpenseType)){
@@ -228,6 +227,10 @@ public class InsPayNoticeListener {
 				List<SaleOrderExt> saleOrderExtList =  orderService.querySaleOrderForTranSaction(requestWithActor);
 				//获取后台配置
 				String isRefund = paramService.getValueByKey("refund_or_cancel");
+				//如果后台没有设置refund_or_cancel  默认退保退款
+				if(isRefund == null){
+					isRefund = "1";
+				}
 				for(SaleOrderExt saleOrderExt:saleOrderExtList){
 					for (SaleOrderDetail saleOrderDetail : saleOrderExt.getSaleOrderDetailList()) {
 						String policyNo = saleOrderDetail.getPolicyNo();
@@ -237,7 +240,7 @@ public class InsPayNoticeListener {
 						policyNoList.add(policyNo);
 						orderCancelVo.setPolicyNoList(policyNoList);
 						requestWithActor2.setEntity(orderCancelVo);
-						requestWithActor2.setAgent(AgentUtil.getAgent());
+						requestWithActor2.setAgent(agent);
 						Boolean cancelResult = false;
 
 						try {
@@ -253,7 +256,7 @@ public class InsPayNoticeListener {
 						}
 					}
 				}
-			}
+			}*/
 
 		} catch (Exception ex) {
 			ex.printStackTrace();

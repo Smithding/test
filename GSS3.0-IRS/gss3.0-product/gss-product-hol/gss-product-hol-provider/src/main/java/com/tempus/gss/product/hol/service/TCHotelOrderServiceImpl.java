@@ -1653,6 +1653,8 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 				}else{
 					throw new GSSException("更新状态信息异常", "0191", "查询订单号为空");
 				}
+			}else{
+				throw new GSSException("更新状态信息异常", "0191", "入参为空或订单号为空");
 			}
 		} catch (Exception e) {			
 			logger.error("更新订单状态异常：",e);
@@ -2036,6 +2038,22 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 		hotelErrorOrderMapper.insertSelective(holErrorOrder);
 	}
 
+	@Override
+	public Boolean updateBQYPayOrderStatus(Agent agent, Long saleOrderNo)throws GSSException{
 
+		HotelOrder hotelOrder = null;
+		try {
+			hotelOrder = getHotelOrderDetail(agent, saleOrderNo);
+			if (hotelOrder != null) {
+				hotelOrder.setOrderStatus(OwnerOrderStatus.PAY_OK.getKey());
+				hotelOrderMapper.updateById(hotelOrder);
+			}else{
+				throw new GSSException("支付成功修改订单", "0399", "支付成功修改订单异常");
+			}
+		} catch (GSSException e) {
+			throw new GSSException("支付成功修改订单", "0399", "支付成功修改订单异常"+e.getMessage());
+		}
+		return true;
+	}
 	
 }

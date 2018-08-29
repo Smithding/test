@@ -39,6 +39,30 @@ public class IftSupplierVo implements Serializable {
      * 创建时间
      */
     private Date createTime;
+    /**
+     * officeNO
+     */
+    private String officeNo;
+    public String getOfficeNo() {
+		return officeNo;
+	}
+
+	public void setOfficeNo(String officeNo) {
+		this.officeNo = officeNo;
+	}
+
+	public Long getChannelType() {
+		return channelType;
+	}
+
+	public void setChannelType(Long channelType) {
+		this.channelType = channelType;
+	}
+
+	/**
+     * 客商类型
+     */
+    private Long channelType;
 
     /**
      * 排序编号

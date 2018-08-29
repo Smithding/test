@@ -158,6 +158,19 @@ public class SaleOrderDetail implements Serializable,Cloneable {
 	 * @return
 	 */
 	private String errorMessage;
+    /**
+
+     * 机票票号
+     * @return
+     */
+    private String billNo;
+    public String getBillNo() {
+        return billNo;
+    }
+
+    public void setBillNo(String billNo) {
+        this.billNo = billNo;
+    }
 	public String getErrorMessage() {
 		return errorMessage;
 	}

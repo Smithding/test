@@ -132,7 +132,7 @@ public class OrderServiceImpl implements IOrderService {
 	private static final String COMPANY_NAME_HUAXIA = "华夏";
 
 	private static final String COMPANY_NAME_JUNLONG = "君龙";
-	private static final String COMPANY_NAME_QIANHAICAI = "前海财";
+	private static final String COMPANY_NAME_QIANHAICAI = "前海";
 	private static final String RESPONSE_SUCCESS = "0000";
 	private static final String RETURN_ERROR_REFUND = "该订单已退款！不能重复此操作";
 	private static final String RETURN_ERROR_SURRENDER = "该订单已退保！不能重复此操作";
@@ -578,6 +578,9 @@ public class OrderServiceImpl implements IOrderService {
 				saleOrderDetail.setOwner(agent.getOwner());
 				saleOrderDetail.setCreateTime(new Date());
 				saleOrderDetail.setCreator(agent.getId().toString());
+				if(saleOrderDetail.getPremium().compareTo(BigDecimal.ZERO)==0){
+                    saleOrderDetail.setPremium(salePrice.multiply(new BigDecimal(saleOrderDetail.getInsuranceNum())));
+                }
 				saleOrderDetail.setIsReport("0");
 				saleOrderDetailDao.insertSelective(saleOrderDetail);
 			}
@@ -711,6 +714,9 @@ public class OrderServiceImpl implements IOrderService {
 				detail.setInsuredPhone(saleOrderDetail.getInsuredPhone());
 				detail.setInsuredBirthday(saleOrderDetail.getInsuredBirthday()); // yyyyMMdd
 				detail.setInsuredSex(saleOrderDetail.getInsuredSex());
+				if(saleOrderDetail.getBillNo()!=null){
+					detail.setBillNo(saleOrderDetail.getBillNo());
+				}
 				saleOrderDetails.add(detail);
 				saleOrderExt.setSaleOrderDetailList(saleOrderDetails);
 				/* 调用保险经纪的接口进行投保，请求是json串 */
@@ -930,6 +936,12 @@ public class OrderServiceImpl implements IOrderService {
 				}else{
 					flightInfoVo.setFlightNo(InsureExtVo.getFlightInfoVo().getFlightNo());
 				}
+				if(insurance.getBuyWay() == 1&&insurance.getIsCivilServant() == 1&&!"".equals(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo())&&saleOrderExt.getSaleOrderDetailList().get(0).getBillNo()!=null){
+					insureRequestVo.setPolicyType((short)2);//设置为行程单保险
+					flightInfoVo.setBillNo(saleOrderExt.getSaleOrderDetailList().get(0).getBillNo());
+				}else{
+					insureRequestVo.setPolicyType((short)0);//设置为普通保险
+				}
 				int day = daysBetween(saleOrderExt.getEffectDate(),saleOrderExt.getExpireDate());
 				insureRequestVo.setTravelDay(day);
 				insureRequestVo.setDestination(InsureExtVo.getFlightInfoVo().getDestinationCity());
@@ -938,6 +950,8 @@ public class OrderServiceImpl implements IOrderService {
 		}catch(Exception e){
 			log.error("json转对象，对象转json异常"+e,1);
 		}
+		//将票号设置为0 以免投保失败
+		saleOrderDetailList.get(0).setBillNo(null);
 		insureRequestVo.setExtendedFieldSJson(extendedFieldsJson);
 		insureRequestVo.setSaleOrderDetailList(null);
 		insureRequestVo.setInsuredList(saleOrderDetailList);
@@ -1039,6 +1053,9 @@ public class OrderServiceImpl implements IOrderService {
 						detail.setInsuredSex(saleOrderDetail.getInsuredSex());
 						detail.setInsuranceNum(saleOrderDetail.getInsuranceNum());
 						detail.setPremium(saleOrderDetail.getPremium());
+						if(saleOrderDetail.getBillNo()!=null){
+							detail.setBillNo(saleOrderDetail.getBillNo());
+						}
 						if(insurance.getCompanyName().contains(COMPANY_NAME_JUNLONG)||	insurance.getCompanyName().contains(COMPANY_NAME_QIANHAICAI)){
 							detail.setPremium(insurance.getFacePrice().multiply( new BigDecimal(saleOrderDetail.getInsuranceNum())));
 						}
@@ -1180,7 +1197,7 @@ public class OrderServiceImpl implements IOrderService {
 			StringBuffer insureNoArray = new StringBuffer();
 			// 对被保人循环进行投保操作
 			for (SaleOrderDetail saleOrderDetail : saleOrderDetailList){
-				if(saleOrderDetail.getStatus()==2){
+				if(saleOrderDetail.getStatus()==2 || saleOrderDetail.getStatus()==3 || saleOrderDetail.getStatus()==10){
 					continue;
 				}
 					List<SaleOrderDetail> saleOrderDetails = new ArrayList<SaleOrderDetail>();
@@ -1193,6 +1210,9 @@ public class OrderServiceImpl implements IOrderService {
 					detail.setInsuredSex(saleOrderDetail.getInsuredSex());
 					detail.setInsuranceNum(saleOrderDetail.getInsuranceNum());
 					detail.setPremium(saleOrderDetail.getPremium());
+					if(saleOrderDetail.getBillNo()!=null){
+						detail.setBillNo(saleOrderDetail.getBillNo());
+					}
 					if(insurance.getCompanyName().contains(COMPANY_NAME_JUNLONG)||	insurance.getCompanyName().contains(COMPANY_NAME_QIANHAICAI)){
 						detail.setPremium(insurance.getFacePrice().multiply( new BigDecimal(saleOrderDetail.getInsuranceNum())));
 					}

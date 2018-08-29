@@ -723,6 +723,9 @@ public class HolProfitServiceImpl extends SuperServiceImpl<ProfitMapper, Profit>
 		} catch (Exception e) {
 			throw new GSSException("根据customerTypeNo查询失败","1001","根据customerTypeNo查询失败,customerTypeNo无对应价格控润 "+e.getMessage());
 		}
+		if (profitPriceList == null || profitPriceList.isEmpty()) {
+			logger.info("当前控润及其上级: "+customerTypeNo+" 查询为空");
+		}
 		return profitPriceList;
 	}
 	

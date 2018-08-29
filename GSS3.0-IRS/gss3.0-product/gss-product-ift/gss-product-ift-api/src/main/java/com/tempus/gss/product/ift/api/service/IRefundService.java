@@ -228,7 +228,7 @@ public interface IRefundService {
 	int queryBuyRefundAndDelCountBylocker(Long userId);
 
 	//废票销售审核
-	void auditWasteTicket(RequestWithActor<wasteAuditPramaVo> request) throws GSSException;
+	void auditWasteTicket(RequestWithActor<WasteAuditPramaVo> request) throws GSSException;
 	//退票销售审核
-    void auditRefundTicket(RequestWithActor<wasteAuditPramaVo> request) throws GSSException;
+    void auditRefundTicket(RequestWithActor<WasteAuditPramaVo> request) throws GSSException;
 }

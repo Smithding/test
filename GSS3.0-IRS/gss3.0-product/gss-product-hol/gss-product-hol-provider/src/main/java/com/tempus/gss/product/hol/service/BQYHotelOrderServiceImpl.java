@@ -3,17 +3,18 @@ package com.tempus.gss.product.hol.service;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.Future;
 
 import com.tempus.gss.order.entity.enums.GoodsBigType;
 import com.tempus.gss.order.entity.vo.ActualInfoSearchVO;
 import com.tempus.gss.order.entity.vo.CertificateCreateVO;
 import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
 import com.tempus.gss.product.hol.api.entity.WhiteListPhone;
+import com.tempus.gss.product.hol.api.entity.response.tc.*;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.RoomInfo;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.request.*;
+import com.tempus.gss.product.hol.api.entity.vo.bqy.response.HotelOrderInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,13 +53,6 @@ import com.tempus.gss.order.service.ITransationOrderService;
 import com.tempus.gss.product.hol.api.entity.request.tc.CancelOrderBeforePayReq;
 import com.tempus.gss.product.hol.api.entity.request.tc.OrderCreateReq;
 import com.tempus.gss.product.hol.api.entity.response.HotelOrder;
-import com.tempus.gss.product.hol.api.entity.response.tc.CancelOrderRes;
-import com.tempus.gss.product.hol.api.entity.response.tc.OwnerOrderStatus;
-import com.tempus.gss.product.hol.api.entity.response.tc.TcOrderStatus;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.request.BQYPushOrderInfo;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.request.CreateOrderReq;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.request.OrderCancelParam;
-import com.tempus.gss.product.hol.api.entity.vo.bqy.request.QueryHotelParam;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.CreateOrderRespone;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.response.OrderCancelResult;
 import com.tempus.gss.product.hol.api.entity.vo.bqy.room.BaseRoomInfo;
@@ -281,17 +276,27 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 	@Transactional(propagation=Propagation.REQUIRED, isolation=Isolation.DEFAULT)
 	public Boolean bqyPushOrderInfo(Agent agent, BQYPushOrderInfo bqyPushOrderInfo) throws GSSException{
 		logger.info("推送更新订单状态:{}",JSON.toJSONString(bqyPushOrderInfo));
-		if (StringUtil.isNotNullOrEmpty(bqyPushOrderInfo) && StringUtil.isNotNullOrEmpty(bqyPushOrderInfo.getOrdernumber()) 
+		if (StringUtil.isNotNullOrEmpty(bqyPushOrderInfo) && StringUtil.isNotNullOrEmpty(bqyPushOrderInfo.getOrderNumber())
 				&& StringUtil.isNotNullOrEmpty(bqyPushOrderInfo.getOrderId())) {
+			Integer orderType = bqyPushOrderInfo.getOrderType();
+
+			if (null == orderType || 2 - orderType != 0) {
+				logger.error("bqy推送订单类型不属于酒店订单!");
+				throw new GSSException("更新状态信息异常", "0191", "推送订单类型不属于酒店订单!");
+			}
 			//订单号
-			Long orderNumber = bqyPushOrderInfo.getOrdernumber();
+			Long orderNumber = bqyPushOrderInfo.getOrderNumber();
 			if (null == orderNumber) {
-				logger.error("推送酒店订单号为空!");
+				logger.error("bqy推送酒店订单号为空!");
 				throw new GSSException("更新状态信息异常", "0191", "推送酒店订单号为空!");
 			}
 			//子订单号
 			Long orderId = bqyPushOrderInfo.getOrderId();
 			HotelOrder hotelOrder = hotelOrderMapper.getOrderByNo(String.valueOf(orderNumber));
+			if (null == hotelOrder) {
+				logger.info("bqy订单推送,查询订单为空,没有该订单!");
+				throw new GSSException("更新状态信息异常", "0200", "查询订单为空,没有该订单!");
+			}
 			LogRecord LogRecord=new LogRecord();
 			LogRecord.setBizCode("HOL-Order");
 			LogRecord.setTitle("酒店订单状态");
@@ -301,7 +306,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			String des= "";
 			String orderStatus = hotelOrder.getOrderStatus();
 			//订单状态
-	 		TcOrderStatus pushOrderStatus = bqyPushOrderInfo.getOrderStatus();
+	 		TcOrderStatus pushOrderStatus = bqyPushOrderInfo.getChangeStatus();
 			if (pushOrderStatus.getKey().equals(TcOrderStatus.ALREADY_TC_CONFIRM.getKey())) {	//订单确认
 				if(!orderStatus.equals(OwnerOrderStatus.ALREADY_CONRIRM.getKey())) {
 					if (OwnerOrderStatus.PAY_OK.equals(orderStatus)) {
@@ -385,7 +390,70 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		return true;
 	}
 
-	/**
+    @Override
+    public Future<OrderInfomationDetail> futureOrderDetailInfo(Agent agent, String hotelOrderNo) {
+		OrderPayReq orderReq = new OrderPayReq();
+		orderReq.setOrderNumber(Long.valueOf(hotelOrderNo));
+		HotelOrderInfo hotelOrderInfo = bqyHotelInterService.orderDetail(orderReq);
+		if (hotelOrderInfo != null) {
+			OrderInfomationDetail orderInfomationDetail = new OrderInfomationDetail();
+			orderInfomationDetail.setIsSuccess(true);
+			List<OrderInfoModel> orderInfoList = new ArrayList<>();
+			OrderInfoModel orderInfo = new OrderInfoModel();
+			orderInfo.setCusOrderId(hotelOrderInfo.getHotelOrderId().toString());
+			orderInfo.setProductTitle(hotelOrderInfo.getHotelName());
+			PassengerModel passengerModel = new PassengerModel();
+			passengerModel.setName(hotelOrderInfo.getGuestName());
+			orderInfo.setPassengers(Arrays.asList(passengerModel));//Arrays.asList(hotelOrderInfo.getGuestName())
+			orderInfo.setStartTime(sdf.format(hotelOrderInfo.getCheckInDate()));
+			orderInfo.setEndTime(sdf.format(hotelOrderInfo.getCheckOutDate()));
+
+			ResourceModel resourceModel = new ResourceModel();
+			resourceModel.setResourceId(hotelOrderInfo.getHotelId());
+			resourceModel.setName(hotelOrderInfo.getHotelName());
+			resourceModel.setProductName(hotelOrderInfo.getProductName());
+			resourceModel.setType("0");
+
+			//resourceModel.setArrivalTime(hotelOrderInfo.getArriveDate()); //到店时间
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			orderInfo.setLasestCancelTime(format.format(hotelOrderInfo.getArriveDate())); //到店时间
+
+
+			CountModel countModel = new CountModel();
+			countModel.setRoomCount(hotelOrderInfo.getBookNumber());
+			orderInfo.setCounts(countModel);
+
+			orderInfo.setOrigin(hotelOrderInfo.getPayPrice());
+
+			Integer orderStatus = hotelOrderInfo.getStatus(); //订单状态
+			if (null != orderStatus) {
+				orderInfo.setOrderStatus(String.valueOf(orderStatus));
+				switch (orderStatus) {
+					case 1:
+						orderInfo.setOrderFlag("待支付");
+					case 2:
+						orderInfo.setOrderFlag("待确认");
+					case 3:
+						orderInfo.setOrderFlag("已确认");
+					case 5:
+						orderInfo.setOrderFlag("退订中");
+					case 508:
+						orderInfo.setOrderFlag("已退订");
+					case 9:
+						orderInfo.setOrderFlag("已取消");
+				}
+			}
+
+			orderInfoList.add(orderInfo);
+			orderInfomationDetail.setOrderInfos(orderInfoList);
+			return new AsyncResult<>(orderInfomationDetail);
+		}else {
+			logger.info("bqy酒店订单查询为空!");
+			throw new GSSException("bqy酒店订单查询为空", "0101", "bqy酒店订单查询为空!");
+		}
+	}
+
+    /**
 	 * 改变订单状态
 	 * @param agent
 	 * @param orderId
@@ -528,12 +596,12 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 
 		HotelOrder hotelOrder = new HotelOrder();
 
-		// 房型ID
-		//String roomTypeId = orderReq.getProductId();
 		//房间单价
-		BigDecimal unitPrice = new BigDecimal(roomInfo.getPrice());
+		BigDecimal unitPrice = roomInfo.getPrice();
 		//房间原单价
-		BigDecimal oldUnitPrice = new BigDecimal(roomInfo.getOldPrice());
+		BigDecimal oldUnitPrice = roomInfo.getOldPrice();
+		//房间挂牌价
+		BigDecimal settleFee = roomInfo.getSettleFee();
 		//供应商ID
 		String supplierId = roomInfo.getSupplierId();
 		//预定检查类型
@@ -543,14 +611,14 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 
 		// 每天的价格记录
 		String eachNightPrice = null;
-		// 每天价格
+		// 实际每天价格
 		BigDecimal oneDayPrice = unitPrice.multiply(new BigDecimal(orderReq.getBookNumber()));
-		// 总价格
+		// 实际总价格
 		BigDecimal newTotalPrice = oneDayPrice.multiply(new BigDecimal(daysBetween));
 		//未减佣金每天的价格
 		BigDecimal oldOneDayPrice = oldUnitPrice.multiply(new BigDecimal(orderReq.getBookNumber()));
 		//未减佣金总价
-		BigDecimal oldTotalPrice = oldUnitPrice.multiply(new BigDecimal(daysBetween));
+		BigDecimal oldTotalPrice = oldOneDayPrice.multiply(new BigDecimal(daysBetween));
 
 		for (int i = 0; i < daysBetween; i++) {
 			if (eachNightPrice == null || "".equals(eachNightPrice)) {
@@ -729,12 +797,10 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		}
 		orderReq.setSupplierId(supplierId);
 		orderReq.setRatePlanCategory(ratePlanCategory);
-		orderReq.setUnitPrice(oldUnitPrice);
+		orderReq.setUnitPrice(settleFee);
 		//可以不传
 		orderReq.setChannelType(2);
-		logger.info("创建8000YI酒店订单入参"+JsonUtil.toJson(orderReq));
 		CreateOrderRespone createOrderRespone = bqyHotelInterService.createOrder(orderReq);
-		logger.info("创建8000YI酒店订单返回结果:"+ JsonUtil.toJson(createOrderRespone));
 		Long orderNo = createOrderRespone.getOrderNumber();
 		// 判断条件返回0订单创建失败
 		if (null != createOrderRespone && orderNo > 0) {

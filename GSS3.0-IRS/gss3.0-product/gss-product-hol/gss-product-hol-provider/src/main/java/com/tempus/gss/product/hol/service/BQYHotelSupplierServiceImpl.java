@@ -249,9 +249,9 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 			Future<List<RoomPriceItem>> asynRoomPrice = bqyHotelInterService.asyncRoomPrice(query);
 			Future<List<ProfitPrice>> computeProfitByAgentFu = null;
             computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getNum(), "bqy");
-			while (asynRoomPrice.isDone() && asyncHotelImage.isDone()) {
+			/*while (asynRoomPrice.isDone() && asyncHotelImage.isDone()) {
 				break;
-			}
+			}*/
 
 			List<ImageList> bqyHotelImgList = asyncHotelImage.get();
 			List<RoomPriceItem> roomPriceItemList = asynRoomPrice.get();
@@ -328,12 +328,10 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 						}
 						//入住人数
 						resProBaseInfo.setAdultCount(Integer.valueOf(roomInfo.getPerson()));
-
 						//预定检查类型
 						resProBaseInfo.setRoomFeature(roomPriceInfo.getRatePlanCategory());
 						//供应商ID
 						resProBaseInfo.setCustomerType(roomInfo.getSupplierId());
-
 						//房间数
 						String roomNumStr = roomPriceInfo.getRemainingRooms();
 						if (roomNumStr.contains("+")) {
@@ -367,13 +365,14 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 									for(ProfitPrice profit : computeProfitByAgent) {
 										BigDecimal lowerPrice = profit.getPriceFrom();
 										BigDecimal upPrice = profit.getPriceTo();
-										BigDecimal firPrice = new BigDecimal(averagePrice.getSettleFee());
+										BigDecimal firPrice = averagePrice.getAverageprice();	//挂牌价
 										if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
 											BigDecimal rate = profit.getRate();
 											rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
 											resProBaseInfo.setRebateRateProfit(rate);
-											resProBaseInfo.setConPrice(averagePrice.getSettleFee().intValue());	//平均价
-											resProBaseInfo.setFirPrice(averagePrice.getSettleFee().intValue());	//首日价
+											resProBaseInfo.setConPrice((firPrice.setScale(0, BigDecimal.ROUND_UP)).intValue());	//平均价
+											resProBaseInfo.setFirPrice((firPrice.setScale(0, BigDecimal.ROUND_UP)).intValue());	//首日价
+											resProBaseInfo.setSettleFee(averagePrice.getSettleFee());	//结算价
 											//价格弹窗
 											TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
 											int daysBetween = DateUtil.daysBetween(checkinDate, checkoutDate);
@@ -382,7 +381,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 												String checkInFormat = sdf.format(DateUtil.offsiteDay(checkIn, i));
 												ProSaleInfoDetail pid = new ProSaleInfoDetail();
 												pid.setDistributionSalePrice(averagePrice.getSettleFee().intValue());
-												pid.setTcDirectPrice(averagePrice.getSettleFee().intValue());	//实际价格
+												pid.setTcDirectPrice((firPrice.setScale(0, BigDecimal.ROUND_UP)).intValue());	//挂牌价
 												mapPro.put(checkInFormat, pid);
 											}
 											resProBaseInfo.setProSaleInfoDetailsTarget(mapPro);
@@ -393,7 +392,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 									for(ProfitPrice profit : computeProfitByAgent) {
 										BigDecimal lowerPrice = profit.getPriceFrom();
 										BigDecimal upPrice = profit.getPriceTo();
-										BigDecimal firPrice = new BigDecimal(averagePrice.getSettleFee());
+										BigDecimal firPrice = averagePrice.getAverageprice();	//结算价
 										if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
 											BigDecimal rate = profit.getRate();
 											rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
@@ -402,6 +401,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 											endPrice = endPrice.setScale(0, BigDecimal.ROUND_UP);
 											resProBaseInfo.setConPrice(endPrice.intValue());	//平均价
 											resProBaseInfo.setFirPrice(endPrice.intValue());	//首日价
+											resProBaseInfo.setSettleFee(averagePrice.getSettleFee());	//结算价
 											//价格弹窗
 											TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
 											int daysBetween = DateUtil.daysBetween(checkinDate, checkoutDate);
@@ -410,7 +410,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 												String checkInFormat = sdf.format(DateUtil.offsiteDay(checkIn, i));
 												ProSaleInfoDetail pid = new ProSaleInfoDetail();
 												pid.setDistributionSalePrice(endPrice.intValue());
-												pid.setTcDirectPrice(firPrice.intValue());
+												pid.setTcDirectPrice(firPrice.intValue());			//未做处理的挂牌价
 												mapPro.put(checkInFormat, pid);
 											}
 											resProBaseInfo.setProSaleInfoDetailsTarget(mapPro);
@@ -595,168 +595,6 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 	}
 
 	@Override
-	public Map<String, Object> getProByRoomCode(Agent agent, HotelDetailSearchReq hotelDetailSearchReq, Long resId) {
-		try {
-			String checkinDate = hotelDetailSearchReq.getCheckinDate();
-			String checkoutDate = hotelDetailSearchReq.getCheckoutDate();
-
-			QueryHotelParam query = new QueryHotelParam();
-			query.setCheckInTime(checkinDate);
-			query.setCheckOutTime(checkoutDate);
-			query.setHotelId(resId);
-			long s = System.currentTimeMillis();
-			List<RoomPriceItem> roomPriceList = bqyHotelInterService.queryHotelRoomPrice(query);
-			System.out.println("查询房型时间:" + (System.currentTimeMillis() - s));
-
-			String planCode = hotelDetailSearchReq.getProductUniqueId();
-			int diff = DateUtil.daysBetween(hotelDetailSearchReq.getCheckinDate(), hotelDetailSearchReq.getCheckoutDate());
-			
-			Future<List<ProfitPrice>> computeProfitByAgentFu = holProfitService.computeProfitByAgentNum(agent, agent.getNum(), "bqy");
-			
-			Double oneDayPrice = null;
-			int roomNum = 0;
-			ResProBaseInfo useRoom = null;
-			//取消规则
-			String cancelPolicy = "";	
-			//取消时间
-			String lastCancelTime = "";
-			
-			if (null != roomPriceList && roomPriceList.size() > 0) {
-	
-				outer:
-				for (RoomPriceItem roomPriceItem : roomPriceList) {
-					List<RoomInfoItem> roomInfo = roomPriceItem.getRoomInfo();
-					for (RoomInfoItem roomInfoItem : roomInfo) {
-						if (!planCode.equals(roomInfoItem.getRoomID())) {
-							continue;
-						}
-						
-						RoomPriceInfo roomPriceInfo = roomInfoItem.getRoomPriceInfo();
-						//房间数
-						String roomNumStr = roomPriceInfo.getRemainingRooms();
-						if (roomNumStr.contains("+")) {
-							roomNumStr = roomNumStr.substring(0, roomNumStr.indexOf("+"));
-						}else if ("true".equalsIgnoreCase(roomNumStr)) {
-							roomNumStr = "10";
-						}
-						roomNum = Integer.valueOf(roomNumStr);
-						//价格	
-						List<RoomPriceDetail> roomPriceDetailList = roomPriceInfo.getRoomPriceDetail();
-						AveragePrice averagePrice = roomPriceInfo.getAveragePrice();
-						oneDayPrice = averagePrice.getSettleFee();
-						/*for (RoomPriceDetail roomPriceDetail : roomPriceDetailList) {
-							Price roomPrice = roomPriceDetail.getPrice();
-							allPrice += Integer.valueOf(roomPrice.getAmount());
-						}*/
-						
-						//取消规则
-						CancelLimitInfo cancelLimitInfo = roomInfoItem.getCancelLimitInfo();
-						if (null != cancelLimitInfo) {
-							cancelPolicy = cancelLimitInfo.getCancelPolicyInfo();
-							lastCancelTime = cancelLimitInfo.getLastCancelTime();
-						}
-						
-						TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
-						
-						/*for (int i = 0; i < roomPriceDetailList.size(); i++) {
-							
-							RoomPriceDetail roomPriceDetail = roomPriceDetailList.get(i);
-							String effectDate = roomPriceDetail.getEffectDate();
-							String checkInFormat = sdf.format(sdf.parse(effectDate));
-							ProSaleInfoDetail pid = new ProSaleInfoDetail();
-							pid.setBreakfastNum(Integer.valueOf(roomPriceDetail.getBreakfast()));
-							pid.setDistributionSalePrice(averagePrice.getSettleFee().intValue());
-							mapPro.put(checkInFormat, pid);
-						}*/
-
-						int daysBetween = DateUtil.daysBetween(checkinDate, checkoutDate);
-						for (int i = 0; i < daysBetween; i++) {
-							Date checkIn = sdf.parse(checkinDate);
-							String checkInFormat = sdf.format(DateUtil.offsiteDay(checkIn, i));
-							ProSaleInfoDetail pid = new ProSaleInfoDetail();
-							pid.setDistributionSalePrice(averagePrice.getSettleFee().intValue());
-							if (null != roomPriceDetailList && roomPriceDetailList.size() > 0) {
-								pid.setBreakfastNum(Integer.valueOf(roomPriceDetailList.get(0).getBreakfast()));
-							}
-							mapPro.put(checkInFormat, pid);
-						}
-						
-						useRoom = new ResProBaseInfo();
-						useRoom.setUserSumPrice(oneDayPrice.intValue() * diff);
-						useRoom.setResId(resId);
-						useRoom.setBreakfastCount(Integer.valueOf(roomPriceDetailList.get(0).getBreakfast()));
-						//房型ID
-						BaseRoomInfo baseRoomInfo = roomPriceItem.getBaseRoomInfo();
-						useRoom.setProId(baseRoomInfo.getRoomTypeID());
-						useRoom.setProductUniqueId(roomInfoItem.getRoomID());
-						//入住人数
-						useRoom.setAdultCount(Integer.valueOf(roomInfoItem.getPerson()));
-						useRoom.setProSaleInfoDetailsTarget(mapPro);
-						//平均价格
-						AveragePrice avgPrice = roomPriceInfo.getAveragePrice();
-						if (null != avgPrice) {
-							String amount = avgPrice.getAmount();
-							if (amount.contains(".")) {
-								amount = amount.substring(0, amount.indexOf("."));
-							}
-							useRoom.setConPrice(Integer.valueOf(amount));
-						}else {
-							useRoom.setConPrice(99999);
-						}
-						
-						//设置控润
-						if(computeProfitByAgentFu!=null) {
-		 						List<ProfitPrice> computeProfitByAgent = computeProfitByAgentFu.get();
-			 					if(computeProfitByAgent != null && computeProfitByAgent.size() > 0) {
-   			 					for(ProfitPrice profit : computeProfitByAgent) {
-   			 						BigDecimal lowerPrice = profit.getPriceFrom();
-   			 						BigDecimal upPrice = profit.getPriceTo();
-   			 						BigDecimal firPrice = new BigDecimal(oneDayPrice);
-   			 						if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
-   			 							BigDecimal rate = profit.getRate();
-   			 							rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
-   			 							useRoom.setRebateRateProfit(rate);
-   			 						}
-   			 					}
-			 				}
-		 				}
-						
-						//房间床型
-						//床型
-						RoomBedTypeInfo roomBedTypeInfo = roomInfoItem.getRoomBedTypeInfo();
-						String bedSize = "";
-						if ("T".equals(roomBedTypeInfo.getHasKingBed())) {
-							bedSize = roomBedTypeInfo.getKingBedWidth();
-						}else if ("T".equals(roomBedTypeInfo.getHasTwinBed())) {
-							bedSize = roomBedTypeInfo.getTwinBedWidth();
-						}else if ("T".equals(roomBedTypeInfo.getHasSingleBed())) {
-							bedSize = roomBedTypeInfo.getSingleBedWidth();
-						}
-						useRoom.setBedSize(bedSize);
-						//跳出循环
-						break outer;
-					}
-				}
-			}
-			Map<String, Object> map = new HashMap<>();
-			map.put("oneDayPrice", oneDayPrice);
-			map.put("cancelPolicy", cancelPolicy);
-			map.put("useRoom", useRoom);
-			map.put("roomNum", roomNum);
-			map.put("diff", diff);
-			map.put("lastCancelTime", lastCancelTime);
-			return map;
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	@Override
 	public Map<String, Object> getProByRoomCode(Agent agent, RoomInfo roomInfo) {
 		try {
 			String holMidId = roomInfo.getHolMidId();
@@ -771,7 +609,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 			}
 			//酒店基础信息
 			ResBaseInfo resBaseInfo = bqyHotelConverService.bqyConvertTcHotelEntity(getHotelInfoById(agent, resId));
-			int oneDayPrice = roomInfo.getPrice();
+			int oneDayPrice = roomInfo.getPrice().intValue();
 			ResProBaseInfo useRoom = new ResProBaseInfo();
 			String checkInDate = roomInfo.getCheckInDate();
 			String checkOutDate = roomInfo.getCheckOutDate();
@@ -787,7 +625,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 						for(ProfitPrice profit : computeProfitByAgent) {
 							BigDecimal lowerPrice = profit.getPriceFrom();
 							BigDecimal upPrice = profit.getPriceTo();
-							BigDecimal firPrice = new BigDecimal(roomInfo.getPrice());
+							BigDecimal firPrice = roomInfo.getPrice();
 							if(lowerPrice.compareTo(firPrice) <= 0 && upPrice.compareTo(firPrice) >= 0) {
 								BigDecimal rate = profit.getRate();
 								rate = rate.multiply(new BigDecimal(0.01)).setScale(2, BigDecimal.ROUND_HALF_UP);
@@ -801,7 +639,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 			}
 			useRoom.setUserSumPrice(oneDayPrice * diff);
 			useRoom.setTotalRebateRateProfit(new BigDecimal(oneDayPrice).multiply(useRoom.getRebateRateProfit()));
-			useRoom.setConPrice(roomInfo.getPrice());
+			useRoom.setConPrice(roomInfo.getPrice().intValue());
 			useRoom.setAdultCount(roomInfo.getPerson());
 			useRoom.setResProName(roomInfo.getRoomTypeName());
 			useRoom.setSupPriceName(roomInfo.getRoomName());

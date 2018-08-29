@@ -255,6 +255,7 @@ public class HolMidServiceImpl implements IHolMidService {
 		String bqyCityCode = (String) resultMap.get("bqyCityCode");
 		ResBaseInfo bqyHotel = null;
 		ResBaseInfo tcHotel = null;
+		List<ProDetails> newProDetailList = new ArrayList<ProDetails>();
 		logger.info("异步查询酒店ID, TC_ID:"+tcResId+", BQY_ID: "+bqyResId);
 		//tc和bqy酒店ID都不为空则开启异步查询,否则执行同步
 		if (null != bqyResId && null != tcResId) {
@@ -266,38 +267,17 @@ public class HolMidServiceImpl implements IHolMidService {
 					
 				List<ProDetails> bqyProDetailList = null;
 				List<ProDetails> tcProDetailList = null;
-				if (null != bqyHotel) {
+				if (null != bqyHotel && bqyHotel.getProDetails()!= null && !bqyHotel.getProDetails().isEmpty()) {
 					bqyProDetailList = bqyHotel.getProDetails();
 				}
-				if (null != tcHotel) {
+				if (null != tcHotel && tcHotel.getProDetails() != null && !tcHotel.getProDetails().isEmpty()) {
 					tcProDetailList = tcHotel.getProDetails();
+					bqyProDetailList.addAll(tcProDetailList);
 				}
-				
-				if (bqyProDetailList == null || bqyProDetailList.size() == 0) {
-					return tcHotel.getProDetails();
+				if (bqyProDetailList == null && tcProDetailList == null) {
+					return null;
 				}
-				if (tcProDetailList == null || tcProDetailList.size() == 0) {
-					return bqyHotel.getProDetails();
-				}
-				List<ProDetails> newProDetailList = new ArrayList<ProDetails>();
-				bqyProDetailList.addAll(tcProDetailList);
-				
-				/*Map<String, List<ProDetails>> collect = bqyProDetailList.stream().collect(Collectors.groupingBy(ProDetails::getResProName));
-				for(Map.Entry<String, List<ProDetails>> entry : collect.entrySet()) {
-					List<ProDetails> value = entry.getValue();
-					if(value!= null && value.size() > 0) {
-						if(value.size() >= 2) {
-							for (int i = 1; i < value.size(); i++) {
-								List<ResProBaseInfo> resProBaseInfoList = value.get(0).getResProBaseInfoList();
-								resProBaseInfoList.addAll(value.get(i).getResProBaseInfoList());
-							}
-						}
-						newProDetailList.add(value.get(0));
-					}
-				}
-				bqyHotel.setProDetails(newProDetailList);*/
-				
-				
+
 				Map<String, ProDetails> map = new HashMap<String, ProDetails>();
 				for(ProDetails pro : bqyProDetailList) {
 					if(map.containsKey(pro.getResProName())) {
@@ -311,7 +291,7 @@ public class HolMidServiceImpl implements IHolMidService {
 					}
 				}
 				newProDetailList = map.entrySet().stream().map(et ->et.getValue()).collect(Collectors.toList());
-				bqyHotel.setProDetails(newProDetailList);
+				//bqyHotel.setProDetails(newProDetailList);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -323,18 +303,22 @@ public class HolMidServiceImpl implements IHolMidService {
 			if (null != tcResId) {
 				bqyHotel = syncHotelInfo.queryProDetail(agent, tcResId, checkinDate, checkoutDate);
 			}
-		}
-		List<ProDetails> proDetailList = bqyHotel.getProDetails();
-		if (null != proDetailList && proDetailList.size() > 0) {
-			for(int i = 0; i < proDetailList.size(); i++) {
-				List<ResProBaseInfo> resProBaseInfoList = proDetailList.get(i).getResProBaseInfoList();
-				resProBaseInfoList.sort(Comparator.comparingInt(ResProBaseInfo :: getFirPrice));
-				proDetailList.get(i).setMinPrice(resProBaseInfoList.get(0).getFirPrice());
+			if(bqyHotel != null && bqyHotel.getProDetails() != null && !bqyHotel.getProDetails().isEmpty()){
+				newProDetailList = bqyHotel.getProDetails();
 			}
-			proDetailList.sort(Comparator.comparingInt(ProDetails :: getMinPrice));
+		}
+
+		//List<ProDetails> proDetailList = bqyHotel.getProDetails();
+		if (null != newProDetailList && !newProDetailList.isEmpty()) {
+			for(int i = 0; i < newProDetailList.size(); i++) {
+				List<ResProBaseInfo> resProBaseInfoList = newProDetailList.get(i).getResProBaseInfoList();
+				resProBaseInfoList.sort(Comparator.comparingInt(ResProBaseInfo :: getFirPrice));
+				newProDetailList.get(i).setMinPrice(resProBaseInfoList.get(0).getFirPrice());
+			}
+			newProDetailList.sort(Comparator.comparingInt(ProDetails :: getMinPrice));
 		}
 		//return bqyHotel;
-		return proDetailList;
+		return newProDetailList;
 	}
 
 	@Override

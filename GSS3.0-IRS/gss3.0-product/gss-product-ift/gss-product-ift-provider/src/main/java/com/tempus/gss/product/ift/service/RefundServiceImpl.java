@@ -1302,6 +1302,7 @@ public class RefundServiceImpl implements IRefundService {
 				throw new GSSException("废退单查询对象为空", "0001", "查询废退改签单失败");
 			}
 			String sourceChannelNo = null;
+			handleTicketNo(requestWithActor);
 			log.info("获取费退改签单的数据,查询条件为："+ JsonUtil.toJson(requestWithActor.getEntity()));
 
 			List<SaleChangeExt> list = saleChangeExtDao.queryObjByKey(page, requestWithActor.getEntity());
@@ -1438,6 +1439,19 @@ public class RefundServiceImpl implements IRefundService {
 		return page;
 	}
 
+	private void handleTicketNo(RequestWithActor<SaleChangeExtVo> saleOrderQueryRequest) {
+		String ticketNo = saleOrderQueryRequest.getEntity().getTicketNo();
+		if(StringUtils.isNotEmpty(ticketNo)){
+			if(!ticketNo.contains("-")){
+				//如果没有“-”的话在第四个位置加上“-”
+				StringBuilder sb = new StringBuilder(ticketNo);
+				sb.insert(3,"-");
+				saleOrderQueryRequest.getEntity().setTicketNo(sb.toString());
+			}
+		}
+	}
+
+
 	@Override
 	@Transactional
 	public Page<SaleChangeExt> queryListByVo(Page<SaleChangeExt> page, RequestWithActor<SaleChangeExtVo> requestWithActor)
@@ -1458,14 +1472,13 @@ public class RefundServiceImpl implements IRefundService {
 				List<Customer> customers = customerService.getSubCustomerByCno(requestWithActor.getAgent(), requestWithActor.getAgent().getNum());
 				List<Long> longList=new ArrayList<>();
 				if(null!=customers&&customers.size()>0) {
-
 					for (Customer customer : customers) {
 						longList.add(customer.getCustomerNo());
 					}
 				}
 				requestWithActor.getEntity().setLongList(longList);
-
 			}
+			handleTicketNo(requestWithActor);
 			List<SaleChangeExt> list = saleChangeExtDao.queryObjByKey(page, requestWithActor.getEntity());
 			if(null!=list) {
 				for (SaleChangeExt saleChangeExt : list) {
@@ -1906,9 +1919,10 @@ public class RefundServiceImpl implements IRefundService {
 	}
 
 	@Override
-	public void auditWasteTicket(RequestWithActor<wasteAuditPramaVo> request) throws GSSException {
+	public void auditWasteTicket(RequestWithActor<WasteAuditPramaVo> request) throws GSSException {
 		Agent agent = request.getAgent();
-		wasteAuditPramaVo entity = request.getEntity();
+		WasteAuditPramaVo entity = request.getEntity();
+		log.info("销售废票审核开始："+entity.toString());
 		String changeRemark = entity.getChangeRemark();
 		PassengerRefundPriceVo passengerRefundPriceVo = entity.getPassengerRefundPriceVo();
 		Long saleChangeNo = entity.getSaleChangeNo();
@@ -1981,6 +1995,7 @@ public class RefundServiceImpl implements IRefundService {
 					refundService.assignBuyWaste(saleChangeRequest);
 				}
 			}
+			log.info("废票销售审核结束。");
 		} catch (Exception e){
 			log.error("废票销售审核异常："+e);
 			throw new GSSException("废票销售审核异常:" + e, "0002", "废票销售审核异常");
@@ -1988,9 +2003,10 @@ public class RefundServiceImpl implements IRefundService {
 	}
 
 	@Override
-	public void auditRefundTicket(RequestWithActor<wasteAuditPramaVo> request) throws GSSException {
+	public void auditRefundTicket(RequestWithActor<WasteAuditPramaVo> request) throws GSSException {
 		Agent agent = request.getAgent();
-		wasteAuditPramaVo entity = request.getEntity();
+		WasteAuditPramaVo entity = request.getEntity();
+		log.info("销售退票审核开始："+entity.toString());
 		String changeRemark = entity.getChangeRemark();
 		PassengerRefundPriceVo passengerRefundPriceVo = entity.getPassengerRefundPriceVo();
 		Long saleChangeNo = entity.getSaleChangeNo();
@@ -2079,6 +2095,7 @@ public class RefundServiceImpl implements IRefundService {
 					ticketSenderService.updateByLockerId(agent,locker,"SALE_REFUSE_NUM");
 				}
 			}
+			log.info("退票销售审核结束。");
 		} catch (Exception e) {
 			log.error("退票销售审核异常",e);
 			throw new GSSException("退票销售审核异常:" + e, "0002", "退票销售审核异常");
