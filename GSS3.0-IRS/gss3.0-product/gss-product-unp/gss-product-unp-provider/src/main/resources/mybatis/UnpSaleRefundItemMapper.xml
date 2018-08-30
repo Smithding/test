@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.unp.dao.UnpSaleRefundItemMapper">
+  <resultMap id="BaseResultMap" type="com.tempus.gss.product.unp.api.entity.UnpSaleRefundItem">
+    <id column="ITEM_ID" jdbcType="BIGINT" property="itemId" />
+    <result column="SALE_REFUND_ORDER_NO" jdbcType="BIGINT" property="saleRefundOrderNo" />
+    <result column="UNP_TYPE" jdbcType="INTEGER" property="unpType" />
+    <result column="NUM" jdbcType="INTEGER" property="num" />
+    <result column="CHANGE_TYPE" jdbcType="INTEGER" property="changeType" />
+    <result column="GROUP_AMOUNT" jdbcType="DECIMAL" property="groupAmount" />
+    <result column="ITEM_STATUS" jdbcType="INTEGER" property="itemStatus" />
+    <result column="VALID" jdbcType="INTEGER" property="valid" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    ITEM_ID, SALE_REFUND_ORDER_NO, UNP_TYPE, NUM, CHANGE_TYPE, GROUP_AMOUNT, ITEM_STATUS,
+    VALID
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select
+    <include refid="Base_Column_List" />
+    from UNP_SALE_REFUND_ITEM
+    where ITEM_ID = #{itemId,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from UNP_SALE_REFUND_ITEM
+    where ITEM_ID = #{itemId,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.tempus.gss.product.unp.api.entity.UnpSaleRefundItem">
+    insert into UNP_SALE_REFUND_ITEM (ITEM_ID, SALE_REFUND_ORDER_NO, UNP_TYPE,
+      NUM, CHANGE_TYPE, GROUP_AMOUNT,
+      ITEM_STATUS, INTEGER)
+    values (#{itemId,jdbcType=BIGINT}, #{saleRefundOrderNo,jdbcType=BIGINT}, #{unpType,jdbcType=INTEGER},
+      #{num,jdbcType=INTEGER}, #{changeType,jdbcType=INTEGER}, #{groupAmount,jdbcType=DECIMAL},
+      #{itemStatus,jdbcType=INTEGER}, #{valid,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpSaleRefundItem">
+    insert into UNP_SALE_REFUND_ITEM
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="itemId != null">
+        ITEM_ID,
+      </if>
+      <if test="saleRefundOrderNo != null">
+        SALE_REFUND_ORDER_NO,
+      </if>
+      <if test="unpType != null">
+        UNP_TYPE,
+      </if>
+      <if test="num != null">
+        NUM,
+      </if>
+      <if test="changeType != null">
+        CHANGE_TYPE,
+      </if>
+      <if test="groupAmount != null">
+        GROUP_AMOUNT,
+      </if>
+      <if test="itemStatus != null">
+        ITEM_STATUS,
+      </if>
+      <if test="valid != null">
+        VALID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="itemId != null">
+        #{itemId,jdbcType=BIGINT},
+      </if>
+      <if test="saleRefundOrderNo != null">
+        #{saleRefundOrderNo,jdbcType=BIGINT},
+      </if>
+      <if test="unpType != null">
+        #{unpType,jdbcType=INTEGER},
+      </if>
+      <if test="num != null">
+        #{num,jdbcType=INTEGER},
+      </if>
+      <if test="changeType != null">
+        #{changeType,jdbcType=INTEGER},
+      </if>
+      <if test="groupAmount != null">
+        #{groupAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="itemStatus != null">
+        #{itemStatus,jdbcType=INTEGER},
+      </if>
+      <if test="valid != null">
+        #{valid,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpSaleRefundItem">
+    update UNP_SALE_REFUND_ITEM
+    <set>
+      <if test="saleRefundOrderNo != null">
+        SALE_REFUND_ORDER_NO = #{saleRefundOrderNo,jdbcType=BIGINT},
+      </if>
+      <if test="unpType != null">
+        UNP_TYPE = #{unpType,jdbcType=INTEGER},
+      </if>
+      <if test="num != null">
+        NUM = #{num,jdbcType=INTEGER},
+      </if>
+      <if test="changeType != null">
+        CHANGE_TYPE = #{changeType,jdbcType=INTEGER},
+      </if>
+      <if test="groupAmount != null">
+        GROUP_AMOUNT = #{groupAmount,jdbcType=DECIMAL},
+      </if>
+      <if test="itemStatus != null">
+        ITEM_STATUS = #{itemStatus,jdbcType=INTEGER},
+      </if>
+      <if test="valid != null">
+        VALID = #{valid,jdbcType=BIT},
+      </if>
+    </set>
+    where ITEM_ID = #{itemId,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.unp.api.entity.UnpSaleRefundItem">
+    update UNP_SALE_REFUND_ITEM
+    set SALE_REFUND_ORDER_NO = #{saleRefundOrderNo,jdbcType=BIGINT},
+      UNP_TYPE = #{unpType,jdbcType=INTEGER},
+      NUM = #{num,jdbcType=INTEGER},
+      CHANGE_TYPE = #{changeType,jdbcType=INTEGER},
+      GROUP_AMOUNT = #{groupAmount,jdbcType=DECIMAL},
+      ITEM_STATUS = #{itemStatus,jdbcType=INTEGER},
+      VALID = #{valid,jdbcType=INTEGER}
+    where ITEM_ID = #{itemId,jdbcType=BIGINT}
+  </update>
+</mapper>

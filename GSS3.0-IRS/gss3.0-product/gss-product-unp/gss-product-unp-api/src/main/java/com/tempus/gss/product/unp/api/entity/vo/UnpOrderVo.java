@@ -1,592 +1,315 @@
-/**
- * UnpOrderVo.java
- * com.tempus.gss.product.unp.api.entity.vo
- * <p>
- * Function： TODO
- * <p>
- * ver     date      		author
- * ──────────────────────────────────
- * 2017年3月10日 		niepeng
- * <p>
- * Copyright (c) 2017, TNT All Rights Reserved.
- */
-
 package com.tempus.gss.product.unp.api.entity.vo;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.tempus.gss.order.entity.BuyOrder;
-import com.tempus.gss.order.entity.SaleOrder;
-import org.apache.ibatis.type.Alias;
-
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * ClassName:UnpOrderVo
- * Function: TODO ADD FUNCTION
- * Reason:	 TODO ADD REASON
- *
- * @author niepeng
- * @Date 2017年3月10日        上午8:52:37
- * @see
- * @since Ver 1.1
+ * @author ZhangBro
+ * 查询条件
  */
-@JsonInclude(Include.NON_NULL)
-@Alias("unpOrderVo")
 public class UnpOrderVo implements Serializable {
-    
-    private static final long serialVersionUID = 1L;
-    
     /**
-     * 编号
+     * 销售单号
      */
-    private Long id;
-    
+    private Long saleOrderNo;
     /**
      * 数据归属单位
      */
     private Integer owner;
-    private Integer unpType;
-    
-    /**
-     * 销售单号
-     */
-    private Long orderNo;
-    
-    /**
-     * 备注
-     */
-    private String remark;
-    
     /**
      * 交易单号
      */
-    private Long tradeNo;
-    
+    private Long traNo;
     /**
-     * 批次号
+     * 客户ID, 外键
      */
-    private Long batchNo;
-    
+    private Long customerNo;
     /**
-     * 销售渠道ID, 外键
+     * 客户类型, 外键
      */
-    private Long channelId;
-    
+    private Long customerType;
     /**
-     * 渠道类型, 外键
+     * 客户名称
      */
-    private Long channelType;
-    
+    private String customerName;
     /**
-     * 销售价, 应收总额
+     * 是否变更以及变更类型 0正常;1退;2改
      */
-    private BigDecimal salePrice;
-    
+    private Integer changeType;
     /**
-     * 支付状态, 1:未支付(默认); 2:部分支付; 3:已支付; 4:部分退款; 5:已退款
+     * 支付状态,1:未支付(默认); 2:支付中; 3:已支付; 4:挂账支付;
+     *
+     * @see com.tempus.gss.product.unp.api.entity.enums.EUnpConstant.PayStatus
      */
     private Integer payStatus;
-    
-    /**
-     * 实收总额, 默认:0
-     */
-    private BigDecimal payAmount;
-    
     /**
      * 收款时间
      */
     private Date payTime;
-    
+    private String payTimeStart;
+    private String payTimeEnd;
     /**
-     * 采购单号
-     */
-    private Long buyOrderNo;
-    
-    /**
-     * 采购渠道id
-     */
-    private Long buyChannelId;
-    
-    /**
-     * 采购渠道类型
-     */
-    private Long buyChannelType;
-    
-    /**
-     * 采购价, 应付总额
-     */
-    private BigDecimal buyPrice;
-    
-    /**
-     * 采购支付状态, 1:未支付(默认); 2:部分支付; 3:已支付; 4:部分退款; 5:已退款
-     */
-    private Integer buyPayStatus;
-    
-    /**
-     * 实付总额, 默认:0
-     */
-    private BigDecimal buyPayAmount;
-    
-    /**
-     * 付款时间
-     */
-    private Date buyPayTime;
-    
-    /**
-     * 状态:1待处理;2处理中;3已完成;4已取消
+     * 状态:1待处理;2处理中;3已完成;4已取消;5变更中;
      */
     private Integer status;
-    
     /**
      * 创建者
      */
     private String creator;
-    
     /**
      * 创建时间
      */
     private Date createTime;
-    
+    private String createTimeStart;
+    private String createTimeEnd;
     /**
      * 修改人
      */
     private String modifier;
-    
     /**
      * 修改时间
      */
     private Date modifyTime;
-    
+    private String modifyTimeStart;
+    private String modifyTimeEnd;
     /**
      * 删除标志 0 无效 已删除 1 有效
      */
-    private Boolean valid;
+    private Integer valid;
+    
+    //-------------------------below is  from BuyOrder------------------------//
+    /**
+     * 采购单号
+     */
+    private Long buyOrderNo;
+    /**
+     * 供应商ID
+     */
+    private Long supplierId;
+    /**
+     * 供应商类型
+     */
+    private Long supplierType;
+    /**
+     * 供应商名称
+     */
+    private String supplierName;
     
     /**
-     * 销售单
+     * 第三方业务单号
      */
-    private SaleOrder saleOrder;
+    private Long thirdBusNo;
     
-    /**
-     * 采购单
-     */
-    private BuyOrder buyOrder;
-    /**
-     * 线下交易流水号
-     */
-    private Long offlinePayNo;
-    /**
-     * 线下交易付款号
-     */
-    private String offlinePayer;
-    /**
-     * 线下交易收款号
-     */
-    private String offlinePayee;
-    /**
-     * 线下交易备注信息
-     */
-    private String offlinePayRemark;
-    private Date createDateStart;
-    private Date createDateEnd;
-    private Integer saleAccountType;//客户付款方式
-    private Long saleAccount;//客户付款账号
-    private Integer buyAccountType;//供应商收款方式
-    private Long buyAccount;//供应商收款账号
-    private Long capitalAccount;//收/付款账号(自己)
-    private String payAmountTransactionNo;//付款流水号
-    
-    public Integer getUnpType() {
-        return unpType;
+    public Long getSaleOrderNo() {
+        return saleOrderNo;
     }
     
-    public void setUnpType(Integer unpType) {
-        this.unpType = unpType;
-    }
-    
-    public Long getOfflinePayNo() {
-        return offlinePayNo;
-    }
-    
-    public void setOfflinePayNo(Long offlinePayNo) {
-        this.offlinePayNo = offlinePayNo;
-    }
-    
-    public String getOfflinePayer() {
-        return offlinePayer;
-    }
-    
-    public void setOfflinePayer(String offlinePayer) {
-        this.offlinePayer = offlinePayer;
-    }
-    
-    public String getOfflinePayee() {
-        return offlinePayee;
-    }
-    
-    public void setOfflinePayee(String offlinePayee) {
-        this.offlinePayee = offlinePayee;
-    }
-    
-    public String getOfflinePayRemark() {
-        return offlinePayRemark;
-    }
-    
-    public void setOfflinePayRemark(String offlinePayRemark) {
-        this.offlinePayRemark = offlinePayRemark;
-    }
-    
-    public Long getId() {
-        
-        return id;
-    }
-    
-    public void setId(Long id) {
-        
-        this.id = id;
+    public void setSaleOrderNo(Long saleOrderNo) {
+        this.saleOrderNo = saleOrderNo;
     }
     
     public Integer getOwner() {
-        
         return owner;
     }
     
     public void setOwner(Integer owner) {
-        
         this.owner = owner;
     }
     
-    public Long getOrderNo() {
-        
-        return orderNo;
+    public Long getTraNo() {
+        return traNo;
     }
     
-    public void setOrderNo(Long orderNo) {
-        
-        this.orderNo = orderNo;
+    public void setTraNo(Long traNo) {
+        this.traNo = traNo;
     }
     
-    public String getRemark() {
-        
-        return remark;
+    public Long getCustomerNo() {
+        return customerNo;
     }
     
-    public void setRemark(String remark) {
-        
-        this.remark = remark;
+    public void setCustomerNo(Long customerNo) {
+        this.customerNo = customerNo;
     }
     
-    public Long getTradeNo() {
-        
-        return tradeNo;
+    public Long getCustomerType() {
+        return customerType;
     }
     
-    public void setTradeNo(Long tradeNo) {
-        
-        this.tradeNo = tradeNo;
+    public void setCustomerType(Long customerType) {
+        this.customerType = customerType;
     }
     
-    public Long getBatchNo() {
-        
-        return batchNo;
+    public String getCustomerName() {
+        return customerName;
     }
     
-    public void setBatchNo(Long batchNo) {
-        
-        this.batchNo = batchNo;
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
     
-    public Long getChannelId() {
-        
-        return channelId;
+    public Integer getChangeType() {
+        return changeType;
     }
     
-    public void setChannelId(Long channelId) {
-        
-        this.channelId = channelId;
-    }
-    
-    public Long getChannelType() {
-        
-        return channelType;
-    }
-    
-    public void setChannelType(Long channelType) {
-        
-        this.channelType = channelType;
-    }
-    
-    public BigDecimal getSalePrice() {
-        
-        return salePrice;
-    }
-    
-    public void setSalePrice(BigDecimal salePrice) {
-        
-        this.salePrice = salePrice;
+    public void setChangeType(Integer changeType) {
+        this.changeType = changeType;
     }
     
     public Integer getPayStatus() {
-        
         return payStatus;
     }
     
     public void setPayStatus(Integer payStatus) {
-        
         this.payStatus = payStatus;
     }
     
-    public BigDecimal getPayAmount() {
-        
-        return payAmount;
-    }
-    
-    public void setPayAmount(BigDecimal payAmount) {
-        
-        this.payAmount = payAmount;
-    }
-    
     public Date getPayTime() {
-        
         return payTime;
     }
     
     public void setPayTime(Date payTime) {
-        
         this.payTime = payTime;
     }
     
-    public Long getBuyChannelId() {
-        
-        return buyChannelId;
+    public String getPayTimeStart() {
+        return payTimeStart;
     }
     
-    public void setBuyChannelId(Long buyChannelId) {
-        
-        this.buyChannelId = buyChannelId;
+    public void setPayTimeStart(String payTimeStart) {
+        this.payTimeStart = payTimeStart;
     }
     
-    public Long getBuyChannelType() {
-        
-        return buyChannelType;
+    public String getPayTimeEnd() {
+        return payTimeEnd;
     }
     
-    public void setBuyChannelType(Long buyChannelType) {
-        
-        this.buyChannelType = buyChannelType;
-    }
-    
-    public BigDecimal getBuyPrice() {
-        
-        return buyPrice;
-    }
-    
-    public void setBuyPrice(BigDecimal buyPrice) {
-        
-        this.buyPrice = buyPrice;
-    }
-    
-    public Integer getBuyPayStatus() {
-        
-        return buyPayStatus;
-    }
-    
-    public void setBuyPayStatus(Integer buyPayStatus) {
-        
-        this.buyPayStatus = buyPayStatus;
-    }
-    
-    public BigDecimal getBuyPayAmount() {
-        
-        return buyPayAmount;
-    }
-    
-    public void setBuyPayAmount(BigDecimal buyPayAmount) {
-        
-        this.buyPayAmount = buyPayAmount;
-    }
-    
-    public Date getBuyPayTime() {
-        
-        return buyPayTime;
-    }
-    
-    public void setBuyPayTime(Date buyPayTime) {
-        
-        this.buyPayTime = buyPayTime;
+    public void setPayTimeEnd(String payTimeEnd) {
+        this.payTimeEnd = payTimeEnd;
     }
     
     public Integer getStatus() {
-        
         return status;
     }
     
     public void setStatus(Integer status) {
-        
         this.status = status;
     }
     
     public String getCreator() {
-        
         return creator;
     }
     
     public void setCreator(String creator) {
-        
         this.creator = creator;
     }
     
     public Date getCreateTime() {
-        
         return createTime;
     }
     
     public void setCreateTime(Date createTime) {
-        
         this.createTime = createTime;
     }
     
+    public String getCreateTimeStart() {
+        return createTimeStart;
+    }
+    
+    public void setCreateTimeStart(String createTimeStart) {
+        this.createTimeStart = createTimeStart;
+    }
+    
+    public String getCreateTimeEnd() {
+        return createTimeEnd;
+    }
+    
+    public void setCreateTimeEnd(String createTimeEnd) {
+        this.createTimeEnd = createTimeEnd;
+    }
+    
     public String getModifier() {
-        
         return modifier;
     }
     
     public void setModifier(String modifier) {
-        
         this.modifier = modifier;
     }
     
     public Date getModifyTime() {
-        
         return modifyTime;
     }
     
     public void setModifyTime(Date modifyTime) {
-        
         this.modifyTime = modifyTime;
     }
     
-    public Boolean getValid() {
-        
+    public String getModifyTimeStart() {
+        return modifyTimeStart;
+    }
+    
+    public void setModifyTimeStart(String modifyTimeStart) {
+        this.modifyTimeStart = modifyTimeStart;
+    }
+    
+    public String getModifyTimeEnd() {
+        return modifyTimeEnd;
+    }
+    
+    public void setModifyTimeEnd(String modifyTimeEnd) {
+        this.modifyTimeEnd = modifyTimeEnd;
+    }
+    
+    public Integer getValid() {
         return valid;
     }
     
-    public void setValid(Boolean valid) {
-        
+    public void setValid(Integer valid) {
         this.valid = valid;
     }
     
-    public SaleOrder getSaleOrder() {
-        
-        return saleOrder;
-    }
-    
-    public void setSaleOrder(SaleOrder saleOrder) {
-        
-        this.saleOrder = saleOrder;
-    }
-    
-    public BuyOrder getBuyOrder() {
-        
-        return buyOrder;
-    }
-    
-    public void setBuyOrder(BuyOrder buyOrder) {
-        
-        this.buyOrder = buyOrder;
-    }
-    
-    public Date getCreateDateStart() {
-        
-        return createDateStart;
-    }
-    
-    public void setCreateDateStart(Date createDateStart) {
-        
-        this.createDateStart = createDateStart;
-    }
-    
-    public Date getCreateDateEnd() {
-        
-        return createDateEnd;
-    }
-    
-    public void setCreateDateEnd(Date createDateEnd) {
-        
-        this.createDateEnd = createDateEnd;
-    }
-    
     public Long getBuyOrderNo() {
-        
         return buyOrderNo;
     }
     
     public void setBuyOrderNo(Long buyOrderNo) {
-        
         this.buyOrderNo = buyOrderNo;
     }
     
-    public Long getSaleAccount() {
-        
-        return saleAccount;
+    public Long getSupplierId() {
+        return supplierId;
     }
     
-    public void setSaleAccount(Long saleAccount) {
-        
-        this.saleAccount = saleAccount;
+    public void setSupplierId(Long supplierId) {
+        this.supplierId = supplierId;
     }
     
-    public Long getCapitalAccount() {
-        
-        return capitalAccount;
+    public Long getSupplierType() {
+        return supplierType;
     }
     
-    public void setCapitalAccount(Long capitalAccount) {
-        
-        this.capitalAccount = capitalAccount;
+    public void setSupplierType(Long supplierType) {
+        this.supplierType = supplierType;
     }
     
-    public String getPayAmountTransactionNo() {
-        
-        return payAmountTransactionNo;
+    public String getSupplierName() {
+        return supplierName;
     }
     
-    public void setPayAmountTransactionNo(String payAmountTransactionNo) {
-        
-        this.payAmountTransactionNo = payAmountTransactionNo;
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
     }
     
-    public Integer getSaleAccountType() {
-        
-        return saleAccountType;
+    public Long getThirdBusNo() {
+        return thirdBusNo;
     }
     
-    public void setSaleAccountType(Integer saleAccountType) {
-        
-        this.saleAccountType = saleAccountType;
+    public void setThirdBusNo(Long thirdBusNo) {
+        this.thirdBusNo = thirdBusNo;
     }
     
-    public Integer getBuyAccountType() {
-        
-        return buyAccountType;
-    }
-    
-    public void setBuyAccountType(Integer buyAccountType) {
-        
-        this.buyAccountType = buyAccountType;
-    }
-    
-    public Long getBuyAccount() {
-        
-        return buyAccount;
-    }
-    
-    public void setBuyAccount(Long buyAccount) {
-        
-        this.buyAccount = buyAccount;
+    @Override
+    public String toString() {
+        return "UnpOrderVo:{ " + "\"saleOrderNo\":" + (saleOrderNo == null ? null : "\"" + saleOrderNo + "\"") + ",\"owner\":" + (owner == null ? null : "\"" + owner + "\"") + ",\"traNo\":" + (traNo == null ? null : "\"" + traNo + "\"") + ",\"customerNo\":" + (customerNo == null ? null : "\"" + customerNo + "\"") + ",\"customerType\":" + (customerType == null ? null : "\"" + customerType + "\"") + ",\"customerName\":" + (customerName == null ? "\"\"" : "\"" + customerName + "\"") + ",\"changeType\":" + (changeType == null ? null : "\"" + changeType + "\"") + ",\"payStatus\":" + (payStatus == null ? null : "\"" + payStatus + "\"") + ",\"payTime\":" + (payTime == null ? null : "\"" + payTime + "\"") + ",\"payTimeStart\":" + (payTimeStart == null ? "\"\"" : "\"" + payTimeStart + "\"") + ",\"payTimeEnd\":" + (payTimeEnd == null ? "\"\"" : "\"" + payTimeEnd + "\"") + ",\"status\":" + (status == null ? null : "\"" + status + "\"") + ",\"creator\":" + (creator == null ? "\"\"" : "\"" + creator + "\"") + ",\"createTime\":" + (createTime == null ? null : "\"" + createTime + "\"") + ",\"createTimeStart\":" + (createTimeStart == null ? "\"\"" : "\"" + createTimeStart + "\"") + ",\"createTimeEnd\":" + (createTimeEnd == null ? "\"\"" : "\"" + createTimeEnd + "\"") + ",\"modifier\":" + (modifier == null ? "\"\"" : "\"" + modifier + "\"") + ",\"modifyTime\":" + (modifyTime == null ? null : "\"" + modifyTime + "\"") + ",\"modifyTimeStart\":" + (modifyTimeStart == null ? "\"\"" : "\"" + modifyTimeStart + "\"") + ",\"modifyTimeEnd\":" + (modifyTimeEnd == null ? "\"\"" : "\"" + modifyTimeEnd + "\"") + ",\"valid\":" + (valid == null ? null : "\"" + valid + "\"") + ",\"buyOrderNo\":" + (buyOrderNo == null ? null : "\"" + buyOrderNo + "\"") + ",\"supplierId\":" + (supplierId == null ? null : "\"" + supplierId + "\"") + ",\"supplierType\":" + (supplierType == null ? null : "\"" + supplierType + "\"") + ",\"supplierName\":" + (supplierName == null ? "\"\"" : "\"" + supplierName + "\"") + ",\"thirdBusNo\":" + (thirdBusNo == null ? null : "\"" + thirdBusNo + "\"") + "}";
     }
 }
-
