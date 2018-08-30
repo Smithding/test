@@ -27,13 +27,26 @@ public interface UnpGroupItemService {
     UnpGroupType getGroupByCode(String code);
     
     /**
+     * 等待被改写
+     *
+     * @param agent
+     *         agent
+     * @param param
+     *         param
+     * @return UnpResult
+     */
+    <T> UnpResult<T> add(Agent agent, UnpGroupItemVo param);
+    
+    UnpResult<Object> add(Agent agent, UnpGroupItemVo param, Boolean group);
+    
+    /**
      * @param agent
      *         agent
      * @param group
      *         group
      * @return UnpResult
      */
-    UnpResult<UnpGroupType> addGroup(Agent agent, UnpGroupType group);
+    UnpResult<UnpGroupType> addGroup(Agent agent, UnpGroupItemVo group);
     
     /**
      * @param agent
@@ -62,7 +75,7 @@ public interface UnpGroupItemService {
      *         item
      * @return UnpResult
      */
-    UnpResult<UnpItemType> addItem(Agent agent, UnpItemType item);
+    UnpResult<UnpItemType> addItem(Agent agent, UnpGroupItemVo item);
     
     /**
      * 批量添加小类

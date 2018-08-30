@@ -1,12 +1,15 @@
 package com.tempus.gss.product.unp.api.entity.util;
 
+import java.io.Serializable;
+
 /**
  * @author ZhangBro
  */
-public class UnpResult<T> {
+public class UnpResult<T> implements Serializable {
     
     public static final int SUCCESS = 1;
     public static final int FAILED = 0;
+    private static final long serialVersionUID = -1302296694836057302L;
     
     private Integer code;
     private String msg;
