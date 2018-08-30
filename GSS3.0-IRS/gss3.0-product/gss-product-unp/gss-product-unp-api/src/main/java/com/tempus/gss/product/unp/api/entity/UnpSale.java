@@ -47,6 +47,7 @@ public class UnpSale implements Serializable {
     private BigDecimal actualAmount;
     /**
      * 支付状态,1:未支付(默认); 2:支付中; 3:已支付; 4:挂账支付;
+     *
      * @see com.tempus.gss.product.unp.api.entity.enums.EUnpConstant.PayStatus
      */
     private Integer payStatus;
@@ -71,6 +72,10 @@ public class UnpSale implements Serializable {
      */
     private String modifier;
     /**
+     * 修改人
+     */
+    private String source;
+    /**
      * 修改时间
      */
     private Date modifyTime;
@@ -78,6 +83,14 @@ public class UnpSale implements Serializable {
      * 删除标志 0 无效 已删除 1 有效
      */
     private Integer valid;
+    
+    public String getSource() {
+        return source;
+    }
+    
+    public void setSource(String source) {
+        this.source = source;
+    }
     
     public Long getSaleOrderNo() {
         return saleOrderNo;

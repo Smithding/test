@@ -34,6 +34,7 @@ public class UnpGroupItemVo implements Serializable {
      * 执行创建操作的用户
      */
     private String creator;
+    
     /**
      * 创建时间
      */
@@ -54,6 +55,8 @@ public class UnpGroupItemVo implements Serializable {
      * 删除标志 0 无效 已删除 1 有效
      */
     private Integer valid;
+    
+    private String remark;
     //-------------------------below is from Item-------------//
     
     /**
@@ -73,6 +76,59 @@ public class UnpGroupItemVo implements Serializable {
      * 推荐价格
      */
     private BigDecimal baseAmount;
+    /**
+     * 图片路径
+     */
+    private String img;
+    /**
+     * 排序级别 1级最高，往后递减，若遇到同样的级别，后创建的优先
+     */
+    private Integer sortNo;
+    
+    //-------------------------below is for query-------------//
+    /**
+     * 查询类型 true 查询大类列表
+     */
+    private Boolean group;
+    
+    public Boolean getGroup() {
+        if (this.group == null) {
+            return true;
+        }
+        return group;
+    }
+    
+    public UnpGroupItemVo setGroup(Boolean group) {
+        this.group = group;
+        return this;
+    }
+    
+    public String getRemark() {
+        return remark;
+    }
+    
+    public UnpGroupItemVo setRemark(String remark) {
+        this.remark = remark;
+        return this;
+    }
+    
+    public String getImg() {
+        return img;
+    }
+    
+    public UnpGroupItemVo setImg(String img) {
+        this.img = img;
+        return this;
+    }
+    
+    public Integer getSortNo() {
+        return sortNo;
+    }
+    
+    public UnpGroupItemVo setSortNo(Integer sortNo) {
+        this.sortNo = sortNo;
+        return this;
+    }
     
     public Long getTypeNo() {
         return typeNo;

@@ -14,6 +14,7 @@
         <result column="PAY_STATUS" jdbcType="TINYINT" property="payStatus"/>
         <result column="PAY_TIME" jdbcType="TIMESTAMP" property="payTime"/>
         <result column="STATUS" jdbcType="BIT" property="status"/>
+        <result column="SOURCE" jdbcType="VARCHAR" property="source"/>
         <result column="CREATOR" jdbcType="VARCHAR" property="creator"/>
         <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="MODIFIER" jdbcType="VARCHAR" property="modifier"/>
@@ -22,7 +23,7 @@
     </resultMap>
     <sql id="Base_Column_List">
     SALE_ORDER_NO, OWNER, TRA_NO, CUSTOMER_NO, CUSTOMER_TYPE, REMARK, CHANGE_TYPE, PLAN_AMOUNT,
-    ACTUAL_AMOUNT, PAY_STATUS, PAY_TIME, STATUS, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME,
+    ACTUAL_AMOUNT, PAY_STATUS, PAY_TIME, STATUS, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME,SOURCE
     VALID
   </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -244,8 +245,8 @@
         where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.unp.api.entity.UnpSale">
-        update UNP_SALE
-        set OWNER         = #{owner,jdbcType=INTEGER},
+        UPDATE UNP_SALE
+        SET OWNER         = #{owner,jdbcType=INTEGER},
             TRA_NO        = #{traNo,jdbcType=BIGINT},
             CUSTOMER_NO   = #{customerNo,jdbcType=BIGINT},
             CUSTOMER_TYPE = #{customerType,jdbcType=BIGINT},
@@ -261,6 +262,6 @@
             MODIFIER      = #{modifier,jdbcType=VARCHAR},
             MODIFY_TIME   = #{modifyTime,jdbcType=TIMESTAMP},
             VALID         = #{valid,jdbcType=INTEGER}
-        where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+        WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
     </update>
 </mapper>

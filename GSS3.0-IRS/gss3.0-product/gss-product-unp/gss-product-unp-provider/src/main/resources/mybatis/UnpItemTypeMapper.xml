@@ -49,16 +49,16 @@
         <if test="owner!=null and ''!=owner">
             AND OWNER = #{owner,jdbcType=INTEGER}
         </if>
-        <if test="groupCode!=null and groupCode!=''">
+        <if test="code!=null and code!=''">
             AND GROUP_CODE like concat('%',concat(#{code,jdbcType=VARCHAR},'%'))
         </if>
-        <if test="groupName!=null and groupName!=''">
+        <if test="name!=null and name!=''">
             AND GROUP_NAME like concat('%',concat(#{name,jdbcType=VARCHAR},'%'))
         </if>
-        <if test="code!=null and ''!=code">
+        <if test="itemCode!=null and ''!=itemCode">
             AND CODE like concat('%',concat(#{itemCode,jdbcType=VARCHAR},'%'))
         </if>
-        <if test="name!=null and ''!=name">
+        <if test="itemName!=null and ''!=itemName">
             AND NAME like concat('%',concat(#{itemName,jdbcType=VARCHAR},'%'))
         </if>
         <if test="baseAmount!=null and baseAmount!=''">

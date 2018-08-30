@@ -64,8 +64,30 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
     }
     
     @Override
+    public <T> UnpResult<T> add(Agent agent, UnpGroupItemVo param) {
+        this.addGroup(agent, param);
+        this.addItem(agent, param);
+        return null;
+    }
+    
+    @Override
+    public UnpResult<Object> add(Agent agent, UnpGroupItemVo param, Boolean group) {
+        UnpResult<Object> result = new UnpResult<>();
+        if (group != null && group) {
+            UnpResult<UnpGroupType> groupResult = this.addGroup(agent, param);
+            result.setCode(groupResult.getCode());
+            result.setMsg(groupResult.getMsg());
+        } else {
+            UnpResult<UnpItemType> itemResult = this.addItem(agent, param);
+            result.setCode(itemResult.getCode());
+            result.setMsg(itemResult.getMsg());
+        }
+        return result;
+    }
+    
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
-    public UnpResult<UnpGroupType> addGroup(Agent agent, UnpGroupType group) {
+    public UnpResult<UnpGroupType> addGroup(Agent agent, UnpGroupItemVo group) {
         UnpResult<UnpGroupType> result = new UnpResult<>();
         try {
             if (agent == null || group == null) {
@@ -140,23 +162,23 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
     }
     
     @Override
-    public UnpResult<UnpItemType> addItem(Agent agent, UnpItemType item) {
+    public UnpResult<UnpItemType> addItem(Agent agent, UnpGroupItemVo item) {
         UnpResult<UnpItemType> result = new UnpResult<>();
         try {
             if (agent == null || item == null) {
                 result.failed("参数 不能为空", null);
                 return result;
             }
-            if (StringUtil.isBlank(item.getGroupCode())) {
+            if (StringUtil.isBlank(item.getCode())) {
                 result.failed("大类代码 不能为空", null);
                 return result;
             }
-            if (StringUtil.isBlank(item.getCode())) {
-                result.failed("参数 不能为空", null);
+            if (StringUtil.isBlank(item.getItemCode())) {
+                result.failed("产品代码 不能为空", null);
                 return result;
             }
-            if (StringUtil.isBlank(item.getName())) {
-                result.failed("参数 不能为空", null);
+            if (StringUtil.isBlank(item.getItemName())) {
+                result.failed("产品名称 不能为空", null);
                 return result;
             }
             String groupName = "";
@@ -165,7 +187,7 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
             if (null != item.getBaseAmount()) {
                 baseAmount = item.getBaseAmount();
             }
-            if (StringUtil.isBlank(item.getGroupName())) {
+            if (StringUtil.isBlank(item.getCode())) {
                 UnpGroupType group = this.getGroupByCode(item.getCode());
                 if (group == null) {
                     result.failed("分类不存在", null);
@@ -175,7 +197,7 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
                 }
             }
             UnpItemType itemToAdd = null;
-            itemToAdd = this.getItemByCode(item.getCode());
+            itemToAdd = this.getItemByCode(item.getItemCode());
             if (itemToAdd != null) {
                 result.failed("要添加的产品代码已存在", itemToAdd);
                 return result;
@@ -187,7 +209,7 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
             itemToAdd.setName(item.getName());
             itemToAdd.setRemark(item.getRemark());
             itemToAdd.setBaseAmount(baseAmount);
-            itemToAdd.setGroupCode(item.getGroupCode());
+            itemToAdd.setGroupCode(item.getCode());
             itemToAdd.setGroupName(groupName);
             itemToAdd.setImg(item.getImg());
             itemToAdd.setCreator(agent.getAccount());
@@ -195,8 +217,8 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
             itemToAdd.setSortNo(item.getSortNo());
             itemToAdd.setValid(VALID);
             
-            if (itemTypeMapper.insertSelective(item) > 0) {
-                result.success("Add Item : OK", item);
+            if (itemTypeMapper.insertSelective(itemToAdd) > 0) {
+                result.success("Add Item : OK", itemToAdd);
             } else {
                 result.failed("Error", null);
             }
