@@ -45,18 +45,17 @@
             WHERE
                 ui.VALID = '1'
             <if test="ticketDateStart !=null and ticketDateStart != '' ">
-                AND IL.DEP_TIME <![CDATA[>=]]>DATE_FORMAT(#{ticketDateStart}, '%Y-%m-%d')
+                AND ue.CREATE_TIME <![CDATA[>=]]>#{ticketDateStart}
             </if>
             <if test="ticketDateEnd !=null  and ticketDateEnd != ''">
-                AND IL.DEP_TIME <![CDATA[<=]]>DATE_FORMAT(STR_TO_DATE(#{ticketDateEnd}, '%Y-%m-%d')+1, '%Y-%m-%d')
+                AND ue.CREATE_TIME <![CDATA[<=]]>#{ticketDateEnd}
             </if>
             <if test="itemTypeNo !=null">
                AND upe.ITEM_TYPE_NO =#{itemTypeNo}
             </if>
             <if test="changeType !=null">
-              AND ue.CHANGE_TYPE=#{changeType}'
+              AND ue.CHANGE_TYPE=#{changeType}
             </if>
-            ORDER BY
-                ue.SALE_ORDER_NO
+            ORDER BY ue.SALE_ORDER_NO
     </select>
 </mapper>

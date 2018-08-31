@@ -9,18 +9,19 @@ public class SaleReportQueryVo implements Serializable {
     //产品
     private Long itemTypeNo;
     //查询起始结束时间
-    private Date ticketDateStart;
-    private Date ticketDateEnd;
+    private String ticketDateStart;
+    private String ticketDateEnd;
 
     public Integer getChangeType() {
         return changeType;
     }
 
-    public void setChangeType(Integer changeTye) {
-        changeType = changeType;
+    public void setChangeType(Integer changeType) {
+        this.changeType = changeType;
     }
 
     public Long getItemTypeNo() {
+
         return itemTypeNo;
     }
 
@@ -28,19 +29,19 @@ public class SaleReportQueryVo implements Serializable {
         this.itemTypeNo = itemTypeNo;
     }
 
-    public Date getTicketDateStart() {
+    public String getTicketDateStart() {
         return ticketDateStart;
     }
 
-    public void setTicketDateStart(Date ticketDateStart) {
+    public void setTicketDateStart(String ticketDateStart) {
         this.ticketDateStart = ticketDateStart;
     }
 
-    public Date getTicketDateEnd() {
+    public String getTicketDateEnd() {
         return ticketDateEnd;
     }
 
-    public void setTicketDateEnd(Date ticketDateEnd) {
+    public void setTicketDateEnd(String ticketDateEnd) {
         this.ticketDateEnd = ticketDateEnd;
     }
 
