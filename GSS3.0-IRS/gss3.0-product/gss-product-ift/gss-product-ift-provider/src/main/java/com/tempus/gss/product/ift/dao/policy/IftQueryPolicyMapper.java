@@ -1,14 +1,9 @@
 package com.tempus.gss.product.ift.dao.policy;
 
-import java.util.Date;
 import java.util.List;
-
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.session.RowBounds;
 
 import com.baomidou.mybatisplus.mapper.AutoMapper;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
-import com.tempus.gss.product.ift.api.entity.policy.IftPolicyQuery;
 import com.tempus.gss.product.ift.api.entity.search.FlightQuery;
 
 
@@ -38,5 +33,5 @@ public interface IftQueryPolicyMapper extends AutoMapper<IftPolicy> {
 	 * @param query 查询条件
 	 * @return List<IftPolicy> 政策结果集合
 	 */
-	List<IftPolicy> query(@Param("owner") int owner, FlightQuery query);
+	List<IftPolicy> query(FlightQuery query);
 }

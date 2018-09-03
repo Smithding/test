@@ -23,6 +23,9 @@ public class FlightQuery implements Serializable{
 
 	/** SVUID */
 	private static final long serialVersionUID = 1L;
+	
+	/** 归集单位 */
+	private int owner;
 	/** 实际出票航空公司 */
 	private String airline;
 	/** 航程类型, 1:单程(默认); 2:往返; */
@@ -57,6 +60,14 @@ public class FlightQuery implements Serializable{
 	private int psgerNum;
 	/**乘客类型 1：成人；2:儿童;3:婴儿；4：成人+儿童；5成人+婴儿；*/
 	private int psgerType;
+	
+	
+	public int getOwner() {
+		return owner;
+	}
+	public void setOwner(int owner) {
+		this.owner = owner;
+	}
 	public String getAirline() {
 		return airline;
 	}
