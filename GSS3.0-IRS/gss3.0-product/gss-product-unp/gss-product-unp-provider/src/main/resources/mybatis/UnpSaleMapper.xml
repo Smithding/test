@@ -13,18 +13,16 @@
         <result column="ACTUAL_AMOUNT" jdbcType="DECIMAL" property="actualAmount"/>
         <result column="PAY_STATUS" jdbcType="TINYINT" property="payStatus"/>
         <result column="PAY_TIME" jdbcType="TIMESTAMP" property="payTime"/>
-        <result column="STATUS" jdbcType="BIT" property="status"/>
+        <result column="STATUS" jdbcType="INTEGER" property="status"/>
         <result column="SOURCE" jdbcType="VARCHAR" property="source"/>
         <result column="CREATOR" jdbcType="VARCHAR" property="creator"/>
         <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="MODIFIER" jdbcType="VARCHAR" property="modifier"/>
         <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
-        <result column="VALID" jdbcType="BIT" property="valid"/>
+        <result column="VALID" jdbcType="INTEGER" property="valid"/>
     </resultMap>
     <sql id="Base_Column_List">
-    SALE_ORDER_NO, OWNER, TRA_NO, CUSTOMER_NO, CUSTOMER_TYPE, REMARK, CHANGE_TYPE, PLAN_AMOUNT,
-    ACTUAL_AMOUNT, PAY_STATUS, PAY_TIME, STATUS, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME,SOURCE
-    VALID
+    SALE_ORDER_NO,OWNER,TRA_NO,CUSTOMER_NO,CUSTOMER_TYPE,REMARK,CHANGE_TYPE,PLAN_AMOUNT,ACTUAL_AMOUNT,PAY_STATUS,PAY_TIME,STATUS,SOURCE,CREATOR,CREATE_TIME,MODIFIER,MODIFY_TIME,VALID
   </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select

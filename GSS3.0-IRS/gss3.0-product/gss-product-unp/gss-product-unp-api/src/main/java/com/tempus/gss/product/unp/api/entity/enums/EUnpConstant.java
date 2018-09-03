@@ -29,7 +29,7 @@ public interface EUnpConstant {
      *         key
      * @return DataType
      */
-    <E> E format(Integer key);
+    <E extends Enum> E format(Integer key);
     
     /**
      * 订单的状态

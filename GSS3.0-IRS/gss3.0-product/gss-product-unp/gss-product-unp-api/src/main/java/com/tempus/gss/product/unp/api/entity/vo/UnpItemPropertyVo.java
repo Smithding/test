@@ -1,4 +1,4 @@
-package com.tempus.gss.product.unp.api.entity;
+package com.tempus.gss.product.unp.api.entity.vo;
 
 import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
 
@@ -8,7 +8,8 @@ import java.util.Date;
 /**
  * @author ZhangBro
  */
-public class UnpItemProperty implements Serializable {
+public class UnpItemPropertyVo implements Serializable {
+    
     /**
      * ID
      */
@@ -32,20 +33,11 @@ public class UnpItemProperty implements Serializable {
      */
     private String cName;
     /**
-     * 数据模式或者提示信息
-     */
-    private String pattern;
-    /**
-     * 排序级别 1级最高，往后递减，若遇到同样的级别，后创建的优先
-     */
-    private Integer sortNo;
-    /**
      * 数据类型:1文本;2数字```
      *
      * @see EUnpConstant.DataType
      */
     private Integer type;
-    private String typeStr;
     /**
      * 执行创建操作的用户
      */
@@ -54,33 +46,61 @@ public class UnpItemProperty implements Serializable {
      * 创建时间
      */
     private Date createTime;
-    /**
-     * 备注
-     */
-    private String remark;
+    private String createTimeStart;
+    private String createTimeEnd;
     /**
      * 状态（0，停用；1，启用）
      */
     private Integer valid;
+    /**
+     * 通用产品-类型代码
+     */
+    private String code;
+    /**
+     * 通用产品-类型名称
+     */
+    private String name;
     
-    public String getTypeStr() {
-        for (EUnpConstant.DataType d : EUnpConstant.DataType.values()) {
-            if (d.getKey().equals(type)) {
-                return d.getValue();
-            }
-        }
-        return "";
-        
+    private static final long serialVersionUID = 770152541861231962L;
+    
+    public String getCode() {
+        return code;
     }
     
-    public void setTypeStr(String typeStr) {
-        this.typeStr = typeStr;
+    public UnpItemPropertyVo setCode(String code) {
+        this.code = code;
+        return this;
     }
     
-    private static final long serialVersionUID = 4154205820747421247L;
+    public String getName() {
+        return name;
+    }
+    
+    public UnpItemPropertyVo setName(String name) {
+        this.name = name;
+        return this;
+    }
     
     public Integer getForType() {
         return forType;
+    }
+    
+    public String getCreateTimeStart() {
+        return createTimeStart;
+    }
+    
+    public UnpItemPropertyVo setCreateTimeStart(String createTimeStart) {
+        this.createTimeStart = createTimeStart;
+        return this;
+    }
+    
+    public String getCreateTimeEnd() {
+        return createTimeEnd;
+    }
+    
+    public UnpItemPropertyVo setCreateTimeEnd(String createTimeEnd) {
+        this.createTimeEnd = createTimeEnd;
+        return this;
     }
     
     public void setForType(Integer forType) {
@@ -119,22 +139,6 @@ public class UnpItemProperty implements Serializable {
         this.cName = cName;
     }
     
-    public String getPattern() {
-        return pattern;
-    }
-    
-    public void setPattern(String pattern) {
-        this.pattern = pattern;
-    }
-    
-    public Integer getSortNo() {
-        return sortNo;
-    }
-    
-    public void setSortNo(Integer sortNo) {
-        this.sortNo = sortNo;
-    }
-    
     public Integer getType() {
         return type;
     }
@@ -159,14 +163,6 @@ public class UnpItemProperty implements Serializable {
         this.createTime = createTime;
     }
     
-    public String getRemark() {
-        return remark;
-    }
-    
-    public void setRemark(String remark) {
-        this.remark = remark;
-    }
-    
     public Integer getValid() {
         return valid;
     }
@@ -174,4 +170,5 @@ public class UnpItemProperty implements Serializable {
     public void setValid(Integer valid) {
         this.valid = valid;
     }
+    
 }

@@ -20,27 +20,44 @@
         VALID
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-        select
+        SELECT
         <include refid="Base_Column_List"/>
-        from UNP_ITEM_PROPERTY
-        where ID = #{id,jdbcType=BIGINT}
+        FROM UNP_ITEM_PROPERTY
+        WHERE ID = #{id,jdbcType=BIGINT}
+    </select>
+    <select id="getAllPropertiersByItemCode" parameterType="java.lang.String" resultMap="BaseResultMap">
+        (
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM UNP_ITEM_PROPERTY
+        WHERE ITEM_NO = (
+        SELECT ITEM_TYPE_NO FROM UNP_ITEM_TYPE WHERE CODE = #{code,jdbcType=VARCHAR}))
+        UNION (
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM UNP_ITEM_PROPERTY UIP
+        WHERE UIP.ITEM_NO = (
+        SELECT TYPE_NO
+        FROM UNP_GROUP_TYPE
+        WHERE CODE = (
+        SELECT GROUP_CODE FROM UNP_ITEM_TYPE WHERE UNP_ITEM_TYPE.CODE = #{code,jdbcType=VARCHAR})))
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from UNP_ITEM_PROPERTY
         where ID = #{id,jdbcType=BIGINT}
     </delete>
     <insert id="insert" parameterType="com.tempus.gss.product.unp.api.entity.UnpItemProperty">
-        insert into UNP_ITEM_PROPERTY (ID, ITEM_NO,FOR_TYPE, ENAME,
+        INSERT INTO UNP_ITEM_PROPERTY (ID, ITEM_NO,FOR_TYPE, ENAME,
         CNAME, PATTERN, SORT_NO,
         TYPE, CREATOR, CREATE_TIME,
         REMARK, VALID)
-        values (#{id,jdbcType=BIGINT}, #{itemNo,jdbcType=BIGINT},#{forType,jdbcType=INTEGER}, #{eName,jdbcType=VARCHAR},
+        VALUES (#{id,jdbcType=BIGINT}, #{itemNo,jdbcType=BIGINT},#{forType,jdbcType=INTEGER}, #{eName,jdbcType=VARCHAR},
         #{cName,jdbcType=VARCHAR}, #{pattern,jdbcType=VARCHAR}, #{sortNo,jdbcType=INTEGER},
         #{type,jdbcType=INTEGER}, #{creator,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
         #{remark,jdbcType=VARCHAR}, #{valid,jdbcType=INTEGER})
     </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpItemProperty">
-        insert into UNP_ITEM_PROPERTY
+        INSERT INTO UNP_ITEM_PROPERTY
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="id != null">
                 ID,
@@ -119,7 +136,7 @@
         </trim>
     </insert>
     <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpItemProperty">
-        update UNP_ITEM_PROPERTY
+        UPDATE UNP_ITEM_PROPERTY
         <set>
             <if test="itemNo != null">
                 ITEM_NO = #{itemNo,jdbcType=BIGINT},
@@ -155,11 +172,11 @@
                 VALID = #{valid,jdbcType=INTEGER},
             </if>
         </set>
-        where ID = #{id,jdbcType=BIGINT}
+        WHERE ID = #{id,jdbcType=BIGINT}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.unp.api.entity.UnpItemProperty">
-        update UNP_ITEM_PROPERTY
-        set ITEM_NO     = #{itemNo,jdbcType=BIGINT},
+        UPDATE UNP_ITEM_PROPERTY
+        SET ITEM_NO     = #{itemNo,jdbcType=BIGINT},
             FOR_TYPE    = #{forType,jdbcType=INTEGER},
             ENAME       = #{eName,jdbcType=VARCHAR},
             CNAME       = #{cName,jdbcType=VARCHAR},
@@ -170,6 +187,6 @@
             CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
             REMARK      = #{remark,jdbcType=VARCHAR},
             VALID       = #{valid,jdbcType=INTEGER}
-        where ID = #{id,jdbcType=BIGINT}
+        WHERE ID = #{id,jdbcType=BIGINT}
     </update>
 </mapper>

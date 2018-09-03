@@ -2,6 +2,7 @@ package com.tempus.gss.product.unp.api.service;
 
 import com.tempus.gss.product.unp.api.entity.UnpItemProperty;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
+import com.tempus.gss.product.unp.api.entity.vo.UnpItemPropertyVo;
 import com.tempus.gss.vo.Agent;
 
 import java.util.List;
@@ -34,15 +35,14 @@ public interface UnpItemPropertyService {
     UnpResult<String> addProperties(Agent agent, List<UnpItemProperty> param);
     
     /**
-     * @param agent
-     *         agent
      * @param param
      *         UnpItemProperty
      *         <p>
      *         根据参数查询properties
      * @return UnpResult
      */
-    UnpResult<List<UnpItemProperty>> getProperties(Agent agent, UnpItemProperty param);
+    
+    List<UnpItemProperty> getProperties(UnpItemPropertyVo param);
     
     /**
      * @param agent
