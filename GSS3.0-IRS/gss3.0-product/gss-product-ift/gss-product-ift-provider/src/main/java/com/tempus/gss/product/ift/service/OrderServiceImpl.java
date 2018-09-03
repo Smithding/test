@@ -343,7 +343,7 @@ public class OrderServiceImpl implements IOrderService {
                 } catch (Exception e) {
                     log.info("获取pnr信息失败", e);
                 }
-                pnr.setCreateTime(new Date());
+                pnr.setCreateTime(today);
                 pnr.setCreator(String.valueOf(agent.getId()));
                 pnr.setOwner(agent.getOwner());
                 pnr.setPnrType(1);// 1：ETERM
