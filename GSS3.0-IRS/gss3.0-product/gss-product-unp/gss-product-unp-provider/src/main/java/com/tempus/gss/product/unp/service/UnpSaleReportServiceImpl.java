@@ -29,15 +29,6 @@ public class UnpSaleReportServiceImpl implements UnpSaleReportService {
 
         try {
             List<UnpSaleReportVo> unpSaleReportVos= unpSaleReportMapper.queryUnpSaleReports(page,saleReportQueryVo);
-               /* UnpItemTypeReportVo unpItemTypeReportVo = new UnpItemTypeReportVo();
-                if (unpSaleReportVos!=null){
-                    for (int i = 0; i <unpSaleReportVos.size() ; i++) {
-                        if (unpSaleReportVos.get(i).getAdditionalInfo()!=null && unpSaleReportVos.get(i).getAdditionalInfo()!="" ){
-                            List< UnpItemTypeReportVo> unpItemTypeReportVos = ( List<UnpItemTypeReportVo>)JSON.parseArray(unpSaleReportVos.get(i).getAdditionalInfo(), unpItemTypeReportVo.getClass());
-                            unpSaleReportVos.get(i).setUnpItemTypeReportVo(unpItemTypeReportVos);
-                        }
-                    }
-                }*/
             page.setRecords(unpSaleReportVos);
         } catch (Exception e) {
            logger.error("Error",e);
