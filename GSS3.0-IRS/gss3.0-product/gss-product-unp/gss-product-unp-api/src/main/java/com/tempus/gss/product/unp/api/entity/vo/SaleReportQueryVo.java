@@ -4,56 +4,54 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class SaleReportQueryVo implements Serializable {
-    
-    private static final long serialVersionUID = 8227010055220418761L;
-    /**
-     * 0 正常票 1 退票
-     */
+    // 0 正常票 1 退票
     private Integer changeType;
-    /**
-     * 产品
-     */
+    //产品
     private Long itemTypeNo;
-    /**
-     * 查询起始结束时间
-     */
-    private Date ticketDateStart;
-    private Date ticketDateEnd;
-    
+    //查询起始结束时间
+    private String ticketDateStart;
+    private String ticketDateEnd;
+
     public Integer getChangeType() {
         return changeType;
     }
-    
-    public void setChangeType(Integer changeTye) {
-        changeType = changeType;
+
+    public void setChangeType(Integer changeType) {
+        this.changeType = changeType;
     }
-    
+
     public Long getItemTypeNo() {
+
         return itemTypeNo;
     }
-    
+
     public void setItemTypeNo(Long itemTypeNo) {
         this.itemTypeNo = itemTypeNo;
     }
-    
-    public Date getTicketDateStart() {
+
+    public String getTicketDateStart() {
         return ticketDateStart;
     }
-    
-    public void setTicketDateStart(Date ticketDateStart) {
+
+    public void setTicketDateStart(String ticketDateStart) {
         this.ticketDateStart = ticketDateStart;
     }
-    
-    public Date getTicketDateEnd() {
+
+    public String getTicketDateEnd() {
         return ticketDateEnd;
     }
-    
-    public void setTicketDateEnd(Date ticketDateEnd) {
+
+    public void setTicketDateEnd(String ticketDateEnd) {
         this.ticketDateEnd = ticketDateEnd;
     }
-    
+
     @Override
     public String toString() {
-        return "SaleReportQueryVo:{ " + "\"changeType\":" + (changeType == null ? null : "\"" + changeType + "\"") + ",\"itemTypeNo\":" + (itemTypeNo == null ? null : "\"" + itemTypeNo + "\"") + ",\"ticketDateStart\":" + (ticketDateStart == null ? null : "\"" + ticketDateStart + "\"") + ",\"ticketDateEnd\":" + (ticketDateEnd == null ? null : "\"" + ticketDateEnd + "\"") + "}";
+        return "SaleReportQueryVo{" +
+                "changeType=" + changeType +
+                ", itemTypeNo=" + itemTypeNo +
+                ", ticketDateStart=" + ticketDateStart +
+                ", ticketDateEnd=" + ticketDateEnd +
+                '}';
     }
 }
