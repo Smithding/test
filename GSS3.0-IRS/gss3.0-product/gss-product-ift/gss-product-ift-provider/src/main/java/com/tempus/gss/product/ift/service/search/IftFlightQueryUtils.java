@@ -59,7 +59,7 @@ public class IftFlightQueryUtils {
 			Country deparcountry = airportService.queryCountryByAirport(flightQuery.getDepAirport());// 根据出发城市查询所属的国家
 			if (deparcountry != null && !deparcountry.equals("")) {
 				query.setDepartContinent(deparcountry.getContinentArea().replace(" ", ""));// 三字码所属州
-				query.setDepartCountry(deparcountry.getCountryEName());// 三字码所属国家
+				query.setDepartCountry(deparcountry.getCountryCode());// 三字码所属国家
 			} else {
 				logerr.info(flightQuery.getDepAirport() + "基础数据获取到城市信息");
 			}
@@ -74,7 +74,7 @@ public class IftFlightQueryUtils {
 			Country airrcountry = airportService.queryCountryByAirport(flightQuery.getArrAirport());// 根据抵达城市查询所属的国家
 			if (airrcountry != null && !airrcountry.equals("")) {
 				query.setArriveContinent(airrcountry.getContinentArea().replace(" ", ""));// 三字码所属州
-				query.setArriveCountry(airrcountry.getCountryEName());// 三字码所属国家
+				query.setArriveCountry(airrcountry.getCountryCode());// 三字码所属国家
 			} else {
 				logerr.info(flightQuery.getDepAirport() + "基础数据获取到城市信息");
 			}
