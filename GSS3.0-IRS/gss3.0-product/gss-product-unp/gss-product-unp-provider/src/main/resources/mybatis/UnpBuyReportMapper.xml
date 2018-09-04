@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.unp.dao.UnpBuyReportMapper">
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.unp.api.entity.vo.UnpBuyReportVo">
+        <result column="SALE_ORDER_NO" jdbcType="BIGINT" property="saleOrderNo" />
+        <result column="SUPPLIER_NAME" jdbcType="VARCHAR" property="supplierName" />
+        <result column="SOURCE" jdbcType="VARCHAR" property="source" />
+        <result column="PRODUCT_NAME" jdbcType="VARCHAR" property="productName" />
+        <result column="ITEM_STATUS" jdbcType="INTEGER" property="itemStuts" />
+        <result column="DEPT_NAME" jdbcType="VARCHAR" property="deptName" />
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="BUY_ACTUAL_AMOUNT" jdbcType="DECIMAL" property="buyActualAmount" />
+        <result column="SALE_ACTUAL_AMOUNT" jdbcType="DECIMAL" property="saleActualAmount" />
+        <result column="BUY_PLAN_AMOUNT" jdbcType="DECIMAL" property="buyPlanAmount" />
+        <result column="ADDITIONAL_INFO" jdbcType="VARCHAR" property="additionalInfo" />
+        <result column="THIRD_BUS_NO" jdbcType="VARCHAR" property="thirdBusNo" />
+    </resultMap>
+    <select id="queryUnpBuyReports" parameterType="com.tempus.gss.product.unp.api.entity.vo.BuyReportQueryVo" resultMap="BaseResultMap">
+        SELECT
+        ub.SALE_ORDER_NO AS SALE_ORDER_NO,
+        cs.SHORT_NAME AS SUPPLIER_NAME,
+        ue.SOURCE AS SOURCE,
+        upn.`NAME` AS PRODUCT_NAME,
+        ubi.ITEM_STATUS AS ITEM_STATUS,
+        mt.`NAME` AS DEPT_NAME,
+        ue.ACTUAL_AMOUNT AS SALE_ACTUAL_AMOUNT,
+        ub.PLAN_AMOUNT AS BUY_PLAN_AMOUNT,
+        ub.ACTUAL_AMOUNT AS BUY_ACTUAL_AMOUNT,
+        ub.CREATE_TIME AS CREATE_TIME,
+        ui.ADDITIONAL_INFO AS ADDITIONAL_INFO,
+        ub.THIRD_BUS_NO AS THIRD_BUS_NO
+        FROM
+        UNP_BUY ub
+        LEFT JOIN CPS_SUPPLIER cs ON ub.SUPPLIER_ID = cs.SUPPLIER_NO
+        LEFT JOIN UNP_SALE ue ON ue.SALE_ORDER_NO = ub.SALE_ORDER_NO
+        LEFT JOIN UNP_BUY_ITEM ubi ON ubi.BUY_ORDER_NO = ub.BUY_ORDER_NO
+        LEFT JOIN UNP_ITEM_TYPE upn ON upn.ITEM_TYPE_NO = ubi.UNP_TYPE
+        LEFT JOIN SM_USER sr ON sr.LOGIN_NAME = ub.CREATOR
+        LEFT JOIN SM_DEPT mt ON mt.ID = sr.DEPT_ID
+        LEFT JOIN UNP_SALE_ITEM ui ON ui.SALE_ORDER_NO = ub.SALE_ORDER_NO
+        WHERE
+        ui.ITEM_STATUS IN (3, 4, 5)
+        AND ub.VALID = 1
+        <if test="ticketDateStart !=null and ticketDateStart != '' ">
+            AND ub.CREATE_TIME <![CDATA[>=]]>#{ticketDateStart}
+        </if>
+        <if test="ticketDateEnd !=null  and ticketDateEnd != ''">
+            AND ub.CREATE_TIME <![CDATA[<=]]>#{ticketDateEnd}
+        </if>
+        <if test="itemTypeNo !=null">
+            AND upn.ITEM_TYPE_NO =#{itemTypeNo}
+        </if>
+        <if test="changeType !=null">
+            AND ub.CHANGE_TYPE=#{changeType}
+        </if>
+        ORDER BY
+        ub.SALE_ORDER_NO
+    </select>
+</mapper>
