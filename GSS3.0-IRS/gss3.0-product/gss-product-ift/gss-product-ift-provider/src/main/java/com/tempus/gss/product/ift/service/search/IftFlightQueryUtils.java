@@ -60,6 +60,7 @@ public class IftFlightQueryUtils {
 			if (deparcountry != null && !deparcountry.equals("")) {
 				query.setDepartContinent(deparcountry.getContinentArea().replace(" ", ""));// 三字码所属州
 				query.setDepartCountry(deparcountry.getCountryEName());// 三字码所属国家
+				query.setDepartSign(deparcountry.getDomOrInt());
 			} else {
 				logerr.info(flightQuery.getDepAirport() + "基础数据获取到城市信息");
 			}
@@ -75,6 +76,7 @@ public class IftFlightQueryUtils {
 			if (airrcountry != null && !airrcountry.equals("")) {
 				query.setArriveContinent(airrcountry.getContinentArea().replace(" ", ""));// 三字码所属州
 				query.setArriveCountry(airrcountry.getCountryEName());// 三字码所属国家
+				query.setDepartSign(airrcountry.getDomOrInt());
 			} else {
 				logerr.info(flightQuery.getDepAirport() + "基础数据获取到城市信息");
 			}
@@ -200,10 +202,10 @@ public class IftFlightQueryUtils {
 					queryIBEDetail.setBackDuration(shoppingOD.getDuration());// 该OD总飞行时间
 					if (queryIBEDetail.getFlights().size() > 1) {
 						// 是否直飞
-						queryIBEDetail.setDirect(false);
+						queryIBEDetail.setRtnIsDirect(false);
 					} else {
 						// 是否直飞
-						queryIBEDetail.setDirect(true);
+						queryIBEDetail.setRtnIsDirect(true);
 					}
 					direction = "back";
 				}
