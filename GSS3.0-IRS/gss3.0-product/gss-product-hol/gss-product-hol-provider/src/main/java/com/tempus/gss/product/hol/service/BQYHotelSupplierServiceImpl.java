@@ -261,7 +261,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 					ProDetails proDetail = new ProDetails();
 					BaseRoomInfo baseRoomInfo = roomPriceItem.getBaseRoomInfo();
 					proDetail.setProId(baseRoomInfo.getRoomTypeID());
-					proDetail.setResProName(baseRoomInfo.getRoomName().replaceAll("\\s*", "").replaceAll("（", "(").replaceAll("）", ")"));
+					proDetail.setResProName(baseRoomInfo.getRoomName().replaceAll("\\s*", "").replaceAll("（", "(").replaceAll("）", ")").trim());
 					proDetail.setRoomFloor(baseRoomInfo.getFloorRange());
 					proDetail.setRoomSize(baseRoomInfo.getAreaRange());
 
@@ -301,7 +301,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 							proDetail.setBedSize(bedWidth);
 						}
 						//产品名称
-						resProBaseInfo.setSupPriceName(roomInfo.getRoomName());
+						resProBaseInfo.setSupPriceName(roomInfo.getRoomName().trim());
 
 						//床型
 						RoomBedTypeInfo roomBedTypeInfo = roomInfo.getRoomBedTypeInfo();
@@ -322,7 +322,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 						//取消规则
 						CancelLimitInfo cancelLimitInfo = roomInfo.getCancelLimitInfo();
 						if (null != cancelLimitInfo) {
-							resProBaseInfo.setBookingNotes(cancelLimitInfo.getCancelPolicyInfo());
+							resProBaseInfo.setBookingNotes(cancelLimitInfo.getCancelPolicyInfo().trim());
 							resProBaseInfo.setPolicyRemark(cancelLimitInfo.getLastCancelTime());
 							resProBaseInfo.setSourceFrom(Long.valueOf(cancelLimitInfo.getPolicyType()));
 						}
@@ -649,6 +649,7 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 			useRoom.setBookingNotes(roomInfo.getCancelPolicyInfo());
 			useRoom.setPolicyRemark(roomInfo.getLastCancelTime());
 			useRoom.setSourceFrom(Long.valueOf(roomInfo.getPolicyType()));
+			useRoom.setBedTypeName(roomInfo.getBedTypeName());
 
 			TreeMap<String, ProSaleInfoDetail> mapPro=new TreeMap<String, ProSaleInfoDetail>();
 			for (int i = 0; i < diff; i++) {

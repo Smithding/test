@@ -369,7 +369,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 					if (!orderStatus.equals(OwnerOrderStatus.CANCEL_OK.getKey())) {
 						if (OwnerOrderStatus.PAY_OK.getKey().equals(orderStatus) || OwnerOrderStatus.CANCEL_ONGOING.getKey().equals(orderStatus) || OwnerOrderStatus.ALREADY_CONRIRM.getKey().equals(orderStatus)) {
 							try {
-								BigDecimal saleRefund = saleRefund(AgentUtil.getAgent(), hotelOrder);
+								BigDecimal saleRefund = saleRefund(agent, hotelOrder);
 								if (null != saleRefund && saleRefund.compareTo(BigDecimal.ZERO) == 1) {	//退款成功
 									logger.info("bqy酒店订单退款成功,取消订单号为:" + orderNumber);
 									des = changeOrderStatus(agent, hotelOrder, OwnerOrderStatus.CANCEL_OK, TcOrderStatus.ALREADY_CANCEL);
@@ -722,11 +722,11 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		try {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 			dateStartDate = dateFormat.parse(orderReq.getCheckInTime());
-			Date departDate = dateFormat.parse(orderReq.getCheckOutTime());
-			Calendar cal = Calendar.getInstance();
+			departureDate = dateFormat.parse(orderReq.getCheckOutTime());
+			/*Calendar cal = Calendar.getInstance();
 			cal.setTime(departDate);
-			cal.add(Calendar.DAY_OF_MONTH, 1);
-			departureDate = cal.getTime();
+			cal.add(Calendar.DAY_OF_MONTH, 0);
+			departureDate = cal.getTime();*/
 			daysBetween = com.tempus.gss.ops.util.DateUtil.daysBetween(orderReq.getCheckInTime(),
 					orderReq.getCheckOutTime());
 		} catch (ParseException e) {
