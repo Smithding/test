@@ -14,6 +14,11 @@ import java.util.Map;
 public class QueryIBEDetail implements Serializable {
     
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
      * 出票航司.
      */
     private String ticketAirline;
@@ -81,8 +86,16 @@ public class QueryIBEDetail implements Serializable {
      * 总则编号.
      */
     private long priceSpecNo;
-    
-    /**
+    /**缺口国家EN*/
+    private String gapCountry;
+    public String getGapCountry() {
+		return gapCountry;
+	}
+
+	public void setGapCountry(String gapCountry) {
+		this.gapCountry = gapCountry;
+	}
+	/**
      * 数据来源(b2c/b2b/cc)
      */
     private String customerType;

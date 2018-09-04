@@ -47,11 +47,11 @@ public class FlightQuery implements Serializable {
 	/** 出发舱位 */
 	private String[] departCabin;
 	/** 中转机场，多个以"/"分割 */
-	private String[] transitAirport;
+	//private String[] transitAirport;
 	/** 中转机场国际I，还是国内D */
-	private String transitSign;
+	//private String transitSign;
 	/** 中转舱位 */
-	private String[] transitCabin;
+//	private String[] transitCabin;
 	/** 到达所属洲 */
 	private String arriveContinent;
 	/** 到达国家，A00代表全球，CN0代表境内，CN1代表境外，国家多个以"/"分割 */
@@ -78,15 +78,6 @@ public class FlightQuery implements Serializable {
 	public void setDepartSign(String departSign) {
 		this.departSign = departSign;
 	}
-
-	public String getTransitSign() {
-		return transitSign;
-	}
-
-	public void setTransitSign(String transitSign) {
-		this.transitSign = transitSign;
-	}
-
 	public String getArriveSign() {
 		return arriveSign;
 	}
@@ -197,22 +188,6 @@ public class FlightQuery implements Serializable {
 
 	public void setDepartCabin(String[] departCabin) {
 		this.departCabin = departCabin;
-	}
-
-	public String[] getTransitAirport() {
-		return transitAirport;
-	}
-
-	public void setTransitAirport(String[] transitAirport) {
-		this.transitAirport = transitAirport;
-	}
-
-	public String[] getTransitCabin() {
-		return transitCabin;
-	}
-
-	public void setTransitCabin(String[] transitCabin) {
-		this.transitCabin = transitCabin;
 	}
 
 	public String getArriveContinent() {
