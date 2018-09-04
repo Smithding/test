@@ -85,6 +85,17 @@
         <if test="modifyTimeEnd!=null and ''!=modifyTimeEnd">
             AND MODIFY_TIME <![CDATA[<=]]> #{modifyTimeEnd,jdbcType=TIMESTAMP}
         </if>
+        ORDER BY CREATE_TIME DESC
+    </select>
+    <select id="queryItemsByUncertainFactors" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM UNP_ITEM_TYPE
+        <if test="param!=null and param!=''">
+            WHERE NAME LIKE concat('%',concat(#{param,jdbcType=VARCHAR},'%')) OR CODE LIKE concat('%',concat(#{param,jdbcType=VARCHAR},'%')) OR GROUP_CODE LIKE concat('%',concat(#{param,jdbcType=VARCHAR},'%')) OR GROUP_NAME LIKE
+            concat('%',concat(#{param,jdbcType=VARCHAR},'%'))
+        </if>
+        ORDER BY CREATE_TIME DESC
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from UNP_ITEM_TYPE

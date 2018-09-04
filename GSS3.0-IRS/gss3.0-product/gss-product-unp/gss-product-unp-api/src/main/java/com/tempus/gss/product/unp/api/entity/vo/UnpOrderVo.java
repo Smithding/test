@@ -8,6 +8,7 @@ import java.util.Date;
  * 查询条件
  */
 public class UnpOrderVo implements Serializable {
+    private static final long serialVersionUID = -6160032397049678376L;
     /**
      * 销售单号
      */
@@ -76,6 +77,10 @@ public class UnpOrderVo implements Serializable {
      * 删除标志 0 无效 已删除 1 有效
      */
     private Integer valid;
+    private String groupName;
+    private String groupCode;
+    private String itemName;
+    private String itemCode;
     
     //-------------------------below is  from BuyOrder------------------------//
     /**
@@ -106,6 +111,38 @@ public class UnpOrderVo implements Serializable {
     
     public void setSaleOrderNo(Long saleOrderNo) {
         this.saleOrderNo = saleOrderNo;
+    }
+    
+    public String getGroupName() {
+        return groupName;
+    }
+    
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
+    
+    public String getGroupCode() {
+        return groupCode;
+    }
+    
+    public void setGroupCode(String groupCode) {
+        this.groupCode = groupCode;
+    }
+    
+    public String getItemName() {
+        return itemName;
+    }
+    
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
+    }
+    
+    public String getItemCode() {
+        return itemCode;
+    }
+    
+    public void setItemCode(String itemCode) {
+        this.itemCode = itemCode;
     }
     
     public Integer getOwner() {

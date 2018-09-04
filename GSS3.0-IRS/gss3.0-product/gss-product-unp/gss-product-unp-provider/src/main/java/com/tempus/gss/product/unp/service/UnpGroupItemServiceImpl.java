@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -146,6 +147,17 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
             logger.error("getItems  Error", e);
         }
         return page;
+    }
+    
+    @Override
+    public List<UnpItemType> getItems(String param) {
+        List<UnpItemType> list = new ArrayList<>();
+        try {
+            list = itemTypeMapper.queryItemsByUncertainFactors(param);
+        } catch (Exception e) {
+            logger.error("getItems By Uncertain Factors  Error", e);
+        }
+        return list;
     }
     
     @Override

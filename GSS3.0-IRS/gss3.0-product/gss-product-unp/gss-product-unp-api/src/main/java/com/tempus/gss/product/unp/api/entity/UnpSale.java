@@ -26,6 +26,10 @@ public class UnpSale implements Serializable {
      */
     private Long customerNo;
     /**
+     * 客户name, 外键
+     */
+    private String name;
+    /**
      * 客户类型, 外键
      */
     private Long customerType;
@@ -90,6 +94,14 @@ public class UnpSale implements Serializable {
     
     public void setSource(String source) {
         this.source = source;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
     }
     
     public Long getSaleOrderNo() {

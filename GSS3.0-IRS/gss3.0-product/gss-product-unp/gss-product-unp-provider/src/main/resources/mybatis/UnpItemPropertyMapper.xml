@@ -31,7 +31,7 @@
         <include refid="Base_Column_List"/>
         FROM UNP_ITEM_PROPERTY
         WHERE ITEM_NO = (
-        SELECT ITEM_TYPE_NO FROM UNP_ITEM_TYPE WHERE CODE = #{code,jdbcType=VARCHAR}))
+        SELECT ITEM_TYPE_NO FROM UNP_ITEM_TYPE WHERE CODE = #{code,jdbcType=VARCHAR}) OR FOR_TYPE=99)
         UNION (
         SELECT
         <include refid="Base_Column_List"/>

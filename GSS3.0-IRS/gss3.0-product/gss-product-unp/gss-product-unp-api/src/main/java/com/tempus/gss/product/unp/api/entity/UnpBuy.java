@@ -77,6 +77,10 @@ public class UnpBuy implements Serializable {
      */
     private String creator;
     /**
+     * 采购付款账号
+     */
+    private String buyAccount;
+    /**
      * 创建时间
      */
     private Date createTime;
@@ -103,6 +107,14 @@ public class UnpBuy implements Serializable {
     
     public Long getSaleOrderNo() {
         return saleOrderNo;
+    }
+    
+    public String getBuyAccount() {
+        return buyAccount;
+    }
+    
+    public void setBuyAccount(String buyAccount) {
+        this.buyAccount = buyAccount;
     }
     
     public void setSaleOrderNo(Long saleOrderNo) {

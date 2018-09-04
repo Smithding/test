@@ -18,7 +18,7 @@ public class UnpSaleItem implements Serializable {
     /**
      * 产品类型
      */
-    private Integer unpType;
+    private Long unpType;
     /**
      * 数量
      */
@@ -66,11 +66,11 @@ public class UnpSaleItem implements Serializable {
         this.saleOrderNo = saleOrderNo;
     }
     
-    public Integer getUnpType() {
+    public Long getUnpType() {
         return unpType;
     }
     
-    public void setUnpType(Integer unpType) {
+    public void setUnpType(Long unpType) {
         this.unpType = unpType;
     }
     

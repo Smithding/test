@@ -66,6 +66,13 @@ public interface UnpGroupItemService {
      */
     Page<UnpItemType> getItems(Page<UnpItemType> page, UnpGroupItemVo param);
     
+    /**
+     * 模糊匹配查询小类，只通过一个字符串查询
+     * @param param 可以是大类 code/name  也可以是 小类 code/name
+     * @return
+     */
+    List<UnpItemType> getItems(String param);
+    
     UnpItemType getItemByCode(String code);
     
     /**

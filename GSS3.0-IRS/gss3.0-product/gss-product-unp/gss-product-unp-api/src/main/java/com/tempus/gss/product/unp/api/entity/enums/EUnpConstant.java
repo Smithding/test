@@ -102,16 +102,18 @@ public interface EUnpConstant {
     enum DataType implements EUnpConstant {
         /** 防止空指针 */
         NULL(0, null),
-        /** 防止空指针 */
+        /** 文本 */
         TEXT(1, "文本"),
-        /** 防止空指针 */
+        /** 2, "数字" */
         NUMBER(2, "数字"),
-        /** 防止空指针 */
+        /** 3, "货币" */
         DECIMAL(3, "货币"),
-        /** 防止空指针 */
+        /** 4, "日期" */
         DATE(4, "日期"),
-        /** 防止空指针 */
-        FILE(5, "文件");
+        /** 5, "文件" */
+        FILE(5, "文件"),
+        /** 6, "正负（是非）值" */
+        BOOLEAN(6, "正负（是非）值");
         
         /** Key. */
         private int key;
