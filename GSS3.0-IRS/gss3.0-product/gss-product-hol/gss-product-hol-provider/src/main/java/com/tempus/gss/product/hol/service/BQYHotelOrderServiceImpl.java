@@ -635,7 +635,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
-	public HotelOrder createOrder(Agent agent, CreateOrderReq orderReq, OrderCreateReq orderCreateReq, RoomInfo roomInfo) {
+	public HotelOrder createOrder(Agent agent, CreateOrderReq orderReq, OrderCreateReq orderCreateReq, RoomInfo roomInfo) throws GSSException {
 		if (tempusMobile.equals(orderCreateReq.getLinkManMobile())) {
 			orderReq.setMobile(tempusMobile);
 		}else {
@@ -943,9 +943,13 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		//可以不传
 		orderReq.setChannelType(2);
 		CreateOrderRespone createOrderRespone = bqyHotelInterService.createOrder(orderReq);
-		Long orderNo = createOrderRespone.getOrderNumber();
 		// 判断条件返回0订单创建失败
-		if (null != createOrderRespone && orderNo > 0) {
+		if (null != createOrderRespone) {
+			Long orderNo = createOrderRespone.getOrderNumber();
+			if (null == orderNo || orderNo <= 0){
+				logger.info("返回结果订单号为空或小于等于0!");
+				throw new GSSException("bqy酒店创建失败!", String.valueOf(saleOrderNo), "bqy酒店创建失败,返回结果订单号为空或小于等于0!");
+			}
 			//订单创建成功更新订单表中数据
 			hotelOrder.setHotelOrderNo(orderNo.toString());
 			hotelOrder.setTcOrderStatus(TcOrderStatus.WAIT_PAY.getKey());
@@ -954,7 +958,8 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			hotelOrderMapper.updateById(hotelOrder);
 			return hotelOrder;
 		}else {
-			throw new GSSException("bqy酒店创建失败!", String.valueOf(saleOrderNo), "bqy酒店创建失败,返回结果为空或订单号小于等于0!");
+			logger.info("bqy酒店创建失败,返回结果为空!");
+			throw new GSSException("bqy酒店创建失败!", String.valueOf(saleOrderNo), "bqy酒店创建失败,返回结果为空!");
 		}
 	}
 }
