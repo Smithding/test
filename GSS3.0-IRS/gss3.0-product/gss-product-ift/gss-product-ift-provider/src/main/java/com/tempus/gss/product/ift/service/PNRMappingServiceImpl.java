@@ -56,7 +56,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
     protected final transient Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
-    public QueryIBEDetail pnrMapping(RequestWithActor<String> flightQueryRequest, String customerType) {
+    public QueryIBEDetail pnrMapping(RequestWithActor<String> flightQueryRequest, String customerType,String isCivilTicket) {
         String flightQuery = flightQueryRequest.getEntity();
         log.info("查询参数：" + JsonUtil.toJson(flightQuery));
         Agent agent = flightQueryRequest.getAgent();
@@ -67,7 +67,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
         try {
             PnrOutPut pnr = getPnrService.getPnr(office, flightQuery);
             log.info("国际机票PNR预定返回原始信息：" + JsonUtil.toJson(pnr));
-            queryIBEDetail = getPnrByQueryIBEDetail(pnr);
+            queryIBEDetail = getPnrByQueryIBEDetail(pnr,isCivilTicket);
             getFSI(queryIBEDetail);
            /* if(!StringUtils.equals("8532",owner)) {//青岛无需匹配政策
                 try {
@@ -84,7 +84,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
     }
 
     @Override
-    public QueryIBEDetail contentPnrMapping(RequestWithActor<String> flightQueryRequest, String customerType) {
+    public QueryIBEDetail contentPnrMapping(RequestWithActor<String> flightQueryRequest, String customerType,String isCivilTicket) {
         String flightQuery = flightQueryRequest.getEntity();
         log.info("查询参数：" + JsonUtil.toJson(flightQuery));
         Agent agent = flightQueryRequest.getAgent();
@@ -95,7 +95,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
         try {
             PnrOutPut pnr = getPnrService.getInfoByPnrRawI(office, CommenUtil.decodeHtml(flightQuery));
             log.info("国际机票PNR内容预定返回原始信息：" + JsonUtil.toJson(pnr));
-            queryIBEDetail = getPnrByQueryIBEDetail(pnr);
+            queryIBEDetail = getPnrByQueryIBEDetail(pnr,isCivilTicket);
             getFSI(queryIBEDetail);
         } catch (Exception e) {
             log.info("pnr内容匹配出错", e);
@@ -106,7 +106,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
 
     //外采pnr内容解析
     @Override
-    public QueryIBEDetail outSourcePnrMapping(RequestWithActor<String> flightQueryRequest, String customerType) {
+    public QueryIBEDetail outSourcePnrMapping(RequestWithActor<String> flightQueryRequest, String customerType,String isCivilTicket) {
         String flightQuery = flightQueryRequest.getEntity();
         log.info("查询参数：" + JsonUtil.toJson(flightQuery));
         Agent agent = flightQueryRequest.getAgent();
@@ -117,7 +117,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
         try{
             PnrOutPut pnr = getPnrService.getOutsourceRaw(office,CommenUtil.decodeHtml(flightQuery));
             log.info("国际机票外采PNR内容预定返回原始信息：" + JsonUtil.toJson(pnr));
-            queryIBEDetail = getPnrByQueryIBEDetail(pnr);
+            queryIBEDetail = getPnrByQueryIBEDetail(pnr,isCivilTicket);
             getFSI(queryIBEDetail);
         }catch (Exception e){
             log.info("外采pnr内容匹配出错", e);
@@ -164,7 +164,7 @@ public class PNRMappingServiceImpl implements PNRMappingService {
         return map;
     }
 
-    public QueryIBEDetail getPnrByQueryIBEDetail(PnrOutPut pnr) throws ParseException {
+    public QueryIBEDetail getPnrByQueryIBEDetail(PnrOutPut pnr,String isCivilTicket) throws ParseException {
         QueryIBEDetail queryIBEDetail = new QueryIBEDetail();
         queryIBEDetail.setPnr(pnr.getPnrNo());
         SimpleDateFormat fl = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -270,7 +270,8 @@ public class PNRMappingServiceImpl implements PNRMappingService {
         }
         queryIBEDetail.setTicketAirline(flight.getAirline());
         try {
-            getPnrByQueryIBEDetail(queryIBEDetail, pnr.getPnrNo());
+            boolean flag =  checkIsCivilTicket(isCivilTicket);
+            getPnrByQueryIBEDetail(queryIBEDetail, pnr.getPnrNo(),flag);
 
         } catch (Exception e) {
             log.error("getPnrByQueryIBEDetail", e);
@@ -278,12 +279,13 @@ public class PNRMappingServiceImpl implements PNRMappingService {
         return queryIBEDetail;
     }
 
-    public void getPnrByQueryIBEDetail(QueryIBEDetail queryIBEDetail, String pnrCode) throws NotSupportException {
+    public void getPnrByQueryIBEDetail(QueryIBEDetail queryIBEDetail, String pnrCode,boolean isCivilTicket) throws NotSupportException {
         QteReq reqobj = new QteReq();
         reqobj.setAirportCode(queryIBEDetail.getFlights().get(0).getDepAirport());
         reqobj.setOffice(office);
         reqobj.setIataNo(iataNo);
         reqobj.setPnr(pnrCode.trim());
+        if(isCivilTicket){reqobj.setNegoCode("GP");}//公务员票价查询参数
         reqobj.setTicketingCarrier(queryIBEDetail.getTicketAirline());
         List<PsgerInput> psgerInputs = new ArrayList<PsgerInput>();
         List<PassengerTypePricesTotal> passengerTypePricesTotals = queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals();
@@ -306,6 +308,11 @@ public class PNRMappingServiceImpl implements PNRMappingService {
             SegQteReq segQteReq = new SegQteReq();
             segQteReq.setOffice(office);
             segQteReq.setIataNo(iataNo);
+            if(isCivilTicket){//公务员票价查询参数
+               List vipCodes = new ArrayList();
+               vipCodes.add("GP");
+               segQteReq.setVipCodes(vipCodes);
+            }
             segQteReq.setTicketingCarrier(queryIBEDetail.getTicketAirline());
             psgerInputs = new ArrayList<PsgerInput>();
             passengerTypePricesTotals = queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals();
@@ -555,6 +562,14 @@ public class PNRMappingServiceImpl implements PNRMappingService {
         queryIBEDetail.setGoDepAirport(godepOD);
         queryIBEDetail.setBackDepAirport(backdepOD);
         queryIBEDetail.setBackArrAirport(backarrOD);
+    }
+
+    private boolean checkIsCivilTicket(String isCivilTicket){
+        boolean flag = Boolean.FALSE;
+        if(StringUtils.isNotEmpty(isCivilTicket) && StringUtils.equals("1",isCivilTicket)){
+            flag = Boolean.TRUE;
+        }
+        return  flag;
     }
 
     /**
