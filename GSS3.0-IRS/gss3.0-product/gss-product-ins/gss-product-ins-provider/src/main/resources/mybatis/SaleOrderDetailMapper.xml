@@ -86,7 +86,7 @@
         LEFT JOIN INS_SALE_ORDER_EXT isoe ON isod.SALE_ORDER_NO=isoe.SALE_ORDER_NO
         LEFT JOIN DPS_SALE ds ON ds.TRADE_NO=isoe.TRANSACTION_ID
         LEFT JOIN DPS_SALE_ITEM dsi ON ds.ID = dsi.SALE_ID AND isod.INSURED_NAME=dsi.NAME AND isoe.EXTENDED_FIELDS_JSON LIKE CONCAT('%',dsi.FLIGHT_NO,'%')
-        where isod.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+        where isod.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} GROUP BY INSURED_NAME,ISREPORT,INSURED_NO,isod.POLICY_NO,INSURED_CERTI_NO
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from INS_SALE_ORDER_DETAIL
