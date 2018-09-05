@@ -52,7 +52,7 @@
       #{planAmount,jdbcType=DECIMAL}, #{payStatus,jdbcType=INTEGER}, #{actualAmount,jdbcType=DECIMAL},
       #{payTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER}, #{creator,jdbcType=VARCHAR},
       #{createTime,jdbcType=TIMESTAMP}, #{modifier,jdbcType=VARCHAR}, #{modifyTime,jdbcType=TIMESTAMP},
-      #{valid,jdbcType=INTEGER},#{buyAccount,jdbcType=VARCHAR})
+      #{buyAccount,jdbcType=VARCHAR},#{valid,jdbcType=INTEGER})
   </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuy">
         insert into UNP_BUY

@@ -28,7 +28,7 @@
     </delete>
     <insert id="insert" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyItem">
         insert into UNP_BUY_ITEM (ITEM_ID, BUY_ORDER_NO, UNP_TYPE,
-        NUM, CHANGE_TYPE, GROUP_AMOUNT,
+          PNUM, CHANGE_TYPE, GROUP_AMOUNT,
         ITEM_STATUS, POLICY, VALID)
         values (#{itemId,jdbcType=BIGINT}, #{buyOrderNo,jdbcType=BIGINT}, #{unpType,jdbcType=INTEGER},
         #{num,jdbcType=INTEGER}, #{changeType,jdbcType=INTEGER}, #{groupAmount,jdbcType=DECIMAL},

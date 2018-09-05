@@ -1,6 +1,7 @@
 package com.tempus.gss.product.unp.api.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.tempus.gss.product.unp.api.entity.UnpBuy;
 import com.tempus.gss.product.unp.api.entity.UnpSale;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderCreateVo;
@@ -39,7 +40,7 @@ public interface UnpOrderService {
      *         UnpOrderCreateVo
      * @return UnpResult
      */
-    UnpResult<UnpSale> createBuy(Agent agent, UnpOrderCreateVo request);
+    UnpResult<UnpBuy> createBuy(Agent agent, UnpOrderCreateVo request);
     
     /**
      * @param agent
