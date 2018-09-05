@@ -947,8 +947,8 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		if (null != createOrderRespone) {
 			Long orderNo = createOrderRespone.getOrderNumber();
 			if (null == orderNo || orderNo <= 0){
-				logger.info("返回结果订单号为空或小于等于0!");
-				throw new GSSException("bqy酒店创建失败!", String.valueOf(saleOrderNo), "bqy酒店创建失败,返回结果订单号为空或小于等于0!");
+				logger.info("bqy酒店订单创建失败,返回结订单号为空或小于等于0!");
+				throw new GSSException("bqy酒店订单创建失败!", String.valueOf(saleOrderNo), "酒店订单创建失败,返回订单号为空!");
 			}
 			//订单创建成功更新订单表中数据
 			hotelOrder.setHotelOrderNo(orderNo.toString());
@@ -958,8 +958,8 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			hotelOrderMapper.updateById(hotelOrder);
 			return hotelOrder;
 		}else {
-			logger.info("bqy酒店创建失败,返回结果为空!");
-			throw new GSSException("bqy酒店创建失败!", String.valueOf(saleOrderNo), "bqy酒店创建失败,返回结果为空!");
+			logger.info("bqy酒店订单创建失败,返回结果为空!");
+			throw new GSSException("bqy酒店订单创建失败!", String.valueOf(saleOrderNo), "酒店订单创建失败,返回结果为空!");
 		}
 	}
 }
