@@ -705,6 +705,10 @@ public class OrderServiceImpl implements IOrderService {
 				//如果该被保人已经投保，则跳过
 				if(saleOrderDetail.getStatus()==2){
 					continue;
+				}else if(saleOrderDetail.getPolicyNo()!=null&&saleOrderDetail.getStatus()==1){
+					saleOrderDetail.setStatus(2);
+					saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
+					continue;
 				}
 				List<SaleOrderDetail> saleOrderDetails = new ArrayList<SaleOrderDetail>();
 				SaleOrderDetail detail = new SaleOrderDetail();
@@ -1042,6 +1046,10 @@ public class OrderServiceImpl implements IOrderService {
 					//如果该被保人已经投保，则越过
 					if(saleOrderDetail.getStatus()==2){
 						continue;
+					}else if(saleOrderDetail.getPolicyNo()!=null&&saleOrderDetail.getStatus()==1){
+						saleOrderDetail.setStatus(2);
+						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
+						continue;
 					}
 						List<SaleOrderDetail> saleOrderDetails = new ArrayList<SaleOrderDetail>();
 						SaleOrderDetail detail = new SaleOrderDetail();
@@ -1198,6 +1206,10 @@ public class OrderServiceImpl implements IOrderService {
 			// 对被保人循环进行投保操作
 			for (SaleOrderDetail saleOrderDetail : saleOrderDetailList){
 				if(saleOrderDetail.getStatus()==2 || saleOrderDetail.getStatus()==3 || saleOrderDetail.getStatus()==10){
+					continue;
+				}else if(saleOrderDetail.getPolicyNo()!=null&&saleOrderDetail.getStatus()==1){
+					saleOrderDetail.setStatus(2);
+					saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					continue;
 				}
 					List<SaleOrderDetail> saleOrderDetails = new ArrayList<SaleOrderDetail>();
@@ -1737,11 +1749,14 @@ public class OrderServiceImpl implements IOrderService {
 			throw new GSSException("保单号为空", "1010", "查询保单失败");
 		}
 		SaleOrderExt saleOrderExt = orderServiceDao.selectByPrimaryKey(requestWithActor.getEntity());
-		/**
-		 * 关联取出销售单的数据
-		 */
-		SaleOrder saleOrder = saleOrderService.getSOrderByNo(requestWithActor.getAgent(), requestWithActor.getEntity().longValue());
-		saleOrderExt.setSaleOrder(saleOrder);
+		if(saleOrderExt!=null){
+			/**
+			 * 关联取出销售单的数据
+			 */
+			SaleOrder saleOrder = saleOrderService.getSOrderByNo(requestWithActor.getAgent(), requestWithActor.getEntity().longValue());
+
+			saleOrderExt.setSaleOrder(saleOrder);
+		}
 		log.info("查询保单结束==============");
 		return saleOrderExt;
 	}
