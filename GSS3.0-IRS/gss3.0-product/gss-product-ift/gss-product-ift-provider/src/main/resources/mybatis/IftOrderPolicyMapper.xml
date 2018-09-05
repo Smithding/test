@@ -33,16 +33,16 @@
     	<if test="null != airline &amp;&amp; '' != airline">	AND (T1.AIRLINE=#{airline} OR T1.SUIT_AIRLINE like '%${airline}%') </if>
     	<if test="null != voyageType &amp;&amp; '' != voyageType">	AND (T1.VOYAGE_TYPE=#{voyageType} OR T1.VOYAGE_TYPE=3) </if>
     	<if test=" null != flyDate">
-			AND T1.FLY_START_DATE &gt;= #{flyDate}
+			AND T1.FLY_START_DATE &lt;= #{flyDate}
 		</if>
 		<if test=" null != flyDate">
-			AND T1.FLY_END_DATE &lt;= #{flyDate}
+			AND T1.FLY_END_DATE &gt;= #{flyDate}
 		</if>
 		<if test=" null != rtnFlyDate">
-			AND T1.RTN_START_DATE &gt;= #{rtnFlyDate}
+			AND T1.RTN_START_DATE &lt;= #{rtnFlyDate}
 		</if>
 		<if test=" null != rtnFlyDate">
-			AND T1.RTN_END_DATE &lt;= #{rtnFlyDate}
+			AND T1.RTN_END_DATE &gt;= #{rtnFlyDate}
 		</if>
 		<!-- 开始销售时间sql组装 -->
 		<if test=" null != saleWeek &amp;&amp; 1 &lt;= saleWeek &amp;&amp; 5 &gt;= saleWeek">
@@ -64,11 +64,11 @@
 			AND ((T1.DEPART_AIRPORT like '%${departAirport}%') 
 				OR (T1.DEPART_COUNTRY like '%${departCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${departAirport}%')
 				<!-- 境外 -->
-				<if test="'I' == departSign">
+				<if test="'I'.toString() == departSign">
 					OR (T1.DEPART_COUNTRY = 'CN1' AND T1.DEPART_EXCLUDE_COUNTRY not like '%${departCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${departAirport}%')
 				</if>
 				<!-- 境内 -->
-				<if test="'D' == departSign">
+				<if test="'D'.toString() == departSign">
 					OR (T1.DEPART_COUNTRY = 'CN0' AND T1.DEPART_EXCLUDE_COUNTRY not like '%${departCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${departAirport}%')
 				</if>
 				<!-- 全球 -->
@@ -80,11 +80,11 @@
 			AND ((T1.ARRIVE_AIRPORT like '%${arriveAirport}%') 
 				OR (T1.ARRIVE_COUNTRY like '%${arriveCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
 				<!-- 境外 -->
-				<if test="'I' == departSign">
+				<if test="'I'.toString() == departSign">
 					OR (T1.ARRIVE_COUNTRY = 'CN1' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
 				</if>
 				<!-- 境内 -->
-				<if test="'D' == departSign">
+				<if test="'D'.toString() == departSign">
 					OR (T1.ARRIVE_COUNTRY = 'CN0' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
 				</if>
 				<!-- 全球 -->
@@ -92,8 +92,8 @@
 				)
 		</if>
 		<if test=" null != psgerNum">
-			AND CAST(LEFT(T1.SUIT_PEOPLE_NUMBER,LOCATE('-',T1.SUIT_PEOPLE_NUMBER)-1) AS SIGNED) &gt;= #{psgerNum}
-			AND CAST(RIGHT(T1.SUIT_PEOPLE_NUMBER,LOCATE('-',T1.SUIT_PEOPLE_NUMBER)-1) AS SIGNED) &lt;= #{psgerNum}
+			AND CAST(LEFT(T1.SUIT_PEOPLE_NUMBER,LOCATE('-',T1.SUIT_PEOPLE_NUMBER)-1) AS SIGNED) &lt;= #{psgerNum}
+			AND CAST(RIGHT(T1.SUIT_PEOPLE_NUMBER,LOCATE('-',T1.SUIT_PEOPLE_NUMBER)-1) AS SIGNED) &gt;= #{psgerNum}
 		</if>
 		<if test=" null != psgerEven &amp;&amp; false == psgerEven">
 			AND (T1.SUIT_DOUBLE_PEOPLE IS NULL OR T1.SUIT_DOUBLE_PEOPLE = FALSE)   
