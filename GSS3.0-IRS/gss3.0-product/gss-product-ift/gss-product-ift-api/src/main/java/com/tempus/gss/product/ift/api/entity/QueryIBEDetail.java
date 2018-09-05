@@ -28,6 +28,10 @@ public class QueryIBEDetail implements Serializable {
      */
     private boolean isDirect;
     /**
+     * 回程是否直飞
+     */
+    private boolean rtnIsDirect;
+	/**
      * 航程类型：1:单程; 2:往返.
      * 目前仅支持单程和往返.
      */
@@ -123,7 +127,7 @@ public class QueryIBEDetail implements Serializable {
     private List<PnrPassenger> pnrPassengers;
     
     /**
-     * 乘机人信息.
+     * 航程信息.
      */
     private List<Flight> flights;
     
@@ -183,6 +187,12 @@ public class QueryIBEDetail implements Serializable {
         isDirect = direct;
     }
     
+    public boolean isRtnIsDirect() {
+		return rtnIsDirect;
+	}
+	public void setRtnIsDirect(boolean rtnIsDirect) {
+		this.rtnIsDirect = rtnIsDirect;
+	}
     public Date getGoDepTime() {
         
         return goDepTime;
