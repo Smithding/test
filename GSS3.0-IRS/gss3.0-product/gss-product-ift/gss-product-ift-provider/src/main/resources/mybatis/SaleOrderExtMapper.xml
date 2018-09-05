@@ -62,6 +62,8 @@
         <result column="BUY_LOCKER" property="buyLocker" jdbcType="BIGINT"/>
         <!--不分单时所有操作步骤都是由这个字段的操作员操作-->
         <result column="ALONE_LOCKER" property="aloneLocker" jdbcType="BIGINT"/>
+        <!--公务员订单标识-->
+        <result column="IS_CIVIL_ORDER" property="isCivilOrder" jdbcType="INTEGER"/>
         <association property="saleOrder" column="SALE_ORDER_NO"
                      select="com.tempus.gss.order.dao.SaleOrderMapper.selectByRecordNo"/>
         <!-- 一对一 PNR-->
@@ -270,6 +272,9 @@
             <if test="aloneLocker != null">
                 ALONE_LOCKER,
             </if>
+            <if test="isCivilOrder !=null">
+                IS_CIVIL_ORDER,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="saleOrderNo != null">
@@ -361,6 +366,9 @@
             </if>
             <if test="aloneLocker != null">
                 #{aloneLocker,jdbcType=BIGINT},
+            </if>
+            <if test="isCivilOrder!=null">
+                #{isCivilOrder,jdbcType=INTEGER},
             </if>
         </trim>
     </insert>

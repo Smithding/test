@@ -157,6 +157,13 @@ public class QueryServiceImpl implements IQueryService {
             segs.add(shoppingSeg);
         }
         shoppingInput.setSegs(segs);
+        if(checkIsCivilTicket(flightQuery.getIsCivilTicket())) {//公务员票参数处理
+            NegotiatedFareCode fareCode = new NegotiatedFareCode();
+            if (StringUtils.isNotEmpty(flightQuery.getAirline())) {
+                fareCode.setCarrier(flightQuery.getAirline());
+            }
+            fareCode.setCode("GP");
+        }
         log.info("开始调用shopping接口,入参:{}",JsonUtil.toJson(shoppingInput));
         ShoppingOutPut shoppingOutPut = shoppingService.shoppingI(shoppingInput);
         log.info("完成调用shopping接口"+shoppingOutPut.getShortText());
@@ -2180,5 +2187,13 @@ public class QueryServiceImpl implements IQueryService {
             }
         }
         return new BigDecimal(0);
+    }
+
+    private boolean checkIsCivilTicket(String param){
+        boolean flag = Boolean.FALSE;
+        if(StringUtils.isNotEmpty(param) && StringUtils.equals(param,"1")){
+            flag = Boolean.TRUE;
+        }
+        return flag;
     }
 }

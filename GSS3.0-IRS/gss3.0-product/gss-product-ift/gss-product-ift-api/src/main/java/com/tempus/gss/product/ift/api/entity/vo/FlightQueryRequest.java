@@ -10,11 +10,8 @@ import java.util.List;
  * 白屏查询请求.
  */
 public class FlightQueryRequest implements Serializable {
-    
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
+
+    private static final long serialVersionUID = -5535047763508030949L;
     
     /**
      * 航司.
@@ -101,6 +98,9 @@ public class FlightQueryRequest implements Serializable {
      * 更多参数   json类型字符串
      */
     private String json;
+
+    //展示公务机票
+    private String isCivilTicket;
     
     // <editor-fold desc="getters and setters">
     public String getDepAirline() {
@@ -261,6 +261,14 @@ public class FlightQueryRequest implements Serializable {
     
     public void setTransfers(List<String> transfers) {
         this.transfers = transfers;
+    }
+
+    public String getIsCivilTicket() {
+        return isCivilTicket;
+    }
+
+    public void setIsCivilTicket(String isCivilTicket) {
+        this.isCivilTicket = isCivilTicket;
     }
 }
 //</editor-fold>
