@@ -5,6 +5,7 @@ import com.tempus.gss.product.unp.api.entity.UnpBuy;
 import com.tempus.gss.product.unp.api.entity.UnpSale;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderCreateVo;
+import com.tempus.gss.product.unp.api.entity.vo.UnpOrderUpdateVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
 import com.tempus.gss.vo.Agent;
 
@@ -68,4 +69,9 @@ public interface UnpOrderService {
      * @return Page
      */
     Page<UnpSale> querySaleOrderList(Page<UnpSale> wrapper, UnpOrderVo param);
+    /*
+    * @param agent
+    * @param request
+    * */
+    UnpResult<UnpBuy> updateBuy(Agent agent, UnpOrderUpdateVo request);
 }

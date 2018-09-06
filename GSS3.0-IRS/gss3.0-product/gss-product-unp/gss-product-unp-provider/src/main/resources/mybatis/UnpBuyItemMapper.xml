@@ -5,7 +5,7 @@
         <id column="ITEM_ID" jdbcType="BIGINT" property="itemId"/>
         <result column="BUY_ORDER_NO" jdbcType="BIGINT" property="buyOrderNo"/>
         <result column="UNP_TYPE" jdbcType="INTEGER" property="unpType"/>
-        <result column="NUM" jdbcType="INTEGER" property="num"/>
+        <result column="PNUM" jdbcType="INTEGER" property="num"/>
         <result column="CHANGE_TYPE" jdbcType="INTEGER" property="changeType"/>
         <result column="GROUP_AMOUNT" jdbcType="DECIMAL" property="groupAmount"/>
         <result column="ITEM_STATUS" jdbcType="INTEGER" property="itemStatus"/>
@@ -13,7 +13,7 @@
         <result column="VALID" jdbcType="INTEGER" property="valid"/>
     </resultMap>
     <sql id="Base_Column_List">
-        ITEM_ID, BUY_ORDER_NO, UNP_TYPE, NUM, CHANGE_TYPE, GROUP_AMOUNT, ITEM_STATUS, POLICY,
+        ITEM_ID, BUY_ORDER_NO, UNP_TYPE, PNUM, CHANGE_TYPE, GROUP_AMOUNT, ITEM_STATUS, POLICY,
         VALID
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -47,7 +47,7 @@
                 UNP_TYPE,
             </if>
             <if test="num != null">
-                NUM,
+                PNUM,
             </if>
             <if test="changeType != null">
                 CHANGE_TYPE,
@@ -106,7 +106,7 @@
                 UNP_TYPE = #{unpType,jdbcType=INTEGER},
             </if>
             <if test="num != null">
-                NUM = #{num,jdbcType=INTEGER},
+                PNUM = #{num,jdbcType=INTEGER},
             </if>
             <if test="changeType != null">
                 CHANGE_TYPE = #{changeType,jdbcType=INTEGER},
@@ -138,4 +138,20 @@
             VALID        = #{valid,jdbcType=INTEGER}
         where ITEM_ID = #{itemId,jdbcType=BIGINT}
     </update>
+    <select id="selectCompletedByBuyOrderNo" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_BUY_ITEM
+        where BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
+        AND ITEM_STATUS='3'
+        AND CHANGE_TYPE=0
+    </select>
+    <select id="selectRefundByBuyOrderNo" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_BUY_ITEM
+        where BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
+        AND ITEM_STATUS IN (1,3)
+        AND CHANGE_TYPE=1
+    </select>
 </mapper>

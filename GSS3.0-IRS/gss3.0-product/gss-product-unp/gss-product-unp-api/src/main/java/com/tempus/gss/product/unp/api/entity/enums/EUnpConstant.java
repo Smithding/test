@@ -272,7 +272,7 @@ public interface EUnpConstant {
         
         /** Key. */
         private int key;
-        
+
         /** 名称. */
         private String value;
         
@@ -304,5 +304,55 @@ public interface EUnpConstant {
             return value;
         }
     }
-    
+    /*
+    * 操作类型
+    * */
+    enum Opertion implements EUnpConstant{
+
+        /** 无操作 */
+        DEFAULT(0, "无操作"),
+
+        /** 1 支付 */
+        PAY(1, "支付"),
+
+        /** 2 退票 */
+        REFUND(2, "退票"),
+
+        /** 3 取消 */
+        CANCEL(3, "取消"),
+        /**4退款*/
+        REFUND_MONEY(4,"退款");
+        /** Key. */
+        private int key;
+
+        /** 名称. */
+        private String value;
+        Opertion(int key, String value){
+            this.key = key;
+            this.value = value;
+        }
+
+        @Override
+        public Integer getKey() {
+            return key;
+        }
+
+        @Override
+        public String getValue() {
+            return value;
+        }
+
+        @Override
+        public Opertion format(Integer key) {
+            if (null == key) {
+                return DEFAULT;
+            }
+            for (Opertion item : Opertion.values()) {
+                if (key == item.key) {
+                    return item;
+                }
+            }
+            return DEFAULT;
+        }
+    }
 }

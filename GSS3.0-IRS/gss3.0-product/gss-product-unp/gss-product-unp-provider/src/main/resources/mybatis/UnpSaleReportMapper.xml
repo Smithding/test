@@ -54,7 +54,7 @@
                AND upe.ITEM_TYPE_NO =#{itemTypeNo}
             </if>
             <if test="changeType !=null">
-              AND ue.CHANGE_TYPE=#{changeType}
+              AND ui.CHANGE_TYPE=#{changeType}
             </if>
             ORDER BY ue.SALE_ORDER_NO
     </select>
