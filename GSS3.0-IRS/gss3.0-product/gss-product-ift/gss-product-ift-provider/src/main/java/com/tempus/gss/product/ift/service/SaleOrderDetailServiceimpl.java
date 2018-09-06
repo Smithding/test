@@ -124,4 +124,10 @@ public class SaleOrderDetailServiceimpl implements ISaleOrderDetailService{
 		}
 		return flag;
 	}
+
+	@Override
+	public SaleOrderDetail selectLastDetailByPgerNo(Long passengerNo) {
+		//查询乘客最新的有票号的详情
+		return  detailDao.selectLastDetailByPgerNo(passengerNo);
+	}
 }

@@ -1032,11 +1032,11 @@ public class ChangeServiceImpl implements IChangeService {
             }
             if (chdList !=null){
                 BigDecimal bigDecimalChd = new BigDecimal(chdList.size());
-                bigDecimalCount= bigDecimalCount.add(adtList.get(0).getCountPrice().multiply(bigDecimalChd));
+                bigDecimalCount= bigDecimalCount.add(chdList.get(0).getCountPrice().multiply(bigDecimalChd));
             }
             if (infList !=null){
                 BigDecimal bigDecimalInf= new BigDecimal(infList.size());
-                bigDecimalCount=bigDecimalCount.add(adtList.get(0).getCountPrice().multiply(bigDecimalInf));
+                bigDecimalCount=bigDecimalCount.add(infList.get(0).getCountPrice().multiply(bigDecimalInf));
             }
             RequestWithActor<IftRepayVo> rePayParameter = new RequestWithActor();
             IftRepayVo repayVo = new IftRepayVo();

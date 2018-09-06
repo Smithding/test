@@ -83,6 +83,14 @@
         from IFT_SALE_ORDER_DETAIL
         where SALE_ORDER_DETAIL_NO = #{saleOrderDetailNo,jdbcType=BIGINT} and VALID=1
     </select>
+    <select id="selectLastDetailByPgerNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from IFT_SALE_ORDER_DETAIL
+        where PASSENGER_NO = #{passengerNo,jdbcType=BIGINT} AND TICKET_NO IS NOT NULL and VALID=1
+        ORDER BY  CREATE_TIME DESC
+        limit 0,1
+    </select>
     <select id="selectBySaleChangeNoList" resultMap="BaseResultMap" >
         select
         <include refid="Base_Column_List"/>
