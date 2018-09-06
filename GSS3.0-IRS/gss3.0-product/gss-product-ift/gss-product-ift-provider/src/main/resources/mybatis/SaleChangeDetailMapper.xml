@@ -43,7 +43,7 @@
     select
     <include refid="Base_Column_List" />
     from IFT_SALE_CHANGE_DETAIL
-    where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
+    where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT} AND ORDER_DETAIL_TYPE=2
     order by ORDER_DETAIL_TYPE asc
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
