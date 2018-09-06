@@ -288,7 +288,7 @@ public class OrderServiceImpl implements IOrderService {
                 //todo 出票类型和政策有关目前先保存BSP
                 passenger.setTicketType("BSP");
                 passenger.setValid((byte) 1);
-                if(1==saleOrderExt.getIsCivilOrder()){//公务员订单
+                if(saleOrderExt.getIsCivilOrder()!=null && 1==saleOrderExt.getIsCivilOrder()){//公务员订单
                     String verifyWay = requestWithActor.getEntity().getVerifyWay();
                     String validContent = requestWithActor.getEntity().getUnitName();
                     passenger.setCivilValidateType(verifyWay);
