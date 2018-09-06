@@ -21,6 +21,7 @@ import com.tempus.gss.product.ift.api.entity.Flight;
 import com.tempus.gss.product.ift.api.entity.PassengerTypePricesTotal;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
 import com.tempus.gss.product.ift.api.entity.search.FlightQuery;
+import com.tempus.gss.product.ift.api.entity.search.Mileage;
 import com.tempus.gss.product.ift.api.entity.vo.FlightCabinPriceVo;
 import com.tempus.gss.product.ift.api.entity.vo.FlightQueryRequest;
 import com.tempus.gss.util.Collections;
@@ -58,9 +59,9 @@ public class IftFlightQueryUtils {
 			query.setDepartAirport(flightQuery.getDepAirport());// 出发城市
 			Country deparcountry = airportService.queryCountryByAirport(flightQuery.getDepAirport());// 根据出发城市查询所属的国家
 			if (deparcountry != null && !deparcountry.equals("")) {
-				query.setDepartContinent(deparcountry.getContinentArea().replace(" ", ""));// 三字码所属州
+				query.setDepartContinent(deparcountry.getAreaCode().replace(" ", ""));// 三字码所属州
 				query.setDepartCountry(deparcountry.getCountryCode());// 三字码所属国家
-				query.setDepartSign(deparcountry.getDomOrInt());
+				query.setDepartSign(deparcountry.getDomOrInt());//国际I还是国内D
 			} else {
 				logerr.info(flightQuery.getDepAirport() + "基础数据获取到城市信息");
 			}
@@ -74,7 +75,7 @@ public class IftFlightQueryUtils {
 			query.setArriveAirport(flightQuery.getArrAirport());
 			Country airrcountry = airportService.queryCountryByAirport(flightQuery.getArrAirport());// 根据抵达城市查询所属的国家
 			if (airrcountry != null && !airrcountry.equals("")) {
-				query.setArriveContinent(airrcountry.getContinentArea().replace(" ", ""));// 三字码所属州
+				query.setArriveContinent(airrcountry.getAreaCode().replace(" ", ""));// 三字码所属州
 				query.setArriveCountry(airrcountry.getCountryCode());// 三字码所属国家
 				query.setDepartSign(airrcountry.getDomOrInt());
 			} else {
@@ -177,8 +178,11 @@ public class IftFlightQueryUtils {
 			} else {
 				queryIBEDetail.setLegType(1);
 			}
-			List<Flight> flightList = new ArrayList<Flight>();
+			List<Flight> flightList = new ArrayList<Flight>();//航段集合
+			List<Mileage> mileagesList = new ArrayList<Mileage>();//里程集合
 			for (ShoppingOD shoppingOD : availableJourney.getOdOption()) {
+				//里程信息
+				Mileage mileage = new Mileage();
 				String direction = "";
 				if ("tvl".equals(shoppingOD.getDirection())) {// 封装去程信息
 					queryIBEDetail.setGoDepAirport(shoppingOD.getOrgCode());// 出发城市
@@ -186,7 +190,7 @@ public class IftFlightQueryUtils {
 					queryIBEDetail.setGoDepTime(fl.parse(shoppingOD.getDepartureTime()));// 起飞时间
 					queryIBEDetail.setGoArrTime(fl.parse(shoppingOD.getArrivalTime()));// 到达时间
 					queryIBEDetail.setGoDuration(shoppingOD.getDuration());// 该OD总飞行时间
-					if (queryIBEDetail.getFlights().size() > 1) {
+					if (shoppingOD.getFlight().size()>1) {
 						// 是否直飞
 						queryIBEDetail.setDirect(false);
 					} else {
@@ -247,16 +251,35 @@ public class IftFlightQueryUtils {
 					}
 					//当上一段的抵达不等于下一段的开始标示缺口成
 					if(!gapFlight.isEmpty()&&!gapFlight.get("gapFlight").toUpperCase().equals(shoppingFlight.getDepartureAirport().toUpperCase())){
-						Country deparcountry = airportService.queryCountryByAirport(shoppingFlight.getDepartureAirport());// 根据出发城市查询所属的国家
+						/*Country deparcountry = airportService.queryCountryByAirport(shoppingFlight.getDepartureAirport());// 根据出发城市查询所属的国家
 						if (deparcountry != null && !deparcountry.equals("")) {
 							queryIBEDetail.setGapCountry(deparcountry.getCountryEName());//缺口国家
 						} else {
 							logerr.info(shoppingFlight.getDepartureAirport() + "基础数据获取到城市信息");
-						}
+						}*/
 					}else{
 						gapFlight.put("gapFlight",shoppingFlight.getDepartureAirport());
 					}
 					flight.setDuration(shoppingFlight.getDuration());// 飞行时间,如 3:05表示飞行3 小时5 分钟
+					if(direction.equals("go")){
+						if(flight.getCodeshare()!=null&&!flight.getCodeshare().equals("")){//共享航程
+							queryIBEDetail.setIsShare(true);
+							mileage.setShareMileage(mileage.getShareMileage()+Integer.parseInt(shoppingFlight.getTPM()));//共享段里程
+						}else{
+							mileage.setNotShareMileage(mileage.getNotShareMileage()+Integer.parseInt(shoppingFlight.getTPM()));//非共享段里程
+						}
+						mileage.setTotalMileage(Integer.parseInt(shoppingFlight.getTPM()));//去程共里程
+						mileage.setFlightNum(1);//设置航程类型 1是去程
+					}else{
+						if(flight.getCodeshare()!=null&&!flight.getCodeshare().equals("")){//共享航程
+							queryIBEDetail.setIsShare(true);
+							mileage.setShareMileage(mileage.getShareMileage()+Integer.parseInt(shoppingFlight.getTPM()));//共享段里程
+						}else{
+							mileage.setNotShareMileage(mileage.getNotShareMileage()+Integer.parseInt(shoppingFlight.getTPM()));//非共享段里程
+						}
+						mileage.setTotalMileage(Integer.parseInt(shoppingFlight.getTPM()));//回程共里程
+						mileage.setFlightNum(2);//设置航程类型 2是回程
+					}
 					List<FlightCabinPriceVo> flightCabinPriceVos = new ArrayList<FlightCabinPriceVo>();
 					for (PassengerTypePricesTotal passengerTypePricesTotal : passengerTypePricesTotals) {
 						// psgerFltInfos": {"baggagePieces": 1,"baggageWeight":
@@ -267,6 +290,7 @@ public class IftFlightQueryUtils {
 								FlightCabinPriceVo flightCabinPriceVo = new FlightCabinPriceVo();// 每段乘客的报价内容.
 								flightCabinPriceVo.setCabin(psgerFlight.getCabinCode());// 舱位代码
 								flightCabinPriceVo.setFareBasisCode(map.get(passengerTypePricesTotal.getPassengerType()));// 乘客类型od运价
+								flightCabinPriceVo.setFare(passengerTypePricesTotal.getFare());
 								flightCabinPriceVo.setPassengerType(passengerTypePricesTotal.getPassengerType());// 设置乘客类型
 								flightCabinPriceVos.add(flightCabinPriceVo);//
 								flight.setGrade(psgerFlight.getCabinPref());// 舱位级别 ECONOMY
@@ -297,9 +321,11 @@ public class IftFlightQueryUtils {
 						}
 					}
 					flight.setFlightCabinPriceVos(flightCabinPriceVos);
-					flightList.add(flight);
+					flightList.add(flight);//航程信息
+					mileagesList.add(mileage);//里程信息
 				}
-				queryIBEDetail.setFlights(flightList);
+				queryIBEDetail.setFlights(flightList);//航程信息
+				queryIBEDetail.setMileages(mileagesList);
 			}
 			cabinsPricesTotals.setCabins(cabins);// 舱位代码
 			cabinsPricesTotals.setCabinsCount(abinsCount);// 舱位数量
@@ -307,7 +333,9 @@ public class IftFlightQueryUtils {
 		}
 		}catch(Exception e){
 			logerr.error("shopping航班查询解析封装对应的参数格式，和政策进行对比筛选:shoppingOutPutConvertQueryIBEDetails", e.getMessage());
+			e.printStackTrace();
 		}
+		System.out.println(JsonUtil.toJson(queryIBEDetails));
 		return queryIBEDetails;
 	}
 }

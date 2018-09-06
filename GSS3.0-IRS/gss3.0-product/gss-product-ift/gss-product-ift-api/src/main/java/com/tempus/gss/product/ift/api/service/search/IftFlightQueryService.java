@@ -27,7 +27,7 @@ import com.tempus.gss.vo.Agent;
 
 public interface IftFlightQueryService {
 	 /**航班白屏列表查询；根据shoppring结果匹配政策*/
-	 public void mappingPriceSpec(QueryIBEDetail queryIBEDetail,List<IftPolicy> policyList, String customerTypeNo, Agent agent); 
+	 public QueryIBEDetail mappingPriceSpec(QueryIBEDetail queryIBEDetail,RequestWithActor<FlightQueryRequest> request, String customerTypeNo, Agent agent); 
 	 
 	 /**根据查询白屏航班条件获取政策信息*/
 	 public List<IftPolicy> matcPolicy(RequestWithActor<FlightQueryRequest> request);
