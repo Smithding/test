@@ -45,8 +45,9 @@ public class BQYPushOrderInfo implements Serializable {
 		this.orderId = orderId;
 	}
 
-	public TcOrderStatus getChangeStatus() {
-		return TcOrderStatus.bqyKey(String.valueOf(this.changeStatus));
+	public Integer getChangeStatus() {
+		//return TcOrderStatus.bqyKey(String.valueOf(this.changeStatus));
+		return this.changeStatus;
 	}
 
 	public void setChangeStatus(Integer changeStatus) {

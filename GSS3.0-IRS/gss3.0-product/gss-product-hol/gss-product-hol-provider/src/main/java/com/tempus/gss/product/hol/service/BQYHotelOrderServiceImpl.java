@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.Future;
 
+import com.tempus.gss.order.entity.enums.BusinessType;
 import com.tempus.gss.order.entity.enums.GoodsBigType;
 import com.tempus.gss.order.entity.vo.ActualInfoSearchVO;
 import com.tempus.gss.order.entity.vo.CertificateCreateVO;
@@ -301,10 +302,11 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		certificateCreateVO.setCustomerNo(hotelOrder.getCustomerNo());
 		certificateCreateVO.setIncomeExpenseType(2);
 		certificateCreateVO.setAmount(hotelOrder.getTotalPrice());
+		certificateCreateVO.setSubBusinessType(BusinessType.BUY_ORDER);
 		List<BusinessOrderInfo> businessOrderInfoList = new ArrayList<>();
 		BusinessOrderInfo businessOrderInfo = new BusinessOrderInfo();
 		businessOrderInfo.setRecordNo(hotelOrder.getSaleOrderNo());
-		businessOrderInfo.setBusinessType(Long.valueOf(hotelOrder.getRequestText()).intValue());
+		businessOrderInfo.setBusinessType(BusinessType.SALE_CHANGE_ORDER);
 		businessOrderInfoList.add(businessOrderInfo);
 		certificateCreateVO.setOrderInfoList(businessOrderInfoList);
 		BigDecimal saleRefundCert = certificateService.saleRefundCert(agent, certificateCreateVO);
@@ -360,7 +362,8 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			String des= "";
 			String orderStatus = hotelOrder.getOrderStatus();
 			//订单状态
-	 		TcOrderStatus pushOrderStatus = bqyPushOrderInfo.getChangeStatus();
+			Integer changeStatus = bqyPushOrderInfo.getChangeStatus();
+			TcOrderStatus pushOrderStatus = TcOrderStatus.bqyKey(String.valueOf(changeStatus));
 			if (pushOrderStatus.getKey().equals(TcOrderStatus.ALREADY_TC_CONFIRM.getKey())) {	//订单确认
 				HotelOrderInfo hotelOrderInfo = getBQYHotelOrderInfo(Long.valueOf(orderNumber));
 				if (3 - hotelOrderInfo.getUserStatus() == 0) {
@@ -429,11 +432,11 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 								}
 							} catch (GSSException e) {
 								logger.info("bqy酒店订单取消异常:取消订单号为:" + orderNumber);
+								throw new GSSException("更新酒店订单", "0107", "bqy酒店订单取消异常:取消订单号为:" + orderNumber);
 								//更新酒店订单状态
-								hotelOrder.setOrderStatus(OwnerOrderStatus.CANCEL_BAD.getKey());
+								/*hotelOrder.setOrderStatus(OwnerOrderStatus.CANCEL_BAD.getKey());
 								hotelOrder.setCancelTime(new Date());
-								hotelOrderMapper.updateById(hotelOrder);
-								return false;
+								hotelOrderMapper.updateById(hotelOrder);*/
 							}
 						}else if (OwnerOrderStatus.WAIT_PAY.getKey().equals(orderStatus)){
 							des = changeOrderStatus(agent, hotelOrder, OwnerOrderStatus.CANCEL_OK, TcOrderStatus.ALREADY_CANCEL);
