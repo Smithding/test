@@ -106,10 +106,20 @@ public class IftPolicyRuleUtils {
 		boolean result = true;
 		if((2 == policy.getVoyageType() || 3 == policy.getVoyageType()) && null != policy.getRoundTripAirportType()){
 			result = false;
-			if(1 == policy.getRoundTripAirportType()){
-				
-//				if((StringUtils.isNotBlank(policy.getDepartAirport()) && policy.getDepartAirport().contains(query.getArriveAirport())) ||
-//						)
+			//1政策始发机场范围已经在sql中过滤
+			if(2 == policy.getRoundTripAirportType()){//同属洲际
+				if(query.getDepartContinent().equals(query.getArriveContinent())){
+					result = true;
+				}
+			}else if(3 == policy.getRoundTripAirportType()){//必须返回行程出发机场
+				if(query.getDepartAirport().equals(query.getArriveAirport())){
+					result = true;
+				}
+			}else if(4 == policy.getRoundTripAirportType()){//指定返回国家或机场范围
+				if(StringUtils.isNotBlank(policy.getRoundTripAirport()) 
+					&& (policy.getRoundTripAirport().contains(query.getArriveAirport()) || policy.getRoundTripAirport().contains(query.getArriveCountry()))){
+					result = true;
+				}
 			}
 		}
 		this.log(policy,result,"检查往返返回机场匹配[matcheTransitCabin]未通过");

@@ -31,7 +31,7 @@
     
     <sql id="queryWhere">
     	<if test="null != airline &amp;&amp; '' != airline">	AND (T1.AIRLINE=#{airline} OR T1.SUIT_AIRLINE like '%${airline}%') </if>
-    	<if test="null != voyageType &amp;&amp; '' != voyageType">	AND (T1.VOYAGE_TYPE=#{voyageType} OR T1.VOYAGE_TYPE=3) </if>
+    	<if test="null != voyageType">	AND (T1.VOYAGE_TYPE=#{voyageType} OR T1.VOYAGE_TYPE=3) </if>
     	<if test=" null != flyDate">
 			AND T1.FLY_START_DATE &lt;= #{flyDate}
 		</if>
@@ -80,15 +80,15 @@
 			AND ((T1.ARRIVE_AIRPORT like '%${arriveAirport}%') 
 				OR (T1.ARRIVE_COUNTRY like '%${arriveCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
 				<!-- 境外 -->
-				<if test="'I'.toString() == departSign">
-					OR (T1.ARRIVE_COUNTRY = 'CN1' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
+				<if test="'I'.toString() == arriveSign">
+					OR (T1.ARRIVE_COUNTRY = 'CN1' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
 				</if>
 				<!-- 境内 -->
-				<if test="'D'.toString() == departSign">
-					OR (T1.ARRIVE_COUNTRY = 'CN0' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
+				<if test="'D'.toString() == arriveSign">
+					OR (T1.ARRIVE_COUNTRY = 'CN0' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
 				</if>
 				<!-- 全球 -->
-				OR (T1.ARRIVE_COUNTRY = 'A00' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
+				OR (T1.ARRIVE_COUNTRY = 'A00' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
 				)
 		</if>
 		<if test=" null != psgerNum">
@@ -113,6 +113,22 @@
 		<if test=" null != rtnDepartWeek ">
 			AND (T1.RTN_NOTSUIT_CYCLE IS NULL OR  T1.RTN_NOTSUIT_CYCLE not like '%${rtnDepartWeek}%')
 		</if>
+		<!-- 往返时匹配返回机场控制（1政策始发机场范围） -->
+		<if test="null != voyageType &amp;&amp; 2 == voyageType">	AND (T1.ROUND_TRIP_AIRPORT_TYPE IS NULL OR  (T1.ROUND_TRIP_AIRPORT_TYPE = 1 
+			AND ((T1.DEPART_AIRPORT like '%${arriveAirport}%')
+			OR (T1.DEPART_COUNTRY like '%${arriveCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
+				<!-- 境外 -->
+				<if test="'I'.toString() == departSign">
+					OR (T1.DEPART_COUNTRY = 'CN1' AND T1.DEPART_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
+				</if>
+				<!-- 境内 -->
+				<if test="'D'.toString() == departSign">
+					OR (T1.DEPART_COUNTRY = 'CN0' AND T1.DEPART_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
+				</if>
+				<!-- 全球 -->
+				OR (T1.DEPART_COUNTRY = 'A00' AND T1.DEPART_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
+				)))
+		 </if>
     </sql>
     
     <select id="query" parameterType="com.tempus.gss.product.ift.api.entity.search.FlightQuery" resultType="com.tempus.gss.product.ift.api.entity.policy.IftPolicy">
