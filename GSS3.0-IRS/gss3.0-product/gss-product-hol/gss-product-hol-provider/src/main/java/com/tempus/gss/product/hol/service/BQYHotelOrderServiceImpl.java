@@ -83,6 +83,9 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private static final String BQY = "bqy";
+	private static final String WAIT_DISPOSE = "1";
+	private static final String ALREADY_DISPOSE = "2";
+
 
 	@Autowired
 	private IBQYHotelInterService bqyHotelInterService;
@@ -185,7 +188,6 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
             		if("0".equals(policyType) || "8".equals(policyType)) {
             			cancelOrderRes.setResult(false);
                         cancelOrderRes.setMsg("该订单不可取消!");
-                        
             		}else if ("1".equals(policyType)) {	//免费取消, 任意退
 						des = cancelOrder(agent, orderCancelBeforePayReq, cancelOrderRes, cancelParam, hotelOrder, des);
             		}else if ("2".equals(policyType) || "4".equals(policyType)) {	//限时取消 || 超时担保限时取消
@@ -200,7 +202,6 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
             				des = cancelOrder(agent, orderCancelBeforePayReq, cancelOrderRes, cancelParam, hotelOrder, des);
             			}
             		}
-            		
             	}
 			} catch (Exception e) {
 				logger.error("取消酒店订单请求出错"+e);
@@ -240,7 +241,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			    cancelOrderRes.setMsg("订单取消成功!");
 			    cancelOrderRes.setLasestCancelTime(hotelOrder.getCancelPenalty());
 
-				saleChangeExt.setStatus("2");
+				saleChangeExt.setStatus(ALREADY_DISPOSE);
 			    saleChangeExtMapper.updateById(saleChangeExt);
 			}else {
 				throw new GSSException("取消酒店订单", "0107", "取消酒店订单,退款失败!");
@@ -280,7 +281,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		}
 		cancelRecord.setChangeType(2);
 		cancelRecord.setValid(1);
-		cancelRecord.setStatus("1");
+		cancelRecord.setStatus(WAIT_DISPOSE);
 		saleChangeExtMapper.insertSelective(cancelRecord);
 		return cancelRecord;
 	}
@@ -422,6 +423,8 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 									des = changeOrderStatus(agent, hotelOrder, OwnerOrderStatus.CANCEL_OK, TcOrderStatus.ALREADY_CANCEL);
 									hotelOrder.setFactTotalPrice(hotelOrder.getFactTotalPrice().subtract(saleRefund));
 									hotelOrderMapper.updateById(hotelOrder);
+
+									saleChangeExt.setStatus(ALREADY_DISPOSE);
 									saleChangeExtMapper.updateById(saleChangeExt);
 								}
 							} catch (GSSException e) {
