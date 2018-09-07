@@ -55,7 +55,7 @@ public class IftFlightQueryUtils {
 		try {
 			FlightQueryRequest flightQuery = request.getEntity();
 			query.setOwner(request.getAgent().getOwner());
-			query.setAirline(query.getAirline());// 出票航司
+			query.setAirline(flightQuery.getAirline());// 出票航司
 			query.setDepartAirport(flightQuery.getDepAirport());// 出发城市
 			Country deparcountry = airportService.queryCountryByAirport(flightQuery.getDepAirport());// 根据出发城市查询所属的国家
 			if (deparcountry != null && !deparcountry.equals("")) {
