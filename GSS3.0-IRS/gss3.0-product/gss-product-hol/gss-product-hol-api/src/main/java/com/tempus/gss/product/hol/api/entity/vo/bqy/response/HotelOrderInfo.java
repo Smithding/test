@@ -192,6 +192,9 @@ public class HotelOrderInfo implements Serializable {
 	@JSONField(name="GetSupplierId")
 	private Long getSupplierId;				//获取子订单供应商ID
 
+	@JSONField(name="CancelPenaltyStart")
+	private String cancelPenaltyStart;		//取消时间
+
 	public Long getHotelOrderId() {
 		return hotelOrderId;
 	}
@@ -663,7 +666,12 @@ public class HotelOrderInfo implements Serializable {
 	public void setGetSupplierId(Long getSupplierId) {
 		this.getSupplierId = getSupplierId;
 	}
-	
-	
 
+	public String getCancelPenaltyStart() {
+		return cancelPenaltyStart;
+	}
+
+	public void setCancelPenaltyStart(String cancelPenaltyStart) {
+		this.cancelPenaltyStart = cancelPenaltyStart;
+	}
 }

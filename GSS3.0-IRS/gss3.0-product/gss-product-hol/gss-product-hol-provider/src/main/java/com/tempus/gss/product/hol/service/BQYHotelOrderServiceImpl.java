@@ -1030,7 +1030,12 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 				logger.info("bqy酒店订单创建失败,返回结订单号为空或小于等于0!");
 				throw new GSSException("bqy酒店订单创建失败!", String.valueOf(saleOrderNo), "酒店订单创建失败,返回订单号为空!");
 			}
+			//查询bqy酒店订单详情
+			OrderPayReq orderPayReq = new OrderPayReq();
+			orderPayReq.setOrderNumber(orderNo);
+			HotelOrderInfo bqyHotelOrder = bqyHotelInterService.orderDetail(orderPayReq);
 			//订单创建成功更新订单表中数据
+			hotelOrder.setCancelPenalty(bqyHotelOrder.getCancelPenaltyStart());
 			hotelOrder.setHotelOrderNo(orderNo.toString());
 			hotelOrder.setTcOrderStatus(TcOrderStatus.WAIT_PAY.getKey());
 			hotelOrder.setOrderStatus(OwnerOrderStatus.WAIT_PAY.getKey());
