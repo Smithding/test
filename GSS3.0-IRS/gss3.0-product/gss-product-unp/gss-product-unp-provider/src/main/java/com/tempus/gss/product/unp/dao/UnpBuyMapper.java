@@ -14,4 +14,6 @@ public interface UnpBuyMapper {
     int updateByPrimaryKeySelective(UnpBuy record);
 
     int updateByPrimaryKey(UnpBuy record);
+
+    UnpBuy selectBySaleOrderNo(Long saleOrderNo);
 }

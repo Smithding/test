@@ -51,7 +51,7 @@
             AND upn.ITEM_TYPE_NO =#{itemTypeNo}
         </if>
         <if test="changeType !=null">
-            AND ub.CHANGE_TYPE=#{changeType}
+            AND ubi.CHANGE_TYPE=#{changeType}
         </if>
         ORDER BY
         ub.SALE_ORDER_NO

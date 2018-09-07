@@ -34,6 +34,12 @@
         from UNP_BUY
         where BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
     </select>
+    <select id="selectBySaleOrderNo" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_BUY
+        where SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+    </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from UNP_BUY
     where BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
@@ -52,7 +58,7 @@
       #{planAmount,jdbcType=DECIMAL}, #{payStatus,jdbcType=INTEGER}, #{actualAmount,jdbcType=DECIMAL},
       #{payTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER}, #{creator,jdbcType=VARCHAR},
       #{createTime,jdbcType=TIMESTAMP}, #{modifier,jdbcType=VARCHAR}, #{modifyTime,jdbcType=TIMESTAMP},
-      #{valid,jdbcType=INTEGER},#{buyAccount,jdbcType=VARCHAR})
+      #{buyAccount,jdbcType=VARCHAR},#{valid,jdbcType=INTEGER})
   </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuy">
         insert into UNP_BUY
@@ -114,7 +120,7 @@
             <if test="valid != null">
                 VALID,
             </if>
-            <if test="valid != null">
+            <if test="buyAccount != null">
                 BUY_ACCOUNT,
             </if>
         </trim>
