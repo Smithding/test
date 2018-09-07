@@ -17,6 +17,9 @@ public class OrderCancelParam extends BaseQueryParam {
 	@JSONField(name="OrderNumber")
 	private Long orderNumber;		//订单号
 
+	@JSONField(name = "HotelOrderNumber")
+	private Long hotelOrderNumber;	//订单号(退订使用)
+
 	public String getBookingUserId() {
 		return bookingUserId;
 	}
@@ -32,7 +35,12 @@ public class OrderCancelParam extends BaseQueryParam {
 	public void setOrderNumber(Long orderNumber) {
 		this.orderNumber = orderNumber;
 	}
-	
-	
 
+	public Long getHotelOrderNumber() {
+		return hotelOrderNumber;
+	}
+
+	public void setHotelOrderNumber(Long hotelOrderNumber) {
+		this.hotelOrderNumber = hotelOrderNumber;
+	}
 }
