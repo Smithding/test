@@ -21,11 +21,36 @@
 		<result column="AUDIT_TIME" property="auditTime" jdbcType="DECIMAL"/>
 		<result column="CUSTOMER_NO" property="customerNo" jdbcType="BIGINT"/>
 		<result column="CUSTOMER_TYPE_NO" property="customerTypeNo" jdbcType="BIGINT"/>
+		<result column="BACK_PRICE" property="backPrice" jdbcType="DECIMAL"/>
+		<result column="FACT_PRICE" property="factPrice" jdbcType="DECIMAL"/>
+		<result column="HOTEL_ORDER_NO" property="hotelOrderNo" jdbcType="VARCHAR"/>
+		<result column="RECORD_NO" property="recordNo" jdbcType="BIGINT"/>
+		<result column="TRANSATION_ORDER_NO" property="transationOrderNo" jdbcType="BIGINT"/>
 	</resultMap>
 
 	<!-- 通用查询结果列-->
 	<sql id="Base_Column_List">
-		 ID AS id, OWNER is owner,SALE_CHANGE_NO AS saleChangeNo,BUY_CHANGE_NO AS buyChangeNo,SALE_ORDER_NO AS saleOrderNo,MODIFIER, STATUS, MODIFY_TIME AS modifyTime, VALID, CREATE_TIME AS createTime, CREATOR, LOCK_TIME AS lockTime, CHANGE_TYPE AS changeType, REMARK, AUDIT_PERSON AS auditPerson, AUDIT_TIME AS auditTime, CUSTOMER_NO AS customerNo, CUSTOMER_TYPE_NO AS customerTypeNo
+		 ID AS id,
+		 OWNER AS owner,
+		 SALE_CHANGE_NO AS saleChangeNo,
+		 BUY_CHANGE_NO AS buyChangeNo,
+		 SALE_ORDER_NO AS saleOrderNo,
+		 MODIFIER, STATUS,
+		 MODIFY_TIME AS modifyTime,
+		  VALID,
+		  CREATE_TIME AS createTime,
+		  CREATOR, LOCK_TIME AS lockTime,
+		   CHANGE_TYPE AS changeType,
+		   REMARK,
+		   AUDIT_PERSON AS auditPerson,
+		   AUDIT_TIME AS auditTime,
+		   CUSTOMER_NO AS customerNo,
+		   CUSTOMER_TYPE_NO AS customerTypeNo,
+		   BACK_PRICE AS backPrice,
+		   FACT_PRICE AS factPrice,
+		   HOTEL_ORDER_NO AS hotelOrderNo,
+		   RECORD_NO AS recordNo,
+		   TRANSATION_ORDER_NO AS transationOrderNo
 	</sql>
 
 	<select id="querySaleChangeExtList" resultMap="BaseResultMap"
@@ -48,7 +73,12 @@
 		hsce.AUDIT_PERSON,
 		hsce.AUDIT_TIME,
 		hsce.CUSTOMER_NO,
-		hsce.CUSTOMER_TYPE_NO
+		hsce.CUSTOMER_TYPE_NO,
+		hsce.BACK_PRICE,
+		hsce.FACT_PRICE,
+		hsce.HOTEL_ORDER_NO,
+		hsce.RECORD_NO,
+		hsce.TRANSATION_ORDER_NO
 		FROM
 		HOL_SALE_CHANGE_EXT hsce,
 		OS_SALECHANGE osc
