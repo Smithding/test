@@ -270,6 +270,12 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		cancelRecord.setSaleOrderNo(hotelOrder.getSaleOrderNo());
 		cancelRecord.setModifyTime(new Date());
 		cancelRecord.setCreateTime(new Date());
+		cancelRecord.setBackPrice(hotelOrder.getFactTotalPrice());
+		cancelRecord.setFactPrice(hotelOrder.getFactTotalPrice());
+		cancelRecord.setHotelOrderNo(hotelOrder.getHotelOrderNo());
+		cancelRecord.setTransationOrderNo(hotelOrder.getTransationOrderNo());
+		cancelRecord.setRecordNo(hotelOrder.getSaleOrderNo());
+
 		if(BQY.equals(flag)) {
 			cancelRecord.setCreator(BQY);
 			cancelRecord.setModifier(BQY);
