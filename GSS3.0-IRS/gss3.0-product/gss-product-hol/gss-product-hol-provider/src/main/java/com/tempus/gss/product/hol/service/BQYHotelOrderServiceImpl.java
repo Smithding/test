@@ -298,16 +298,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 	 * @return
 	 */
 	private BigDecimal saleRefund(Agent agent, HotelOrder hotelOrder, Long saleChangeNo) {
-		//创建变更单
-		CreatePlanAmountVO amountVO = new CreatePlanAmountVO();
-		amountVO.setRecordNo(saleChangeNo);
-		amountVO.setBusinessType(4);
-		amountVO.setGoodsType(4);
-		amountVO.setIncomeExpenseType(2);
-		amountVO.setPlanAmount(hotelOrder.getFactTotalPrice());
-		amountVO.setRecordMovingType(1);
-		planAmountRecordService.create(agent, amountVO);
-
+		//创建销售变更单
 		SaleChange saleChange = new SaleChange();
 		saleChange.setSaleChangeNo(saleChangeNo);
 		saleChange.setTransationOrderNo(hotelOrder.getTransationOrderNo());
@@ -318,6 +309,17 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		saleChange.setCreateTime(new Date());
 		saleChange.setGoodsType(GoodsBigType.GROGSHOP.getKey());
 		saleChangeService.create(agent, saleChange);
+		
+		//创建应付记录单
+		CreatePlanAmountVO amountVO = new CreatePlanAmountVO();
+		amountVO.setRecordNo(saleChangeNo);
+		amountVO.setBusinessType(4);
+		amountVO.setGoodsType(4);
+		amountVO.setIncomeExpenseType(2);
+		amountVO.setPlanAmount(hotelOrder.getFactTotalPrice());
+		amountVO.setRecordMovingType(1);
+		planAmountRecordService.create(agent, amountVO);
+		
 		//退款操作
 		ActualInfoSearchVO actualInfo = actualAmountRecorService.queryActualInfoByBusNo(agent, hotelOrder.getSaleOrderNo(), 2);
 		CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
