@@ -18,36 +18,6 @@ public class UnpOrderCreateVo implements Serializable {
     private List<UnpSaleItem> saleItems;
     private List<UnpBuyItem> buyItems;
     
-    /**
-     * 交易单号
-     */
-    private Long traNo;
-    /**
-     * 客户ID, 外键
-     */
-    private Long customerNo;
-    /**
-     * 客户类型, 外键
-     */
-    private Long customerType;
-    
-    /**
-     * 供应商ID
-     */
-    private Long supplierId;
-    /**
-     * 供应商类型
-     */
-    private Long supplierType;
-    /**
-     * 备注
-     */
-    private String saleRemark;
-    /**
-     * 备注
-     */
-    private String buyRemark;
-    
     public UnpBuy getUnpBuy() {
         return unpBuy;
     }
@@ -78,61 +48,5 @@ public class UnpOrderCreateVo implements Serializable {
     
     public void setBuyItems(List<UnpBuyItem> buyItems) {
         this.buyItems = buyItems;
-    }
-    
-    public Long getTraNo() {
-        return traNo;
-    }
-    
-    public void setTraNo(Long traNo) {
-        this.traNo = traNo;
-    }
-    
-    public Long getCustomerNo() {
-        return customerNo;
-    }
-    
-    public void setCustomerNo(Long customerNo) {
-        this.customerNo = customerNo;
-    }
-    
-    public Long getCustomerType() {
-        return customerType;
-    }
-    
-    public void setCustomerType(Long customerType) {
-        this.customerType = customerType;
-    }
-    
-    public Long getSupplierId() {
-        return supplierId;
-    }
-    
-    public void setSupplierId(Long supplierId) {
-        this.supplierId = supplierId;
-    }
-    
-    public Long getSupplierType() {
-        return supplierType;
-    }
-    
-    public void setSupplierType(Long supplierType) {
-        this.supplierType = supplierType;
-    }
-    
-    public String getSaleRemark() {
-        return saleRemark;
-    }
-    
-    public void setSaleRemark(String saleRemark) {
-        this.saleRemark = saleRemark;
-    }
-    
-    public String getBuyRemark() {
-        return buyRemark;
-    }
-    
-    public void setBuyRemark(String buyRemark) {
-        this.buyRemark = buyRemark;
     }
 }

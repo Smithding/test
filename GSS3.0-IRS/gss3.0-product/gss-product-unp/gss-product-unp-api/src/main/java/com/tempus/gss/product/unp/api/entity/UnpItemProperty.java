@@ -46,6 +46,7 @@ public class UnpItemProperty implements Serializable {
      */
     private Integer type;
     private String typeStr;
+    
     /**
      * 执行创建操作的用户
      */
@@ -55,6 +56,10 @@ public class UnpItemProperty implements Serializable {
      */
     private Date createTime;
     /**
+     * defaults
+     */
+    private String defaults;
+    /**
      * 备注
      */
     private String remark;
@@ -62,6 +67,14 @@ public class UnpItemProperty implements Serializable {
      * 状态（0，停用；1，启用）
      */
     private Integer valid;
+    
+    public String getDefaults() {
+        return defaults;
+    }
+    
+    public void setDefaults(String defaults) {
+        this.defaults = defaults;
+    }
     
     public String getTypeStr() {
         for (EUnpConstant.DataType d : EUnpConstant.DataType.values()) {

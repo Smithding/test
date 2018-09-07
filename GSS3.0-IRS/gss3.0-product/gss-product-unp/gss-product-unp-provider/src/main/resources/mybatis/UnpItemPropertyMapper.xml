@@ -13,10 +13,11 @@
         <result column="CREATOR" jdbcType="VARCHAR" property="creator"/>
         <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="REMARK" jdbcType="VARCHAR" property="remark"/>
+        <result column="DEFAULTS" jdbcType="VARCHAR" property="defaults"/>
         <result column="VALID" jdbcType="INTEGER" property="valid"/>
     </resultMap>
     <sql id="Base_Column_List">
-        ID, ITEM_NO,FOR_TYPE, ENAME, CNAME, PATTERN, SORT_NO, TYPE, CREATOR, CREATE_TIME, REMARK,
+        ID, ITEM_NO,FOR_TYPE, ENAME, CNAME, PATTERN, SORT_NO, TYPE, CREATOR, CREATE_TIME, REMARK,DEFAULTS,
         VALID
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -49,11 +50,11 @@
     <insert id="insert" parameterType="com.tempus.gss.product.unp.api.entity.UnpItemProperty">
         INSERT INTO UNP_ITEM_PROPERTY (ID, ITEM_NO,FOR_TYPE, ENAME,
         CNAME, PATTERN, SORT_NO,
-        TYPE, CREATOR, CREATE_TIME,
+        TYPE, CREATOR, CREATE_TIME,DEFAULTS,
         REMARK, VALID)
         VALUES (#{id,jdbcType=BIGINT}, #{itemNo,jdbcType=BIGINT},#{forType,jdbcType=INTEGER}, #{eName,jdbcType=VARCHAR},
         #{cName,jdbcType=VARCHAR}, #{pattern,jdbcType=VARCHAR}, #{sortNo,jdbcType=INTEGER},
-        #{type,jdbcType=INTEGER}, #{creator,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},
+        #{type,jdbcType=INTEGER}, #{creator,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP},#{defaults,jdbcType=VARCHAR},
         #{remark,jdbcType=VARCHAR}, #{valid,jdbcType=INTEGER})
     </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpItemProperty">
@@ -95,6 +96,9 @@
             <if test="valid != null">
                 VALID,
             </if>
+            <if test="defaults != null">
+                DEFAULTS,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -132,6 +136,9 @@
             </if>
             <if test="valid != null">
                 #{valid,jdbcType=INTEGER},
+            </if>
+            <if test="defaults != null">
+                #{defaults,jdbcType=VARCHAR},
             </if>
         </trim>
     </insert>
@@ -171,6 +178,9 @@
             <if test="valid != null">
                 VALID = #{valid,jdbcType=INTEGER},
             </if>
+            <if test="defaults != null">
+                DEFAULTS = #{defaults,jdbcType=VARCHAR},
+            </if>
         </set>
         WHERE ID = #{id,jdbcType=BIGINT}
     </update>
@@ -186,7 +196,8 @@
             CREATOR     = #{creator,jdbcType=VARCHAR},
             CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
             REMARK      = #{remark,jdbcType=VARCHAR},
-            VALID       = #{valid,jdbcType=INTEGER}
+            VALID       = #{valid,jdbcType=INTEGER},
+            DEFAULTS    = #{defaults,jdbcType=VARCHAR}
         WHERE ID = #{id,jdbcType=BIGINT}
     </update>
 </mapper>
