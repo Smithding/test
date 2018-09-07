@@ -102,7 +102,7 @@ public class IftPolicyRuleUtils {
 	 * @param query  查询政策信息
 	 * @return
 	 */
-	public boolean matcheTransitCabin(IftPolicy policy, FlightQuery query) {
+	public boolean matcheRtnAirport(IftPolicy policy, FlightQuery query) {
 		boolean result = true;
 		if((2 == policy.getVoyageType() || 3 == policy.getVoyageType()) && null != policy.getRoundTripAirportType()){
 			result = false;
@@ -122,7 +122,30 @@ public class IftPolicyRuleUtils {
 				}
 			}
 		}
-		this.log(policy,result,"检查往返返回机场匹配[matcheTransitCabin]未通过");
+		this.log(policy,result,"检查往返返回机场匹配[matcheRtnAirport]未通过");
+		return result;
+	}
+	
+	/**
+	 * 检查不适用转机机场
+	 * 
+	 * @param policy  待匹配的政策
+	 * @param transitAirports 转机机场集合
+	 * @return
+	 */
+	public boolean matcheNotSuitTransitAirport(IftPolicy policy, String[] transitAirports) {
+		boolean result = true;
+		if(null != policy.getIsNotsuitTransferAirport() && policy.getIsNotsuitTransferAirport()){
+			if(StringUtils.isNotBlank(policy.getNotsuitTransferAirport())){
+				for(String transitAirport : transitAirports){
+					if(policy.getNotsuitTransferAirport().contains(transitAirport)){
+						result = false;
+						break;
+					}
+				}
+			}
+		}
+		this.log(policy,result,"检查不适用转机机场[matcheNotSuitTransitAirport]未通过");
 		return result;
 	}
 	
