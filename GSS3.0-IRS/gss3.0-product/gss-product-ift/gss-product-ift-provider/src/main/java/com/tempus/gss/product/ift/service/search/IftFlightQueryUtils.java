@@ -9,8 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -24,7 +24,6 @@ import com.tempus.gss.product.ift.api.entity.search.FlightQuery;
 import com.tempus.gss.product.ift.api.entity.search.Mileage;
 import com.tempus.gss.product.ift.api.entity.vo.FlightCabinPriceVo;
 import com.tempus.gss.product.ift.api.entity.vo.FlightQueryRequest;
-import com.tempus.gss.util.Collections;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.tbd.entity.Country;
 import com.tempus.tbd.service.IAirportService;
@@ -40,7 +39,7 @@ import com.tempus.tbe.entity.Tax;
 
 @Service(value = "ift.fftFlightQueryUtils")
 public class IftFlightQueryUtils {
-	protected final transient Logger logerr = LoggerFactory.getLogger(getClass());
+	protected static final Logger logerr = LogManager.getLogger(IftFlightQueryUtils.class);
 	@Reference
 	private IAirportService airportService;
 
@@ -121,16 +120,18 @@ public class IftFlightQueryUtils {
 			String cabins = "";
 			String ticketType = "";
 			List<PassengerTypePricesTotal> passengerTypePricesTotals = new ArrayList<PassengerTypePricesTotal>();
+			List<Mileage> mileagesList = new ArrayList<Mileage>();//里程集合
 			// shoppingFare.getPsgerFares（航班查询列表才有）
 			for (PsgerFare psgerFare : shoppingFare.getPsgerFares()) {
 				PassengerTypePricesTotal passengerTypePricesTotal = new PassengerTypePricesTotal();
 				// 总个行程的票面价格
 				passengerTypePricesTotal.setFare(new BigDecimal(psgerFare.getBaseFare().getAmount()));
+				passengerTypePricesTotal.setNucFareInfos(psgerFare.getNucFareInfos());//NUC
 				// 运价计算横式
 				passengerTypePricesTotal.setFareLinear(psgerFare.getFareLinear());
-				if (psgerFare.getFareLinear().contains("/it")) {
+				/*if (psgerFare.getFareLinear().contains("/it")) {
 					ticketType = "IT";
-				}
+				}*/
 				// 乘客类型ADT成人,CNN儿童,INF婴儿
 				passengerTypePricesTotal.setPassengerType(psgerFare.getPsgerInfo().getCode());
 				// 运价基础代码 KOBCN
@@ -179,7 +180,6 @@ public class IftFlightQueryUtils {
 				queryIBEDetail.setLegType(1);
 			}
 			List<Flight> flightList = new ArrayList<Flight>();//航段集合
-			List<Mileage> mileagesList = new ArrayList<Mileage>();//里程集合
 			for (ShoppingOD shoppingOD : availableJourney.getOdOption()) {
 				//里程信息
 				Mileage mileage = new Mileage();
@@ -262,23 +262,23 @@ public class IftFlightQueryUtils {
 					}
 					flight.setDuration(shoppingFlight.getDuration());// 飞行时间,如 3:05表示飞行3 小时5 分钟
 					if(direction.equals("go")){
-						if(flight.getCodeshare()!=null&&!flight.getCodeshare().equals("")){//共享航程
+						if(shoppingFlight.getOpCode()!=null&&!shoppingFlight.getOpCode().equals("")){//共享航程
 							queryIBEDetail.setIsShare(true);
 							mileage.setShareMileage(mileage.getShareMileage()+Integer.parseInt(shoppingFlight.getTPM()));//共享段里程
 						}else{
 							mileage.setNotShareMileage(mileage.getNotShareMileage()+Integer.parseInt(shoppingFlight.getTPM()));//非共享段里程
 						}
-						mileage.setTotalMileage(Integer.parseInt(shoppingFlight.getTPM()));//去程共里程
-						mileage.setFlightNum(1);//设置航程类型 1是去程
+						mileage.setTotalMileage(mileage.getTotalMileage()+Integer.parseInt(shoppingFlight.getTPM()));//去程共里程
+						mileage.setFlightNum(0);//设置航程类型 1是去程
 					}else{
-						if(flight.getCodeshare()!=null&&!flight.getCodeshare().equals("")){//共享航程
+						if(shoppingFlight.getOpCode()!=null&&!shoppingFlight.getOpCode().equals("")){//共享航程
 							queryIBEDetail.setIsShare(true);
 							mileage.setShareMileage(mileage.getShareMileage()+Integer.parseInt(shoppingFlight.getTPM()));//共享段里程
 						}else{
 							mileage.setNotShareMileage(mileage.getNotShareMileage()+Integer.parseInt(shoppingFlight.getTPM()));//非共享段里程
 						}
-						mileage.setTotalMileage(Integer.parseInt(shoppingFlight.getTPM()));//回程共里程
-						mileage.setFlightNum(2);//设置航程类型 2是回程
+						mileage.setTotalMileage(mileage.getTotalMileage()+Integer.parseInt(shoppingFlight.getTPM()));//回程共里程
+						mileage.setFlightNum(1);//设置航程类型 2是回程
 					}
 					List<FlightCabinPriceVo> flightCabinPriceVos = new ArrayList<FlightCabinPriceVo>();
 					for (PassengerTypePricesTotal passengerTypePricesTotal : passengerTypePricesTotals) {
@@ -322,8 +322,8 @@ public class IftFlightQueryUtils {
 					}
 					flight.setFlightCabinPriceVos(flightCabinPriceVos);
 					flightList.add(flight);//航程信息
-					mileagesList.add(mileage);//里程信息
 				}
+				mileagesList.add(mileage);//里程信息
 				queryIBEDetail.setFlights(flightList);//航程信息
 				queryIBEDetail.setMileages(mileagesList);
 			}
@@ -332,7 +332,7 @@ public class IftFlightQueryUtils {
 			queryIBEDetails.add(queryIBEDetail);
 		}
 		}catch(Exception e){
-			logerr.error("shopping航班查询解析封装对应的参数格式，和政策进行对比筛选:shoppingOutPutConvertQueryIBEDetails", e.getMessage());
+			logerr.error("shopping航班查询解析封装对应的参数格式，和政策进行对比筛选:shoppingOutPutConvertQueryIBEDetails"+e.getMessage());
 			e.printStackTrace();
 		}
 		System.out.println(JsonUtil.toJson(queryIBEDetails));

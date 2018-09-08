@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.tempus.gss.product.ift.api.entity.search.Mileage;
+import com.tempus.tbe.entity.NucFareInfo;
 
 /**
  * Created by 杨威 on 2016/10/18.
@@ -61,12 +62,33 @@ public class FormulaParameters {
 	 */
 	private BigDecimal salePrice;
 	/**
+	 * 航程类型
+	 */
+	private Integer flightType;
+	/**
 	 * 里程信息
 	 */
 	private List<Mileage> mileage;
+	/**
+	 * NUC
+	 */
+	private List<NucFareInfo> nucFareInfos;
 
+	public List<NucFareInfo> getNucFareInfos() {
+		return nucFareInfos;
+	}
+	public void setNucFareInfos(List<NucFareInfo> nucFareInfos) {
+		this.nucFareInfos = nucFareInfos;
+	}
 	public List<Mileage> getMileage() {
 		return mileage;
+	}
+	public Integer getFlightType() {
+		return flightType;
+	}
+
+	public void setFlightType(Integer flightType) {
+		this.flightType = flightType;
 	}
 
 	public void setMileage(List<Mileage> mileage) {
