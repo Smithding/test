@@ -76,7 +76,7 @@ public class IftFlightQueryUtils {
 			if (airrcountry != null && !airrcountry.equals("")) {
 				query.setArriveContinent(airrcountry.getAreaCode().replace(" ", ""));// 三字码所属州
 				query.setArriveCountry(airrcountry.getCountryCode());// 三字码所属国家
-				query.setDepartSign(airrcountry.getDomOrInt());
+				query.setArriveSign(airrcountry.getDomOrInt());
 			} else {
 				logerr.info(flightQuery.getDepAirport() + "基础数据获取到城市信息");
 			}

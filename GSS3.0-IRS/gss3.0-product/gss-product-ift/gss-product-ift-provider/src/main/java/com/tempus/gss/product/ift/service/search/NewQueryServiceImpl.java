@@ -82,7 +82,6 @@ public class NewQueryServiceImpl implements NewQueryService {
 	IftFlightQueryService iftFlightQueryService;
 	@Autowired
 	private IftFlightQueryUtils iftFlightQueryUtils;
-
 	@Value("${ift.iataNo}")
 	private String iataNo;
 	@Value("${ift.office}")
