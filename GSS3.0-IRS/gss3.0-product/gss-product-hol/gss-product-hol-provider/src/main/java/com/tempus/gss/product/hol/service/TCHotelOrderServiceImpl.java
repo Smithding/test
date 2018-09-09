@@ -760,7 +760,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
 
 	@Override
 	public Page<HotelOrder> queryOrderListWithPage(Page<HotelOrder> page, RequestWithActor<HotelOrderVo> pageRequest) throws GSSException{
-		logger.info("根据条件查询酒店订单列表开始,入参:" + JSONObject.toJSONString(pageRequest));
+		logger.info("根据条件查询酒店订单列表开始,入参:" + JsonUtil.toJson(pageRequest));
 		try {
 			Agent agent = pageRequest.getAgent();
 	        if (StringUtil.isNullOrEmpty(agent)) {

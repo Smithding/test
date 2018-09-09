@@ -110,7 +110,7 @@ public class HolPayNoticeListener {
     	    		        		//hotelOrder.setFactTotalPrice(new BigDecimal(orderPay.getPayPrice()));
     	    		        		hotelOrder.setTcOrderStatus(TcOrderStatus.ALREADY_PAY.getKey());
 								  	hotelOrder.setResultCode(orderPay.getPayPrice());	//与八千翼的支付价格
-    	    		        		hotelOrder.setRequestCode(String.valueOf(payNoticeVO.getBusinessNo()));//付款交易单号
+    	    		        		//hotelOrder.setRequestCode(String.valueOf(payNoticeVO.getBusinessNo()));//付款交易单号
     	    		        		hotelOrderMapper.updateById(hotelOrder);
     		                    }else {		//支付失败
     		                    	Agent agent = AgentUtil.getAgent();

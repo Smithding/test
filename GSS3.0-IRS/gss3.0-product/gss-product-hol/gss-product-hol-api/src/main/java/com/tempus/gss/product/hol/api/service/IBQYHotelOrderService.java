@@ -49,4 +49,12 @@ public interface IBQYHotelOrderService {
 	 * @return
 	 */
     Future<OrderInfomationDetail> futureOrderDetailInfo(Agent agent, String hotelOrderNo);
+
+	/**
+	 * 更新订单状态
+	 * @param agent
+	 * @param orderNo
+	 * @return
+	 */
+    Boolean updateOrderStatus(Agent agent, String orderNo);
 }
