@@ -104,6 +104,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         unpSale.setSaleItems(saleItems);
         return unpSale;
     }
+    
     @Override
     public UnpBuy getBuyOrderInfo(UnpOrderVo params) {
         UnpBuy unpBuy = null;
@@ -525,11 +526,11 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         wrapper.setRecords(list);
         return wrapper;
     }
-
+    
     @Override
     public Page<UnpBuy> queryBuyOrderList(Page<UnpBuy> wrapper, UnpOrderVo param) {
         if (null == wrapper) {
-
+            
             wrapper = new Page<>();
         }
         if (null == param) {
@@ -539,7 +540,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         wrapper.setRecords(list);
         return wrapper;
     }
-
+    
     @Override
     public UnpResult<UnpSale> updateSale(Agent agent, UnpOrderUpdateVo request) {
         UnpResult<UnpSale> result = new UnpResult<>();
@@ -727,15 +728,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         }
         return list;
     }
-    @Override
-    public List<UnpBuyItem> getBuyItems(UnpOrderVo params) {
-        List<UnpBuyItem> list;
-        list = unpBuyItemMapper.selectItems(params.getBuyOrderNo());
-        if (NullableCheck.isNullOrEmpty(list)) {
-            return new ArrayList<>(2);
-        }
-        return list;
-    }
+    
     @Override
     public UnpSaleItem getItem(Long itemNo) {
         UnpOrderVo param = new UnpOrderVo();
