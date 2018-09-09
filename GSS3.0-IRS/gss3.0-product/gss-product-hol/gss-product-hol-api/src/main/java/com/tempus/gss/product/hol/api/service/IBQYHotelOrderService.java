@@ -24,7 +24,7 @@ public interface IBQYHotelOrderService {
 	 * @param orderReq
 	 * @return
 	 */
-	HotelOrder createOrder(Agent agent, CreateOrderReq orderReq, OrderCreateReq orderCreateReq, RoomInfo roomInfo);
+	HotelOrder createOrder(Agent agent, CreateOrderReq orderReq, OrderCreateReq orderCreateReq, RoomInfo roomInfo) throws GSSException;
 	
 	/**
 	 * 取消订单
@@ -49,4 +49,12 @@ public interface IBQYHotelOrderService {
 	 * @return
 	 */
     Future<OrderInfomationDetail> futureOrderDetailInfo(Agent agent, String hotelOrderNo);
+
+	/**
+	 * 更新订单状态
+	 * @param agent
+	 * @param orderNo
+	 * @return
+	 */
+    Boolean updateOrderStatus(Agent agent, String orderNo);
 }

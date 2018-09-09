@@ -1,12 +1,14 @@
 package com.tempus.gss.product.ift.api.entity;
 
-import com.tempus.tbe.entity.AvailableJourney;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
+import com.tempus.gss.product.ift.api.entity.search.Mileage;
+import com.tempus.tbe.entity.AvailableJourney;
 
 /**
  * Created by 杨威 on 2016/10/13.
@@ -14,6 +16,11 @@ import java.util.Map;
 public class QueryIBEDetail implements Serializable {
     
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
      * 出票航司.
      */
     private String ticketAirline;
@@ -23,6 +30,10 @@ public class QueryIBEDetail implements Serializable {
      */
     private boolean isDirect;
     /**
+     * 回程是否直飞
+     */
+    private boolean rtnIsDirect;
+	/**
      * 航程类型：1:单程; 2:往返.
      * 目前仅支持单程和往返.
      */
@@ -37,7 +48,8 @@ public class QueryIBEDetail implements Serializable {
      * 去程到达时间.
      */
     private Date goArrTime;
-    
+    /**去程是否有共享航程*/
+    private Boolean isShare;
     /**
      * 去程起点机场.
      */
@@ -51,7 +63,8 @@ public class QueryIBEDetail implements Serializable {
      * 回程起飞时间.
      */
     private Date backDepTime;
-    
+    /**回程是否有共享航程*/
+    private Boolean rtnIsShare;
     /**
      * 回程到达时间.
      */
@@ -81,8 +94,16 @@ public class QueryIBEDetail implements Serializable {
      * 总则编号.
      */
     private long priceSpecNo;
-    
-    /**
+    /**缺口国家EN*/
+    private String gapCountry;
+    public String getGapCountry() {
+		return gapCountry;
+	}
+
+	public void setGapCountry(String gapCountry) {
+		this.gapCountry = gapCountry;
+	}
+	/**
      * 数据来源(b2c/b2b/cc)
      */
     private String customerType;
@@ -110,11 +131,15 @@ public class QueryIBEDetail implements Serializable {
     private List<PnrPassenger> pnrPassengers;
     
     /**
-     * 乘机人信息.
+     * 航程信息.
      */
     private List<Flight> flights;
     
     /**
+     * 里程信息
+     */
+    private List<Mileage> mileages;
+	/**
      * 查询更多舱位呃参数信息，从搜索航班功能中保存下来的
      */
     private AvailableJourney availableJourney;
@@ -125,8 +150,40 @@ public class QueryIBEDetail implements Serializable {
 
     /**各个乘客类型数量统计*/
     private Map<String,Integer> passengerTypeCount;
+    /**政策集合*/
+    private List<IftPolicy> iftPolicies;
+    public List<IftPolicy> getIftPolicies() {
+		return iftPolicies;
+	}
 
-    public String getFareRule() {
+	public void setIftPolicies(List<IftPolicy> iftPolicies) {
+		this.iftPolicies = iftPolicies;
+	}
+
+	public List<Mileage> getMileages() {
+  		return mileages;
+  	}
+
+  	public void setMileages(List<Mileage> mileages) {
+  		this.mileages = mileages;
+  	}
+    public Boolean getIsShare() {
+		return isShare;
+	}
+
+	public void setIsShare(Boolean isShare) {
+		this.isShare = isShare;
+	}
+
+	public Boolean getRtnIsShare() {
+		return rtnIsShare;
+	}
+
+	public void setRtnIsShare(Boolean rtnIsShare) {
+		this.rtnIsShare = rtnIsShare;
+	}
+
+	public String getFareRule() {
         return fareRule;
     }
 
@@ -170,6 +227,12 @@ public class QueryIBEDetail implements Serializable {
         isDirect = direct;
     }
     
+    public boolean isRtnIsDirect() {
+		return rtnIsDirect;
+	}
+	public void setRtnIsDirect(boolean rtnIsDirect) {
+		this.rtnIsDirect = rtnIsDirect;
+	}
     public Date getGoDepTime() {
         
         return goDepTime;

@@ -1032,11 +1032,11 @@ public class ChangeServiceImpl implements IChangeService {
             }
             if (chdList !=null){
                 BigDecimal bigDecimalChd = new BigDecimal(chdList.size());
-                bigDecimalCount= bigDecimalCount.add(adtList.get(0).getCountPrice().multiply(bigDecimalChd));
+                bigDecimalCount= bigDecimalCount.add(chdList.get(0).getCountPrice().multiply(bigDecimalChd));
             }
             if (infList !=null){
                 BigDecimal bigDecimalInf= new BigDecimal(infList.size());
-                bigDecimalCount=bigDecimalCount.add(adtList.get(0).getCountPrice().multiply(bigDecimalInf));
+                bigDecimalCount=bigDecimalCount.add(infList.get(0).getCountPrice().multiply(bigDecimalInf));
             }
             RequestWithActor<IftRepayVo> rePayParameter = new RequestWithActor();
             IftRepayVo repayVo = new IftRepayVo();
@@ -1832,9 +1832,23 @@ public class ChangeServiceImpl implements IChangeService {
         try {
             Long saleChangeNo = requestWithActor.getEntity().getSaleChangeNo();
             List<ChangePriceVo> priceList = requestWithActor.getEntity().getBuyPriceList();
+            //用键值对去存储票号和其对应的detail
+            //key:detailNo value:ticketNo
+            Map<String,String> ticketNoAndDetailNoMap=new HashMap<>();
             for (ChangePriceVo priceVo : priceList) {
                 List<Long> detailNoList = priceVo.getSaleOrderDetailNoList();
-                //List<String> ticketNoList = priceVo.getTicketNoList();
+                if(null!=priceVo.getTicketNo()){
+                    //将用逗号隔开的票号拆分开
+                   String[] ticketNoAndDetailNos= priceVo.getTicketNo().split(",");
+                   for(String s:ticketNoAndDetailNos){
+                       //将用/拼在一起的票号和detail区分开
+                       String[] ticketNos=s.split("/");
+                       //票号和detailNo中间至多只有1个/
+                       if(ticketNos.length>1){
+                          ticketNoAndDetailNoMap.put(ticketNos[1],ticketNos[0]);
+                       }
+                   }
+                }
                 for (int i = 0; i < detailNoList.size(); i++) {
                     SaleOrderDetail orderDetail = saleOrderDetailDao.selectByPrimaryKey(detailNoList.get(i));
                     SaleChangeDetail changeDetail = saleChangeDetailDao.selectBySaleOrderDetailNoAndSaleChangeNo(orderDetail.getSaleOrderDetailNo(),saleChangeNo);
@@ -1844,7 +1858,15 @@ public class ChangeServiceImpl implements IChangeService {
                         orderDetail.setModifyTime(new Date());
                         orderDetail.setModifier(requestWithActor.getAgent().getAccount());
                         orderDetail.setStatus("4");//将改签的新行程变为已出票
-                        orderDetail.setTicketNo(priceVo.getTicketNo());
+                        if(null!=detailNoList.get(i)){
+                            //遍历map，匹配detailNo，将票号传入
+                            for (Map.Entry<String, String> entry : ticketNoAndDetailNoMap.entrySet()) {
+                                if(entry.getKey().equals(String.valueOf(detailNoList.get(i)))){
+                                    orderDetail.setTicketNo(entry.getValue());
+                                    break;
+                                }
+                            }
+                        }
                         saleOrderDetailDao.updateByPrimaryKeySelective(orderDetail);
                     }
                 }

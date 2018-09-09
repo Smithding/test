@@ -88,6 +88,10 @@
         <result column="BUY_CURRENCY" property="buyCurrency" jdbcType="VARCHAR" />
         <!--采购汇率-->
         <result column="BUY_EXCHANGE_RATE" property="buyExchangeRate" jdbcType="DECIMAL"/>
+        <!--公务员验证类型-->
+        <result column="CIVIL_VALIDATE_TYPE"  property="civilValidateType"  jdbcType="VARCHAR"/>
+        <!--验证内容-->
+        <result column="VALIDATE_CONTENT"  property="validateContent"  jdbcType="VARCHAR"/>
     </resultMap>
     <sql id="Base_Column_List" >
         PASSENGER_NO, OWNER, ID, SALE_ORDER_NO, PASSENGER_TYPE, SURNAME, NAME, CERT_TYPE,
@@ -95,7 +99,7 @@
         TICKET_TYPE, BUY_FARE, BUY_TAX, BUY_BROKERAGE, BUY_AGENCY_FEE, BUY_REBATE, BUY_AWARD_PRICE,
         BUY_PRICE, SALE_FARE, SALE_TAX, SALE_BROKERAGE, SALE_AGENCY_FEE, SALE_REBATE, SALE_AWARD_PRICE,
         SALE_PRICE, MODIFIER, STATUS, MODIFY_TIME, VALID, CREATE_TIME, CREATOR,SERVICE_CHARGE,PHONE,POLICY_NO,
-        DEPT_PROFIT,PROFIT,BUY_CURRENCY,BUY_EXCHANGE_RATE
+        DEPT_PROFIT,PROFIT,BUY_CURRENCY,BUY_EXCHANGE_RATE,CIVIL_VALIDATE_TYPE,VALIDATE_CONTENT
     </sql>
     <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
         select
@@ -270,6 +274,12 @@
             <if test="buyExchangeRate !=null">
                 BUY_EXCHANGE_RATE,
             </if>
+            <if test="civilValidateType">
+                CIVIL_VALIDATE_TYPE,
+            </if>
+            <if test="validateContent">
+                VALIDATE_CONTENT,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides="," >
             <if test="passengerNo != null" >
@@ -400,6 +410,12 @@
             </if>
             <if test="buyExchangeRate !=null">
                 #{buyExchangeRate,jdbcType=DECIMAL},
+            </if>
+            <if test="civilValidateType !=null">
+                #{civilValidateType},
+            </if>
+            <if test="validateContent !=null">
+                #{validateContent}
             </if>
         </trim>
     </insert>

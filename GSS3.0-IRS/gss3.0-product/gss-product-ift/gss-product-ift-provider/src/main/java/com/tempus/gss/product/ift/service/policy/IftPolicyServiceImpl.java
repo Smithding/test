@@ -157,6 +157,15 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 		if(null == iftPolicy.getChdRewardType()){
 			iftPolicy.setChdRewardType(1); //儿童票奖励方式，1奖励与成人一致（默认）
 		}
+		if(null == iftPolicy.getPnrTicketType()){
+			iftPolicy.setPnrTicketType(1);//PNR出票方式：1无需换编码（默认）
+		}
+		if(null == iftPolicy.getArnkType()){
+			iftPolicy.setArnkType(1);//缺口程类型：1适用政策内缺口
+		}
+		if(null == iftPolicy.getShareRewardType()){
+			iftPolicy.setShareRewardType(1); //共享奖励类型：1全程无奖励
+		}
 		return iftPolicy;
 	}
 	

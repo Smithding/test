@@ -53,4 +53,11 @@ public interface SaleOrderDetailDao extends BaseDao<SaleOrderDetail, SaleOrderDe
     int updateSaleOrderDetailStatusByNoAndStatus(@Param("saleOrderNo") Long saleOrderNo, @Param("status")int status);
 
     List<SaleOrderDetail> selectBySaleChangeNoList(@Param("saleChangeNoList")List<Long> saleChangeNoList);
+
+	/**
+	 * 查询乘客最新的有票号的详情
+	 * @param passengerNo
+	 * @return
+	 */
+	SaleOrderDetail selectLastDetailByPgerNo(Long passengerNo);
 }

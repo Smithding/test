@@ -64,6 +64,11 @@ public class OrderCreateVo implements Serializable {
 	 */
 	private Long originalOrderNo;
 
+	//公务员验证方式
+	private String verifyWay;
+	//单位名称
+	private String unitName;
+
 	public SaleOrderExt getSaleOrderExt() {
 
 		return saleOrderExt;
@@ -166,5 +171,21 @@ public class OrderCreateVo implements Serializable {
 
 	public void setOriginalOrderNo(Long originalOrderNo) {
 		this.originalOrderNo = originalOrderNo;
+	}
+
+	public String getVerifyWay() {
+		return verifyWay;
+	}
+
+	public void setVerifyWay(String verifyWay) {
+		this.verifyWay = verifyWay;
+	}
+
+	public String getUnitName() {
+		return unitName;
+	}
+
+	public void setUnitName(String unitName) {
+		this.unitName = unitName;
 	}
 }

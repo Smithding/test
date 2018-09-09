@@ -226,6 +226,10 @@ public class Passenger implements Serializable {
 	private String buyCurrency;
 	//采购汇率 BUY_EXCHANGE_RATE
 	private BigDecimal buyExchangeRate;
+	//公务员验证方式
+	private String civilValidateType;
+	//公务员验证内容
+	private String validateContent;
 
 	public String getBuyCurrency() {
 		return buyCurrency;
@@ -248,6 +252,7 @@ public class Passenger implements Serializable {
 		return "Passenger{" +
 				"passengerNo=" + passengerNo +
 				", owner=" + owner +
+				", historyPassenger='" + historyPassenger + '\'' +
 				", id=" + id +
 				", saleOrderNo=" + saleOrderNo +
 				", passengerType='" + passengerType + '\'' +
@@ -288,6 +293,10 @@ public class Passenger implements Serializable {
 				", policyNo=" + policyNo +
 				", deptProfit=" + deptProfit +
 				", profit=" + profit +
+				", buyCurrency='" + buyCurrency + '\'' +
+				", buyExchangeRate=" + buyExchangeRate +
+				", civilValidateType='" + civilValidateType + '\'' +
+				", validateContent='" + validateContent + '\'' +
 				'}';
 	}
 
@@ -637,5 +646,21 @@ public class Passenger implements Serializable {
 
 	public void setHistoryPassenger(String historyPassenger) {
 		this.historyPassenger = historyPassenger;
+	}
+
+	public String getCivilValidateType() {
+		return civilValidateType;
+	}
+
+	public void setCivilValidateType(String civilValidateType) {
+		this.civilValidateType = civilValidateType;
+	}
+
+	public String getValidateContent() {
+		return validateContent;
+	}
+
+	public void setValidateContent(String validateContent) {
+		this.validateContent = validateContent;
 	}
 }

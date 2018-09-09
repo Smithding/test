@@ -58,4 +58,7 @@ public interface ISaleOrderDetailService {
 	 * @return
 	 */
 	public int updateBySaleOrderNo(RequestWithActor<SaleOrderDetail> saleOrderDetail);
+
+    SaleOrderDetail selectLastDetailByPgerNo(Long passengerNo);
+
 }
