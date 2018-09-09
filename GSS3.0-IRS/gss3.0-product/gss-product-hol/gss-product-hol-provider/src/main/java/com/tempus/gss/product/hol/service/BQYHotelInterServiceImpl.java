@@ -601,11 +601,26 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 		logger.info("bqy酒店订单详情查询入参:" + paramJson);
 		String result = httpClientUtil.doJsonPost(BQY_HOTEL_ORDER_DETAIL_URL, paramJson);
 		logger.info("bqy酒店订单详情查询结果:" + result);
-		if (StringUtils.isNoneBlank(result.trim())) {
+		/*if (StringUtils.isNoneBlank(result.trim())) {
 			ResponseResult<HotelOrderInfo> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<HotelOrderInfo>>(){});
 			if (responseResult != null) {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
 					hotelOrderInfo = responseResult.getResult();
+				}
+			}
+		}*/
+		if (StringUtils.isNoneBlank(result.trim())) {
+			ResponseResult<String> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<String>>(){});
+			if (responseResult != null) {
+				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
+					String resultStr = responseResult.getResult();
+					JSONObject jsonObject = JsonUtil.toBean(resultStr);
+					String hotelOrderInfoStr = jsonObject.getString("HotelOrderInfo");
+					if (StringUtil.isNotNullOrEmpty(hotelOrderInfoStr)) {
+						hotelOrderInfo = JsonUtil.toBean(hotelOrderInfoStr, HotelOrderInfo.class);
+					}else {
+						throw new GSSException("获取订单详情","0122", "订单详情返回为空!");
+					}
 				}
 			}
 		}else {

@@ -521,6 +521,17 @@ public class DateUtil {
         long between_days = (time2 - time1) / (1000 * 3600 * 24);
         return Integer.parseInt(String.valueOf(between_days));
     }
+
+	public static int daysBetween2(String date1, String date2)throws ParseException {
+		SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(sdf.parse(date1));
+		long time1 = cal.getTimeInMillis();
+		cal.setTime(sdf.parse(date2));
+		long time2 = cal.getTimeInMillis();
+		long between_days = (time2 - time1) / (1000 * 3600 * 24);
+		return Integer.parseInt(String.valueOf(between_days));
+	}
 	
 	public static Long getLongTypedTimeFromTimeStr(String strTime, String format) {
 		if(format.equals(NORM_DATETIME_PATTERN)) {

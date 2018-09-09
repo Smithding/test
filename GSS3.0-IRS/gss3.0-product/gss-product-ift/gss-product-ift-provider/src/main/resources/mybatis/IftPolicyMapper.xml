@@ -293,4 +293,12 @@
 		<foreach collection="policyIds" item="policyId" index="index" open="( " separator=", " close=" ) ">${policyId}</foreach>
 		AND OWNER=#{owner} AND VALID=1
 	</update>
+	
+	<update id="delete">
+		UPDATE IFT_POLICY_NEW
+			SET VALID=0, MODIFIER=#{modifier}, MODIFY_TIME=#{modifyTime}
+		WHERE ID IN
+		<foreach collection="policyIds" item="policyId" index="index" open="( " separator=", " close=" ) ">${policyId}</foreach>
+		AND OWNER=#{owner} AND VALID=1
+	</update>
 </mapper>

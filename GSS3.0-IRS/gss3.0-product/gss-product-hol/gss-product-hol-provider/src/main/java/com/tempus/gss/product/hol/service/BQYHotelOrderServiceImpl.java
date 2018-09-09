@@ -292,7 +292,10 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			}
 			//子订单号
 			Long orderId = bqyPushOrderInfo.getOrderId();
-			HotelOrder hotelOrder = hotelOrderMapper.getOrderByNo(String.valueOf(orderNumber));
+			//HotelOrder hotelOrder = hotelOrderMapper.getOrderByNo(String.valueOf(orderNumber));
+			HotelOrder queryHotelOrder = new HotelOrder();
+			queryHotelOrder.setHotelOrderNo(String.valueOf(orderNumber));
+			HotelOrder hotelOrder = hotelOrderMapper.selectOne(queryHotelOrder);
 			if (null == hotelOrder) {
 				logger.info("bqy订单推送,查询订单为空,没有该订单!");
 				throw new GSSException("更新状态信息异常", "0200", "查询订单为空,没有该订单!");
@@ -308,79 +311,103 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			//订单状态
 	 		TcOrderStatus pushOrderStatus = bqyPushOrderInfo.getChangeStatus();
 			if (pushOrderStatus.getKey().equals(TcOrderStatus.ALREADY_TC_CONFIRM.getKey())) {	//订单确认
-				if(!orderStatus.equals(OwnerOrderStatus.ALREADY_CONRIRM.getKey())) {
-					if (OwnerOrderStatus.PAY_OK.equals(orderStatus)) {
-						//改变订单状态
-						des = changeOrderStatus(agent, orderId, hotelOrder, orderStatus, OwnerOrderStatus.ALREADY_CONRIRM, TcOrderStatus.ALREADY_TC_CONFIRM);
-						//更新数据库
-						hotelOrderMapper.updateById(hotelOrder);
-				    	
-						SmsTemplateDetail smsTemplateDetail = new SmsTemplateDetail();
-						smsTemplateDetail.setDictCode("HOTEL_GUARANTEE");
-				    	List<SmsTemplateDetail> stds = smsTemplateDetailService.query(smsTemplateDetail);
-				    	String messageReplace = messageReplace(stds.get(0).getContent(), hotelOrder);
-				    	LogRecord logRecord=new LogRecord();
-						logRecord.setAppCode("GSS");
-						logRecord.setBizCode("HOL-Order");
-						logRecord.setBizNo(hotelOrder.getHotelOrderNo());		
-						//logRecord.setCreateTime(new java.sql.Date(System.currentTimeMillis()));
-						logRecord.setDesc(messageReplace);
-						logRecord.setCreateTime(new Date());
-						logRecord.setOptName("腾邦国际");
-						logService.insert(logRecord); 
-						
-					}else {
-						logger.error("更新订单状态失败,订单状态非已支付!");
-						throw new GSSException("更新酒店订单", "0106", "更新订单状态失败,订单状态非已支付!");
-					}
-					
-				}
-				
-			}else if (pushOrderStatus.getKey().equals(TcOrderStatus.CANCEL_ING.getKey())) {		//退订中
-				if (!orderStatus.equals(OwnerOrderStatus.CANCEL_ONGOING.getKey())) {
-					if (OwnerOrderStatus.PAY_OK.getKey().equals(orderStatus) || OwnerOrderStatus.ALREADY_CONRIRM.getKey().equals(orderStatus)) {
-						des = changeOrderStatus(agent, orderId, hotelOrder, orderStatus, OwnerOrderStatus.CANCEL_ONGOING, TcOrderStatus.CANCEL_ING);
-						hotelOrderMapper.updateById(hotelOrder);
-					}else {
-						logger.error("更新订单状态失败,订单状态非已支付或已确认!");
-						throw new GSSException("更新酒店订单", "0108", "更新订单状态失败,订单状态非已支付、已确认!");
-					}
-				}
-				
-			}else if (pushOrderStatus.getKey().equals(TcOrderStatus.CANCEL_FINISH.getKey())) {	//已退订
-				if (!orderStatus.equals(OwnerOrderStatus.CANCEL_OK.getKey())) {
-					des = "订单号"+orderId +",订单状态由"+ OwnerOrderStatus.keyOf(orderStatus).getValue()+"变成:"+ OwnerOrderStatus.CANCEL_OK.getValue();
-					if (OwnerOrderStatus.PAY_OK.getKey().equals(orderStatus) || OwnerOrderStatus.CANCEL_ONGOING.getKey().equals(orderStatus) || OwnerOrderStatus.ALREADY_CONRIRM.getKey().equals(orderStatus)) {
-						try {
-							BigDecimal saleRefund = saleRefund(AgentUtil.getAgent(), hotelOrder);
-							if (null != saleRefund && saleRefund.compareTo(BigDecimal.ZERO) == 1) {	//退款成功
-								des = changeOrderStatus(agent, orderId, hotelOrder, orderStatus, OwnerOrderStatus.CANCEL_OK, TcOrderStatus.ALREADY_CANCEL);
-							    hotelOrder.setFactTotalPrice(hotelOrder.getFactTotalPrice().subtract(saleRefund));
-							    hotelOrderMapper.updateById(hotelOrder);
-							}
-						} catch (GSSException e) {
-							//更新酒店订单状态
-						    hotelOrder.setOrderStatus(OwnerOrderStatus.CANCEL_BAD.getKey());
-						    hotelOrder.setCancelTime(new Date());
-						    hotelOrderMapper.updateById(hotelOrder);
-						    return false;
+				HotelOrderInfo hotelOrderInfo = getBQYHotelOrderInfo(Long.valueOf(orderNumber));
+				if (3 - hotelOrderInfo.getStatus() == 0) {
+					if(!orderStatus.equals(OwnerOrderStatus.ALREADY_CONRIRM.getKey())) {
+						if (OwnerOrderStatus.PAY_OK.getKey().equals(orderStatus)) {
+							//改变订单状态
+							des = changeOrderStatus(agent, orderId, hotelOrder, orderStatus, OwnerOrderStatus.ALREADY_CONRIRM, TcOrderStatus.ALREADY_TC_CONFIRM);
+							//更新数据库
+							hotelOrderMapper.updateById(hotelOrder);
+
+							SmsTemplateDetail smsTemplateDetail = new SmsTemplateDetail();
+							smsTemplateDetail.setDictCode("HOTEL_GUARANTEE");
+							List<SmsTemplateDetail> stds = smsTemplateDetailService.query(smsTemplateDetail);
+							String messageReplace = messageReplace(stds.get(0).getContent(), hotelOrder);
+							LogRecord logRecord=new LogRecord();
+							logRecord.setAppCode("GSS");
+							logRecord.setBizCode("HOL-Order");
+							logRecord.setBizNo(hotelOrder.getHotelOrderNo());
+							//logRecord.setCreateTime(new java.sql.Date(System.currentTimeMillis()));
+							logRecord.setDesc(messageReplace);
+							logRecord.setCreateTime(new Date());
+							logRecord.setOptName("腾邦国际");
+							logService.insert(logRecord);
+
+						}else {
+							logger.error("更新订单状态失败,订单状态非已支付!");
+							throw new GSSException("更新酒店订单", "0106", "更新订单状态失败,订单状态非已支付!");
 						}
-					}else if (OwnerOrderStatus.WAIT_PAY.getKey().equals(orderStatus)){
-						des = changeOrderStatus(agent, orderId, hotelOrder, orderStatus, OwnerOrderStatus.CANCEL_OK, TcOrderStatus.ALREADY_CANCEL);
-						hotelOrderMapper.updateById(hotelOrder);
-					}else {
-						logger.error("更新订单状态失败,订单状态非已支付、已确认、退订中!");
-						throw new GSSException("更新酒店订单", "0107", "更新订单状态失败,与本地订单状态不符!");
 					}
+				}else{
+					logger.error("更新订单状态失败,供应商非已确认状态!");
+					throw new GSSException("更新酒店订单", "0106", "供应商非已确认状态!");
+				}
+			}else if (pushOrderStatus.getKey().equals(TcOrderStatus.CANCEL_ING.getKey())) {	//退订中
+				HotelOrderInfo hotelOrderInfo = getBQYHotelOrderInfo(Long.valueOf(orderNumber));
+				if (5 - hotelOrderInfo.getStatus() == 0) {
+					if (!orderStatus.equals(OwnerOrderStatus.CANCEL_ONGOING.getKey())) {
+						if (OwnerOrderStatus.PAY_OK.getKey().equals(orderStatus) || OwnerOrderStatus.ALREADY_CONRIRM.getKey().equals(orderStatus)) {
+							des = changeOrderStatus(agent, orderId, hotelOrder, orderStatus, OwnerOrderStatus.CANCEL_ONGOING, TcOrderStatus.CANCEL_ING);
+							hotelOrderMapper.updateById(hotelOrder);
+						}else {
+							logger.error("更新订单状态失败,订单状态非已支付或已确认!");
+							throw new GSSException("更新酒店订单", "0108", "更新订单状态失败,订单状态非已支付、已确认!");
+						}
+					}
+				} else {
+					logger.error("更新订单状态失败,供应商非退订中状态!");
+					throw new GSSException("更新酒店订单", "0106", "供应商非退订中状态!");
 				}
 
-			}else if (pushOrderStatus.getKey().equals(TcOrderStatus.ALREADY_CANCEL.getKey())) { //已取消(bqy用户下单未支付,超时自动取消)
-				if (!OwnerOrderStatus.CANCEL_OK.getKey().equals(orderStatus)) {
-					//改变订单状态
-					des = changeOrderStatus(agent, orderId, hotelOrder, orderStatus, OwnerOrderStatus.CANCEL_OK, TcOrderStatus.ALREADY_CANCEL);
-					//更新数据库
-					hotelOrderMapper.updateById(hotelOrder);
+				
+			}else if (pushOrderStatus.getKey().equals(TcOrderStatus.CANCEL_FINISH.getKey())) {	//已退订
+				HotelOrderInfo hotelOrderInfo = getBQYHotelOrderInfo(orderNumber);
+				if (508 - hotelOrderInfo.getStatus() == 0) {
+					if (!orderStatus.equals(OwnerOrderStatus.CANCEL_OK.getKey())) {
+						des = "订单号"+orderId +",订单状态由"+ OwnerOrderStatus.keyOf(orderStatus).getValue()+"变成:"+ OwnerOrderStatus.CANCEL_OK.getValue();
+
+						if (OwnerOrderStatus.PAY_OK.getKey().equals(orderStatus) || OwnerOrderStatus.CANCEL_ONGOING.getKey().equals(orderStatus) || OwnerOrderStatus.ALREADY_CONRIRM.getKey().equals(orderStatus)) {
+							try {
+								BigDecimal saleRefund = saleRefund(AgentUtil.getAgent(), hotelOrder);
+								if (null != saleRefund && saleRefund.compareTo(BigDecimal.ZERO) == 1) {	//退款成功
+									des = changeOrderStatus(agent, orderId, hotelOrder, orderStatus, OwnerOrderStatus.CANCEL_OK, TcOrderStatus.ALREADY_CANCEL);
+									hotelOrder.setFactTotalPrice(hotelOrder.getFactTotalPrice().subtract(saleRefund));
+									hotelOrderMapper.updateById(hotelOrder);
+								}
+							} catch (GSSException e) {
+								//更新酒店订单状态
+								hotelOrder.setOrderStatus(OwnerOrderStatus.CANCEL_BAD.getKey());
+								hotelOrder.setCancelTime(new Date());
+								hotelOrderMapper.updateById(hotelOrder);
+								return false;
+							}
+						}else if (OwnerOrderStatus.WAIT_PAY.getKey().equals(orderStatus)){
+							des = changeOrderStatus(agent, orderId, hotelOrder, orderStatus, OwnerOrderStatus.CANCEL_OK, TcOrderStatus.ALREADY_CANCEL);
+							hotelOrderMapper.updateById(hotelOrder);
+						}else {
+							logger.error("更新订单状态失败,订单状态非已支付、已确认、退订中!");
+							throw new GSSException("更新酒店订单", "0107", "更新订单状态失败,与本地订单状态不符!");
+						}
+					}
+				}else {
+					logger.error("更新订单状态失败,供应商非已已退订状态!");
+					throw new GSSException("更新酒店订单", "0106", "供应商非已退订状态!");
 				}
+			}else if (pushOrderStatus.getKey().equals(TcOrderStatus.ALREADY_CANCEL.getKey())) { //已取消(bqy用户下单未支付,超时自动取消)
+				HotelOrderInfo hotelOrderInfo = getBQYHotelOrderInfo(Long.valueOf(orderNumber));
+				if (9 - hotelOrderInfo.getStatus() == 0) {
+					if (!OwnerOrderStatus.CANCEL_OK.getKey().equals(orderStatus)) {
+						//改变订单状态
+						des = changeOrderStatus(agent, orderId, hotelOrder, orderStatus, OwnerOrderStatus.CANCEL_OK, TcOrderStatus.ALREADY_CANCEL);
+						//更新数据库
+						hotelOrderMapper.updateById(hotelOrder);
+					}
+				} else {
+					logger.error("更新订单状态失败,供应商非已取消状态!");
+					throw new GSSException("更新酒店订单", "0106", "供应商非已取消状态!");
+				}
+
 			}
 			
 		}else {
@@ -390,11 +417,15 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		return true;
 	}
 
-    @Override
-    public Future<OrderInfomationDetail> futureOrderDetailInfo(Agent agent, String hotelOrderNo) {
-		OrderPayReq orderReq = new OrderPayReq();
-		orderReq.setOrderNumber(Long.valueOf(hotelOrderNo));
-		HotelOrderInfo hotelOrderInfo = bqyHotelInterService.orderDetail(orderReq);
+	public HotelOrderInfo getBQYHotelOrderInfo(Long orderNumber) {
+		OrderPayReq orderPayReq = new OrderPayReq();
+		orderPayReq.setOrderNumber(orderNumber);
+		return bqyHotelInterService.orderDetail(orderPayReq);
+	}
+
+	@Override
+	public Future<OrderInfomationDetail> futureOrderDetailInfo(Agent agent, String hotelOrderNo) {
+		HotelOrderInfo hotelOrderInfo = getBQYHotelOrderInfo(Long.valueOf(hotelOrderNo));
 		if (hotelOrderInfo != null) {
 			OrderInfomationDetail orderInfomationDetail = new OrderInfomationDetail();
 			orderInfomationDetail.setIsSuccess(true);
@@ -405,24 +436,40 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			PassengerModel passengerModel = new PassengerModel();
 			passengerModel.setName(hotelOrderInfo.getGuestName());
 			orderInfo.setPassengers(Arrays.asList(passengerModel));//Arrays.asList(hotelOrderInfo.getGuestName())
-			orderInfo.setStartTime(sdf.format(hotelOrderInfo.getCheckInDate()));
-			orderInfo.setEndTime(sdf.format(hotelOrderInfo.getCheckOutDate()));
+
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			/*orderInfo.setStartTime(format.format(hotelOrderInfo.getCheckInDate()));
+			orderInfo.setEndTime(format.format(hotelOrderInfo.getCheckOutDate()));*/
+			/*String checkInDate = hotelOrderInfo.getCheckInDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+			String checkOutDate = hotelOrderInfo.getCheckOutDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));*/
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+			String checkInDate = simpleDateFormat.format(hotelOrderInfo.getCheckInDate());
+			String checkOutDate = simpleDateFormat.format(hotelOrderInfo.getCheckOutDate());
+			orderInfo.setStartTime(checkInDate);
+			orderInfo.setEndTime(checkOutDate);
 
 			ResourceModel resourceModel = new ResourceModel();
 			resourceModel.setResourceId(hotelOrderInfo.getHotelId());
 			resourceModel.setName(hotelOrderInfo.getHotelName());
 			resourceModel.setProductName(hotelOrderInfo.getProductName());
 			resourceModel.setType("0");
+			resourceModel.setPriceFraction(hotelOrderInfo.getBookNumber());
+			resourceModel.setRemark(hotelOrderInfo.getSpecial());
+			orderInfo.setResources(Arrays.asList(resourceModel));
 
 			//resourceModel.setArrivalTime(hotelOrderInfo.getArriveDate()); //到店时间
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			orderInfo.setLasestCancelTime(format.format(hotelOrderInfo.getArriveDate())); //到店时间
 
 
-			CountModel countModel = new CountModel();
-			countModel.setRoomCount(hotelOrderInfo.getBookNumber());
-			orderInfo.setCounts(countModel);
-
+			try {
+				CountModel countModel = new CountModel();
+				int daysBetween = com.tempus.gss.product.hol.api.util.DateUtil.daysBetween2(checkInDate, checkOutDate);
+				countModel.setRoomCount(hotelOrderInfo.getBookNumber() * daysBetween);
+				orderInfo.setCounts(countModel);
+			} catch (ParseException e) {
+				logger.error("计算两日期天数出错!");
+				throw new GSSException("计算日期天数","0112", "计算两日期天数出错!");
+			}
 			orderInfo.setOrigin(hotelOrderInfo.getPayPrice());
 
 			Integer orderStatus = hotelOrderInfo.getStatus(); //订单状态
@@ -749,7 +796,8 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		hotelOrder.setGuestName(passengers);
 		hotelOrder.setGuestMobile(orderReq.getMobile());
 		hotelOrder.setDbCancelRule(policyType);			//取消政策类型
-		hotelOrder.setSupPriceName(roomInfo.getRoomTypeName()); //房型
+		hotelOrder.setSupPriceName(roomInfo.getRoomName()); //房间名称
+		hotelOrder.setProName(roomInfo.getRoomTypeName()); //房型名称
 		if (StringUtil.isNotNullOrEmpty(orderCreateReq.getOrderRemark())) {
 			hotelOrder.setRemark(orderCreateReq.getOrderRemark());
 		}

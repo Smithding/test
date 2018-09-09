@@ -1081,15 +1081,15 @@ public class OrderServiceImpl implements IOrderService {
             }
             //设置采购币种
             saleOrderExt.setCurrency(listVo.getpVoList().get(0).getCurrency());
-            List<BuyOrderExt> buyOrderExts = buyOrderExtDao.selectBuyOrderBySaleOrderNo(saleOrderExt.getSaleOrderNo());
+           /* List<BuyOrderExt> buyOrderExts = buyOrderExtDao.selectBuyOrderBySaleOrderNo(saleOrderExt.getSaleOrderNo());
             Long buyLocker = null;
             if(buyOrderExts != null && buyOrderExts.size()>0){
                 buyLocker = buyOrderExts.get(0).getBuyLocker();
-            }
+            }*/
             //saleOrderExt.setLocker(0L);
             // 修改采购单信息
             //TODO
-            updateBuyOrder(agent, buyOrder, payable, listVo, supplier);
+            Long buyLocker = updateBuyOrder(agent, buyOrder, payable, listVo, supplier);
             // 更改主订单状态
             int result = 0;
             saleOrderService.updateStatus(agent, saleOrderNo, 4);// 将状态改为已出票
@@ -2895,12 +2895,13 @@ public class OrderServiceImpl implements IOrderService {
         log.info("国际机票出票通知--->发送MQ消息：" + ToStringBuilder.reflectionToString(iftTicketMessage));
         iftTicketMqSender.send(IftTicketMqSender.TICKETED_KEY, iftTicketMessage);
     }
-    
-    private void updateBuyOrder(Agent agent, BuyOrder buyOrder, BigDecimal payable, PassengerListVo listVo, Supplier supplier) throws RuntimeException {
+
+    private Long updateBuyOrder(Agent agent, BuyOrder buyOrder, BigDecimal payable, PassengerListVo listVo, Supplier supplier) throws RuntimeException {
         //Supplier supplier = supplierService.getSupplierByNo(agent, listVo.getSupplierNo());
         //List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(agent, saleOrderNo);
         //if (buyOrderList != null && buyOrderList.size() != 0) {
         //   BuyOrder buyOrder = buyOrderList.get(0);
+        Long buyLocker = null;
         BuyOrder newBuyOrder = new BuyOrder();
         newBuyOrder.setSupplierNo(supplier.getSupplierNo());
         newBuyOrder.setSupplierTypeNo(supplier.getCustomerTypeNo());
@@ -2923,10 +2924,11 @@ public class OrderServiceImpl implements IOrderService {
             buyOrderExt.setBuyRemarke(listVo.getBuyRemarke());
             buyOrderExt.setSupplierNo(supplier.getSupplierNo());
             buyOrderExt.setSupplierTypeNo(supplier.getCustomerTypeNo());
+            buyLocker = buyOrderExt.getBuyLocker();
         }
         log.info("出票更新采购扩展表"+buyOrderExt.toString());
         buyOrderExtDao.updateByPrimaryKeySelective(buyOrderExt);
-        //}
+        return buyLocker;
     }
     
     private Long savePnr(Long pnrNo, PassengerListVo listVo, Long saleOrderNo, Agent agent, Date date) throws RuntimeException {

@@ -72,4 +72,13 @@ public interface IftPolicyMapper extends AutoMapper<IftPolicy> {
 	 * @return int 修改行数记录 
 	 */
 	int changeStatus(@Param("owner") int owner,  @Param("policyIds") Long[] policyIds, @Param("status") int status, @Param("modifier") String modifier, @Param("modifyTime") Date modifyTime);
+	
+	/**
+	 * 	删除国际政策
+	 * 
+	 * @param owner 归集信息
+	 * @param policyIds 国际政策ID集合
+	 * @return int 删除行数记录 
+	 */
+	int delete(@Param("owner") int owner,  @Param("policyIds") Long[] policyIds, @Param("modifier") String modifier, @Param("modifyTime") Date modifyTime);
 }

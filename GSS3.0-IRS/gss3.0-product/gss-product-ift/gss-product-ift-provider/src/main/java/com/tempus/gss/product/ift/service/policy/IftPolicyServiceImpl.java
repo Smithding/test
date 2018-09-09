@@ -14,6 +14,7 @@ import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicyQuery;
 import com.tempus.gss.product.ift.api.service.policy.IftPolicyService;
 import com.tempus.gss.product.ift.dao.policy.IftPolicyMapper;
+import com.tempus.gss.product.ift.help.IftLogHelper;
 import com.tempus.gss.util.EntityUtil;
 import com.tempus.gss.vo.Agent;
 
@@ -38,13 +39,20 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 	
 	@Autowired
 	private IftPolicyMapper iftPolicyMapper;
-		
+	
+	@Autowired
+	private IftLogHelper logHelper;
+	
 	@Override
 	public long create(Agent agent, IftPolicy iftPolicy) {
 		long policyId = IdWorker.getId();
 		iftPolicy.setId(policyId);
+		
+		/* 设置默认值 */
+		iftPolicy = this.setDefault(iftPolicy);
 		EntityUtil.setAddInfo(iftPolicy, agent);
 		iftPolicyMapper.insert(iftPolicy);
+		logHelper.logger(agent, policyId, "创建政策", packagePolicyLog(iftPolicy));
 		return policyId;
 	}
 
@@ -55,6 +63,8 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 
 	@Override
 	public Page<IftPolicy> search(Agent agent, Page<IftPolicy> page, IftPolicyQuery query) {
+		
+		query.setOwner(agent.getOwner());
 		// 调用底层先分页查询出符合国际政策ID列表
 		List<Long> ids = iftPolicyMapper.query(page, query);
 		// 根据国际政策ID列表循环拉取国际政策的详细
@@ -76,8 +86,11 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 		
 		/* 第一步设置原政策无效 */
 		this.setInvalid(agent, iftPolicy.getId());
+		logHelper.logger(agent, iftPolicy.getId(), "删除政策", "编辑政策删除旧政策");
+		
 		/* 第二步新增一条政策 */
 		long policyId = this.create(agent, iftPolicy);
+		logHelper.logger(agent, iftPolicy.getId(), "编辑政策", "该政策为编辑老政策["+policyId+"]生成的新政策");
 		
 		return policyId;
 	}
@@ -94,6 +107,57 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 		Date modifyTime = new Date(System.currentTimeMillis());
 		int count = iftPolicyMapper.changeStatus(agent.getOwner(), policyIds, status, agent.getAccount(), modifyTime);
 		return count > 0 ? true:false;
+	}
+	
+	@Override
+	public boolean delete(Agent agent, Long... policyIds) {
+		Date modifyTime = new Date(System.currentTimeMillis());
+		int count = iftPolicyMapper.delete(agent.getOwner(), policyIds, agent.getAccount(), modifyTime);
+		return count > 0 ? true:false;
+	}
+	
+	/**
+	 * 组装国际政策代理费及奖励信息
+	 * 
+	 * @param policy 国际政策
+	 * @return String 国际政策代理费及奖励内容 
+	 */
+	public String packagePolicyLog(IftPolicy policy){
+		StringBuffer buffer = new StringBuffer();
+		buffer.append("上游代理费：" + policy.getOriginalAgencyFee() + "\t上游奖励费用:" + policy.getOriginalRewardFee());
+		buffer.append("\t下游代理费：" + policy.getAgencyFee() + "\t下游奖励费用:" + policy.getRewardFee());
+		buffer.append("\t单程直减费用：" + policy.getOneWayPrivilege() + "\t往返直减费用:" + policy.getRoundTripPrivilege());
+		buffer.append("\t开票费：" + policy.getOpenTicketFee());
+		return buffer.toString();
+	}
+	
+	/**
+	 *  创建政策时设置默认值
+	 * 
+	 * @param iftPolicy  创建国际政策信息
+	 * @return IftPolicy 设置默认值后的国际政策信息
+	 */
+	public IftPolicy setDefault(IftPolicy iftPolicy){
+		
+		if(null == iftPolicy.getSatIsTicket()){
+			iftPolicy.setSatIsTicket(1); //默认星期六开票
+		}
+		if(null == iftPolicy.getSunIsTicket()){
+			iftPolicy.setSunIsTicket(1); //默认星期日开票
+		}
+		if(null == iftPolicy.getIsNotsuitTransferAirport()){
+			iftPolicy.setIsNotsuitTransferAirport(false); //默认不存在不适用转机机场
+		}
+		if(null == iftPolicy.getSuitDoublePeople()){
+			iftPolicy.setSuitDoublePeople(false); //默认不适用双人
+		}
+		if(null == iftPolicy.getChangeAndRefund()){
+			iftPolicy.setSuitDoublePeople(false); //默认不适用同改同退
+		}
+		if(null == iftPolicy.getChdRewardType()){
+			iftPolicy.setChdRewardType(1); //儿童票奖励方式，1奖励与成人一致（默认）
+		}
+		return iftPolicy;
 	}
 	
 	public static void main(String[] args) {

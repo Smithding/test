@@ -76,5 +76,14 @@ public interface IftPolicyService {
 	 * @param policyId 国际政策ID集合
 	 * @return boolean 是否成功
 	 */
-	boolean changeStatus(Agent agent, Integer status, Long... policyId);
+	boolean changeStatus(Agent agent, Integer status, Long... policyIds);
+	
+	/**
+	 *  删除政策
+	 * 
+	 * @param agent 用户信息
+	 * @param policyId 国际政策ID集合
+	 * @return boolean 是否成功
+	 */
+	boolean delete(Agent agent, Long... policyIds);
 }
