@@ -127,8 +127,8 @@
         where ITEM_ID = #{itemId,jdbcType=BIGINT}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyItem">
-        update UNP_BUY_ITEM
-        set BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT},
+        UPDATE UNP_BUY_ITEM
+        SET BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT},
             UNP_TYPE     = #{unpType,jdbcType=INTEGER},
             NUM          = #{num,jdbcType=INTEGER},
             CHANGE_TYPE  = #{changeType,jdbcType=INTEGER},
@@ -136,8 +136,38 @@
             ITEM_STATUS  = #{itemStatus,jdbcType=BIT},
             POLICY       = #{policy,jdbcType=INTEGER},
             VALID        = #{valid,jdbcType=INTEGER}
-        where ITEM_ID = #{itemId,jdbcType=BIGINT}
+        WHERE ITEM_ID = #{itemId,jdbcType=BIGINT}
     </update>
+    <select id="selectItemsByParams" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_BUY_ITEM
+        where 1=1
+        <if test="buyOrderNo != null">
+            AND BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
+        </if>
+        <if test="unpType != null">
+            AND UNP_TYPE = #{unpType,jdbcType=INTEGER}
+        </if>
+        <if test="num != null">
+            AND PNUM = #{num,jdbcType=INTEGER}
+        </if>
+        <if test="changeType != null">
+            AND CHANGE_TYPE = #{changeType,jdbcType=INTEGER}
+        </if>
+        <if test="groupAmount != null">
+            AND GROUP_AMOUNT = #{groupAmount,jdbcType=DECIMAL}
+        </if>
+        <if test="itemStatus != null">
+            AND ITEM_STATUS = #{itemStatus,jdbcType=BIT}
+        </if>
+        <if test="policy != null">
+            AND POLICY = #{policy,jdbcType=INTEGER}
+        </if>
+        <if test="valid != null">
+            AND VALID = #{valid,jdbcType=INTEGER}
+        </if>
+    </select>
     <select id="selectCompletedByBuyOrderNo" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

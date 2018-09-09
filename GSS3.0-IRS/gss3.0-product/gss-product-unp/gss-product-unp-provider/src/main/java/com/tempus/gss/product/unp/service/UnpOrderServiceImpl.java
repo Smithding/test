@@ -106,6 +106,19 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
+    public UnpBuy getBuyInfos(UnpOrderVo params) {
+        UnpBuy unpBuy = this.unpBuyMapper.selectByPrimaryKey(params.getBuyOrderNo());
+        if (unpBuy == null) {
+            return null;
+        }
+        UnpOrderVo p = new UnpOrderVo();
+        p.setBuyOrderNo(unpBuy.getBuyOrderNo());
+        List<UnpBuyItem> unpBuyItems = this.getBuyItems(p);
+        unpBuy.setBuyItems(unpBuyItems);
+        return unpBuy;
+    }
+    
+    @Override
     
     public UnpResult<UnpSale> createOrder(Agent agent, UnpOrderCreateVo orderCreateVo) {
         UnpResult<UnpSale> result = new UnpResult<>();
@@ -497,6 +510,28 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
+    public UnpResult<UnpSale> updateSale(Agent agent, UnpOrderUpdateVo request) {
+        UnpResult<UnpSale> result = new UnpResult<>();
+        UnpSale unpSale = request.getUnpSale();
+        if (unpSale != null) {
+            List<UnpSaleItem> saleItems = unpSale.getSaleItems();
+            saleItems.forEach(item -> {
+                if (item != null && item.getItemId() != null) {
+                    if (!unpSale.getSaleOrderNo().equals(item.getSaleOrderNo())) {
+                        throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "只可修改当前大单下的明细单");
+                    }
+                    item.setSaleOrderNo(null);
+                    int updateFlag = this.unpSaleItemMapper.updateByPrimaryKeySelective(item);
+                    if (updateFlag > 0) {
+                        result.setMsg("销售明细单【" + item.getItemId() + "】修改失败");
+                    }
+                }
+            });
+        }
+        return result;
+    }
+    
+    @Override
     public UnpResult<UnpBuy> updateBuy(Agent agent, UnpOrderUpdateVo request) {
         logger.info("采购单更新开始");
         if (agent == null) {
@@ -646,7 +681,18 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         List<UnpSaleItem> list;
         list = unpSaleItemMapper.selectItems(params);
         if (NullableCheck.isNullOrEmpty(list)) {
-            return new ArrayList<>(2);
+            return new ArrayList<>();
+        }
+        return list;
+    }
+    
+    @Override
+    public List<UnpBuyItem> getBuyItems(UnpOrderVo params) {
+        UnpBuyItem buyItem = new UnpBuyItem();
+        buyItem.setBuyOrderNo(params.getBuyOrderNo());
+        List<UnpBuyItem> list = unpBuyItemMapper.selectItemsByParams(buyItem);
+        if (NullableCheck.isNullOrEmpty(list)) {
+            return new ArrayList<>();
         }
         return list;
     }

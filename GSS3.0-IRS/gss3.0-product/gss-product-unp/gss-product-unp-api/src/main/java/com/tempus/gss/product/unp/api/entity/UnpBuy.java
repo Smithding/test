@@ -5,6 +5,7 @@ import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author ZhangBro
@@ -96,6 +97,15 @@ public class UnpBuy implements Serializable {
      * 删除标志 0 无效 已删除 1 有效
      */
     private Integer valid;
+    private List<UnpBuyItem> buyItems;
+    
+    public List<UnpBuyItem> getBuyItems() {
+        return buyItems;
+    }
+    
+    public void setBuyItems(List<UnpBuyItem> buyItems) {
+        this.buyItems = buyItems;
+    }
     
     public Long getBuyOrderNo() {
         return buyOrderNo;
