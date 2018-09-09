@@ -55,7 +55,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     @Reference
     ISaleOrderService osSaleorderservice;
     
-    @Reference
+    @Reference(version = "2.2")
     UnpItemTypeService unpItemTypeService;
     
     @Autowired
@@ -344,6 +344,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             }
             unpBuy.setTraNo(saleOrder.getTransationOrderNo());
             unpBuy.setBuyOrderNo(buyOrderNo);
+            unpBuy.setSaleOrderNo(saleOrder.getSaleOrderNo());
             unpBuy.setCreator(agent.getAccount());
             unpBuy.setModifier(agent.getAccount());
             unpBuy.setOwner(agent.getOwner());
@@ -362,6 +363,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             //通用产品
             buyOrder.setGoodsType(9);
             //采购单
+            buyOrder.setSaleOrderNo(unpBuy.getSaleOrderNo());
             buyOrder.setGoodsSubType(2);
             buyOrder.setGoodsName(productName + ":" + String.join(",", nameList));
             buyOrder.setSupplierTypeNo(unpBuy.getSupplierType());
@@ -558,6 +560,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                     }
                 }
             });
+            this.unpSaleMapper.updateByPrimaryKeySelective(unpSale);
         }
         return result;
     }

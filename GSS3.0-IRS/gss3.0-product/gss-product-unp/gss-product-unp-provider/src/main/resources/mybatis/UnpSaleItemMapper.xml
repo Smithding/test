@@ -29,7 +29,7 @@
         LEFT JOIN UNP_SALE US ON US.SALE_ORDER_NO = USI.SALE_ORDER_NO
         LEFT JOIN UNP_BUY UB ON UB.SALE_ORDER_NO = USI.SALE_ORDER_NO
         WHERE 1=1
-        <if test="traNo != null">
+        <if test="saleOrderNo != null">
             AND USI.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
         </if>
         <if test="traNo != null">

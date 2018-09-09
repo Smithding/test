@@ -48,7 +48,7 @@ public class PayListener {
     public void processLogRecord(PayNoticeVO payNoticeVO) {
         try {
             if (GoodsBigType.GENERAL.getKey() == payNoticeVO.getGoodsType() && PayReceiveVO.PS_PAY_STATUS_SUCCESS == payNoticeVO.getPayStatus()) {
-                logger.info("监听到【通用产品】支付消息队列" + JSON.toJSONString(payNoticeVO));
+                 logger.info("监听到【通用产品】支付消息队列" + JSON.toJSONString(payNoticeVO));
                 try {
                     UnpBuy queryUnpBuy = unpBuyMapper.selectBySaleOrderNo(payNoticeVO.getBusinessNo());
                     if (queryUnpBuy != null && queryUnpBuy.getPayStatus() < EUnpConstant.PayStatus.PAIED.getKey()) {
@@ -97,10 +97,12 @@ public class PayListener {
                     unpSale.getSaleItems().forEach(item -> {
                         UnpSaleItem itemUpdate = new UnpSaleItem();
                         itemUpdate.setItemId(item.getItemId());
+                        itemUpdate.setSaleOrderNo(item.getSaleOrderNo());
                         itemUpdate.setItemStatus(EUnpConstant.OrderStatus.DONE.getKey());
                         itemsToUpdate.add(itemUpdate);
                     });
                     unpUpdate.setSaleItems(itemsToUpdate);
+                    updateVo.setUnpSale(unpUpdate);
                     unpOrderService.updateSale(agent, updateVo);
                     
                 }

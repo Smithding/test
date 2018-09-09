@@ -36,7 +36,8 @@
          LEFT JOIN UNP_BUY UB ON UB.SALE_ORDER_NO = US.SALE_ORDER_NO
          LEFT JOIN CPS_SUPPLIER CS ON UB.SUPPLIER_ID = CS.SUPPLIER_NO-->
     <select id="queryOrderList" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo" resultMap="BaseResultMap">
-        SELECT US.SALE_ORDER_NO ,US.OWNER ,US.TRA_NO ,US.CUSTOMER_NO ,US.CUSTOMER_TYPE ,US.REMARK ,US.CHANGE_TYPE ,US.PLAN_AMOUNT ,US.ACTUAL_AMOUNT ,US.PAY_STATUS ,US.PAY_TIME ,US.STATUS ,US.SOURCE ,US.CREATOR ,US.CREATE_TIME ,US.MODIFIER
+        SELECT US.SALE_ORDER_NO ,US.OWNER ,US.TRA_NO ,US.CUSTOMER_NO ,US.CUSTOMER_TYPE ,US.REMARK ,US.CHANGE_TYPE ,US.PLAN_AMOUNT ,US.ACTUAL_AMOUNT
+        ,US.PAY_STATUS ,US.PAY_TIME ,US.STATUS ,US.SOURCE ,US.CREATOR ,US.CREATE_TIME ,US.MODIFIER
         ,US.MODIFY_TIME ,US.VALID,CC.NAME
         FROM UNP_SALE US
         LEFT JOIN UNP_SALE_ITEM USI ON USI.SALE_ORDER_NO = US.SALE_ORDER_NO
@@ -44,61 +45,65 @@
         LEFT JOIN UNP_ITEM_TYPE UIT ON UIT.ITEM_TYPE_NO = USI.UNP_TYPE
         LEFT JOIN UNP_GROUP_TYPE UGT ON UGT.TYPE_NO = USI.CHANGE_TYPE
         where 1=1
+        <if test="saleOrderNo != null">
+            AND US.SALE_ORDER_NO = #{saleOrderNo,jdbcType=INTEGER}
+        </if>
         <if test="owner != null">
-            US.OWNER = #{owner,jdbcType=INTEGER},
+            AND US.OWNER = #{owner,jdbcType=INTEGER}
         </if>
         <if test="traNo != null">
-            US.TRA_NO = #{traNo,jdbcType=BIGINT},
+            AND US.TRA_NO = #{traNo,jdbcType=BIGINT}
         </if>
         <if test="customerNo != null">
-            US.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT},
+            AND US.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT}
         </if>
         <if test="customerType != null">
-            US. CUSTOMER_TYPE = #{customerType,jdbcType=BIGINT},
+            AND US. CUSTOMER_TYPE = #{customerType,jdbcType=BIGINT}
         </if>
         <if test="changeType != null">
-            US.CHANGE_TYPE = #{changeType,jdbcType=INTEGER},
+            AND US.CHANGE_TYPE = #{changeType,jdbcType=INTEGER}
         </if>
         <if test="payStatus != null">
-            US.PAY_STATUS = #{payStatus,jdbcType=INTEGER},
+            AND US.PAY_STATUS = #{payStatus,jdbcType=INTEGER}
         </if>
         <if test="payTime != null">
-            US.PAY_TIME = #{payTime,jdbcType=TIMESTAMP},
+            AND US.PAY_TIME = #{payTime,jdbcType=TIMESTAMP}
         </if>
         <if test="status != null">
-            US.STATUS = #{status,jdbcType=INTEGER},
+            AND US.STATUS = #{status,jdbcType=INTEGER}
         </if>
         <if test="creator != null">
-            US.CREATOR LIKE concat('%',concat(#{creator,jdbcType=VARCHAR},'%')),
+            AND US.CREATOR LIKE concat('%',concat(#{creator,jdbcType=VARCHAR},'%'))
         </if>
         <if test="createTime != null">
-            US.CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            AND US.CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
         </if>
         <if test="modifier != null">
-            US.MODIFIER LIKE concat('%',concat(#{modifier,jdbcType=VARCHAR},'%')),
+            AND US.MODIFIER LIKE concat('%',concat(#{modifier,jdbcType=VARCHAR},'%'))
         </if>
         <if test="modifyTime != null">
-            US.MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            AND US.MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP}
         </if>
         <if test="valid != null">
-            US.VALID = #{valid,jdbcType=INTEGER},
+            AND US.VALID = #{valid,jdbcType=INTEGER}
         </if>
         <if test="customerName != null and customerName!=''">
-            CC.NAME LIKE concat('%',concat(#{customerName,jdbcType=VARCHAR},'%'))
+            AND CC.NAME LIKE concat('%',concat(#{customerName,jdbcType=VARCHAR},'%'))
         </if>
         <if test="itemCode != null and itemCode!=''">
-           UIT.CODE LIKE concat('%',concat(#{itemCode,jdbcType=VARCHAR},'%'))
+            AND UIT.CODE LIKE concat('%',concat(#{itemCode,jdbcType=VARCHAR},'%'))
         </if>
         <if test="itemName != null and itemName!=''">
-            UIT.NAME LIKE concat('%',concat(#{itemName,jdbcType=VARCHAR},'%'))
+            AND UIT.NAME LIKE concat('%',concat(#{itemName,jdbcType=VARCHAR},'%'))
         </if>
         <if test="groupCode != null and groupCode!=''">
-            UGT.CODE LIKE concat('%',concat(#{groupCode,jdbcType=VARCHAR},'%'))
+            AND UGT.CODE LIKE concat('%',concat(#{groupCode,jdbcType=VARCHAR},'%'))
         </if>
         <if test="groupName != null and groupName!=''">
-            UGT.NAME LIKE concat('%',concat(#{groupName,jdbcType=VARCHAR},'%'))
+            AND UGT.NAME LIKE concat('%',concat(#{groupName,jdbcType=VARCHAR},'%'))
         </if>
         GROUP BY US.SALE_ORDER_NO
+        ORDER BY US.CREATE_TIME DESC
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
     delete from UNP_SALE
