@@ -19,6 +19,10 @@ public class UnpBuyItem implements Serializable {
      */
     private Long buyOrderNo;
     /**
+     * 销售单号
+     */
+    private Long saleItemNo;
+    /**
      * 产品类型
      */
     private Long unpType;
@@ -49,10 +53,28 @@ public class UnpBuyItem implements Serializable {
      */
     private Integer valid;
     
+    private String additionalInfo;
     private static final long serialVersionUID = 5304640655455648250L;
+    
+    public String getAdditionalInfo() {
+        return additionalInfo;
+       
+    }
+    
+    public void setAdditionalInfo(String additionalInfo) {
+        this.additionalInfo = additionalInfo;
+    }
     
     public Long getItemId() {
         return itemId;
+    }
+    
+    public Long getSaleItemNo() {
+        return saleItemNo;
+    }
+    
+    public void setSaleItemNo(Long saleItemNo) {
+        this.saleItemNo = saleItemNo;
     }
     
     public void setItemId(Long itemId) {

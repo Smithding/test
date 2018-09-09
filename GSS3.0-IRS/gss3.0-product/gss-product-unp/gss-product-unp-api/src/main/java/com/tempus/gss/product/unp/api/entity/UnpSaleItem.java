@@ -2,6 +2,7 @@ package com.tempus.gss.product.unp.api.entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
  * @author ZhangBro
@@ -49,6 +50,7 @@ public class UnpSaleItem implements Serializable {
     private Integer valid;
     
     private static final long serialVersionUID = 7248601471160558477L;
+    
     
     public Long getItemId() {
         return itemId;

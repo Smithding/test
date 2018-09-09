@@ -11,10 +11,12 @@
         <result column="ITEM_STATUS" jdbcType="INTEGER" property="itemStatus"/>
         <result column="POLICY" jdbcType="INTEGER" property="policy"/>
         <result column="VALID" jdbcType="INTEGER" property="valid"/>
+        <result column="SALE_ITEM_NO" jdbcType="BIGINT" property="saleItemNo"/>
+        <result column="ADDITIONAL_INFO" jdbcType="VARCHAR" property="additionalInfo"/>
     </resultMap>
     <sql id="Base_Column_List">
         ITEM_ID, BUY_ORDER_NO, UNP_TYPE, PNUM, CHANGE_TYPE, GROUP_AMOUNT, ITEM_STATUS, POLICY,
-        VALID
+        VALID,SALE_ITEM_NO,ADDITIONAL_INFO
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
@@ -185,9 +187,9 @@
         AND CHANGE_TYPE=1
     </select>
     <select id="selectItems" parameterType="java.lang.Long" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from UNP_BUY_ITEM
-        where BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
+        SELECT UBI.*, USI.ADDITIONAL_INFO
+        FROM UNP_BUY_ITEM              UBI
+         LEFT JOIN UNP_SALE_ITEM USI ON USI.ITEM_ID = UBI.SALE_ITEM_NO
+        WHERE  BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
     </select>
 </mapper>

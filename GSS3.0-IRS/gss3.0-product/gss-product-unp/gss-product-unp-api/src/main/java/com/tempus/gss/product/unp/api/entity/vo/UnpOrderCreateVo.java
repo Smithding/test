@@ -7,6 +7,7 @@ import com.tempus.gss.product.unp.api.entity.UnpSaleItem;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author ZhangBro

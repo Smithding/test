@@ -200,6 +200,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             UnpSale unpSale = request.getUnpSale();
             BigDecimal planAmount = new BigDecimal(0);
             List<UnpSaleItem> items = request.getSaleItems();
+            List<UnpBuyItem> buyItems = request.getBuyItems();
             String goodsName = "通用产品";
             List<String> goods = new ArrayList<>();
             Long saleOrderNo = this.getUnpNo(PREFIX_SALE);
@@ -248,6 +249,11 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 o.setValid(VALID);
                 if (unpSaleItemMapper.insertSelective(o) <= 0) {
                     result.setMsg("小类【" + o.getUnpType() + "|" + item.getCode() + "|" + o.getGroupAmount() + "】添加失败");
+                } else {
+                    request.getBuyItems().forEach(bi -> {
+                        bi.getUnpType().equals(o.getUnpType());
+                        bi.setSaleItemNo(o.getItemId());
+                    });
                 }
             }
             
