@@ -3,6 +3,7 @@ package com.tempus.gss.product.unp.api.entity;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author ZhangBro
@@ -87,6 +88,16 @@ public class UnpSale implements Serializable {
      * 删除标志 0 无效 已删除 1 有效
      */
     private Integer valid;
+    
+    private List<UnpSaleItem> saleItems;
+    
+    public List<UnpSaleItem> getSaleItems() {
+        return saleItems;
+    }
+    
+    public void setSaleItems(List<UnpSaleItem> saleItems) {
+        this.saleItems = saleItems;
+    }
     
     public String getSource() {
         return source;

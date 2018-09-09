@@ -32,6 +32,10 @@ public class UnpItemProperty implements Serializable {
      */
     private String cName;
     /**
+     * 值
+     */
+    private String value;
+    /**
      * 数据模式或者提示信息
      */
     private String pattern;
@@ -84,6 +88,14 @@ public class UnpItemProperty implements Serializable {
         }
         return "";
         
+    }
+    
+    public String getValue() {
+        return value;
+    }
+    
+    public void setValue(String value) {
+        this.value = value;
     }
     
     public void setTypeStr(String typeStr) {

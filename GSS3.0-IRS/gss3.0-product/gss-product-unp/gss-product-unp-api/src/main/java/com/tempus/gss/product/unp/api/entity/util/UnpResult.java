@@ -7,6 +7,7 @@ import java.io.Serializable;
  */
 public class UnpResult<T> implements Serializable {
     
+    public static final String DEFAULT_FAILED = "Failed By Default!";
     public static final int SUCCESS = 1;
     public static final int FAILED = 0;
     private static final long serialVersionUID = -1302296694836057302L;
@@ -28,7 +29,15 @@ public class UnpResult<T> implements Serializable {
     }
     
     public void setMsg(String msg) {
-        this.msg = msg;
+        if (this.msg != null) {
+            if (DEFAULT_FAILED.equals(this.msg)) {
+                this.msg = msg;
+            } else {
+                this.msg += ("|" + msg);
+            }
+        } else {
+            this.msg = msg;
+        }
     }
     
     public T getEntity() {
@@ -53,7 +62,7 @@ public class UnpResult<T> implements Serializable {
     
     public UnpResult() {
         this.code = FAILED;
-        this.msg = "Failed By Default!";
+        this.msg = DEFAULT_FAILED;
         this.entity = null;
     }
 }

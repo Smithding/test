@@ -79,6 +79,7 @@ public class UnpOrderVo implements Serializable {
     private Integer valid;
     private String groupName;
     private String groupCode;
+    private Long itemNo;
     private String itemName;
     private String itemCode;
     
@@ -104,6 +105,14 @@ public class UnpOrderVo implements Serializable {
      * 第三方业务单号
      */
     private Long thirdBusNo;
+    
+    public Long getItemNo() {
+        return itemNo;
+    }
+    
+    public void setItemNo(Long itemNo) {
+        this.itemNo = itemNo;
+    }
     
     public Long getSaleOrderNo() {
         return saleOrderNo;
