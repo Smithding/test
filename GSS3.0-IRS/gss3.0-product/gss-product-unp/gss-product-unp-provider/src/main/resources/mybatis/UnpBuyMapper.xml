@@ -288,59 +288,63 @@
         LEFT JOIN CPS_SUPPLIER CS ON UB.SUPPLIER_ID = CS.SUPPLIER_NO
         where 1=1
         <if test="owner != null">
-            UB.OWNER = #{owner,jdbcType=INTEGER},
+            AND UB.OWNER = #{owner,jdbcType=INTEGER}
+        </if>
+        <if test="saleOrderNo != null">
+            AND UB.SALE_ORDER_NO = #{saleOrderNo,jdbcType=INTEGER}
         </if>
         <if test="traNo != null">
-            UB.TRA_NO = #{traNo,jdbcType=BIGINT},
+            AND UB.TRA_NO = #{traNo,jdbcType=BIGINT}
         </if>
         <if test="customerNo != null">
-            UB.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT},
+            AND UB.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT}
         </if>
         <if test="customerType != null">
-            UB. CUSTOMER_TYPE = #{customerType,jdbcType=BIGINT},
+            AND UB. CUSTOMER_TYPE = #{customerType,jdbcType=BIGINT}
         </if>
         <if test="changeType != null">
-            UB.CHANGE_TYPE = #{changeType,jdbcType=INTEGER},
+            AND UB.CHANGE_TYPE = #{changeType,jdbcType=INTEGER}
         </if>
         <if test="payStatus != null">
-            UB.PAY_STATUS = #{payStatus,jdbcType=INTEGER},
+            AND UB.PAY_STATUS = #{payStatus,jdbcType=INTEGER}
         </if>
         <if test="payTime != null">
-            UB.PAY_TIME = #{payTime,jdbcType=TIMESTAMP},
+            AND UB.PAY_TIME = #{payTime,jdbcType=TIMESTAMP}
         </if>
         <if test="status != null">
-            UB.STATUS = #{status,jdbcType=INTEGER},
+            AND UB.STATUS = #{status,jdbcType=INTEGER}
         </if>
         <if test="creator != null">
-            UB.CREATOR LIKE concat('%',concat(#{creator,jdbcType=VARCHAR},'%')),
+            AND UB.CREATOR LIKE concat('%',concat(#{creator,jdbcType=VARCHAR},'%'))
         </if>
         <if test="createTime != null">
-            UB.CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            AND  UB.CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
         </if>
         <if test="modifier != null">
-            UB.MODIFIER LIKE concat('%',concat(#{modifier,jdbcType=VARCHAR},'%')),
+            AND UB.MODIFIER LIKE concat('%',concat(#{modifier,jdbcType=VARCHAR},'%'))
         </if>
         <if test="modifyTime != null">
-            UB.MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            AND UB.MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP}
         </if>
         <if test="valid != null">
-            UB.VALID = #{valid,jdbcType=INTEGER},
+            AND UB.VALID = #{valid,jdbcType=INTEGER}
         </if>
         <if test="customerName != null and customerName!=''">
-            CC.NAME LIKE concat('%',concat(#{customerName,jdbcType=VARCHAR},'%'))
+            AND CC.NAME LIKE concat('%',concat(#{customerName,jdbcType=VARCHAR},'%'))
         </if>
         <if test="itemCode != null and itemCode!=''">
-            UIT.CODE LIKE concat('%',concat(#{itemCode,jdbcType=VARCHAR},'%'))
+            AND UIT.CODE LIKE concat('%',concat(#{itemCode,jdbcType=VARCHAR},'%'))
         </if>
         <if test="itemName != null and itemName!=''">
-            UIT.NAME LIKE concat('%',concat(#{itemName,jdbcType=VARCHAR},'%'))
+            AND UIT.NAME LIKE concat('%',concat(#{itemName,jdbcType=VARCHAR},'%'))
         </if>
         <if test="groupCode != null and groupCode!=''">
-            UGT.CODE LIKE concat('%',concat(#{groupCode,jdbcType=VARCHAR},'%'))
+            AND  UGT.CODE LIKE concat('%',concat(#{groupCode,jdbcType=VARCHAR},'%'))
         </if>
         <if test="groupName != null and groupName!=''">
-            UGT.NAME LIKE concat('%',concat(#{groupName,jdbcType=VARCHAR},'%'))
+            AND UGT.NAME LIKE concat('%',concat(#{groupName,jdbcType=VARCHAR},'%'))
         </if>
         GROUP BY US.SALE_ORDER_NO
+        ORDER BY UB.CREATE_TIME DESC
     </select>
 </mapper>

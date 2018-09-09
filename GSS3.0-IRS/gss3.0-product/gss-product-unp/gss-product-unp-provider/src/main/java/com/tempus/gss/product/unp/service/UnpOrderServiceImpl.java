@@ -54,7 +54,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     
     @Reference
     ISaleOrderService osSaleorderservice;
-    
+
     @Reference
     UnpItemTypeService unpItemTypeService;
     
@@ -341,7 +341,6 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             unpBuy.setStatus(EUnpConstant.OrderStatus.READY.getKey());
             unpBuy.setPayStatus(EUnpConstant.PayStatus.NOT_PAIED.getKey());
             unpBuyMapper.insertSelective(unpBuy);
-            unpBuyUnpResult.success("创建采购单成功", unpBuy);
             //创建os_buy 主单记录
             BuyOrder buyOrder = new BuyOrder();
             buyOrder.setOwner(agent.getOwner());
@@ -360,7 +359,8 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             //待处理
             buyOrder.setBuyChildStatus(unpBuy.getStatus());
             buyOrder.setPayable(planAmount);
-            buyOrderService.create(agent, buyOrder);
+            buyOrder.setSaleOrderNo(unpBuy.getSaleOrderNo());
+            BuyOrder buyOrder1 = buyOrderService.create(agent, buyOrder);
             //创建应收
             CreatePlanAmountVO planAmountRecordType = new CreatePlanAmountVO();
             planAmountRecordType.setRecordNo(buyOrderNo);
