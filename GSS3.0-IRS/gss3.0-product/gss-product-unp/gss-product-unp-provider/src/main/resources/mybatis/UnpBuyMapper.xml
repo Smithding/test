@@ -22,6 +22,7 @@
         <result column="MODIFIER" jdbcType="VARCHAR" property="modifier"/>
         <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
         <result column="VALID" jdbcType="INTEGER" property="valid"/>
+        <result column="NAME" jdbcType="VARCHAR" property="name"/>
     </resultMap>
     <sql id="Base_Column_List">
     BUY_ORDER_NO, SALE_ORDER_NO, OWNER, SUPPLIER_ID, SUPPLIER_TYPE, CHANGE_TYPE, REMARK,
@@ -273,4 +274,73 @@
             VALID         = #{valid,jdbcType=INTEGER}
         WHERE BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
     </update>
+    <!--
+       LEFT JOIN UNP_BUY UB ON UB.SALE_ORDER_NO = US.SALE_ORDER_NO
+       LEFT JOIN CPS_SUPPLIER CS ON UB.SUPPLIER_ID = CS.SUPPLIER_NO-->
+    <select id="queryBuyOrderList" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo" resultMap="BaseResultMap">
+        SELECT UB.SALE_ORDER_NO ,UB.BUY_ORDER_NO,UB.OWNER ,UB.TRA_NO ,UB.REMARK ,UB.CHANGE_TYPE ,UB.PLAN_AMOUNT ,UB.ACTUAL_AMOUNT ,UB.PAY_STATUS ,UB.PAY_TIME ,UB.STATUS ,UB.CREATOR ,UB.CREATE_TIME ,UB.MODIFIER
+        ,US.MODIFY_TIME ,US.VALID,CS.NAME,UB.SUPPLIER_ID
+        FROM UNP_BUY UB
+        LEFT JOIN UNP_SALE US ON  US.SALE_ORDER_NO = UB.SALE_ORDER_NO
+        LEFT JOIN UNP_BUY_ITEM UBI ON UBI.BUY_ORDER_NO = UB.BUY_ORDER_NO
+        LEFT JOIN UNP_ITEM_TYPE UIT ON UIT.ITEM_TYPE_NO = UBI.UNP_TYPE
+        LEFT JOIN UNP_GROUP_TYPE UGT ON UGT.TYPE_NO = UBI.CHANGE_TYPE
+        LEFT JOIN CPS_SUPPLIER CS ON UB.SUPPLIER_ID = CS.SUPPLIER_NO
+        where 1=1
+        <if test="owner != null">
+            UB.OWNER = #{owner,jdbcType=INTEGER},
+        </if>
+        <if test="traNo != null">
+            UB.TRA_NO = #{traNo,jdbcType=BIGINT},
+        </if>
+        <if test="customerNo != null">
+            UB.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT},
+        </if>
+        <if test="customerType != null">
+            UB. CUSTOMER_TYPE = #{customerType,jdbcType=BIGINT},
+        </if>
+        <if test="changeType != null">
+            UB.CHANGE_TYPE = #{changeType,jdbcType=INTEGER},
+        </if>
+        <if test="payStatus != null">
+            UB.PAY_STATUS = #{payStatus,jdbcType=INTEGER},
+        </if>
+        <if test="payTime != null">
+            UB.PAY_TIME = #{payTime,jdbcType=TIMESTAMP},
+        </if>
+        <if test="status != null">
+            UB.STATUS = #{status,jdbcType=INTEGER},
+        </if>
+        <if test="creator != null">
+            UB.CREATOR LIKE concat('%',concat(#{creator,jdbcType=VARCHAR},'%')),
+        </if>
+        <if test="createTime != null">
+            UB.CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+        </if>
+        <if test="modifier != null">
+            UB.MODIFIER LIKE concat('%',concat(#{modifier,jdbcType=VARCHAR},'%')),
+        </if>
+        <if test="modifyTime != null">
+            UB.MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+        </if>
+        <if test="valid != null">
+            UB.VALID = #{valid,jdbcType=INTEGER},
+        </if>
+        <if test="customerName != null and customerName!=''">
+            CC.NAME LIKE concat('%',concat(#{customerName,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="itemCode != null and itemCode!=''">
+            UIT.CODE LIKE concat('%',concat(#{itemCode,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="itemName != null and itemName!=''">
+            UIT.NAME LIKE concat('%',concat(#{itemName,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="groupCode != null and groupCode!=''">
+            UGT.CODE LIKE concat('%',concat(#{groupCode,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="groupName != null and groupName!=''">
+            UGT.NAME LIKE concat('%',concat(#{groupName,jdbcType=VARCHAR},'%'))
+        </if>
+        GROUP BY US.SALE_ORDER_NO
+    </select>
 </mapper>

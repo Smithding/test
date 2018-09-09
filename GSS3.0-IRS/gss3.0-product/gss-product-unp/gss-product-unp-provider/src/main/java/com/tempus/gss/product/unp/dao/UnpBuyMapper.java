@@ -1,6 +1,11 @@
 package com.tempus.gss.product.unp.dao;
 
+import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.unp.api.entity.UnpBuy;
+import com.tempus.gss.product.unp.api.entity.UnpSale;
+import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
+
+import java.util.List;
 
 public interface UnpBuyMapper {
     int deleteByPrimaryKey(Long buyOrderNo);
@@ -16,4 +21,6 @@ public interface UnpBuyMapper {
     int updateByPrimaryKey(UnpBuy record);
 
     UnpBuy selectBySaleOrderNo(Long saleOrderNo);
+
+    List<UnpBuy> queryBuyOrderList(Page<UnpBuy> page, UnpOrderVo param);
 }

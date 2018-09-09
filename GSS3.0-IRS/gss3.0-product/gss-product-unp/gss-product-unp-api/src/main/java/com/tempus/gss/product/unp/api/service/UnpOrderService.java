@@ -72,12 +72,6 @@ public interface UnpOrderService {
      * @param agent
      * @param request
      */
-    UnpResult<UnpSale> updateSale(Agent agent, UnpOrderUpdateVo request);
-    
-    /**
-     * @param agent
-     * @param request
-     */
     UnpResult<UnpBuy> updateBuy(Agent agent, UnpOrderUpdateVo request);
     /**<<<<<<<<<<<<<<<<<<<<<<<【UPDATE】【SELECT】>>>>>>>>>>>>>>>>>>>>>>>*/
     
@@ -100,9 +94,8 @@ public interface UnpOrderService {
      * @see EUnpConstant.ChangeType
      */
     UnpSale getSaleOrderInfo(UnpOrderVo params);
-    
-    UnpBuy getBuyInfos(UnpOrderVo params);
-    
+    UnpBuy getBuyOrderInfo(UnpOrderVo params);
+
     /**
      * 根据条件查询明细表集合
      *
@@ -118,7 +111,6 @@ public interface UnpOrderService {
      */
     List<UnpSaleItem> getItems(UnpOrderVo params);
     List<UnpBuyItem> getBuyItems(UnpOrderVo params);
-    
     /**
      * @param itemNo
      *         itemNo
@@ -133,7 +125,8 @@ public interface UnpOrderService {
      * @return Page
      */
     Page<UnpSale> querySaleOrderList(Page<UnpSale> wrapper, UnpOrderVo param);
-    
+    Page<UnpBuy> queryBuyOrderList(Page<UnpBuy> wrapper, UnpOrderVo param);
+
     /**<<<<<<<<<<<<<<<<<<<<<<<【SELECT】【】>>>>>>>>>>>>>>>>>>>>>>>*/
     
 }
