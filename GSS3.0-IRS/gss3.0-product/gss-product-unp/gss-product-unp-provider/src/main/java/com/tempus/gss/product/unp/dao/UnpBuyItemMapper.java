@@ -18,6 +18,8 @@ public interface UnpBuyItemMapper {
     
     int updateByPrimaryKey(UnpBuyItem record);
 
+    List<UnpBuyItem> selectItemsByParams(UnpBuyItem record);
+    
     List<UnpBuyItem> selectCompletedByBuyOrderNo(Long buyOrderNo);
 
     List<UnpBuyItem> selectRefundByBuyOrderNo(Long buyOrderNo);
