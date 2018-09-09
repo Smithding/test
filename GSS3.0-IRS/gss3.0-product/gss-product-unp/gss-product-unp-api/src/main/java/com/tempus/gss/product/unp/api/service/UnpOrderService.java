@@ -68,6 +68,8 @@ public interface UnpOrderService {
     
     /**<<<<<<<<<<<<<<<<<<<<<<<【CREATE】【UPDATE】>>>>>>>>>>>>>>>>>>>>>>>*/
     
+    UnpResult<UnpSale> updateSale(Agent agent, UnpOrderUpdateVo request);
+    
     /**
      * @param agent
      * @param request

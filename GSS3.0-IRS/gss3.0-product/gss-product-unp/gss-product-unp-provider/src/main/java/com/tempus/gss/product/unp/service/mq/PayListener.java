@@ -105,7 +105,7 @@ public class PayListener {
                     
                 }
                 if (payNoticeVO.getBusinessType() == BusinessType.BUY_ORDER) {
-                    UnpBuy unpBuy = unpOrderService.getBuyInfos(queryVo);
+                    UnpBuy unpBuy = unpOrderService.getBuyOrderInfo(queryVo);
                     updateVo.setUnpBuy(unpBuy);
                     updateVo.setBuyItems(unpBuy.getBuyItems());
                     updateVo.setOperationType(EUnpConstant.Opertion.PAY.getKey());

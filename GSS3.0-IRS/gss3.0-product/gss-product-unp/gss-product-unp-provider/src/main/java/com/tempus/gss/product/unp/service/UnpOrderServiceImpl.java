@@ -123,7 +123,6 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         return unpBuy;
     }
     
-    @Override
     public UnpBuy getBuyInfos(UnpOrderVo params) {
         UnpBuy unpBuy = this.unpBuyMapper.selectByPrimaryKey(params.getBuyOrderNo());
         if (unpBuy == null) {
