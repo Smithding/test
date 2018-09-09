@@ -154,4 +154,10 @@
         AND ITEM_STATUS IN (1,3)
         AND CHANGE_TYPE=1
     </select>
+    <select id="selectItems" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_BUY_ITEM
+        where BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
+    </select>
 </mapper>

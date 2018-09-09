@@ -21,4 +21,5 @@ public interface UnpBuyItemMapper {
     List<UnpBuyItem> selectCompletedByBuyOrderNo(Long buyOrderNo);
 
     List<UnpBuyItem> selectRefundByBuyOrderNo(Long buyOrderNo);
+    List<UnpBuyItem> selectItems(Long buyOrderNo);
 }

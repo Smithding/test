@@ -5,6 +5,7 @@ import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author ZhangBro
@@ -32,7 +33,12 @@ public class UnpBuy implements Serializable {
      * 供应商类型
      */
     private Long supplierType;
+    /*
+    * 供应商名称
+    * */
+    private  String name;
     /**
+     *
      * 是否变更以及变更类型 0正常;1退;2改
      */
     private Integer changeType;
@@ -96,6 +102,8 @@ public class UnpBuy implements Serializable {
      * 删除标志 0 无效 已删除 1 有效
      */
     private Integer valid;
+
+    private List<UnpBuyItem> buyItems;
     
     public Long getBuyOrderNo() {
         return buyOrderNo;
@@ -255,5 +263,25 @@ public class UnpBuy implements Serializable {
     
     public void setValid(Integer valid) {
         this.valid = valid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
+    }
+
+    public List<UnpBuyItem> getBuyItems() {
+        return buyItems;
+    }
+
+    public void setBuyItems(List<UnpBuyItem> buyItems) {
+        this.buyItems = buyItems;
     }
 }

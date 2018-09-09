@@ -1,10 +1,7 @@
 package com.tempus.gss.product.unp.api.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
-import com.tempus.gss.product.unp.api.entity.UnpBuy;
-import com.tempus.gss.product.unp.api.entity.UnpBuyRefund;
-import com.tempus.gss.product.unp.api.entity.UnpSale;
-import com.tempus.gss.product.unp.api.entity.UnpSaleItem;
+import com.tempus.gss.product.unp.api.entity.*;
 import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
 import com.tempus.gss.product.unp.api.entity.vo.UnpCreateOrderRefund;
@@ -97,7 +94,8 @@ public interface UnpOrderService {
      * @see EUnpConstant.ChangeType
      */
     UnpSale getSaleOrderInfo(UnpOrderVo params);
-    
+    UnpBuy getBuyOrderInfo(UnpOrderVo params);
+
     /**
      * 根据条件查询明细表集合
      *
@@ -112,7 +110,7 @@ public interface UnpOrderService {
      * @return UnpResult
      */
     List<UnpSaleItem> getItems(UnpOrderVo params);
-    
+    List<UnpBuyItem> getBuyItems(UnpOrderVo params);
     /**
      * @param itemNo
      *         itemNo
@@ -127,7 +125,8 @@ public interface UnpOrderService {
      * @return Page
      */
     Page<UnpSale> querySaleOrderList(Page<UnpSale> wrapper, UnpOrderVo param);
-    
+    Page<UnpBuy> queryBuyOrderList(Page<UnpBuy> wrapper, UnpOrderVo param);
+
     /**<<<<<<<<<<<<<<<<<<<<<<<【SELECT】【】>>>>>>>>>>>>>>>>>>>>>>>*/
     
 }
