@@ -1,6 +1,10 @@
 package com.tempus.gss.product.ift.api.entity.formula;
 
 import java.math.BigDecimal;
+import java.util.List;
+
+import com.tempus.gss.product.ift.api.entity.search.Mileage;
+import com.tempus.tbe.entity.NucFareInfo;
 
 /**
  * Created by 杨威 on 2016/10/18.
@@ -37,6 +41,99 @@ public class FormulaParameters {
 	 *
 	 */
 	private BigDecimal saleRebate;
+	/**
+	 * 单程直减费用
+	 */
+	private BigDecimal oneWayPrivilege;
+	/**
+	 * 往返直减费用
+	 */
+	private BigDecimal roundTripPrivilege;
+	/**
+	 * 共享段奖励
+	 */
+	private BigDecimal shareRebate;
+	/**
+	 * 是否共享航班
+	 */
+	private Boolean isShare;
+	/**
+	 * 销售价格
+	 */
+	private BigDecimal salePrice;
+	/**
+	 * 航程类型
+	 */
+	private Integer flightType;
+	/**
+	 * 里程信息
+	 */
+	private List<Mileage> mileage;
+	/**
+	 * NUC
+	 */
+	private List<NucFareInfo> nucFareInfos;
+
+	public List<NucFareInfo> getNucFareInfos() {
+		return nucFareInfos;
+	}
+	public void setNucFareInfos(List<NucFareInfo> nucFareInfos) {
+		this.nucFareInfos = nucFareInfos;
+	}
+	public List<Mileage> getMileage() {
+		return mileage;
+	}
+	public Integer getFlightType() {
+		return flightType;
+	}
+
+	public void setFlightType(Integer flightType) {
+		this.flightType = flightType;
+	}
+
+	public void setMileage(List<Mileage> mileage) {
+		this.mileage = mileage;
+	}
+
+	public BigDecimal getSalePrice() {
+		return salePrice;
+	}
+
+	public void setSalePrice(BigDecimal salePrice) {
+		this.salePrice = salePrice;
+	}
+
+	public BigDecimal getShareRebate() {
+		return shareRebate;
+	}
+
+	public void setShareRebate(BigDecimal shareRebate) {
+		this.shareRebate = shareRebate;
+	}
+
+	public Boolean getIsShare() {
+		return isShare;
+	}
+
+	public void setIsShare(Boolean isShare) {
+		this.isShare = isShare;
+	}
+
+	public BigDecimal getOneWayPrivilege() {
+		return oneWayPrivilege;
+	}
+
+	public void setOneWayPrivilege(BigDecimal oneWayPrivilege) {
+		this.oneWayPrivilege = oneWayPrivilege;
+	}
+
+	public BigDecimal getRoundTripPrivilege() {
+		return roundTripPrivilege;
+	}
+
+	public void setRoundTripPrivilege(BigDecimal roundTripPrivilege) {
+		this.roundTripPrivilege = roundTripPrivilege;
+	}
 
 	public BigDecimal getFare() {
 

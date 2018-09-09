@@ -21,6 +21,11 @@ public class HotelId implements Serializable {
 
 	private String lastUpdateTime = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
 
+	public HotelId(){}
+	public HotelId(Long hotelId) {
+		this.hotelId = hotelId;
+	}
+
 	public Long getHotelId() {
 		return hotelId;
 	}

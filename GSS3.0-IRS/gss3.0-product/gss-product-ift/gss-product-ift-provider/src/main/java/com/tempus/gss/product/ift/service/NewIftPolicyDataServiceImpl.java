@@ -209,7 +209,7 @@ public class NewIftPolicyDataServiceImpl implements NewIftPolicyDataService {
 	public List<Airline> getAllAirCode() {
 		// TODO Auto-generated method stub
 		try {
-			List<Airline> airlineList = airlineService.queryAirlineList("D");
+			List<Airline> airlineList = airlineService.queryAirlineList(null);
 			SortUtils.sort(airlineList, "airlineCode");
 			return airlineList;
 		} catch (Exception e) {

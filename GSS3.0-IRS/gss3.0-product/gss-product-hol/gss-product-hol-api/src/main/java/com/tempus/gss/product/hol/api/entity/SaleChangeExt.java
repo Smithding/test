@@ -1,6 +1,7 @@
 package com.tempus.gss.product.hol.api.entity;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import com.baomidou.mybatisplus.annotations.IdType;
@@ -108,6 +109,31 @@ public class SaleChangeExt implements Serializable {
      * 客商类型编号
      */
     private Long customerTypeNo;
+
+    /**
+     * 退款金额
+     */
+    private BigDecimal backPrice;
+
+    /**
+     * 实际收款金额
+     */
+    private BigDecimal factPrice;
+
+    /**
+     * 酒店供应商订单号
+     */
+    private String hotelOrderNo;
+
+    /**
+     * 业务单号(与销售单号一致)
+     */
+    private Long recordNo;
+
+    /**
+     * 交易单号
+     */
+    private Long transationOrderNo;
 
     /**
      * 销售变更单实体
@@ -281,5 +307,44 @@ public class SaleChangeExt implements Serializable {
 	public void setSaleOrder(SaleOrder saleOrder) {
 		this.saleOrder = saleOrder;
 	}
-    
+
+    public BigDecimal getBackPrice() {
+        return backPrice;
+    }
+
+    public void setBackPrice(BigDecimal backPrice) {
+        this.backPrice = backPrice;
+    }
+
+    public BigDecimal getFactPrice() {
+        return factPrice;
+    }
+
+    public void setFactPrice(BigDecimal factPrice) {
+        this.factPrice = factPrice;
+    }
+
+    public String getHotelOrderNo() {
+        return hotelOrderNo;
+    }
+
+    public void setHotelOrderNo(String hotelOrderNo) {
+        this.hotelOrderNo = hotelOrderNo;
+    }
+
+    public Long getRecordNo() {
+        return recordNo;
+    }
+
+    public void setRecordNo(Long recordNo) {
+        this.recordNo = recordNo;
+    }
+
+    public Long getTransationOrderNo() {
+        return transationOrderNo;
+    }
+
+    public void setTransationOrderNo(Long transationOrderNo) {
+        this.transationOrderNo = transationOrderNo;
+    }
 }

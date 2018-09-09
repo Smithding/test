@@ -288,6 +288,14 @@ public class OrderServiceImpl implements IOrderService {
                 //todo 出票类型和政策有关目前先保存BSP
                 passenger.setTicketType("BSP");
                 passenger.setValid((byte) 1);
+                if(saleOrderExt.getIsCivilOrder()!=null && 1==saleOrderExt.getIsCivilOrder()){//公务员订单
+                    String verifyWay = requestWithActor.getEntity().getVerifyWay();
+                    String validContent = requestWithActor.getEntity().getUnitName();
+                    passenger.setCivilValidateType(verifyWay);
+                    if(StringUtils.isNotEmpty(validContent)){
+                        passenger.setValidateContent(validContent);
+                    }
+                }
                 passengerDao.insertSelective(passenger);
             }
             
@@ -343,7 +351,7 @@ public class OrderServiceImpl implements IOrderService {
                 } catch (Exception e) {
                     log.info("获取pnr信息失败", e);
                 }
-                pnr.setCreateTime(new Date());
+                pnr.setCreateTime(today);
                 pnr.setCreator(String.valueOf(agent.getId()));
                 pnr.setOwner(agent.getOwner());
                 pnr.setPnrType(1);// 1：ETERM
@@ -825,6 +833,8 @@ public class OrderServiceImpl implements IOrderService {
         
         boolean flag = true;
         Agent agent = requestWithActor.getAgent();
+        //机票订单状态
+        String status="";
         Long saleOrderNo = requestWithActor.getEntity();
         log.info("取消订单开始！");
         try {
@@ -834,6 +844,11 @@ public class OrderServiceImpl implements IOrderService {
             }
             
             SaleOrderExt saleOrderExt = saleOrderExtDao.selectByPrimaryKey(saleOrderNo);
+            if(null!=saleOrderExt){
+                if(null!=saleOrderExt.getSaleOrderDetailList()){
+                    status=saleOrderExt.getSaleOrderDetailList().get(0).getStatus();
+                }
+            }
             List<BuyOrderExt> buyOrderExtList = buyOrderExtDao.selectBuyOrderBySaleOrderNo(saleOrderNo);
             if (saleOrderExt != null) {
                 /**
@@ -850,7 +865,9 @@ public class OrderServiceImpl implements IOrderService {
                 RequestWithActor<List<Passenger>> param = new RequestWithActor<>();
                 param.setEntity(passengers);
                 param.setAgent(agent);
-                this.verify(param);
+                if(!"1".equals(status)){
+                    this.verify(param);
+                }
                 //判断是否已支付  若已支付则退款
                 if (saleOrderExt.getSaleOrder() != null && (saleOrderExt.getSaleOrder().getPayStatus() == 3 || saleOrderExt.getSaleOrder().getPayStatus() == 4)) {
                     CertificateCreateVO certificateCreateVO = new CertificateCreateVO();

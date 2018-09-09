@@ -31,8 +31,8 @@ public class IftPolicy implements Serializable {
 	/** 产品来源 */
 	private String source;
 
-	/** 航程类型, 1:单程(默认); 2:往返; 多个以"/"分割,例：1/2 */
-	private String voyageType;
+	/** 航程类型, 1:单程(默认); 2:往返; 3:单程/往返; */
+	private Integer voyageType;
 
 	/** 票本类型，BSP、B2B、境外电子;多个以"/"分割，例:BSP/B2B */
 	private String ticketWay;
@@ -418,11 +418,11 @@ public class IftPolicy implements Serializable {
 		this.source = source;
 	}
 
-	public String getVoyageType() {
+	public Integer getVoyageType() {
 		return this.voyageType;
 	}
 
-	public void setVoyageType(String voyageType) {
+	public void setVoyageType(Integer voyageType) {
 		this.voyageType = voyageType;
 	}
 

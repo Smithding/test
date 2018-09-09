@@ -189,11 +189,18 @@ public interface IBQYHotelInterService{
 	OrderPayResult orderPay(OrderPayReq orderPayReq);
 	
 	/**
-	 * 取消订单
+	 * 取消订单(未支付使用)
 	 * @param cancelParam
 	 * @return
 	 */
-	Boolean cancelOrder(OrderCancelParam cancelParam);
+	OrderCancelResult cancelOrder(OrderCancelParam cancelParam);
+
+	/**
+	 * 订单退订
+	 * @param cancelParam
+	 * @return
+	 */
+	OrderCancelResult retreatOrder(OrderCancelParam cancelParam);
 	
 	/**
 	 * 订单详情

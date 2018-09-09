@@ -6,6 +6,8 @@
         <artifactId>gss-core</artifactId>
         <groupId>com.tempus.gss</groupId>
         <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../gss-core</relativePath>
+        <!-- <relativePath>../../../../core/CORE/GSS3.0-CORE/gss3.0-core</relativePath> -->
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

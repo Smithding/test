@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tempus.gss.product.ift.dao.policy.IftOrderPolicyMapper">
+    <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.policy.IftOrderPolicy" >
+	    insert into IFT_ORDER_POLICY (ID, OWNER, POLICY_ID, 
+	      SALE_ID, BUY_ID, NAME, 
+	      SOURCE, VOYAGE_TYPE, TICKET_WAY, 
+	      AIRLINE, SUPPLIERS, SUPPLIER_OFFICE, 
+	      TICKET_OFFICE, ORIGINAL_AGENCY_FEE, ORIGINAL_REWARD_FEE, 
+	      AGENCY_FEE, REWARD_FEE, PROFIT_FEE, 
+	      SALE_REWARD_FEE, ONE_WAY_PRIVILEGE, ROUND_TRIP_PRIVILEGE, 
+	      OPEN_TICKET_FEE, AUTO_TICKET, IS_GDS, 
+	      TICKET_DATE, SAT_IS_TICKET, SAT_TICKET_DATE, 
+	      SUN_IS_TICKET, SUN_TICKET_DATE, CHD_REWARD_TYPE, 
+	      CHD_ASSIGN_REWARD_FEE, CHD_IS_ADD_HANDLING_FEE, CHD_ADD_HANDLING_FEE, 
+	      CHD_TICKET_NO_AGENCY_FEE, CHD_NOT_ALONE_TICKET, CHD_PRIVILEGE, 
+	      INF_TICKET, INF_IS_ADD_HANDLING_FEE, INF_ADD_HANDLING_FEE, 
+	      PNR_TICKET_TYPE, SHARE_REWARD_TYPE, SHARE_ASSIGN_REWARD, 
+	      SHARE_LEG_REWARD, SHARE_IS_SUIT_AIRLINE, SHARE_SUIT_AIRLINE, 
+	      TICKET_REMARKS, REMARK, CREATOR, 
+	      CREATE_TIME, MODIFIER, MODIFY_TIME, 
+	      VALID)
+	    values (#{id}, #{owner}, #{policyId}, 
+	      #{saleId}, #{buyId}, #{name}, 
+	      #{source}, #{voyageType}, #{ticketWay}, 
+	      #{airline}, #{suppliers}, #{supplierOffice}, 
+	      #{ticketOffice}, #{originalAgencyFee}, #{originalRewardFee}, 
+	      #{agencyFee}, #{rewardFee}, #{profitFee}, 
+	      #{saleRewardFee}, #{oneWayPrivilege}, #{roundTripPrivilege}, 
+	      #{openTicketFee}, #{autoTicket}, #{isGds}, 
+	      #{ticketDate}, #{satIsTicket}, #{satTicketDate}, 
+	      #{sunIsTicket}, #{sunTicketDate}, #{chdRewardType}, 
+	      #{chdAssignRewardFee}, #{chdIsAddHandlingFee}, #{chdAddHandlingFee}, 
+	      #{chdTicketNoAgencyFee}, #{chdNotAloneTicket}, #{chdPrivilege}, 
+	      #{infTicket}, #{infIsAddHandlingFee}, #{infAddHandlingFee}, 
+	      #{pnrTicketType}, #{shareRewardType}, #{shareAssignReward}, 
+	      #{shareLegReward}, #{shareIsSuitAirline}, #{shareSuitAirline}, 
+	      #{ticketRemarks}, #{remark}, #{creator}, 
+	      #{createTime}, #{modifier}, #{modifyTime}, 
+	      1)
+  </insert>
+</mapper>

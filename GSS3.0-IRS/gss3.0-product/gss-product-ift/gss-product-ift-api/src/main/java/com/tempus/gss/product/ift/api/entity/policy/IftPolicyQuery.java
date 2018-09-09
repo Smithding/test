@@ -45,8 +45,8 @@ public class IftPolicyQuery implements Serializable{
 	/** 政策来源 */
 	private String source;
 	
-	/** 航程类型(政策类型)  */
-	private String voyageType;
+	/** 航程类型(政策类型)1:单程(默认); 2:往返; 3:单程/往返; */
+	private Integer voyageType;
 	
 	/** 状态, 1:待审核; 2:已审核; 3:启用; 4:禁用; */
 	private Integer status;
@@ -103,7 +103,7 @@ public class IftPolicyQuery implements Serializable{
 	 * @param pnrTicketType 是否换编码：1无需换编码（默认），2换编码出票，3大编出票（无需换编），4大编出票（需换编），5无位不换出票（外放有位时换编）
 	 */
 	public IftPolicyQuery(Long policyId, Integer owner, Integer flightType, String airline, String departAirport,
-			String arriveAirport, String source, String voyageType, Integer status, String cabin, String ticketOffice,
+			String arriveAirport, String source, Integer voyageType, Integer status, String cabin, String ticketOffice,
 			Integer autoTicket, Date policyStartDate, Date policyEndDate, String ticketWay, String name, Integer pnrTicketType) {
 		this.policyId = policyId;
 		this.owner = owner;
@@ -180,11 +180,11 @@ public class IftPolicyQuery implements Serializable{
 		this.source = source;
 	}
 
-	public String getVoyageType() {
+	public Integer getVoyageType() {
 		return voyageType;
 	}
 
-	public void setVoyageType(String voyageType) {
+	public void setVoyageType(Integer voyageType) {
 		this.voyageType = voyageType;
 	}
 

@@ -257,7 +257,7 @@
     	<if test="null != departAirport &amp;&amp; '' != departAirport">	AND T1.DEPART_AIRPORT like '%${departAirport}%' </if>
     	<if test="null != arriveAirport &amp;&amp; '' != arriveAirport">	AND T1.ARRIVE_AIRPORT like '%${arriveAirport}%' </if>
     	<if test="null != source &amp;&amp; '' != source">	AND T1.SOURCE=#{source} </if>
-    	<if test="null != voyageType &amp;&amp; '' != voyageType">	AND T1.VOYAGE_TYPE=#{voyageType} </if>
+    	<if test="null != voyageType ">	AND T1.VOYAGE_TYPE=#{voyageType} </if>
     	<if test="null != status ">	AND T1.STATUS=#{status} </if>
     	<if test="null != cabin &amp;&amp; '' != cabin">	AND T1.DEPART_CABIN like '%${cabin}%' </if>
     	<if test="null != ticketOffice &amp;&amp; '' != ticketOffice">	AND T1.TICKET_OFFICE like '%${ticketOffice}%' </if>

@@ -1,5 +1,6 @@
 package com.tempus.gss.product.ift.api.entity;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +64,25 @@ public class CabinsPricesTotals implements Serializable {
 
 	/**各个乘客类型的价格统计**/
 	private Map<String,Double> passengerTypeSalePrice;
+	/**
+	 * 直减价格
+	 */
+    private BigDecimal oneWayPrivilege;
 
+	public BigDecimal getOneWayPrivilege() {
+		return oneWayPrivilege;
+	}
+
+	public BigDecimal setOneWayPrivilege(BigDecimal oneWayPrivilege) {
+		BigDecimal a = new BigDecimal(0);
+		if(this.passengerTypePricesTotals!=null){
+			for(PassengerTypePricesTotal pricesTotal:this.passengerTypePricesTotals){
+				if(pricesTotal.getOneWayPrivilege()!=null)
+				a = a.add(oneWayPrivilege);
+			}
+		}
+		return a;
+	}
 	public String getCabins() {
 
 		return cabins;

@@ -171,6 +171,7 @@ public class SaleOrderExt implements Serializable {
     private String drawerLoginName;//出票员登录名
     //客户名称
     private String customerName;
+    private Integer isCivilOrder;//是公务员订单 0:否 1:是
     
     /**
      * office
@@ -584,8 +585,56 @@ public class SaleOrderExt implements Serializable {
         this.buyLocker = buyLocker;
     }
 
+    public Integer getIsCivilOrder() {
+        return isCivilOrder;
+    }
+
+    public void setIsCivilOrder(Integer isCivilOrder) {
+        this.isCivilOrder = isCivilOrder;
+    }
+
     @Override
     public String toString() {
-        return "SaleOrderExt{" + "saleOrderNo=" + saleOrderNo + ", saleOrder=" + saleOrder + ", id=" + id + ", owner=" + owner + ", demandNo=" + demandNo + ", teamNo=" + teamNo + ", demand=" + demand + ", legType=" + legType + ", contactName='" + contactName + '\'' + ", contactPhone='" + contactPhone + '\'' + ", contactMobile='" + contactMobile + '\'' + ", contactMail='" + contactMail + '\'' + ", saleRemark='" + saleRemark + '\'' + ", valid=" + valid + ", version=" + version + ", locker=" + locker + ", lockTime=" + lockTime + ", createType=" + createType + ", pnrNo=" + pnrNo + ", importPnr=" + importPnr + ", createTime=" + createTime + ", modifyTime=" + modifyTime + ", creator='" + creator + '\'' + ", modifier='" + modifier + '\'' + ", issueTime=" + issueTime + ", originalOrderNo=" + originalOrderNo + ", legList=" + legList + ", status='" + status + '\'' + ", linkType=" + linkType + ", linkNo='" + linkNo + '\'' + ", currency='" + currency + '\'' + ", saleCurrency='" + saleCurrency + '\'' + ", exchangeRate=" + exchangeRate + '}';
+        return "SaleOrderExt{" +
+                "aloneLocker=" + aloneLocker +
+                ", saleOrderNo=" + saleOrderNo +
+                ", saleOrder=" + saleOrder +
+                ", id=" + id +
+                ", owner=" + owner +
+                ", demandNo=" + demandNo +
+                ", teamNo=" + teamNo +
+                ", legType=" + legType +
+                ", contactName='" + contactName + '\'' +
+                ", contactPhone='" + contactPhone + '\'' +
+                ", contactMobile='" + contactMobile + '\'' +
+                ", contactMail='" + contactMail + '\'' +
+                ", saleRemark='" + saleRemark + '\'' +
+                ", valid=" + valid +
+                ", version=" + version +
+                ", locker=" + locker +
+                ", buyLocker=" + buyLocker +
+                ", lockTime=" + lockTime +
+                ", createType=" + createType +
+                ", pnrNo=" + pnrNo +
+                ", importPnr=" + importPnr +
+                ", createTime=" + createTime +
+                ", modifyTime=" + modifyTime +
+                ", creator='" + creator + '\'' +
+                ", modifier='" + modifier + '\'' +
+                ", issueTime=" + issueTime +
+                ", originalOrderNo=" + originalOrderNo +
+                ", status='" + status + '\'' +
+                ", linkType=" + linkType +
+                ", linkNo='" + linkNo + '\'' +
+                ", currency='" + currency + '\'' +
+                ", saleCurrency='" + saleCurrency + '\'' +
+                ", exchangeRate=" + exchangeRate +
+                ", handlers='" + handlers + '\'' +
+                ", drawerLoginName='" + drawerLoginName + '\'' +
+                ", customerName='" + customerName + '\'' +
+                ", isCivilOrder=" + isCivilOrder +
+                ", office='" + office + '\'' +
+                ", differenceOrderList=" + differenceOrderList +
+                '}';
     }
 }
