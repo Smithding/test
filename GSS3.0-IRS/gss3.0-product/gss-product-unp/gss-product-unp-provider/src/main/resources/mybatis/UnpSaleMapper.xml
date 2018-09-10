@@ -69,17 +69,26 @@
         <if test="payTime != null">
             AND US.PAY_TIME = #{payTime,jdbcType=TIMESTAMP}
         </if>
+        <if test="payTimeStart!=null and ''!=payTimeStart">
+            AND US.PAY_TIME <![CDATA[>=]]> CONCAT(#{payTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="payTimeEnd!=null and ''!=payTimeEnd">
+            AND US.PAY_TIME  <![CDATA[<=]]> CONCAT(#{payTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+        </if>
         <if test="status != null">
             AND US.STATUS = #{status,jdbcType=INTEGER}
         </if>
         <if test="creator != null">
-            AND US.CREATOR LIKE concat('%',concat(#{creator,jdbcType=VARCHAR},'%'))
+            AND US.CREATOR LIKE concat('%',CONCAT(#{creator,jdbcType=VARCHAR},'%'))
         </if>
-        <if test="createTime != null">
-            AND US.CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
+        <if test="createTimeStart!=null and ''!=createTimeStart">
+            AND US.CREATE_TIME <![CDATA[>=]]> CONCAT(#{createTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="createTimeEnd!=null and ''!=createTimeEnd">
+            AND US.CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
         <if test="modifier != null">
-            AND US.MODIFIER LIKE concat('%',concat(#{modifier,jdbcType=VARCHAR},'%'))
+            AND US.MODIFIER LIKE concat('%',CONCAT(#{modifier,jdbcType=VARCHAR},'%'))
         </if>
         <if test="modifyTime != null">
             AND US.MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP}

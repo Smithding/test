@@ -12,10 +12,7 @@ import com.tempus.gss.order.entity.SaleOrder;
 import com.tempus.gss.order.entity.TransationOrder;
 import com.tempus.gss.order.entity.enums.*;
 import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
-import com.tempus.gss.order.service.IBuyOrderService;
-import com.tempus.gss.order.service.IPlanAmountRecordService;
-import com.tempus.gss.order.service.ISaleOrderService;
-import com.tempus.gss.order.service.ITransationOrderService;
+import com.tempus.gss.order.service.*;
 import com.tempus.gss.product.unp.api.entity.*;
 import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
@@ -51,6 +48,9 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     
     @Reference
     IPlanAmountRecordService planAmountRecordService;
+    
+    @Reference
+    ICertificateService certificateService;
     
     @Reference
     ISaleOrderService osSaleorderservice;
@@ -251,8 +251,9 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                     result.setMsg("小类【" + o.getUnpType() + "|" + item.getCode() + "|" + o.getGroupAmount() + "】添加失败");
                 } else {
                     request.getBuyItems().forEach(bi -> {
-                        bi.getUnpType().equals(o.getUnpType());
-                        bi.setSaleItemNo(o.getItemId());
+                        if (bi.getUnpType().equals(o.getUnpType())) {
+                            bi.setSaleItemNo(o.getItemId());
+                        }
                     });
                 }
             }
@@ -744,4 +745,5 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         param.setItemNo(itemNo);
         return this.getItems(param).get(0);
     }
+    
 }

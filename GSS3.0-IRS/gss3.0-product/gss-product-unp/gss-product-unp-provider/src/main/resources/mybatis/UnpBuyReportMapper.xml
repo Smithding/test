@@ -42,10 +42,10 @@
         ui.ITEM_STATUS IN (3, 4, 5)
         AND ub.VALID = 1
         <if test="ticketDateStart !=null and ticketDateStart != '' ">
-            AND ub.CREATE_TIME <![CDATA[>=]]>#{ticketDateStart}
+            AND ub.CREATE_TIME <![CDATA[>=]]>CONCAT(#{ticketDateStart},' 00:00:00')
         </if>
         <if test="ticketDateEnd !=null  and ticketDateEnd != ''">
-            AND ub.CREATE_TIME <![CDATA[<=]]>#{ticketDateEnd}
+            AND ub.CREATE_TIME <![CDATA[<=]]>CONCAT(#{ticketDateEnd},' 23:59:59')
         </if>
         <if test="itemTypeNo !=null">
             AND upn.ITEM_TYPE_NO =#{itemTypeNo}
