@@ -296,6 +296,17 @@ public class SaleChangeExtVo implements Serializable{
 	//提交航司后采购审核状态
 	private Integer[] airLineRefundStatus;
 
+	//ORIGIN_SALE_CHANGE_NO 源改签单号
+	private Long originSaleChangeNo;
+
+	public Long getOriginSaleChangeNo() {
+		return originSaleChangeNo;
+	}
+
+	public void setOriginSaleChangeNo(Long originSaleChangeNo) {
+		this.originSaleChangeNo = originSaleChangeNo;
+	}
+
 	public String getCustomerName() {
 		return customerName;
 	}

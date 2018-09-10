@@ -331,6 +331,10 @@ public class ChangeServiceImpl implements IChangeService {
             saleChangeExt.setOwner(agent.getOwner());
             saleChangeExt.setCustomerNo(agent.getNum());
             saleChangeExt.setCustomerTypeNo(agent.getType());
+            Long originSaleChangeNo = requestWithActor.getEntity().getOriginSaleChangeNo();
+            if(originSaleChangeNo != null && originSaleChangeNo != 0l){
+                saleChangeExt.setOriginSaleChangeNo(originSaleChangeNo);
+            }
             setChangeOrderLocker(saleChangeExt,agent,saleOrder);
             log.info("申请改签单时保存的改签单信息:{}",saleChangeExt.toString());
             saleChangeExtDao.insertSelective(saleChangeExt);
@@ -995,6 +999,18 @@ public class ChangeServiceImpl implements IChangeService {
         }
         return saleChangesBySONo;
 
+    }
+
+    @Override
+    public Boolean isAlreadyChange(Agent agent, Long saleChangeNo) throws Exception {
+        if(saleChangeNo == null){
+            return false;
+        }
+        SaleChange saleChangeByNo = saleChangeService.getSaleChangeByNo(agent, saleChangeNo);
+        if(saleChangeByNo != null && saleChangeByNo.getChildStatus() == 10){
+            return true;
+        }
+        return false;
     }
 
     /**
