@@ -7,8 +7,7 @@ import java.util.*;
 import java.util.concurrent.Future;
 
 import com.tempus.gss.order.entity.*;
-import com.tempus.gss.order.entity.enums.BusinessType;
-import com.tempus.gss.order.entity.enums.GoodsBigType;
+import com.tempus.gss.order.entity.enums.*;
 import com.tempus.gss.order.entity.vo.ActualInfoSearchVO;
 import com.tempus.gss.order.entity.vo.CertificateCreateVO;
 import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
@@ -308,6 +307,13 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		saleChange.setPayStatus(1);
 		saleChange.setCreateTime(new Date());
 		saleChange.setGoodsType(GoodsBigType.GROGSHOP.getKey());
+		saleChange.setOwner(hotelOrder.getOwner());
+		saleChange.setGoodsSubType(EgoodsSubType.SALE_RETREAT.getKey());
+		saleChange.setGoodsName("酒店");
+		saleChange.setBusinessSignNo(IdWorker.getId());
+		saleChange.setBsignType(BSignType.REFUND.getKey());
+		saleChange.setOrderChangeType(ChangeType.RETREAT.getKey());
+		saleChange.setChildStatus(Integer.valueOf(hotelOrder.getOrderStatus()));
 		saleChangeService.create(agent, saleChange);
 		
 		//创建应付记录单
