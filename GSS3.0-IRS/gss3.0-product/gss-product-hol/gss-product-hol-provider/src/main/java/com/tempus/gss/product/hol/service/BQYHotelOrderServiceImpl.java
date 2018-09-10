@@ -313,7 +313,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		saleChange.setBusinessSignNo(IdWorker.getId());
 		saleChange.setBsignType(BSignType.REFUND.getKey());
 		saleChange.setOrderChangeType(ChangeType.RETREAT.getKey());
-		saleChange.setChildStatus(Integer.valueOf(hotelOrder.getOrderStatus()));
+		saleChange.setChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus())));
 		saleChangeService.create(agent, saleChange);
 		
 		//创建应付记录单
