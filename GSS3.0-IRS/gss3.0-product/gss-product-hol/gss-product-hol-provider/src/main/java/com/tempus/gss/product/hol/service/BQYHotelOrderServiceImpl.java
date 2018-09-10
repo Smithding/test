@@ -314,8 +314,9 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		saleChange.setBsignType(BSignType.REFUND.getKey());
 		saleChange.setOrderChangeType(ChangeType.RETREAT.getKey());
 		saleChange.setChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus())));
-		saleChangeService.create(agent, saleChange);
-		
+		SaleChange saleChange1 = saleChangeService.create(agent, saleChange);
+		logger.info("创建销售变更单为: "+JsonUtil.toJson(saleChange1));
+
 		//创建应付记录单
 		CreatePlanAmountVO amountVO = new CreatePlanAmountVO();
 		amountVO.setRecordNo(saleChangeNo);
@@ -324,8 +325,9 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		amountVO.setIncomeExpenseType(2);
 		amountVO.setPlanAmount(hotelOrder.getFactTotalPrice());
 		amountVO.setRecordMovingType(1);
-		planAmountRecordService.create(agent, amountVO);
-		
+		PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, amountVO);
+		logger.info("创建应付记录单: "+JsonUtil.toJson(planAmountRecord));
+
 		//退款操作
 		ActualInfoSearchVO actualInfo = actualAmountRecorService.queryActualInfoByBusNo(agent, hotelOrder.getSaleOrderNo(), 2);
 		CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
