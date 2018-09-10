@@ -473,19 +473,23 @@ public class FlagInfoExcelUtils{
 	       				resultflag = false;
 	       			}
 	       		 }
-	       		 //数字校验
-	       		 if(field.isAnnotationPresent(IsNum.class)){
-	       			IsNum annotationIsNum = field.getAnnotation(IsNum.class);
-	       			boolean handelIsNum = handelIsNum(formatValue);
-	       			if(!handelIsNum){
-	       				if(StringUtils.isEmpty(annotationIsNum.message())){
-	       					errorMsg.append(addErrMsg(currRowIndex+1,c+1,"不是数字格式"));
-	       				}else{
-	       					errorMsg.append(addErrMsg(currRowIndex+1,c+1,annotationIsNum.message()));
-	       				}
-	       				resultflag = false;
-	       			}
-	       		 }
+				//数字校验
+				if(field.isAnnotationPresent(IsNum.class)){
+					IsNum annotationIsNum = field.getAnnotation(IsNum.class);
+					boolean handelIsNum = handelIsNum2(formatValue);
+					if (!handelIsNum) {
+						formatValue = "0";
+					}
+					handelIsNum = handelIsNum(formatValue);
+					if(!handelIsNum){
+						if(StringUtils.isEmpty(annotationIsNum.message())){
+							errorMsg.append(addErrMsg(currRowIndex+1,c+1,"不是数字格式"));
+						}else{
+							errorMsg.append(addErrMsg(currRowIndex+1,c+1,annotationIsNum.message()));
+						}
+						resultflag = false;
+					}
+				}
 	       		 //中文校验
 	       		 if(field.isAnnotationPresent(IsChinese.class)){
 	       			IsChinese annotationIsChinese = field.getAnnotation(IsChinese.class);
@@ -678,6 +682,13 @@ public class FlagInfoExcelUtils{
 		    if(formatValue == null){return true;}
 	        return Pattern.compile("^([+-]?)\\d*\\.?\\d+$").matcher(formatValue.toString()).matches();
 	 }
+	private boolean  handelIsNum2(Object formatValue){
+		if(formatValue == null || "".equals(String.valueOf(formatValue))){
+			return false;
+		}
+		return true;
+		//return Pattern.compile("^([+-]?)\\d*\\.?\\d+$").matcher(formatValue.toString()).matches();
+	}
 	 
 	 /**
 	  * 验证手机号
