@@ -675,7 +675,7 @@ public class FlagInfoExcelUtils{
 
 
 	private boolean  handelIsNum(Object formatValue){
-		    if(formatValue == null){return true;}
+		    if(formatValue == null || "".equals(String.valueOf(formatValue))){return true;}
 	        return Pattern.compile("^([+-]?)\\d*\\.?\\d+$").matcher(formatValue.toString()).matches();
 	 }
 	 
