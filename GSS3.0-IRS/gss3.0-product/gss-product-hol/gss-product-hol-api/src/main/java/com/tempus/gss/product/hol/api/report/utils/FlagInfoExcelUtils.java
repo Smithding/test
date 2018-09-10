@@ -800,11 +800,17 @@ public class FlagInfoExcelUtils{
 			   //公式生成类型 
 			   case Cell.CELL_TYPE_FORMULA:
 				    //导入时如果为公式生成的数据则无值 
-				    if(!cell.getStringCellValue().equals("")){ 
+				   ////这样对于字符串cell.getStringCellValue()方法即可取得其值，如果公式生成的是数值，使用cell.getStringCellValue()方法会抛出IllegalStateException异常，在异常处理中使用cell.getNumericCellValue();即可
+				    /*if(!cell.getStringCellValue().equals("")){ 
 				    	value = cell.getStringCellValue(); 
 				    }else{ 
 				    	value = cell.getNumericCellValue(); 
-				    } 
+				    } */
+				   try {
+					   value = cell.getStringCellValue();
+				   } catch (IllegalStateException e) {
+					   value = cell.getNumericCellValue();
+				   }
 				    break; 
 			   //空白 
 			   case Cell.CELL_TYPE_BLANK:
