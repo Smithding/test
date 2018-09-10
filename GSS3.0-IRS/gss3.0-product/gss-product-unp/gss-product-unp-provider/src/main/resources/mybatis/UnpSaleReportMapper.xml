@@ -45,10 +45,10 @@
             WHERE
                 ui.VALID = '1'
             <if test="ticketDateStart !=null and ticketDateStart != '' ">
-                AND ue.CREATE_TIME <![CDATA[>=]]>#{ticketDateStart}
+                AND ue.CREATE_TIME <![CDATA[>=]]>CONCAT(#{ticketDateStart},' 00:00:00')
             </if>
             <if test="ticketDateEnd !=null  and ticketDateEnd != ''">
-                AND ue.CREATE_TIME <![CDATA[<=]]>#{ticketDateEnd}
+                AND ue.CREATE_TIME <![CDATA[<=]]>CONCAT(#{ticketDateEnd},' 23:59:59')
             </if>
             <if test="itemTypeNo !=null">
                AND upe.ITEM_TYPE_NO =#{itemTypeNo}

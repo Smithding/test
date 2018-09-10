@@ -48,17 +48,17 @@ public class PayListener {
     public void processLogRecord(PayNoticeVO payNoticeVO) {
         try {
             if (GoodsBigType.GENERAL.getKey() == payNoticeVO.getGoodsType() && PayReceiveVO.PS_PAY_STATUS_SUCCESS == payNoticeVO.getPayStatus()) {
-                 logger.info("监听到【通用产品】支付消息队列" + JSON.toJSONString(payNoticeVO));
+                logger.info("监听到【通用产品】支付消息队列" + JSON.toJSONString(payNoticeVO));
                 try {
                     UnpBuy queryUnpBuy = unpBuyMapper.selectBySaleOrderNo(payNoticeVO.getBusinessNo());
                     if (queryUnpBuy != null && queryUnpBuy.getPayStatus() < EUnpConstant.PayStatus.PAIED.getKey()) {
-                        
-                        Runnable runnable = () -> {
-                            //满足条件 新开线程  进行采购支付(采购未支付)
-//                            unpOrderService.
-                        };
-                        logger.info("新开线程进行UNP采购支付,销售单号:{},采购单号:{}", payNoticeVO.getBusinessNo(), queryUnpBuy.getBuyOrderNo());
-                        runnable.run();
+//
+//                        Runnable runnable = () -> {
+//                            //满足条件 新开线程  进行采购支付 采购支付为记账，只有线下
+////                            unpOrderService.
+//                        };
+//                        logger.info("新开线程进行UNP采购支付,销售单号:{},采购单号:{}", payNoticeVO.getBusinessNo(), queryUnpBuy.getBuyOrderNo());
+//                        runnable.run();
                     }
                 } catch (Exception e) {
                     logger.error("Error", e);
@@ -91,6 +91,8 @@ public class PayListener {
                             unpUpdate.setPayStatus(EUnpConstant.PayStatus.PAIED.getKey());
                         }
                         unpUpdate.setPayTime(new Date());
+                        unpSale.setModifier(agent.getAccount());
+                        unpSale.setModifyTime(new Date());
                     }
                     unpUpdate.setStatus(EUnpConstant.OrderStatus.DONE.getKey());
                     unpUpdate.setActualAmount(payNoticeVO.getActualAmount());

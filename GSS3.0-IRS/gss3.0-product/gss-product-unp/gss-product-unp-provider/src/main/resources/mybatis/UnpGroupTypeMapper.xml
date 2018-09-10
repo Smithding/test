@@ -129,19 +129,19 @@
             AND CREATOR like concat('%',concat(#{creator,jdbcType=VARCHAR},'%'))
         </if>
         <if test="createTimeStart!=null and ''!=createTimeStart">
-            AND CREATE_TIME <![CDATA[>=]]> #{createTimeStart,jdbcType=TIMESTAMP}
+            AND CREATE_TIME <![CDATA[>=]]> CONCAT(#{createTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
         </if>
         <if test="createTimeEnd!=null and ''!=createTimeEnd">
-            AND CREATE_TIME  <![CDATA[<=]]> #{createTimeEnd,jdbcType=TIMESTAMP}
+            AND CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
         <if test="modifier!=null and ''!=modifier">
             AND MODIFIER like concat(concat('%',#{modifier,jdbcType=VARCHAR}),'%')
         </if>
         <if test="modifyTimeStart!=null and ''!=modifyTimeStart">
-            AND MODIFY_TIME <![CDATA[>=]]> #{modifyTimeStart,jdbcType=TIMESTAMP}
+            AND MODIFY_TIME <![CDATA[>=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
         </if>
         <if test="modifyTimeStart!=null and ''!=modifyTimeStart">
-            AND MODIFY_TIME <![CDATA[<=]]> #{modifyTimeStart,jdbcType=TIMESTAMP}
+            AND MODIFY_TIME <![CDATA[<=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
         ORDER BY CREATE_TIME DESC
     </select>

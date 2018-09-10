@@ -1,6 +1,5 @@
 package com.tempus.gss.product.ift.api.service;
 
-import java.util.Date;
 import java.util.List;
 
 import com.baomidou.mybatisplus.plugins.Page;
@@ -204,4 +203,6 @@ public interface IChangeService {
 	 * @return
 	 */
     List<SaleChange> getSaleChangeBySONo(Agent agent, Long saleOrderNo);
+
+    Boolean isAlreadyChange(Agent agent, Long saleChangeNo) throws Exception;
 }
