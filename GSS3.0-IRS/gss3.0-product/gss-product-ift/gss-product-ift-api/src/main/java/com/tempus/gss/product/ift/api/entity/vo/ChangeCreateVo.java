@@ -79,8 +79,20 @@ public class ChangeCreateVo implements Serializable {
 	/** 业务批次号 */
 	@JsonSerialize(using = LongSerializer.class)
 	private Long businessSignNo;
-	
-	
+
+	/**
+	 * 源改签单号，如果是在销售单上改签则无
+	 */
+	private Long originSaleChangeNo;
+
+	public Long getOriginSaleChangeNo() {
+		return originSaleChangeNo;
+	}
+
+	public void setOriginSaleChangeNo(Long originSaleChangeNo) {
+		this.originSaleChangeNo = originSaleChangeNo;
+	}
+
 	public Long getSaleOrderNo() {
 
 		return saleOrderNo;

@@ -730,9 +730,8 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     
     @Override
     public List<UnpBuyItem> getBuyItems(UnpOrderVo params) {
-        UnpBuyItem buyItem = new UnpBuyItem();
-        buyItem.setBuyOrderNo(params.getBuyOrderNo());
-        List<UnpBuyItem> list = unpBuyItemMapper.selectItemsByParams(buyItem);
+        List<UnpBuyItem> list = unpBuyItemMapper.selectItems(params.getBuyOrderNo());
+
         if (NullableCheck.isNullOrEmpty(list)) {
             return new ArrayList<>();
         }
