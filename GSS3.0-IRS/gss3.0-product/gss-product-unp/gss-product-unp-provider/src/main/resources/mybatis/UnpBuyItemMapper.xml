@@ -66,6 +66,9 @@
             <if test="valid != null">
                 VALID,
             </if>
+            <if test="saleItemNo !=null">
+                SALE_ITEM_NO
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="itemId != null">
@@ -94,6 +97,9 @@
             </if>
             <if test="valid != null">
                 #{valid,jdbcType=INTEGER},
+            </if>
+            <if test="saleItemNo != null">
+                #{saleItemNo,jdbcType=INTEGER},
             </if>
         </trim>
     </insert>
