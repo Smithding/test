@@ -4,19 +4,31 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
+import com.tempus.gss.bbp.util.DateUtil;
+import com.tempus.gss.product.ift.api.entity.Leg;
+import com.tempus.gss.product.ift.api.entity.Passenger;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicyQuery;
+import com.tempus.gss.product.ift.api.entity.search.FlightQuery;
 import com.tempus.gss.product.ift.api.service.policy.IftPolicyService;
 import com.tempus.gss.product.ift.dao.policy.IftPolicyMapper;
+import com.tempus.gss.product.ift.dao.policy.IftQueryPolicyMapper;
 import com.tempus.gss.product.ift.help.IftLogHelper;
+import com.tempus.gss.product.ift.help.IftPolicyHelper;
+import com.tempus.gss.util.Collections;
 import com.tempus.gss.util.EntityUtil;
 import com.tempus.gss.vo.Agent;
+import com.tempus.tbd.entity.Country;
+import com.tempus.tbd.service.IAirportService;
 
 /**
  * 
@@ -41,7 +53,16 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 	private IftPolicyMapper iftPolicyMapper;
 	
 	@Autowired
+	private IftQueryPolicyMapper iftQueryPolicyMapper;
+	
+	@Autowired
+	private IftPolicyHelper policyHelper;
+	
+	@Autowired
 	private IftLogHelper logHelper;
+	
+	/** 日志记录器. */
+	protected static Logger logger = LogManager.getLogger(IftPolicyServiceImpl.class);
 	
 	@Override
 	public long create(Agent agent, IftPolicy iftPolicy) {
@@ -196,6 +217,33 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 	    "STATUS, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME, VALID";
 		String[] b = a.split(",");
 		System.out.println(b.length);
+	}
+
+	@Override
+	public List<IftPolicy> getPolicys(Agent agent, List<Leg> legs, double parPrice, int peopleNumber) {
+		
+		/* 第一步，组装条件从库里面获取政策 */
+		FlightQuery query = policyHelper.packageQuery(agent, legs, peopleNumber);
+		List<IftPolicy> iftPolicyList = iftQueryPolicyMapper.query(query);
+		
+		/* 第二步，再逐步过滤政策条件 */
+		iftPolicyList = policyHelper.ruleFilter(iftPolicyList, legs, query, parPrice);
+		
+		return iftPolicyList;
+	}
+	
+	@Override
+	public List<IftPolicy> getPolicysByPnr(Agent agent, List<Passenger> passengers, List<Leg> legs,
+			String pnr, String pnrContext) {
+		
+		/* 第一步，组装条件从库里面获取政策 */
+		FlightQuery query = policyHelper.packageQuery(agent, legs, passengers.size());
+		List<IftPolicy> iftPolicyList = iftQueryPolicyMapper.query(query);
+		
+		/* 第二步，再逐步过滤政策条件 */
+		iftPolicyList = policyHelper.ruleFilterByPnr(iftPolicyList, passengers, legs, query, pnr, pnrContext);
+		
+		return iftPolicyList;
 	}
 
 }
