@@ -3,7 +3,6 @@ package com.tempus.gss.product.unp.service;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
-import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.product.unp.api.entity.UnpGroupType;
 import com.tempus.gss.product.unp.api.entity.UnpItemType;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
@@ -11,6 +10,7 @@ import com.tempus.gss.product.unp.api.entity.vo.UnpGroupItemVo;
 import com.tempus.gss.product.unp.api.service.UnpGroupItemService;
 import com.tempus.gss.product.unp.dao.UnpGroupTypeMapper;
 import com.tempus.gss.product.unp.dao.UnpItemTypeMapper;
+import com.tempus.gss.util.NullableCheck;
 import com.tempus.gss.vo.Agent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +54,7 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
     @Override
     public UnpGroupType getGroupByCode(String code) {
         try {
-            if (StringUtil.isBlank(code)) {
+            if (NullableCheck.isNullOrEmpty(code)) {
                 return null;
             }
             return this.groupTypeMapper.selectByCode(code);
@@ -95,11 +95,11 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
                 result.failed("参数 不能为空", null);
                 return result;
             }
-            if (StringUtil.isBlank(group.getCode())) {
+            if (NullableCheck.isNullOrEmpty(group.getCode())) {
                 result.failed("产品代码 不能为空", null);
                 return result;
             }
-            if (StringUtil.isBlank(group.getName())) {
+            if (NullableCheck.isNullOrEmpty(group.getName())) {
                 result.failed("产品名称 不能为空", null);
                 return result;
             }
@@ -163,7 +163,7 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
     @Override
     public UnpItemType getItemByCode(String code) {
         try {
-            if (StringUtil.isBlank(code)) {
+            if (NullableCheck.isNullOrEmpty(code)) {
                 return null;
             }
             return this.itemTypeMapper.selectByCode(code);
@@ -181,15 +181,15 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
                 result.failed("参数 不能为空", null);
                 return result;
             }
-            if (StringUtil.isBlank(item.getCode())) {
+            if (NullableCheck.isNullOrEmpty(item.getCode())) {
                 result.failed("大类代码 不能为空", null);
                 return result;
             }
-            if (StringUtil.isBlank(item.getItemCode())) {
+            if (NullableCheck.isNullOrEmpty(item.getItemCode())) {
                 result.failed("产品代码 不能为空", null);
                 return result;
             }
-            if (StringUtil.isBlank(item.getItemName())) {
+            if (NullableCheck.isNullOrEmpty(item.getItemName())) {
                 result.failed("产品名称 不能为空", null);
                 return result;
             }
@@ -199,7 +199,7 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
             if (null != item.getBaseAmount()) {
                 baseAmount = item.getBaseAmount();
             }
-            if (StringUtil.isBlank(item.getCode())) {
+            if (NullableCheck.isNotNullAndEmpty(item.getCode())) {
                 UnpGroupType group = this.getGroupByCode(item.getCode());
                 if (group == null) {
                     result.failed("分类不存在", null);
@@ -217,8 +217,8 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
             itemToAdd = new UnpItemType();
             itemToAdd.setItemTypeNo(itemNo);
             itemToAdd.setOwner(agent.getOwner());
-            itemToAdd.setCode(item.getCode());
-            itemToAdd.setName(item.getName());
+            itemToAdd.setCode(item.getItemCode());
+            itemToAdd.setName(item.getItemName());
             itemToAdd.setRemark(item.getRemark());
             itemToAdd.setBaseAmount(baseAmount);
             itemToAdd.setGroupCode(item.getCode());
@@ -351,12 +351,12 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
                     itemToUpdate.setModifyTime(new Date());
                     //构建修改小类的参数
                     UnpItemType itemParam = new UnpItemType();
-                    if (StringUtil.isNotBlank(((UnpGroupType) entity).getCode())) {
+                    if (NullableCheck.isNotNullAndEmpty(((UnpGroupType) entity).getCode())) {
                         //如果大类修改了CODE
                         itemParam.setGroupCode(beforeUpdate.getCode());
                     }
                     
-                    if (StringUtil.isNotBlank(((UnpGroupType) entity).getName())) {
+                    if (NullableCheck.isNotNullAndEmpty(((UnpGroupType) entity).getName())) {
                         //如果大类修改了NAME
                         itemParam.setGroupName(beforeUpdate.getName());
                     }

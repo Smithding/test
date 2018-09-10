@@ -58,7 +58,7 @@ public class UnpBuyItem implements Serializable {
     
     public String getAdditionalInfo() {
         return additionalInfo;
-       
+        
     }
     
     public void setAdditionalInfo(String additionalInfo) {

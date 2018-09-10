@@ -331,6 +331,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                     if (unpBuyItem.getUnpType() == null) {
                         throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "小类编号 不能为空");
                     }
+                    unpBuyItem.setItemId(IdWorker.getId());
                     unpBuyItem.setBuyOrderNo(buyOrderNo);
                     unpBuyItem.setItemStatus(1);
                     planAmount = planAmount.add(unpBuyItem.getGroupAmount());
