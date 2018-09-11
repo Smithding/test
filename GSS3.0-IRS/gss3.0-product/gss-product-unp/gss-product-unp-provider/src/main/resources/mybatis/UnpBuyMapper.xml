@@ -23,6 +23,7 @@
         <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
         <result column="VALID" jdbcType="INTEGER" property="valid"/>
         <result column="NAME" jdbcType="VARCHAR" property="name"/>
+        <result column="CUSTOMER_NAME" jdbcType="VARCHAR" property="customerName"/>
     </resultMap>
     <sql id="Base_Column_List">
     BUY_ORDER_NO, SALE_ORDER_NO, OWNER, SUPPLIER_ID, SUPPLIER_TYPE, CHANGE_TYPE, REMARK,
@@ -278,15 +279,18 @@
        LEFT JOIN UNP_BUY UB ON UB.SALE_ORDER_NO = US.SALE_ORDER_NO
        LEFT JOIN CPS_SUPPLIER CS ON UB.SUPPLIER_ID = CS.SUPPLIER_NO-->
     <select id="queryBuyOrderList" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo" resultMap="BaseResultMap">
-        SELECT UB.SALE_ORDER_NO ,UB.BUY_ORDER_NO,UB.OWNER ,UB.TRA_NO ,UB.REMARK ,UB.CHANGE_TYPE ,UB.PLAN_AMOUNT ,UB.ACTUAL_AMOUNT ,UB.PAY_STATUS ,UB.PAY_TIME ,UB.STATUS ,UB.CREATOR ,UB.CREATE_TIME ,UB.MODIFIER
-        ,US.MODIFY_TIME ,US.VALID,CS.NAME,UB.SUPPLIER_ID
+        SELECT UB.*,CS.NAME,CC.NAME AS CUSTOMER_NAME
         FROM UNP_BUY UB
-        LEFT JOIN UNP_SALE US ON  US.SALE_ORDER_NO = UB.SALE_ORDER_NO
+        LEFT JOIN UNP_SALE US ON US.SALE_ORDER_NO = UB.SALE_ORDER_NO
         LEFT JOIN UNP_BUY_ITEM UBI ON UBI.BUY_ORDER_NO = UB.BUY_ORDER_NO
         LEFT JOIN UNP_ITEM_TYPE UIT ON UIT.ITEM_TYPE_NO = UBI.UNP_TYPE
         LEFT JOIN UNP_GROUP_TYPE UGT ON UGT.TYPE_NO = UBI.CHANGE_TYPE
         LEFT JOIN CPS_SUPPLIER CS ON UB.SUPPLIER_ID = CS.SUPPLIER_NO
+        LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO=US.CUSTOMER_NO
         where 1=1
+        <if test="buyOrderNo != null">
+            AND UB.BUY_ORDER_NO = #{buyOrderNo,jdbcType=INTEGER}
+        </if>
         <if test="owner != null">
             AND UB.OWNER = #{owner,jdbcType=INTEGER}
         </if>
@@ -308,8 +312,11 @@
         <if test="payStatus != null">
             AND UB.PAY_STATUS = #{payStatus,jdbcType=INTEGER}
         </if>
-        <if test="payTime != null">
-            AND UB.PAY_TIME = #{payTime,jdbcType=TIMESTAMP}
+        <if test="payTimeStart!=null and ''!=payTimeStart">
+            AND UB.PAY_TIME <![CDATA[>=]]> CONCAT(#{payTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="payTimeEnd!=null and ''!=payTimeEnd">
+            AND UB.PAY_TIME  <![CDATA[<=]]> CONCAT(#{payTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
         <if test="status != null">
             AND UB.STATUS = #{status,jdbcType=INTEGER}
@@ -317,14 +324,20 @@
         <if test="creator != null">
             AND UB.CREATOR LIKE concat('%',concat(#{creator,jdbcType=VARCHAR},'%'))
         </if>
-        <if test="createTime != null">
-            AND  UB.CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
+        <if test="createTimeStart!=null and ''!=createTimeStart">
+            AND UB.CREATE_TIME <![CDATA[>=]]> CONCAT(#{createTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="createTimeEnd!=null and ''!=createTimeEnd">
+            AND UB.CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
         <if test="modifier != null">
             AND UB.MODIFIER LIKE concat('%',concat(#{modifier,jdbcType=VARCHAR},'%'))
         </if>
-        <if test="modifyTime != null">
-            AND UB.MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP}
+        <if test="modifyTimeStart != null and ''!=modifyTimeStart">
+            AND UB.MODIFY_TIME <![CDATA[>=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="modifyTimeEnd != null and ''!=modifyTimeEnd">
+            AND UB.MODIFY_TIME <![CDATA[<=]]> CONCAT(#{modifyTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
         <if test="valid != null">
             AND UB.VALID = #{valid,jdbcType=INTEGER}
@@ -339,12 +352,12 @@
             AND UIT.NAME LIKE concat('%',concat(#{itemName,jdbcType=VARCHAR},'%'))
         </if>
         <if test="groupCode != null and groupCode!=''">
-            AND  UGT.CODE LIKE concat('%',concat(#{groupCode,jdbcType=VARCHAR},'%'))
+            AND UGT.CODE LIKE concat('%',concat(#{groupCode,jdbcType=VARCHAR},'%'))
         </if>
         <if test="groupName != null and groupName!=''">
             AND UGT.NAME LIKE concat('%',concat(#{groupName,jdbcType=VARCHAR},'%'))
         </if>
-        GROUP BY US.SALE_ORDER_NO
+        GROUP BY UB.BUY_ORDER_NO
         ORDER BY UB.CREATE_TIME DESC
     </select>
 </mapper>

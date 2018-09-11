@@ -38,6 +38,10 @@ public class UnpBuy implements Serializable {
      */
     private String name;
     /**
+     * 对应销售单客户名称
+     */
+    private String customerName;
+    /**
      * 是否变更以及变更类型 0正常;1退;2改
      */
     private Integer changeType;
@@ -101,6 +105,14 @@ public class UnpBuy implements Serializable {
      * 删除标志 0 无效 已删除 1 有效
      */
     private Integer valid;
+    
+    public String getCustomerName() {
+        return customerName;
+    }
+    
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
     
     private List<UnpBuyItem> buyItems;
     
