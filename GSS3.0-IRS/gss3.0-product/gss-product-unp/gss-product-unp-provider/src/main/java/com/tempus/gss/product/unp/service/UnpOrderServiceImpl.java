@@ -705,14 +705,12 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         if (request.getBuyItems() == null) {
             logger.error("采购订单更新失败{}", "buyItems不能为null");
         }
-        UnpBuy unpBuy = null;
-        List<UnpBuyItem> unpBuyItemList = null;
+        UnpBuy unpBuy = request.getUnpBuy();
+        List<UnpBuyItem> unpBuyItemList = request.getBuyItems();
         UnpResult<UnpBuy> unpBuyUnpResult = new UnpResult();
         BigDecimal planAmount = new BigDecimal(0);
         try {
             if (request != null) {
-                unpBuy = request.getUnpBuy();
-                unpBuyItemList = request.getBuyItems();
                 UnpBuy queryUnpBuy = unpBuyMapper.selectBySaleOrderNo(unpBuy.getSaleOrderNo());//判断原单是否可操作
                 if (queryUnpBuy == null && queryUnpBuy.getChangeType() == 2) {
                     throw new Exception("不存在可操作订单");
