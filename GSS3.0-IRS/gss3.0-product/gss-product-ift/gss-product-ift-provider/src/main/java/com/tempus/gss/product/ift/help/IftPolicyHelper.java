@@ -69,10 +69,22 @@ public class IftPolicyHelper {
 	 * 
 	 * @param agent 用户信息
 	 * @param legs 航段集合
-	 * @param passengerNumber 人数
+	 * @param adtNumber 成人数
+	 * @param chdNumber 儿童数
+	 * @param infNumber 婴儿数
 	 * @return FlightQuery 组装好的查询条件
 	 */
-	public FlightQuery packageQuery(Agent agent, List<Leg> legs, int passengerNumber){
+	public FlightQuery packageQuery(Agent agent, List<Leg> legs, int adtNumber, int chdNumber, int infNumber){
+		int psgType = 1; //乘客类型 1：成人；2:儿童;3:婴儿；4：成人+儿童；5成人+婴儿；
+		if(0 == adtNumber && 0 < chdNumber && 0 == infNumber){
+			psgType = 2;
+		}else if(0 == adtNumber && 0 == chdNumber && 0 < infNumber){
+			psgType = 3;
+		}else if(0 < adtNumber && 0 < chdNumber && 0 == infNumber){
+			psgType = 4;
+		}else if(0 < adtNumber && 0 == chdNumber && 0 < infNumber){
+			psgType = 5;
+		}
 		FlightQuery query = new FlightQuery();
 		try {
 			int legType = this.getLegType(legs);
@@ -128,8 +140,9 @@ public class IftPolicyHelper {
 			}
 			query.setSaleWeek(Integer.parseInt(DateUtil.getDayOfWeek(new Date(), 0)));// 当前星期
 			query.setDepartWeek(Integer.parseInt(DateUtil.getDayOfWeek(query.getFlyDate(), 0)));// 去程星期几
-			query.setPsgerNum(passengerNumber);// 查询人数
+			query.setPsgerNum(adtNumber + chdNumber + infNumber);// 查询人数
 			query.setPsgerEven(query.getPsgerNum() % 2 == 0 ? true : false);// 人数是双数，还上单数
+			query.setPsgerType(psgType);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -149,7 +162,6 @@ public class IftPolicyHelper {
 		ArrayList<String> airlines = new ArrayList<>();//航司集合
 		ArrayList<String> cabins = new ArrayList<>(); //舱位集合
 		ArrayList<String> flightNos = new ArrayList<>(); //航班号集合
-//		ArrayList<String> cabinGrades = new ArrayList<>(); //舱位等级集合
 		ArrayList<String> flyFlightNos = new ArrayList<>();//去程航班号集合
 		ArrayList<String> rtnFlightNos = new ArrayList<>();//回程航班号集合
 		ArrayList<String> transitCabins = new ArrayList<>();//中转舱位集合
@@ -163,7 +175,6 @@ public class IftPolicyHelper {
 				airlines.add(leg.getAirline());
 				cabins.add(leg.getCabin());
 				flightNos.add(leg.getFlightNo());
-//				cabinGrades[i] = 
 				flyFlightNos.add(leg.getFlightNo());
 				if(legs.size() > 1 && i > 0){
 					transitCabins.add(leg.getCabin());
@@ -188,7 +199,6 @@ public class IftPolicyHelper {
 				airlines.add(leg.getAirline());
 				cabins.add(leg.getCabin());
 				flightNos.add(leg.getFlightNo());
-//				cabinGrades[i] = 
 				if(!startRtn){
 					if(legs.get(i - 1).getDepAirport().equals(legs.get(i).getArrAirport())){
 						startRtn = true;
@@ -246,7 +256,6 @@ public class IftPolicyHelper {
 		ArrayList<String> airlines = new ArrayList<>();//航司集合
 		ArrayList<String> cabins = new ArrayList<>(); //舱位集合
 		ArrayList<String> flightNos = new ArrayList<>(); //航班号集合
-//		ArrayList<String> cabinGrades = new ArrayList<>(); //舱位等级集合
 		ArrayList<String> flyFlightNos = new ArrayList<>();//去程航班号集合
 		ArrayList<String> rtnFlightNos = new ArrayList<>();//回程航班号集合
 		ArrayList<String> transitCabins = new ArrayList<>();//中转舱位集合
@@ -260,7 +269,6 @@ public class IftPolicyHelper {
 				airlines.add(leg.getAirline());
 				cabins.add(leg.getCabin());
 				flightNos.add(leg.getFlightNo());
-//				cabinGrades[i] = 
 				flyFlightNos.add(leg.getFlightNo());
 				if(legs.size() > 1 && i > 0){
 					transitCabins.add(leg.getCabin());
@@ -285,7 +293,6 @@ public class IftPolicyHelper {
 				airlines.add(leg.getAirline());
 				cabins.add(leg.getCabin());
 				flightNos.add(leg.getFlightNo());
-//				cabinGrades[i] = 
 				if(!startRtn){
 					if(legs.get(i - 1).getDepAirport().equals(legs.get(i).getArrAirport())){
 						startRtn = true;
