@@ -562,7 +562,6 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         wrapper.setRecords(list);
         return wrapper;
     }
-    
     @Override
     public UnpResult<UnpSale> updateSale(Agent agent, UnpOrderUpdateVo request) {
         UnpResult<UnpSale> result = new UnpResult<>();

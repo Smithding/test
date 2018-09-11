@@ -335,7 +335,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		certificateCreateVO.setCustomerTypeNo(Long.valueOf(hotelOrder.getRequestText()));
 		certificateCreateVO.setCustomerNo(hotelOrder.getCustomerNo());
 		certificateCreateVO.setIncomeExpenseType(2);
-		certificateCreateVO.setAmount(hotelOrder.getTotalPrice());
+		certificateCreateVO.setAmount(hotelOrder.getFactTotalPrice());
 		certificateCreateVO.setSubBusinessType(BusinessType.BUY_ORDER);
 		List<BusinessOrderInfo> businessOrderInfoList = new ArrayList<>();
 		BusinessOrderInfo businessOrderInfo = new BusinessOrderInfo();
@@ -345,6 +345,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		businessOrderInfoList.add(businessOrderInfo);
 		certificateCreateVO.setOrderInfoList(businessOrderInfoList);
 		BigDecimal saleRefundCert = certificateService.saleRefundCert(agent, certificateCreateVO);
+		logger.info("退款操作完成, 退款金额为: "+saleRefundCert);
 		return saleRefundCert;
 	}
 

@@ -90,8 +90,11 @@
         <if test="modifier != null">
             AND US.MODIFIER LIKE concat('%',CONCAT(#{modifier,jdbcType=VARCHAR},'%'))
         </if>
-        <if test="modifyTime != null">
-            AND US.MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP}
+        <if test="modifyTimeStart != null and ''!=modifyTimeStart">
+            AND US.MODIFY_TIME <![CDATA[>=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="modifyTimeEnd != null and ''!=modifyTimeEnd">
+            AND US.MODIFY_TIME <![CDATA[<=]]> CONCAT(#{modifyTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
         <if test="valid != null">
             AND US.VALID = #{valid,jdbcType=INTEGER}
@@ -111,7 +114,6 @@
         <if test="groupName != null and groupName!=''">
             AND UGT.NAME LIKE concat('%',concat(#{groupName,jdbcType=VARCHAR},'%'))
         </if>
-        GROUP BY US.SALE_ORDER_NO
         ORDER BY US.CREATE_TIME DESC
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">

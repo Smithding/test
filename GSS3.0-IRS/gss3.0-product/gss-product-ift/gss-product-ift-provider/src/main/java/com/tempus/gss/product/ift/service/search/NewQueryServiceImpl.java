@@ -40,9 +40,7 @@ import com.tempus.gss.vo.Agent;
 import com.tempus.tbd.service.IAirportService;
 import com.tempus.tbe.service.IShoppingService;
 
-/**
- * Created by 杨威 on 2016/10/12.
- */
+
 @Service
 @EnableAutoConfiguration
 public class NewQueryServiceImpl implements NewQueryService {
