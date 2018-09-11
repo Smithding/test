@@ -65,7 +65,7 @@ public class PayListener {
                     List<UnpSaleItem> itemsToUpdate = new ArrayList<>();
                     unpUpdate.setSaleOrderNo(payNoticeVO.getBusinessNo());
                     if (payNoticeVO.getIncomeExpenseType() == IncomeExpenseType.INCOME.getKey()) {
-                        logger.info("监听到", );
+                        logger.info("监听到UNP销售支付消息:{}--￥{}", payNoticeVO.getBusinessNo(), payNoticeVO.getActualAmount());
                         //收款
                         if (unpSale.getPayStatus() <= EUnpConstant.PayStatus.PAYING.getKey()) {
                             //首次通知 首次修改
@@ -102,6 +102,7 @@ public class PayListener {
                 if (payNoticeVO.getBusinessType() == BusinessType.BUY_ORDER) {
                     if (payNoticeVO.getIncomeExpenseType() == IncomeExpenseType.EXPENSE.getKey()) {
                         //采购付款
+                        logger.info("监听到UNP采购付款消息:{}--￥{}", payNoticeVO.getBusinessNo(), payNoticeVO.getActualAmount());
                         UnpBuy unpBuy = unpOrderService.getBuyOrderInfo(queryVo);
                         updateVo.setUnpBuy(unpBuy);
                         updateVo.setBuyItems(unpBuy.getBuyItems());
@@ -113,14 +114,14 @@ public class PayListener {
                     //退
                     if (payNoticeVO.getIncomeExpenseType() == IncomeExpenseType.EXPENSE.getKey()) {
                         //销售退款
-                        
+                        logger.info("监听到UNP销售退款消息:{}--￥{}", payNoticeVO.getBusinessNo(), payNoticeVO.getActualAmount());
                     }
                 }
                 if ((payNoticeVO.getBusinessType() == BusinessType.BUY_CHANGE_ORDER)) {
                     //退
                     if (payNoticeVO.getIncomeExpenseType() == IncomeExpenseType.INCOME.getKey()) {
                         //采购退款
-                        
+                        logger.info("监听到UNP采购退款消息:{}--￥{}", payNoticeVO.getBusinessNo(), payNoticeVO.getActualAmount());
                     }
                 }
             }

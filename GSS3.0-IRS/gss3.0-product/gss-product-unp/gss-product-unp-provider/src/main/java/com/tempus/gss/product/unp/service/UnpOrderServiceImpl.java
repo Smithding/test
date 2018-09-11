@@ -84,6 +84,8 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     IBuyOrderService buyOrderService;
     @Reference
     IBuyChangeService buyChangeService;
+    @Reference
+    ISaleChangeService saleChangeService;
     
     @Override
     public UnpSale getSaleOrderInfo(UnpOrderVo params) {
@@ -404,13 +406,108 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
-    public UnpResult<UnpSale> createSaleRefund(Agent agent, UnpOrderCreateVo request) {
-        return null;
+    public UnpResult<UnpSaleRefund> createSaleRefund(Agent agent, UnpOrderCreateVo request) {
+        this.createValid(request, VALID_TYPE_SALE_REFUND);
+        logger.info("创建销售采购退单开始");
+        UnpSaleRefund unpSaleRefund = new UnpSaleRefund();
+        UnpSaleRefundItem unpSaleRefundItem = new UnpSaleRefundItem();
+        List<UnpSaleItem> saleItems = request.getSaleItems();
+        UnpResult<UnpSaleRefund> unpResult = new UnpResult();
+        BigDecimal planAmount = new BigDecimal(0);
+        String productName = "通用产品";
+        List<String> goods = new ArrayList<>();
+        
+        try {
+            //获取采购单信息
+            UnpSale unpSale = unpSaleMapper.selectByPrimaryKey(request.getUnpSale().getSaleOrderNo());
+            if (unpSale == null) {
+                throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购单不存在");
+            }
+            Long saleRefundOrderNo = this.getUnpNo(PREFIX_SALE_REFUND);
+            unpSaleRefund.setSaleRefundOrderNo(saleRefundOrderNo);
+            unpSaleRefund.setSaleOrderNo(unpSale.getSaleOrderNo());
+            unpSaleRefund.setOwner(unpSale.getOwner());
+            unpSaleRefund.setCustomerType(unpSale.getCustomerType());
+            unpSaleRefund.setCustomerNo(unpSale.getCustomerNo());
+            unpSaleRefund.setRemark(request.getUnpBuy().getRemark());
+            unpSaleRefund.setTraNo(unpSale.getTraNo());
+            unpSaleRefund.setChangeType(EUnpConstant.ChangeType.REFUND.getKey());
+            unpSaleRefund.setPayStatus(EUnpConstant.PayStatus.NOT_PAIED.getKey());
+            unpSaleRefund.setStatus(EUnpConstant.OrderStatus.READY.getKey());
+            unpSaleRefund.setCreator(agent.getAccount());
+            unpSaleRefund.setCreateTime(new Date());
+            for (UnpSaleItem saleItem : saleItems) {
+                if (saleItem.getItemId() == null) {
+                    throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购明细单编号不能为空");
+                }
+                UnpSaleItem unpSaleItem = unpSaleItemMapper.selectByPrimaryKey(saleItem.getItemId());
+                UnpItemType unpItemType = itemTypeMapper.selectByPrimaryKey(unpSaleItem.getUnpType());
+                goods.add(unpItemType.getName());
+                planAmount = planAmount.add(unpSaleItem.getGroupAmount());
+                unpSaleRefundItem.setItemId(IdWorker.getId());
+                unpSaleRefundItem.setSaleRefundOrderNo(saleRefundOrderNo);
+                unpSaleRefundItem.setUnpType(GoodsBigType.GENERAL.getKey());
+                unpSaleRefundItem.setNum(unpSaleItem.getNum());
+                unpSaleRefundItem.setChangeType(EUnpConstant.ChangeType.REFUND.getKey());
+                unpSaleRefundItem.setGroupAmount(unpSaleItem.getGroupAmount());
+                unpSaleRefundItem.setItemStatus(EUnpConstant.OrderStatus.READY.getKey());
+                if (unpSaleRefundItemMapper.insertSelective(unpSaleRefundItem) < 0) {
+                    throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "明细列表中 小类【" + unpSaleRefundItem.getUnpType() + "】创建失败");
+                }
+            }
+            //创建 refund 主表
+            unpSaleRefund.setRefundAmount(planAmount);
+            if (unpSaleRefundMapper.insertSelective(unpSaleRefund) < 0) {
+                throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售退单创建失败");
+            }
+            //创建os_buyChange主单记录
+            SaleChange saleChange = new SaleChange();
+            saleChange.setSaleChangeNo(unpSaleRefund.getSaleRefundOrderNo());
+            saleChange.setOwner(unpSaleRefund.getOwner());
+            saleChange.setBusinessSignNo(IdWorker.getId());
+            saleChange.setSaleOrderNo(unpSaleRefund.getSaleOrderNo());
+            saleChange.setTransationOrderNo(unpSaleRefund.getTraNo());
+            saleChange.setOrderChangeType(ChangeType.RETREAT.getKey());
+            saleChange.setIncomeExpenseType(IncomeExpenseType.INCOME.getKey());
+            saleChange.setChangeReason(unpSaleRefund.getRemark());
+            saleChange.setPayStatus(PayStatus.NO_PAYMENT.getKey());
+            saleChange.setStatus(BSignType.REFUND.getKey());
+            saleChange.setChildStatus(unpSaleRefund.getStatus());
+            saleChange.setCreateTime(unpSaleRefund.getCreateTime());
+            saleChange.setGoodsType(GoodsBigType.GENERAL.getKey());
+            saleChange.setGoodsSubType(EgoodsSubType.BUY_RETREAT.getKey());
+            saleChange.setGoodsName(productName + ":" + String.join(",", goods));
+            saleChange.setBsignType(BSignType.REFUND.getKey());
+            SaleChange saleChange1 = saleChangeService.create(agent, saleChange);
+            if (saleChange1 == null) {
+                throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "os销售退单创建失败");
+            }
+            //创建应收
+            CreatePlanAmountVO planAmountRecordType = new CreatePlanAmountVO();
+            planAmountRecordType.setRecordNo(unpSaleRefund.getSaleRefundOrderNo());
+            planAmountRecordType.setIncomeExpenseType(IncomeExpenseType.EXPENSE.getKey());//收支类型 1 收，2 为支
+            planAmountRecordType.setBusinessType(BusinessType.SALECHANGE.getKey());
+            planAmountRecordType.setRecordMovingType(CostType.FARE.getKey());
+            planAmountRecordType.setPlanAmount(planAmount);//合计
+            //商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送 9 通用产品
+            planAmountRecordType.setGoodsType(GoodsBigType.GENERAL.getKey());
+            PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, planAmountRecordType);
+            if (planAmountRecord == null) {
+                throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售退单创建退款应付失败");
+            }
+            unpResult.success("创建销售退单成功", unpSaleRefund);
+            logger.info("创建销售退单结束");
+        } catch (com.tempus.gss.system.service.GSSException e) {
+            unpResult.failed("创建销售退单失败", unpSaleRefund);
+            logger.error("创建销售退单失败", e);
+            return unpResult;
+        }
+        return unpResult;
     }
     
     @Override
     public UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpOrderCreateVo request) {
-        this.createValid(request, VALID_TYPE_SALE_REFUND);
+        this.createValid(request, VALID_TYPE_BUY_REFUND);
         logger.info("创建采购退单开始");
         UnpBuyRefund unpBuyRefund = new UnpBuyRefund();
         UnpBuyRefundItem unpBuyRefundItem = new UnpBuyRefundItem();
@@ -433,10 +530,10 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             unpBuyRefund.setSupplierType(unpBuy.getSupplierType());
             unpBuyRefund.setSupplierId(unpBuy.getSupplierId());
             unpBuyRefund.setRemark(request.getUnpBuy().getRemark());
-            unpBuyRefund.setTraNo(unpBuyRefund.getTraNo());
+            unpBuyRefund.setTraNo(unpBuy.getTraNo());
             unpBuyRefund.setChangeType(EUnpConstant.ChangeType.REFUND.getKey());
             unpBuyRefund.setThirdBusNo(unpBuy.getThirdBusNo());
-            unpBuyRefund.setPayStatus(unpBuy.getPayStatus());
+            unpBuyRefund.setPayStatus(EUnpConstant.PayStatus.NOT_PAIED.getKey());
             unpBuyRefund.setStatus(EUnpConstant.OrderStatus.READY.getKey());
             unpBuyRefund.setCreator(agent.getAccount());
             unpBuyRefund.setCreateTime(new Date());
@@ -452,6 +549,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 unpBuyRefundItem.setBuyRefundOrderNo(buyRefundOrderNo);
                 unpBuyRefundItem.setUnpType(GoodsBigType.GENERAL.getKey());
                 unpBuyRefundItem.setNum(buyItem.getNum());
+                unpBuyRefundItem.setNum(buyItem.getNum());
                 unpBuyRefundItem.setChangeType(EUnpConstant.ChangeType.REFUND.getKey());
                 unpBuyRefundItem.setGroupAmount(buyItem.getGroupAmount());
                 unpBuyRefundItem.setItemStatus(EUnpConstant.OrderStatus.READY.getKey());
@@ -461,9 +559,12 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 }
             }
             //创建 refund 主表
+            if (unpBuy.getThirdBusNo() == null) {
+                unpBuyRefund.setThirdBusNo(IdWorker.getId());
+            }
             unpBuyRefund.setRefundAmount(planAmount);
             if (unpBuyRefundMapper.insertSelective(unpBuyRefund) < 0) {
-                throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "退单创建失败");
+                throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购退单创建失败");
             }
             //创建os_buyChange主单记录
             BuyChange buyChange = new BuyChange();
@@ -484,7 +585,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             buyChange.setBsignType(BSignType.REFUND.getKey());
             BuyChange buyChange1 = buyChangeService.create(agent, buyChange);
             if (buyChange1 == null) {
-                throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "os退单创建失败");
+                throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "os采购退单创建失败");
             }
             //创建应收
             CreatePlanAmountVO planAmountRecordType = new CreatePlanAmountVO();
@@ -497,7 +598,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             planAmountRecordType.setGoodsType(GoodsBigType.GENERAL.getKey());
             PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, planAmountRecordType);
             if (planAmountRecord == null) {
-                throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "退单创建退款应付失败");
+                throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购退单创建退款应付失败");
             }
             unpResult.success("创建采购退单成功", unpBuyRefund);
             logger.info("创建采购退单结束");
@@ -523,7 +624,9 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             if (NullableCheck.isNullOrEmpty(createVo.getUnpBuy().getBuyAccount())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购付款账号 不能为空");}
             if (NullableCheck.isNullOrEmpty(createVo.getBuyItems())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购明细 至少一条");}
         } else if (validType == VALID_TYPE_SALE_REFUND) {
-        
+            if (NullableCheck.isNullOrEmpty(createVo.getUnpSale())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售总单信息 不能为空");}
+            if (NullableCheck.isNullOrEmpty(createVo.getUnpSale().getSaleOrderNo())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售总单单号 不能为空");}
+            if (NullableCheck.isNullOrEmpty(createVo.getSaleItems())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售明细 至少一条");}
         } else if (validType == VALID_TYPE_BUY_REFUND) {
             if (NullableCheck.isNullOrEmpty(createVo.getUnpBuy())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购总单信息 不能为空");}
             if (NullableCheck.isNullOrEmpty(createVo.getUnpBuy().getBuyOrderNo())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购总单单号 不能为空");}
@@ -625,6 +728,8 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                     unpBuy.setStatus(3);
                     unpBuy.setChangeType(0);
                     unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                    buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
+                    
                     for (UnpBuyItem unpBuyItem : unpBuyItemList) {
                         unpBuyItem.setItemStatus(3);
                         unpBuyItem.setChangeType(0);
@@ -644,12 +749,14 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                             unpBuy.setChangeType(3);
                             unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                             unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                            buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
                         } else {
                             unpBuy.setModifier(agent.getAccount());
                             unpBuy.setModifyTime(new Date());
                             unpBuy.setChangeType(1);
                             unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                             unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                            buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
                         }
                     }
                     for (UnpBuyItem unpBuyItem : unpBuyItemList) {
@@ -669,6 +776,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                         unpBuy.setStatus(4);
                         unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                         unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                        buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
                         for (UnpBuyItem unpBuyItem : unpBuyItemList) {
                             unpBuyItem.setChangeType(0);
                             unpBuyItem.setItemStatus(4);
@@ -697,12 +805,14 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                             unpBuy.setChangeType(0);
                             unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                             unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                            buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
                         } else {
                             unpBuy.setModifier(agent.getAccount());
                             unpBuy.setModifyTime(new Date());
                             unpBuy.setChangeType(3);
                             unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                             unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                            buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
                         }
                         for (UnpBuyItem unpBuyItem : unpBuyItemList) {
                             unpBuyItem.setChangeType(0);
