@@ -21,9 +21,26 @@ import springfox.documentation.spring.web.json.Json;
 public class FormulaUtils {
 	protected static final Logger logerr = LogManager.getLogger(FormulaUtils.class);
 	/**
-	 * 公式1:记奖励*（1-代理费率-返点）+(票面-记奖励)*(1-代理费率)+税款 + 手续费-直减费用(往返直减)
+	 * 公式1:记奖励*（1-代理费率）*（1-返点）+(票面-记奖励)*(1-代理费率) +(票面-记奖励)*(1-代理费率)+税款 +
+	 * 手续费-直减费用(往返直减)
 	 */
 	public static BigDecimal formulaPrice1(FormulaParameters formulaParameters) {
+		BigDecimal salePrice = formulaParameters.getAwardPrice()
+				.multiply(new BigDecimal(1).subtract(formulaParameters.getAgencyFee().divide(new BigDecimal(100))))
+				.multiply(new BigDecimal(1).subtract(formulaParameters.getSaleRebate().divide(new BigDecimal(100))))
+				.add((formulaParameters.getFare().subtract(formulaParameters.getAwardPrice())).multiply(
+						new BigDecimal(1).subtract(formulaParameters.getAgencyFee().divide(new BigDecimal(100)))))
+				.add(formulaParameters.getTax().add(formulaParameters.getBrokerage()));
+		if (formulaParameters.getFlightType().intValue() == 1)//设置直减价格
+			salePrice.subtract(formulaParameters.getOneWayPrivilege());
+		else
+			salePrice.subtract(formulaParameters.getRoundTripPrivilege());
+		return salePrice;
+	}
+	/**
+	 * 公式2:记奖励*（1-代理费率-返点）+(票面-记奖励)*(1-代理费率)+税款 + 手续费-直减费用(往返直减)
+	 */
+	public static BigDecimal formulaPrice2(FormulaParameters formulaParameters) {
 		BigDecimal salePrice = formulaParameters.getAwardPrice()
 				.multiply(new BigDecimal(1).subtract(formulaParameters.getAgencyFee().divide(new BigDecimal(100)))
 						.subtract(formulaParameters.getSaleRebate().divide(new BigDecimal(100))))
@@ -38,25 +55,7 @@ public class FormulaUtils {
 	}
 
 	/**
-	 * 公式2:记奖励*（1-代理费率）*（1-返点）+(票面-记奖励)*(1-代理费率) +(票面-记奖励)*(1-代理费率)+税款 +
-	 * 手续费-直减费用(往返直减)
-	 */
-	public static BigDecimal formulaPrice2(FormulaParameters formulaParameters) {
-		BigDecimal salePrice = formulaParameters.getAwardPrice()
-				.multiply(new BigDecimal(1).subtract(formulaParameters.getAgencyFee().divide(new BigDecimal(100))))
-				.multiply(new BigDecimal(1).subtract(formulaParameters.getSaleRebate().divide(new BigDecimal(100))))
-				.add((formulaParameters.getFare().subtract(formulaParameters.getAwardPrice())).multiply(
-						new BigDecimal(1).subtract(formulaParameters.getAgencyFee().divide(new BigDecimal(100)))))
-				.add(formulaParameters.getTax().add(formulaParameters.getBrokerage()));
-		if (formulaParameters.getFlightType().intValue() == 1)//设置直减价格
-			salePrice.subtract(formulaParameters.getOneWayPrivilege());
-		else
-			salePrice.subtract(formulaParameters.getRoundTripPrivilege());
-		return salePrice;
-	}
-
-	/**
-	 * 单程公式1:记奖励*（1-代理费率-返点）+(票面-记奖励)*(1-代理费率)+税款 + 手续费-直减费用(往返直减)
+	 * 单程公式1:记奖励*（1-代理费率）*（1-返点）+(票面-记奖励)*(1-代理费率)+税款 + 手续费-直减费用(往返直减)
 	 */
 	public static FormulaParameters formulaMethod1(FormulaParameters formulaParameters) {
 		BigDecimal salePrice = new BigDecimal(0);
@@ -70,7 +69,7 @@ public class FormulaUtils {
 		return formulaParameters;
 	}
 	/**
-	 * 单程公式2公式2:记奖励*（1-代理费率）*（1-返点）+(票面-记奖励)*(1-代理费率) +(票面-记奖励)*(1-代理费率)+税款 +
+	 * 单程公式2公式2:记奖励*（1-代理费率-返点）+(票面-记奖励)*(1-代理费率) +(票面-记奖励)*(1-代理费率)+税款 +
 	 * 手续费-直减费用(往返直减)
 	 */
 	public static FormulaParameters formulaMethod2(FormulaParameters formulaParameters) {
@@ -119,7 +118,7 @@ public class FormulaUtils {
 		return formulaParameters;
 	}
 	/**
-	 * 往返公式2:记奖励*（1-代理费率）*（1-返点）+(票面-记奖励)*(1-代理费率) +(票面-记奖励)*(1-代理费率)+税款 +
+	 * 往返公式2:记奖励*（1-代理费率-返点）+(票面-记奖励)*(1-代理费率) +(票面-记奖励)*(1-代理费率)+税款 +
 	 * 手续费-直减费用(往返直减)
 	 */
 	public static FormulaParameters towFormulaMethod2(FormulaParameters formulaParameters) {
@@ -153,7 +152,7 @@ public class FormulaUtils {
 		return formulaParameters;
 	}
 	/**
-	 * 共享航程的价格 公式1:记奖励*（1-代理费率-返点）+(票面-记奖励)*(1-代理费率)+税款 + 手续费-直减费用(往返直减)
+	 * 共享航程的价格 公式1:记奖励*（1-代理费率）*（1-返点）+(票面-记奖励)*(1-代理费率)+税款 + 手续费-直减费用(往返直减)
 	 * 
 	 * @param mileage
 	 * @param ticket
@@ -171,15 +170,11 @@ public class FormulaUtils {
 		// 计算共享段销售价格
 		BigDecimal shareSalePrice = sharePrice
 				.multiply(new BigDecimal(1).subtract(formulaParameters.getAgencyFee().divide(new BigDecimal(100))))
-				.multiply(new BigDecimal(1).subtract(formulaParameters.getShareRebate().divide(new BigDecimal(100))))
-				.add((formulaParameters.getFare().subtract(sharePrice)).multiply(
-						new BigDecimal(1).subtract(formulaParameters.getAgencyFee().divide(new BigDecimal(100)))));
+				.multiply(new BigDecimal(1).subtract(formulaParameters.getShareRebate().divide(new BigDecimal(100))));
 		// 计算非共享段销售价格
 		BigDecimal notSalePrice = notSharePrice
 				.multiply(new BigDecimal(1).subtract(formulaParameters.getAgencyFee().divide(new BigDecimal(100))))
-				.multiply(new BigDecimal(1).subtract(formulaParameters.getSaleRebate().divide(new BigDecimal(100))))
-				.add((formulaParameters.getFare().subtract(notSharePrice)).multiply(
-						new BigDecimal(1).subtract(formulaParameters.getAgencyFee().divide(new BigDecimal(100)))));
+				.multiply(new BigDecimal(1).subtract(formulaParameters.getSaleRebate().divide(new BigDecimal(100))));
 		BigDecimal salePrice = shareSalePrice.add(notSalePrice);
 		if (formulaParameters.getFlightType().intValue() == 1){
 			//设置直减价格
@@ -194,7 +189,7 @@ public class FormulaUtils {
 	}
 
 	/**
-	 * 共享段计算价格 公式2:记奖励*（1-代理费率）*（1-返点）+(票面-记奖励)*(1-代理费率) +(票面-记奖励)*(1-代理费率)+税款 +
+	 * 共享段计算价格 公式2:记奖励*（1-代理费率-返点）+(票面-记奖励)*(1-代理费率) +(票面-记奖励)*(1-代理费率)+税款 +
 	 * 手续费-直减费用(往返直减)
 	 * 
 	 * @param mileage

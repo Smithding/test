@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.shiro.util.CollectionUtils;
 
 import com.tempus.gss.product.ift.api.entity.CabinsPricesTotals;
@@ -14,6 +15,8 @@ import com.tempus.gss.product.ift.api.entity.PassengerTypePricesTotal;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
 import com.tempus.gss.product.ift.api.entity.formula.FormulaParameters;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
+import com.tempus.gss.product.ift.api.entity.policy.IftPolicyChange;
+
 
 /**
  * 根据政策计算航程价格
@@ -35,7 +38,7 @@ public class CalculatePriceUtils {
 		IftPolicy policy = new IftPolicy();// 单程只会有一条政策
 		// 单程
 		List<QueryIBEDetail> details = new ArrayList<QueryIBEDetail>();
-		if (queryIBEDetail.getLegType().intValue() == 1) {
+		/*if (queryIBEDetail.getLegType().intValue() == 1) {*/
 			if(!CollectionUtils.isEmpty(policyList)){
 				for (IftPolicy iftPolicy : policyList) {
 					//根据政策计算价格
@@ -49,7 +52,7 @@ public class CalculatePriceUtils {
 			}
 			//价格排序
 			priceSort(details);
-		}else{
+	/*	}else{
 				if(!CollectionUtils.isEmpty(policyList)){
 					for (IftPolicy iftPolicy : policyList) {
 						//根据政策计算价格
@@ -63,8 +66,37 @@ public class CalculatePriceUtils {
 				}
 				//价格排序
 				priceSort(details);
-		}
+		}*/
 		return details.get(0);
+	}
+	/**
+	 * 订单预定页面计算订单价格
+	 * 
+	 * @param queryIBEDetail
+	 * @param policyList
+	 * @param formula
+	 * 计算公式 1计奖的部分*(1-代理费率)(1-返点)+无奖的部分*(1-代理费率)+税费+手续费
+	 * 计奖的部分*(1-代理费率-返点)+无奖的部分*(1-代理费率)+税费+手续费
+	 */
+	public static List<IftPolicyChange> orderPolicyCalculate(QueryIBEDetail queryIBEDetail, List<IftPolicy> policyList,
+			int formula) {
+		List<IftPolicyChange> flightPolicies = new ArrayList<IftPolicyChange>();
+		try {
+
+			if (!CollectionUtils.isEmpty(policyList)) {
+				for (IftPolicy iftPolicy : policyList) {
+					QueryIBEDetail detail = (QueryIBEDetail) BeanUtils.cloneBean(queryIBEDetail);
+					// 根据政策计算价格
+					detail = oneWayQueryIBEDetail(detail, iftPolicy, formula);
+					// 订单预定页面价格和政策组装
+					IftPolicyChange policyChange = OrderPolicyUtils.getIftPolicyChange(detail, iftPolicy);
+					flightPolicies.add(policyChange);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return flightPolicies;
 	}
 	/**
 	 * 单程根据政策计算价格

@@ -5,7 +5,9 @@ import java.util.List;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
+import com.tempus.gss.product.ift.api.entity.policy.IftFlightPolicy;
 import com.tempus.gss.product.ift.api.entity.vo.FlightQueryRequest;
+import com.tempus.gss.vo.Agent;
 
 public interface NewQueryService {
 	  /**
@@ -21,5 +23,6 @@ public interface NewQueryService {
 	  * @return
 	  */
 	 public List<QueryIBEDetail> getCabinAll(RequestWithActor<FlightQueryRequest> flightQueryRequest);
+	 
 	 
 }

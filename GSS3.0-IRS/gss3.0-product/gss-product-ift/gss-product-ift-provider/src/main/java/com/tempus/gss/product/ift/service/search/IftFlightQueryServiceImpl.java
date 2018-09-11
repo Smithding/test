@@ -10,7 +10,9 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
+import com.tempus.gss.product.ift.api.entity.policy.IftFlightPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
+import com.tempus.gss.product.ift.api.entity.policy.IftPolicyChange;
 import com.tempus.gss.product.ift.api.entity.search.FlightQuery;
 import com.tempus.gss.product.ift.api.entity.vo.FlightQueryRequest;
 import com.tempus.gss.product.ift.api.service.search.IftFlightQueryService;
@@ -66,5 +68,11 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 		FlightQuery query = fftFlightQueryUtils.getFlightQueryParam(request);
 		List<IftPolicy> iftPolicyList = iftQueryPolicyMapper.query(query);
 		return iftPolicyList;
+	}
+	@Override
+	public List<IftPolicyChange> orderPolicy(QueryIBEDetail queryIBEDetail,List<IftPolicy> policys) {
+		// TODO Auto-generated method stub
+		List<IftPolicyChange> policyChanges = CalculatePriceUtils.orderPolicyCalculate(queryIBEDetail,policys,1);
+		return policyChanges;
 	}
 }
