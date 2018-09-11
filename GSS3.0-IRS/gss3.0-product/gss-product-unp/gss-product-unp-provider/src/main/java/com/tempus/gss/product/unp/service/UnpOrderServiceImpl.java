@@ -725,6 +725,8 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                     unpBuy.setStatus(3);
                     unpBuy.setChangeType(0);
                     unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                    buyOrderService.updatePayStatus(agent,unpBuy.getBuyOrderNo(),unpBuy.getStatus());
+
                     for (UnpBuyItem unpBuyItem : unpBuyItemList) {
                         unpBuyItem.setItemStatus(3);
                         unpBuyItem.setChangeType(0);
@@ -744,12 +746,14 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                             unpBuy.setChangeType(3);
                             unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                             unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                            buyOrderService.updatePayStatus(agent,unpBuy.getBuyOrderNo(),unpBuy.getStatus());
                         } else {
                             unpBuy.setModifier(agent.getAccount());
                             unpBuy.setModifyTime(new Date());
                             unpBuy.setChangeType(1);
                             unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                             unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                            buyOrderService.updatePayStatus(agent,unpBuy.getBuyOrderNo(),unpBuy.getStatus());
                         }
                     }
                     for (UnpBuyItem unpBuyItem : unpBuyItemList) {
@@ -769,6 +773,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                         unpBuy.setStatus(4);
                         unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                         unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                        buyOrderService.updatePayStatus(agent,unpBuy.getBuyOrderNo(),unpBuy.getStatus());
                         for (UnpBuyItem unpBuyItem : unpBuyItemList) {
                             unpBuyItem.setChangeType(0);
                             unpBuyItem.setItemStatus(4);
@@ -797,12 +802,14 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                             unpBuy.setChangeType(0);
                             unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                             unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                            buyOrderService.updatePayStatus(agent,unpBuy.getBuyOrderNo(),unpBuy.getStatus());
                         } else {
                             unpBuy.setModifier(agent.getAccount());
                             unpBuy.setModifyTime(new Date());
                             unpBuy.setChangeType(3);
                             unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                             unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                            buyOrderService.updatePayStatus(agent,unpBuy.getBuyOrderNo(),unpBuy.getStatus());
                         }
                         for (UnpBuyItem unpBuyItem : unpBuyItemList) {
                             unpBuyItem.setChangeType(0);
