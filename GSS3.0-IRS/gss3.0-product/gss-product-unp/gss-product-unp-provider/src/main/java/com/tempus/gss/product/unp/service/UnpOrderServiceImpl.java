@@ -13,9 +13,9 @@ import com.tempus.gss.order.service.*;
 import com.tempus.gss.product.unp.api.entity.*;
 import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
-import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
+import com.tempus.gss.product.unp.api.entity.vo.UnpRefundVo;
 import com.tempus.gss.product.unp.api.service.UnpItemTypeService;
 import com.tempus.gss.product.unp.api.service.UnpOrderService;
 import com.tempus.gss.product.unp.dao.*;
@@ -694,140 +694,146 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     
     @Override
     public UnpResult<UnpBuy> updateBuy(Agent agent, UnpOrderVo request) {
+        UnpBuy unpBuy = null;
+        List<UnpBuyItem> unpBuyItemList = null;
+        UnpResult<UnpBuy> unpBuyUnpResult = new UnpResult<>();
+        BigDecimal planAmount = new BigDecimal(0);
         logger.info("采购单更新开始");
         if (agent == null) {
             logger.error("采购订单更新失败{}", "agent不能为null");
+            unpBuyUnpResult.failed("agent不能为null", null);
+            return unpBuyUnpResult;
         }
         if (request == null) {
             logger.error("采购订单更新失败{}", "request不能为null");
+            unpBuyUnpResult.failed("agent不能为null", null);
+            return unpBuyUnpResult;
         }
         if (request.getUnpBuy() == null) {
-            logger.error("采购订单更新失败{}", "npBuyU不能为null");
+            logger.error("采购订单更新失败{}", "unpBuy不能为null");
+            unpBuyUnpResult.failed("agent不能为null", null);
+            return unpBuyUnpResult;
         }
         
         if (request.getBuyItems() == null) {
             logger.error("采购订单更新失败{}", "buyItems不能为null");
+            unpBuyUnpResult.failed("buyItems不能为null", null);
+            return unpBuyUnpResult;
         }
-        UnpBuy unpBuy = null;
-        List<UnpBuyItem> unpBuyItemList = null;
-        UnpResult<UnpBuy> unpBuyUnpResult = new UnpResult();
-        BigDecimal planAmount = new BigDecimal(0);
         try {
-            if (request != null) {
-                unpBuy = request.getUnpBuy();
-                unpBuyItemList = request.getBuyItems();
-                UnpBuy queryUnpBuy = unpBuyMapper.selectBySaleOrderNo(unpBuy.getSaleOrderNo());//判断原单是否可操作
-                if (queryUnpBuy == null && queryUnpBuy.getChangeType() == 2) {
-                    throw new Exception("不存在可操作订单");
+            unpBuy = request.getUnpBuy();
+            unpBuyItemList = request.getBuyItems();
+            UnpBuy queryUnpBuy = unpBuyMapper.selectBySaleOrderNo(unpBuy.getSaleOrderNo());//判断原单是否可操作
+            if (queryUnpBuy == null && queryUnpBuy.getChangeType() == 2) {
+                throw new Exception("不存在可操作订单");
+            }
+            //支付操作
+            if (request.getOperationType() == 1) {
+                unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
+                unpBuy.setModifier(agent.getAccount());
+                unpBuy.setModifyTime(new Date());
+                unpBuy.setStatus(3);
+                unpBuy.setChangeType(0);
+                unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
+                
+                for (UnpBuyItem unpBuyItem : unpBuyItemList) {
+                    unpBuyItem.setItemStatus(3);
+                    unpBuyItem.setChangeType(0);
+                    unpBuyItemMapper.updateByPrimaryKeySelective(unpBuyItem);
                 }
-                //支付操作
-                if (request.getOperationType() == 1) {
-                    unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
-                    unpBuy.setModifier(agent.getAccount());
-                    unpBuy.setModifyTime(new Date());
-                    unpBuy.setStatus(3);
-                    unpBuy.setChangeType(0);
-                    unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
-                    buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
-                    
-                    for (UnpBuyItem unpBuyItem : unpBuyItemList) {
-                        unpBuyItem.setItemStatus(3);
-                        unpBuyItem.setChangeType(0);
-                        unpBuyItemMapper.updateByPrimaryKeySelective(unpBuyItem);
-                    }
-                }
-                //退 暂时不管 原单状态
-                if (request.getOperationType() == 2) {
-                    //判断原单是否全部退
-                    List<UnpBuyItem> queryUnpBuyItemList = unpBuyItemMapper.selectCompletedByBuyOrderNo(queryUnpBuy.getBuyOrderNo());
-                    if (queryUnpBuyItemList != null && unpBuyItemList != null) {
-                        //判断是否部分退
-                        if (queryUnpBuyItemList.size() > unpBuyItemList.size()) {
-                            //部分退
-                            unpBuy.setModifier(agent.getAccount());
-                            unpBuy.setModifyTime(new Date());
-                            unpBuy.setChangeType(3);
-                            unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
-                            unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
-                            buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
-                        } else {
-                            unpBuy.setModifier(agent.getAccount());
-                            unpBuy.setModifyTime(new Date());
-                            unpBuy.setChangeType(1);
-                            unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
-                            unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
-                            buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
-                        }
-                    }
-                    for (UnpBuyItem unpBuyItem : unpBuyItemList) {
-                        unpBuyItem.setItemStatus(1);
-                        unpBuyItem.setChangeType(1);
-                        unpBuyItem.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
-                        unpBuyItemMapper.updateByPrimaryKeySelective(unpBuyItem);
-                        
-                    }
-                }
-                //取消  退票取消事暂时不管原单状态
-                if (request.getOperationType() == 3) {
-                    if (queryUnpBuy.getStatus() == 1) {
-                        //订单取消 原单状态 buyItem 表状态 都变为取消
+            }
+            //退 暂时不管 原单状态
+            if (request.getOperationType() == 2) {
+                //判断原单是否全部退
+                List<UnpBuyItem> queryUnpBuyItemList = unpBuyItemMapper.selectCompletedByBuyOrderNo(queryUnpBuy.getBuyOrderNo());
+                if (queryUnpBuyItemList != null && unpBuyItemList != null) {
+                    //判断是否部分退
+                    if (queryUnpBuyItemList.size() > unpBuyItemList.size()) {
+                        //部分退
                         unpBuy.setModifier(agent.getAccount());
                         unpBuy.setModifyTime(new Date());
-                        unpBuy.setStatus(4);
+                        unpBuy.setChangeType(3);
                         unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                         unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
                         buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
-                        for (UnpBuyItem unpBuyItem : unpBuyItemList) {
-                            unpBuyItem.setChangeType(0);
-                            unpBuyItem.setItemStatus(4);
-                            unpBuyItemMapper.updateByPrimaryKeySelective(unpBuyItem);
-                        }
+                    } else {
+                        unpBuy.setModifier(agent.getAccount());
+                        unpBuy.setModifyTime(new Date());
+                        unpBuy.setChangeType(1);
+                        unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
+                        unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                        buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
                     }
-                    //退票取消 原单状态不变 buyIteam 变为 已完成状态
-                    if (queryUnpBuy.getStatus() == 3) {
-                        //查询是否已有小类完成退款
-                        //查询为未完成的退款的小类
-                        int hasRefund = 0;//完场退款数量
-                        int noRefund = 0;//已退 未退款
-                        List<UnpBuyItem> unpBuyRefundItemList = unpBuyItemMapper.selectRefundByBuyOrderNo(queryUnpBuy.getBuyOrderNo());
-                        for (UnpBuyItem unpBuyItem : unpBuyRefundItemList) {
-                            if (unpBuyItem.getItemStatus() == 1) {
-                                noRefund++;
-                            }
-                            if (unpBuyItem.getItemStatus() == 3) {
-                                hasRefund++;
-                            }
-                        }
-                        //无完成退票 取消的小类数量 与 退票 小类数量相同时 更改原单changeType
-                        if (hasRefund < 1 && noRefund == unpBuyItemList.size()) {
-                            unpBuy.setModifier(agent.getAccount());
-                            unpBuy.setModifyTime(new Date());
-                            unpBuy.setChangeType(0);
-                            unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
-                            unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
-                            buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
-                        } else {
-                            unpBuy.setModifier(agent.getAccount());
-                            unpBuy.setModifyTime(new Date());
-                            unpBuy.setChangeType(3);
-                            unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
-                            unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
-                            buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
-                        }
-                        for (UnpBuyItem unpBuyItem : unpBuyItemList) {
-                            unpBuyItem.setChangeType(0);
-                            unpBuyItem.setItemStatus(3);
-                            unpBuyItemMapper.updateByPrimaryKeySelective(unpBuyItem);
-                        }
-                    }
+                }
+                for (UnpBuyItem unpBuyItem : unpBuyItemList) {
+                    unpBuyItem.setItemStatus(1);
+                    unpBuyItem.setChangeType(1);
+                    unpBuyItem.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
+                    unpBuyItemMapper.updateByPrimaryKeySelective(unpBuyItem);
                     
                 }
-                //退款 待处理状态更换为 已处理
-                if (request.getOperationType() == 4) {
+            }
+            //取消  退票取消事暂时不管原单状态
+            if (request.getOperationType() == 3) {
+                if (queryUnpBuy.getStatus() == 1) {
+                    //订单取消 原单状态 buyItem 表状态 都变为取消
+                    unpBuy.setModifier(agent.getAccount());
+                    unpBuy.setModifyTime(new Date());
+                    unpBuy.setStatus(4);
+                    unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
+                    unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                    buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
                     for (UnpBuyItem unpBuyItem : unpBuyItemList) {
+                        unpBuyItem.setChangeType(0);
+                        unpBuyItem.setItemStatus(4);
+                        unpBuyItemMapper.updateByPrimaryKeySelective(unpBuyItem);
+                    }
+                }
+                //退票取消 原单状态不变 buyIteam 变为 已完成状态
+                if (queryUnpBuy.getStatus() == 3) {
+                    //查询是否已有小类完成退款
+                    //查询为未完成的退款的小类
+                    int hasRefund = 0;//完场退款数量
+                    int noRefund = 0;//已退 未退款
+                    List<UnpBuyItem> unpBuyRefundItemList = unpBuyItemMapper.selectRefundByBuyOrderNo(queryUnpBuy.getBuyOrderNo());
+                    for (UnpBuyItem unpBuyItem : unpBuyRefundItemList) {
+                        if (unpBuyItem.getItemStatus() == 1) {
+                            noRefund++;
+                        }
+                        if (unpBuyItem.getItemStatus() == 3) {
+                            hasRefund++;
+                        }
+                    }
+                    //无完成退票 取消的小类数量 与 退票 小类数量相同时 更改原单changeType
+                    if (hasRefund < 1 && noRefund == unpBuyItemList.size()) {
+                        unpBuy.setModifier(agent.getAccount());
+                        unpBuy.setModifyTime(new Date());
+                        unpBuy.setChangeType(0);
+                        unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
+                        unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                        buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
+                    } else {
+                        unpBuy.setModifier(agent.getAccount());
+                        unpBuy.setModifyTime(new Date());
+                        unpBuy.setChangeType(3);
+                        unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
+                        unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
+                        buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
+                    }
+                    for (UnpBuyItem unpBuyItem : unpBuyItemList) {
+                        unpBuyItem.setChangeType(0);
                         unpBuyItem.setItemStatus(3);
                         unpBuyItemMapper.updateByPrimaryKeySelective(unpBuyItem);
                     }
+                }
+                
+            }
+            //退款 待处理状态更换为 已处理
+            if (request.getOperationType() == 4) {
+                for (UnpBuyItem unpBuyItem : unpBuyItemList) {
+                    unpBuyItem.setItemStatus(3);
+                    unpBuyItemMapper.updateByPrimaryKeySelective(unpBuyItem);
                 }
             }
             unpBuyUnpResult.setCode(1);
@@ -842,6 +848,16 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             return unpBuyUnpResult;
         }
         return unpBuyUnpResult;
+    }
+    
+    @Override
+    public UnpResult<UnpSaleRefund> updateSale(Agent agent, UnpRefundVo request) {
+        return null;
+    }
+    
+    @Override
+    public UnpResult<UnpBuyRefund> updateBuy(Agent agent, UnpRefundVo request) {
+        return null;
     }
     
     @Override

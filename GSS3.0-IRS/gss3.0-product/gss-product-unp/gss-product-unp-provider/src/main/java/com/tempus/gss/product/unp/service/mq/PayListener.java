@@ -42,8 +42,6 @@ public class PayListener {
     private Logger logger = LoggerFactory.getLogger(PayListener.class);
     @Reference
     UnpOrderService unpOrderService;
-    @Autowired
-    private UnpBuyMapper unpBuyMapper;
     
     @RabbitHandler
     public void processLogRecord(PayNoticeVO payNoticeVO) {
