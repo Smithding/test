@@ -92,10 +92,17 @@ public class IftFlightPolicy implements Serializable{
 
 	/** 共享以下航司间给全部奖励，航司二字代码，多个以"/"分割 */
 	private String shareSuitAirline;
-  
+	/** 平时开票时间（星期一至星期五），例:00:00-23:59 */
+	private String ticketDate;
 	/** 备注 */
 	private String remark;
+	public String getTicketDate() {
+		return ticketDate;
+	}
 
+	public void setTicketDate(String ticketDate) {
+		this.ticketDate = ticketDate;
+	}
 	public BigDecimal getOriginalAgencyFee() {
 		return originalAgencyFee;
 	}

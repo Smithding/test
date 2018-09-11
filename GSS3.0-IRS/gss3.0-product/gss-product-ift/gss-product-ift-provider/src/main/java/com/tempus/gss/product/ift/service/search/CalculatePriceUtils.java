@@ -16,6 +16,9 @@ import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
 import com.tempus.gss.product.ift.api.entity.formula.FormulaParameters;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicyChange;
+import com.tempus.gss.util.JsonUtil;
+
+import springfox.documentation.spring.web.json.Json;
 
 
 /**
@@ -42,12 +45,16 @@ public class CalculatePriceUtils {
 			if(!CollectionUtils.isEmpty(policyList)){
 				for (IftPolicy iftPolicy : policyList) {
 					//根据政策计算价格
-					queryIBEDetail = oneWayQueryIBEDetail(queryIBEDetail,iftPolicy,formula);
-					details.add(queryIBEDetail);
+					QueryIBEDetail detail = (QueryIBEDetail)CloneUtils.deepCopy(queryIBEDetail);
+					// 根据政策计算价格
+					detail = oneWayQueryIBEDetail(detail, iftPolicy, formula);
+					details.add(detail);
 				}
 			}else{
-				//当没有政策的情况，给个空的政策对象
-				queryIBEDetail = oneWayQueryIBEDetail(queryIBEDetail,policy,formula);
+				//根据政策计算价格
+				QueryIBEDetail detail = (QueryIBEDetail)CloneUtils.deepCopy(queryIBEDetail);
+				// 根据政策计算价格
+				detail = oneWayQueryIBEDetail(detail, policy, formula);
 				details.add(queryIBEDetail);
 			}
 			//价格排序
@@ -82,10 +89,9 @@ public class CalculatePriceUtils {
 			int formula) {
 		List<IftPolicyChange> flightPolicies = new ArrayList<IftPolicyChange>();
 		try {
-
 			if (!CollectionUtils.isEmpty(policyList)) {
 				for (IftPolicy iftPolicy : policyList) {
-					QueryIBEDetail detail = (QueryIBEDetail) BeanUtils.cloneBean(queryIBEDetail);
+					QueryIBEDetail detail = (QueryIBEDetail)CloneUtils.deepCopy(queryIBEDetail);
 					// 根据政策计算价格
 					detail = oneWayQueryIBEDetail(detail, iftPolicy, formula);
 					// 订单预定页面价格和政策组装
