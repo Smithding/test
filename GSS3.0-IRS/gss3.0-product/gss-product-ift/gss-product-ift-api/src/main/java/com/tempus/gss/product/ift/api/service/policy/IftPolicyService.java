@@ -97,10 +97,12 @@ public interface IftPolicyService {
 	 * @param agent 用户信息
 	 * @param legs 航程信息
 	 * @param parPrice 单人票面总价
-	 * @param peopleNumber 总人数
+	 * @param adtNumber 成人数
+	 * @param chdNumber 儿童数
+	 * @param infNumber 婴儿数
 	 * @return List<IftPolicy> 政策集合
 	 */
-	List<IftPolicy> getPolicys(Agent agent, List<Leg> legs, double parPrice, int peopleNumber);
+	List<IftPolicy> getPolicys(Agent agent, List<Leg> legs, double parPrice, int adtNumber, int chdNumber, int infNumber);
 	
 	/**
 	 * 下单获取实时政策(PNR导入)
