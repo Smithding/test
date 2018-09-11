@@ -15,7 +15,7 @@
     </resultMap>
     <sql id="Base_Column_List">
         ITEM_ID, BUY_ORDER_NO, UNP_TYPE, PNUM, CHANGE_TYPE, GROUP_AMOUNT, ITEM_STATUS, POLICY,
-        VALID,SALE_ITEM_NO,ADDITIONAL_INFO
+        VALID,SALE_ITEM_NO
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select

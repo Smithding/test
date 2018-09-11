@@ -86,7 +86,7 @@ public class UnpItemProperty implements Serializable {
                 return d.getValue();
             }
         }
-        return "";
+        return typeStr;
         
     }
     

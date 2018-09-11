@@ -49,24 +49,17 @@ public class PayListener {
         try {
             if (GoodsBigType.GENERAL.getKey() == payNoticeVO.getGoodsType() && PayReceiveVO.PS_PAY_STATUS_SUCCESS == payNoticeVO.getPayStatus()) {
                 logger.info("监听到【通用产品】支付消息队列" + JSON.toJSONString(payNoticeVO));
-                try {
+                
+                Agent agent = payNoticeVO.getAgent();
+                UnpOrderUpdateVo updateVo = new UnpOrderUpdateVo();
+                UnpOrderVo queryVo = new UnpOrderVo();
+                try {//BUY
                     UnpBuy queryUnpBuy = unpBuyMapper.selectBySaleOrderNo(payNoticeVO.getBusinessNo());
                     if (queryUnpBuy != null && queryUnpBuy.getPayStatus() < EUnpConstant.PayStatus.PAIED.getKey()) {
-//
-//                        Runnable runnable = () -> {
-//                            //满足条件 新开线程  进行采购支付 采购支付为记账，只有线下
-////                            unpOrderService.
-//                        };
-//                        logger.info("新开线程进行UNP采购支付,销售单号:{},采购单号:{}", payNoticeVO.getBusinessNo(), queryUnpBuy.getBuyOrderNo());
-//                        runnable.run();
                     }
                 } catch (Exception e) {
                     logger.error("Error", e);
                 }
-                Agent agent = payNoticeVO.getAgent();
-                UnpOrderUpdateVo updateVo = new UnpOrderUpdateVo();
-                UnpOrderVo queryVo = new UnpOrderVo();
-                
                 if (payNoticeVO.getBusinessType() == BusinessType.SALE_ORDER) {
                     queryVo.setSaleOrderNo(payNoticeVO.getBusinessNo());
                     UnpSale unpSale = unpOrderService.getSaleOrderInfo(queryVo);
