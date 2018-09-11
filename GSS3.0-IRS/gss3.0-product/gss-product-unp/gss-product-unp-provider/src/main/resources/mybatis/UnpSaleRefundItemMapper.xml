@@ -46,7 +46,7 @@
         UNP_TYPE,
       </if>
       <if test="num != null">
-        NUM,
+        PNUM,
       </if>
       <if test="changeType != null">
         CHANGE_TYPE,
