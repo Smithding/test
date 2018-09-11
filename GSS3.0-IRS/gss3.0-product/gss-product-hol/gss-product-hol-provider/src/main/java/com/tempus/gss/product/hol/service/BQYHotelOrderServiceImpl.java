@@ -339,7 +339,8 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		certificateCreateVO.setSubBusinessType(BusinessType.BUY_ORDER);
 		List<BusinessOrderInfo> businessOrderInfoList = new ArrayList<>();
 		BusinessOrderInfo businessOrderInfo = new BusinessOrderInfo();
-		businessOrderInfo.setRecordNo(hotelOrder.getSaleOrderNo());
+		businessOrderInfo.setRecordNo(saleChangeNo);
+		//businessOrderInfo.setRecordNo(hotelOrder.getSaleOrderNo());
 		businessOrderInfo.setBusinessType(BusinessType.SALE_CHANGE_ORDER);
 		businessOrderInfoList.add(businessOrderInfo);
 		certificateCreateVO.setOrderInfoList(businessOrderInfoList);
