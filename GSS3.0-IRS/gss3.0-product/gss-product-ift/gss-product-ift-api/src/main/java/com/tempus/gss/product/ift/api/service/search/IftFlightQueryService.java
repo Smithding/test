@@ -4,7 +4,9 @@ import java.util.List;
 
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
+import com.tempus.gss.product.ift.api.entity.policy.IftFlightPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
+import com.tempus.gss.product.ift.api.entity.policy.IftPolicyChange;
 import com.tempus.gss.product.ift.api.entity.vo.FlightQueryRequest;
 import com.tempus.gss.vo.Agent;
 
@@ -26,9 +28,27 @@ import com.tempus.gss.vo.Agent;
  */
 
 public interface IftFlightQueryService {
-	 /**航班白屏列表查询；根据shoppring结果匹配政策*/
+	/**
+	 * 航班白屏列表查询；根据shoppring结果匹配政策
+	 * @param queryIBEDetail
+	 * @param iftPolicyList
+	 * @param customerTypeNo
+	 * @param agent
+	 * @return
+	 */
 	 public QueryIBEDetail mappingPriceSpec(QueryIBEDetail queryIBEDetail,List<IftPolicy> iftPolicyList, String customerTypeNo, Agent agent); 
+	 /**
+	  * 订单预订异步实时获取政策数据
+	  * @param queryIBEDetail
+	  * @param request
+	  * @return
+	  */
+	 public List<IftPolicyChange> orderPolicy(QueryIBEDetail queryIBEDetail, List<IftPolicy> policys);
 	 
-	 /**根据查询白屏航班条件获取政策信息*/
+	 /**根据查询白屏航班条件获取政策信息
+	  * 
+	  * @param request
+	  * @return
+	  */
 	 public List<IftPolicy> matcPolicy(RequestWithActor<FlightQueryRequest> request);
 }

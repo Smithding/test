@@ -20,6 +20,9 @@ import com.tempus.gss.product.ift.api.entity.CabinsPricesTotals;
 import com.tempus.gss.product.ift.api.entity.Flight;
 import com.tempus.gss.product.ift.api.entity.PassengerTypePricesTotal;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
+import com.tempus.gss.product.ift.api.entity.policy.IftFlightPolicy;
+import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
+import com.tempus.gss.product.ift.api.entity.policy.IftPolicyChange;
 import com.tempus.gss.product.ift.api.entity.search.FlightQuery;
 import com.tempus.gss.product.ift.api.entity.search.Mileage;
 import com.tempus.gss.product.ift.api.entity.vo.FlightCabinPriceVo;
@@ -54,7 +57,7 @@ public class IftFlightQueryUtils {
 		try {
 			FlightQueryRequest flightQuery = request.getEntity();
 			query.setOwner(request.getAgent().getOwner());
-			query.setAirline(flightQuery.getAirline());// 出票航司
+			//query.setAirline(flightQuery.getAirline());// 出票航司
 			query.setDepartAirport(flightQuery.getDepAirport());// 出发城市
 			Country deparcountry = airportService.queryCountryByAirport(flightQuery.getDepAirport());// 根据出发城市查询所属的国家
 			if (deparcountry != null && !deparcountry.equals("")) {
@@ -338,4 +341,5 @@ public class IftFlightQueryUtils {
 		System.out.println(JsonUtil.toJson(queryIBEDetails));
 		return queryIBEDetails;
 	}
+	
 }

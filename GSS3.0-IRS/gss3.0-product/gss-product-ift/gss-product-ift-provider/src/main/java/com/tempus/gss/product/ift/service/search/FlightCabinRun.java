@@ -139,7 +139,17 @@ public class FlightCabinRun implements Runnable {
 					for (ShoppingOD shoppingOD : journey.getOdOption()) {//获取更多舱位返回的航班集合
 						for (ShoppingOD shoppings : availableJourney.getOdOption()) {//白屏查询列表页面带过的航班数据
 							if(shoppingOD.getRph()==shoppings.getRph()){
-								shoppingOD.setFlight(shoppings.getFlight());
+								for (ShoppingFlight newshoppingOneOD : shoppingOD.getFlight()) {//更多舱位的航班数据
+									for (ShoppingFlight oldshoppingOneOD : shoppings.getFlight()) {//原始的列表查询航班数据
+										if(newshoppingOneOD.getRph()==oldshoppingOneOD.getRph()){
+											newshoppingOneOD.setCodeshare(oldshoppingOneOD.isCodeshare());
+											newshoppingOneOD.setOpCode(oldshoppingOneOD.getOpCode());
+											newshoppingOneOD.setOpFltNo(oldshoppingOneOD.getOpFltNo());
+											newshoppingOneOD.setMarketingAirline(oldshoppingOneOD.getMarketingAirline());
+											newshoppingOneOD.setFlightNumber(oldshoppingOneOD.getFlightNumber());
+										}
+									}
+								}
 							}
 						}
 					}
