@@ -96,6 +96,18 @@ public class IftFlightPolicy implements Serializable{
 	private String ticketDate;
 	/** 备注 */
 	private String remark;
+	/**
+	 * 政策id
+	 */
+	private Long policyId;
+	public Long getPolicyId() {
+		return policyId;
+	}
+
+	public void setPolicyId(Long policyId) {
+		this.policyId = policyId;
+	}
+
 	public String getTicketDate() {
 		return ticketDate;
 	}

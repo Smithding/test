@@ -37,6 +37,7 @@ public class OrderPolicyUtils {
 	 */
 	public static IftFlightPolicy getIftFlightPolicy(IftPolicy policy,BigDecimal salePriceCount,BigDecimal favorableCount){
 		IftFlightPolicy flightPolicy = new IftFlightPolicy();
+		flightPolicy.setPolicyId(policy.getId());
 		/**
 		 * 订单优惠总金额
 		 */
