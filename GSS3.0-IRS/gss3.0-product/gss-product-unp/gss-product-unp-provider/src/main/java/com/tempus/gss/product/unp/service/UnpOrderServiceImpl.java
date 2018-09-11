@@ -5,7 +5,6 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
-import com.tempus.gss.dps.order.entity.buy.BuyItem;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.order.entity.*;
 import com.tempus.gss.order.entity.enums.*;
@@ -14,7 +13,6 @@ import com.tempus.gss.order.service.*;
 import com.tempus.gss.product.unp.api.entity.*;
 import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
-import com.tempus.gss.product.unp.api.entity.vo.UnpCreateOrderRefund;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderCreateVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderUpdateVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
@@ -86,6 +84,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     IBuyOrderService buyOrderService;
     @Reference
     IBuyChangeService buyChangeService;
+    
     @Override
     public UnpSale getSaleOrderInfo(UnpOrderVo params) {
         UnpSale unpSale = null;
@@ -414,17 +413,17 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         this.createValid(request, VALID_TYPE_SALE_REFUND);
         logger.info("创建采购退单开始");
         UnpBuyRefund unpBuyRefund = new UnpBuyRefund();
-        UnpBuyRefundItem unpBuyRefundItem= new UnpBuyRefundItem();
+        UnpBuyRefundItem unpBuyRefundItem = new UnpBuyRefundItem();
         List<UnpBuyItem> buyItems = request.getBuyItems();
         UnpResult<UnpBuyRefund> unpResult = new UnpResult();
         BigDecimal planAmount = new BigDecimal(0);
         String productName = "通用产品";
         List<String> goods = new ArrayList<>();
-
+        
         try {
             //获取采购单信息
             UnpBuy unpBuy = unpBuyMapper.selectByPrimaryKey(request.getUnpBuy().getBuyOrderNo());
-            if (unpBuy == null){
+            if (unpBuy == null) {
                 throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购单不存在");
             }
             Long buyRefundOrderNo = this.getUnpNo(PREFIX_BUY_REFUND);
@@ -442,13 +441,13 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             unpBuyRefund.setCreator(agent.getAccount());
             unpBuyRefund.setCreateTime(new Date());
             for (UnpBuyItem buyItem : buyItems) {
-                if (buyItem.getItemId()==null){
+                if (buyItem.getItemId() == null) {
                     throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购明细单编号不能为空");
                 }
                 UnpBuyItem unpBuyItem = unpBuyItemMapper.selectByPrimaryKey(buyItem.getItemId());
                 UnpItemType unpItemType = itemTypeMapper.selectByPrimaryKey(unpBuyItem.getUnpType());
                 goods.add(unpItemType.getName());
-                planAmount=planAmount.add(unpBuyItem.getGroupAmount());
+                planAmount = planAmount.add(unpBuyItem.getGroupAmount());
                 unpBuyRefundItem.setItemId(IdWorker.getId());
                 unpBuyRefundItem.setBuyRefundOrderNo(buyRefundOrderNo);
                 unpBuyRefundItem.setUnpType(GoodsBigType.GENERAL.getKey());
@@ -456,14 +455,14 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 unpBuyRefundItem.setChangeType(EUnpConstant.ChangeType.REFUND.getKey());
                 unpBuyRefundItem.setGroupAmount(buyItem.getGroupAmount());
                 unpBuyRefundItem.setItemStatus(EUnpConstant.OrderStatus.READY.getKey());
-                int unpBuyRefundItemMapperRecord= unpBuyRefundItemMapper.insertSelective(unpBuyRefundItem);
-                if (unpBuyRefundItemMapperRecord<0){
-                    throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "明细列表中 小类【" +unpBuyRefundItem .getUnpType() + "】创建失败");
+                int unpBuyRefundItemMapperRecord = unpBuyRefundItemMapper.insertSelective(unpBuyRefundItem);
+                if (unpBuyRefundItemMapperRecord < 0) {
+                    throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "明细列表中 小类【" + unpBuyRefundItem.getUnpType() + "】创建失败");
                 }
             }
             //创建 refund 主表
             unpBuyRefund.setRefundAmount(planAmount);
-            if (unpBuyRefundMapper.insertSelective(unpBuyRefund)<0) {
+            if (unpBuyRefundMapper.insertSelective(unpBuyRefund) < 0) {
                 throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "退单创建失败");
             }
             //创建os_buyChange主单记录
@@ -484,7 +483,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             buyChange.setGoodsName(productName + ":" + String.join(",", goods));
             buyChange.setBsignType(BSignType.REFUND.getKey());
             BuyChange buyChange1 = buyChangeService.create(agent, buyChange);
-            if (buyChange1==null){
+            if (buyChange1 == null) {
                 throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "os退单创建失败");
             }
             //创建应收
@@ -497,13 +496,13 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             //商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送 9 通用产品
             planAmountRecordType.setGoodsType(GoodsBigType.GENERAL.getKey());
             PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, planAmountRecordType);
-            if (planAmountRecord == null){
+            if (planAmountRecord == null) {
                 throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "退单创建退款应付失败");
             }
-            unpResult.success("创建采购退单成功",unpBuyRefund);
+            unpResult.success("创建采购退单成功", unpBuyRefund);
             logger.info("创建采购退单结束");
         } catch (com.tempus.gss.system.service.GSSException e) {
-            unpResult.failed("创建采购退单失败",unpBuyRefund);
+            unpResult.failed("创建采购退单失败", unpBuyRefund);
             logger.error("创建采购退单失败", e);
             return unpResult;
         }
@@ -524,7 +523,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             if (NullableCheck.isNullOrEmpty(createVo.getUnpBuy().getBuyAccount())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购付款账号 不能为空");}
             if (NullableCheck.isNullOrEmpty(createVo.getBuyItems())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购明细 至少一条");}
         } else if (validType == VALID_TYPE_SALE_REFUND) {
-
+        
         } else if (validType == VALID_TYPE_BUY_REFUND) {
             if (NullableCheck.isNullOrEmpty(createVo.getUnpBuy())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购总单信息 不能为空");}
             if (NullableCheck.isNullOrEmpty(createVo.getUnpBuy().getBuyOrderNo())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购总单单号 不能为空");}
@@ -562,6 +561,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         wrapper.setRecords(list);
         return wrapper;
     }
+    
     @Override
     public UnpResult<UnpSale> updateSale(Agent agent, UnpOrderUpdateVo request) {
         UnpResult<UnpSale> result = new UnpResult<>();
@@ -580,7 +580,11 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                     }
                 }
             });
-            this.unpSaleMapper.updateByPrimaryKeySelective(unpSale);
+            int flag = this.unpSaleMapper.updateByPrimaryKeySelective(unpSale);
+            if (flag > 0) {
+                logger.info("更新销售单成功:{}，开始更新OS销售单", unpSale.getSaleOrderNo());
+                osSaleorderservice.updateStatus(agent, unpSale.getSaleOrderNo(), unpSale.getStatus());
+            }
         }
         return result;
     }
@@ -743,7 +747,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     @Override
     public List<UnpBuyItem> getBuyItems(UnpOrderVo params) {
         List<UnpBuyItem> list = unpBuyItemMapper.selectItems(params.getBuyOrderNo());
-
+        
         if (NullableCheck.isNullOrEmpty(list)) {
             return new ArrayList<>();
         }
