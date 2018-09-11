@@ -278,7 +278,7 @@
     <!--
        LEFT JOIN UNP_BUY UB ON UB.SALE_ORDER_NO = US.SALE_ORDER_NO
        LEFT JOIN CPS_SUPPLIER CS ON UB.SUPPLIER_ID = CS.SUPPLIER_NO-->
-    <select id="queryBuyOrderList" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo" resultMap="BaseResultMap">
+    <select id="queryBuyOrderList" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo" resultMap="BaseResultMap">
         SELECT UB.*,CS.NAME,CC.NAME AS CUSTOMER_NAME
         FROM UNP_BUY UB
         LEFT JOIN UNP_SALE US ON US.SALE_ORDER_NO = UB.SALE_ORDER_NO

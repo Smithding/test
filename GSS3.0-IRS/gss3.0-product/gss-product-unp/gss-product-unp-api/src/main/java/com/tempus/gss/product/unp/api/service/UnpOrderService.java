@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.unp.api.entity.*;
 import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
-import com.tempus.gss.product.unp.api.entity.vo.UnpOrderCreateVo;
-import com.tempus.gss.product.unp.api.entity.vo.UnpOrderUpdateVo;
+import com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
+import com.tempus.gss.product.unp.api.entity.vo.UnpRefundVo;
 import com.tempus.gss.vo.Agent;
 
 import java.util.List;
@@ -24,63 +24,83 @@ public interface UnpOrderService {
      * @param agent
      *         agent
      * @param request
-     *         UnpOrderCreateVo
+     *         UnpOrderVo
      * @return UnpResult
      */
-    UnpResult<UnpSale> createOrder(Agent agent, UnpOrderCreateVo request);
+    UnpResult<UnpSale> createOrder(Agent agent, UnpOrderVo request);
     
     /**
      * @param agent
      *         agent
      * @param request
-     *         UnpOrderCreateVo
+     *         UnpOrderVo
      * @return UnpResult
      */
-    UnpResult<UnpSale> createSale(Agent agent, UnpOrderCreateVo request);
+    UnpResult<UnpSale> createSale(Agent agent, UnpOrderVo request);
     
     /**
      * @param agent
      *         agent
      * @param request
-     *         UnpOrderCreateVo
+     *         UnpOrderVo
      * @return UnpResult
      */
-    UnpResult<UnpBuy> createBuy(Agent agent, UnpOrderCreateVo request);
+    UnpResult<UnpBuy> createBuy(Agent agent, UnpOrderVo request);
     
     /**
      * @param agent
      *         agent
      * @param request
-     *         UnpOrderCreateVo
+     *         UnpOrderVo
      * @return UnpResult
      */
-    UnpResult<UnpSaleRefund> createSaleRefund(Agent agent, UnpOrderCreateVo request);
+    UnpResult<UnpSaleRefund> createSaleRefund(Agent agent, UnpOrderVo request);
     
     /**
      * @param agent
      *         agent
      * @param request
-     *         UnpOrderCreateVo
+     *         UnpOrderVo
      * @return UnpResult
      */
-    UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpOrderCreateVo request);
+    UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpOrderVo request);
     
     /** <<<<<<<<<<<<<<<<<<<<<<<【CREATE】【UPDATE】>>>>>>>>>>>>>>>>>>>>>>> */
-    
-    UnpResult<UnpSale> updateSale(Agent agent, UnpOrderUpdateVo request);
+    /**
+     * @param agent
+     *         agent
+     * @param request
+     *         UnpOrderVo
+     * @return UnpResult
+     */
+    UnpResult<UnpSale> updateSale(Agent agent, UnpOrderVo request);
     
     /**
      * @param agent
      * @param request
      */
-    UnpResult<UnpBuy> updateBuy(Agent agent, UnpOrderUpdateVo request);
+    UnpResult<UnpBuy> updateBuy(Agent agent, UnpOrderVo request);
+    
+    /**
+     * @param agent
+     * @param request
+     *         1、 参数传进来的都是需要修改的目标状态
+     *         2、 增删改查的SQL尽量只各写一条
+     */
+    UnpResult<UnpSaleRefund> updateSale(Agent agent, UnpRefundVo request);
+    
+    /**
+     * @param agent
+     * @param request
+     */
+    UnpResult<UnpBuyRefund> updateBuy(Agent agent, UnpRefundVo request);
     /**<<<<<<<<<<<<<<<<<<<<<<<【UPDATE】【SELECT】>>>>>>>>>>>>>>>>>>>>>>>*/
     
     /**
      * 查询一个销售订单详细信息，包括销售单下的明细信息
      *
      * @param params
-     *         UnpOrderCreateVo
+     *         UnpOrderVo
      * @param params
      *         saleOrderNo     销售单号
      * @param params
@@ -94,9 +114,9 @@ public interface UnpOrderService {
      * @return UnpResult
      * @see EUnpConstant.ChangeType
      */
-    UnpSale getSaleOrderInfo(UnpOrderVo params);
+    UnpSale getSaleOrderInfo(UnpOrderQueryVo params);
     
-    UnpBuy getBuyOrderInfo(UnpOrderVo params);
+    UnpBuy getBuyOrderInfo(UnpOrderQueryVo params);
     
     /**
      * 根据条件查询明细表集合
@@ -111,9 +131,9 @@ public interface UnpOrderService {
      *         thirdBusNo    第三方业务单号
      * @return UnpResult
      */
-    List<UnpSaleItem> getItems(UnpOrderVo params);
+    List<UnpSaleItem> getItems(UnpOrderQueryVo params);
     
-    List<UnpBuyItem> getBuyItems(UnpOrderVo params);
+    List<UnpBuyItem> getBuyItems(UnpOrderQueryVo params);
     
     /**
      * @param itemNo
@@ -128,9 +148,9 @@ public interface UnpOrderService {
      * @param param
      * @return Page
      */
-    Page<UnpSale> querySaleOrderList(Page<UnpSale> wrapper, UnpOrderVo param);
+    Page<UnpSale> querySaleOrderList(Page<UnpSale> wrapper, UnpOrderQueryVo param);
     
-    Page<UnpBuy> queryBuyOrderList(Page<UnpBuy> wrapper, UnpOrderVo param);
+    Page<UnpBuy> queryBuyOrderList(Page<UnpBuy> wrapper, UnpOrderQueryVo param);
     
-    /** <<<<<<<<<<<<<<<<<<<<<<<【SELECT】【PAY】>>>>>>>>>>>>>>>>>>>>>>> */
+    /** <<<<<<<<<<<<<<<<<<<<<<<【SELECT】【】>>>>>>>>>>>>>>>>>>>>>>> */
 }

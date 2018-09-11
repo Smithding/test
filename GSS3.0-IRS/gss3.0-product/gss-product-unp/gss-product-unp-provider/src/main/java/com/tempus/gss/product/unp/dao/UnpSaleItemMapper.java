@@ -1,7 +1,7 @@
 package com.tempus.gss.product.unp.dao;
 
 import com.tempus.gss.product.unp.api.entity.UnpSaleItem;
-import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
+import com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public interface UnpSaleItemMapper {
     
     UnpSaleItem selectByPrimaryKey(Long itemId);
     
-    List<UnpSaleItem> selectItems(UnpOrderVo params);
+    List<UnpSaleItem> selectItems(UnpOrderQueryVo params);
     
     int updateByPrimaryKeySelective(UnpSaleItem record);
     

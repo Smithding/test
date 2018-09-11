@@ -12,7 +12,7 @@ import com.tempus.gss.product.unp.api.entity.UnpBuy;
 import com.tempus.gss.product.unp.api.entity.UnpSale;
 import com.tempus.gss.product.unp.api.entity.UnpSaleItem;
 import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
-import com.tempus.gss.product.unp.api.entity.vo.UnpOrderUpdateVo;
+import com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
 import com.tempus.gss.product.unp.api.service.UnpOrderService;
 import com.tempus.gss.product.unp.dao.UnpBuyMapper;
@@ -52,8 +52,8 @@ public class PayListener {
                 logger.info("监听到【通用产品】支付消息队列" + JSON.toJSONString(payNoticeVO));
                 
                 Agent agent = payNoticeVO.getAgent();
-                UnpOrderUpdateVo updateVo = new UnpOrderUpdateVo();
-                UnpOrderVo queryVo = new UnpOrderVo();
+                UnpOrderVo updateVo = new UnpOrderVo();
+                UnpOrderQueryVo queryVo = new UnpOrderQueryVo();
                 if (payNoticeVO.getBusinessType() == BusinessType.SALE_ORDER) {
                     queryVo.setSaleOrderNo(payNoticeVO.getBusinessNo());
                     UnpSale unpSale = unpOrderService.getSaleOrderInfo(queryVo);

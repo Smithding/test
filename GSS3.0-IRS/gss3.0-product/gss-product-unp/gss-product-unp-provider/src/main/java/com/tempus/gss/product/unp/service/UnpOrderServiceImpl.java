@@ -13,8 +13,8 @@ import com.tempus.gss.order.service.*;
 import com.tempus.gss.product.unp.api.entity.*;
 import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
-import com.tempus.gss.product.unp.api.entity.vo.UnpOrderCreateVo;
-import com.tempus.gss.product.unp.api.entity.vo.UnpOrderUpdateVo;
+import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
+import com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
 import com.tempus.gss.product.unp.api.service.UnpItemTypeService;
 import com.tempus.gss.product.unp.api.service.UnpOrderService;
@@ -88,7 +88,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     ISaleChangeService saleChangeService;
     
     @Override
-    public UnpSale getSaleOrderInfo(UnpOrderVo params) {
+    public UnpSale getSaleOrderInfo(UnpOrderQueryVo params) {
         UnpSale unpSale = null;
         Page<UnpSale> page = this.querySaleOrderList(new Page<>(1, 1), params);
         if (page == null || page.getRecords() == null) {
@@ -98,7 +98,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         if (unpSale == null) {
             return null;
         }
-        UnpOrderVo p = new UnpOrderVo();
+        UnpOrderQueryVo p = new UnpOrderQueryVo();
         p.setSaleOrderNo(unpSale.getSaleOrderNo());
         List<UnpSaleItem> saleItems = this.getItems(p);
         unpSale.setSaleItems(saleItems);
@@ -106,7 +106,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
-    public UnpBuy getBuyOrderInfo(UnpOrderVo params) {
+    public UnpBuy getBuyOrderInfo(UnpOrderQueryVo params) {
         UnpBuy unpBuy = null;
         Page<UnpBuy> page = this.queryBuyOrderList(new Page<>(1, 1), params);
         if (page == null || page.getRecords() == null) {
@@ -116,19 +116,19 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         if (unpBuy == null) {
             return null;
         }
-        UnpOrderVo p = new UnpOrderVo();
+        UnpOrderQueryVo p = new UnpOrderQueryVo();
         p.setBuyOrderNo(unpBuy.getBuyOrderNo());
         List<UnpBuyItem> buyItems = this.getBuyItems(p);
         unpBuy.setBuyItems(buyItems);
         return unpBuy;
     }
     
-    public UnpBuy getBuyInfos(UnpOrderVo params) {
+    public UnpBuy getBuyInfos(UnpOrderQueryVo params) {
         UnpBuy unpBuy = this.unpBuyMapper.selectByPrimaryKey(params.getBuyOrderNo());
         if (unpBuy == null) {
             return null;
         }
-        UnpOrderVo p = new UnpOrderVo();
+        UnpOrderQueryVo p = new UnpOrderQueryVo();
         p.setBuyOrderNo(unpBuy.getBuyOrderNo());
         List<UnpBuyItem> unpBuyItems = this.getBuyItems(p);
         unpBuy.setBuyItems(unpBuyItems);
@@ -137,7 +137,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     
     @Override
     
-    public UnpResult<UnpSale> createOrder(Agent agent, UnpOrderCreateVo orderCreateVo) {
+    public UnpResult<UnpSale> createOrder(Agent agent, UnpOrderVo orderCreateVo) {
         UnpResult<UnpSale> result = new UnpResult<>();
         try {
             boolean createTra = true;
@@ -193,7 +193,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public UnpResult<UnpSale> createSale(Agent agent, UnpOrderCreateVo request) {
+    public UnpResult<UnpSale> createSale(Agent agent, UnpOrderVo request) {
         UnpResult<UnpSale> result = new UnpResult<>();
         try {
             this.createValid(request, VALID_TYPE_SALE);
@@ -309,7 +309,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
-    public UnpResult<UnpBuy> createBuy(Agent agent, UnpOrderCreateVo request) {
+    public UnpResult<UnpBuy> createBuy(Agent agent, UnpOrderVo request) {
         this.createValid(request, VALID_TYPE_BUY);
         UnpResult<UnpBuy> unpBuyUnpResult = new UnpResult<>();
         logger.info("创建UNP采购单开始");
@@ -406,7 +406,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
-    public UnpResult<UnpSaleRefund> createSaleRefund(Agent agent, UnpOrderCreateVo request) {
+    public UnpResult<UnpSaleRefund> createSaleRefund(Agent agent, UnpOrderVo request) {
         this.createValid(request, VALID_TYPE_SALE_REFUND);
         logger.info("创建销售采购退单开始");
         UnpSaleRefund unpSaleRefund = new UnpSaleRefund();
@@ -506,7 +506,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
-    public UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpOrderCreateVo request) {
+    public UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpOrderVo request) {
         this.createValid(request, VALID_TYPE_BUY_REFUND);
         logger.info("创建采购退单开始");
         UnpBuyRefund unpBuyRefund = new UnpBuyRefund();
@@ -610,7 +610,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         return unpResult;
     }
     
-    private void createValid(UnpOrderCreateVo createVo, Integer validType) throws GSSException {
+    private void createValid(UnpOrderVo createVo, Integer validType) throws GSSException {
         if (validType == VALID_TYPE_ALL) {
             if (NullableCheck.isNullOrEmpty(createVo)) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "创建请求参数 不能为空");}
         } else if (validType == VALID_TYPE_SALE) {
@@ -638,13 +638,13 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
-    public Page<UnpSale> querySaleOrderList(Page<UnpSale> wrapper, UnpOrderVo param) {
+    public Page<UnpSale> querySaleOrderList(Page<UnpSale> wrapper, UnpOrderQueryVo param) {
         if (null == wrapper) {
             
             wrapper = new Page<>();
         }
         if (null == param) {
-            param = new UnpOrderVo();
+            param = new UnpOrderQueryVo();
         }
         List<UnpSale> list = unpSaleMapper.queryOrderList(wrapper, param);
         wrapper.setRecords(list);
@@ -652,13 +652,13 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
-    public Page<UnpBuy> queryBuyOrderList(Page<UnpBuy> wrapper, UnpOrderVo param) {
+    public Page<UnpBuy> queryBuyOrderList(Page<UnpBuy> wrapper, UnpOrderQueryVo param) {
         if (null == wrapper) {
             
             wrapper = new Page<>();
         }
         if (null == param) {
-            param = new UnpOrderVo();
+            param = new UnpOrderQueryVo();
         }
         List<UnpBuy> list = unpBuyMapper.queryBuyOrderList(wrapper, param);
         wrapper.setRecords(list);
@@ -666,7 +666,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
-    public UnpResult<UnpSale> updateSale(Agent agent, UnpOrderUpdateVo request) {
+    public UnpResult<UnpSale> updateSale(Agent agent, UnpOrderVo request) {
         UnpResult<UnpSale> result = new UnpResult<>();
         UnpSale unpSale = request.getUnpSale();
         if (unpSale != null) {
@@ -693,7 +693,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
-    public UnpResult<UnpBuy> updateBuy(Agent agent, UnpOrderUpdateVo request) {
+    public UnpResult<UnpBuy> updateBuy(Agent agent, UnpOrderVo request) {
         logger.info("采购单更新开始");
         if (agent == null) {
             logger.error("采购订单更新失败{}", "agent不能为null");
@@ -845,7 +845,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
-    public List<UnpSaleItem> getItems(UnpOrderVo params) {
+    public List<UnpSaleItem> getItems(UnpOrderQueryVo params) {
         List<UnpSaleItem> list;
         list = unpSaleItemMapper.selectItems(params);
         if (NullableCheck.isNullOrEmpty(list)) {
@@ -855,7 +855,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
-    public List<UnpBuyItem> getBuyItems(UnpOrderVo params) {
+    public List<UnpBuyItem> getBuyItems(UnpOrderQueryVo params) {
         List<UnpBuyItem> list = unpBuyItemMapper.selectItems(params.getBuyOrderNo());
         
         if (NullableCheck.isNullOrEmpty(list)) {
@@ -866,7 +866,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     
     @Override
     public UnpSaleItem getItem(Long itemNo) {
-        UnpOrderVo param = new UnpOrderVo();
+        UnpOrderQueryVo param = new UnpOrderQueryVo();
         param.setItemNo(itemNo);
         return this.getItems(param).get(0);
     }
