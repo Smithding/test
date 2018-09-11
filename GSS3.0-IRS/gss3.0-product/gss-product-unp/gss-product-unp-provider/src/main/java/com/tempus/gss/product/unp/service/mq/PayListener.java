@@ -5,13 +5,14 @@ import com.alibaba.fastjson.JSON;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.order.entity.enums.BusinessType;
 import com.tempus.gss.order.entity.enums.GoodsBigType;
+import com.tempus.gss.order.entity.enums.IncomeExpenseType;
 import com.tempus.gss.order.entity.vo.PayNoticeVO;
 import com.tempus.gss.order.entity.vo.PayReceiveVO;
 import com.tempus.gss.product.unp.api.entity.UnpBuy;
 import com.tempus.gss.product.unp.api.entity.UnpSale;
 import com.tempus.gss.product.unp.api.entity.UnpSaleItem;
 import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
-import com.tempus.gss.product.unp.api.entity.vo.UnpOrderUpdateVo;
+import com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
 import com.tempus.gss.product.unp.api.service.UnpOrderService;
 import com.tempus.gss.product.unp.dao.UnpBuyMapper;
@@ -51,15 +52,8 @@ public class PayListener {
                 logger.info("监听到【通用产品】支付消息队列" + JSON.toJSONString(payNoticeVO));
                 
                 Agent agent = payNoticeVO.getAgent();
-                UnpOrderUpdateVo updateVo = new UnpOrderUpdateVo();
-                UnpOrderVo queryVo = new UnpOrderVo();
-                try {//BUY
-                    UnpBuy queryUnpBuy = unpBuyMapper.selectBySaleOrderNo(payNoticeVO.getBusinessNo());
-                    if (queryUnpBuy != null && queryUnpBuy.getPayStatus() < EUnpConstant.PayStatus.PAIED.getKey()) {
-                    }
-                } catch (Exception e) {
-                    logger.error("Error", e);
-                }
+                UnpOrderVo updateVo = new UnpOrderVo();
+                UnpOrderQueryVo queryVo = new UnpOrderQueryVo();
                 if (payNoticeVO.getBusinessType() == BusinessType.SALE_ORDER) {
                     queryVo.setSaleOrderNo(payNoticeVO.getBusinessNo());
                     UnpSale unpSale = unpOrderService.getSaleOrderInfo(queryVo);
@@ -70,43 +64,65 @@ public class PayListener {
                     UnpSale unpUpdate = new UnpSale();
                     List<UnpSaleItem> itemsToUpdate = new ArrayList<>();
                     unpUpdate.setSaleOrderNo(payNoticeVO.getBusinessNo());
-                    if (unpSale.getPayStatus() <= EUnpConstant.PayStatus.PAYING.getKey()) {
-                        //首次通知 首次修改
-                        String payWayIn = String.valueOf(payNoticeVO.getPayWay()) + "";
-                        if (payWayIn.length() == 0) {
-                            logger.error("销售单号【{}】接收到的支付消息中，支付方式为空", payNoticeVO.getBusinessNo());
-                            payWayIn = "3";
+                    if (payNoticeVO.getIncomeExpenseType() == IncomeExpenseType.INCOME.getKey()) {
+                        logger.info("监听到UNP销售支付消息:{}--￥{}", payNoticeVO.getBusinessNo(), payNoticeVO.getActualAmount());
+                        //收款
+                        if (unpSale.getPayStatus() <= EUnpConstant.PayStatus.PAYING.getKey()) {
+                            //首次通知 首次修改
+                            String payWayIn = String.valueOf(payNoticeVO.getPayWay()) + "";
+                            if (payWayIn.length() == 0) {
+                                logger.error("销售单号【{}】接收到的支付消息中，支付方式为空", payNoticeVO.getBusinessNo());
+                                payWayIn = "3";
+                            }
+                            String payWay = payWayIn.substring(0, 1);
+                            if ("2".equals(payWay)) {
+                                unpUpdate.setPayStatus(EUnpConstant.PayStatus.BALANCE_PAIED.getKey());
+                            } else {
+                                unpUpdate.setPayStatus(EUnpConstant.PayStatus.PAIED.getKey());
+                            }
+                            unpUpdate.setPayTime(new Date());
+                            unpSale.setModifier(agent.getAccount());
+                            unpSale.setModifyTime(new Date());
                         }
-                        String payWay = payWayIn.substring(0, 1);
-                        if ("2".equals(payWay)) {
-                            unpUpdate.setPayStatus(EUnpConstant.PayStatus.BALANCE_PAIED.getKey());
-                        } else {
-                            unpUpdate.setPayStatus(EUnpConstant.PayStatus.PAIED.getKey());
-                        }
-                        unpUpdate.setPayTime(new Date());
-                        unpSale.setModifier(agent.getAccount());
-                        unpSale.setModifyTime(new Date());
+                        unpUpdate.setStatus(EUnpConstant.OrderStatus.DONE.getKey());
+                        unpUpdate.setActualAmount(payNoticeVO.getActualAmount());
+                        unpSale.getSaleItems().forEach(item -> {
+                            UnpSaleItem itemUpdate = new UnpSaleItem();
+                            itemUpdate.setItemId(item.getItemId());
+                            itemUpdate.setSaleOrderNo(item.getSaleOrderNo());
+                            itemUpdate.setItemStatus(EUnpConstant.OrderStatus.DONE.getKey());
+                            itemsToUpdate.add(itemUpdate);
+                        });
+                        unpUpdate.setSaleItems(itemsToUpdate);
+                        updateVo.setUnpSale(unpUpdate);
+                        unpOrderService.updateSale(agent, updateVo);
+                        
                     }
-                    unpUpdate.setStatus(EUnpConstant.OrderStatus.DONE.getKey());
-                    unpUpdate.setActualAmount(payNoticeVO.getActualAmount());
-                    unpSale.getSaleItems().forEach(item -> {
-                        UnpSaleItem itemUpdate = new UnpSaleItem();
-                        itemUpdate.setItemId(item.getItemId());
-                        itemUpdate.setSaleOrderNo(item.getSaleOrderNo());
-                        itemUpdate.setItemStatus(EUnpConstant.OrderStatus.DONE.getKey());
-                        itemsToUpdate.add(itemUpdate);
-                    });
-                    unpUpdate.setSaleItems(itemsToUpdate);
-                    updateVo.setUnpSale(unpUpdate);
-                    unpOrderService.updateSale(agent, updateVo);
-                    
                 }
                 if (payNoticeVO.getBusinessType() == BusinessType.BUY_ORDER) {
-                    UnpBuy unpBuy = unpOrderService.getBuyOrderInfo(queryVo);
-                    updateVo.setUnpBuy(unpBuy);
-                    updateVo.setBuyItems(unpBuy.getBuyItems());
-                    updateVo.setOperationType(EUnpConstant.Opertion.PAY.getKey());
-                    unpOrderService.updateBuy(agent, updateVo);
+                    if (payNoticeVO.getIncomeExpenseType() == IncomeExpenseType.EXPENSE.getKey()) {
+                        //采购付款
+                        logger.info("监听到UNP采购付款消息:{}--￥{}", payNoticeVO.getBusinessNo(), payNoticeVO.getActualAmount());
+                        UnpBuy unpBuy = unpOrderService.getBuyOrderInfo(queryVo);
+                        updateVo.setUnpBuy(unpBuy);
+                        updateVo.setBuyItems(unpBuy.getBuyItems());
+                        updateVo.setOperationType(EUnpConstant.Opertion.PAY.getKey());
+                        unpOrderService.updateBuy(agent, updateVo);
+                    }
+                }
+                if ((payNoticeVO.getBusinessType() == BusinessType.SALE_CHANGE_ORDER)) {
+                    //退
+                    if (payNoticeVO.getIncomeExpenseType() == IncomeExpenseType.EXPENSE.getKey()) {
+                        //销售退款
+                        logger.info("监听到UNP销售退款消息:{}--￥{}", payNoticeVO.getBusinessNo(), payNoticeVO.getActualAmount());
+                    }
+                }
+                if ((payNoticeVO.getBusinessType() == BusinessType.BUY_CHANGE_ORDER)) {
+                    //退
+                    if (payNoticeVO.getIncomeExpenseType() == IncomeExpenseType.INCOME.getKey()) {
+                        //采购退款
+                        logger.info("监听到UNP采购退款消息:{}--￥{}", payNoticeVO.getBusinessNo(), payNoticeVO.getActualAmount());
+                    }
                 }
             }
         } catch (Exception ex) {

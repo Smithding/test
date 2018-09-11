@@ -35,7 +35,7 @@
     <!--
          LEFT JOIN UNP_BUY UB ON UB.SALE_ORDER_NO = US.SALE_ORDER_NO
          LEFT JOIN CPS_SUPPLIER CS ON UB.SUPPLIER_ID = CS.SUPPLIER_NO-->
-    <select id="queryOrderList" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo" resultMap="BaseResultMap">
+    <select id="queryOrderList" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo" resultMap="BaseResultMap">
         SELECT US.SALE_ORDER_NO ,US.OWNER ,US.TRA_NO ,US.CUSTOMER_NO ,US.CUSTOMER_TYPE ,US.REMARK ,US.CHANGE_TYPE ,US.PLAN_AMOUNT ,US.ACTUAL_AMOUNT
         ,US.PAY_STATUS ,US.PAY_TIME ,US.STATUS ,US.SOURCE ,US.CREATOR ,US.CREATE_TIME ,US.MODIFIER
         ,US.MODIFY_TIME ,US.VALID,CC.NAME

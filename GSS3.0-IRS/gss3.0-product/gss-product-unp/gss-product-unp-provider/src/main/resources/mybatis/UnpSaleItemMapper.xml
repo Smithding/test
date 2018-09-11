@@ -23,7 +23,7 @@
         from UNP_SALE_ITEM
         where ITEM_ID = #{itemId,jdbcType=BIGINT}
     </select>
-    <select id="selectItems" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo" resultMap="BaseResultMap">
+    <select id="selectItems" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo" resultMap="BaseResultMap">
         SELECT USI.*
         FROM UNP_SALE_ITEM USI
         LEFT JOIN UNP_SALE US ON US.SALE_ORDER_NO = USI.SALE_ORDER_NO
