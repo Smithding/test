@@ -723,8 +723,9 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         try {
             unpBuy = request.getUnpBuy();
             unpBuyItemList = request.getBuyItems();
-            UnpBuy queryUnpBuy = unpBuyMapper.selectBySaleOrderNo(unpBuy.getSaleOrderNo());//判断原单是否可操作
-            if (queryUnpBuy == null && queryUnpBuy.getChangeType() == 2) {
+            //判断原单是否可操作
+            UnpBuy queryUnpBuy = unpBuyMapper.selectBySaleOrderNo(unpBuy.getSaleOrderNo());
+            if (queryUnpBuy == null) {
                 throw new Exception("不存在可操作订单");
             }
             //支付操作
@@ -765,13 +766,12 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                         unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
                         buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
                     }
-                }
-                for (UnpBuyItem unpBuyItem : unpBuyItemList) {
-                    unpBuyItem.setItemStatus(1);
-                    unpBuyItem.setChangeType(1);
-                    unpBuyItem.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
-                    unpBuyItemMapper.updateByPrimaryKeySelective(unpBuyItem);
-                    
+                    unpBuyItemList.forEach(unpBuyItem -> {
+                        unpBuyItem.setItemStatus(1);
+                        unpBuyItem.setChangeType(1);
+                        unpBuyItem.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
+                        unpBuyItemMapper.updateByPrimaryKeySelective(unpBuyItem);
+                    });
                 }
             }
             //取消  退票取消事暂时不管原单状态
