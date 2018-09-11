@@ -146,7 +146,10 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	private String BQY_HOTEL_ORDER_CANCEL_URL;		//取消订单
 	
 	@Value("${bqy.hotel.order.detail.url}")
-	private String BQY_HOTEL_ORDER_DETAIL_URL;		//订单详情	
+	private String BQY_HOTEL_ORDER_DETAIL_URL;		//订单详情
+
+	 @Value("${bqy.hotel.order.retreat.url}")
+	private String BQY_HOTEL_ORDER_RETREAT_URL;		//订单退订
 	
 	@Value("${bqy.count}")
 	private int PAGE_SIZE;							//查询id数量
@@ -568,18 +571,42 @@ public class BQYHotelInterServiceImpl implements IBQYHotelInterService {
 	
 	
 	@Override
-	public Boolean cancelOrder(OrderCancelParam cancelParam) {
+	public OrderCancelResult cancelOrder(OrderCancelParam cancelParam) {
 		//BQY_HOTEL_ORDER_CANCEL_URL
 		cancelParam.setAgentId(Long.parseLong(BQY_AGENTID));
 		cancelParam.setToken(md5Encryption());
 		cancelParam.setBookingUserId(BQY_AGENTID);
-		Boolean orderCancelResult = null;
+		OrderCancelResult orderCancelResult = null;
 		String paramJson = JsonUtil.toJson(cancelParam);
 		logger.info("取消酒店订单入参：" + paramJson);
 		String result = httpClientUtil.doJsonPost(BQY_HOTEL_ORDER_CANCEL_URL, paramJson);
 		logger.info("取消酒店订单返回结果：" + result);
 		if (StringUtils.isNoneBlank(result.trim())) {
-			ResponseResult<Boolean> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<Boolean>>(){});
+			ResponseResult<OrderCancelResult> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<OrderCancelResult>>(){});
+			if (responseResult != null) {
+				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
+					orderCancelResult = responseResult.getResult();
+				}
+			}
+		}else {
+			throw new GSSException("酒店订单取消失败!", "0111", "酒店订单取消返回空值");
+		}
+		return orderCancelResult;
+	}
+
+	@Override
+	public OrderCancelResult retreatOrder(OrderCancelParam cancelParam) {
+		//BQY_HOTEL_ORDER_RETREAT_URL
+		cancelParam.setAgentId(Long.parseLong(BQY_AGENTID));
+		cancelParam.setToken(md5Encryption());
+		cancelParam.setBookingUserId(BQY_AGENTID);
+		OrderCancelResult orderCancelResult = null;
+		String paramJson = JsonUtil.toJson(cancelParam);
+		logger.info("取消酒店订单入参：" + paramJson);
+		String result = httpClientUtil.doJsonPost(BQY_HOTEL_ORDER_RETREAT_URL, paramJson);
+		logger.info("取消酒店订单返回结果：" + result);
+		if (StringUtils.isNoneBlank(result.trim())) {
+			ResponseResult<OrderCancelResult> responseResult = JsonUtil.toBean(result, new TypeReference<ResponseResult<OrderCancelResult>>(){});
 			if (responseResult != null) {
 				if (responseResult.getResponseStatus() != null && responseResult.getResponseStatus().getAck() == 1) {
 					orderCancelResult = responseResult.getResult();

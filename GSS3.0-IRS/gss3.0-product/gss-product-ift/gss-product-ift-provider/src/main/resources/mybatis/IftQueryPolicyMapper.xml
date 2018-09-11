@@ -116,7 +116,8 @@
 			AND (T1.RTN_NOTSUIT_CYCLE IS NULL OR  T1.RTN_NOTSUIT_CYCLE not like '%${rtnDepartWeek}%')
 		</if>
 		<!-- 往返时匹配返回机场控制（1政策始发机场范围） -->
-		<if test="null != voyageType &amp;&amp; 2 == voyageType">	AND (T1.ROUND_TRIP_AIRPORT_TYPE IS NULL OR  (T1.ROUND_TRIP_AIRPORT_TYPE = 1 
+		<if test="null != voyageType &amp;&amp; 2 == voyageType">	
+			AND (T1.ROUND_TRIP_AIRPORT_TYPE IS NULL OR T1.ROUND_TRIP_AIRPORT_TYPE != 1 OR (T1.ROUND_TRIP_AIRPORT_TYPE = 1 
 			AND ((T1.DEPART_AIRPORT like '%${arriveAirport}%')
 			OR (T1.DEPART_COUNTRY like '%${arriveCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
 				<!-- 境外 -->

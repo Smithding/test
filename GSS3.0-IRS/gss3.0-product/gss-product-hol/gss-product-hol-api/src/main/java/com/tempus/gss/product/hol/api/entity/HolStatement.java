@@ -34,63 +34,63 @@ public class HolStatement implements Serializable {
      * 销售公司
      */
     @ExcelImportField(order = 1)
-    @NotNull
+    //@NotNull
     private String saleCorporation;
 
     /**
      * 结算公司
      */
     @ExcelImportField(order = 2)
-    @NotNull
+    //@NotNull
     private String balanceCorporation;
 
     /**
      * 产品类型
      */
     @ExcelImportField(order = 3)
-    @NotNull
+   // @NotNull
     private String productType;
 
     /**
      * 业务线
      */
     @ExcelImportField(order = 4)
-    @NotNull
+    //@NotNull
     private String businessLine;
 
     /**
      * 销售部门
      */
     @ExcelImportField(order = 5)
-    @NotNull
+   // @NotNull
     private String saleDepartment;
 
     /**
      * 客户名称
      */
     @ExcelImportField(order = 6)
-    @NotNull
+    //@NotNull
     private String customerName;
 
     /**
      * 客户编号
      */
     @ExcelImportField(order = 7)
-    @NotNull
+    //@NotNull
     private String customerNo;
 
     /**
      * 账单号
      */
     @ExcelImportField(order = 8)
-    @NotNull
+   // @NotNull
     private String billNo;
 
     /**
      * 订单来源
      */
     @ExcelImportField(order = 9)
-    @NotNull
+   // @NotNull
     private String orderSource;
 
     /**
@@ -143,7 +143,7 @@ public class HolStatement implements Serializable {
      * 入住房号
      */
     @ExcelImportField(order = 16)
-    @NotNull
+   // @NotNull
     private String checkinRoomCode;
 
     /**
@@ -192,21 +192,21 @@ public class HolStatement implements Serializable {
      * 房型
      */
     @ExcelImportField(order = 22)
-    @NotNull
+   // @NotNull
     private String roomType;
 
     /**
      * 其它
      */
     @ExcelImportField(order = 23)
-    @NotNull
+  //  @NotNull
     private String other;
 
     /**
      * 其它费用
      */
     @ExcelImportField(order = 24)
-    @NotNull
+   // @NotNull
     @IsNum
     private BigDecimal otherPrice;
 
@@ -277,28 +277,28 @@ public class HolStatement implements Serializable {
      *供应商结算方式
      */
     @ExcelImportField(order = 33)
-    @NotNull
+   // @NotNull
     private String supplierSettleType;
 
     /**
      *供应商支付方式
      */
     @ExcelImportField(order = 34)
-    @NotNull
+  //  @NotNull
     private String supplierPayType;
 
     /**
      * 供应商支付流水
      */
     @ExcelImportField(order = 35)
-    @NotNull
+  //  @NotNull
     private String supplierPayWater;
 
     /**
      * 备注
      */
     @ExcelImportField(order = 36)
-    @NotNull
+   // @NotNull
     private String remark;
 
     /**

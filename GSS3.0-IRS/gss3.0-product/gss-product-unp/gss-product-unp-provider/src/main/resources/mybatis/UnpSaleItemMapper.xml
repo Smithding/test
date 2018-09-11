@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.unp.dao.UnpSaleItemMapper">
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.unp.api.entity.UnpSaleItem">
+        <id column="ITEM_ID" jdbcType="BIGINT" property="itemId"/>
+        <result column="SALE_ORDER_NO" jdbcType="BIGINT" property="saleOrderNo"/>
+        <result column="UNP_TYPE" jdbcType="INTEGER" property="unpType"/>
+        <result column="NUM" jdbcType="INTEGER" property="num"/>
+        <result column="GROUP_AMOUNT" jdbcType="DECIMAL" property="groupAmount"/>
+        <result column="ITEM_STATUS" jdbcType="INTEGER" property="itemStatus"/>
+        <result column="CHANGE_TYPE" jdbcType="INTEGER" property="changeType"/>
+        <result column="POLICY" jdbcType="INTEGER" property="policy"/>
+        <result column="ADDITIONAL_INFO" jdbcType="VARCHAR" property="additionalInfo"/>
+        <result column="VALID" jdbcType="INTEGER" property="valid"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+    ITEM_ID, SALE_ORDER_NO, UNP_TYPE, NUM, GROUP_AMOUNT, ITEM_STATUS, CHANGE_TYPE, POLICY,
+    ADDITIONAL_INFO, VALID
+  </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_SALE_ITEM
+        where ITEM_ID = #{itemId,jdbcType=BIGINT}
+    </select>
+    <select id="selectItems" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo" resultMap="BaseResultMap">
+        SELECT USI.*
+        FROM UNP_SALE_ITEM USI
+        LEFT JOIN UNP_SALE US ON US.SALE_ORDER_NO = USI.SALE_ORDER_NO
+        LEFT JOIN UNP_BUY UB ON UB.SALE_ORDER_NO = USI.SALE_ORDER_NO
+        WHERE 1=1
+        <if test="saleOrderNo != null">
+            AND USI.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+        </if>
+        <if test="traNo != null">
+            AND US.TRA_NO = #{traNo,jdbcType=BIGINT}
+        </if>
+        <if test="changeType != null">
+            AND USI.CHANGE_TYPE = #{changeType,jdbcType=INTEGER}
+        </if>
+        <if test="thirdBusNo != null">
+            AND UB.THIRD_BUS_NO = #{thirdBusNo,jdbcType=BIGINT}
+        </if>
+        <if test="buyOrderNo != null">
+            AND UB.BUY_ORDER_NO=#{buyOrderNo,jdbcType=BIGINT}
+        </if>
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from UNP_SALE_ITEM
+    where ITEM_ID = #{itemId,jdbcType=BIGINT}
+  </delete>
+    <insert id="insert" parameterType="com.tempus.gss.product.unp.api.entity.UnpSaleItem">
+    insert into UNP_SALE_ITEM (ITEM_ID, SALE_ORDER_NO, UNP_TYPE,
+      NUM, GROUP_AMOUNT, ITEM_STATUS,
+      CHANGE_TYPE, POLICY, ADDITIONAL_INFO,
+      VALID)
+    values (#{itemId,jdbcType=BIGINT}, #{saleOrderNo,jdbcType=BIGINT}, #{unpType,jdbcType=INTEGER},
+      #{num,jdbcType=INTEGER}, #{groupAmount,jdbcType=DECIMAL}, #{itemStatus,jdbcType=INTEGER},
+      #{changeType,jdbcType=INTEGER}, #{policy,jdbcType=INTEGER}, #{additionalInfo,jdbcType=VARCHAR},
+      #{valid,jdbcType=INTEGER})
+  </insert>
+    <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpSaleItem">
+        insert into UNP_SALE_ITEM
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="itemId != null">
+                ITEM_ID,
+            </if>
+            <if test="saleOrderNo != null">
+                SALE_ORDER_NO,
+            </if>
+            <if test="unpType != null">
+                UNP_TYPE,
+            </if>
+            <if test="num != null">
+                NUM,
+            </if>
+            <if test="groupAmount != null">
+                GROUP_AMOUNT,
+            </if>
+            <if test="itemStatus != null">
+                ITEM_STATUS,
+            </if>
+            <if test="changeType != null">
+                CHANGE_TYPE,
+            </if>
+            <if test="policy != null">
+                POLICY,
+            </if>
+            <if test="additionalInfo != null">
+                ADDITIONAL_INFO,
+            </if>
+            <if test="valid != null">
+                VALID,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="itemId != null">
+                #{itemId,jdbcType=BIGINT},
+            </if>
+            <if test="saleOrderNo != null">
+                #{saleOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="unpType != null">
+                #{unpType,jdbcType=INTEGER},
+            </if>
+            <if test="num != null">
+                #{num,jdbcType=INTEGER},
+            </if>
+            <if test="groupAmount != null">
+                #{groupAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="itemStatus != null">
+                #{itemStatus,jdbcType=INTEGER},
+            </if>
+            <if test="changeType != null">
+                #{changeType,jdbcType=INTEGER},
+            </if>
+            <if test="policy != null">
+                #{policy,jdbcType=INTEGER},
+            </if>
+            <if test="additionalInfo != null">
+                #{additionalInfo,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                #{valid,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpSaleItem">
+        update UNP_SALE_ITEM
+        <set>
+            <if test="saleOrderNo != null">
+                SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="unpType != null">
+                UNP_TYPE = #{unpType,jdbcType=INTEGER},
+            </if>
+            <if test="num != null">
+                NUM = #{num,jdbcType=INTEGER},
+            </if>
+            <if test="groupAmount != null">
+                GROUP_AMOUNT = #{groupAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="itemStatus != null">
+                ITEM_STATUS = #{itemStatus,jdbcType=INTEGER},
+            </if>
+            <if test="changeType != null">
+                CHANGE_TYPE = #{changeType,jdbcType=INTEGER},
+            </if>
+            <if test="policy != null">
+                POLICY = #{policy,jdbcType=INTEGER},
+            </if>
+            <if test="additionalInfo != null">
+                ADDITIONAL_INFO = #{additionalInfo,jdbcType=VARCHAR},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=INTEGER},
+            </if>
+        </set>
+        where ITEM_ID = #{itemId,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.unp.api.entity.UnpSaleItem">
+        UPDATE UNP_SALE_ITEM
+        SET SALE_ORDER_NO   = #{saleOrderNo,jdbcType=BIGINT},
+            UNP_TYPE        = #{unpType,jdbcType=INTEGER},
+            NUM             = #{num,jdbcType=INTEGER},
+            GROUP_AMOUNT    = #{groupAmount,jdbcType=DECIMAL},
+            ITEM_STATUS     = #{itemStatus,jdbcType=INTEGER},
+            CHANGE_TYPE     = #{changeType,jdbcType=INTEGER},
+            POLICY          = #{policy,jdbcType=INTEGER},
+            ADDITIONAL_INFO = #{additionalInfo,jdbcType=VARCHAR},
+            VALID           = #{valid,jdbcType=INTEGER}
+        WHERE ITEM_ID = #{itemId,jdbcType=BIGINT}
+    </update>
+</mapper>

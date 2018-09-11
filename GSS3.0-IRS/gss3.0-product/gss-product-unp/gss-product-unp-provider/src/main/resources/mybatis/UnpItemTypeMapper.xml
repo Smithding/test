@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.unp.dao.UnpItemTypeMapper">
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.unp.api.entity.UnpItemType">
+        <id column="ITEM_TYPE_NO" jdbcType="BIGINT" property="itemTypeNo"/>
+        <result column="OWNER" jdbcType="INTEGER" property="owner"/>
+        <result column="GROUP_CODE" jdbcType="VARCHAR" property="groupCode"/>
+        <result column="GROUP_NAME" jdbcType="VARCHAR" property="groupName"/>
+        <result column="CODE" jdbcType="VARCHAR" property="code"/>
+        <result column="NAME" jdbcType="VARCHAR" property="name"/>
+        <result column="IMG" jdbcType="VARCHAR" property="img"/>
+        <result column="BASE_AMOUNT" jdbcType="DECIMAL" property="baseAmount"/>
+        <result column="SORT_NO" jdbcType="INTEGER" property="sortNo"/>
+        <result column="VALID" jdbcType="INTEGER" property="valid"/>
+        <result column="REMARK" jdbcType="VARCHAR" property="remark"/>
+        <result column="CREATOR" jdbcType="VARCHAR" property="creator"/>
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="MODIFIER" jdbcType="VARCHAR" property="modifier"/>
+        <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        ITEM_TYPE_NO, OWNER, GROUP_CODE, GROUP_NAME, CODE, NAME, IMG, BASE_AMOUNT,SORT_NO, VALID, REMARK,
+        CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_ITEM_TYPE
+        where ITEM_TYPE_NO = #{itemTypeNo,jdbcType=BIGINT}
+    </select>
+    <select id="selectByCode" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_ITEM_TYPE
+        where CODE = #{code,jdbcType=VARCHAR}
+    </select>
+    <select id="queryAllItems" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM UNP_ITEM_TYPE
+        WHERE
+        VALID='1'
+    </select>
+    <select id="queryItems" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpGroupItemVo" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM UNP_ITEM_TYPE
+        WHERE 1=1
+        <if test="owner!=null and ''!=owner">
+            AND OWNER = #{owner,jdbcType=INTEGER}
+        </if>
+        <if test="code!=null and code!=''">
+            AND GROUP_CODE like concat('%',concat(#{code,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="name!=null and name!=''">
+            AND GROUP_NAME like concat('%',concat(#{name,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="itemCode!=null and ''!=itemCode">
+            AND CODE like concat('%',concat(#{itemCode,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="itemName!=null and ''!=itemName">
+            AND NAME like concat('%',concat(#{itemName,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="baseAmount!=null and baseAmount!=''">
+            AND BASE_AMOUNT = #{baseAmount,jdbcType=DECIMAL}
+        </if>
+        <if test="valid!=null and valid!=''">
+            AND VALID = #{valid,jdbcType=INTEGER}
+        </if>
+        <if test="creator!=null and ''!=creator">
+            AND CREATOR like concat('%',concat(#{creator,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="createTimeStart!=null and ''!=createTimeStart">
+            AND CREATE_TIME <![CDATA[>=]]> CONCAT(#{createTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="createTimeEnd!=null and ''!=createTimeEnd">
+            AND CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+        </if>
+        <if test="modifier!=null and ''!=modifier">
+            AND MODIFIER like concat(concat('%',#{modifier,jdbcType=VARCHAR}),'%')
+        </if>
+        <if test="modifyTimeStart!=null and ''!=modifyTimeStart">
+            AND MODIFY_TIME <![CDATA[>=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="modifyTimeEnd!=null and ''!=modifyTimeEnd">
+            AND MODIFY_TIME <![CDATA[<=]]> CONCAT(#{modifyTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+        </if>
+        ORDER BY CREATE_TIME DESC
+    </select>
+    <select id="queryItemsByUncertainFactors" parameterType="java.lang.String" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM UNP_ITEM_TYPE
+        <if test="param!=null and param!=''">
+            WHERE NAME LIKE concat('%',concat(#{param,jdbcType=VARCHAR},'%')) OR CODE LIKE concat('%',concat(#{param,jdbcType=VARCHAR},'%')) OR
+            GROUP_CODE LIKE concat('%',concat(#{param,jdbcType=VARCHAR},'%')) OR GROUP_NAME LIKE
+            concat('%',concat(#{param,jdbcType=VARCHAR},'%'))
+        </if>
+        ORDER BY CREATE_TIME DESC
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from UNP_ITEM_TYPE
+        where ITEM_TYPE_NO = #{itemTypeNo,jdbcType=BIGINT}
+    </delete>
+    <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpItemType">
+        insert into UNP_ITEM_TYPE
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="itemTypeNo != null">
+                ITEM_TYPE_NO,
+            </if>
+            <if test="owner != null">
+                OWNER,
+            </if>
+            <if test="groupCode != null">
+                GROUP_CODE,
+            </if>
+            <if test="groupName != null">
+                GROUP_NAME,
+            </if>
+            <if test="code != null">
+                CODE,
+            </if>
+            <if test="name != null">
+                NAME,
+            </if>
+            <if test="img != null">
+                IMG,
+            </if>
+            <if test="baseAmount != null">
+                BASE_AMOUNT,
+            </if>
+            <if test="sortNo != null">
+                SORT_NO,
+            </if>
+            <if test="valid != null">
+                VALID,
+            </if>
+            <if test="remark != null">
+                REMARK,
+            </if>
+            <if test="creator != null">
+                CREATOR,
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME,
+            </if>
+            <if test="modifier != null">
+                MODIFIER,
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="itemTypeNo != null">
+                #{itemTypeNo,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null">
+                #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="groupCode != null">
+                #{groupCode,jdbcType=VARCHAR},
+            </if>
+            <if test="groupName != null">
+                #{groupName,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null">
+                #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="img != null">
+                #{img,jdbcType=VARCHAR},
+            </if>
+            <if test="baseAmount != null">
+                #{baseAmount,jdbcType=VARCHAR},
+            </if>
+            <if test="sortNo != null">
+                #{sortNo,jdbcType=INTEGER},
+            </if>
+            <if test="valid != null">
+                #{valid,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="creator != null">
+                #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifier != null">
+                #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpItemType">
+        update UNP_ITEM_TYPE
+        <set>
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="groupCode != null">
+                GROUP_CODE = #{groupCode,jdbcType=VARCHAR},
+            </if>
+            <if test="groupName != null">
+                GROUP_NAME = #{groupName,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null">
+                CODE = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                NAME = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="img != null">
+                IMG = #{img,jdbcType=VARCHAR},
+            </if>
+            <if test="baseAmount != null">
+                BASE_AMOUNT = #{baseAmount,jdbcType=VARCHAR},
+            </if>
+            <if test="sortNo != null">
+                SORT_NO = #{sortNo,jdbcType=INTEGER},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null">
+                REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="creator != null">
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifier != null">
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where ITEM_TYPE_NO = #{itemTypeNo,jdbcType=BIGINT}
+    </update>
+    <update id="updateSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpItemType">
+        update UNP_ITEM_TYPE
+        <set>
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="groupCode != null">
+                GROUP_CODE = #{groupCode,jdbcType=VARCHAR},
+            </if>
+            <if test="groupName != null">
+                GROUP_NAME = #{groupName,jdbcType=VARCHAR},
+            </if>
+            <if test="code != null">
+                CODE = #{code,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null">
+                NAME = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="img != null">
+                IMG = #{img,jdbcType=VARCHAR},
+            </if>
+            <if test="baseAmount != null">
+                BASE_AMOUNT = #{baseAmount,jdbcType=VARCHAR},
+            </if>
+            <if test="sortNo != null">
+                SORT_NO = #{sortNo,jdbcType=INTEGER},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=INTEGER},
+            </if>
+            <if test="remark != null">
+                REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="creator != null">
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifier != null">
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where 1=1
+        <if test="groupCode != null">
+            AND GROUP_CODE = #{groupCode,jdbcType=VARCHAR}
+        </if>
+        <if test="groupCode != null">
+            AND ITEM_TYPE_NO = #{itemTypeNo,jdbcType=BIGINT}
+        </if>
+        <if test="groupName != null">
+            AND GROUP_NAME = #{groupName,jdbcType=VARCHAR}
+        </if>
+        <if test="code != null">
+            AND CODE = #{code,jdbcType=VARCHAR}
+        </if>
+        <if test="name != null">
+            AND NAME = #{name,jdbcType=VARCHAR}
+        </if>
+        <if test="valid != null">
+            AND VALID = #{valid,jdbcType=INTEGER}
+        </if>
+        <if test="creator != null">
+            AND CREATOR = #{creator,jdbcType=VARCHAR}
+        </if>
+        <if test="createTimeStart!=null and ''!=createTimeStart">
+            AND CREATE_TIME <![CDATA[>=]]> CONCAT(#{createTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="createTimeEnd!=null and ''!=createTimeEnd">
+            AND CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+        </if>
+        <if test="modifier!=null and ''!=modifier">
+            AND MODIFIER = #{modifier,jdbcType=VARCHAR}
+        </if>
+        <if test="modifyTimeStart!=null and ''!=modifyTimeStart">
+            AND MODIFY_TIME <![CDATA[>=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="modifyTimeEnd!=null and ''!=modifyTimeEnd">
+            AND MODIFY_TIME <![CDATA[<=]]> CONCAT(#{modifyTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+        </if>
+    </update>
+</mapper>

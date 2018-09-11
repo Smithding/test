@@ -473,19 +473,23 @@ public class FlagInfoExcelUtils{
 	       				resultflag = false;
 	       			}
 	       		 }
-	       		 //数字校验
-	       		 if(field.isAnnotationPresent(IsNum.class)){
-	       			IsNum annotationIsNum = field.getAnnotation(IsNum.class);
-	       			boolean handelIsNum = handelIsNum(formatValue);
-	       			if(!handelIsNum){
-	       				if(StringUtils.isEmpty(annotationIsNum.message())){
-	       					errorMsg.append(addErrMsg(currRowIndex+1,c+1,"不是数字格式"));
-	       				}else{
-	       					errorMsg.append(addErrMsg(currRowIndex+1,c+1,annotationIsNum.message()));
-	       				}
-	       				resultflag = false;
-	       			}
-	       		 }
+				//数字校验
+				if(field.isAnnotationPresent(IsNum.class)){
+					IsNum annotationIsNum = field.getAnnotation(IsNum.class);
+					boolean handelIsNum = handelIsNum2(formatValue);
+					if (!handelIsNum) {
+						formatValue = "0";
+					}
+					handelIsNum = handelIsNum(formatValue);
+					if(!handelIsNum){
+						if(StringUtils.isEmpty(annotationIsNum.message())){
+							errorMsg.append(addErrMsg(currRowIndex+1,c+1,"不是数字格式"));
+						}else{
+							errorMsg.append(addErrMsg(currRowIndex+1,c+1,annotationIsNum.message()));
+						}
+						resultflag = false;
+					}
+				}
 	       		 //中文校验
 	       		 if(field.isAnnotationPresent(IsChinese.class)){
 	       			IsChinese annotationIsChinese = field.getAnnotation(IsChinese.class);
@@ -678,6 +682,13 @@ public class FlagInfoExcelUtils{
 		    if(formatValue == null){return true;}
 	        return Pattern.compile("^([+-]?)\\d*\\.?\\d+$").matcher(formatValue.toString()).matches();
 	 }
+	private boolean  handelIsNum2(Object formatValue){
+		if(formatValue == null || "".equals(String.valueOf(formatValue))){
+			return false;
+		}
+		return true;
+		//return Pattern.compile("^([+-]?)\\d*\\.?\\d+$").matcher(formatValue.toString()).matches();
+	}
 	 
 	 /**
 	  * 验证手机号
@@ -800,11 +811,17 @@ public class FlagInfoExcelUtils{
 			   //公式生成类型 
 			   case Cell.CELL_TYPE_FORMULA:
 				    //导入时如果为公式生成的数据则无值 
-				    if(!cell.getStringCellValue().equals("")){ 
+				   ////这样对于字符串cell.getStringCellValue()方法即可取得其值，如果公式生成的是数值，使用cell.getStringCellValue()方法会抛出IllegalStateException异常，在异常处理中使用cell.getNumericCellValue();即可
+				    /*if(!cell.getStringCellValue().equals("")){ 
 				    	value = cell.getStringCellValue(); 
 				    }else{ 
 				    	value = cell.getNumericCellValue(); 
-				    } 
+				    } */
+				   try {
+					   value = cell.getStringCellValue();
+				   } catch (IllegalStateException e) {
+					   value = cell.getNumericCellValue();
+				   }
 				    break; 
 			   //空白 
 			   case Cell.CELL_TYPE_BLANK:

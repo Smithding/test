@@ -3,9 +3,11 @@ package com.tempus.gss.product.ift.api.entity;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.tempus.gss.serializer.LongSerializer;
+import com.tempus.tbe.entity.NucFareInfo;
 
 /**
  * Created by 杨威 on 2016/10/18.
@@ -94,8 +96,27 @@ public class PassengerTypePricesTotal implements Serializable {
 	 * 税费集合.
 	 */
 	private HashMap<String,BigDecimal> taxs;
+	/**
+	 * NUC
+	 */
+	private List<NucFareInfo> nucFareInfos;
+	/**
+	 * 直减价格
+	 */
+    private BigDecimal oneWayPrivilege;
+    public List<NucFareInfo> getNucFareInfos() {
+		return nucFareInfos;
+	}
+	public void setNucFareInfos(List<NucFareInfo> nucFareInfos) {
+		this.nucFareInfos = nucFareInfos;
+	}
+	public BigDecimal getOneWayPrivilege() {
+		return oneWayPrivilege;
+	}
 
-
+	public void setOneWayPrivilege(BigDecimal oneWayPrivilege) {
+		this.oneWayPrivilege = oneWayPrivilege;
+	}
 
 	@JsonSerialize(using = LongSerializer.class)
 	private long priceNo;

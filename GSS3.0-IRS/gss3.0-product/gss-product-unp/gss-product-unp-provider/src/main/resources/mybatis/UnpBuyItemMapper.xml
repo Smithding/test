@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tempus.gss.product.unp.dao.UnpBuyItemMapper">
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.unp.api.entity.UnpBuyItem">
+        <id column="ITEM_ID" jdbcType="BIGINT" property="itemId"/>
+        <result column="BUY_ORDER_NO" jdbcType="BIGINT" property="buyOrderNo"/>
+        <result column="UNP_TYPE" jdbcType="INTEGER" property="unpType"/>
+        <result column="PNUM" jdbcType="INTEGER" property="num"/>
+        <result column="CHANGE_TYPE" jdbcType="INTEGER" property="changeType"/>
+        <result column="GROUP_AMOUNT" jdbcType="DECIMAL" property="groupAmount"/>
+        <result column="ITEM_STATUS" jdbcType="INTEGER" property="itemStatus"/>
+        <result column="POLICY" jdbcType="INTEGER" property="policy"/>
+        <result column="VALID" jdbcType="INTEGER" property="valid"/>
+        <result column="SALE_ITEM_NO" jdbcType="BIGINT" property="saleItemNo"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        ITEM_ID, BUY_ORDER_NO, UNP_TYPE, PNUM, CHANGE_TYPE, GROUP_AMOUNT, ITEM_STATUS, POLICY,
+        VALID,SALE_ITEM_NO
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_BUY_ITEM
+        where ITEM_ID = #{itemId,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from UNP_BUY_ITEM
+        where ITEM_ID = #{itemId,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyItem">
+        insert into UNP_BUY_ITEM (ITEM_ID, BUY_ORDER_NO, UNP_TYPE,
+          PNUM, CHANGE_TYPE, GROUP_AMOUNT,
+        ITEM_STATUS, POLICY, VALID)
+        values (#{itemId,jdbcType=BIGINT}, #{buyOrderNo,jdbcType=BIGINT}, #{unpType,jdbcType=INTEGER},
+        #{num,jdbcType=INTEGER}, #{changeType,jdbcType=INTEGER}, #{groupAmount,jdbcType=DECIMAL},
+        #{itemStatus,jdbcType=BIT}, #{policy,jdbcType=INTEGER}, #{valid,jdbcType=INTEGER})
+    </insert>
+    <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyItem">
+        insert into UNP_BUY_ITEM
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="itemId != null">
+                ITEM_ID,
+            </if>
+            <if test="buyOrderNo != null">
+                BUY_ORDER_NO,
+            </if>
+            <if test="unpType != null">
+                UNP_TYPE,
+            </if>
+            <if test="num != null">
+                PNUM,
+            </if>
+            <if test="changeType != null">
+                CHANGE_TYPE,
+            </if>
+            <if test="groupAmount != null">
+                GROUP_AMOUNT,
+            </if>
+            <if test="itemStatus != null">
+                ITEM_STATUS,
+            </if>
+            <if test="policy != null">
+                POLICY,
+            </if>
+            <if test="valid != null">
+                VALID,
+            </if>
+            <if test="saleItemNo !=null">
+                SALE_ITEM_NO
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="itemId != null">
+                #{itemId,jdbcType=BIGINT},
+            </if>
+            <if test="buyOrderNo != null">
+                #{buyOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="unpType != null">
+                #{unpType,jdbcType=INTEGER},
+            </if>
+            <if test="num != null">
+                #{num,jdbcType=INTEGER},
+            </if>
+            <if test="changeType != null">
+                #{changeType,jdbcType=INTEGER},
+            </if>
+            <if test="groupAmount != null">
+                #{groupAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="itemStatus != null">
+                #{itemStatus,jdbcType=BIT},
+            </if>
+            <if test="policy != null">
+                #{policy,jdbcType=INTEGER},
+            </if>
+            <if test="valid != null">
+                #{valid,jdbcType=INTEGER},
+            </if>
+            <if test="saleItemNo != null">
+                #{saleItemNo,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyItem">
+        update UNP_BUY_ITEM
+        <set>
+            <if test="buyOrderNo != null">
+                BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="unpType != null">
+                UNP_TYPE = #{unpType,jdbcType=INTEGER},
+            </if>
+            <if test="num != null">
+                PNUM = #{num,jdbcType=INTEGER},
+            </if>
+            <if test="changeType != null">
+                CHANGE_TYPE = #{changeType,jdbcType=INTEGER},
+            </if>
+            <if test="groupAmount != null">
+                GROUP_AMOUNT = #{groupAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="itemStatus != null">
+                ITEM_STATUS = #{itemStatus,jdbcType=BIT},
+            </if>
+            <if test="policy != null">
+                POLICY = #{policy,jdbcType=INTEGER},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=INTEGER},
+            </if>
+        </set>
+        where ITEM_ID = #{itemId,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyItem">
+        UPDATE UNP_BUY_ITEM
+        SET BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT},
+            UNP_TYPE     = #{unpType,jdbcType=INTEGER},
+            NUM          = #{num,jdbcType=INTEGER},
+            CHANGE_TYPE  = #{changeType,jdbcType=INTEGER},
+            GROUP_AMOUNT = #{groupAmount,jdbcType=DECIMAL},
+            ITEM_STATUS  = #{itemStatus,jdbcType=BIT},
+            POLICY       = #{policy,jdbcType=INTEGER},
+            VALID        = #{valid,jdbcType=INTEGER}
+        WHERE ITEM_ID = #{itemId,jdbcType=BIGINT}
+    </update>
+    <select id="selectItemsByParams" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_BUY_ITEM
+        where 1=1
+        <if test="buyOrderNo != null">
+            AND BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
+        </if>
+        <if test="unpType != null">
+            AND UNP_TYPE = #{unpType,jdbcType=INTEGER}
+        </if>
+        <if test="num != null">
+            AND PNUM = #{num,jdbcType=INTEGER}
+        </if>
+        <if test="changeType != null">
+            AND CHANGE_TYPE = #{changeType,jdbcType=INTEGER}
+        </if>
+        <if test="groupAmount != null">
+            AND GROUP_AMOUNT = #{groupAmount,jdbcType=DECIMAL}
+        </if>
+        <if test="itemStatus != null">
+            AND ITEM_STATUS = #{itemStatus,jdbcType=BIT}
+        </if>
+        <if test="policy != null">
+            AND POLICY = #{policy,jdbcType=INTEGER}
+        </if>
+        <if test="valid != null">
+            AND VALID = #{valid,jdbcType=INTEGER}
+        </if>
+    </select>
+    <select id="selectCompletedByBuyOrderNo" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_BUY_ITEM
+        where BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
+        AND ITEM_STATUS='3'
+        AND CHANGE_TYPE=0
+    </select>
+    <select id="selectRefundByBuyOrderNo" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_BUY_ITEM
+        where BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
+        AND ITEM_STATUS IN (1,3)
+        AND CHANGE_TYPE=1
+    </select>
+    <select id="selectItems" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT  UBI.*, USI.ADDITIONAL_INFO
+        FROM UNP_BUY_ITEM              UBI
+         LEFT JOIN UNP_SALE_ITEM USI ON USI.ITEM_ID = UBI.SALE_ITEM_NO
+        WHERE  BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
+    </select>
+</mapper>
