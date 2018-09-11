@@ -1,7 +1,9 @@
 package com.tempus.gss.product.ift.service.search;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
+import com.tempus.gss.bbp.util.DateUtil;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
 import com.tempus.gss.product.ift.api.entity.policy.IftFlightPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
@@ -116,6 +118,18 @@ public class OrderPolicyUtils {
 	  
 		/** 备注 */
 		flightPolicy.setRemark(policy.getRemark());
+		
+		String day = DateUtil.getDayOfWeek(new Date(), 0);
+		if(day.endsWith("6")){
+			/** 平时开票时间（星期一至星期五），例:00:00-23:59 */
+			flightPolicy.setTicketDate(policy.getSatTicketDate());
+		}else if(day.endsWith("7")){
+			/** 平时开票时间（星期一至星期五），例:00:00-23:59 */
+			flightPolicy.setTicketDate(policy.getSunTicketDate());
+		}else{
+			/** 平时开票时间（星期一至星期五），例:00:00-23:59 */
+			flightPolicy.setTicketDate(policy.getTicketDate());
+		}
 		return flightPolicy;
 	}
 }
