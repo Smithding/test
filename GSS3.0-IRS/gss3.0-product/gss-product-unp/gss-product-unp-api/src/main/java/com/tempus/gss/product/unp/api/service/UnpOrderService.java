@@ -64,7 +64,7 @@ public interface UnpOrderService {
      *         UnpOrderCreateVo
      * @return UnpResult
      */
-    UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpCreateOrderRefund request);
+    UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpOrderCreateVo request);
     
     /** <<<<<<<<<<<<<<<<<<<<<<<【CREATE】【UPDATE】>>>>>>>>>>>>>>>>>>>>>>> */
     

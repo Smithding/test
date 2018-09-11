@@ -5,11 +5,9 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
+import com.tempus.gss.dps.order.entity.buy.BuyItem;
 import com.tempus.gss.exception.GSSException;
-import com.tempus.gss.order.entity.BuyOrder;
-import com.tempus.gss.order.entity.PlanAmountRecord;
-import com.tempus.gss.order.entity.SaleOrder;
-import com.tempus.gss.order.entity.TransationOrder;
+import com.tempus.gss.order.entity.*;
 import com.tempus.gss.order.entity.enums.*;
 import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
 import com.tempus.gss.order.service.*;
@@ -86,7 +84,8 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     private UnpBuyRefundItemMapper unpBuyRefundItemMapper;
     @Reference
     IBuyOrderService buyOrderService;
-    
+    @Reference
+    IBuyChangeService buyChangeService;
     @Override
     public UnpSale getSaleOrderInfo(UnpOrderVo params) {
         UnpSale unpSale = null;
@@ -411,90 +410,102 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
-    public UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpCreateOrderRefund request) {
+    public UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpOrderCreateVo request) {
+        this.createValid(request, VALID_TYPE_SALE_REFUND);
         logger.info("创建采购退单开始");
-        if (agent == null) {
-            logger.error("创建采购退单失败[]", "agent不能为null");
-        }
-        if (request == null) {
-            logger.error("创建采购退单失败[]", "request不能为null");
-        }
-        if (request.getUnpBuyRefund() == null) {
-            logger.error("创建采购退单失败[]", "npBuyU不能为null");
-        }
-        
-        if (request.getUnpBuyRefundItemList() == null) {
-            logger.error("采购订单更新失败[]", "buyItems不能为null");
-        }
-        UnpBuyRefund unpBuyRefund = null;
-        List<UnpBuyRefundItem> unpBuyRefundItemList = null;
+        UnpBuyRefund unpBuyRefund = new UnpBuyRefund();
+        UnpBuyRefundItem unpBuyRefundItem= new UnpBuyRefundItem();
+        List<UnpBuyItem> buyItems = request.getBuyItems();
         UnpResult<UnpBuyRefund> unpResult = new UnpResult();
         BigDecimal planAmount = new BigDecimal(0);
-        String productName = "";
+        String productName = "通用产品";
+        List<String> goods = new ArrayList<>();
+
         try {
-            Long buyRefundOrderNo = this.getUnpNo(PREFIX_SALE_REFUND);
-            List<UnpItemType> unpItemTypes = unpItemTypeService.queryAllUnpItemType();
-            Long businessSignNo = IdWorker.getId();
-            unpBuyRefundItemList = request.getUnpBuyRefundItemList();
-            for (UnpBuyRefundItem unpBuyRefundItem : unpBuyRefundItemList) {
+            //获取采购单信息
+            UnpBuy unpBuy = unpBuyMapper.selectByPrimaryKey(request.getUnpBuy().getBuyOrderNo());
+            if (unpBuy == null){
+                throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购单不存在");
+            }
+            Long buyRefundOrderNo = this.getUnpNo(PREFIX_BUY_REFUND);
+            unpBuyRefund.setBuyRefundOrderNo(buyRefundOrderNo);
+            unpBuyRefund.setBuyOrderNo(unpBuy.getBuyOrderNo());
+            unpBuyRefund.setOwner(unpBuy.getOwner());
+            unpBuyRefund.setSupplierType(unpBuy.getSupplierType());
+            unpBuyRefund.setSupplierId(unpBuy.getSupplierId());
+            unpBuyRefund.setRemark(request.getUnpBuy().getRemark());
+            unpBuyRefund.setTraNo(unpBuyRefund.getTraNo());
+            unpBuyRefund.setChangeType(EUnpConstant.ChangeType.REFUND.getKey());
+            unpBuyRefund.setThirdBusNo(unpBuy.getThirdBusNo());
+            unpBuyRefund.setPayStatus(unpBuy.getPayStatus());
+            unpBuyRefund.setStatus(EUnpConstant.OrderStatus.READY.getKey());
+            unpBuyRefund.setCreator(agent.getAccount());
+            unpBuyRefund.setCreateTime(new Date());
+            for (UnpBuyItem buyItem : buyItems) {
+                if (buyItem.getItemId()==null){
+                    throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购明细单编号不能为空");
+                }
+                UnpBuyItem unpBuyItem = unpBuyItemMapper.selectByPrimaryKey(buyItem.getItemId());
+                UnpItemType unpItemType = itemTypeMapper.selectByPrimaryKey(unpBuyItem.getUnpType());
+                goods.add(unpItemType.getName());
+                planAmount=planAmount.add(unpBuyItem.getGroupAmount());
+                unpBuyRefundItem.setItemId(IdWorker.getId());
                 unpBuyRefundItem.setBuyRefundOrderNo(buyRefundOrderNo);
-                unpBuyRefundItem.setItemStatus(1);
-                planAmount = planAmount.add(unpBuyRefundItem.getGroupAmount());
-                unpBuyRefundItemMapper.insertSelective(unpBuyRefundItem);
-                for (UnpItemType unpItemType : unpItemTypes) {
-                    if (unpItemType.getItemTypeNo().equals(unpBuyRefundItem.getUnpType())) {
-                        productName += unpItemType.getName() + ",";
-                        break;
-                    }
+                unpBuyRefundItem.setUnpType(GoodsBigType.GENERAL.getKey());
+                unpBuyRefundItem.setNum(buyItem.getNum());
+                unpBuyRefundItem.setChangeType(EUnpConstant.ChangeType.REFUND.getKey());
+                unpBuyRefundItem.setGroupAmount(buyItem.getGroupAmount());
+                unpBuyRefundItem.setItemStatus(EUnpConstant.OrderStatus.READY.getKey());
+                int unpBuyRefundItemMapperRecord= unpBuyRefundItemMapper.insertSelective(unpBuyRefundItem);
+                if (unpBuyRefundItemMapperRecord<0){
+                    throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "明细列表中 小类【" +unpBuyRefundItem .getUnpType() + "】创建失败");
                 }
             }
-            //更新unp_buy_refund
-            unpBuyRefund = request.getUnpBuyRefund();
-            unpBuyRefund.setBuyOrderNo(buyRefundOrderNo);
-            unpBuyRefund.setCreator(agent.getAccount());
-            unpBuyRefund.setModifier(agent.getAccount());
-            unpBuyRefund.setOwner(agent.getOwner());
+            //创建 refund 主表
             unpBuyRefund.setRefundAmount(planAmount);
-            unpBuyRefund.setCreateTime(new Date());
-            unpBuyRefund.setModifyTime(new Date());
-            unpBuyRefund.setValid(1);//有效
-            unpBuyRefund.setStatus(1);//待处理
-            unpBuyRefund.setPayStatus(1);//待支付
-            unpBuyRefundMapper.insertSelective(unpBuyRefund);
-            //创建os_buy 主单记录
-            BuyOrder buyOrder = new BuyOrder();
-            buyOrder.setOwner(agent.getOwner());
-            buyOrder.setBuyOrderNo(unpBuyRefund.getBuyOrderNo());
-            buyOrder.setGoodsType(9);//通用产品
-            buyOrder.setGoodsSubType(3);//采购单
-            buyOrder.setGoodsName(productName);
-            buyOrder.setSupplierTypeNo(unpBuyRefund.getSupplierType());
-            buyOrder.setSupplierNo(unpBuyRefund.getSupplierId());
-            buyOrder.setBusinessSignNo(businessSignNo);
-            buyOrder.setBuyChannelNo("UNP");
-            buyOrder.setBsignType(1);//销采
-            buyOrder.setBuyChildStatus(1);//待处理
-            buyOrder.setPayable(planAmount);
-            buyOrderService.create(agent, buyOrder);
+            if (unpBuyRefundMapper.insertSelective(unpBuyRefund)<0) {
+                throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "退单创建失败");
+            }
+            //创建os_buyChange主单记录
+            BuyChange buyChange = new BuyChange();
+            buyChange.setBuyChangeNo(unpBuyRefund.getBuyRefundOrderNo());
+            buyChange.setOwner(agent.getOwner());
+            buyChange.setBusinessSignNo(IdWorker.getId());
+            buyChange.setBuyOrderNo(unpBuyRefund.getBuyOrderNo());
+            buyChange.setOrderChangeType(ChangeType.RETREAT.getKey());
+            buyChange.setIncomeExpenseType(IncomeExpenseType.INCOME.getKey());
+            buyChange.setChangeReason(unpBuyRefund.getRemark());
+            buyChange.setPayStatus(PayStatus.NO_PAYMENT.getKey());
+            buyChange.setStatus(BSignType.REFUND.getKey());
+            buyChange.setChildStatus(unpBuyRefund.getStatus());
+            buyChange.setCreateTime(unpBuyRefund.getCreateTime());
+            buyChange.setGoodsType(GoodsBigType.GENERAL.getKey());
+            buyChange.setGoodsSubType(EgoodsSubType.BUY_RETREAT.getKey());
+            buyChange.setGoodsName(productName + ":" + String.join(",", goods));
+            buyChange.setBsignType(BSignType.REFUND.getKey());
+            BuyChange buyChange1 = buyChangeService.create(agent, buyChange);
+            if (buyChange1==null){
+                throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "os退单创建失败");
+            }
             //创建应收
             CreatePlanAmountVO planAmountRecordType = new CreatePlanAmountVO();
-            planAmountRecordType.setRecordNo(unpBuyRefund.getBuyOrderNo());
-            planAmountRecordType.setIncomeExpenseType(1);//收支类型 1 收，2 为支
-            planAmountRecordType.setBusinessType(BusinessType.BUYORDER.getKey());
+            planAmountRecordType.setRecordNo(unpBuyRefund.getBuyRefundOrderNo());
+            planAmountRecordType.setIncomeExpenseType(IncomeExpenseType.INCOME.getKey());//收支类型 1 收，2 为支
+            planAmountRecordType.setBusinessType(BusinessType.BUYCHANGE.getKey());
             planAmountRecordType.setRecordMovingType(CostType.FARE.getKey());
             planAmountRecordType.setPlanAmount(planAmount);//合计
             //商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送 9 通用产品
             planAmountRecordType.setGoodsType(GoodsBigType.GENERAL.getKey());
-            planAmountRecordService.create(agent, planAmountRecordType);
-            unpResult.setCode(1);
-            unpResult.setMsg("创建采购退单成功");
-            unpResult.setEntity(unpBuyRefund);
+            PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, planAmountRecordType);
+            if (planAmountRecord == null){
+                throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "退单创建退款应付失败");
+            }
+            unpResult.success("创建采购退单成功",unpBuyRefund);
             logger.info("创建采购退单结束");
         } catch (com.tempus.gss.system.service.GSSException e) {
-            unpResult.setCode(1);
-            unpResult.setMsg("创建采购退单失败");
-            unpResult.setEntity(unpBuyRefund);
+            unpResult.failed("创建采购退单失败",unpBuyRefund);
             logger.error("创建采购退单失败", e);
+            return unpResult;
         }
         return unpResult;
     }
@@ -513,9 +524,11 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             if (NullableCheck.isNullOrEmpty(createVo.getUnpBuy().getBuyAccount())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购付款账号 不能为空");}
             if (NullableCheck.isNullOrEmpty(createVo.getBuyItems())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购明细 至少一条");}
         } else if (validType == VALID_TYPE_SALE_REFUND) {
-        
+
         } else if (validType == VALID_TYPE_BUY_REFUND) {
-        
+            if (NullableCheck.isNullOrEmpty(createVo.getUnpBuy())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购总单信息 不能为空");}
+            if (NullableCheck.isNullOrEmpty(createVo.getUnpBuy().getBuyOrderNo())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购总单单号 不能为空");}
+            if (NullableCheck.isNullOrEmpty(createVo.getBuyItems())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购明细 至少一条");}
         } else {
             throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "验证类型参数错误【1~5】");
         }
