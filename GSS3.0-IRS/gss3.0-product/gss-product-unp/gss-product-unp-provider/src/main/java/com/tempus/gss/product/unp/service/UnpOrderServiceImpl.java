@@ -86,7 +86,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     IBuyChangeService buyChangeService;
     @Reference
     ISaleChangeService saleChangeService;
-
+    
     @Override
     public UnpSale getSaleOrderInfo(UnpOrderQueryVo params) {
         UnpSale unpSale = null;
@@ -636,12 +636,13 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         }
         
     }
+    
     private void refundValid(UnpRefundVo refundVo, Integer validType) throws GSSException {
         if (validType == VALID_TYPE_ALL) {
         } else if (validType == VALID_TYPE_SALE) {
-
+        
         } else if (validType == VALID_TYPE_BUY) {
-
+        
         } else if (validType == VALID_TYPE_SALE_REFUND) {
             if (NullableCheck.isNullOrEmpty(refundVo.getUnpSaleRefund())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售总单信息 不能为空");}
             if (NullableCheck.isNullOrEmpty(refundVo.getUnpSaleRefund().getSaleOrderNo())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售总单单号 不能为空");}
@@ -653,9 +654,9 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         } else {
             throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "验证类型参数错误【1~5】");
         }
-
+        
     }
-
+    
     @Override
     public Page<UnpSale> querySaleOrderList(Page<UnpSale> wrapper, UnpOrderQueryVo param) {
         if (null == wrapper) {
@@ -868,61 +869,51 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         }
         return unpBuyUnpResult;
     }
-
+    
     @Override
     public UnpResult<UnpSaleRefund> updateSale(Agent agent, UnpRefundVo request) {
-        this.refundValid(request,VALID_TYPE_SALE_REFUND);
+        this.refundValid(request, VALID_TYPE_SALE_REFUND);
         UnpResult<UnpSaleRefund> result = new UnpResult<>();
         UnpSaleRefund unpSaleRefund = request.getUnpSaleRefund();
         List<UnpSaleRefundItem> unpSaleRefundItemList = request.getUnpSaleRefundItemList();
-        unpSaleRefundItemList.forEach(item ->{
-            if (!item.getSaleRefundOrderNo().equals(unpSaleRefund.getSaleRefundOrderNo())){
+        unpSaleRefundItemList.forEach(item -> {
+            if (!item.getSaleRefundOrderNo().equals(unpSaleRefund.getSaleRefundOrderNo())) {
                 throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "只可修改当前大单下的明细单");
             }
-            if (unpSaleRefundItemMapper.updateByPrimaryKeySelective(item) <= 0){
+            if (unpSaleRefundItemMapper.updateByPrimaryKeySelective(item) <= 0) {
                 result.setMsg("销售明细单【" + item.getItemId() + "】修改失败");
             }
         });
         unpSaleRefund.setSaleRefundOrderNo(null);
         int i = unpSaleRefundMapper.updateByPrimaryKeySelective(unpSaleRefund);
-        if (i > 0){
+        if (i > 0) {
             logger.info("更新销售退单单成功:{}，开始更新OS销售退单", unpSaleRefund.getSaleRefundOrderNo());
-            saleChangeService.updateStatus(agent,unpSaleRefund.getSaleRefundOrderNo(),unpSaleRefund.getStatus());
+            saleChangeService.updateStatus(agent, unpSaleRefund.getSaleRefundOrderNo(), unpSaleRefund.getStatus());
         }
         return result;
     }
-
+    
     @Override
     public UnpResult<UnpBuyRefund> updateBuy(Agent agent, UnpRefundVo request) {
-        this.refundValid(request,VALID_TYPE_BUY_REFUND);
+        this.refundValid(request, VALID_TYPE_BUY_REFUND);
         UnpResult<UnpBuyRefund> result = new UnpResult<>();
         UnpBuyRefund unpBuyRefund = request.getUnpBuyRefund();
         List<UnpBuyRefundItem> unpBuyRefundItemList = request.getUnpBuyRefundItemList();
-        unpBuyRefundItemList.forEach(item ->{
-            if (!item.getBuyRefundOrderNo().equals(unpBuyRefund.getBuyRefundOrderNo())){
+        unpBuyRefundItemList.forEach(item -> {
+            if (!item.getBuyRefundOrderNo().equals(unpBuyRefund.getBuyRefundOrderNo())) {
                 throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "只可修改当前大单下的明细单");
             }
-            if (unpBuyRefundItemMapper.updateByPrimaryKeySelective(item) <= 0){
+            if (unpBuyRefundItemMapper.updateByPrimaryKeySelective(item) <= 0) {
                 result.setMsg("销售明细单【" + item.getItemId() + "】修改失败");
             }
         });
         unpBuyRefund.setBuyRefundOrderNo(null);
         int i = unpBuyRefundMapper.updateByPrimaryKeySelective(unpBuyRefund);
-        if (i> 0 ){
+        if (i > 0) {
             logger.info("更新销售退单单成功:{}，开始更新OS销售退单", unpBuyRefund.getBuyRefundOrderNo());
-            buyChangeService.updateStatus(agent,unpBuyRefund.getBuyRefundOrderNo(),unpBuyRefund.getStatus());
+            buyChangeService.updateStatus(agent, unpBuyRefund.getBuyRefundOrderNo(), unpBuyRefund.getStatus());
         }
         return result;
-    }
-
-    @Override
-    public UnpResult<UnpSaleRefund> updateSale(Agent agent, UnpRefundVo request) {
-        return null;
-    }
-    
-    @Override
-    public UnpResult<UnpBuyRefund> updateBuy(Agent agent, UnpRefundVo request) {
-        return null;
     }
     
     @Override
