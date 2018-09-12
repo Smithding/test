@@ -37,17 +37,12 @@ public class IftPolicyRuleUtils {
 	 * 检查产品是否符合航司
 	 * 
 	 * @param policy  待匹配的政策
-	 * @param airlines  航司集合
+	 * @param airline  航司
 	 * @return
 	 */
-	public boolean matcheAirline(IftPolicy policy, List<String> airlines) {
+	public boolean matcheAirline(IftPolicy policy, String airline) {
 		boolean result = true;
-		for(String airline : airlines){
-			result = policy.getAirline().equals(airline) || (StringUtils.isNotBlank(policy.getSuitAirline()) && policy.getSuitAirline().contains(airline));
-			if(!result){
-				break;
-			}
-		}
+		result = policy.getAirline().equals(airline) || (StringUtils.isNotBlank(policy.getSuitAirline()) && policy.getSuitAirline().contains(airline));
 		this.log(policy,result,"检查产品是否符合航司[matcheAirline]未通过");
 		return result;
 	}
@@ -166,7 +161,7 @@ public class IftPolicyRuleUtils {
 	 * 检查目的地缺口程
 	 * 
 	 * @param policy  待匹配的政策
-	 * @param isArnk  航线是否缺口
+	 * @param flightNos  航班号集合
 	 * @return
 	 */
 	public boolean matcheArnk(IftPolicy policy, boolean isArnk) {
@@ -198,13 +193,48 @@ public class IftPolicyRuleUtils {
 	 * 检查航程类型不适用
 	 * 
 	 * @param policy  待匹配的政策
-	 * @param borders 航程集合
+	 * @param legs 航程集合
 	 * @return
 	 */
-	public boolean matcheFlightType(IftPolicy policy, ArrayList<String> borders) {
+	public boolean matcheFlightType(IftPolicy policy, ArrayList<String> airlines, Integer flyType, Integer rtnType, boolean isOpen) {
 		boolean result = true;
-		if(borders.size() > 1 && StringUtils.isNotBlank(policy.getNotsuitPassengerType())){
+		if(StringUtils.isNotBlank(policy.getNotsuitPassengerType())){
+			/* 判断Add-on */
+			if(policy.getNotsuitPassengerType().contains("11")){
+				if(1 == flyType || 3 == flyType){
+					result = false; 
+				}
+				if(result && null != rtnType && (1 == rtnType || 3 == rtnType)){
+					result = false; 
+				}
+			}
 			
+			/* 判断境外中转 */
+			if(result && policy.getNotsuitPassengerType().contains("12")){
+				if(2 == flyType || 3 == flyType){
+					result = false; 
+				}
+				if(result && null != rtnType && (2 == rtnType || 3 == rtnType)){
+					result = false; 
+				}
+			}
+			
+			/* 判断OPEN */
+			if(result && policy.getNotsuitPassengerType().contains("13")){
+				if(isOpen){
+					result = false;
+				}
+			}
+			
+			/* 判断SPA */
+			if(result && policy.getNotsuitPassengerType().contains("14")){
+				for(String airline : airlines){
+					if(!this.matcheAirline(policy, airline)){
+						result = false;
+						break;
+					}
+				}
+			}
 		}
 		this.log(policy,result,"检查航程类型不适用[matcheFlightType]未通过");
 		return result;

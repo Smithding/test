@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
@@ -167,10 +168,16 @@ public class IftPolicyHelper {
 		ArrayList<String> rtnFlightNos = new ArrayList<>();//回程航班号集合
 		ArrayList<String> transitCabins = new ArrayList<>();//中转舱位集合
 		ArrayList<String> transitAirports = new ArrayList<>();//中转机场集合
-		ArrayList<String> borders = new ArrayList<>();//出发城市属于境内或境外集合 D境内，I境外
-		boolean isArnk = false; //是否缺口程
+		boolean isArnk = false;//是否缺口
+		int flyType = 0; //单程：0直飞 1Add-on 2境外中转 3Add-on+境外中转
+		int rtnType = 0; //往返：0直飞 1Add-on 2境外中转 3Add-on+境外中转
+		boolean isOpen = false; //是否open
 		
 		IftPolicyRuleUtils ruleUtils = new IftPolicyRuleUtils();
+		
+		if(null == legs.get(legs.size() -1).getDepTime()){
+			isOpen = true;
+		}
 		
 		if(1 == query.getVoyageType()){//单程
 			for(int i = 0; i < legs.size(); i++){
@@ -179,34 +186,21 @@ public class IftPolicyHelper {
 				cabins.add(leg.getCabin());
 				flightNos.add(leg.getFlightNo());
 				flyFlightNos.add(leg.getFlightNo());
-				try{
-					Country deparcountry = airportService.queryCountryByAirport(leg.getDepAirport());// 根据出发城市查询所属的国家
-					borders.add(deparcountry.getDomOrInt());
-				}catch(Exception e){
-					logger.info(leg.getDepAirport() + "基础数据获取到城市信息");
-				}
-				/* 获取是否缺口 */
-				if(!isArnk){
-					if(null == leg.getFlightNo()){
-						isArnk = true;
-					}
-				}
 				if(legs.size() > 1 && i > 0){
 					transitCabins.add(leg.getCabin());
 					transitAirports.add(leg.getDepAirport());
+					
+					/* 判断缺口 */
+					if(!isArnk){
+						if(StringUtils.isBlank(leg.getFlightNo())){
+							isArnk = true;
+						}
+					}
+					flyType = this.getFlyType(flyType, leg.getDepAirport());
 				}
 			}
-			iftPolicyList = Collections.filter(iftPolicyList, (iftPolicy) -> true
-//					&& ruleUtils.matcheAirline(iftPolicy, airlines)
-					&& ruleUtils.matcheDepartCabin(iftPolicy, cabins)
-					&& ruleUtils.matcheTransitCabin(iftPolicy, transitCabins) 
-					&& ruleUtils.matcheNotSuitTransitAirport(iftPolicy, transitAirports)
-					&& ruleUtils.matcheDepartSuitFlight(iftPolicy, flightNos)
-					&& ruleUtils.matcheNotSuitFlight(iftPolicy, flightNos) 
-					&& ruleUtils.matcheMixtrueCabin(iftPolicy, cabins)
-					&& ruleUtils.matcheFareBasis(iftPolicy, fareBasis) 
-					&& ruleUtils.matcheParpirce(iftPolicy, parPrice)
-					&& ruleUtils.matchedExclude(iftPolicy, query.getDepartAirport(), query.getArriveAirport()));
+			iftPolicyList = this.flyFilterPolicy(ruleUtils, iftPolicyList, airlines, cabins, rtnFlightNos, transitCabins, transitAirports, query, 
+					fareBasis, parPrice, isArnk, flyType, isOpen);
 		}else{//往返
 			ArrayList<Leg> flyLegs = new ArrayList<>(); //去程
 			ArrayList<Leg> rtnLegs = new ArrayList<>(); //回程
@@ -215,15 +209,8 @@ public class IftPolicyHelper {
 				airlines.add(leg.getAirline());
 				cabins.add(leg.getCabin());
 				flightNos.add(leg.getFlightNo());
-				try{
-					Country deparcountry = airportService.queryCountryByAirport(leg.getDepAirport());// 根据出发城市查询所属的国家
-					borders.add(deparcountry.getDomOrInt());
-				}catch(Exception e){
-					logger.info(leg.getDepAirport() + "基础数据获取到城市信息");
-				}
-				/* 获取是否缺口 */
 				if(!isArnk){
-					if(null == leg.getFlightNo()){
+					if(StringUtils.isBlank(leg.getFlightNo())){
 						isArnk = true;
 					}
 				}
@@ -240,6 +227,7 @@ public class IftPolicyHelper {
 					if(i > 0){
 						transitCabins.add(leg.getCabin());
 						transitAirports.add(leg.getDepAirport());
+						flyType = this.getFlyType(flyType, leg.getDepAirport());
 					}
 				}
 				for(int i = 0; i < rtnLegs.size(); i++){//遍历回程获取转机信息
@@ -248,26 +236,44 @@ public class IftPolicyHelper {
 					if(i > 0){
 						transitCabins.add(leg.getCabin());
 						transitAirports.add(leg.getDepAirport());
+						rtnType = this.getFlyType(rtnType, leg.getDepAirport());
 					}
 				}
 			}
-			iftPolicyList = Collections.filter(iftPolicyList, (iftPolicy) -> true
-//					&& ruleUtils.matcheAirline(iftPolicy, airlines)
-					&& ruleUtils.matcheDepartCabin(iftPolicy, cabins)
-					&& ruleUtils.matcheTransitCabin(iftPolicy, transitCabins) 
-					&& ruleUtils.matcheRtnAirport(iftPolicy, query)
-					&& ruleUtils.matcheNotSuitTransitAirport(iftPolicy, transitAirports)
-					&& ruleUtils.matcheDepartSuitFlight(iftPolicy, flyFlightNos)
-					&& ruleUtils.matcheArriveSuitFlight(iftPolicy, rtnFlightNos)
-					&& ruleUtils.matcheNotSuitFlight(iftPolicy, flightNos) 
-					&& ruleUtils.matcheMixtrueCabin(iftPolicy, cabins) 
-					&& ruleUtils.matcheFareBasis(iftPolicy, fareBasis) 
-					&& ruleUtils.matcheParpirce(iftPolicy, parPrice)
-					&& ruleUtils.matchedExclude(iftPolicy, query.getDepartAirport(), query.getArriveAirport()));
+			iftPolicyList = this.rtnFilterPolicy(ruleUtils, iftPolicyList, airlines, cabins, flightNos, transitCabins, transitAirports, 
+					flyFlightNos, rtnFlightNos, query, fareBasis, parPrice, isArnk, flyType, rtnType, isOpen);
 		}
 		return iftPolicyList;
 	}
 	
+	/**
+	 * 根据出发城市获取转机类型
+	 * 
+	 * @param flyType 转机类型
+	 * @param depart 出发城市
+	 * @return int 0直飞 1Add-on 2境外中转 3Add-on+境外中转
+	 */
+	public int getFlyType(int flyType, String depart){
+		try{
+			Country deparcountry = airportService.queryCountryByAirport(depart);// 根据出发城市查询所属的国家
+			if("D".equals(deparcountry.getDomOrInt())){
+				if(0 == flyType){
+					flyType =1;
+				}else if(2 == flyType){
+					flyType =3;
+				}
+			}else{
+				if(0 == flyType){
+					flyType =2;
+				}else if(1 == flyType){
+					flyType =3;
+				}
+			}
+		}catch(Exception e){
+			logger.info(depart + "基础数据获取到城市信息");
+		}
+		return flyType;
+	}
 	
 	/**
 	 * 根据政策规则过滤政策(PNR过滤政策)
@@ -282,6 +288,83 @@ public class IftPolicyHelper {
 			String pnr, String pnrContext){
 		iftPolicyList = this.ruleFilter(iftPolicyList, legs, query, fareBasis, passengers.get(0).getSaleFare().doubleValue());
 		//TODO 实现pnr以及PNR内容中数据过滤
+		return iftPolicyList;
+	}
+	
+	/**
+	 * 单程政策过滤
+	 * 
+	 * @param ruleUtils 规则工具
+	 * @param iftPolicyList 政策集合
+	 * @param airlines 航司集合
+	 * @param cabins 舱位集合
+	 * @param flightNos 航班号集合
+	 * @param transitCabins 中转舱位集合
+	 * @param transitAirports 中转机场集合
+	 * @param query 匹配政策查询参数
+	 * @param fareBasis 运价基础字符串
+	 * @param parPrice 票面总价
+	 * @param isArnk 是否缺口
+	 * @param flyType 航段类型：0直飞 1Add-on 2境外中转 3Add-on+境外中转
+	 * @param isOpen 是否OPEn
+	 * @return List<IftPolicy> 过滤后的政策
+	 */
+	private List<IftPolicy> flyFilterPolicy(IftPolicyRuleUtils ruleUtils, List<IftPolicy> iftPolicyList, ArrayList<String> airlines, ArrayList<String> cabins, 
+			ArrayList<String> flightNos, ArrayList<String> transitCabins, ArrayList<String> transitAirports, FlightQuery query, String fareBasis, 
+			double parPrice, boolean isArnk, int flyType, boolean isOpen){
+		iftPolicyList = Collections.filter(iftPolicyList, (iftPolicy) -> true
+				&& ruleUtils.matcheDepartCabin(iftPolicy, cabins)
+				&& ruleUtils.matcheTransitCabin(iftPolicy, transitCabins) 
+				&& ruleUtils.matcheNotSuitTransitAirport(iftPolicy, transitAirports)
+				&& ruleUtils.matcheArnk(iftPolicy, isArnk) 
+				&& ruleUtils.matcheFlightType(iftPolicy, airlines, flyType, null, isOpen)
+				&& ruleUtils.matcheDepartSuitFlight(iftPolicy, flightNos)
+				&& ruleUtils.matcheNotSuitFlight(iftPolicy, flightNos) 
+				&& ruleUtils.matcheMixtrueCabin(iftPolicy, cabins)
+				&& ruleUtils.matcheFareBasis(iftPolicy, fareBasis) 
+				&& ruleUtils.matcheParpirce(iftPolicy, parPrice)
+				&& ruleUtils.matchedExclude(iftPolicy, query.getDepartAirport(), query.getArriveAirport()));
+		return iftPolicyList;
+	}
+	
+	/**
+	 * 往返政策过滤
+	 * 
+	 * @param ruleUtils 规则工具
+	 * @param iftPolicyList 政策集合
+	 * @param airlines 航司集合
+	 * @param cabins 舱位集合
+	 * @param flightNos 航班号集合
+	 * @param transitCabins 中转舱位集合
+	 * @param transitAirports 中转机场集合
+	 * @param flyFlightNos 去程航班号集合
+	 * @param rtnFlightNos 回程航班号集合
+	 * @param query 匹配政策查询参数
+	 * @param fareBasis 运价基础字符串
+	 * @param parPrice 票面总价
+	 * @param isArnk 是否缺口
+	 * @param flyType 去程航段类型：0直飞 1Add-on 2境外中转 3Add-on+境外中转
+	 * @param rtnType 回程航段类型：0直飞 1Add-on 2境外中转 3Add-on+境外中转
+	 * @param isOpen 是否OPEn
+	 * @return List<IftPolicy> 过滤后的政策
+	 */
+	private List<IftPolicy> rtnFilterPolicy(IftPolicyRuleUtils ruleUtils, List<IftPolicy> iftPolicyList, ArrayList<String> airlines, ArrayList<String> cabins, ArrayList<String> flightNos,
+			ArrayList<String> transitCabins, ArrayList<String> transitAirports, ArrayList<String> flyFlightNos, ArrayList<String> rtnFlightNos, FlightQuery query, String fareBasis, 
+			double parPrice, boolean isArnk, int flyType, int rtnType, boolean isOpen){
+		iftPolicyList = Collections.filter(iftPolicyList, (iftPolicy) -> true
+				&& ruleUtils.matcheDepartCabin(iftPolicy, cabins)
+				&& ruleUtils.matcheTransitCabin(iftPolicy, transitCabins) 
+				&& ruleUtils.matcheRtnAirport(iftPolicy, query)
+				&& ruleUtils.matcheNotSuitTransitAirport(iftPolicy, transitAirports)
+				&& ruleUtils.matcheArnk(iftPolicy, isArnk)
+				&& ruleUtils.matcheFlightType(iftPolicy, airlines, flyType, rtnType, isOpen)
+				&& ruleUtils.matcheDepartSuitFlight(iftPolicy, flyFlightNos)
+				&& ruleUtils.matcheArriveSuitFlight(iftPolicy, rtnFlightNos)
+				&& ruleUtils.matcheNotSuitFlight(iftPolicy, flightNos) 
+				&& ruleUtils.matcheMixtrueCabin(iftPolicy, cabins) 
+				&& ruleUtils.matcheFareBasis(iftPolicy, fareBasis) 
+				&& ruleUtils.matcheParpirce(iftPolicy, parPrice)
+				&& ruleUtils.matchedExclude(iftPolicy, query.getDepartAirport(), query.getArriveAirport()));
 		return iftPolicyList;
 	}
 }
