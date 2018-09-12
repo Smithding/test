@@ -116,8 +116,8 @@ public class ExportReportUtil {
                     
                     //客户卡号
                     case 3: {
-                        if (null != obj.getCustomerNo()) {
-                            cell.setCellValue(obj.getCustomerNo().toString());
+                        if (null != obj.getCreator()) {
+                            cell.setCellValue(obj.getCreator());
                         } else {
                             cell.setCellValue("--");
                             log.info("报表导出模块,0907,第" + (i + 1) + "行的客户卡号为空");
