@@ -50,6 +50,7 @@ public class InsureTicketListenter {
         @RabbitHandler
         public void processLogRecord(TicketMessage ticketMessage){
                 logger.info("-------保险订单投保-----收到出票消息:"+ticketMessage.getOwner()+","+ticketMessage.getOrderNo()+","+ticketMessage.getTradeNo());
+                logger.info("-------保险订单投保-----机票数据为:"+ticketMessage.toString());
                 boolean result  = false;
                 Agent agent = new Agent(ticketMessage.getOwner(), "sys");
                 try{
@@ -79,6 +80,7 @@ public class InsureTicketListenter {
                                                                         if(saleOrderExtTwo.getExtendedFieldsJson().contains(saleItem.getFlightNo())&&saleOrderDetail.getInsuredName().equals(saleItem.getName())){
                                                                                 saleOrderDetail.setBillNo(saleItem.getTicketNo());
                                                                                 saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
+                                                                                logger.info("-------------------该保险订单的票号为:"+saleItem.getTicketNo());
                                                                         }
                                                                 }
                                                         }

@@ -8,6 +8,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.tempus.gss.mq.MqSender;
+import com.tempus.gss.product.ins.api.entity.vo.*;
+import com.tempus.gss.security.AgentUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.util.Log;
 import org.slf4j.Logger;
@@ -64,13 +67,6 @@ import com.tempus.gss.product.ins.api.entity.SaleChangeDetail;
 import com.tempus.gss.product.ins.api.entity.SaleChangeExt;
 import com.tempus.gss.product.ins.api.entity.SaleOrderDetail;
 import com.tempus.gss.product.ins.api.entity.SaleOrderExt;
-import com.tempus.gss.product.ins.api.entity.vo.FlightInfoVo;
-import com.tempus.gss.product.ins.api.entity.vo.InsureExtVo;
-import com.tempus.gss.product.ins.api.entity.vo.InsureRequestVo;
-import com.tempus.gss.product.ins.api.entity.vo.OrderCancelVo;
-import com.tempus.gss.product.ins.api.entity.vo.OrderCreateVo;
-import com.tempus.gss.product.ins.api.entity.vo.SaleOrderDetailVo;
-import com.tempus.gss.product.ins.api.entity.vo.SaleOrderExtVo;
 import com.tempus.gss.product.ins.api.service.IInsuranceProfitService;
 import com.tempus.gss.product.ins.api.service.IInsuranceService;
 import com.tempus.gss.product.ins.api.service.IOrderService;
@@ -211,7 +207,9 @@ public class OrderServiceImpl implements IOrderService {
 	
 	@Reference
 	ICustomerService customerService;
-	
+
+	@Autowired
+	MqSender mqSender;
     @Reference
     public IInsuranceProfitService insuranceProfitService;
 	SimpleDateFormat simple = new SimpleDateFormat("yyyy-MM-dd");
@@ -742,6 +740,14 @@ public class OrderServiceImpl implements IOrderService {
 				}
 				if (RESPONSE_SUCCESS.equals(response.getCode())) {
 					log.info("投保响应成功");
+					InsureMqVo insureMqVo = new InsureMqVo();
+					if(!"".equals(saleOrderExt.getTransactionId())){
+						insureMqVo.setTransactionNo(Long.valueOf(saleOrderExt.getTransactionId()));
+					}
+					insureMqVo.setSaleOrderNo(saleOrderDetail.getSaleOrderNo());
+					insureMqVo.setAgent(AgentUtil.getAgent());
+					//发送投保成功的mq通知
+					mqSender.send("gss-ins-exchange", "insure", insureMqVo);
 					// 更新采购单状态为2(已投保)
 					saleOrderService.updateStatus(requestWithActor.getAgent(), requestWithActor.getEntity(), 2);
 					saleOrderDetail.setInsureTime(new Date());
@@ -1099,6 +1105,15 @@ public class OrderServiceImpl implements IOrderService {
 				saleOrderExtVo = JSON.toJavaObject(js, SaleOrderExtVo.class);
 				if (RESPONSE_SUCCESS.equals(response.getCode())) {
 					log.info("投保响应成功");
+					InsureMqVo insureMqVo = new InsureMqVo();
+					if(!"".equals(saleOrderExt.getTransactionId())){
+						insureMqVo.setTransactionNo(Long.valueOf(saleOrderExt.getTransactionId()));
+					}
+					insureMqVo.setSaleOrderNo(saleOrderDetail.getSaleOrderNo());
+					insureMqVo.setAgent(agent);
+					//发送投保成功的mq通知
+					mqSender.send("gss-ins-exchange", "insure", insureMqVo);
+
 					// 设置子订单状态为2(已投保)
 					saleOrderDetail.setStatus(2);
 					//设置投保时间
@@ -1264,13 +1279,21 @@ public class OrderServiceImpl implements IOrderService {
 					saleOrderDetail.setInsureTime(new Date());
 					//saleOrderDetail.setEleUrl(response.get);
 					saleOrderExt.setTotalInsureTime(new Date());
+					InsureMqVo insureMqVo = new InsureMqVo();
+					if(!"".equals(saleOrderExt.getTransactionId())){
+						insureMqVo.setTransactionNo(Long.valueOf(saleOrderExt.getTransactionId()));
+					}
+					insureMqVo.setSaleOrderNo(saleOrderDetail.getSaleOrderNo());
+					insureMqVo.setAgent(agent);
+					//发送投保成功的mq通知
+					mqSender.send("gss-ins-exchange", "insure", insureMqVo);
 					// 更新销售单和采购单状态为2(已投保)
 					if (StringUtils.isNotBlank(saleOrderExtVo.getPolicyNo())) {
 						log.error("获取保险保单成功--------》"+saleOrderExtVo.getPolicyNo());
 						saleOrderDetail.setPolicyNo(saleOrderExtVo.getPolicyNo());
 						//存储保单下载链接
 						if(saleOrderExtVo.getEleUrl()!=null){
-							saleOrderDetail.setEleUrl(saleOrderExtVo.getEleUrl());
+						saleOrderDetail.setEleUrl(saleOrderExtVo.getEleUrl());
 						}
 						//投保时间
 /*						saleOrderDetail.setModifyTime(new Date());*/
