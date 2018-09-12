@@ -27,10 +27,10 @@
         <result column="SALE_REFUND_ORDER_NO" jdbcType="BIGINT" property="saleRefundOrderNo"/>
     </resultMap>
     <sql id="Base_Column_List">
-    BUY_REFUND_ORDER_NO, BUY_ORDER_NO, OWNER, SUPPLIER_ID, SUPPLIER_TYPE, REMARK, TRA_NO,
-    CHANGE_TYPE, THIRD_BUS_NO, REFUND_AMOUNT, PAY_STATUS, ACTUAL_AMOUNT, PAY_TIME, STATUS,
-    CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME, VALID
-  </sql>
+        BUY_REFUND_ORDER_NO, BUY_ORDER_NO, OWNER, SUPPLIER_ID, SUPPLIER_TYPE, REMARK, TRA_NO,
+        CHANGE_TYPE, THIRD_BUS_NO, REFUND_AMOUNT, PAY_STATUS, ACTUAL_AMOUNT, PAY_TIME, STATUS,
+        CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME, VALID
+    </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
@@ -38,9 +38,9 @@
         where BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-    delete from UNP_BUY_REFUND
-    where BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
-  </delete>
+        delete from UNP_BUY_REFUND
+        where BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
+    </delete>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyRefund">
         insert into UNP_BUY_REFUND
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -242,67 +242,73 @@
         LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO = USR.CUSTOMER_NO
         LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO = UB.SUPPLIER_ID
         WHERE 1=1
+        <if test="saleOrderNo != null">
+            AND UB.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+        </if>
+        <if test="buyChangeNo != null">
+            AND UBR.BUY_REFUND_NO = #{buyChangeNo,jdbcType=BIGINT}
+        </if>
         <if test="buyOrderNo != null">
-            AND UBR.BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT},
+            AND UBR.BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
         </if>
         <if test="owner != null">
-            AND UBR.OWNER = #{ownerjdbcType=INTEGER}
+            AND UBR.OWNER = #{owner,jdbcType=INTEGER}
         </if>
         <if test="customerNo != null">
-            AND USR.CUSTOMER_NO = #{customerNojdbcType=BIGINT}
+            AND USR.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT}
         </if>
         <if test="thirdBusNo != null">
-            AND UBR.THIRD_BUS_NO = #{thirdBusNo,jdbcType=BIGINT},
+            AND UBR.THIRD_BUS_NO = #{thirdBusNo,jdbcType=BIGINT}
         </if>
         <if test="customerType != null">
-            AND USR.CUSTOMER_TYPE = #{customerTypejdbcType=BIGINT}
+            AND USR.CUSTOMER_TYPE = #{customerType,jdbcType=BIGINT}
         </if>
         <if test="supplierId != null">
-            AND UBR.SUPPLIER_ID = #{supplierId,jdbcType=BIGINT},
+            AND UBR.SUPPLIER_ID = #{supplierId,jdbcType=BIGINT}
         </if>
         <if test="supplierType != null">
-            AND UBR.SUPPLIER_TYPE = #{supplierType,jdbcType=BIGINT},
+            AND UBR.SUPPLIER_TYPE = #{supplierType,jdbcType=BIGINT}
         </if>
         <if test="traNo != null">
-            AND UBR.TRA_NO = #{traNojdbcType=BIGINT}
+            AND UBR.TRA_NO = #{traNo,jdbcType=BIGINT}
         </if>
         <if test="changeType != null">
-            AND UBR.CHANGE_TYPE = #{changeTypejdbcType=INTEGER}
+            AND UBR.CHANGE_TYPE = #{changeType,jdbcType=INTEGER}
         </if>
         <if test="payStatus != null">
-            AND UBR.PAY_STATUS = #{payStatusjdbcType=TINYINT}
+            AND UBR.PAY_STATUS = #{payStatus,jdbcType=TINYINT}
         </if>
         <if test="payTimeStart!=null and ''!=payTimeStart">
-            AND UBR.PAY_TIME <![CDATA[>=]]> CONCAT(#{payTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+            AND UBR.PAY_TIME <![CDATA[>=]]> CONCAT(#{payTimeStart,jdbcType=TIMESTAMP}' 00:00:00')
         </if>
         <if test="payTimeEnd!=null and ''!=payTimeEnd">
-            AND UBR.PAY_TIME  <![CDATA[<=]]> CONCAT(#{payTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+            AND UBR.PAY_TIME  <![CDATA[<=]]> CONCAT(#{payTimeEnd,jdbcType=TIMESTAMP}' 23:59:59')
         </if>
         <if test="status != null">
-            AND UBR.STATUS = #{statusjdbcType=INTEGER}
+            AND UBR.STATUS = #{status,jdbcType=INTEGER}
         </if>
         <if test="creator != null">
             AND UBR.CREATOR LIKE concat('%',CONCAT(#{creator,jdbcType=VARCHAR},'%'))
         </if>
         <if test="createTimeStart!=null and ''!=createTimeStart">
-            AND UBR.CREATE_TIME <![CDATA[>=]]> CONCAT(#{createTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+            AND UBR.CREATE_TIME <![CDATA[>=]]> CONCAT(#{createTimeStart,jdbcType=TIMESTAMP}' 00:00:00')
         </if>
         <if test="createTimeEnd!=null and ''!=createTimeEnd">
-            AND UBR.CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+            AND UBR.CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP}' 23:59:59')
         </if>
         <if test="modifier != null">
-            AND UBR.MODIFIER LIKE concat('%',CONCAT(#{modifier,jdbcType=VARCHAR},'%'))
+            AND UBR.MODIFIER LIKE concat('%',CONCAT(#{modifier,jdbcType=VARCHAR}'%'))
         </if>
         <if test="modifyTimeStart != null and ''!=modifyTimeStart">
-            AND UBR.MODIFY_TIME <![CDATA[>=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+            AND UBR.MODIFY_TIME <![CDATA[>=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP}' 00:00:00')
         </if>
         <if test="modifyTimeEnd != null and ''!=modifyTimeEnd">
-            AND UBR.MODIFY_TIME <![CDATA[<=]]> CONCAT(#{modifyTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+            AND UBR.MODIFY_TIME <![CDATA[<=]]> CONCAT(#{modifyTimeEnd,jdbcType=TIMESTAMP}' 23:59:59')
         </if>
         <if test="valid != null">
-            AND UBR.VALID = #{validjdbcType=INTEGER}
+            AND UBR.VALID = #{valid,jdbcType=INTEGER}
         </if>
-        GROUP BY UBR.BUY_REFUND_ORDER_NO  ORDER BY UBR.CREATE_TIME DESC
+        GROUP BY UBR.BUY_REFUND_ORDER_NO ORDER BY UBR.CREATE_TIME DESC
     </select>
 
 </mapper>

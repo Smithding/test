@@ -12,8 +12,6 @@ import java.util.List;
 public interface UnpBuyRefundMapper {
     int deleteByPrimaryKey(Long buyRefundOrderNo);
     
-    int insert(UnpBuyRefund record);
-    
     int insertSelective(UnpBuyRefund record);
     
     UnpBuyRefund selectByPrimaryKey(Long buyRefundOrderNo);
@@ -22,5 +20,4 @@ public interface UnpBuyRefundMapper {
     
     int updateByPrimaryKeySelective(UnpBuyRefund record);
     
-    int updateByPrimaryKey(UnpBuyRefund record);
 }
