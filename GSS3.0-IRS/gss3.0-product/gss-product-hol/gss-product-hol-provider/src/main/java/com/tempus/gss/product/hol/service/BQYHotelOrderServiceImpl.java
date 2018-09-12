@@ -337,6 +337,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		certificateCreateVO.setIncomeExpenseType(2);
 		certificateCreateVO.setAmount(hotelOrder.getFactTotalPrice());
 		certificateCreateVO.setSubBusinessType(BusinessType.BUY_ORDER);
+		certificateCreateVO.setServiceLine("1");
 		List<BusinessOrderInfo> businessOrderInfoList = new ArrayList<>();
 		BusinessOrderInfo businessOrderInfo = new BusinessOrderInfo();
 		businessOrderInfo.setRecordNo(saleChangeNo);
