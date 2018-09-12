@@ -4,7 +4,6 @@
     <resultMap id="BaseResultMap" type="com.tempus.gss.product.unp.api.entity.UnpBuyRefund">
         <id column="BUY_REFUND_ORDER_NO" jdbcType="BIGINT" property="buyRefundOrderNo"/>
         <result column="BUY_ORDER_NO" jdbcType="BIGINT" property="buyOrderNo"/>
-        <result column="SALE_REFUND_ORDER_NO" jdbcType="BIGINT" property="saleRefundOrderNo"/>
         <result column="OWNER" jdbcType="INTEGER" property="owner"/>
         <result column="SUPPLIER_ID" jdbcType="BIGINT" property="supplierId"/>
         <result column="SUPPLIER_TYPE" jdbcType="BIGINT" property="supplierType"/>
@@ -46,6 +45,9 @@
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="buyRefundOrderNo != null">
                 BUY_REFUND_ORDER_NO,
+            </if>
+            <if test="saleRefundOrderNo != null">
+                SALE_REFUND_ORDER_NO,
             </if>
             <if test="buyOrderNo != null">
                 BUY_ORDER_NO,
@@ -105,6 +107,9 @@
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="buyRefundOrderNo != null">
                 #{buyRefundOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="saleRefundOrderNo != null">
+                #{saleRefundOrderNo,jdbcType=BIGINT},
             </if>
             <if test="buyOrderNo != null">
                 #{buyOrderNo,jdbcType=BIGINT},
