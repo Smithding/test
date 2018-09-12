@@ -1680,6 +1680,7 @@ public class TCHotelOrderServiceImpl implements ITCHotelOrderService{
         	List<Customer> customerList = customerService.getSubCustomerByCno(agent, pageRequest.getEntity().getCustomerNo());
         	List<Long> list = new ArrayList<Long>();
         	if(StringUtil.isNotNullOrEmpty(customerList)){
+				list.add(pageRequest.getEntity().getCustomerNo());
         		for(Customer cu : customerList){
             		list.add(cu.getCustomerNo());
             	}
