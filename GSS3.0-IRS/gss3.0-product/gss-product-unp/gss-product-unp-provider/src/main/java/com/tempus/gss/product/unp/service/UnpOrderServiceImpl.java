@@ -595,15 +595,17 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 planAmount = planAmount.add(unpBuyItem.getGroupAmount());
                 unpBuyRefundItem.setItemId(IdWorker.getId());
                 unpBuyRefundItem.setBuyRefundOrderNo(buyRefundOrderNo);
-                unpBuyRefundItem.setUnpType(GoodsBigType.GENERAL.getKey());
+                unpBuyRefundItem.setUnpType(unpBuyItem.getUnpType());
                 unpBuyRefundItem.setNum(buyItem.getNum());
                 unpBuyRefundItem.setNum(buyItem.getNum());
                 unpBuyRefundItem.setChangeType(EUnpConstant.ChangeType.REFUND.getKey());
                 unpBuyRefundItem.setGroupAmount(buyItem.getGroupAmount());
                 unpBuyRefundItem.setItemStatus(EUnpConstant.OrderStatus.READY.getKey());
+
                 for (UnpSaleRefundItem unpSaleRefundItem : unpSaleRefund.getItems()) {
                     if (unpSaleRefundItem.getSaleItemNo().equals(buyItem.getSaleItemNo())){
                         unpBuyRefundItem.setSaleRefundItemNo(unpSaleRefundItem.getItemId());
+                        unpBuyRefundItem.setSaleRefundOrderNo(unpSaleRefundItem.getSaleRefundOrderNo());
                         break;
                     }
                 }
