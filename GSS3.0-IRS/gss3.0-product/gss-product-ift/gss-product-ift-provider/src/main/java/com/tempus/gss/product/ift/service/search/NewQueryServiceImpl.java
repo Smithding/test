@@ -127,7 +127,7 @@ public class NewQueryServiceImpl implements NewQueryService {
 		List<QueryIBEDetail> newQueryIBEDetailList = new ArrayList<QueryIBEDetail>();
 		for (QueryIBEDetail queryIBEDetail : queryIBEDetailList) {
 			QueryIBEDetail detail = iftFlightQueryService.mappingPriceSpec(queryIBEDetail, policyList,
-					flightQuery.getCustomerType(), agent);
+					flightQuery.getCustomerType(), flightQueryRequest);
 			newQueryIBEDetailList.add(detail);
 		}
 		log.info("开始组装数据");
@@ -173,7 +173,7 @@ public class NewQueryServiceImpl implements NewQueryService {
 		List<QueryIBEDetail> newQueryIBEDetailList = new ArrayList<QueryIBEDetail>();
 		for (QueryIBEDetail queryIBEDetail : flightCabinRun.getQueryIBEDetails()) {
 			QueryIBEDetail detail = iftFlightQueryService.mappingPriceSpec(queryIBEDetail,
-					flightPolicyRun.getIftPolicyList(), flightQuery.getCustomerType(), agent);
+					flightPolicyRun.getIftPolicyList(), flightQuery.getCustomerType(), flightQueryRequest);
 			newQueryIBEDetailList.add(detail);
 		}
 		return newQueryIBEDetailList;

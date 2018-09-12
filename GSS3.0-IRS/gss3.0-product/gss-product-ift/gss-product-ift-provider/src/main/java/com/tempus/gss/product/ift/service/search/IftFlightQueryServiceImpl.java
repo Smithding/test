@@ -1,5 +1,6 @@
 package com.tempus.gss.product.ift.service.search;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -9,16 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSONObject;
 import com.tempus.gss.product.common.entity.RequestWithActor;
+import com.tempus.gss.product.ift.api.entity.Flight;
+import com.tempus.gss.product.ift.api.entity.Leg;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
-import com.tempus.gss.product.ift.api.entity.policy.IftFlightPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicyChange;
 import com.tempus.gss.product.ift.api.entity.search.FlightQuery;
 import com.tempus.gss.product.ift.api.entity.vo.FlightQueryRequest;
 import com.tempus.gss.product.ift.api.service.search.IftFlightQueryService;
 import com.tempus.gss.product.ift.dao.policy.IftQueryPolicyMapper;
-import com.tempus.gss.util.JsonUtil;
-import com.tempus.gss.vo.Agent;
+import com.tempus.gss.product.ift.help.IftPolicyHelper;
 import com.tempus.tbe.entity.AvailableJourney;
 
 /**
@@ -44,16 +45,34 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 	private IftQueryPolicyMapper iftQueryPolicyMapper;
 	@Autowired
 	private IftFlightQueryUtils fftFlightQueryUtils;
-	private IftPolicyRuleUtils ruleUtils;
+	@Autowired
+	private IftPolicyHelper policyHelper;
+	
 	@Override
-	public QueryIBEDetail mappingPriceSpec(QueryIBEDetail queryIBEDetail,List<IftPolicy> iftPolicyList,String customerTypeNo, Agent agent) {
-		// TODO Auto-generated method stub
-		//List<IftPolicy> iftPolicies = this.matcPolicy(request);
-		/*if(!CollectionUtils.isEmpty(iftPolicyList)){
-			iftPolicyList = Collections.filter(iftPolicyList, (policy) -> 
-				ruleUtils.matcheAirline(policy, queryIBEDetail.getTicketAirline()));
-				queryIBEDetail.setIftPolicies(iftPolicyList);
-		}*/
+	public QueryIBEDetail mappingPriceSpec(QueryIBEDetail queryIBEDetail,List<IftPolicy> iftPolicyList,String customerTypeNo, RequestWithActor<FlightQueryRequest> request) {
+		
+		/* 组装航程信息 */
+		List<Leg> legs = new ArrayList<Leg>();
+		for (Flight flights : queryIBEDetail.getFlights()) {
+			Leg leg = new Leg();
+			leg.setAirline(flights.getAirline());//航司
+			leg.setFlightNo(flights.getFlightNo());//航班号
+			leg.setDepTime(flights.getDepTime());//起飞时间
+            leg.setArrTime(flights.getArrTime());//到达时间.
+            leg.setArrAirport(flights.getArrAirport());//到达机场.
+			leg.setDepAirport(flights.getDepAirport());//起点机场.
+            leg.setGoBack(flights.getDirection().equals("go")?1:2);//方向标识 go/back
+            leg.setStopAirport(flights.getStopOverAirport());//经停机场
+            leg.setLegNo(Long.parseLong(String.valueOf(flights.getFlightNum())));
+		}
+		int adtCount = request.getEntity().getAdultCount();
+		int chdCount = request.getEntity().getChildCount();
+		int infCount = request.getEntity().getInfantCount();
+		FlightQuery query = policyHelper.packageQuery(request.getAgent(), legs, queryIBEDetail.getTicketAirline(), adtCount, chdCount, infCount);
+		
+		iftPolicyList = policyHelper.ruleFilter(iftPolicyList, legs, query, 
+				queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFareBasis(), 
+				queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFare().doubleValue());
 		QueryIBEDetail detail  = CalculatePriceUtils.fligthCalculate(queryIBEDetail,iftPolicyList, 1);
 		return detail;
 	}
