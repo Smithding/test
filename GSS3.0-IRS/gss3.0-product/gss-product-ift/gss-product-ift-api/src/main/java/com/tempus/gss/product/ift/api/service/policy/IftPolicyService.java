@@ -96,13 +96,15 @@ public interface IftPolicyService {
 	 * 
 	 * @param agent 用户信息
 	 * @param legs 航程信息
+	 * @param airline 实际承运航司
+	 * @param fareBasis 运价基础
 	 * @param parPrice 单人票面总价
 	 * @param adtNumber 成人数
 	 * @param chdNumber 儿童数
 	 * @param infNumber 婴儿数
 	 * @return List<IftPolicy> 政策集合
 	 */
-	List<IftPolicy> getPolicys(Agent agent, List<Leg> legs, double parPrice, int adtNumber, int chdNumber, int infNumber);
+	List<IftPolicy> getPolicys(Agent agent, List<Leg> legs, String airline, String fareBasis, double parPrice, int adtNumber, int chdNumber, int infNumber);
 	
 	/**
 	 * 下单获取实时政策(PNR导入)
@@ -110,9 +112,11 @@ public interface IftPolicyService {
 	 * @param agent 用户信息
 	 * @param passengers 乘客信息
 	 * @param legs 航程信息
+	 * @param airline 实际承运航司
+	 * @param fareBasis 运价基础
 	 * @param pnr 6位PNR编码
 	 * @param pnrContext PNR内容，可为空
 	 * @return List<IftPolicy> 政策集合
 	 */
-	List<IftPolicy> getPolicysByPnr(Agent agent, List<Passenger> passengers, List<Leg> legs, String pnr, String pnrContext);
+	List<IftPolicy> getPolicysByPnr(Agent agent, List<Passenger> passengers, List<Leg> legs, String airline, String fareBasis, String pnr, String pnrContext);
 }

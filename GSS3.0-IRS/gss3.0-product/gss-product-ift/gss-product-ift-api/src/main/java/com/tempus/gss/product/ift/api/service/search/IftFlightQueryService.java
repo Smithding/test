@@ -36,7 +36,7 @@ public interface IftFlightQueryService {
 	 * @param agent
 	 * @return
 	 */
-	 public QueryIBEDetail mappingPriceSpec(QueryIBEDetail queryIBEDetail,List<IftPolicy> iftPolicyList, String customerTypeNo, Agent agent); 
+	 public QueryIBEDetail mappingPriceSpec(QueryIBEDetail queryIBEDetail,List<IftPolicy> iftPolicyList, String customerTypeNo, RequestWithActor<FlightQueryRequest> request); 
 	 /**
 	  * 订单预订异步实时获取政策数据
 	  * @param queryIBEDetail

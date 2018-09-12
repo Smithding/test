@@ -130,29 +130,29 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 	}
 	
 	@Override
-	public List<IftPolicy> getPolicys(Agent agent, List<Leg> legs, double parPrice, int adtNumber, int chdNumber, int infNumber) {
+	public List<IftPolicy> getPolicys(Agent agent, List<Leg> legs, String airline, String fareBasis, double parPrice, int adtNumber, int chdNumber, int infNumber) {
 		
 		/* 第一步，组装条件从库里面获取政策 */
-		FlightQuery query = policyHelper.packageQuery(agent, legs, adtNumber, chdNumber, infNumber);
+		FlightQuery query = policyHelper.packageQuery(agent, legs, airline, adtNumber, chdNumber, infNumber);
 		List<IftPolicy> iftPolicyList = iftQueryPolicyMapper.query(query);
 		
 		/* 第二步，再逐步过滤政策条件 */
-		iftPolicyList = policyHelper.ruleFilter(iftPolicyList, legs, query, parPrice);
+		iftPolicyList = policyHelper.ruleFilter(iftPolicyList, legs, query, fareBasis, parPrice);
 		
 		return iftPolicyList;
 	}
 	
 	@Override
-	public List<IftPolicy> getPolicysByPnr(Agent agent, List<Passenger> passengers, List<Leg> legs,
+	public List<IftPolicy> getPolicysByPnr(Agent agent, List<Passenger> passengers, List<Leg> legs, String airline, String fareBasis,
 			String pnr, String pnrContext) {
 		
 		/* 第一步，组装条件从库里面获取政策 */
 		//TODO 儿童数以及婴儿数暂时还未获取
-		FlightQuery query = policyHelper.packageQuery(agent, legs, passengers.size(), 0, 0);
+		FlightQuery query = policyHelper.packageQuery(agent, legs, airline, passengers.size(), 0, 0);
 		List<IftPolicy> iftPolicyList = iftQueryPolicyMapper.query(query);
 		
 		/* 第二步，再逐步过滤政策条件 */
-		iftPolicyList = policyHelper.ruleFilterByPnr(iftPolicyList, passengers, legs, query, pnr, pnrContext);
+		iftPolicyList = policyHelper.ruleFilterByPnr(iftPolicyList, passengers, legs, query, fareBasis, pnr, pnrContext);
 		
 		return iftPolicyList;
 	}
