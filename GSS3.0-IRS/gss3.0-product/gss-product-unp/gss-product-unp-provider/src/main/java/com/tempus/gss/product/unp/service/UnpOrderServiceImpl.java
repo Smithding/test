@@ -801,7 +801,6 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 unpBuy.setChangeType(0);
                 unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
                 buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
-                
                 for (UnpBuyItem unpBuyItem : unpBuyItemList) {
                     unpBuyItem.setItemStatus(3);
                     unpBuyItem.setChangeType(0);
