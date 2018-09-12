@@ -22,6 +22,9 @@
         <result column="MODIFIER" jdbcType="VARCHAR" property="modifier"/>
         <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
         <result column="VALID" jdbcType="BIT" property="valid"/>
+        <result column="CUSTOMER_NAME" jdbcType="VARCHAR" property="customerName"/>
+        <result column="SUPPLIER_NAME" jdbcType="VARCHAR" property="supplierName"/>
+        <result column="SALE_REFUND_ORDER_NO" jdbcType="BIGINT" property="saleRefundOrderNo"/>
     </resultMap>
     <sql id="Base_Column_List">
     BUY_REFUND_ORDER_NO, BUY_ORDER_NO, OWNER, SUPPLIER_ID, SUPPLIER_TYPE, REMARK, TRA_NO,
@@ -220,12 +223,25 @@
         where BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
     </update>
     <select id="queryList" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo" resultMap="BaseResultMap">
-        SELECT *
+        SELECT
+        UBR.BUY_REFUND_ORDER_NO,
+        CC.SHORT_NAME AS CUSTOMER_NAME,
+        CS.SHORT_NAME AS SUPPLIER_NAME,
+        UBR.REFUND_AMOUNT,
+        UBR.PAY_STATUS,
+        UBR. STATUS,
+        UBR.CREATE_TIME,
+        UBR.REMARK,
+        UBR.CREATOR,
+        UBR.TRA_NO,
+        UBR.CHANGE_TYPE,
+        UBR.SALE_REFUND_ORDER_NO
         FROM UNP_BUY_REFUND UBR
         LEFT JOIN UNP_BUY UB ON UB.BUY_ORDER_NO = UBR.BUY_ORDER_NO
         LEFT JOIN UNP_SALE_REFUND USR ON USR.SALE_ORDER_NO = UB.SALE_ORDER_NO
         LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO = USR.CUSTOMER_NO
         LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO = UB.SUPPLIER_ID
+        WHERE 1=1
         <if test="buyOrderNo != null">
             AND UBR.BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT},
         </if>
@@ -247,23 +263,14 @@
         <if test="supplierType != null">
             AND UBR.SUPPLIER_TYPE = #{supplierType,jdbcType=BIGINT},
         </if>
-        <if test="remark != null">
-            AND UBR.REMARK = #{remarkjdbcType=VARCHAR}
-        </if>
         <if test="traNo != null">
             AND UBR.TRA_NO = #{traNojdbcType=BIGINT}
         </if>
         <if test="changeType != null">
             AND UBR.CHANGE_TYPE = #{changeTypejdbcType=INTEGER}
         </if>
-        <if test="refundAmount != null">
-            AND UBR.REFUND_AMOUNT = #{refundAmountjdbcType=DECIMAL}
-        </if>
         <if test="payStatus != null">
             AND UBR.PAY_STATUS = #{payStatusjdbcType=TINYINT}
-        </if>
-        <if test="actualAmount != null">
-            AND UBR.ACTUAL_AMOUNT = #{actualAmountjdbcType=DECIMAL}
         </if>
         <if test="payTimeStart!=null and ''!=payTimeStart">
             AND UBR.PAY_TIME <![CDATA[>=]]> CONCAT(#{payTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
@@ -295,7 +302,7 @@
         <if test="valid != null">
             AND UBR.VALID = #{validjdbcType=INTEGER}
         </if>
-        ORDER BY UBR.CREATE_TIME DESC
+        GROUP BY UBR.BUY_REFUND_ORDER_NO  ORDER BY UBR.CREATE_TIME DESC
     </select>
 
 </mapper>

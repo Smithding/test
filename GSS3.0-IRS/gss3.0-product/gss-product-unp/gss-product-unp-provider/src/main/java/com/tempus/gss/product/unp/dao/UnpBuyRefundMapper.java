@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.unp.api.entity.UnpBuyRefund;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo;
 
+import java.util.List;
+
 /**
  * @author ZhangBro
  */
@@ -16,7 +18,7 @@ public interface UnpBuyRefundMapper {
     
     UnpBuyRefund selectByPrimaryKey(Long buyRefundOrderNo);
     
-    Page<UnpBuyRefund> queryList(Page<UnpBuyRefund> wrapper, UnpOrderQueryVo vo);
+    List<UnpBuyRefund> queryList(Page<UnpBuyRefund> wrapper, UnpOrderQueryVo vo);
     
     int updateByPrimaryKeySelective(UnpBuyRefund record);
     

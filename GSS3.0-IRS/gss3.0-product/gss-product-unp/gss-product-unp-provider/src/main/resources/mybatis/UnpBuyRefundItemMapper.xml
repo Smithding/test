@@ -37,20 +37,8 @@
         <if test="buyChangeNo != null">
             AND UBRI.BUY_REFUND_ORDER_NO = #{buyChangeNo,jdbcType=BIGINT}
         </if>
-        <if test="unpType != null">
-            AND UBRI.UNP_TYPE = #{unpType,jdbcType=INTEGER}
-        </if>
-        <if test="num != null">
-            AND UBRI.NUM = #{num,jdbcType=INTEGER}
-        </if>
         <if test="changeType != null">
             AND UBRI.CHANGE_TYPE = #{changeType,jdbcType=INTEGER}
-        </if>
-        <if test="groupAmount != null">
-            AND UBRI.GROUP_AMOUNT = #{groupAmount,jdbcType=DECIMAL}
-        </if>
-        <if test="itemStatus != null">
-            AND UBRI.ITEM_STATUS = #{itemStatus,jdbcType=INTEGER}
         </if>
         <if test="valid != null">
             AND UBRI.VALID = #{valid,jdbcType=BIT}

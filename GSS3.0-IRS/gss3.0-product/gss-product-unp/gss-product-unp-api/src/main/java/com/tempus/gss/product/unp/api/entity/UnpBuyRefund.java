@@ -101,7 +101,25 @@ public class UnpBuyRefund implements Serializable {
      * 明细单们
      */
     private List<UnpBuyRefundItem> items;
-    
+    private String customerName;
+    private String supplierName;
+
+    public String getCustomerName() {
+        return customerName;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getSupplierName() {
+        return supplierName;
+    }
+
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
+    }
+
     public Long getSaleRefundOrderNo() {
         return saleRefundOrderNo;
     }
