@@ -168,7 +168,6 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 orderCreateVo.getUnpSale().setTraNo(traNo);
             }
             //交易单存在，不必创建
-            
             //--------创建sale相关------------//
             UnpResult<UnpSale> saleResult = this.createSale(agent, orderCreateVo);
             if (saleResult.getCode() == 0) {
@@ -183,7 +182,6 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 return result;
             }
             result.success("创建订单成功", saleResult.getEntity());
-            
         } catch (Exception e) {
             logger.error("Error", e);
             result.failed(e.getMessage(), null);
@@ -289,14 +287,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 result.failed("创建OS销售单失败", null);
                 return result;
             }
-            CreatePlanAmountVO createPlanAmountVO = new CreatePlanAmountVO();
-            createPlanAmountVO.setPlanAmount(unpSale.getPlanAmount());
-            createPlanAmountVO.setGoodsType(GoodsBigType.GENERAL.getKey());
-            createPlanAmountVO.setIncomeExpenseType(IncomeExpenseType.INCOME.getKey());
-            createPlanAmountVO.setBusinessType(BusinessType.SALE_ORDER);
-            createPlanAmountVO.setRecordNo(unpSale.getSaleOrderNo());
-            createPlanAmountVO.setRecordMovingType(CostType.FARE.getKey());
-            PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, createPlanAmountVO);
+            PlanAmountRecord planAmountRecord = this.createPlanAmount(agent, unpSale.getSaleOrderNo(), unpSale.getPlanAmount(), BusinessType.SALEORDER, IncomeExpenseType.INCOME, CostType.FARE);
             if (planAmountRecord != null) {
                 logger.info("创建销售应收{}", planAmountRecord.getPlanAmount());
                 result.success("创建销售应收" + planAmountRecord.getPlanAmount(), unpSale);
@@ -308,7 +299,20 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         return result;
     }
     
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public PlanAmountRecord createPlanAmount(Agent agent, Long recordNo, BigDecimal planAmount, BusinessType businessType, IncomeExpenseType incomeExpenseType, CostType costType) {
+        CreatePlanAmountVO createPlanAmountVO = new CreatePlanAmountVO();
+        createPlanAmountVO.setPlanAmount(planAmount);
+        createPlanAmountVO.setGoodsType(GoodsBigType.GENERAL.getKey());
+        createPlanAmountVO.setIncomeExpenseType(incomeExpenseType.getKey());
+        createPlanAmountVO.setBusinessType(businessType.getKey());
+        createPlanAmountVO.setRecordNo(recordNo);
+        createPlanAmountVO.setRecordMovingType(costType.getKey());
+        return planAmountRecordService.create(agent, createPlanAmountVO);
+    }
+    
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public UnpResult<UnpBuy> createBuy(Agent agent, UnpOrderVo request) {
         this.createValid(request, VALID_TYPE_BUY);
         UnpResult<UnpBuy> unpBuyUnpResult = new UnpResult<>();
@@ -385,18 +389,11 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             buyOrder.setSaleOrderNo(unpBuy.getSaleOrderNo());
             BuyOrder buyOrder1 = buyOrderService.create(agent, buyOrder);
             //创建应收
-            CreatePlanAmountVO planAmountRecordType = new CreatePlanAmountVO();
-            planAmountRecordType.setRecordNo(buyOrderNo);
-            //收支类型 1 收，2 为支
-            planAmountRecordType.setIncomeExpenseType(IncomeExpenseType.EXPENSE.getKey());
-            planAmountRecordType.setBusinessType(BusinessType.BUYORDER.getKey());
-            planAmountRecordType.setRecordMovingType(CostType.FARE.getKey());
-            //合计
-            planAmountRecordType.setPlanAmount(planAmount);
-            //商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送 9 通用产品
-            planAmountRecordType.setGoodsType(GoodsBigType.GENERAL.getKey());
-            planAmountRecordService.create(agent, planAmountRecordType);
-            unpBuyUnpResult.success("创建采购单成功", unpBuy);
+            PlanAmountRecord planAmountRecord = this.createPlanAmount(agent, buyOrderNo, planAmount, BusinessType.BUYORDER, IncomeExpenseType.EXPENSE, CostType.FARE);
+            if (planAmountRecord != null) {
+                logger.info("创建采购应收{}", planAmountRecord.getPlanAmount());
+                unpBuyUnpResult.success("创建采购单成功", unpBuy);
+            }
             logger.info("创建采购单结束");
         } catch (Exception e) {
             logger.error("创建采购单失败", e);
@@ -512,7 +509,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         UnpBuyRefund unpBuyRefund = new UnpBuyRefund();
         UnpBuyRefundItem unpBuyRefundItem = new UnpBuyRefundItem();
         List<UnpBuyItem> buyItems = request.getBuyItems();
-        UnpResult<UnpBuyRefund> unpResult = new UnpResult();
+        UnpResult<UnpBuyRefund> unpResult = new UnpResult<>();
         BigDecimal planAmount = new BigDecimal(0);
         String productName = "通用产品";
         List<String> goods = new ArrayList<>();
@@ -644,13 +641,17 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     @Override
     public Page<UnpSale> querySaleOrderList(Page<UnpSale> wrapper, UnpOrderQueryVo param) {
         if (null == wrapper) {
-            
             wrapper = new Page<>();
         }
         if (null == param) {
             param = new UnpOrderQueryVo();
         }
-        List<UnpSale> list = unpSaleMapper.queryOrderList(wrapper, param);
+        List<UnpSale> list = null;
+        try {
+            list = unpSaleMapper.queryOrderList(wrapper, param);
+        } catch (Exception e) {
+            logger.error("Error", e);
+        }
         wrapper.setRecords(list);
         return wrapper;
     }
@@ -658,13 +659,17 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     @Override
     public Page<UnpBuy> queryBuyOrderList(Page<UnpBuy> wrapper, UnpOrderQueryVo param) {
         if (null == wrapper) {
-            
             wrapper = new Page<>();
         }
         if (null == param) {
             param = new UnpOrderQueryVo();
         }
-        List<UnpBuy> list = unpBuyMapper.queryBuyOrderList(wrapper, param);
+        List<UnpBuy> list = null;
+        try {
+            list = unpBuyMapper.queryBuyOrderList(wrapper, param);
+        } catch (Exception e) {
+            logger.error("Error", e);
+        }
         wrapper.setRecords(list);
         return wrapper;
     }
@@ -681,20 +686,46 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     
     @Override
     public UnpSaleRefund querySaleOrderRefund(UnpOrderQueryVo param) {
+        UnpSaleRefund unpSaleRefund = null;
+        List<UnpSaleRefundItem> items = new ArrayList<>();
         Page<UnpSaleRefund> page = new Page<>(1, 1);
         UnpOrderQueryVo newVo = new UnpOrderQueryVo();
         newVo.setSaleChangeNo(param.getSaleChangeNo());
         newVo.setBuyChangeNo(param.getBuyChangeNo());
-        newVo.setSaleOrderNo(param.getSaleOrderNo());
-        newVo.setBuyOrderNo(param.getBuyOrderNo());
-        return this.querySaleOrderRefundList(page, newVo).getRecords().get(0);
-        //todo 查询单记录接口
+        page = this.querySaleOrderRefundList(page, newVo);
+        if (page.getRecords() != null && page.getRecords().size() > 0) {
+            unpSaleRefund = page.getRecords().get(0);
+            if (unpSaleRefund != null) {
+                param = new UnpOrderQueryVo();
+                param.setSaleChangeNo(unpSaleRefund.getSaleRefundOrderNo());
+                items = this.getSaleRefundItems(param);
+                unpSaleRefund.setItems(items);
+            }
+        }
+        logger.info("【UNP】查询单条销售退 parameters:{},itemSize:{}", param, items.size());
+        return unpSaleRefund;
     }
     
     @Override
     public UnpBuyRefund queryBuyOrderRefund(UnpOrderQueryVo param) {
-        
-        return null;
+        UnpBuyRefund unpBuyRefund = null;
+        List<UnpBuyRefundItem> items = new ArrayList<>();
+        Page<UnpBuyRefund> page = new Page<>(1, 1);
+        UnpOrderQueryVo newVo = new UnpOrderQueryVo();
+        newVo.setSaleChangeNo(param.getSaleChangeNo());
+        newVo.setBuyChangeNo(param.getBuyChangeNo());
+        page = this.queryBuyOrderRefundList(page, newVo);
+        if (page.getRecords() != null && page.getRecords().size() > 0) {
+            unpBuyRefund = page.getRecords().get(0);
+            if (unpBuyRefund != null) {
+                param = new UnpOrderQueryVo();
+                param.setSaleChangeNo(unpBuyRefund.getBuyRefundOrderNo());
+                items = this.getBuyRefundItems(param);
+                unpBuyRefund.setItems(items);
+            }
+        }
+        logger.info("【UNP】查询单条采购退 parameters:{},itemSize:{}", param, items.size());
+        return unpBuyRefund;
     }
     
     @Override
@@ -711,6 +742,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                     item.setSaleOrderNo(null);
                     int updateFlag = this.unpSaleItemMapper.updateByPrimaryKeySelective(item);
                     if (updateFlag <= 0) {
+                        logger.error("销售明细单【{}】修改失败,目标:{}", item.getItemId(), item);
                         result.setMsg("销售明细单【" + item.getItemId() + "】修改失败");
                     }
                 }
@@ -826,8 +858,10 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 if (queryUnpBuy.getStatus() == 3) {
                     //查询是否已有小类完成退款
                     //查询为未完成的退款的小类
-                    int hasRefund = 0;//完场退款数量
-                    int noRefund = 0;//已退 未退款
+                    //完场退款数量
+                    int hasRefund = 0;
+                    //已退 未退款
+                    int noRefund = 0;
                     List<UnpBuyItem> unpBuyRefundItemList = unpBuyItemMapper.selectRefundByBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                     for (UnpBuyItem unpBuyItem : unpBuyRefundItemList) {
                         if (unpBuyItem.getItemStatus() == 1) {
@@ -892,7 +926,9 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             if (!item.getSaleRefundOrderNo().equals(unpSaleRefund.getSaleRefundOrderNo())) {
                 throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "只可修改当前大单下的明细单");
             }
+            item.setSaleRefundOrderNo(null);
             if (unpSaleRefundItemMapper.updateByPrimaryKeySelective(item) <= 0) {
+                logger.error("采购明细单【{}】修改失败,目标:{}", item.getItemId(), item);
                 result.setMsg("销售明细单【" + item.getItemId() + "】修改失败");
             }
         });
@@ -915,14 +951,16 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             if (!item.getBuyRefundOrderNo().equals(unpBuyRefund.getBuyRefundOrderNo())) {
                 throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "只可修改当前大单下的明细单");
             }
+            item.setBuyRefundOrderNo(null);
             if (unpBuyRefundItemMapper.updateByPrimaryKeySelective(item) <= 0) {
-                result.setMsg("销售明细单【" + item.getItemId() + "】修改失败");
+                logger.error("采购明细单【{}】修改失败,目标:{}", item.getItemId(), item);
+                result.setMsg("采购明细单【" + item.getItemId() + "】修改失败");
             }
         });
         unpBuyRefund.setBuyRefundOrderNo(null);
         int i = unpBuyRefundMapper.updateByPrimaryKeySelective(unpBuyRefund);
         if (i > 0) {
-            logger.info("更新销售退单单成功:{}，开始更新OS销售退单", unpBuyRefund.getBuyRefundOrderNo());
+            logger.info("更新采购退单成功:{}，开始更新OS采购退单", unpBuyRefund.getBuyRefundOrderNo());
             buyChangeService.updateStatus(agent, unpBuyRefund.getBuyRefundOrderNo(), unpBuyRefund.getStatus());
         }
         return result;
@@ -935,16 +973,17 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         if (NullableCheck.isNullOrEmpty(list)) {
             return new ArrayList<>();
         }
+        logger.info("【UNP】查询-SALE_ITEM SIZE:{},parameter:{}", list.size(), params);
         return list;
     }
     
     @Override
     public List<UnpBuyItem> getBuyItems(UnpOrderQueryVo params) {
         List<UnpBuyItem> list = unpBuyItemMapper.selectItems(params.getBuyOrderNo());
-        
         if (NullableCheck.isNullOrEmpty(list)) {
             return new ArrayList<>();
         }
+        logger.info("【UNP】查询-BUY_ITEM SIZE:{},parameter:{}", list.size(), params);
         return list;
     }
     
@@ -955,4 +994,23 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         return this.getItems(param).get(0);
     }
     
+    @Override
+    public List<UnpSaleRefundItem> getSaleRefundItems(UnpOrderQueryVo params) {
+        List<UnpSaleRefundItem> list = unpSaleRefundItemMapper.selectItems(params);
+        if (NullableCheck.isNullOrEmpty(list)) {
+            return new ArrayList<>();
+        }
+        logger.info("【UNP】查询-SALE_REFUND_ITEM SIZE:{},parameter:{}", list.size(), params);
+        return list;
+    }
+    
+    @Override
+    public List<UnpBuyRefundItem> getBuyRefundItems(UnpOrderQueryVo params) {
+        List<UnpBuyRefundItem> list = unpBuyRefundItemMapper.selectItems(params);
+        if (NullableCheck.isNullOrEmpty(list)) {
+            return new ArrayList<>();
+        }
+        logger.info("【UNP】查询-BUY_REFUND_ITEM SIZE:{},parameter:{}", list.size(), params);
+        return list;
+    }
 }

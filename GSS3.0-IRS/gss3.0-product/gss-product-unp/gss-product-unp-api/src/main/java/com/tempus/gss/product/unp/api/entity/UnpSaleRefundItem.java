@@ -17,6 +17,11 @@ public class UnpSaleRefundItem implements Serializable {
      */
     private Long saleRefundOrderNo;
     /**
+     * 销售明细单号
+     */
+    private Long saleItemNo;
+    
+    /**
      * 产品类型
      */
     private Integer unpType;
@@ -103,5 +108,13 @@ public class UnpSaleRefundItem implements Serializable {
     
     public void setValid(Integer valid) {
         this.valid = valid;
+    }
+    
+    public Long getSaleItemNo() {
+        return saleItemNo;
+    }
+    
+    public void setSaleItemNo(Long saleItemNo) {
+        this.saleItemNo = saleItemNo;
     }
 }
