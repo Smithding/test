@@ -69,12 +69,13 @@ public class IftPolicyHelper {
 	 * 
 	 * @param agent 用户信息
 	 * @param legs 航段集合
+	 * @param airline 实际出票航司
 	 * @param adtNumber 成人数
 	 * @param chdNumber 儿童数
 	 * @param infNumber 婴儿数
 	 * @return FlightQuery 组装好的查询条件
 	 */
-	public FlightQuery packageQuery(Agent agent, List<Leg> legs, int adtNumber, int chdNumber, int infNumber){
+	public FlightQuery packageQuery(Agent agent, List<Leg> legs, String airline, int adtNumber, int chdNumber, int infNumber){
 		int psgType = 1; //乘客类型 1：成人；2:儿童;3:婴儿；4：成人+儿童；5成人+婴儿；
 		if(0 == adtNumber && 0 < chdNumber && 0 == infNumber){
 			psgType = 2;
@@ -87,22 +88,22 @@ public class IftPolicyHelper {
 		}
 		FlightQuery query = new FlightQuery();
 		try {
-			int legType = this.getLegType(legs);
+			int legType = 1; //默认单程
 			Leg departLeg = legs.get(0);
 			Leg arriveLeg = legs.get(legs.size() -1);
 			Leg rtnLeg = null;
-			if(2 == legType){ //获取回程航段
+			if(legs.size() > 1){
 				for(int i = 0; i < legs.size(); i++){
-					if(i > 0){
-						if(legs.get(i - 1).getDepAirport().equals(legs.get(i).getArrAirport())){
-							rtnLeg = legs.get(i);
-							break;
-						}
+					Leg leg = legs.get(i);
+					if(2 == leg.getGoBack()){
+						rtnLeg = legs.get(i);
+						legType = 2;
+						break;
 					}
 				}
 			}
 			query.setOwner(agent.getOwner());
-			query.setAirline(departLeg.getAirline());// 出票航司
+			query.setAirline(airline);// 出票航司
 			query.setDepartAirport(departLeg.getDepAirport());// 出发城市
 			Country deparcountry = airportService.queryCountryByAirport(departLeg.getDepAirport());// 根据出发城市查询所属的国家
 			if (deparcountry != null && !deparcountry.equals("")) {
@@ -125,7 +126,7 @@ public class IftPolicyHelper {
 					query.setArriveCountry(airrcountry.getCountryCode());// 三字码所属国家
 					query.setArriveSign(airrcountry.getDomOrInt());
 				} else {
-					logger.info(arriveLeg.getArrAirport() + "基础数据获取到城市信息");
+					logger.info(rtnLeg.getDepAirport() + "基础数据获取到城市信息");
 				}
 			}else{
 				query.setArriveAirport(arriveLeg.getArrAirport());
@@ -158,7 +159,7 @@ public class IftPolicyHelper {
 	 * @param pnrContext 编码内容
 	 * @return List<IftPolicy> 过滤后的政策集合
 	 */
-	public List<IftPolicy> ruleFilter(List<IftPolicy> iftPolicyList, List<Leg> legs, FlightQuery query, double parPrice){
+	public List<IftPolicy> ruleFilter(List<IftPolicy> iftPolicyList, List<Leg> legs, FlightQuery query, String fareBasis, double parPrice){
 		ArrayList<String> airlines = new ArrayList<>();//航司集合
 		ArrayList<String> cabins = new ArrayList<>(); //舱位集合
 		ArrayList<String> flightNos = new ArrayList<>(); //航班号集合
@@ -166,6 +167,8 @@ public class IftPolicyHelper {
 		ArrayList<String> rtnFlightNos = new ArrayList<>();//回程航班号集合
 		ArrayList<String> transitCabins = new ArrayList<>();//中转舱位集合
 		ArrayList<String> transitAirports = new ArrayList<>();//中转机场集合
+		ArrayList<String> borders = new ArrayList<>();//出发城市属于境内或境外集合 D境内，I境外
+		boolean isArnk = false; //是否缺口程
 		
 		IftPolicyRuleUtils ruleUtils = new IftPolicyRuleUtils();
 		
@@ -176,33 +179,55 @@ public class IftPolicyHelper {
 				cabins.add(leg.getCabin());
 				flightNos.add(leg.getFlightNo());
 				flyFlightNos.add(leg.getFlightNo());
+				try{
+					Country deparcountry = airportService.queryCountryByAirport(leg.getDepAirport());// 根据出发城市查询所属的国家
+					borders.add(deparcountry.getDomOrInt());
+				}catch(Exception e){
+					logger.info(leg.getDepAirport() + "基础数据获取到城市信息");
+				}
+				/* 获取是否缺口 */
+				if(!isArnk){
+					if(null == leg.getFlightNo()){
+						isArnk = true;
+					}
+				}
 				if(legs.size() > 1 && i > 0){
 					transitCabins.add(leg.getCabin());
 					transitAirports.add(leg.getDepAirport());
 				}
 			}
-			iftPolicyList = Collections.filter(iftPolicyList, (iftPolicy) -> ruleUtils.matcheAirline(iftPolicy, airlines)
+			iftPolicyList = Collections.filter(iftPolicyList, (iftPolicy) -> true
+//					&& ruleUtils.matcheAirline(iftPolicy, airlines)
 					&& ruleUtils.matcheDepartCabin(iftPolicy, cabins)
 					&& ruleUtils.matcheTransitCabin(iftPolicy, transitCabins) 
 					&& ruleUtils.matcheNotSuitTransitAirport(iftPolicy, transitAirports)
 					&& ruleUtils.matcheDepartSuitFlight(iftPolicy, flightNos)
 					&& ruleUtils.matcheNotSuitFlight(iftPolicy, flightNos) 
 					&& ruleUtils.matcheMixtrueCabin(iftPolicy, cabins)
+					&& ruleUtils.matcheFareBasis(iftPolicy, fareBasis) 
 					&& ruleUtils.matcheParpirce(iftPolicy, parPrice)
 					&& ruleUtils.matchedExclude(iftPolicy, query.getDepartAirport(), query.getArriveAirport()));
 		}else{//往返
 			ArrayList<Leg> flyLegs = new ArrayList<>(); //去程
 			ArrayList<Leg> rtnLegs = new ArrayList<>(); //回程
-			boolean startRtn = false;
 			for(int i = 0; i < legs.size(); i++){ //遍历获取信息并得到去程以及回航段
 				Leg leg = legs.get(i);
 				airlines.add(leg.getAirline());
 				cabins.add(leg.getCabin());
 				flightNos.add(leg.getFlightNo());
-				if(!startRtn){
-					if(legs.get(i - 1).getDepAirport().equals(legs.get(i).getArrAirport())){
-						startRtn = true;
+				try{
+					Country deparcountry = airportService.queryCountryByAirport(leg.getDepAirport());// 根据出发城市查询所属的国家
+					borders.add(deparcountry.getDomOrInt());
+				}catch(Exception e){
+					logger.info(leg.getDepAirport() + "基础数据获取到城市信息");
+				}
+				/* 获取是否缺口 */
+				if(!isArnk){
+					if(null == leg.getFlightNo()){
+						isArnk = true;
 					}
+				}
+				if(1 == leg.getGoBack()){
 					flyLegs.add(leg);
 				}else{
 					rtnLegs.add(leg);
@@ -226,7 +251,8 @@ public class IftPolicyHelper {
 					}
 				}
 			}
-			iftPolicyList = Collections.filter(iftPolicyList, (iftPolicy) -> ruleUtils.matcheAirline(iftPolicy, airlines)
+			iftPolicyList = Collections.filter(iftPolicyList, (iftPolicy) -> true
+//					&& ruleUtils.matcheAirline(iftPolicy, airlines)
 					&& ruleUtils.matcheDepartCabin(iftPolicy, cabins)
 					&& ruleUtils.matcheTransitCabin(iftPolicy, transitCabins) 
 					&& ruleUtils.matcheRtnAirport(iftPolicy, query)
@@ -234,7 +260,8 @@ public class IftPolicyHelper {
 					&& ruleUtils.matcheDepartSuitFlight(iftPolicy, flyFlightNos)
 					&& ruleUtils.matcheArriveSuitFlight(iftPolicy, rtnFlightNos)
 					&& ruleUtils.matcheNotSuitFlight(iftPolicy, flightNos) 
-					&& ruleUtils.matcheMixtrueCabin(iftPolicy, cabins)
+					&& ruleUtils.matcheMixtrueCabin(iftPolicy, cabins) 
+					&& ruleUtils.matcheFareBasis(iftPolicy, fareBasis) 
 					&& ruleUtils.matcheParpirce(iftPolicy, parPrice)
 					&& ruleUtils.matchedExclude(iftPolicy, query.getDepartAirport(), query.getArriveAirport()));
 		}
@@ -251,87 +278,10 @@ public class IftPolicyHelper {
 	 * @param pnrContext 编码内容
 	 * @return List<IftPolicy> 过滤后的政策集合
 	 */
-	public List<IftPolicy> ruleFilterByPnr(List<IftPolicy> iftPolicyList, List<Passenger> passengers, List<Leg> legs, FlightQuery query,
+	public List<IftPolicy> ruleFilterByPnr(List<IftPolicy> iftPolicyList, List<Passenger> passengers, List<Leg> legs, FlightQuery query, String fareBasis,
 			String pnr, String pnrContext){
-		ArrayList<String> airlines = new ArrayList<>();//航司集合
-		ArrayList<String> cabins = new ArrayList<>(); //舱位集合
-		ArrayList<String> flightNos = new ArrayList<>(); //航班号集合
-		ArrayList<String> flyFlightNos = new ArrayList<>();//去程航班号集合
-		ArrayList<String> rtnFlightNos = new ArrayList<>();//回程航班号集合
-		ArrayList<String> transitCabins = new ArrayList<>();//中转舱位集合
-		ArrayList<String> transitAirports = new ArrayList<>();//中转机场集合
-		
-		IftPolicyRuleUtils ruleUtils = new IftPolicyRuleUtils();
-		
-		if(1 == query.getVoyageType()){//单程
-			for(int i = 0; i < legs.size(); i++){
-				Leg leg = legs.get(i);
-				airlines.add(leg.getAirline());
-				cabins.add(leg.getCabin());
-				flightNos.add(leg.getFlightNo());
-				flyFlightNos.add(leg.getFlightNo());
-				if(legs.size() > 1 && i > 0){
-					transitCabins.add(leg.getCabin());
-					transitAirports.add(leg.getDepAirport());
-				}
-			}
-			iftPolicyList = Collections.filter(iftPolicyList, (iftPolicy) -> ruleUtils.matcheAirline(iftPolicy, airlines)
-					&& ruleUtils.matcheDepartCabin(iftPolicy, cabins)
-					&& ruleUtils.matcheTransitCabin(iftPolicy, transitCabins) 
-					&& ruleUtils.matcheNotSuitTransitAirport(iftPolicy, transitAirports)
-					&& ruleUtils.matcheDepartSuitFlight(iftPolicy, flightNos)
-					&& ruleUtils.matcheNotSuitFlight(iftPolicy, flightNos) 
-					&& ruleUtils.matcheMixtrueCabin(iftPolicy, cabins)
-					&& ruleUtils.matcheParpirce(iftPolicy, passengers.get(0).getSaleFare().doubleValue())
-					&& ruleUtils.matchedExclude(iftPolicy, query.getDepartAirport(), query.getArriveAirport()));
-		}else{//往返
-			ArrayList<Leg> flyLegs = new ArrayList<>(); //去程
-			ArrayList<Leg> rtnLegs = new ArrayList<>(); //回程
-			boolean startRtn = false;
-			for(int i = 0; i < legs.size(); i++){ //遍历获取信息并得到去程以及回航段
-				Leg leg = legs.get(i);
-				airlines.add(leg.getAirline());
-				cabins.add(leg.getCabin());
-				flightNos.add(leg.getFlightNo());
-				if(!startRtn){
-					if(legs.get(i - 1).getDepAirport().equals(legs.get(i).getArrAirport())){
-						startRtn = true;
-					}
-					flyLegs.add(leg);
-				}else{
-					rtnLegs.add(leg);
-				}
-			}
-			if(flyLegs.size() > 1 && rtnLegs.size() > 1){
-				for(int i = 0; i < flyLegs.size(); i++){ //遍历去程获取转机信息
-					Leg leg = legs.get(i);
-					flyFlightNos.add(leg.getFlightNo());
-					if(i > 0){
-						transitCabins.add(leg.getCabin());
-						transitAirports.add(leg.getDepAirport());
-					}
-				}
-				for(int i = 0; i < rtnLegs.size(); i++){//遍历回程获取转机信息
-					Leg leg = legs.get(i);
-					rtnFlightNos.add(leg.getFlightNo());
-					if(i > 0){
-						transitCabins.add(leg.getCabin());
-						transitAirports.add(leg.getDepAirport());
-					}
-				}
-			}
-			iftPolicyList = Collections.filter(iftPolicyList, (iftPolicy) -> ruleUtils.matcheAirline(iftPolicy, airlines)
-					&& ruleUtils.matcheDepartCabin(iftPolicy, cabins)
-					&& ruleUtils.matcheTransitCabin(iftPolicy, transitCabins) 
-					&& ruleUtils.matcheRtnAirport(iftPolicy, query)
-					&& ruleUtils.matcheNotSuitTransitAirport(iftPolicy, transitAirports)
-					&& ruleUtils.matcheDepartSuitFlight(iftPolicy, flyFlightNos)
-					&& ruleUtils.matcheArriveSuitFlight(iftPolicy, rtnFlightNos)
-					&& ruleUtils.matcheNotSuitFlight(iftPolicy, flightNos) 
-					&& ruleUtils.matcheMixtrueCabin(iftPolicy, cabins)
-					&& ruleUtils.matcheParpirce(iftPolicy, passengers.get(0).getSaleFare().doubleValue())
-					&& ruleUtils.matchedExclude(iftPolicy, query.getDepartAirport(), query.getArriveAirport()));
-		}
+		iftPolicyList = this.ruleFilter(iftPolicyList, legs, query, fareBasis, passengers.get(0).getSaleFare().doubleValue());
+		//TODO 实现pnr以及PNR内容中数据过滤
 		return iftPolicyList;
 	}
 }

@@ -1,11 +1,32 @@
 package com.tempus.gss.product.ift.service;
 
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
+
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.tempus.gss.ops.util.CommenUtil;
 import com.tempus.gss.order.entity.SaleOrder;
 import com.tempus.gss.product.common.entity.RequestWithActor;
-import com.tempus.gss.product.ift.api.entity.*;
+import com.tempus.gss.product.ift.api.entity.CabinsPricesTotals;
+import com.tempus.gss.product.ift.api.entity.Flight;
+import com.tempus.gss.product.ift.api.entity.PassengerTypeEnum;
+import com.tempus.gss.product.ift.api.entity.PassengerTypePricesTotal;
+import com.tempus.gss.product.ift.api.entity.PnrPassenger;
+import com.tempus.gss.product.ift.api.entity.QueryByPnr;
+import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
 import com.tempus.gss.product.ift.api.entity.vo.FlightCabinPriceVo;
 import com.tempus.gss.product.ift.api.service.IOrderService;
 import com.tempus.gss.product.ift.api.service.IQueryService;
@@ -15,19 +36,17 @@ import com.tempus.gss.vo.Agent;
 import com.tempus.tbd.entity.Airport;
 import com.tempus.tbd.service.IAirportService;
 import com.tempus.tbe.NotSupportException;
-import com.tempus.tbe.entity.*;
+import com.tempus.tbe.entity.PnrAirTraveler;
+import com.tempus.tbe.entity.PnrOutPut;
+import com.tempus.tbe.entity.PnrSeg;
+import com.tempus.tbe.entity.PsgerInput;
+import com.tempus.tbe.entity.QteFlight;
+import com.tempus.tbe.entity.QteReq;
+import com.tempus.tbe.entity.QteRes;
+import com.tempus.tbe.entity.QteResult;
+import com.tempus.tbe.entity.SegQteReq;
 import com.tempus.tbe.service.IFareService;
 import com.tempus.tbe.service.IGetPnrService;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 /**
  * Created by 杨威 on 2017/9/6.
@@ -53,7 +72,9 @@ public class PNRMappingServiceImpl implements PNRMappingService {
     private String office;
     @Value("${dpsconfig.job.owner}")
     private String owner;
-    protected final transient Logger log = LoggerFactory.getLogger(getClass());
+    
+	/** 日志记录器. */
+	protected static Logger log = LogManager.getLogger(PNRMappingServiceImpl.class);
 
     @Override
     public QueryIBEDetail pnrMapping(RequestWithActor<String> flightQueryRequest, String customerType,String isCivilTicket) {

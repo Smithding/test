@@ -1,5 +1,6 @@
 package com.tempus.gss.product.ift.service.search;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -7,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.tempus.gss.product.ift.api.entity.Passenger;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.search.FlightQuery;
 
@@ -157,6 +159,100 @@ public class IftPolicyRuleUtils {
 			}
 		}
 		this.log(policy,result,"检查不适用转机机场[matcheNotSuitTransitAirport]未通过");
+		return result;
+	}
+	
+	/**
+	 * 检查目的地缺口程
+	 * 
+	 * @param policy  待匹配的政策
+	 * @param isArnk  航线是否缺口
+	 * @return
+	 */
+	public boolean matcheArnk(IftPolicy policy, boolean isArnk) {
+		boolean result = true;
+		if(null != policy.getArnkType() && 3 == policy.getArnkType()){
+			if(isArnk){
+				result = false;
+			}
+		}
+		this.log(policy,result,"检查目的地缺口程[matcheArnk]未通过");
+		return result;
+	}
+	
+	/**
+	 * 检查乘客类型不适用
+	 * 
+	 * @param policy  待匹配的政策
+	 * @param passengers  乘客集合
+	 * @return
+	 */
+	public boolean matchePassengerType(IftPolicy policy, List<Passenger> passengers) {
+		boolean result = true;
+		//TODO 未知乘客类型，后实现
+		this.log(policy,result,"检查乘客类型不适用[matchePassengerType]未通过");
+		return result;
+	}
+	
+	/**
+	 * 检查航程类型不适用
+	 * 
+	 * @param policy  待匹配的政策
+	 * @param borders 航程集合
+	 * @return
+	 */
+	public boolean matcheFlightType(IftPolicy policy, ArrayList<String> borders) {
+		boolean result = true;
+		if(borders.size() > 1 && StringUtils.isNotBlank(policy.getNotsuitPassengerType())){
+			
+		}
+		this.log(policy,result,"检查航程类型不适用[matcheFlightType]未通过");
+		return result;
+	}
+	
+	/**
+	 * 检查运价基础
+	 * 
+	 * @param policy  待匹配的政策
+	 * @param fareBasis 运价基础
+	 * @return
+	 */
+	public boolean matcheFareBasis(IftPolicy policy, String fareBasis) {
+		boolean result = true;
+		/* 首先检查不适用的运价基础 */
+		if(null != policy.getIsFareIncludeText() && policy.getIsFareIncludeText() && null != policy.getFareIncludeType() && 3 == policy.getFareIncludeType()){
+			if(StringUtils.isNotBlank(policy.getFareIncludeText())){
+				String[] policyFareBasisList = policy.getFareIncludeText().split("/");
+				for(String policyFareBasis : policyFareBasisList){
+					if(fareBasis.contains(policyFareBasis)){
+						result = false;
+						break;
+					}
+				}
+			}
+		}
+		
+		/* 检查适用的运价基础 */
+		if(result && null != policy.getIsSuitFareBase() && policy.getIsSuitFareBase()){
+			if(StringUtils.isNotBlank(policy.getSuitFareBase())){
+				String[] policySuitFareBases = policy.getSuitFareBase().split("/");
+				String[] fareBasisList = fareBasis.split("\\+");
+				for(int i=0; i < policySuitFareBases.length; i++){
+					boolean isHand = false;
+					for(String fareBasisStr : fareBasisList){
+						if(policySuitFareBases[i].equals(fareBasisStr)){
+							isHand = true;
+							break;
+						}
+					}
+					if(!isHand){
+						result = false;
+						break;
+					}
+				}
+			}
+		}
+		this.log(policy,result,"检查运价基础[matcheFareBasis]未通过");
 		return result;
 	}
 	
@@ -324,6 +420,9 @@ public class IftPolicyRuleUtils {
 //		String[] cabins = str.split(",");
 //		System.out.println(cabins.length);
 //		System.out.println(Arrays.binarySearch(cabins, "K"));
-
+		String str = "J+P+A";
+		for(String s : str.split("\\+")){
+			System.out.println(s);
+		}
 	}
 }
