@@ -58,6 +58,9 @@
             <if test="saleRefundOrderNo != null">
                 SALE_REFUND_ORDER_NO,
             </if>
+            <if test="saleItemNo != null">
+                SALE_ITEM_NO,
+            </if>
             <if test="unpType != null">
                 UNP_TYPE,
             </if>
@@ -84,8 +87,11 @@
             <if test="saleRefundOrderNo != null">
                 #{saleRefundOrderNo,jdbcType=BIGINT},
             </if>
+            <if test="saleItemNo != null">
+                #{saleItemNo,jdbcType=BIGINT},
+            </if>
             <if test="unpType != null">
-                #{unpType,jdbcType=INTEGER},
+                #{unpType,jdbcType=BIGINT},
             </if>
             <if test="num != null">
                 #{num,jdbcType=INTEGER},

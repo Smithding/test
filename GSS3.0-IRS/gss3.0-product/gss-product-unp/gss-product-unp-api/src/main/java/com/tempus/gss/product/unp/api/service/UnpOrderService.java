@@ -64,7 +64,7 @@ public interface UnpOrderService {
      *         UnpOrderVo
      * @return UnpResult
      */
-    UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpOrderVo request);
+    UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpOrderVo request,UnpSaleRefund unpSaleRefund);
     
     /** <<<<<<<<<<<<<<<<<<<<<<<【CREATE】【UPDATE】>>>>>>>>>>>>>>>>>>>>>>> */
     /**
@@ -203,4 +203,6 @@ public interface UnpOrderService {
      * @return Page
      */
     UnpResult<Object> buyRefund(Agent agent,Long buyRefundNo) throws GSSException;
+
+    UnpResult<Object> createRefund(Agent agent, Long saleOrderNo);
 }
