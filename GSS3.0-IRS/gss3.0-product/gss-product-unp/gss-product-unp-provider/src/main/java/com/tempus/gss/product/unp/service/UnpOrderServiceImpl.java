@@ -1012,4 +1012,14 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         logger.info("【UNP】查询-BUY_REFUND_ITEM SIZE:{},parameter:{}", list.size(), params);
         return list;
     }
+    
+    @Override
+    public UnpResult<Object> saleRefund(Long saleRefundNo) throws GSSException {
+        return null;
+    }
+    
+    @Override
+    public UnpResult<Object> buyRefund(Long buyRefundNo) throws GSSException {
+        return null;
+    }
 }

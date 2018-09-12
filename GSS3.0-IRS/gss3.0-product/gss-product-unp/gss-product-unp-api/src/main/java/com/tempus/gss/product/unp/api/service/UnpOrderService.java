@@ -1,6 +1,7 @@
 package com.tempus.gss.product.unp.api.service;
 
 import com.baomidou.mybatisplus.plugins.Page;
+import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.unp.api.entity.*;
 import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
@@ -187,5 +188,19 @@ public interface UnpOrderService {
      */
     UnpBuyRefund queryBuyOrderRefund(UnpOrderQueryVo param);
     
-    /** <<<<<<<<<<<<<<<<<<<<<<<【SELECT】【】>>>>>>>>>>>>>>>>>>>>>>> */
+    /** <<<<<<<<<<<<<<<<<<<<<<<【SELECT】【REFUND_PAY】>>>>>>>>>>>>>>>>>>>>>>> */
+    
+    /**
+     * @param saleRefundNo
+     *         销售退单号
+     * @return Page
+     */
+    UnpResult<Object> saleRefund(Long saleRefundNo) throws GSSException;
+    
+    /**
+     * @param buyRefundNo
+     *         退单号
+     * @return Page
+     */
+    UnpResult<Object> buyRefund(Long buyRefundNo) throws GSSException;
 }
