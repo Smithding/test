@@ -104,6 +104,25 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         unpSale.setSaleItems(saleItems);
         return unpSale;
     }
+
+    @Override
+    public UnpSaleRefund getSaleRefundOrderInfo(UnpOrderQueryVo params) {
+        UnpSaleRefund unpSaleRefund=null;
+        Page<UnpSaleRefund> page = this.querySaleOrderRefundList(new Page<>(1, 1), params);
+        if (page == null || page.getRecords() == null) {
+            return null;
+        }
+        unpSaleRefund = page.getRecords().get(0);
+        if (unpSaleRefund == null) {
+            return null;
+        }
+        UnpOrderQueryVo p = new UnpOrderQueryVo();
+        p.setSaleChangeNo(unpSaleRefund.getSaleRefundOrderNo());
+        List<UnpSaleRefundItem> saleRefundItems = this.getSaleRefundItems(p);
+        unpSaleRefund.setItems(saleRefundItems);
+        return unpSaleRefund;
+    }
+
     @Override
     public UnpBuyRefund getBuyRefundOrderInfo(UnpOrderQueryVo params) {
         UnpBuyRefund unpBuyRefund = null;
@@ -121,6 +140,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         unpBuyRefund.setItems(buyRefundItems);
         return unpBuyRefund;
     }
+
     @Override
     public UnpBuy getBuyOrderInfo(UnpOrderQueryVo params) {
         UnpBuy unpBuy = null;
@@ -692,7 +712,9 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     
     @Override
     public Page<UnpSaleRefund> querySaleOrderRefundList(Page<UnpSaleRefund> wrapper, UnpOrderQueryVo param) {
-        return this.unpSaleRefundMapper.queryList(wrapper, param);
+        List<UnpSaleRefund> unpSaleRefunds = unpSaleRefundMapper.queryList(wrapper, param);
+        wrapper.setRecords(unpSaleRefunds);
+        return  wrapper;
     }
     
     @Override

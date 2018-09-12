@@ -258,34 +258,25 @@
             AND USR.SALE_REFUND_ORDER_NO = #{saleRefundOrderNojdbcType=BIGINT}
         </if>
         <if test="saleOrderNo != null">
-            AND USR.SALE_ORDER_NO = #{saleOrderNojdbcType=BIGINT}
+            AND USR.SALE_ORDER_NO = #{saleOrderNo jdbcType=BIGINT}
         </if>
         <if test="owner != null">
-            AND USR.OWNER = #{ownerjdbcType=INTEGER}
+            AND USR.OWNER = #{owner jdbcType=INTEGER}
         </if>
         <if test="customerNo != null">
-            AND USR.CUSTOMER_NO = #{customerNojdbcType=BIGINT}
+            AND USR.CUSTOMER_NO = #{customerNo jdbcType=BIGINT}
         </if>
         <if test="customerType != null">
-            AND USR.CUSTOMER_TYPE = #{customerTypejdbcType=BIGINT}
-        </if>
-        <if test="remark != null">
-            AND USR.REMARK = #{remarkjdbcType=VARCHAR}
+            AND USR.CUSTOMER_TYPE = #{customerType jdbcType=BIGINT}
         </if>
         <if test="traNo != null">
             AND USR.TRA_NO = #{traNojdbcType=BIGINT}
         </if>
         <if test="changeType != null">
-            AND USR.CHANGE_TYPE = #{changeTypejdbcType=INTEGER}
-        </if>
-        <if test="refundAmount != null">
-            AND USR.REFUND_AMOUNT = #{refundAmountjdbcType=DECIMAL}
+            AND USR.CHANGE_TYPE = #{changeType jdbcType=INTEGER}
         </if>
         <if test="payStatus != null">
-            AND USR.PAY_STATUS = #{payStatusjdbcType=TINYINT}
-        </if>
-        <if test="actualAmount != null">
-            AND USR.ACTUAL_AMOUNT = #{actualAmountjdbcType=DECIMAL}
+            AND USR.PAY_STATUS = #{payStatus jdbcType=TINYINT}
         </if>
         <if test="payTimeStart!=null and ''!=payTimeStart">
             AND USR.PAY_TIME <![CDATA[>=]]> CONCAT(#{payTimeStart,jdbcType=TIMESTAMP},' 00:00:00')

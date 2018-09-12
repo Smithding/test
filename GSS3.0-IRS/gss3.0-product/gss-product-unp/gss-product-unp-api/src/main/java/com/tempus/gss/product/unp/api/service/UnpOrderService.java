@@ -116,7 +116,7 @@ public interface UnpOrderService {
      * @see EUnpConstant.ChangeType
      */
     UnpSale getSaleOrderInfo(UnpOrderQueryVo params);
-    
+    UnpSaleRefund getSaleRefundOrderInfo(UnpOrderQueryVo params);
     UnpBuy getBuyOrderInfo(UnpOrderQueryVo params);
     UnpBuyRefund getBuyRefundOrderInfo(UnpOrderQueryVo params);
     /**

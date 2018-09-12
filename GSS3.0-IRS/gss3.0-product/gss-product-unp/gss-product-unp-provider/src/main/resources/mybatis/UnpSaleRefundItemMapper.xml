@@ -28,23 +28,12 @@
         <if test="saleChangeNo != null">
             AND USRI.SALE_REFUND_ORDER_NO = #{saleChangeNo,jdbcType=BIGINT}
         </if>
-        <if test="buyRefundOrderNo != null">
-            AND USRI.BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
+        <if test="buyChangeNo != null">
+            AND USRI.BUY_REFUND_ORDER_NO = #{buyChangeNo,jdbcType=BIGINT}
         </if>
-        <if test="unpType != null">
-            AND USRI.UNP_TYPE = #{unpType,jdbcType=INTEGER}
-        </if>
-        <if test="num != null">
-            AND USRI.NUM = #{num,jdbcType=INTEGER}
-        </if>
+
         <if test="changeType != null">
             AND USRI.CHANGE_TYPE = #{changeType,jdbcType=INTEGER}
-        </if>
-        <if test="groupAmount != null">
-            AND USRI.GROUP_AMOUNT = #{groupAmount,jdbcType=DECIMAL}
-        </if>
-        <if test="itemStatus != null">
-            AND USRI.ITEM_STATUS = #{itemStatus,jdbcType=INTEGER}
         </if>
         <if test="valid != null">
             AND USRI.VALID = #{valid,jdbcType=BIT}
