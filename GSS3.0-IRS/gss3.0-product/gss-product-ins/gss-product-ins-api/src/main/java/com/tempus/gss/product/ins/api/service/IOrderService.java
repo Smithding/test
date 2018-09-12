@@ -323,6 +323,5 @@ public interface IOrderService {
 	 * @throws Exception
 	 */
 	boolean cancelInsuranceOrder(RequestWithActor<Long> requestWithActor) throws Exception;
-
 }
 

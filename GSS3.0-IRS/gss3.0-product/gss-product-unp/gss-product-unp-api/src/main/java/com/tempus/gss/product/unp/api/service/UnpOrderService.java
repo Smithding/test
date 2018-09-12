@@ -118,7 +118,7 @@ public interface UnpOrderService {
     UnpSale getSaleOrderInfo(UnpOrderQueryVo params);
     
     UnpBuy getBuyOrderInfo(UnpOrderQueryVo params);
-    
+    UnpBuyRefund getBuyRefundOrderInfo(UnpOrderQueryVo params);
     /**
      * 根据条件查询明细表集合
      *
