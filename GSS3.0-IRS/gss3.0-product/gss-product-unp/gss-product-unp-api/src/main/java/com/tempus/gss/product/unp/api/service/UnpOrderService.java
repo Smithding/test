@@ -195,12 +195,12 @@ public interface UnpOrderService {
      *         销售退单号
      * @return Page
      */
-    UnpResult<Object> saleRefund(Long saleRefundNo) throws GSSException;
+    UnpResult<Object> saleRefund(Agent agent,Long saleRefundNo) throws GSSException;
     
     /**
      * @param buyRefundNo
      *         退单号
      * @return Page
      */
-    UnpResult<Object> buyRefund(Long buyRefundNo) throws GSSException;
+    UnpResult<Object> buyRefund(Agent agent,Long buyRefundNo) throws GSSException;
 }

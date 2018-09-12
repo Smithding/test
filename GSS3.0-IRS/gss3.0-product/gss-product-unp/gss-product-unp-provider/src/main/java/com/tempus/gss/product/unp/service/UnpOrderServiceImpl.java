@@ -5,11 +5,17 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
+import com.tempus.gss.cps.entity.Supplier;
+import com.tempus.gss.cps.service.ISupplierService;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.order.entity.*;
 import com.tempus.gss.order.entity.enums.*;
+import com.tempus.gss.order.entity.vo.ActualInfoSearchVO;
+import com.tempus.gss.order.entity.vo.CertificateCreateVO;
 import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
 import com.tempus.gss.order.service.*;
+import com.tempus.gss.pay.dict.DetailPayWay;
+import com.tempus.gss.pay.dict.ProductType;
 import com.tempus.gss.product.unp.api.entity.*;
 import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
@@ -21,6 +27,7 @@ import com.tempus.gss.product.unp.api.service.UnpOrderService;
 import com.tempus.gss.product.unp.dao.*;
 import com.tempus.gss.util.NullableCheck;
 import com.tempus.gss.vo.Agent;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +93,8 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     IBuyChangeService buyChangeService;
     @Reference
     ISaleChangeService saleChangeService;
+    @Reference
+    ISupplierService supplierService;
     
     @Override
     public UnpSale getSaleOrderInfo(UnpOrderQueryVo params) {
@@ -1054,12 +1063,146 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     }
     
     @Override
-    public UnpResult<Object> saleRefund(Long saleRefundNo) throws GSSException {
-        return null;
+    public UnpResult<Object> saleRefund(Agent agent, Long saleRefundNo) throws GSSException {
+        UnpResult<Object> result = new UnpResult<>();
+        UnpOrderQueryVo queryVo = new UnpOrderQueryVo();
+        queryVo.setSaleChangeNo(saleRefundNo);
+        UnpSaleRefund refundOrder = null;
+        int payWay = 0;
+        int payType = 0;
+        try {
+            refundOrder = this.querySaleOrderRefund(queryVo);
+            if (refundOrder == null) {
+                throw new GSSException("UNP", "9400", "单号为【" + saleRefundNo + "】的【销售退单】不存在");
+            }
+            Long traNo = null;
+            Long saleOrderNo = null;
+            //原单的支付信息
+            saleOrderNo = refundOrder.getSaleOrderNo();
+            traNo = refundOrder.getTraNo();
+            if (traNo == null) {
+                queryVo.setSaleChangeNo(null);
+                queryVo.setSaleOrderNo(refundOrder.getSaleOrderNo());
+                UnpSale unpSale = this.getSaleOrderInfo(queryVo);
+                if (unpSale == null) {
+                    throw new GSSException("UNP", "9400", "退单单号为【" + saleRefundNo + "】的【销售单】不存在");
+                }
+                traNo = unpSale.getTraNo();
+            }
+            ActualInfoSearchVO actualInfoVO = certificateService.queryListByTONo(agent, traNo);
+            List<ActualAmountRecord> actualAmounts = actualInfoVO.getActualAmountRecordList();
+            final long saleNo = saleOrderNo;
+            List<String> payNos = new ArrayList<>();
+            CollectionUtils.filter(actualAmounts, ac -> {
+                //过滤销售支付成功的信息
+                if (ac.getActualStatus() == 1 && ac.getRecordNo().equals(saleNo)) {
+                    payNos.add(ac.getPayNo());
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+            if (CollectionUtils.isEmpty(actualAmounts) || CollectionUtils.isEmpty(payNos)) {
+                throw new GSSException("UNP", "9400", "退单单号为【" + saleRefundNo + "】的【销售单支付信息】不存在");
+            }
+            payWay = Integer.getInteger(actualAmounts.get(0).getPayWay());
+            payType = actualAmounts.get(0).getPayType();
+            CertificateCreateVO vo = new CertificateCreateVO();
+            vo.setTransationOrderNo(String.valueOf(refundOrder.getTraNo()));
+            vo.setPayWay(payWay);
+            vo.setPayType(payType);
+            vo.setServiceLine("1");
+            vo.setReason("UNP销售单变更退款");
+            vo.setChannel("WEB");
+            vo.setCustomerTypeNo(refundOrder.getCustomerNo());
+            vo.setCustomerTypeNo(refundOrder.getCustomerType());
+            vo.setSubBusinessType(EgoodsSubType.SALE_RETREAT.getKey());
+            vo.setIncomeExpenseType(IncomeExpenseType.EXPENSE.getKey());
+            vo.setProductType(ProductType.GENERAL);
+            vo.setDetailPayWay(DetailPayWay.NORMAL);
+            vo.setSaleOrderNo(String.valueOf(saleOrderNo));
+            vo.setPayNo(payNos.get(0));
+            BigDecimal refundAmount = certificateService.saleRefundCert(agent, vo);
+            result.success("销售退款成功", refundAmount);
+        } catch (Exception e) {
+            logger.error("Error", e);
+            throw new GSSException("UNP退款", "9400", e.getMessage());
+        }
+        return result;
     }
+    //todo 采购付款  审核状态
     
     @Override
-    public UnpResult<Object> buyRefund(Long buyRefundNo) throws GSSException {
-        return null;
+    public UnpResult<Object> buyRefund(Agent agent, Long buyRefundNo) throws GSSException {
+        UnpResult<Object> result = new UnpResult<>();
+        UnpOrderQueryVo queryVo = new UnpOrderQueryVo();
+        queryVo.setBuyChangeNo(buyRefundNo);
+        UnpBuyRefund refundOrder;
+        try {
+            refundOrder = queryBuyOrderRefund(queryVo);
+            if (refundOrder == null) {
+                throw new GSSException("UNP", "9400", "单号为【" + buyRefundNo + "】的【采购退单】不存在");
+            }
+            Long traNo = null;
+            Long buyOrderNo = null;
+            int payWay = 0;
+            int payType = 0;
+            //原单的支付信息
+            buyOrderNo = refundOrder.getBuyOrderNo();
+            traNo = refundOrder.getTraNo();
+            if (traNo == null) {
+                queryVo.setBuyChangeNo(null);
+                queryVo.setBuyOrderNo(buyOrderNo);
+                UnpBuy unpBuy = this.getBuyInfos(queryVo);
+                if (unpBuy == null) {
+                    throw new GSSException("UNP", "9400", "退单单号为【" + buyRefundNo + "】的【采购单】不存在");
+                }
+                traNo = unpBuy.getTraNo();
+            }
+            ActualInfoSearchVO actualInfoVO = certificateService.queryListByTONo(agent, traNo);
+            List<ActualAmountRecord> actualAmounts = actualInfoVO.getActualAmountRecordList();
+            final long buyNo = buyOrderNo;
+            List<String> payNos = new ArrayList<>();
+            CollectionUtils.filter(actualAmounts, ac -> {
+                //过滤销售支付成功的信息  ac.getActualStatus() == 1 &&   采购审核状态有误
+                if (ac.getRecordNo().equals(buyNo)) {
+                    payNos.add(ac.getPayNo());
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+            if (CollectionUtils.isEmpty(actualAmounts) || CollectionUtils.isEmpty(payNos)) {
+                throw new GSSException("UNP", "9400", "退单单号为【" + buyRefundNo + "】的【采购单支付信息】不存在");
+            }
+            payWay = Integer.getInteger(actualAmounts.get(0).getPayWay());
+            payType = actualAmounts.get(0).getPayType();
+            Supplier supplier = supplierService.getSupplierByNo(agent, refundOrder.getSupplierId());
+            if (supplier == null) {
+                throw new GSSException("UNP", "9400", "退单单号为【" + buyRefundNo + "】的【供应商客户信息】不存在");
+            }
+            CertificateCreateVO vo = new CertificateCreateVO();
+            vo.setTransationOrderNo(String.valueOf(refundOrder.getTraNo()));
+            vo.setPayWay(payWay);
+            vo.setPayType(payType);
+            vo.setServiceLine("1");
+            vo.setReason("UNP采购单变更退款");
+            vo.setChannel("WEB");
+            vo.setCustomerTypeNo(supplier.getCustomerNo());
+            vo.setCustomerTypeNo(supplier.getCustomerTypeNo());
+            vo.setSubBusinessType(EgoodsSubType.BUY_RETREAT.getKey());
+            vo.setIncomeExpenseType(IncomeExpenseType.INCOME.getKey());
+            vo.setProductType(ProductType.GENERAL);
+            vo.setDetailPayWay(DetailPayWay.NORMAL);
+            vo.setSaleOrderNo(String.valueOf(buyOrderNo));
+            vo.setPayNo(payNos.get(0));
+            BigDecimal refundAmount = certificateService.saleRefundCert(agent, vo);
+            result.success("采购退款成功", refundAmount);
+            logger.info("采购退款成功 ￥{}", refundAmount);
+        } catch (Exception e) {
+            logger.error("Error", e);
+            throw new GSSException("UNP退款", "9400", e.getMessage());
+        }
+        return result;
     }
 }

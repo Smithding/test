@@ -1,5 +1,6 @@
 package com.tempus.gss.product.ins.mq;
 
+import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.tempus.gss.dps.order.entity.sale.Sale;
 import com.tempus.gss.dps.order.entity.sale.SaleItem;
@@ -72,6 +73,7 @@ public class InsureTicketListenter {
                                 if(ispay){
                                        // List<Sale> sales = saleService.getByTradeNo(AgentUtil.getAgent(),ticketMessage.getTradeNo());
                                         requestWithActor.setEntity(saleOrderExt.getSaleOrderNo());
+                                        Thread.sleep(2000);
                                         List<Sale> sales = saleService.getByTradeNo(agent,ticketMessage.getTradeNo());
                                         for(SaleOrderExt saleOrderExtTwo:saleOrderExtList){
                                                 for(SaleOrderDetail saleOrderDetail:saleOrderExtTwo.getSaleOrderDetailList()){
