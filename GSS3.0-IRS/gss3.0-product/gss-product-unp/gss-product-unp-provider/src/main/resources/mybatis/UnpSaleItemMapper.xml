@@ -49,16 +49,6 @@
     delete from UNP_SALE_ITEM
     where ITEM_ID = #{itemId,jdbcType=BIGINT}
   </delete>
-    <insert id="insert" parameterType="com.tempus.gss.product.unp.api.entity.UnpSaleItem">
-    insert into UNP_SALE_ITEM (ITEM_ID, SALE_ORDER_NO, UNP_TYPE,
-      NUM, GROUP_AMOUNT, ITEM_STATUS,
-      CHANGE_TYPE, POLICY, ADDITIONAL_INFO,
-      VALID)
-    values (#{itemId,jdbcType=BIGINT}, #{saleOrderNo,jdbcType=BIGINT}, #{unpType,jdbcType=INTEGER},
-      #{num,jdbcType=INTEGER}, #{groupAmount,jdbcType=DECIMAL}, #{itemStatus,jdbcType=INTEGER},
-      #{changeType,jdbcType=INTEGER}, #{policy,jdbcType=INTEGER}, #{additionalInfo,jdbcType=VARCHAR},
-      #{valid,jdbcType=INTEGER})
-  </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpSaleItem">
         insert into UNP_SALE_ITEM
         <trim prefix="(" suffix=")" suffixOverrides=",">

@@ -114,6 +114,7 @@
         <if test="groupName != null and groupName!=''">
             AND UGT.NAME LIKE concat('%',concat(#{groupName,jdbcType=VARCHAR},'%'))
         </if>
+        GROUP BY US.SALE_ORDER_NO
         ORDER BY US.CREATE_TIME DESC
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
@@ -302,5 +303,6 @@
             MODIFY_TIME   = #{modifyTime,jdbcType=TIMESTAMP},
             VALID         = #{valid,jdbcType=INTEGER}
         WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+
     </update>
 </mapper>

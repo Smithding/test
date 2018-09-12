@@ -112,6 +112,7 @@ public class PayListener {
                     //退
                     if (payNoticeVO.getIncomeExpenseType() == IncomeExpenseType.EXPENSE.getKey()) {
                         //销售退款
+                        
                         logger.info("监听到UNP销售退款消息:{}--￥{}", payNoticeVO.getBusinessNo(), payNoticeVO.getActualAmount());
                     }
                 }

@@ -135,6 +135,10 @@ public interface UnpOrderService {
     
     List<UnpBuyItem> getBuyItems(UnpOrderQueryVo params);
     
+    List<UnpSaleRefundItem> getSaleRefundItems(UnpOrderQueryVo params);
+    
+    List<UnpBuyRefundItem> getBuyRefundItems(UnpOrderQueryVo params);
+    
     /**
      * @param itemNo
      *         itemNo
@@ -172,6 +176,8 @@ public interface UnpOrderService {
     /**
      * @param param
      * @return Page
+     * SaleChangeNo 销售变更单号
+     * BuyChangeNo 采购变更单号
      */
     UnpSaleRefund querySaleOrderRefund(UnpOrderQueryVo param);
     

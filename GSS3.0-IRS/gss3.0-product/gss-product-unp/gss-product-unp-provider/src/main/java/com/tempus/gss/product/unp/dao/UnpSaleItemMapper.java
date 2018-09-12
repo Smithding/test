@@ -8,8 +8,6 @@ import java.util.List;
 public interface UnpSaleItemMapper {
     int deleteByPrimaryKey(Long itemId);
     
-    int insert(UnpSaleItem record);
-    
     int insertSelective(UnpSaleItem record);
     
     UnpSaleItem selectByPrimaryKey(Long itemId);

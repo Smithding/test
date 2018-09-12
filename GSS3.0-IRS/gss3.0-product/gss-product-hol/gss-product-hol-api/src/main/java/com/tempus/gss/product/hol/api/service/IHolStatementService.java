@@ -18,9 +18,22 @@ public interface IHolStatementService {
     Page<HolStatement> list(Page<HolStatement> page, QueryStatementVo queryStatementVo);
 
     /**
+     * 保存列表
+     * @param holStatement
+     * @return
+     */
+    void saveList(List<HolStatement> holStatementList);
+
+    /**
      * 保存
      * @param holStatement
      * @return
      */
-    void save(List<HolStatement> holStatementList);
+    void updateById(HolStatement holStatement);
+
+    /**
+     * 删除
+     * @param id
+     */
+    void delete(Long id);
 }

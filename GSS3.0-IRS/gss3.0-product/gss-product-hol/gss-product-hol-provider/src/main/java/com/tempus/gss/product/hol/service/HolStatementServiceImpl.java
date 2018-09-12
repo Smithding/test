@@ -30,7 +30,17 @@ public class HolStatementServiceImpl implements IHolStatementService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
-    public void save(List<HolStatement> holStatementList) {
+    public void saveList(List<HolStatement> holStatementList) {
         holStatementMapper.insertBatch(holStatementList);
+    }
+
+    @Override
+    public void updateById(HolStatement holStatement) {
+        holStatementMapper.updateById(holStatement);
+    }
+
+    @Override
+    public void delete(Long id) {
+        holStatementMapper.deleteById(id);
     }
 }

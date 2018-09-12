@@ -4,6 +4,7 @@
     <resultMap id="BaseResultMap" type="com.tempus.gss.product.unp.api.entity.UnpBuyRefund">
         <id column="BUY_REFUND_ORDER_NO" jdbcType="BIGINT" property="buyRefundOrderNo"/>
         <result column="BUY_ORDER_NO" jdbcType="BIGINT" property="buyOrderNo"/>
+        <result column="SALE_REFUND_ORDER_NO" jdbcType="BIGINT" property="saleRefundOrderNo"/>
         <result column="OWNER" jdbcType="INTEGER" property="owner"/>
         <result column="SUPPLIER_ID" jdbcType="BIGINT" property="supplierId"/>
         <result column="SUPPLIER_TYPE" jdbcType="BIGINT" property="supplierType"/>
@@ -37,22 +38,6 @@
     delete from UNP_BUY_REFUND
     where BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
   </delete>
-    <insert id="insert" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyRefund">
-    insert into UNP_BUY_REFUND (BUY_REFUND_ORDER_NO, BUY_ORDER_NO, OWNER,
-      SUPPLIER_ID, SUPPLIER_TYPE, REMARK,
-      TRA_NO, CHANGE_TYPE, THIRD_BUS_NO,
-      REFUND_AMOUNT, PAY_STATUS, ACTUAL_AMOUNT,
-      PAY_TIME, STATUS, CREATOR,
-      CREATE_TIME, MODIFIER, MODIFY_TIME,
-      VALID)
-    values (#{buyRefundOrderNo,jdbcType=BIGINT}, #{buyOrderNo,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
-      #{supplierId,jdbcType=BIGINT}, #{supplierType,jdbcType=BIGINT}, #{remark,jdbcType=VARCHAR},
-      #{traNo,jdbcType=BIGINT}, #{changeType,jdbcType=INTEGER}, #{thirdBusNo,jdbcType=BIGINT},
-      #{refundAmount,jdbcType=DECIMAL}, #{payStatus,jdbcType=INTEGER}, #{actualAmount,jdbcType=DECIMAL},
-      #{payTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER}, #{creator,jdbcType=VARCHAR},
-      #{createTime,jdbcType=TIMESTAMP}, #{modifier,jdbcType=VARCHAR}, #{modifyTime,jdbcType=TIMESTAMP},
-      #{valid,jdbcType=BIT})
-  </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyRefund">
         insert into UNP_BUY_REFUND
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -233,28 +218,6 @@
             </if>
         </set>
         where BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
-    </update>
-    <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyRefund">
-        UPDATE UNP_BUY_REFUND
-        SET BUY_ORDER_NO  = #{buyOrderNo,jdbcType=BIGINT},
-            OWNER         = #{owner,jdbcType=INTEGER},
-            SUPPLIER_ID   = #{supplierId,jdbcType=BIGINT},
-            SUPPLIER_TYPE = #{supplierType,jdbcType=BIGINT},
-            REMARK        = #{remark,jdbcType=VARCHAR},
-            TRA_NO        = #{traNo,jdbcType=BIGINT},
-            CHANGE_TYPE   = #{changeType,jdbcType=INTEGER},
-            THIRD_BUS_NO  = #{thirdBusNo,jdbcType=BIGINT},
-            REFUND_AMOUNT = #{refundAmount,jdbcType=DECIMAL},
-            PAY_STATUS    = #{payStatus,jdbcType=INTEGER},
-            ACTUAL_AMOUNT = #{actualAmount,jdbcType=DECIMAL},
-            PAY_TIME      = #{payTime,jdbcType=TIMESTAMP},
-            STATUS        = #{status,jdbcType=INTEGER},
-            CREATOR       = #{creator,jdbcType=VARCHAR},
-            CREATE_TIME   = #{createTime,jdbcType=TIMESTAMP},
-            MODIFIER      = #{modifier,jdbcType=VARCHAR},
-            MODIFY_TIME   = #{modifyTime,jdbcType=TIMESTAMP},
-            VALID         = #{valid,jdbcType=BIT}
-        WHERE BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
     </update>
     <select id="queryList" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo" resultMap="BaseResultMap">
         SELECT *
