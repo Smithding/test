@@ -412,7 +412,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         UnpSaleRefund unpSaleRefund = new UnpSaleRefund();
         UnpSaleRefundItem unpSaleRefundItem = new UnpSaleRefundItem();
         List<UnpSaleItem> saleItems = request.getSaleItems();
-        UnpResult<UnpSaleRefund> unpResult = new UnpResult();
+        UnpResult<UnpSaleRefund> unpResult = new UnpResult<>();
         BigDecimal planAmount = new BigDecimal(0);
         String productName = "通用产品";
         List<String> goods = new ArrayList<>();
@@ -485,10 +485,10 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             //创建应收
             CreatePlanAmountVO planAmountRecordType = new CreatePlanAmountVO();
             planAmountRecordType.setRecordNo(unpSaleRefund.getSaleRefundOrderNo());
-            planAmountRecordType.setIncomeExpenseType(IncomeExpenseType.EXPENSE.getKey());//收支类型 1 收，2 为支
+            planAmountRecordType.setIncomeExpenseType(IncomeExpenseType.EXPENSE.getKey());
             planAmountRecordType.setBusinessType(BusinessType.SALECHANGE.getKey());
             planAmountRecordType.setRecordMovingType(CostType.FARE.getKey());
-            planAmountRecordType.setPlanAmount(planAmount);//合计
+            planAmountRecordType.setPlanAmount(planAmount);
             //商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送 9 通用产品
             planAmountRecordType.setGoodsType(GoodsBigType.GENERAL.getKey());
             PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, planAmountRecordType);
@@ -590,10 +590,10 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             //创建应收
             CreatePlanAmountVO planAmountRecordType = new CreatePlanAmountVO();
             planAmountRecordType.setRecordNo(unpBuyRefund.getBuyRefundOrderNo());
-            planAmountRecordType.setIncomeExpenseType(IncomeExpenseType.INCOME.getKey());//收支类型 1 收，2 为支
+            planAmountRecordType.setIncomeExpenseType(IncomeExpenseType.INCOME.getKey());
             planAmountRecordType.setBusinessType(BusinessType.BUYCHANGE.getKey());
             planAmountRecordType.setRecordMovingType(CostType.FARE.getKey());
-            planAmountRecordType.setPlanAmount(planAmount);//合计
+            planAmountRecordType.setPlanAmount(planAmount);
             //商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送 9 通用产品
             planAmountRecordType.setGoodsType(GoodsBigType.GENERAL.getKey());
             PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, planAmountRecordType);
@@ -623,27 +623,11 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             if (NullableCheck.isNullOrEmpty(createVo.getUnpBuy().getSupplierId())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购供应商 不能为空");}
             if (NullableCheck.isNullOrEmpty(createVo.getUnpBuy().getBuyAccount())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购付款账号 不能为空");}
             if (NullableCheck.isNullOrEmpty(createVo.getBuyItems())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购明细 至少一条");}
-        } else if (validType == VALID_TYPE_SALE_REFUND) {
-            if (NullableCheck.isNullOrEmpty(createVo.getUnpSale())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售总单信息 不能为空");}
-            if (NullableCheck.isNullOrEmpty(createVo.getUnpSale().getSaleOrderNo())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售总单单号 不能为空");}
-            if (NullableCheck.isNullOrEmpty(createVo.getSaleItems())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售明细 至少一条");}
-        } else if (validType == VALID_TYPE_BUY_REFUND) {
-            if (NullableCheck.isNullOrEmpty(createVo.getUnpBuy())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购总单信息 不能为空");}
-            if (NullableCheck.isNullOrEmpty(createVo.getUnpBuy().getBuyOrderNo())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购总单单号 不能为空");}
-            if (NullableCheck.isNullOrEmpty(createVo.getBuyItems())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购明细 至少一条");}
-        } else {
-            throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "验证类型参数错误【1~5】");
         }
-        
     }
     
-    private void refundValid(UnpRefundVo refundVo, Integer validType) throws GSSException {
-        if (validType == VALID_TYPE_ALL) {
-        } else if (validType == VALID_TYPE_SALE) {
-        
-        } else if (validType == VALID_TYPE_BUY) {
-        
-        } else if (validType == VALID_TYPE_SALE_REFUND) {
+    private void createValid(UnpRefundVo refundVo, Integer validType) throws GSSException {
+        if (validType == VALID_TYPE_SALE_REFUND) {
             if (NullableCheck.isNullOrEmpty(refundVo.getUnpSaleRefund())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售总单信息 不能为空");}
             if (NullableCheck.isNullOrEmpty(refundVo.getUnpSaleRefund().getSaleOrderNo())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售总单单号 不能为空");}
             if (NullableCheck.isNullOrEmpty(refundVo.getUnpSaleRefundItemList())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售明细 至少一条");}
@@ -683,6 +667,34 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         List<UnpBuy> list = unpBuyMapper.queryBuyOrderList(wrapper, param);
         wrapper.setRecords(list);
         return wrapper;
+    }
+    
+    @Override
+    public Page<UnpSaleRefund> querySaleOrderRefundList(Page<UnpSaleRefund> wrapper, UnpOrderQueryVo param) {
+        return this.unpSaleRefundMapper.queryList(wrapper, param);
+    }
+    
+    @Override
+    public Page<UnpBuyRefund> queryBuyOrderRefundList(Page<UnpBuyRefund> wrapper, UnpOrderQueryVo param) {
+        return this.unpBuyRefundMapper.queryList(wrapper, param);
+    }
+    
+    @Override
+    public UnpSaleRefund querySaleOrderRefund(UnpOrderQueryVo param) {
+        Page<UnpSaleRefund> page = new Page<>(1, 1);
+        UnpOrderQueryVo newVo = new UnpOrderQueryVo();
+        newVo.setSaleChangeNo(param.getSaleChangeNo());
+        newVo.setBuyChangeNo(param.getBuyChangeNo());
+        newVo.setSaleOrderNo(param.getSaleOrderNo());
+        newVo.setBuyOrderNo(param.getBuyOrderNo());
+        return this.querySaleOrderRefundList(page, newVo).getRecords().get(0);
+        //todo 查询单记录接口
+    }
+    
+    @Override
+    public UnpBuyRefund queryBuyOrderRefund(UnpOrderQueryVo param) {
+        
+        return null;
     }
     
     @Override
@@ -872,7 +884,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     
     @Override
     public UnpResult<UnpSaleRefund> updateSale(Agent agent, UnpRefundVo request) {
-        this.refundValid(request, VALID_TYPE_SALE_REFUND);
+        this.createValid(request, VALID_TYPE_SALE_REFUND);
         UnpResult<UnpSaleRefund> result = new UnpResult<>();
         UnpSaleRefund unpSaleRefund = request.getUnpSaleRefund();
         List<UnpSaleRefundItem> unpSaleRefundItemList = request.getUnpSaleRefundItemList();
@@ -895,7 +907,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     
     @Override
     public UnpResult<UnpBuyRefund> updateBuy(Agent agent, UnpRefundVo request) {
-        this.refundValid(request, VALID_TYPE_BUY_REFUND);
+        this.createValid(request, VALID_TYPE_BUY_REFUND);
         UnpResult<UnpBuyRefund> result = new UnpResult<>();
         UnpBuyRefund unpBuyRefund = request.getUnpBuyRefund();
         List<UnpBuyRefundItem> unpBuyRefundItemList = request.getUnpBuyRefundItemList();

@@ -150,7 +150,36 @@ public interface UnpOrderService {
      */
     Page<UnpSale> querySaleOrderList(Page<UnpSale> wrapper, UnpOrderQueryVo param);
     
+    /**
+     * @param wrapper
+     * @param param
+     * @return Page
+     */
     Page<UnpBuy> queryBuyOrderList(Page<UnpBuy> wrapper, UnpOrderQueryVo param);
+    
+    /**
+     * @param param
+     * @return Page
+     */
+    Page<UnpSaleRefund> querySaleOrderRefundList(Page<UnpSaleRefund> wrapper, UnpOrderQueryVo param);
+    
+    /**
+     * @param param
+     * @return Page
+     */
+    Page<UnpBuyRefund> queryBuyOrderRefundList(Page<UnpBuyRefund> wrapper, UnpOrderQueryVo param);
+    
+    /**
+     * @param param
+     * @return Page
+     */
+    UnpSaleRefund querySaleOrderRefund(UnpOrderQueryVo param);
+    
+    /**
+     * @param param
+     * @return Page
+     */
+    UnpBuyRefund queryBuyOrderRefund(UnpOrderQueryVo param);
     
     /** <<<<<<<<<<<<<<<<<<<<<<<【SELECT】【】>>>>>>>>>>>>>>>>>>>>>>> */
 }

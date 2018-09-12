@@ -75,6 +75,14 @@ public class UnpSaleRefund implements Serializable {
      */
     private String modifier;
     /**
+     * 客户名称
+     */
+    private String name;
+    /**
+     * 供应商名称
+     */
+    private String supplierName;
+    /**
      * 修改时间
      */
     private Date modifyTime;
@@ -84,6 +92,22 @@ public class UnpSaleRefund implements Serializable {
     private Integer valid;
     
     private static final long serialVersionUID = -6218324244217597170L;
+    
+    public String getSupplierName() {
+        return supplierName;
+    }
+    
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
     
     public Long getSaleRefundOrderNo() {
         return saleRefundOrderNo;

@@ -14,6 +14,10 @@ public class UnpOrderQueryVo implements Serializable {
      */
     private Long saleOrderNo;
     /**
+     * 销售变更单号
+     */
+    private Long saleChangeNo;
+    /**
      * 数据归属单位
      */
     private Integer owner;
@@ -89,6 +93,10 @@ public class UnpOrderQueryVo implements Serializable {
      */
     private Long buyOrderNo;
     /**
+     * 采购变更单号
+     */
+    private Long buyChangeNo;
+    /**
      * 供应商ID
      */
     private Long supplierId;
@@ -108,6 +116,22 @@ public class UnpOrderQueryVo implements Serializable {
     
     public Long getItemNo() {
         return itemNo;
+    }
+    
+    public Long getSaleChangeNo() {
+        return saleChangeNo;
+    }
+    
+    public void setSaleChangeNo(Long saleChangeNo) {
+        this.saleChangeNo = saleChangeNo;
+    }
+    
+    public Long getBuyChangeNo() {
+        return buyChangeNo;
+    }
+    
+    public void setBuyChangeNo(Long buyChangeNo) {
+        this.buyChangeNo = buyChangeNo;
     }
     
     public void setItemNo(Long itemNo) {
