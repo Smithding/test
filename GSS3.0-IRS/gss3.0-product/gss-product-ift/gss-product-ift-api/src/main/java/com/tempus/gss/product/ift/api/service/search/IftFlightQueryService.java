@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
-import com.tempus.gss.product.ift.api.entity.policy.IftFlightPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicyChange;
 import com.tempus.gss.product.ift.api.entity.vo.FlightQueryRequest;
@@ -43,7 +42,7 @@ public interface IftFlightQueryService {
 	  * @param request
 	  * @return
 	  */
-	 public List<IftPolicyChange> orderPolicy(QueryIBEDetail queryIBEDetail, List<IftPolicy> policys);
+	 public List<IftPolicyChange> orderPolicy(Agent agent, QueryIBEDetail queryIBEDetail, int adtNumber, int chdNumber, int infNumber);
 	 
 	 /**根据查询白屏航班条件获取政策信息
 	  * 

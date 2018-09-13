@@ -131,29 +131,40 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 	
 	@Override
 	public List<IftPolicy> getPolicys(Agent agent, List<Leg> legs, String airline, String fareBasis, double parPrice, int adtNumber, int chdNumber, int infNumber) {
-		
+		long startTime = System.currentTimeMillis();
 		/* 第一步，组装条件从库里面获取政策 */
 		FlightQuery query = policyHelper.packageQuery(agent, legs, airline, adtNumber, chdNumber, infNumber);
 		List<IftPolicy> iftPolicyList = iftQueryPolicyMapper.query(query);
+		long time1 = System.currentTimeMillis();
+		logger.info("数据库获取政策耗时：" + (time1 - startTime) + "毫秒");
 		
 		/* 第二步，再逐步过滤政策条件 */
 		iftPolicyList = policyHelper.ruleFilter(iftPolicyList, legs, query, fareBasis, parPrice);
 		
+		long endTime = System.currentTimeMillis();
+		logger.info("过滤耗时：" + (endTime - time1) + "毫秒");
+		logger.info("获取政策总耗时：" + (endTime - startTime) + "毫秒");
 		return iftPolicyList;
 	}
 	
 	@Override
 	public List<IftPolicy> getPolicysByPnr(Agent agent, List<Passenger> passengers, List<Leg> legs, String airline, String fareBasis,
 			String pnr, String pnrContext) {
-		
+		long startTime = System.currentTimeMillis();
 		/* 第一步，组装条件从库里面获取政策 */
 		//TODO 儿童数以及婴儿数暂时还未获取
 		FlightQuery query = policyHelper.packageQuery(agent, legs, airline, passengers.size(), 0, 0);
 		List<IftPolicy> iftPolicyList = iftQueryPolicyMapper.query(query);
 		
+		long time1 = System.currentTimeMillis();
+		logger.info("数据库获取政策耗时：" + (time1 - startTime) + "毫秒");
+		
 		/* 第二步，再逐步过滤政策条件 */
 		iftPolicyList = policyHelper.ruleFilterByPnr(iftPolicyList, passengers, legs, query, fareBasis, pnr, pnrContext);
 		
+		long endTime = System.currentTimeMillis();
+		logger.info("过滤耗时：" + (endTime - time1) + "毫秒");
+		logger.info("获取政策总耗时：" + (endTime - startTime) + "毫秒");
 		return iftPolicyList;
 	}
 	

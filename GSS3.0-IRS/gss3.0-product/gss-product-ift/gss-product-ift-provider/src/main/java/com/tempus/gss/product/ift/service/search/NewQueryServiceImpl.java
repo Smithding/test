@@ -32,6 +32,7 @@ import com.tempus.gss.product.ift.api.entity.vo.FlightQueryRequest;
 import com.tempus.gss.product.ift.api.service.FliePriceMappingService;
 import com.tempus.gss.product.ift.api.service.IMultipassMappingService;
 import com.tempus.gss.product.ift.api.service.IPolicyRService;
+import com.tempus.gss.product.ift.api.service.policy.IftPolicyService;
 import com.tempus.gss.product.ift.api.service.search.IftFlightQueryService;
 import com.tempus.gss.product.ift.api.service.search.NewQueryService;
 import com.tempus.gss.product.ift.api.utils.ThreadExecutor;
@@ -76,10 +77,13 @@ public class NewQueryServiceImpl implements NewQueryService {
 	ILogService logService;
 	@Autowired
 	IPolicyRService policyRService;
-	@Reference
+	@Autowired
 	IftFlightQueryService iftFlightQueryService;
 	@Autowired
 	private IftFlightQueryUtils iftFlightQueryUtils;
+	@Autowired
+	IftPolicyService policyService;
+	
 	@Value("${ift.iataNo}")
 	private String iataNo;
 	@Value("${ift.office}")
@@ -170,12 +174,15 @@ public class NewQueryServiceImpl implements NewQueryService {
 			return null;
 		}
 		log.info("开始匹配政策");
+		long startTime = System.currentTimeMillis();
 		List<QueryIBEDetail> newQueryIBEDetailList = new ArrayList<QueryIBEDetail>();
 		for (QueryIBEDetail queryIBEDetail : flightCabinRun.getQueryIBEDetails()) {
 			QueryIBEDetail detail = iftFlightQueryService.mappingPriceSpec(queryIBEDetail,
 					flightPolicyRun.getIftPolicyList(), flightQuery.getCustomerType(), flightQueryRequest);
 			newQueryIBEDetailList.add(detail);
 		}
+		long endTime = System.currentTimeMillis();
+		log.info("开始匹配政策，耗时：" + (endTime - startTime) + "毫秒");
 		return newQueryIBEDetailList;
 	}
 	/**

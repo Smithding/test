@@ -161,6 +161,7 @@ public class IftPolicyHelper {
 	 * @return List<IftPolicy> 过滤后的政策集合
 	 */
 	public List<IftPolicy> ruleFilter(List<IftPolicy> iftPolicyList, List<Leg> legs, FlightQuery query, String fareBasis, double parPrice){
+		long startTime = System.currentTimeMillis();
 		ArrayList<String> airlines = new ArrayList<>();//航司集合
 		ArrayList<String> cabins = new ArrayList<>(); //舱位集合
 		ArrayList<String> flightNos = new ArrayList<>(); //航班号集合
@@ -243,6 +244,8 @@ public class IftPolicyHelper {
 			iftPolicyList = this.rtnFilterPolicy(ruleUtils, iftPolicyList, airlines, cabins, flightNos, transitCabins, transitAirports, 
 					flyFlightNos, rtnFlightNos, query, fareBasis, parPrice, isArnk, flyType, rtnType, isOpen);
 		}
+		long endTime = System.currentTimeMillis();
+		logger.info("匹配规则耗时：" + (endTime - startTime) + "毫秒");
 		return iftPolicyList;
 	}
 	

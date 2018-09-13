@@ -55,7 +55,7 @@ public class CalculatePriceUtils {
 				QueryIBEDetail detail = (QueryIBEDetail)CloneUtils.deepCopy(queryIBEDetail);
 				// 根据政策计算价格
 				detail = oneWayQueryIBEDetail(detail, policy, formula);
-				details.add(queryIBEDetail);
+				details.add(detail);
 			}
 			//价格排序
 			priceSort(details);
