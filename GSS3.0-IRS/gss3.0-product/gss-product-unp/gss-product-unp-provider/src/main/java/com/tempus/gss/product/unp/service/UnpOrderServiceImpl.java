@@ -22,7 +22,7 @@ import com.tempus.gss.product.unp.api.entity.util.UnpResult;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpRefundVo;
-import com.tempus.gss.product.unp.api.service.UnpItemTypeService;
+import com.tempus.gss.product.unp.api.service.UnpGroupItemService;
 import com.tempus.gss.product.unp.api.service.UnpOrderService;
 import com.tempus.gss.product.unp.dao.*;
 import com.tempus.gss.util.NullableCheck;
@@ -59,7 +59,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     ISaleOrderService osSaleorderservice;
     
     @Reference
-    UnpItemTypeService unpItemTypeService;
+    UnpGroupItemService unpGroupItemService;
     
     @Autowired
     private UnpSaleMapper unpSaleMapper;
@@ -372,7 +372,6 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         try {
             Long buyOrderNo = this.getUnpNo(PREFIX_BUY);
             Long businessSignNo = IdWorker.getId();
-            List<UnpItemType> unpItemTypes = unpItemTypeService.queryAllUnpItemType();
             String productName = "通用产品";
             List<String> nameList = new ArrayList<>();
             //buy_items 表
@@ -386,11 +385,8 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                     unpBuyItem.setItemStatus(1);
                     planAmount = planAmount.add(unpBuyItem.getGroupAmount());
                     unpBuyItemMapper.insertSelective(unpBuyItem);
-                    unpItemTypes.forEach(i -> {
-                        if (i.getItemTypeNo().equals(unpBuyItem.getUnpType())) {
-                            nameList.add(i.getName());
-                        }
-                    });
+                    UnpItemType item = itemTypeMapper.selectByPrimaryKey(unpBuyItem.getUnpType());
+                    nameList.add(item.getName());
                 }
             }
             //unp_buy 表
