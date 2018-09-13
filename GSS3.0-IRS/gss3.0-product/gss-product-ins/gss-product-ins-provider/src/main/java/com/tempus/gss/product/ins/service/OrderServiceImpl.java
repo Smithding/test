@@ -1297,6 +1297,7 @@ public class OrderServiceImpl implements IOrderService {
 						}
 						//投保时间
 /*						saleOrderDetail.setModifyTime(new Date());*/
+						saleOrderDetail.setStatus(2);
 						saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 					}
 					saleOrderService.updateStatus(agent, saleOrderNo, 2);
@@ -1310,11 +1311,6 @@ public class OrderServiceImpl implements IOrderService {
 					saleOrderService.updateStatus(agent, saleOrderNo, 4);
 					buyOrderService.updateStatus(agent, buyOrderNo, 4);
 					throw new GSSException(response.getMsg(), "1010", "投保失败");
-				}
-				if (StringUtils.isNotBlank(saleOrderExtVo.getPolicyNo())) {
-					log.error("获取保险保单成功--------》"+saleOrderExtVo.getPolicyNo());
-					saleOrderDetail.setPolicyNo(saleOrderExtVo.getPolicyNo());
-					saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
 				}
 				// 为创建采购付款单获取保单号列
 				if (StringUtils.isNotBlank(saleOrderExtVo.getPolicyNo())) {

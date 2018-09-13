@@ -64,6 +64,9 @@ public class InsureTicketListenter {
                         }
                         boolean ispay = false;
                         for(SaleOrderExt saleOrderExt:saleOrderExtList){
+                                if("2".equals(saleOrderExt.getSaleOrder().getOrderChildStatus())){
+                                        continue;
+                                }
                                 ActualInfoSearchVO actualInfoSearchVO = actualAmountRecorService.queryActualInfoByBusNo(agent,saleOrderExt.getSaleOrderNo(),2);
                                 for(ActualAmountRecord actualAmountRecord:actualInfoSearchVO.getActualAmountRecordList()){
                                         if(actualAmountRecord.getIncomeExpenseType() == 1&&actualAmountRecord.getGoodsType() == 3&&actualAmountRecord.getActualStatus() == 1){
