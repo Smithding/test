@@ -47,7 +47,13 @@ public interface UnpOrderService {
      * @return UnpResult
      */
     UnpResult<UnpBuy> createBuy(Agent agent, UnpOrderVo request);
-    
+    /**
+     * @param agent
+     *         agent
+     * @param saleOrderNo
+     *
+     * @return UnpResult
+     */
     UnpResult<Object> createRefund(Agent agent, Long saleOrderNo);
     
     /**
@@ -67,7 +73,14 @@ public interface UnpOrderService {
      * @return UnpResult
      */
     UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpRefundVo request, UnpSaleRefund unpSaleRefund);
-    
+    /**
+     * @param agent
+     *         agent
+     * @param request
+     *         UnpOrderVo
+     *@param unpSaleRefund
+     * @return UnpResult
+     */
     UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpOrderVo request, UnpSaleRefund unpSaleRefund);
     
     /** <<<<<<<<<<<<<<<<<<<<<<<【CREATE】【UPDATE】>>>>>>>>>>>>>>>>>>>>>>> */

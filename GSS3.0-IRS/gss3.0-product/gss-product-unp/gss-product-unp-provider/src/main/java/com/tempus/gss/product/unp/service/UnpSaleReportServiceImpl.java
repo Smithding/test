@@ -18,6 +18,9 @@ import sun.rmi.runtime.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+/**
+ * @author zhangcheng
+ */
 @Service
 public class UnpSaleReportServiceImpl implements UnpSaleReportService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
