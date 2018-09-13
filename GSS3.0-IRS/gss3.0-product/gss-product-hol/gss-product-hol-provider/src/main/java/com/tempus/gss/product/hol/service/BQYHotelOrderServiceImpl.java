@@ -1033,7 +1033,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		}
 		orderReq.setSupplierId(supplierId);
 		orderReq.setRatePlanCategory(ratePlanCategory);
-		orderReq.setUnitPrice(settleFee);
+		orderReq.setUnitPrice(settleFee.multiply(new BigDecimal(daysBetween)));
 		//可以不传
 		orderReq.setChannelType(2);
 		CreateOrderRespone createOrderRespone = bqyHotelInterService.createOrder(orderReq);
