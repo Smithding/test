@@ -380,7 +380,8 @@ public class BQYHotelSupplierServiceImpl implements IBQYHotelSupplierService  {
 												Date checkIn = sdf.parse(checkinDate);
 												String checkInFormat = sdf.format(DateUtil.offsiteDay(checkIn, i));
 												ProSaleInfoDetail pid = new ProSaleInfoDetail();
-												pid.setDistributionSalePrice(averagePrice.getSettleFee().intValue());
+												//pid.setDistributionSalePrice(averagePrice.getSettleFee().intValue());
+												pid.setDistributionSalePrice(firPrice.intValue());
 												pid.setTcDirectPrice((firPrice.setScale(0, BigDecimal.ROUND_UP)).intValue());	//挂牌价
 												mapPro.put(checkInFormat, pid);
 											}
