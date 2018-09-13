@@ -53,7 +53,8 @@
         <if test="changeType !=null">
             AND ubi.CHANGE_TYPE=#{changeType}
         </if>
+        GROUP BY ubi.UNP_TYPE
         ORDER BY
-        ub.SALE_ORDER_NO
+        ub.CREATE_TIME
     </select>
 </mapper>
