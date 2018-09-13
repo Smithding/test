@@ -1,5 +1,6 @@
 package com.tempus.gss.product.ift.service.search;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,6 +140,7 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 			passenger.setGender(pnrPassenger.getPassengersex());////乘机人性别 ( MR MS  CHD  OTHER)
 			passenger.setCertNo(pnrPassenger.getPassengeridentitynumber());//证件号码
 			passenger.setCertType(pnrPassenger.getPassengeridentitytype());//证件类型
+			passenger.setSaleFare(queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFare());
 			passengers.add(passenger);
 		}
 		
