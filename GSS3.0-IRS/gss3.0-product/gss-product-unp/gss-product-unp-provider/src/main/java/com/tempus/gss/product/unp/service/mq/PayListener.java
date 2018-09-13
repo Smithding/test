@@ -85,18 +85,23 @@ public class PayListener {
                             unpUpdate.setModifier(agent.getAccount());
                             unpUpdate.setModifyTime(new Date());
                         }
-                        unpUpdate.setStatus(EUnpConstant.OrderStatus.PROCESSING.getKey());
-                        unpUpdate.setActualAmount(payNoticeVO.getActualAmount());
-                        unpSale.getSaleItems().forEach(item -> {
-                            UnpSaleItem itemUpdate = new UnpSaleItem();
-                            itemUpdate.setItemId(item.getItemId());
-                            itemUpdate.setSaleOrderNo(item.getSaleOrderNo());
-                            itemUpdate.setItemStatus(EUnpConstant.OrderStatus.PROCESSING.getKey());
-                            itemsToUpdate.add(itemUpdate);
-                        });
+                        if (unpSale.getChangeType().equals(EUnpConstant.ChangeType.DEFAULT.getKey())) {
+                            //正常支付
+                            unpUpdate.setStatus(EUnpConstant.OrderStatus.PROCESSING.getKey());
+                            unpSale.getSaleItems().forEach(item -> {
+                                UnpSaleItem itemUpdate = new UnpSaleItem();
+                                itemUpdate.setItemId(item.getItemId());
+                                itemUpdate.setSaleOrderNo(item.getSaleOrderNo());
+                                itemUpdate.setItemStatus(EUnpConstant.OrderStatus.PROCESSING.getKey());
+                                itemsToUpdate.add(itemUpdate);
+                            });
+                        }
+                        //多次点击通知
                         unpUpdate.setSaleItems(itemsToUpdate);
                         updateVo.setUnpSale(unpUpdate);
                         unpOrderService.updateSale(agent, updateVo);
+                        unpUpdate.setActualAmount(payNoticeVO.getActualAmount());
+                        
                     }
                 }
                 if (payNoticeVO.getBusinessType() == BusinessType.BUY_ORDER) {
@@ -114,16 +119,15 @@ public class PayListener {
                             unpBuyUpdate.setModifier(agent.getAccount());
                             unpBuyUpdate.setModifyTime(new Date());
                         }
-                        updateVo.setUnpBuy(unpBuy);
+                        updateVo.setUnpBuy(unpBuyUpdate);
                         updateVo.setBuyItems(unpBuy.getBuyItems());
                         updateVo.setOperationType(EUnpConstant.Opertion.PAY.getKey());
                         unpOrderService.updateBuy(agent, updateVo);
-                        
                         UnpSale unpSale = unpOrderService.getSaleOrderInfo(queryVo);
                         //更新销售状态为已完成
-                        
                         List<UnpSaleItem> itemsToUpdate = new ArrayList<>();
                         UnpSale unpUpdate = new UnpSale();
+                        unpUpdate.setSaleOrderNo(unpSale.getSaleOrderNo());
                         unpUpdate.setStatus(EUnpConstant.OrderStatus.DONE.getKey());
                         unpUpdate.setActualAmount(payNoticeVO.getActualAmount());
                         unpSale.getSaleItems().forEach(item -> {
@@ -208,4 +212,14 @@ public class PayListener {
         }
     }
     
+    private void toBuyPay() {
+        
+        try {
+            Runnable runner = () -> {
+            
+            };
+        } catch (Exception e) {
+            logger.error("Error", e);
+        }
+    }
 }

@@ -5,7 +5,6 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
-import com.tempus.gss.cps.entity.Supplier;
 import com.tempus.gss.cps.service.ISupplierService;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.order.entity.*;
@@ -54,7 +53,8 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     
     @Reference
     ICertificateService certificateService;
-    
+    @Reference
+    IActualAmountRecorService actualAmountRecorService;
     @Reference
     ISaleOrderService osSaleorderservice;
     
@@ -243,7 +243,6 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             UnpSale unpSale = request.getUnpSale();
             BigDecimal planAmount = new BigDecimal(0);
             List<UnpSaleItem> items = request.getSaleItems();
-            List<UnpBuyItem> buyItems = request.getBuyItems();
             String goodsName = "通用产品";
             List<String> goods = new ArrayList<>();
             Long saleOrderNo = this.getUnpNo(PREFIX_SALE);
@@ -843,7 +842,6 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         UnpBuy unpBuy = null;
         List<UnpBuyItem> unpBuyItemList = null;
         UnpResult<UnpBuy> unpBuyUnpResult = new UnpResult<>();
-        BigDecimal planAmount = new BigDecimal(0);
         logger.info("采购单更新开始");
         if (agent == null) {
             logger.error("采购订单更新失败{}", "agent不能为null");
@@ -1185,7 +1183,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             vo.setServiceLine("1");
             vo.setReason("UNP销售单变更退款");
             vo.setChannel("WEB");
-            vo.setCustomerTypeNo(refundOrder.getCustomerNo());
+            vo.setCustomerNo(refundOrder.getCustomerNo());
             vo.setCustomerTypeNo(refundOrder.getCustomerType());
             vo.setSubBusinessType(EgoodsSubType.SALE_RETREAT.getKey());
             vo.setIncomeExpenseType(IncomeExpenseType.EXPENSE.getKey());
@@ -1193,6 +1191,13 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             vo.setDetailPayWay(DetailPayWay.NORMAL);
             vo.setSaleOrderNo(String.valueOf(saleOrderNo));
             vo.setPayNo(payNos.get(0));
+            List<BusinessOrderInfo> list = new ArrayList<>();
+            BusinessOrderInfo record = new BusinessOrderInfo();
+            record.setBusinessType(BusinessType.SALE_CHANGE_ORDER);
+            record.setRecordNo(refundOrder.getSaleRefundOrderNo());
+            record.setActualAmount(refundOrder.getRefundAmount());
+            list.add(record);
+            vo.setOrderInfoList(list);
             BigDecimal refundAmount = certificateService.saleRefundCert(agent, vo);
             result.success("销售退款成功", refundAmount);
         } catch (Exception e) {
@@ -1230,7 +1235,8 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 }
                 traNo = unpBuy.getTraNo();
             }
-            ActualInfoSearchVO actualInfoVO = certificateService.queryListByTONo(agent, traNo);
+            
+            ActualInfoSearchVO actualInfoVO = actualAmountRecorService.queryActualInfoByBusNo(agent, buyOrderNo, BusinessType.BUY_ORDER);
             List<ActualAmountRecord> actualAmounts = actualInfoVO.getActualAmountRecordList();
             final long buyNo = buyOrderNo;
             List<String> payNos = new ArrayList<>();
@@ -1248,10 +1254,6 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             }
             payWay = Integer.decode(actualAmounts.get(0).getPayWay());
             payType = actualAmounts.get(0).getPayType();
-            Supplier supplier = supplierService.getSupplierByNo(agent, refundOrder.getSupplierId());
-            if (supplier == null) {
-                throw new GSSException("UNP", "9400", "退单单号为【" + buyRefundNo + "】的【供应商客户信息】不存在");
-            }
             CertificateCreateVO vo = new CertificateCreateVO();
             vo.setTransationOrderNo(String.valueOf(refundOrder.getTraNo()));
             vo.setPayWay(payWay);
@@ -1259,15 +1261,22 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             vo.setServiceLine("1");
             vo.setReason("UNP采购单变更退款");
             vo.setChannel("WEB");
-            vo.setCustomerTypeNo(supplier.getCustomerNo());
-            vo.setCustomerTypeNo(supplier.getCustomerTypeNo());
+            vo.setCustomerNo(refundOrder.getSupplierId());
+            vo.setCustomerTypeNo(refundOrder.getSupplierType());
             vo.setSubBusinessType(EgoodsSubType.BUY_RETREAT.getKey());
             vo.setIncomeExpenseType(IncomeExpenseType.INCOME.getKey());
             vo.setProductType(ProductType.GENERAL);
             vo.setDetailPayWay(DetailPayWay.NORMAL);
             vo.setSaleOrderNo(String.valueOf(buyOrderNo));
             vo.setPayNo(payNos.get(0));
-            BigDecimal refundAmount = certificateService.saleRefundCert(agent, vo);
+            List<BusinessOrderInfo> list = new ArrayList<>();
+            BusinessOrderInfo record = new BusinessOrderInfo();
+            record.setBusinessType(BusinessType.BUY_CHANGE_ORDER);
+            record.setRecordNo(refundOrder.getBuyRefundOrderNo());
+            record.setActualAmount(refundOrder.getRefundAmount());
+            list.add(record);
+            vo.setOrderInfoList(list);
+            BigDecimal refundAmount = certificateService.buyRefundCert(agent, vo);
             result.success("采购退款成功", refundAmount);
             logger.info("采购退款成功 ￥{}", refundAmount);
         } catch (Exception e) {
