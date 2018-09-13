@@ -44,6 +44,14 @@ public interface IftFlightQueryService {
 	  */
 	 public List<IftPolicyChange> orderPolicy(Agent agent, QueryIBEDetail queryIBEDetail, int adtNumber, int chdNumber, int infNumber);
 	 
+	 /**
+	  * PNR预订异步实时获取政策数据
+	  * @param queryIBEDetail
+	  * @param request
+	  * @return
+	  */
+	 public List<IftPolicyChange> orderPolicyByPnr(Agent agent, QueryIBEDetail queryIBEDetail, String pnr, String pnrContext);
+	 
 	 /**根据查询白屏航班条件获取政策信息
 	  * 
 	  * @param request

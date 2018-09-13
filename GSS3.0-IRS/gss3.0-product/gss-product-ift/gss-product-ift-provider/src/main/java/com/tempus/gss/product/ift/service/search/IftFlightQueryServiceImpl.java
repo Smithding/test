@@ -9,9 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSONObject;
+import com.tempus.gss.bbp.util.DateUtil;
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.Flight;
 import com.tempus.gss.product.ift.api.entity.Leg;
+import com.tempus.gss.product.ift.api.entity.Passenger;
+import com.tempus.gss.product.ift.api.entity.PnrPassenger;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicyChange;
@@ -121,6 +124,42 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 		
 		List<IftPolicy> iftPolicyList = policyService.getPolicys(agent, legs, queryIBEDetail.getTicketAirline(), queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFareBasis()
 				, queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFare().doubleValue(), adtNumber, chdNumber, infNumber);
+		List<IftPolicyChange> policyChanges = CalculatePriceUtils.orderPolicyCalculate(queryIBEDetail,iftPolicyList,1);
+		return policyChanges;
+	}
+	@Override
+	public List<IftPolicyChange> orderPolicyByPnr(Agent agent, QueryIBEDetail queryIBEDetail, String pnr, String pnrContext) {
+		
+		List<Passenger> passengers = new ArrayList<Passenger>();
+		for (PnrPassenger pnrPassenger : queryIBEDetail.getPnrPassengers()) {
+			Passenger passenger = new Passenger();
+			passenger.setPassengerType(pnrPassenger.getPassengerstype());//乘客类型
+			passenger.setPassengerBirth(DateUtil.getDate(pnrPassenger.getPassengerbirthday(), DateUtil.DATAFORMAT_STR));//乘客生日
+			passenger.setName(pnrPassenger.getPassengername());//乘客名字
+			passenger.setGender(pnrPassenger.getPassengersex());////乘机人性别 ( MR MS  CHD  OTHER)
+			passenger.setCertNo(pnrPassenger.getPassengeridentitynumber());//证件号码
+			passenger.setCertType(pnrPassenger.getPassengeridentitytype());//证件类型
+			passengers.add(passenger);
+		}
+		
+		/* 组装航程信息 */
+		List<Leg> legs = new ArrayList<Leg>();
+		for (Flight flights : queryIBEDetail.getFlights()) {
+			Leg leg = new Leg();
+			leg.setAirline(flights.getAirline());//航司
+			leg.setFlightNo(flights.getFlightNo());//航班号
+			leg.setDepTime(flights.getDepTime());//起飞时间
+            leg.setArrTime(flights.getArrTime());//到达时间.
+            leg.setCabin(flights.getFlightCabinPriceVos().get(0).getCabin());
+            leg.setArrAirport(flights.getArrAirport());//到达机场.
+			leg.setDepAirport(flights.getDepAirport());//起点机场.
+            leg.setGoBack(flights.getDirection().equals("go")?1:2);//方向标识 go/back
+            leg.setStopAirport(flights.getStopOverAirport());//经停机场
+            leg.setLegNo(Long.parseLong(String.valueOf(flights.getFlightNum())));
+            legs.add(leg);
+		}
+		
+		List<IftPolicy> iftPolicyList = policyService.getPolicysByPnr(agent, passengers, legs, queryIBEDetail.getTicketAirline(),  queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFareBasis(), pnr, pnrContext);
 		List<IftPolicyChange> policyChanges = CalculatePriceUtils.orderPolicyCalculate(queryIBEDetail,iftPolicyList,1);
 		return policyChanges;
 	}
