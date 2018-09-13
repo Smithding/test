@@ -209,13 +209,13 @@
             <if test="status != null">
                 STATUS = #{status,jdbcType=INTEGER},
             </if>
-            <if test="creator != null">
+            <if test="creator != null and creator!=''">
                 CREATOR = #{creator,jdbcType=VARCHAR},
             </if>
             <if test="createTime != null">
                 CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
             </if>
-            <if test="modifier != null">
+            <if test="modifier != null and modifier!=''">
                 MODIFIER = #{modifier,jdbcType=VARCHAR},
             </if>
             <if test="modifyTime != null">
@@ -229,18 +229,9 @@
     </update>
     <select id="queryList" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo" resultMap="BaseResultMap">
         SELECT
-        UBR.BUY_REFUND_ORDER_NO,
+        UBR.*,
         CC.SHORT_NAME AS CUSTOMER_NAME,
-        CS.SHORT_NAME AS SUPPLIER_NAME,
-        UBR.REFUND_AMOUNT,
-        UBR.PAY_STATUS,
-        UBR. STATUS,
-        UBR.CREATE_TIME,
-        UBR.REMARK,
-        UBR.CREATOR,
-        UBR.TRA_NO,
-        UBR.CHANGE_TYPE,
-        UBR.SALE_REFUND_ORDER_NO
+        CS.SHORT_NAME AS SUPPLIER_NAME
         FROM UNP_BUY_REFUND UBR
         LEFT JOIN UNP_BUY UB ON UB.BUY_ORDER_NO = UBR.BUY_ORDER_NO
         LEFT JOIN UNP_SALE_REFUND USR ON USR.SALE_ORDER_NO = UB.SALE_ORDER_NO
@@ -284,31 +275,31 @@
             AND UBR.PAY_STATUS = #{payStatus,jdbcType=TINYINT}
         </if>
         <if test="payTimeStart!=null and ''!=payTimeStart">
-            AND UBR.PAY_TIME <![CDATA[>=]]> CONCAT(#{payTimeStart,jdbcType=TIMESTAMP}' 00:00:00')
+            AND UBR.PAY_TIME <![CDATA[>=]]> CONCAT(#{payTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
         </if>
         <if test="payTimeEnd!=null and ''!=payTimeEnd">
-            AND UBR.PAY_TIME  <![CDATA[<=]]> CONCAT(#{payTimeEnd,jdbcType=TIMESTAMP}' 23:59:59')
+            AND UBR.PAY_TIME  <![CDATA[<=]]> CONCAT(#{payTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
         <if test="status != null">
             AND UBR.STATUS = #{status,jdbcType=INTEGER}
         </if>
-        <if test="creator != null">
+        <if test="creator != null  and creator!=''">
             AND UBR.CREATOR LIKE concat('%',CONCAT(#{creator,jdbcType=VARCHAR},'%'))
         </if>
         <if test="createTimeStart!=null and ''!=createTimeStart">
-            AND UBR.CREATE_TIME <![CDATA[>=]]> CONCAT(#{createTimeStart,jdbcType=TIMESTAMP}' 00:00:00')
+            AND UBR.CREATE_TIME <![CDATA[>=]]> CONCAT(#{createTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
         </if>
         <if test="createTimeEnd!=null and ''!=createTimeEnd">
-            AND UBR.CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP}' 23:59:59')
+            AND UBR.CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
-        <if test="modifier != null">
-            AND UBR.MODIFIER LIKE concat('%',CONCAT(#{modifier,jdbcType=VARCHAR}'%'))
+        <if test="modifier != null and modifier!=''">
+            AND UBR.MODIFIER LIKE concat('%',CONCAT(#{modifier,jdbcType=VARCHAR},'%'))
         </if>
         <if test="modifyTimeStart != null and ''!=modifyTimeStart">
-            AND UBR.MODIFY_TIME <![CDATA[>=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP}' 00:00:00')
+            AND UBR.MODIFY_TIME <![CDATA[>=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
         </if>
         <if test="modifyTimeEnd != null and ''!=modifyTimeEnd">
-            AND UBR.MODIFY_TIME <![CDATA[<=]]> CONCAT(#{modifyTimeEnd,jdbcType=TIMESTAMP}' 23:59:59')
+            AND UBR.MODIFY_TIME <![CDATA[<=]]> CONCAT(#{modifyTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
         <if test="valid != null">
             AND UBR.VALID = #{valid,jdbcType=INTEGER}

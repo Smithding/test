@@ -64,9 +64,6 @@ public class InsureTicketListenter {
                         }
                         boolean ispay = false;
                         for(SaleOrderExt saleOrderExt:saleOrderExtList){
-                                if("2".equals(saleOrderExt.getSaleOrder().getOrderChildStatus())){
-                                        continue;
-                                }
                                 ActualInfoSearchVO actualInfoSearchVO = actualAmountRecorService.queryActualInfoByBusNo(agent,saleOrderExt.getSaleOrderNo(),2);
                                 for(ActualAmountRecord actualAmountRecord:actualInfoSearchVO.getActualAmountRecordList()){
                                         if(actualAmountRecord.getIncomeExpenseType() == 1&&actualAmountRecord.getGoodsType() == 3&&actualAmountRecord.getActualStatus() == 1){
@@ -82,7 +79,7 @@ public class InsureTicketListenter {
                                                 for(SaleOrderDetail saleOrderDetail:saleOrderExtTwo.getSaleOrderDetailList()){
                                                         for(Sale sale:sales){
                                                                 for(SaleItem saleItem:sale.getItems()){
-                                                                        if(saleOrderExtTwo.getExtendedFieldsJson().contains(saleItem.getFlightNo())&&saleOrderDetail.getInsuredName().equals(saleItem.getName())){
+                                                                        if(saleOrderExtTwo.getExtendedFieldsJson().contains(saleItem.getFlightNo())&&saleOrderDetail.getInsuredName().equals(saleItem.getName())&&saleOrderDetail.getBillNo()==null){
                                                                                 saleOrderDetail.setBillNo(saleItem.getTicketNo());
                                                                                 saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
                                                                                 logger.info("-------------------该保险订单的票号为:"+saleItem.getTicketNo());
@@ -102,6 +99,7 @@ public class InsureTicketListenter {
                         }
 
                 } catch (Exception ex) {
+                        ex.printStackTrace();
                         logger.error("----------------查询保险订单出错！ 交易单号:"+ticketMessage.getTradeNo());
                         throw new GSSException("已出票保险订单投保失败！","003","已出票保险订单投保失败！");
                 }

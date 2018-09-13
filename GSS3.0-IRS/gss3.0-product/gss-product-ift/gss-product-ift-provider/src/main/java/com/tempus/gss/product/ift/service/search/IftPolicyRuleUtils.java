@@ -364,7 +364,7 @@ public class IftPolicyRuleUtils {
 	 */
 	public boolean matcheMixtrueCabin(IftPolicy policy, List<String> cabinGrades){
 		boolean result = true;
-		if(null != policy.getIsMixCabin() && policy.getIsMixCabin()){
+		if(null != policy.getIsMixCabin() && !policy.getIsMixCabin()){
 			String filghtCabinGrade = cabinGrades.get(0);
 			for(String cabinGrade : cabinGrades){
 				if(!cabinGrade.equals(filghtCabinGrade)){

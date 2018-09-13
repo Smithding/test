@@ -287,7 +287,7 @@
         <if test="status != null">
             AND USR.STATUS = #{status,jdbcType=INTEGER}
         </if>
-        <if test="creator != null">
+        <if test="creator != null and creator!=''">
             AND USR.CREATOR LIKE concat('%',CONCAT(#{creator,jdbcType=VARCHAR},'%'))
         </if>
         <if test="createTimeStart!=null and ''!=createTimeStart">
@@ -296,7 +296,7 @@
         <if test="createTimeEnd!=null and ''!=createTimeEnd">
             AND USR.CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
-        <if test="modifier != null">
+        <if test="modifier != null  and modifier!=''">
             AND USR.MODIFIER LIKE concat('%',CONCAT(#{modifier,jdbcType=VARCHAR},'%'))
         </if>
         <if test="modifyTimeStart != null and ''!=modifyTimeStart">
