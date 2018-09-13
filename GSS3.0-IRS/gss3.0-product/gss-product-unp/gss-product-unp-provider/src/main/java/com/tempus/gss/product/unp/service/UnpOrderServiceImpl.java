@@ -491,7 +491,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 unpSaleRefundItem.setSaleRefundOrderNo(saleRefundOrderNo);
                 unpSaleRefundItem.setUnpType(saleItem.getUnpType());
                 unpSaleRefundItem.setNum(unpSaleItem.getNum());
-                unpSaleRefundItem.setChangeType(EUnpConstant.ChangeType.REFUND.getKey());
+                unpSaleRefundItem.setChangeType(EUnpConstant.ChangeType.DEFAULT.getKey());
                 unpSaleRefundItem.setGroupAmount(unpSaleItem.getGroupAmount());
                 unpSaleRefundItem.setItemStatus(EUnpConstant.OrderStatus.READY.getKey());
                 unpSaleRefundItem.setSaleItemNo(saleItem.getItemId());
@@ -502,6 +502,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 UnpSaleItem saleItemUpdate = new UnpSaleItem();
                 saleItemUpdate.setItemId(unpSaleItem.getItemId());
                 saleItemUpdate.setItemStatus(EUnpConstant.OrderStatus.CHANGING.getKey());
+                saleItemUpdate.setChangeType(EUnpConstant.ChangeType.REFUND.getKey());
                 unpSaleItemMapper.updateByPrimaryKeySelective(saleItemUpdate);
             }
             //创建 refund 主表
@@ -514,6 +515,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             UnpSale saleUpdate = new UnpSale();
             saleUpdate.setSaleOrderNo(unpSale.getSaleOrderNo());
             saleUpdate.setStatus(EUnpConstant.OrderStatus.CHANGING.getKey());
+            saleUpdate.setChangeType(EUnpConstant.ChangeType.REFUND.getKey());
             unpSaleMapper.updateByPrimaryKeySelective(saleUpdate);
             //创建os_buyChange主单记录
             SaleChange saleChange = new SaleChange();
@@ -611,6 +613,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                         UnpBuyItem itemUpdate = new UnpBuyItem();
                         itemUpdate.setItemId(bi.getItemId());
                         itemUpdate.setItemStatus(EUnpConstant.OrderStatus.CHANGING.getKey());
+                        itemUpdate.setChangeType(EUnpConstant.ChangeType.REFUND.getKey());
                         //修改原单状态
                         this.unpBuyItemMapper.updateByPrimaryKeySelective(itemUpdate);
                     }
@@ -641,6 +644,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             UnpBuy buyUpdate = new UnpBuy();
             buyUpdate.setBuyOrderNo(unpBuy.getBuyOrderNo());
             buyUpdate.setStatus(EUnpConstant.OrderStatus.CHANGING.getKey());
+            buyUpdate.setChangeType(EUnpConstant.ChangeType.REFUND.getKey());
             unpBuyMapper.updateByPrimaryKeySelective(buyUpdate);
             
             //创建os_buyChange主单记录
@@ -1071,7 +1075,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             sale.getSaleItems().forEach(i -> {
                 UnpSaleItem iUpdate = new UnpSaleItem();
                 iUpdate.setItemId(i.getItemId());
-                iUpdate.setItemStatus(EUnpConstant.OrderStatus.CHANGING.getKey());
+                iUpdate.setItemStatus(EUnpConstant.OrderStatus.CANCELED.getKey());
                 this.unpSaleItemMapper.updateByPrimaryKeySelective(iUpdate);
             });
             unpSaleMapper.updateByPrimaryKeySelective(saleUpdate);
@@ -1282,6 +1286,12 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             unpOrderQueryVo.setSaleOrderNo(saleOrderNo);
             UnpSale unpSale = this.getSaleOrderInfo(unpOrderQueryVo);
             UnpBuy unpBuy = this.getBuyOrderInfo(unpOrderQueryVo);
+            if (unpSale.getPayStatus() < EUnpConstant.PayStatus.PAIED.getKey()) {
+                throw new GSSException("UNP", "9400", "检测到销售单未支付");
+            }
+            if (unpBuy.getPayStatus() < EUnpConstant.PayStatus.PAIED.getKey()) {
+                throw new GSSException("UNP", "9400", "检测到采购单未支付");
+            }
             unpOrderVo.setUnpSale(unpSale);
             unpOrderVo.setUnpBuy(unpBuy);
             unpOrderVo.setSaleItems(unpSale.getSaleItems());
@@ -1301,7 +1311,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             }
         } catch (Exception e) {
             logger.error("创建退单失败'", e);
-            objectUnpResult.failed("创建退单失败", null);
+            objectUnpResult.failed(e.getMessage(), null);
             return objectUnpResult;
         }
         return objectUnpResult;
