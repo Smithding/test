@@ -290,7 +290,7 @@ public class FormulaUtils {
 					: policy.getOneWayPrivilege();// 单程直减费用
 			BigDecimal roundTripPrivilege = policy.getRoundTripPrivilege() == null ? new BigDecimal(0)
 					: policy.getRoundTripPrivilege();// 单程直减费用
-			if (passengerTypePricesTotal.getPassengerType().equals("CNN")) {
+			if (passengerTypePricesTotal.getPassengerType().equals("CNN")||passengerTypePricesTotal.getPassengerType().equals("CHD")) {
 				/** 儿童是否可开无代理费，0否（默认），1是 */
 				if (policy.getChdTicketNoAgencyFee() != null && policy.getChdTicketNoAgencyFee())
 					formula.setAgencyFee(new BigDecimal(0));// 代理费

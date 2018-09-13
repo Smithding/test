@@ -155,6 +155,7 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 			leg.setDepAirport(flights.getDepAirport());//起点机场.
             leg.setGoBack(flights.getDirection().equals("go")?1:2);//方向标识 go/back
             leg.setStopAirport(flights.getStopOverAirport());//经停机场
+            leg.setCabin(flights.getFlightCabinPriceVos().get(0).getCabin());
             leg.setLegNo(Long.parseLong(String.valueOf(flights.getFlightNum())));
             legs.add(leg);
 		}
