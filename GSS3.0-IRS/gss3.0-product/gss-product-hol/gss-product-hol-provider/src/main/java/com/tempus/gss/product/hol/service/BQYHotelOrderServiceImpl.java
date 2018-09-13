@@ -1042,7 +1042,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			Long orderNo = createOrderRespone.getOrderNumber();
 			if (null == orderNo || orderNo <= 0){
 				logger.info("bqy酒店订单创建失败,返回结订单号为空或小于等于0!");
-				throw new GSSException("bqy酒店订单创建失败!", String.valueOf(saleOrderNo), "酒店订单创建失败,返回订单号为空!");
+				throw new GSSException(hotelOrder.getHotelName(), String.valueOf(saleOrderNo), "酒店订单创建失败,返回订单号为空!");
 			}
 			//查询bqy酒店订单详情
 			OrderPayReq orderPayReq = new OrderPayReq();
