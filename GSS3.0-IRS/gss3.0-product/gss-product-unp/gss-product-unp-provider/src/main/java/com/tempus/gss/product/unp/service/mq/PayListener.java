@@ -112,6 +112,7 @@ public class PayListener {
                         UnpBuy unpBuy = unpOrderService.getBuyOrderInfo(queryVo);
                         UnpBuy unpBuyUpdate = new UnpBuy();
                         unpBuyUpdate.setBuyOrderNo(unpBuy.getBuyOrderNo());
+                        unpBuyUpdate.setSaleOrderNo(unpBuy.getSaleOrderNo());
                         if (unpBuy.getPayStatus() <= EUnpConstant.PayStatus.PAYING.getKey()) {
                             //首次成功通知
                             unpBuyUpdate.setPayStatus(payStatus);
