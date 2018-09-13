@@ -85,13 +85,13 @@ public class PayListener {
                             unpUpdate.setModifier(agent.getAccount());
                             unpUpdate.setModifyTime(new Date());
                         }
-                        unpUpdate.setStatus(EUnpConstant.OrderStatus.DONE.getKey());
+                        unpUpdate.setStatus(EUnpConstant.OrderStatus.PROCESSING.getKey());
                         unpUpdate.setActualAmount(payNoticeVO.getActualAmount());
                         unpSale.getSaleItems().forEach(item -> {
                             UnpSaleItem itemUpdate = new UnpSaleItem();
                             itemUpdate.setItemId(item.getItemId());
                             itemUpdate.setSaleOrderNo(item.getSaleOrderNo());
-                            itemUpdate.setItemStatus(EUnpConstant.OrderStatus.DONE.getKey());
+                            itemUpdate.setItemStatus(EUnpConstant.OrderStatus.PROCESSING.getKey());
                             itemsToUpdate.add(itemUpdate);
                         });
                         unpUpdate.setSaleItems(itemsToUpdate);
@@ -103,8 +103,8 @@ public class PayListener {
                     if (payNoticeVO.getIncomeExpenseType() == IncomeExpenseType.EXPENSE.getKey()) {
                         //采购付款
                         logger.info("监听到UNP采购付款消息:{}--￥{}", payNoticeVO.getBusinessNo(), payNoticeVO.getActualAmount());
+                        queryVo.setBuyOrderNo(payNoticeVO.getBusinessNo());
                         UnpBuy unpBuy = unpOrderService.getBuyOrderInfo(queryVo);
-                        
                         UnpBuy unpBuyUpdate = new UnpBuy();
                         unpBuyUpdate.setBuyOrderNo(unpBuy.getBuyOrderNo());
                         if (unpBuy.getPayStatus() <= EUnpConstant.PayStatus.PAYING.getKey()) {
@@ -118,6 +118,24 @@ public class PayListener {
                         updateVo.setBuyItems(unpBuy.getBuyItems());
                         updateVo.setOperationType(EUnpConstant.Opertion.PAY.getKey());
                         unpOrderService.updateBuy(agent, updateVo);
+                        
+                        UnpSale unpSale = unpOrderService.getSaleOrderInfo(queryVo);
+                        //更新销售状态为已完成
+                        
+                        List<UnpSaleItem> itemsToUpdate = new ArrayList<>();
+                        UnpSale unpUpdate = new UnpSale();
+                        unpUpdate.setStatus(EUnpConstant.OrderStatus.DONE.getKey());
+                        unpUpdate.setActualAmount(payNoticeVO.getActualAmount());
+                        unpSale.getSaleItems().forEach(item -> {
+                            UnpSaleItem itemUpdate = new UnpSaleItem();
+                            itemUpdate.setItemId(item.getItemId());
+                            itemUpdate.setSaleOrderNo(item.getSaleOrderNo());
+                            itemUpdate.setItemStatus(EUnpConstant.OrderStatus.DONE.getKey());
+                            itemsToUpdate.add(itemUpdate);
+                        });
+                        unpUpdate.setSaleItems(itemsToUpdate);
+                        updateVo.setUnpSale(unpUpdate);
+                        unpOrderService.updateSale(agent, updateVo);
                     }
                 }
                 if ((payNoticeVO.getBusinessType() == BusinessType.SALE_CHANGE_ORDER)) {
@@ -173,7 +191,7 @@ public class PayListener {
                             UnpBuyRefundItem itemUpdate = new UnpBuyRefundItem();
                             itemUpdate.setItemId(item.getItemId());
                             //验证要修改的item处于当前总单下
-                            itemUpdate.setSaleRefundOrderNo(item.getSaleRefundOrderNo());
+                            itemUpdate.setBuyRefundOrderNo(item.getBuyRefundOrderNo());
                             itemUpdate.setItemStatus(EUnpConstant.OrderStatus.DONE.getKey());
                             refundItems.add(itemUpdate);
                         });

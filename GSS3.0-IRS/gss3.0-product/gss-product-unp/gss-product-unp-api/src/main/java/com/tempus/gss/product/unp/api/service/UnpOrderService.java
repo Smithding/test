@@ -48,6 +48,8 @@ public interface UnpOrderService {
      */
     UnpResult<UnpBuy> createBuy(Agent agent, UnpOrderVo request);
     
+    UnpResult<Object> createRefund(Agent agent, Long saleOrderNo);
+    
     /**
      * @param agent
      *         agent
@@ -64,7 +66,9 @@ public interface UnpOrderService {
      *         UnpOrderVo
      * @return UnpResult
      */
-    UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpOrderVo request,UnpSaleRefund unpSaleRefund);
+    UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpRefundVo request, UnpSaleRefund unpSaleRefund);
+    
+    UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpOrderVo request, UnpSaleRefund unpSaleRefund);
     
     /** <<<<<<<<<<<<<<<<<<<<<<<【CREATE】【UPDATE】>>>>>>>>>>>>>>>>>>>>>>> */
     /**
@@ -95,6 +99,13 @@ public interface UnpOrderService {
      * @param request
      */
     UnpResult<UnpBuyRefund> updateBuy(Agent agent, UnpRefundVo request);
+    
+    /**
+     * @param agent
+     * @param saleOrderNo
+     * @return
+     */
+    UnpResult<Object> cancel(Agent agent, Long... saleOrderNo);
     /**<<<<<<<<<<<<<<<<<<<<<<<【UPDATE】【SELECT】>>>>>>>>>>>>>>>>>>>>>>>*/
     
     /**
@@ -116,9 +127,13 @@ public interface UnpOrderService {
      * @see EUnpConstant.ChangeType
      */
     UnpSale getSaleOrderInfo(UnpOrderQueryVo params);
+    
     UnpSaleRefund getSaleRefundOrderInfo(UnpOrderQueryVo params);
+    
     UnpBuy getBuyOrderInfo(UnpOrderQueryVo params);
+    
     UnpBuyRefund getBuyRefundOrderInfo(UnpOrderQueryVo params);
+    
     /**
      * 根据条件查询明细表集合
      *
@@ -195,14 +210,12 @@ public interface UnpOrderService {
      *         销售退单号
      * @return Page
      */
-    UnpResult<Object> saleRefund(Agent agent,Long saleRefundNo) throws GSSException;
+    UnpResult<Object> saleRefund(Agent agent, Long saleRefundNo) throws GSSException;
     
     /**
      * @param buyRefundNo
      *         退单号
      * @return Page
      */
-    UnpResult<Object> buyRefund(Agent agent,Long buyRefundNo) throws GSSException;
-
-    UnpResult<Object> createRefund(Agent agent, Long saleOrderNo);
+    UnpResult<Object> buyRefund(Agent agent, Long buyRefundNo) throws GSSException;
 }
