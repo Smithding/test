@@ -251,7 +251,7 @@
             AND UB.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
         </if>
         <if test="buyChangeNo != null">
-            AND UBR.BUY_REFUND_NO = #{buyChangeNo,jdbcType=BIGINT}
+            AND UBR.BUY_REFUND_ORDER_NO = #{buyChangeNo,jdbcType=BIGINT}
         </if>
         <if test="buyOrderNo != null">
             AND UBR.BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}

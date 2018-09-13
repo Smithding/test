@@ -570,6 +570,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购单不存在");
             }
             Long buyRefundOrderNo = this.getUnpNo(PREFIX_BUY_REFUND);
+            
             unpBuyRefund.setBuyRefundOrderNo(buyRefundOrderNo);
             unpBuyRefund.setSaleRefundOrderNo(unpSaleRefund.getSaleRefundOrderNo());
             unpBuyRefund.setBuyOrderNo(unpBuy.getBuyOrderNo());
@@ -1117,7 +1118,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             if (CollectionUtils.isEmpty(actualAmounts) || CollectionUtils.isEmpty(payNos)) {
                 throw new GSSException("UNP", "9400", "退单单号为【" + saleRefundNo + "】的【销售单支付信息】不存在");
             }
-            payWay = Integer.getInteger(actualAmounts.get(0).getPayWay());
+            payWay = Integer.decode(actualAmounts.get(0).getPayWay());
             payType = actualAmounts.get(0).getPayType();
             CertificateCreateVO vo = new CertificateCreateVO();
             vo.setTransationOrderNo(String.valueOf(refundOrder.getTraNo()));
@@ -1187,7 +1188,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             if (CollectionUtils.isEmpty(actualAmounts) || CollectionUtils.isEmpty(payNos)) {
                 throw new GSSException("UNP", "9400", "退单单号为【" + buyRefundNo + "】的【采购单支付信息】不存在");
             }
-            payWay = Integer.getInteger(actualAmounts.get(0).getPayWay());
+            payWay = Integer.decode(actualAmounts.get(0).getPayWay());
             payType = actualAmounts.get(0).getPayType();
             Supplier supplier = supplierService.getSupplierByNo(agent, refundOrder.getSupplierId());
             if (supplier == null) {
