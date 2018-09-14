@@ -239,10 +239,10 @@
         LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO = UB.SUPPLIER_ID
         WHERE 1=1
         <if test="saleChangeNo != null">
-            AND UB.SALE_ORDER_NO = #{saleChangeNo,jdbcType=BIGINT}
+            AND UBR.SALE_REFUND_ORDER_NO = #{saleChangeNo,jdbcType=BIGINT}
         </if>
         <if test="saleOrderNo != null">
-            AND UBR.SALE_REFUND_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+            AND UB.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
         </if>
         <if test="buyChangeNo != null">
             AND UBR.BUY_REFUND_ORDER_NO = #{buyChangeNo,jdbcType=BIGINT}

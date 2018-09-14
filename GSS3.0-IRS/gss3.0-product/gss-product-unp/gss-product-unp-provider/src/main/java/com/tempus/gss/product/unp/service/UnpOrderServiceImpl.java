@@ -1020,7 +1020,6 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 result.setMsg("销售明细单【" + item.getItemId() + "】修改失败");
             }
         });
-        unpSaleRefund.setSaleRefundOrderNo(null);
         int i = unpSaleRefundMapper.updateByPrimaryKeySelective(unpSaleRefund);
         if (i > 0) {
             logger.info("更新销售退单单成功:{}，开始更新OS销售退单", unpSaleRefund.getSaleRefundOrderNo());
@@ -1045,7 +1044,6 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 result.setMsg("采购明细单【" + item.getItemId() + "】修改失败");
             }
         });
-        unpBuyRefund.setBuyRefundOrderNo(null);
         int i = unpBuyRefundMapper.updateByPrimaryKeySelective(unpBuyRefund);
         if (i > 0) {
             logger.info("更新采购退单成功:{}，开始更新OS采购退单", unpBuyRefund.getBuyRefundOrderNo());

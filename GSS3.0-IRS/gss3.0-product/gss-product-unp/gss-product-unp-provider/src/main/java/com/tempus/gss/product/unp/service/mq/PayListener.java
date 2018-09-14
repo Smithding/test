@@ -148,16 +148,18 @@ public class PayListener {
                 }
                 if ((payNoticeVO.getBusinessType() == BusinessType.SALE_CHANGE_ORDER)) {
                     if (payNoticeVO.getIncomeExpenseType() == IncomeExpenseType.EXPENSE.getKey()) {
-                        try { //新开线程  进行采购退款
+                        try { //新开线程  如果采购未退  进行采购退款
                             UnpOrderQueryVo getBuyVo = new UnpOrderQueryVo();
                             getBuyVo.setSaleChangeNo(payNoticeVO.getBusinessNo());
                             UnpBuyRefund buyRefund = unpOrderService.getBuyRefundOrderInfo(getBuyVo);
                             if (buyRefund != null) {
-                                Runnable runner = () -> {
-                                    UnpResult<Object> buyRefundResult = unpOrderService.buyRefund(agent, buyRefund.getBuyRefundOrderNo());
-                                    logger.info("线程退采购结果:{}", buyRefundResult.getMsg());
-                                };
-                                runner.run();
+                                if (buyRefund.getPayStatus() < EUnpConstant.PayStatus.PAIED.getKey()) {
+                                    Runnable runner = () -> {
+                                        UnpResult<Object> buyRefundResult = unpOrderService.buyRefund(agent, buyRefund.getBuyRefundOrderNo());
+                                        logger.info("线程退采购结果:{}", buyRefundResult.getMsg());
+                                    };
+                                    runner.run();
+                                }
                             }
                         } catch (Exception e) {
                             logger.error("新开线程  进行采购退款", e);
@@ -167,7 +169,7 @@ public class PayListener {
                         queryVo.setSaleChangeNo(payNoticeVO.getBusinessNo());
                         UnpSaleRefund unpSaleRefund = unpOrderService.querySaleOrderRefund(queryVo);
                         UnpSaleRefund saleRefundUpdate = new UnpSaleRefund();
-                        unpSaleRefund.setSaleRefundOrderNo(payNoticeVO.getBusinessNo());
+                        saleRefundUpdate.setSaleRefundOrderNo(payNoticeVO.getBusinessNo());
                         if (unpSaleRefund.getPayStatus() < EUnpConstant.PayStatus.PAYING.getKey()) {
                             // 首次成功通知
                             saleRefundUpdate.setPayStatus(payStatus);
