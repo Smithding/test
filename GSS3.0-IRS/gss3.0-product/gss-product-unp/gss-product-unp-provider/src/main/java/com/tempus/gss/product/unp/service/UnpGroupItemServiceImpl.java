@@ -3,6 +3,7 @@ package com.tempus.gss.product.unp.service;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
+import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.unp.api.entity.UnpGroupType;
 import com.tempus.gss.product.unp.api.entity.UnpItemType;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
@@ -257,7 +258,7 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
         }
         UnpGroupType[] entities = new UnpGroupType[params.length];
         try {
-            if (null == group || !group) {
+            if (null != group && group) {
                 for (int i = 0; i < params.length; i++) {
                     UnpGroupType u = new UnpGroupType();
                     if (params[i] instanceof Long) {
@@ -335,7 +336,12 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
                 if (entity instanceof UnpGroupType) {
                     ((UnpGroupType) entity).setModifier(agent.getAccount());
                     ((UnpGroupType) entity).setModifyTime(new Date());
-                    UnpGroupType beforeUpdate = groupTypeMapper.selectByCode(((UnpGroupType) entity).getCode());
+                    UnpGroupType beforeUpdate = null;
+                    if (((UnpGroupType) entity).getCode() == null) {
+                        beforeUpdate = groupTypeMapper.selectByPrimaryKey(((UnpGroupType) entity).getTypeNo());
+                    } else {
+                        beforeUpdate = groupTypeMapper.selectByCode(((UnpGroupType) entity).getCode());
+                    }
                     if (null == beforeUpdate) {
                         continue;
                     }
@@ -350,26 +356,24 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
                     itemToUpdate.setModifier(agent.getAccount());
                     itemToUpdate.setModifyTime(new Date());
                     //构建修改小类的参数
-                    UnpItemType itemParam = new UnpItemType();
                     if (NullableCheck.isNotNullAndEmpty(((UnpGroupType) entity).getCode())) {
                         //如果大类修改了CODE
-                        itemParam.setGroupCode(beforeUpdate.getCode());
+                        throw new GSSException("UNP", "00", "不可修改代号");
+                        
                     }
-                    
+                    itemToUpdate.setGroupCode(beforeUpdate.getCode());
                     if (NullableCheck.isNotNullAndEmpty(((UnpGroupType) entity).getName())) {
                         //如果大类修改了NAME
-                        itemParam.setGroupName(beforeUpdate.getName());
+                        itemToUpdate.setGroupName(beforeUpdate.getName());
                     }
-                    
                     //大类修改可见性
-                    itemParam.setValid(((UnpGroupType) entity).getValid());
-                    int i = itemTypeMapper.updateSelective(itemToUpdate, itemParam);
+                    itemToUpdate.setValid(((UnpGroupType) entity).getValid());
+                    int i = itemTypeMapper.updateSelective(itemToUpdate);
                     if (i > 0) {
                         itemUpdated += i;
                     }
                 } else if (entity instanceof UnpItemType) {
-                    ((UnpItemType) entity).setModifier(agent.getAccount());
-                    ((UnpItemType) entity).setModifyTime(new Date());
+                    
                     UnpItemType itemBefore = null;
                     if (((UnpItemType) entity).getCode() == null) {
                         itemBefore = itemTypeMapper.selectByPrimaryKey(((UnpItemType) entity).getItemTypeNo());
@@ -379,7 +383,10 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
                     if (null == itemBefore) {
                         continue;
                     }
-                    int i = itemTypeMapper.updateSelective((UnpItemType) entity, itemBefore);
+                    ((UnpItemType) entity).setModifier(agent.getAccount());
+                    ((UnpItemType) entity).setModifyTime(new Date());
+                    ((UnpItemType) entity).setItemTypeNo(itemBefore.getItemTypeNo());
+                    int i = itemTypeMapper.updateByPrimaryKeySelective((UnpItemType) entity);
                     if (i > 0) {
                         itemUpdated += i;
                     }

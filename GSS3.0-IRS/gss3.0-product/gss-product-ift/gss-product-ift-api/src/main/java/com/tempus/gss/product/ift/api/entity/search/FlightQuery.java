@@ -70,6 +70,16 @@ public class FlightQuery implements Serializable {
 	private int departWeek;
 	/** 回程星期 */
 	private int rtnDepartWeek;
+	
+	/** 新增往返回程所属国家信息 */
+	/** 回程所属洲 */
+	private String rtnContinent;
+	/** 回程国家，A00代表全球，CN0代表境内，CN1代表境外，国家多个以"/"分割 */
+	private String rtnCountry;
+	/** 回程机场，多个以"/"分割 */
+	private String rtnAirport;
+	/** 回程机场国际I，还是国内D */
+	private String rtnSign;
 
 	public String getDepartSign() {
 		return departSign;
@@ -229,4 +239,37 @@ public class FlightQuery implements Serializable {
 	public void setPsgerType(int psgerType) {
 		this.psgerType = psgerType;
 	}
+
+	public String getRtnContinent() {
+		return rtnContinent;
+	}
+
+	public void setRtnContinent(String rtnContinent) {
+		this.rtnContinent = rtnContinent;
+	}
+
+	public String getRtnCountry() {
+		return rtnCountry;
+	}
+
+	public void setRtnCountry(String rtnCountry) {
+		this.rtnCountry = rtnCountry;
+	}
+
+	public String getRtnAirport() {
+		return rtnAirport;
+	}
+
+	public void setRtnAirport(String rtnAirport) {
+		this.rtnAirport = rtnAirport;
+	}
+
+	public String getRtnSign() {
+		return rtnSign;
+	}
+
+	public void setRtnSign(String rtnSign) {
+		this.rtnSign = rtnSign;
+	}
+	
 }

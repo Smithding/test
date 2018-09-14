@@ -15,7 +15,7 @@
         <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
     </resultMap>
     <sql id="Base_Column_List">
-    TYPE_NO, OWNER, CODE, NAME, STATUS, REMARK, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME
+    TYPE_NO, OWNER, CODE, NAME, STATUS, REMARK, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME,VALID
   </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
@@ -160,6 +160,9 @@
             </if>
             <if test="status != null">
                 STATUS = #{status,jdbcType=INTEGER},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=INTEGER},
             </if>
             <if test="remark != null">
                 REMARK = #{remark,jdbcType=VARCHAR},
