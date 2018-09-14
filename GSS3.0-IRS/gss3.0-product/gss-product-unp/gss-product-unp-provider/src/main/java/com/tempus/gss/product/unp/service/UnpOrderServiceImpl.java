@@ -491,6 +491,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 unpSaleRefundItem.setItemStatus(EUnpConstant.OrderStatus.READY.getKey());
                 unpSaleRefundItem.setSaleItemNo(saleItem.getItemId());
                 refundItems.add(unpSaleRefundItem);
+                logger.info("创建销售退单明细:{}", unpSaleRefund);
                 if (unpSaleRefundItemMapper.insertSelective(unpSaleRefundItem) < 0) {
                     throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "明细列表中 小类【" + unpSaleRefundItem.getUnpType() + "】创建失败");
                 }
