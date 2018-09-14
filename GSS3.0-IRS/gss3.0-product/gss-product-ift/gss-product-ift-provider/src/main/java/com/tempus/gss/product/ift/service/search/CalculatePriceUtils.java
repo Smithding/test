@@ -102,6 +102,7 @@ public class CalculatePriceUtils {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		priceSortCabins(flightPolicies);
 		return flightPolicies;
 	}
 	/**
@@ -203,9 +204,30 @@ public class CalculatePriceUtils {
      */
 	private static void priceSort(List<QueryIBEDetail> details) {
 		// 按结算价从低到高排序
-		if (CollectionUtils.isEmpty(details)) {
+		if (!CollectionUtils.isEmpty(details)) {
 			Collections.sort(details, new Comparator<QueryIBEDetail>() {
 				public int compare(QueryIBEDetail o1, QueryIBEDetail o2) {
+
+					if (o1.getCabinsPricesTotalses().get(0).getSalePriceCount() > o2.getCabinsPricesTotalses().get(0)
+							.getSalePriceCount()) {
+						return 1;
+					} else if (o1.getCabinsPricesTotalses().get(0).getSalePriceCount() > o2.getCabinsPricesTotalses()
+							.get(0).getSalePriceCount())
+						return 0;
+					return -1;
+				}
+			});
+		}
+	}
+	 /**
+     * 订单预订页面价格排序
+     * @param details
+     */
+	private static void priceSortCabins(List<IftPolicyChange> flightPolicies) {
+		// 按结算价从低到高排序
+		if (!CollectionUtils.isEmpty(flightPolicies)) {
+			Collections.sort(flightPolicies, new Comparator<IftPolicyChange>() {
+				public int compare(IftPolicyChange o1, IftPolicyChange o2) {
 
 					if (o1.getCabinsPricesTotalses().get(0).getSalePriceCount() > o2.getCabinsPricesTotalses().get(0)
 							.getSalePriceCount()) {
