@@ -97,9 +97,57 @@ public class IftFlightPolicy implements Serializable{
 	/** 备注 */
 	private String remark;
 	/**
+	 * 出票方式
+	 */
+	private String ticketWay;
+	/**
+	 * 儿童奖励说明
+	 */
+	private String chdRemark;
+	/**
+	 * 婴儿奖励说明
+	 */
+	private String infRemark;
+	/**
+	 * 共享奖励说明
+	 */
+	private String shareRemark;
+	/**
 	 * 政策id
 	 */
 	private Long policyId;
+	public String getTicketWay() {
+		return ticketWay;
+	}
+
+	public void setTicketWay(String ticketWay) {
+		this.ticketWay = ticketWay;
+	}
+
+	public String getChdRemark() {
+		return chdRemark;
+	}
+
+	public void setChdRemark(String chdRemark) {
+		this.chdRemark = chdRemark;
+	}
+
+	public String getInfRemark() {
+		return infRemark;
+	}
+
+	public void setInfRemark(String infRemark) {
+		this.infRemark = infRemark;
+	}
+
+	public String getShareRemark() {
+		return shareRemark;
+	}
+
+	public void setShareRemark(String shareRemark) {
+		this.shareRemark = shareRemark;
+	}
+
 	public Long getPolicyId() {
 		return policyId;
 	}

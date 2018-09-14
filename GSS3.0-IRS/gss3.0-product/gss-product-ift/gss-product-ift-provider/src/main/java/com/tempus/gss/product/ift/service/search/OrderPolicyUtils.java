@@ -25,6 +25,14 @@ public class OrderPolicyUtils {
 		IftPolicyChange iftPolicyChange = new IftPolicyChange();
 		IftFlightPolicy flightPolicy = getIftFlightPolicy(policy,new BigDecimal(detail.getCabinsPricesTotalses().get(0).getSalePriceCount()),new BigDecimal(detail.getCabinsPricesTotalses().get(0).getFavorableCount()));
 		iftPolicyChange.setFlightPolicy(flightPolicy);
+		//暂时因为航班数据有问题，一个舱位有两个价格，所以暂时保留第一个舱位价格，其他价格移除掉
+		if(detail.getCabinsPricesTotalses().size()>1){
+			for (int i = 0; i < detail.getCabinsPricesTotalses().size(); i++) {
+				if(i>0){
+					detail.getCabinsPricesTotalses().remove(i);
+				}
+			}
+		}
 		iftPolicyChange.setCabinsPricesTotalses(detail.getCabinsPricesTotalses());
 		return iftPolicyChange;
 	}
@@ -92,7 +100,39 @@ public class OrderPolicyUtils {
 
 		/** 儿童是否不享受直减，0否（默认），1是 */
 		flightPolicy.setChdPrivilege(policy.getChdPrivilege());
-
+         StringBuffer chdStr = new StringBuffer();
+		 if(policy.getChdNotAloneTicket()!=null&&policy.getChdNotAloneTicket()){
+			 chdStr.append("儿童不单开;");
+		 }
+		 if(policy.getChdRewardType()!=null){
+			switch (policy.getChdRewardType()) {
+			case 1:
+				 chdStr.append("儿童奖励与成人一致;");
+				break;
+			case 2:
+				chdStr.append("儿童奖可开无奖励;");
+				break;
+			case 3:
+				chdStr.append("儿童奖不可开;");
+				break;
+			case 4:
+				chdStr.append("儿童指定奖励;"+policy.getChdAssignRewardFee());
+				break;
+			default:
+				 chdStr.append("儿童奖励与成人一致;");
+				break;
+			}
+		 }
+		 if(policy.getChdIsAddHandlingFee()!=null&&policy.getChdIsAddHandlingFee()){
+			 chdStr.append("儿童加收手续费;"+policy.getChdAddHandlingFee());
+		 }
+		 if(policy.getChdTicketNoAgencyFee()!=null&&policy.getChdTicketNoAgencyFee()){
+			 chdStr.append("儿童可开无代理费;");
+		 }
+		 if(policy.getChdPrivilege()!=null&&policy.getChdPrivilege()){
+			 chdStr.append("儿童不享受直减;");
+		 }
+		 flightPolicy.setChdRemark(chdStr.toString());
 		/** 婴儿票：1可开无奖励,2不可开 */
 		flightPolicy.setInfTicket(policy.getInfTicket());
 
@@ -101,10 +141,17 @@ public class OrderPolicyUtils {
 
 		/** 婴儿加收的手续费 */
 		flightPolicy.setInfAddHandlingFee(policy.getInfAddHandlingFee());
-
+		StringBuffer infStr = new StringBuffer();
+		if (policy.getInfTicket() != null) {
+			infStr.append(policy.getInfTicket().intValue() == 1 ? "可开无奖励;" : "不可开;");
+		}
+		if (policy.getInfIsAddHandlingFee() != null && policy.getInfIsAddHandlingFee()) {
+			infStr.append("婴儿加收的手续费" + policy.getInfAddHandlingFee());
+		}
+		flightPolicy.setInfRemark(infStr.toString());
 		/** 共享奖励类型：1全程无奖励，2全程指定奖励，3共享段无奖励，4共享段指定奖励，5给全部奖励 */
 		flightPolicy.setShareRewardType(policy.getShareRewardType());
-
+      
 		/** 存在共享航班时全程指定奖励 */
 		flightPolicy.setShareAssignReward(policy.getShareAssignReward());
 
@@ -116,7 +163,33 @@ public class OrderPolicyUtils {
 
 		/** 共享以下航司间给全部奖励，航司二字代码，多个以"/"分割 */
 		flightPolicy.setShareSuitAirline(policy.getShareSuitAirline());
-	  
+	    StringBuffer shareStr = new StringBuffer();
+	    if(policy.getShareRewardType()!=null){
+	    	switch (policy.getShareRewardType()) {
+			case 1:
+				shareStr.append("全程无奖励");
+				break;
+			case 2:
+				shareStr.append("全程指定奖励"+policy.getShareAssignReward());
+				break;
+			case 3:
+				shareStr.append("全程无奖励");
+				break;
+			case 4:
+				shareStr.append("共享段指定奖励"+policy.getShareLegReward());
+				break;
+			case 5:
+				shareStr.append("给全部奖励");
+				break;
+			default:
+				shareStr.append("全程无奖励");
+				break;
+			}
+	    }
+	    if(policy.getShareIsSuitAirline()!=null&&policy.getShareIsSuitAirline()){
+	    	shareStr.append("以下航司间共享时给全部奖励"+policy.getShareSuitAirline());
+	    }
+	    flightPolicy.setShareRemark(shareStr.toString());
 		/** 备注 */
 		flightPolicy.setRemark(policy.getRemark());
 		
@@ -131,6 +204,7 @@ public class OrderPolicyUtils {
 			/** 平时开票时间（星期一至星期五），例:00:00-23:59 */
 			flightPolicy.setTicketDate(policy.getTicketDate());
 		}
+		flightPolicy.setTicketWay(policy.getTicketWay());
 		return flightPolicy;
 	}
 }

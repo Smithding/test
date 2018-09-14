@@ -37,6 +37,7 @@ import com.tempus.gss.product.ift.api.service.search.IftFlightQueryService;
 import com.tempus.gss.product.ift.api.service.search.NewQueryService;
 import com.tempus.gss.product.ift.api.utils.ThreadExecutor;
 import com.tempus.gss.product.ift.dao.ProfitDao;
+import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 import com.tempus.tbd.service.IAirportService;
 import com.tempus.tbe.service.IShoppingService;
@@ -181,6 +182,7 @@ public class NewQueryServiceImpl implements NewQueryService {
 					flightPolicyRun.getIftPolicyList(), flightQuery.getCustomerType(), flightQueryRequest);
 			newQueryIBEDetailList.add(detail);
 		}
+		
 		long endTime = System.currentTimeMillis();
 		log.info("开始匹配政策，耗时：" + (endTime - startTime) + "毫秒");
 		return newQueryIBEDetailList;

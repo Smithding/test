@@ -114,7 +114,7 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 			leg.setFlightNo(flights.getFlightNo());//航班号
 			leg.setDepTime(flights.getDepTime());//起飞时间
             leg.setArrTime(flights.getArrTime());//到达时间.
-            leg.setCabin(flights.getFlightCabinPriceVos().get(0).getCabin());
+            leg.setCabin(flights.getFlightCabinPriceVos().get(0).getCabin()==null?"":flights.getFlightCabinPriceVos().get(0).getCabin());
             leg.setArrAirport(flights.getArrAirport());//到达机场.
 			leg.setDepAirport(flights.getDepAirport());//起点机场.
             leg.setGoBack(flights.getDirection().equals("go")?1:2);//方向标识 go/back
@@ -152,7 +152,7 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 			leg.setFlightNo(flights.getFlightNo());//航班号
 			leg.setDepTime(flights.getDepTime());//起飞时间
             leg.setArrTime(flights.getArrTime());//到达时间.
-            leg.setCabin(flights.getFlightCabinPriceVos().get(0).getCabin());
+            leg.setCabin(flights.getFlightCabinPriceVos().get(0).getCabin()==null?"":flights.getFlightCabinPriceVos().get(0).getCabin());
             leg.setArrAirport(flights.getArrAirport());//到达机场.
 			leg.setDepAirport(flights.getDepAirport());//起点机场.
             leg.setGoBack(flights.getDirection().equals("go")?1:2);//方向标识 go/back

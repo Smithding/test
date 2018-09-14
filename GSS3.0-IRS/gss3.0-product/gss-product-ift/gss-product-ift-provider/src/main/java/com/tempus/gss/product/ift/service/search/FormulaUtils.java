@@ -16,8 +16,6 @@ import com.tempus.gss.product.ift.api.entity.search.Mileage;
 import com.tempus.gss.util.JsonUtil;
 import com.tempus.tbe.entity.NucFareInfo;
 
-import springfox.documentation.spring.web.json.Json;
-
 public class FormulaUtils {
 	protected static final Logger logerr = LogManager.getLogger(FormulaUtils.class);
 	/**
@@ -59,8 +57,9 @@ public class FormulaUtils {
 	 */
 	public static FormulaParameters formulaMethod1(FormulaParameters formulaParameters) {
 		BigDecimal salePrice = new BigDecimal(0);
-		if (formulaParameters.getIsShare()!=null&&formulaParameters.getIsShare()) {// 当包含共享段航程计算价格
-			salePrice = sharePrice1(formulaParameters.getMileage().get(0), formulaParameters);
+		// 当包含共享段航程计算价格，当没有里程按整段计算，因为没有里程拆分不了价格(暂时只有PNR导入获取不到里程)
+		if (formulaParameters.getIsShare()!=null&&formulaParameters.getIsShare()&&!CollectionUtils.isEmpty(formulaParameters.getMileage())) {
+				salePrice = sharePrice1(formulaParameters.getMileage().get(0),formulaParameters);
 		} else {// 当不包含共享航程的情况计算销售价格
 			formulaParameters.setAwardPrice(formulaParameters.getFare());
 			salePrice = formulaPrice1(formulaParameters);
@@ -74,11 +73,12 @@ public class FormulaUtils {
 	 */
 	public static FormulaParameters formulaMethod2(FormulaParameters formulaParameters) {
 		BigDecimal salePrice = new BigDecimal(0);
-		if (formulaParameters.getIsShare()) {// 当包含共享段航程计算价格
-			salePrice = sharePrice1(formulaParameters.getMileage().get(0), formulaParameters);
+		// 当包含共享段航程计算价格，当没有里程按整段计算，因为没有里程拆分不了价格(暂时只有PNR导入获取不到里程)
+		if (formulaParameters.getIsShare()!=null&&formulaParameters.getIsShare()&&!CollectionUtils.isEmpty(formulaParameters.getMileage())) {
+			salePrice = sharePrice2(formulaParameters.getMileage().get(0), formulaParameters);
 		} else {// 当不包含共享航程的情况计算销售价格
 			formulaParameters.setAwardPrice(formulaParameters.getFare());// 记奖励价格为票面
-			salePrice = formulaPrice1(formulaParameters);
+			salePrice = formulaPrice2(formulaParameters);
 		}
 		formulaParameters.setSalePrice(salePrice);
 		return formulaParameters;
@@ -89,7 +89,8 @@ public class FormulaUtils {
 	 */
 	public static FormulaParameters towFormulaMethod1(FormulaParameters formulaParameters) {
 		BigDecimal salePrice = new BigDecimal(0);
-		if (formulaParameters.getIsShare()!=null&&formulaParameters.getIsShare()) {// 当包含共享段航程计算价格
+		// 当包含共享段航程计算价格，当没有里程按整段计算，因为没有里程拆分不了价格(暂时只有PNR导入获取不到里程)
+		if (formulaParameters.getIsShare()!=null&&formulaParameters.getIsShare()&&!CollectionUtils.isEmpty(formulaParameters.getMileage())) {
 			if(!CollectionUtils.isEmpty(formulaParameters.getNucFareInfos())){//当NUC不为空的时候安NUC拆
 				//根据NUC拆分往返每段的票面价格
 				Map<String,Object> mapPrice = getNucConvertPrice(formulaParameters.getFare(),formulaParameters.getNucFareInfos(),formulaParameters.getMileage());
@@ -123,7 +124,8 @@ public class FormulaUtils {
 	 */
 	public static FormulaParameters towFormulaMethod2(FormulaParameters formulaParameters) {
 		BigDecimal salePrice = new BigDecimal(0);
-		if (formulaParameters.getIsShare()) {// 当包含共享段航程计算价格
+		// 当包含共享段航程计算价格，当没有里程按整段计算，因为没有里程拆分不了价格(暂时只有PNR导入获取不到里程)
+		if (formulaParameters.getIsShare()!=null&&formulaParameters.getIsShare()&&!CollectionUtils.isEmpty(formulaParameters.getMileage())) {
 			if(!CollectionUtils.isEmpty(formulaParameters.getNucFareInfos())){//当NUC不为空的时候安NUC拆
 				//根据NUC拆分往返每段的票面价格
 				Map<String,Object> mapPrice = getNucConvertPrice(formulaParameters.getFare(),formulaParameters.getNucFareInfos(),formulaParameters.getMileage());
@@ -184,6 +186,11 @@ public class FormulaUtils {
 		}else{
 			salePrice.subtract(formulaParameters.getRoundTripPrivilege());
 		}
+		if(formulaParameters.getShareRebate().doubleValue()==0){
+			formulaParameters.setAwardPrice(notSharePrice);
+		}else{
+			formulaParameters.setAwardPrice(sharePrice.add(notSharePrice));
+		}
 		logerr.info("共享段票面"+sharePrice+"非共享段票面"+shareSalePrice+"里程比"+JsonUtil.toJson(mileage)+"formulaParameters:"+JsonUtil.toJson(formulaParameters));
 		return salePrice;
 	}
@@ -220,6 +227,11 @@ public class FormulaUtils {
 			salePrice = salePrice.add(formulaParameters.getTax().add(formulaParameters.getBrokerage()));
 		}else{
 			salePrice.subtract(formulaParameters.getRoundTripPrivilege());
+		}
+		if(formulaParameters.getShareRebate().doubleValue()==0){
+			formulaParameters.setAwardPrice(notSharePrice);
+		}else{
+			formulaParameters.setAwardPrice(sharePrice.add(notSharePrice));
 		}
 		logerr.info("共享段票面"+sharePrice+"非共享段票面"+shareSalePrice+"里程比"+JsonUtil.toJson(mileage)+"formulaParameters:"+JsonUtil.toJson(formulaParameters));
 		return salePrice;

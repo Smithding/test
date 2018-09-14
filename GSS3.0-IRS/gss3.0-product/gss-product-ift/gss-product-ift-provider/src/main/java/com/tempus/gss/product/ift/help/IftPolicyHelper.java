@@ -108,7 +108,7 @@ public class IftPolicyHelper {
 			query.setDepartAirport(departLeg.getDepAirport());// 出发城市
 			Country deparcountry = airportService.queryCountryByAirport(departLeg.getDepAirport());// 根据出发城市查询所属的国家
 			if (deparcountry != null && !deparcountry.equals("")) {
-				query.setDepartContinent(deparcountry.getAreaCode().replace(" ", ""));// 三字码所属州
+				query.setDepartContinent(deparcountry.getAreaCode()==null?"":deparcountry.getAreaCode().replace(" ", ""));// 三字码所属州
 				query.setDepartCountry(deparcountry.getCountryCode());// 三字码所属国家
 				query.setDepartSign(deparcountry.getDomOrInt());//国际I还是国内D
 			} else {
@@ -123,7 +123,7 @@ public class IftPolicyHelper {
 				query.setArriveAirport(rtnLeg.getDepAirport());
 				Country airrcountry = airportService.queryCountryByAirport(rtnLeg.getDepAirport());// 根据抵达城市查询所属的国家
 				if (airrcountry != null && !airrcountry.equals("")) {
-					query.setArriveContinent(airrcountry.getAreaCode().replace(" ", ""));// 三字码所属州
+					query.setArriveContinent(airrcountry.getAreaCode()==null?"":airrcountry.getAreaCode().replace(" ", ""));// 三字码所属州
 					query.setArriveCountry(airrcountry.getCountryCode());// 三字码所属国家
 					query.setArriveSign(airrcountry.getDomOrInt());
 				} else {
