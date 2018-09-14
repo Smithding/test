@@ -711,6 +711,18 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         
     }
     
+    private void updateValid(UnpRefundVo refundVo, Integer validType) throws GSSException {
+        if (validType == VALID_TYPE_SALE_REFUND) {
+            if (NullableCheck.isNullOrEmpty(refundVo.getUnpSaleRefund())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售总单信息 不能为空");}
+            if (NullableCheck.isNullOrEmpty(refundVo.getUnpSaleRefundItemList())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "销售明细 至少一条");}
+        } else if (validType == VALID_TYPE_BUY_REFUND) {
+            if (NullableCheck.isNullOrEmpty(refundVo.getUnpBuyRefund())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购总单信息 不能为空");}
+            if (NullableCheck.isNullOrEmpty(refundVo.getUnpBuyRefundItemList())) {throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购明细 至少一条");}
+        } else {
+            throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "验证类型参数错误【1~5】");
+        }
+    }
+    
     @Override
     public Page<UnpSale> querySaleOrderList(Page<UnpSale> wrapper, UnpOrderQueryVo param) {
         if (null == wrapper) {
@@ -796,7 +808,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             unpBuyRefund = page.getRecords().get(0);
             if (unpBuyRefund != null) {
                 param = new UnpOrderQueryVo();
-                param.setSaleChangeNo(unpBuyRefund.getBuyRefundOrderNo());
+                param.setBuyChangeNo(unpBuyRefund.getBuyRefundOrderNo());
                 items = this.getBuyRefundItems(param);
                 unpBuyRefund.setItems(items);
             }
@@ -993,7 +1005,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     
     @Override
     public UnpResult<UnpSaleRefund> updateSale(Agent agent, UnpRefundVo request) {
-        this.createValid(request, VALID_TYPE_SALE_REFUND);
+        this.updateValid(request, VALID_TYPE_SALE_REFUND);
         UnpResult<UnpSaleRefund> result = new UnpResult<>();
         UnpSaleRefund unpSaleRefund = request.getUnpSaleRefund();
         List<UnpSaleRefundItem> unpSaleRefundItemList = request.getUnpSaleRefundItemList();
@@ -1018,7 +1030,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     
     @Override
     public UnpResult<UnpBuyRefund> updateBuy(Agent agent, UnpRefundVo request) {
-        this.createValid(request, VALID_TYPE_BUY_REFUND);
+        this.updateValid(request, VALID_TYPE_BUY_REFUND);
         UnpResult<UnpBuyRefund> result = new UnpResult<>();
         UnpBuyRefund unpBuyRefund = request.getUnpBuyRefund();
         List<UnpBuyRefundItem> unpBuyRefundItemList = request.getUnpBuyRefundItemList();

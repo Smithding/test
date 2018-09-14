@@ -10,6 +10,7 @@ import com.tempus.gss.order.entity.vo.PayNoticeVO;
 import com.tempus.gss.order.entity.vo.PayReceiveVO;
 import com.tempus.gss.product.unp.api.entity.*;
 import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
+import com.tempus.gss.product.unp.api.entity.util.UnpResult;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpRefundVo;
@@ -125,31 +126,48 @@ public class PayListener {
                         updateVo.setOperationType(EUnpConstant.Opertion.PAY.getKey());
                         unpOrderService.updateBuy(agent, updateVo);
                         UnpSale unpSale = unpOrderService.getSaleOrderInfo(queryVo);
-                        //更新销售状态为已完成
-                        List<UnpSaleItem> itemsToUpdate = new ArrayList<>();
-                        UnpSale unpUpdate = new UnpSale();
-                        unpUpdate.setSaleOrderNo(unpSale.getSaleOrderNo());
-                        unpUpdate.setStatus(EUnpConstant.OrderStatus.DONE.getKey());
-                        unpUpdate.setActualAmount(payNoticeVO.getActualAmount());
-                        unpSale.getSaleItems().forEach(item -> {
-                            UnpSaleItem itemUpdate = new UnpSaleItem();
-                            itemUpdate.setItemId(item.getItemId());
-                            itemUpdate.setSaleOrderNo(item.getSaleOrderNo());
-                            itemUpdate.setItemStatus(EUnpConstant.OrderStatus.DONE.getKey());
-                            itemsToUpdate.add(itemUpdate);
-                        });
-                        unpUpdate.setSaleItems(itemsToUpdate);
-                        updateVo.setUnpSale(unpUpdate);
-                        unpOrderService.updateSale(agent, updateVo);
+                        if (unpSale.getPayStatus() > EUnpConstant.PayStatus.PAYING.getKey()) {
+                            // 如果销售单已支付    更新销售状态为已完成
+                            List<UnpSaleItem> itemsToUpdate = new ArrayList<>();
+                            UnpSale unpUpdate = new UnpSale();
+                            unpUpdate.setSaleOrderNo(unpSale.getSaleOrderNo());
+                            unpUpdate.setStatus(EUnpConstant.OrderStatus.DONE.getKey());
+                            unpUpdate.setActualAmount(payNoticeVO.getActualAmount());
+                            unpSale.getSaleItems().forEach(item -> {
+                                UnpSaleItem itemUpdate = new UnpSaleItem();
+                                itemUpdate.setItemId(item.getItemId());
+                                itemUpdate.setSaleOrderNo(item.getSaleOrderNo());
+                                itemUpdate.setItemStatus(EUnpConstant.OrderStatus.DONE.getKey());
+                                itemsToUpdate.add(itemUpdate);
+                            });
+                            unpUpdate.setSaleItems(itemsToUpdate);
+                            updateVo.setUnpSale(unpUpdate);
+                            unpOrderService.updateSale(agent, updateVo);
+                        }
                     }
                 }
                 if ((payNoticeVO.getBusinessType() == BusinessType.SALE_CHANGE_ORDER)) {
                     if (payNoticeVO.getIncomeExpenseType() == IncomeExpenseType.EXPENSE.getKey()) {
+                        try { //新开线程  进行采购退款
+                            UnpOrderQueryVo getBuyVo = new UnpOrderQueryVo();
+                            getBuyVo.setSaleChangeNo(payNoticeVO.getBusinessNo());
+                            UnpBuyRefund buyRefund = unpOrderService.getBuyRefundOrderInfo(getBuyVo);
+                            if (buyRefund != null) {
+                                Runnable runner = () -> {
+                                    UnpResult<Object> buyRefundResult = unpOrderService.buyRefund(agent, buyRefund.getBuyRefundOrderNo());
+                                    logger.info("线程退采购结果:{}", buyRefundResult.getMsg());
+                                };
+                                runner.run();
+                            }
+                        } catch (Exception e) {
+                            logger.error("新开线程  进行采购退款", e);
+                        }
                         //销售退款  //退
                         logger.info("监听到UNP销售退款消息:{}--￥{}", payNoticeVO.getBusinessNo(), payNoticeVO.getActualAmount());
                         queryVo.setSaleChangeNo(payNoticeVO.getBusinessNo());
                         UnpSaleRefund unpSaleRefund = unpOrderService.querySaleOrderRefund(queryVo);
                         UnpSaleRefund saleRefundUpdate = new UnpSaleRefund();
+                        unpSaleRefund.setSaleRefundOrderNo(payNoticeVO.getBusinessNo());
                         if (unpSaleRefund.getPayStatus() < EUnpConstant.PayStatus.PAYING.getKey()) {
                             // 首次成功通知
                             saleRefundUpdate.setPayStatus(payStatus);
@@ -182,6 +200,7 @@ public class PayListener {
                         queryVo.setBuyChangeNo(payNoticeVO.getBusinessNo());
                         UnpBuyRefund unpBuyRefund = unpOrderService.queryBuyOrderRefund(queryVo);
                         UnpBuyRefund buyRefundUpdate = new UnpBuyRefund();
+                        buyRefundUpdate.setBuyRefundOrderNo(payNoticeVO.getBusinessNo());
                         if (unpBuyRefund.getPayStatus() < EUnpConstant.PayStatus.PAYING.getKey()) {
                             // 首次成功通知
                             buyRefundUpdate.setPayStatus(payStatus);
@@ -204,7 +223,7 @@ public class PayListener {
                         updateRefundVo.setUnpBuyRefund(buyRefundUpdate);
                         updateRefundVo.setUnpBuyRefundItemList(buyRefundUpdate.getItems());
                         //调用退单的update
-                        unpOrderService.updateSale(agent, updateRefundVo);
+                        unpOrderService.updateBuy(agent, updateRefundVo);
                     }
                 }
             }
@@ -213,14 +232,4 @@ public class PayListener {
         }
     }
     
-    private void toBuyPay() {
-        
-        try {
-            Runnable runner = () -> {
-            
-            };
-        } catch (Exception e) {
-            logger.error("Error", e);
-        }
-    }
 }
