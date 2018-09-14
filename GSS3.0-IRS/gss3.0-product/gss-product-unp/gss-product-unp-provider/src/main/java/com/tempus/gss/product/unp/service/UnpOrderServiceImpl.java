@@ -447,7 +447,6 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         this.createValid(request, VALID_TYPE_SALE_REFUND);
         logger.info("创建销售采购退单开始");
         UnpSaleRefund unpSaleRefund = new UnpSaleRefund();
-        UnpSaleRefundItem unpSaleRefundItem = new UnpSaleRefundItem();
         List<UnpSaleRefundItem> refundItems = new ArrayList<UnpSaleRefundItem>();
         List<UnpSaleItem> saleItems = request.getSaleItems();
         UnpResult<UnpSaleRefund> unpResult = new UnpResult<>();
@@ -456,7 +455,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         List<String> goods = new ArrayList<>();
         
         try {
-            //获取采购单信息
+            //获取单信息
             UnpSale unpSale = unpSaleMapper.selectByPrimaryKey(request.getUnpSale().getSaleOrderNo());
             if (unpSale == null) {
                 throw new GSSException(GoodsBigType.GENERAL.getValue(), "0", "采购单不存在");
@@ -482,6 +481,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 UnpItemType unpItemType = itemTypeMapper.selectByPrimaryKey(unpSaleItem.getUnpType());
                 goods.add(unpItemType.getName());
                 planAmount = planAmount.add(unpSaleItem.getGroupAmount());
+                UnpSaleRefundItem unpSaleRefundItem = new UnpSaleRefundItem();
                 unpSaleRefundItem.setItemId(IdWorker.getId());
                 unpSaleRefundItem.setSaleRefundOrderNo(saleRefundOrderNo);
                 unpSaleRefundItem.setUnpType(saleItem.getUnpType());
