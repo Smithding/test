@@ -120,25 +120,24 @@ public class IftPolicyHelper {
 			if (legType == 2) {
 				query.setRtnFlyDate(rtnLeg.getDepTime());// 回程时间
 				query.setRtnDepartWeek(Integer.parseInt(DateUtil.getDayOfWeek(query.getRtnFlyDate(), 0)));// 去程星期几
-				query.setArriveAirport(rtnLeg.getDepAirport());
+				query.setRtnAirport(rtnLeg.getDepAirport());
 				Country airrcountry = airportService.queryCountryByAirport(rtnLeg.getDepAirport());// 根据抵达城市查询所属的国家
 				if (airrcountry != null && !airrcountry.equals("")) {
-					query.setArriveContinent(airrcountry.getAreaCode()==null?"":airrcountry.getAreaCode().replace(" ", ""));// 三字码所属州
-					query.setArriveCountry(airrcountry.getCountryCode());// 三字码所属国家
-					query.setArriveSign(airrcountry.getDomOrInt());
+					query.setRtnContinent(airrcountry.getAreaCode()==null?"":airrcountry.getAreaCode().replace(" ", ""));// 三字码所属州
+					query.setRtnCountry(airrcountry.getCountryCode());// 三字码所属国家
+					query.setRtnSign(airrcountry.getDomOrInt());
 				} else {
 					logger.info(rtnLeg.getDepAirport() + "基础数据获取到城市信息");
 				}
-			}else{
-				query.setArriveAirport(arriveLeg.getArrAirport());
-				Country airrcountry = airportService.queryCountryByAirport(arriveLeg.getArrAirport());// 根据抵达城市查询所属的国家
-				if (airrcountry != null && !airrcountry.equals("")) {
-					query.setArriveContinent(airrcountry.getAreaCode().replace(" ", ""));// 三字码所属州
-					query.setArriveCountry(airrcountry.getCountryCode());// 三字码所属国家
-					query.setArriveSign(airrcountry.getDomOrInt());
-				} else {
-					logger.info(arriveLeg.getArrAirport() + "基础数据获取到城市信息");
-				}
+			}
+			query.setArriveAirport(arriveLeg.getArrAirport());
+			Country airrcountry = airportService.queryCountryByAirport(arriveLeg.getArrAirport());// 根据抵达城市查询所属的国家
+			if (airrcountry != null && !airrcountry.equals("")) {
+				query.setArriveContinent(airrcountry.getAreaCode().replace(" ", ""));// 三字码所属州
+				query.setArriveCountry(airrcountry.getCountryCode());// 三字码所属国家
+				query.setArriveSign(airrcountry.getDomOrInt());
+			} else {
+				logger.info(arriveLeg.getArrAirport() + "基础数据获取到城市信息");
 			}
 			query.setSaleWeek(Integer.parseInt(DateUtil.getDayOfWeek(new Date(), 0)));// 当前星期
 			query.setDepartWeek(Integer.parseInt(DateUtil.getDayOfWeek(query.getFlyDate(), 0)));// 去程星期几
