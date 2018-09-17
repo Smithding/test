@@ -12,6 +12,7 @@ import org.apache.shiro.util.CollectionUtils;
 import com.tempus.gss.product.ift.api.entity.CabinsPricesTotals;
 import com.tempus.gss.product.ift.api.entity.Flight;
 import com.tempus.gss.product.ift.api.entity.PassengerTypePricesTotal;
+import com.tempus.gss.product.ift.api.entity.Profit;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
 import com.tempus.gss.product.ift.api.entity.formula.FormulaParameters;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
@@ -37,7 +38,7 @@ public class CalculatePriceUtils {
 	 * 计算公式 1计奖的部分*(1-代理费率)(1-返点)+无奖的部分*(1-代理费率)+税费+手续费
 	 * 计奖的部分*(1-代理费率-返点)+无奖的部分*(1-代理费率)+税费+手续费
 	 */
-	public static QueryIBEDetail fligthCalculate(QueryIBEDetail queryIBEDetail, List<IftPolicy> policyList, int formula) {
+	public static QueryIBEDetail fligthCalculate(QueryIBEDetail queryIBEDetail, List<IftPolicy> policyList, int formula,Profit profit) {
 		IftPolicy policy = new IftPolicy();// 单程只会有一条政策
 		// 单程
 		List<QueryIBEDetail> details = new ArrayList<QueryIBEDetail>();
@@ -47,14 +48,14 @@ public class CalculatePriceUtils {
 					//根据政策计算价格
 					QueryIBEDetail detail = (QueryIBEDetail)CloneUtils.deepCopy(queryIBEDetail);
 					// 根据政策计算价格
-					detail = oneWayQueryIBEDetail(detail, iftPolicy, formula);
+					detail = oneWayQueryIBEDetail(detail, iftPolicy, formula,profit);
 					details.add(detail);
 				}
 			}else{
 				//根据政策计算价格
 				QueryIBEDetail detail = (QueryIBEDetail)CloneUtils.deepCopy(queryIBEDetail);
 				// 根据政策计算价格
-				detail = oneWayQueryIBEDetail(detail, policy, formula);
+				detail = oneWayQueryIBEDetail(detail, policy, formula,profit);
 				details.add(detail);
 			}
 			//价格排序
@@ -86,14 +87,14 @@ public class CalculatePriceUtils {
 	 * 计奖的部分*(1-代理费率-返点)+无奖的部分*(1-代理费率)+税费+手续费
 	 */
 	public static List<IftPolicyChange> orderPolicyCalculate(QueryIBEDetail queryIBEDetail, List<IftPolicy> policyList,
-			int formula) {
+			int formula,Profit profit) {
 		List<IftPolicyChange> flightPolicies = new ArrayList<IftPolicyChange>();
 		try {
 			if (!CollectionUtils.isEmpty(policyList)) {
 				for (IftPolicy iftPolicy : policyList) {
 					QueryIBEDetail detail = (QueryIBEDetail)CloneUtils.deepCopy(queryIBEDetail);
 					// 根据政策计算价格
-					detail = oneWayQueryIBEDetail(detail, iftPolicy, formula);
+					detail = oneWayQueryIBEDetail(detail, iftPolicy, formula,profit);
 					// 订单预定页面价格和政策组装
 					IftPolicyChange policyChange = OrderPolicyUtils.getIftPolicyChange(detail, iftPolicy);
 					flightPolicies.add(policyChange);
@@ -112,7 +113,7 @@ public class CalculatePriceUtils {
 	 * @param formula
 	 * @return
 	 */
-	private static  QueryIBEDetail oneWayQueryIBEDetail(QueryIBEDetail queryIBEDetail,IftPolicy policy,int formula){
+	private static  QueryIBEDetail oneWayQueryIBEDetail(QueryIBEDetail queryIBEDetail,IftPolicy policy,int formula,Profit profit){
 		for (CabinsPricesTotals cabins : queryIBEDetail.getCabinsPricesTotalses()) {
 			for (PassengerTypePricesTotal passengerTypePricesTotal : cabins.getPassengerTypePricesTotals()) {// 乘客价格信息
 				FormulaParameters formulaP = new FormulaParameters();
@@ -148,6 +149,8 @@ public class CalculatePriceUtils {
 						formulaP.setIsShare(true);
 					}
 				}
+				//控润
+				FormulaUtils.getProfit(policy, passengerTypePricesTotal.getPassengerType(), formulaP, profit);
 				formulaP.setFlightType(queryIBEDetail.getLegType());//设置航程信息
 				if(queryIBEDetail.getLegType().intValue() == 1){
 					formulaPrice(passengerTypePricesTotal, formulaP, formula);//单程计算价格
@@ -250,5 +253,7 @@ public class CalculatePriceUtils {
 		passengerTypePricesTotal.setSaleRebate(formula.getSaleRebate());//返点
 		passengerTypePricesTotal.setAgencyFee(formula.getAgencyFee());//代理费率，小于等于1的2位小数，0.01表示一个点.
 		passengerTypePricesTotal.setBrokerage(formula.getBrokerage());//手续费，5，表示￥5.
+		passengerTypePricesTotal.setAddPrice(formula.getProfitPrice()==null?new BigDecimal(0):formula.getProfitPrice());//控润的钱
+		passengerTypePricesTotal.setProfitRebate(formula.getProfitRebate()==null?new BigDecimal(0):formula.getProfitRebate());//控润的返点
 	}
 }

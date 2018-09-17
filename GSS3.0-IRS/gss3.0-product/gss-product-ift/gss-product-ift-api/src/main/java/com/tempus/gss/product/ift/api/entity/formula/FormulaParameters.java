@@ -73,7 +73,27 @@ public class FormulaParameters {
 	 * NUC
 	 */
 	private List<NucFareInfo> nucFareInfos;
+	  /**
+     * 控润返点
+     */
+    private BigDecimal profitRebate;
+    /**
+     * 控润加价
+     */
+    private BigDecimal profitPrice;
 
+	public BigDecimal getProfitPrice() {
+		return profitPrice;
+	}
+	public void setProfitPrice(BigDecimal profitPrice) {
+		this.profitPrice = profitPrice;
+	}
+	public BigDecimal getProfitRebate() {
+		return profitRebate;
+	}
+	public void setProfitRebate(BigDecimal profitRebate) {
+		this.profitRebate = profitRebate;
+	}
 	public List<NucFareInfo> getNucFareInfos() {
 		return nucFareInfos;
 	}

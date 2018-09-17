@@ -1,5 +1,26 @@
 package com.tempus.gss.product.ift.service;
 
+import java.math.BigDecimal;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
@@ -24,14 +45,47 @@ import com.tempus.gss.order.entity.enums.CostType;
 import com.tempus.gss.order.entity.vo.CertificateCreateVO;
 import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
 import com.tempus.gss.order.entity.vo.UpdatePlanAmountVO;
-import com.tempus.gss.order.service.*;
+import com.tempus.gss.order.service.IBuyOrderService;
+import com.tempus.gss.order.service.ICertificateService;
+import com.tempus.gss.order.service.IPlanAmountRecordService;
+import com.tempus.gss.order.service.ISaleOrderService;
+import com.tempus.gss.order.service.ITransationOrderService;
 import com.tempus.gss.pay.entity.CapitalAccount;
 import com.tempus.gss.pay.service.ICapitalAccountService;
 import com.tempus.gss.pay.service.facade.IPayRestService;
 import com.tempus.gss.product.common.entity.RequestWithActor;
-import com.tempus.gss.product.ift.api.entity.*;
+import com.tempus.gss.product.ift.api.entity.AdjustOrder;
+import com.tempus.gss.product.ift.api.entity.BuyOrderDetail;
+import com.tempus.gss.product.ift.api.entity.BuyOrderExt;
+import com.tempus.gss.product.ift.api.entity.GssMain;
+import com.tempus.gss.product.ift.api.entity.IftPlaneTicket;
+import com.tempus.gss.product.ift.api.entity.InallsaleRequest;
+import com.tempus.gss.product.ift.api.entity.Leg;
+import com.tempus.gss.product.ift.api.entity.Passenger;
+import com.tempus.gss.product.ift.api.entity.Pnr;
+import com.tempus.gss.product.ift.api.entity.QueryByPnr;
+import com.tempus.gss.product.ift.api.entity.SaleOrderDetail;
+import com.tempus.gss.product.ift.api.entity.SaleOrderExt;
+import com.tempus.gss.product.ift.api.entity.TicketSender;
+import com.tempus.gss.product.ift.api.entity.WarnOrder;
+import com.tempus.gss.product.ift.api.entity.policy.IftOrderPrice;
 import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
-import com.tempus.gss.product.ift.api.entity.vo.*;
+import com.tempus.gss.product.ift.api.entity.vo.BlackOrderExtVo;
+import com.tempus.gss.product.ift.api.entity.vo.DemandTeamVo;
+import com.tempus.gss.product.ift.api.entity.vo.IftTicketMessage;
+import com.tempus.gss.product.ift.api.entity.vo.OrderCreateVo;
+import com.tempus.gss.product.ift.api.entity.vo.OrderInformVo;
+import com.tempus.gss.product.ift.api.entity.vo.OrderPriceVo;
+import com.tempus.gss.product.ift.api.entity.vo.OrderRefuseRequest;
+import com.tempus.gss.product.ift.api.entity.vo.PassengerListVo;
+import com.tempus.gss.product.ift.api.entity.vo.PassengerVo;
+import com.tempus.gss.product.ift.api.entity.vo.QueryPnrAndTimeVo;
+import com.tempus.gss.product.ift.api.entity.vo.ReportVo;
+import com.tempus.gss.product.ift.api.entity.vo.SaleOrderDetailVo;
+import com.tempus.gss.product.ift.api.entity.vo.SaleOrderExtVo;
+import com.tempus.gss.product.ift.api.entity.vo.SaleQueryOrderVo;
+import com.tempus.gss.product.ift.api.entity.vo.TicketRequest;
+import com.tempus.gss.product.ift.api.entity.vo.WarnOrderRequest;
 import com.tempus.gss.product.ift.api.entity.webservice.InairlinesVo;
 import com.tempus.gss.product.ift.api.entity.webservice.InpayVo;
 import com.tempus.gss.product.ift.api.entity.webservice.InsaleVo;
@@ -39,9 +93,24 @@ import com.tempus.gss.product.ift.api.entity.webservice.settt.InallsaleVo;
 import com.tempus.gss.product.ift.api.entity.webservice.settt.InsaleService;
 import com.tempus.gss.product.ift.api.entity.webservice.settt.InsaleService_Service;
 import com.tempus.gss.product.ift.api.entity.webservice.settt.ReturnSettInfo;
-import com.tempus.gss.product.ift.api.service.*;
+import com.tempus.gss.product.ift.api.service.IBuyOrderExtService;
+import com.tempus.gss.product.ift.api.service.IOrderService;
+import com.tempus.gss.product.ift.api.service.IPassengerService;
+import com.tempus.gss.product.ift.api.service.ITicketSenderService;
+import com.tempus.gss.product.ift.api.service.IWarnOrderService;
+import com.tempus.gss.product.ift.api.service.IftPlaneTicketService;
+import com.tempus.gss.product.ift.api.service.policy.IftPolicyService;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
-import com.tempus.gss.product.ift.dao.*;
+import com.tempus.gss.product.ift.dao.AdjustOrderDao;
+import com.tempus.gss.product.ift.dao.BuyOrderDetailDao;
+import com.tempus.gss.product.ift.dao.BuyOrderExtDao;
+import com.tempus.gss.product.ift.dao.GssMainDao;
+import com.tempus.gss.product.ift.dao.LegDao;
+import com.tempus.gss.product.ift.dao.PassengerDao;
+import com.tempus.gss.product.ift.dao.PnrDao;
+import com.tempus.gss.product.ift.dao.SaleChangeExtDao;
+import com.tempus.gss.product.ift.dao.SaleOrderDetailDao;
+import com.tempus.gss.product.ift.dao.SaleOrderExtDao;
 import com.tempus.gss.product.ift.help.IftLogHelper;
 import com.tempus.gss.product.ift.mq.IftTicketMqSender;
 import com.tempus.gss.security.AgentUtil;
@@ -55,22 +124,6 @@ import com.tempus.tbd.entity.Airport;
 import com.tempus.tbd.service.IAirportService;
 import com.tempus.tbe.entity.PnrOutPut;
 import com.tempus.tbe.service.IGetPnrService;
-import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.net.URL;
-import java.util.*;
 
 @Service
 @org.springframework.stereotype.Service("iftOrderService")
@@ -179,6 +232,8 @@ public class OrderServiceImpl implements IOrderService {
     IBuyOrderExtService buyOrderExtService;
     @Autowired
     IftMessageServiceImpl iftMessageServiceImpl;
+    @Autowired
+    IftPolicyService fftPolicyService;
     
     @Value("${dpsconfig.job.owner}")
     protected String owner;
@@ -480,7 +535,11 @@ public class OrderServiceImpl implements IOrderService {
             }
             //将插入的数据原样返回
             saleOrderExt.setSaleOrderDetailList(saleOrderDetailList);
-            
+            //保存政策数据
+            if(requestWithActor.getEntity().getOrderPolicy()!=null&&!requestWithActor.getEntity().getOrderPolicy().equals("")){
+            	IftOrderPrice orderPolicy =  requestWithActor.getEntity().getOrderPolicy();
+            	fftPolicyService.createOrderPolicy(agent,Long.parseLong(orderPolicy.getPolicyId()), saleOrderNo, buyOrderNo, orderPolicy);
+            }
         } catch (GSSException ex) {
             log.error("创建订单失败", ex);
             throw ex;

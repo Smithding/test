@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 import org.apache.shiro.util.CollectionUtils;
 
 import com.tempus.gss.product.ift.api.entity.PassengerTypePricesTotal;
+import com.tempus.gss.product.ift.api.entity.Profit;
 import com.tempus.gss.product.ift.api.entity.formula.FormulaParameters;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.search.Mileage;
@@ -89,6 +90,7 @@ public class FormulaUtils {
 	 */
 	public static FormulaParameters towFormulaMethod1(FormulaParameters formulaParameters) {
 		BigDecimal salePrice = new BigDecimal(0);
+		BigDecimal awardPrice = new BigDecimal(0);
 		// 当包含共享段航程计算价格，当没有里程按整段计算，因为没有里程拆分不了价格(暂时只有PNR导入获取不到里程)
 		if (formulaParameters.getIsShare()!=null&&formulaParameters.getIsShare()&&!CollectionUtils.isEmpty(formulaParameters.getMileage())) {
 			if(!CollectionUtils.isEmpty(formulaParameters.getNucFareInfos())){//当NUC不为空的时候安NUC拆
@@ -105,7 +107,11 @@ public class FormulaUtils {
 						 price = sharePrice1(mileage, formulaParameters);
 					}
 					salePrice = salePrice.add(price);//总的结算价格
+					awardPrice = awardPrice.add(formulaParameters.getAwardPrice());
 				}
+				//计算完成，重新赋值票面价格
+				formulaParameters.setFare(new BigDecimal(String.valueOf(mapPrice.get("totalPcie"))));
+				formulaParameters.setAwardPrice(awardPrice);
 			}else{//或者按里程拆。这种只能适用往返为一条政策的情况，当往返匹配两天政策的情况不适用
 				Mileage mileage = getMileage(formulaParameters.getMileage());//把往返的里程相加组合成一个里程对象
 				salePrice = sharePrice1(mileage, formulaParameters);
@@ -124,6 +130,7 @@ public class FormulaUtils {
 	 */
 	public static FormulaParameters towFormulaMethod2(FormulaParameters formulaParameters) {
 		BigDecimal salePrice = new BigDecimal(0);
+		BigDecimal awardPrice = new BigDecimal(0);
 		// 当包含共享段航程计算价格，当没有里程按整段计算，因为没有里程拆分不了价格(暂时只有PNR导入获取不到里程)
 		if (formulaParameters.getIsShare()!=null&&formulaParameters.getIsShare()&&!CollectionUtils.isEmpty(formulaParameters.getMileage())) {
 			if(!CollectionUtils.isEmpty(formulaParameters.getNucFareInfos())){//当NUC不为空的时候安NUC拆
@@ -140,7 +147,11 @@ public class FormulaUtils {
 						 price = sharePrice2(mileage, formulaParameters);
 					}
 					salePrice = salePrice.add(price);//总的结算价格
+					awardPrice.add(formulaParameters.getAwardPrice());
 				}
+				//计算完成，重新赋值票面价格
+				formulaParameters.setFare(new BigDecimal(String.valueOf(mapPrice.get("totalPcie"))));
+				formulaParameters.setAwardPrice(awardPrice);
 			}else{//或者按里程拆。这种只能适用往返为一条政策的情况，当往返匹配两天政策的情况不适用
 				Mileage mileage = getMileage(formulaParameters.getMileage());//把往返的里程相加组合成一个里程对象
 				salePrice = sharePrice2(mileage, formulaParameters);
@@ -189,7 +200,7 @@ public class FormulaUtils {
 		if(formulaParameters.getShareRebate().doubleValue()==0){
 			formulaParameters.setAwardPrice(notSharePrice);
 		}else{
-			formulaParameters.setAwardPrice(sharePrice.add(notSharePrice));
+			formulaParameters.setAwardPrice(ticket);
 		}
 		logerr.info("共享段票面"+sharePrice+"非共享段票面"+shareSalePrice+"里程比"+JsonUtil.toJson(mileage)+"formulaParameters:"+JsonUtil.toJson(formulaParameters));
 		return salePrice;
@@ -231,7 +242,7 @@ public class FormulaUtils {
 		if(formulaParameters.getShareRebate().doubleValue()==0){
 			formulaParameters.setAwardPrice(notSharePrice);
 		}else{
-			formulaParameters.setAwardPrice(sharePrice.add(notSharePrice));
+			formulaParameters.setAwardPrice(ticket);
 		}
 		logerr.info("共享段票面"+sharePrice+"非共享段票面"+shareSalePrice+"里程比"+JsonUtil.toJson(mileage)+"formulaParameters:"+JsonUtil.toJson(formulaParameters));
 		return salePrice;
@@ -336,8 +347,7 @@ public class FormulaUtils {
 			} else if (passengerTypePricesTotal.getPassengerType().equals("INF")) {// 婴儿
 				formula.setAgencyFee(new BigDecimal(0));// 代理费
 				formula.setSaleRebate(new BigDecimal(0));// 下游返点
-				formula.setBrokerage(openTicketFee.add(
-						policy.getInfAddHandlingFee() == null ? new BigDecimal(0) : policy.getInfAddHandlingFee()));// 手续费
+				formula.setBrokerage(openTicketFee.add(policy.getInfAddHandlingFee() == null ? new BigDecimal(0) : policy.getInfAddHandlingFee()));// 手续费
 				formula.setOneWayPrivilege(new BigDecimal(0));// 单程直减费用
 				formula.setRoundTripPrivilege(new BigDecimal(0));// 单程直减费用
 				formula.setAgencyFee(agencyFee);// 代理费
@@ -358,5 +368,37 @@ public class FormulaUtils {
 		}
 		return formula;
 	}
-	
+	/**
+	 * 控润
+	 * @param policy 政策
+	 * @param passengerType 成人类型
+	 * @param formulaParameters 乘客的价格返点信息
+	 * @param profit 控润信息
+	 * @return
+	 */
+	public static FormulaParameters getProfit(IftPolicy policy,String passengerType,FormulaParameters formulaParameters,Profit profit) {
+		try{
+			//当政策不为空的情况对政策进行控润
+			if(policy!=null&&!policy.equals("")){
+				if(profit!=null&&!profit.equals("")&&profit.getPriceType().intValue()!=1){//价格方式  1 不控 2 控点 
+					 if (!passengerType.equals("INF")) {// 婴儿不控润
+						 if(profit.getPriceType().intValue()==2){// 2 控点
+							 formulaParameters.setProfitRebate(profit.getRebate());//控的返点
+							 formulaParameters.setProfitPrice(new BigDecimal(0));//空的返现
+							 formulaParameters.setSaleRebate(formulaParameters.getSaleRebate().subtract(profit.getRebate()));//在返点基础扣点控点
+							 formulaParameters.setShareRebate(formulaParameters.getShareRebate().subtract(profit.getRebate()));//在共享段返点基础扣点
+						 }else if(profit.getPriceType().intValue()==3){//3 控现 把钱加在服务费上
+							 formulaParameters.setProfitRebate(new BigDecimal(0));//控的返点
+							 formulaParameters.setBrokerage(profit.getRaisePrice());// 控现 把钱加在服务费上
+							 formulaParameters.setProfitPrice(formulaParameters.getBrokerage().add(profit.getRaisePrice()));//加钱
+						 }
+					 }
+				}
+			}
+		}catch(Exception e){
+			logerr.error("设置控润异常"+e.getMessage());
+			return formulaParameters;
+		}
+		return formulaParameters;
+	}
 }

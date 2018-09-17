@@ -104,7 +104,17 @@ public class PassengerTypePricesTotal implements Serializable {
 	 * 直减价格
 	 */
     private BigDecimal oneWayPrivilege;
-    public List<NucFareInfo> getNucFareInfos() {
+    /**
+     * 控润返点
+     */
+    private BigDecimal profitRebate; 
+    public BigDecimal getProfitRebate() {
+		return profitRebate;
+	}
+	public void setProfitRebate(BigDecimal profitRebate) {
+		this.profitRebate = profitRebate;
+	}
+	public List<NucFareInfo> getNucFareInfos() {
 		return nucFareInfos;
 	}
 	public void setNucFareInfos(List<NucFareInfo> nucFareInfos) {

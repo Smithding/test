@@ -14,14 +14,18 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
 import com.tempus.gss.product.ift.api.entity.Leg;
 import com.tempus.gss.product.ift.api.entity.Passenger;
+import com.tempus.gss.product.ift.api.entity.policy.IftOrderPolicy;
+import com.tempus.gss.product.ift.api.entity.policy.IftOrderPrice;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicyQuery;
 import com.tempus.gss.product.ift.api.entity.search.FlightQuery;
 import com.tempus.gss.product.ift.api.service.policy.IftPolicyService;
+import com.tempus.gss.product.ift.dao.policy.IftOrderPolicyMapper;
 import com.tempus.gss.product.ift.dao.policy.IftPolicyMapper;
 import com.tempus.gss.product.ift.dao.policy.IftQueryPolicyMapper;
 import com.tempus.gss.product.ift.help.IftLogHelper;
 import com.tempus.gss.product.ift.help.IftPolicyHelper;
+import com.tempus.gss.product.ift.service.search.OrderPolicyUtils;
 import com.tempus.gss.util.EntityUtil;
 import com.tempus.gss.vo.Agent;
 
@@ -52,6 +56,8 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 	
 	@Autowired
 	private IftPolicyHelper policyHelper;
+	@Autowired
+	private IftOrderPolicyMapper orderPolicyMapper;
 	
 	/** 日志记录器. */
 	protected static Logger logger = LogManager.getLogger(IftPolicyServiceImpl.class);
@@ -68,7 +74,7 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 		IftLogHelper.logger(agent, policyId, "创建政策", packagePolicyLog(iftPolicy));
 		return policyId;
 	}
-
+    
 	@Override
 	public IftPolicy find(Agent agent, long policyId) {
 		return iftPolicyMapper.find(agent.getOwner(), policyId);
@@ -248,6 +254,26 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 	    "STATUS, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME, VALID";
 		String[] b = a.split(",");
 		System.out.println(b.length);
+	}
+
+	@Override
+	public void createOrderPolicy(Agent agent, Long policyId,Long saleId,Long buyId, IftOrderPrice orderPrice) {
+		// TODO Auto-generated method stub
+		try{
+			IftOrderPolicy orderPolicy = new IftOrderPolicy();
+			//根据政策Id查找政策详情
+			IftPolicy policy = this.find(agent, policyId);
+			//封装订单政策对象数据
+			orderPolicy = OrderPolicyUtils.setOrderPolicy(policy,saleId, buyId, orderPrice);
+			long id = IdWorker.getId();
+			orderPolicy.setId(id);
+			EntityUtil.setAddInfo(orderPolicy, agent);
+			orderPolicyMapper.insert(orderPolicy);	
+		}catch(Exception e){
+			logger.error("插入政策异常"+e.getMessage());
+			e.printStackTrace();
+		}
+		
 	}
 
 }

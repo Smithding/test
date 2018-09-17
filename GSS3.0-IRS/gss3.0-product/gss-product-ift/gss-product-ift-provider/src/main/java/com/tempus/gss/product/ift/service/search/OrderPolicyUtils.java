@@ -4,8 +4,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import com.tempus.gss.bbp.util.DateUtil;
+import com.tempus.gss.product.ift.api.entity.PassengerTypePricesTotal;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
 import com.tempus.gss.product.ift.api.entity.policy.IftFlightPolicy;
+import com.tempus.gss.product.ift.api.entity.policy.IftOrderPolicy;
+import com.tempus.gss.product.ift.api.entity.policy.IftOrderPrice;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicyChange;
 
@@ -206,5 +209,157 @@ public class OrderPolicyUtils {
 		}
 		flightPolicy.setTicketWay(policy.getTicketWay());
 		return flightPolicy;
+	}
+	/**
+	 * 订单政策保存数据封装
+	 * @param policy
+	 * @param saleId
+	 * @param buyId
+	 * @param orderPrice订单销售政策数据
+	 * @return
+	 */
+	public static IftOrderPolicy setOrderPolicy(IftPolicy policy,Long saleId,Long buyId,IftOrderPrice orderPrice){
+		IftOrderPolicy orderPolicy = new IftOrderPolicy();
+		/** 归集单位 */
+		orderPolicy.setOwner(policy.getOwner());
+
+		/** 政策ID集合，多个以"/"分割 */
+		orderPolicy.setPolicyId(String.valueOf(policy.getId()));
+
+		/** 销售单ID */
+		orderPolicy.setSaleId(saleId);
+
+		/** 采购单ID */
+		orderPolicy.setBuyId(buyId);
+
+		/** 产品名称（别名） */
+		orderPolicy.setName(policy.getName());
+
+		/** 产品来源 */
+		orderPolicy.setSource(policy.getSource());
+
+		/** 航程类型, 1:单程(默认); 2:往返; 多个以"/"分割,例：1/2 */
+		orderPolicy.setVoyageType(String.valueOf(policy.getVoyageType()));
+
+		/** 票本类型，BSP、B2B、境外电子;多个以"/"分割，例:BSP/B2B */
+		orderPolicy.setTicketWay(policy.getTicketWay());
+
+		/** 航空公司编码 */
+		orderPolicy.setAirline(policy.getAirline());
+
+		/** 供应商, 可多个, 例如:[{\\\\ */
+		orderPolicy.setSuppliers(policy.getSuppliers());
+
+		/** 供应商Office, 多个以"/"分隔 */
+		orderPolicy.setSupplierOffice(policy.getSupplierOffice());
+
+		/** 开票Office, 多个以"/"分隔 */
+		orderPolicy.setTicketOffice(policy.getTicketOffice());
+
+		/** 上游代理费用 */
+		orderPolicy.setOriginalAgencyFee(policy.getOriginalAgencyFee());
+
+		/** 上游奖励费用 */
+		orderPolicy.setOriginalRewardFee(policy.getOriginalRewardFee());
+
+		/** 下游代理费 */
+		orderPolicy.setAgencyFee(policy.getAgencyFee());
+
+		/** 下游奖励费用 */
+		orderPolicy.setRewardFee(policy.getRewardFee());
+		for (PassengerTypePricesTotal prices : orderPrice.getPsgPolicyTotal()) {
+			/** 控润点数 */
+			orderPolicy.setProfitFee(prices.getProfitRebate());
+			/** 实际销售奖励费 */
+			orderPolicy.setSaleRewardFee(prices.getSaleRebate());
+			/**控润的加钱*/
+			orderPolicy.setProfitPrice(prices.getAddPrice());
+			break;
+		}
+		/** 单程直减费用 */
+		orderPolicy.setOneWayPrivilege(policy.getOneWayPrivilege());
+
+		/** 往返直减费用 */
+		orderPolicy.setRoundTripPrivilege(policy.getRoundTripPrivilege());
+
+		/** 开票费 */
+		orderPolicy.setOpenTicketFee(policy.getOpenTicketFee());
+
+		/** 是否自动出票，0不自动出（默认），1自动出票 */
+		orderPolicy.setAutoTicket(policy.getAutoTicket());
+
+		/** 是否航司普发GDS政策,1是（默认），0否 */
+		orderPolicy.setIsGds(policy.getIsGds());
+
+		/** 平时开票时间（星期一至星期五），例:00:00-23:59 */
+		orderPolicy.setTicketDate(policy.getTicketDate());
+
+		/** 星期六是否开票,0不开票，1开票（默认） */
+		orderPolicy.setSatIsTicket(policy.getSatIsTicket());
+
+		/** 星期六开票时间，例:00:00-23:59 */
+		orderPolicy.setSatTicketDate(policy.getSatTicketDate());
+
+		/** 星期日是否开票,0不开票，1开票（默认） */
+		orderPolicy.setSunIsTicket(policy.getSunIsTicket());
+
+		/** 星期日开票时间，例:00:00-23:59 */
+		orderPolicy.setSunTicketDate(policy.getSunTicketDate());
+
+		/** 儿童票奖励方式，1奖励与成人一致（默认）,2可开无奖励，3不可开，4指定奖励 */
+		orderPolicy.setChdRewardType(policy.getChdRewardType());
+
+		/** 儿童指定奖励 */
+		orderPolicy.setChdAssignRewardFee(policy.getChdAssignRewardFee());
+
+		/** 儿童是否加收手续费，0否（默认），1是 */
+		orderPolicy.setChdIsAddHandlingFee(policy.getChdIsAddHandlingFee());
+
+		/** 儿童加收的手续费 */
+		orderPolicy.setChdAddHandlingFee(policy.getChdAddHandlingFee());
+
+		/** 儿童是否可开无代理费，0否（默认），1是 */
+		orderPolicy.setChdTicketNoAgencyFee(policy.getChdTicketNoAgencyFee());
+
+		/** 儿童是否不单开，0否（默认），1是 */
+		orderPolicy.setChdNotAloneTicket(policy.getChdNotAloneTicket());
+
+		/** 儿童是否不享受直减，0否（默认），1是 */
+		orderPolicy.setChdPrivilege(policy.getChdPrivilege());
+
+		/** 婴儿票：1可开无奖励,2不可开 */
+		orderPolicy.setInfTicket(policy.getInfTicket());
+
+		/** 婴儿是否加收手续费，0否（默认），1是 */
+		orderPolicy.setInfIsAddHandlingFee(policy.getInfIsAddHandlingFee());
+
+		/** 婴儿加收的手续费 */
+		orderPolicy.setInfAddHandlingFee(policy.getInfAddHandlingFee());
+
+		/** PNR出票方式：1无需换编码（默认），2换编码出票，3大编出票（无需换编），4大编出票（需换编），5无位不换出票（外放有位时换编） */
+		orderPolicy.setPnrTicketType(policy.getPnrTicketType());
+
+		/** 共享奖励类型：1全程无奖励，2全程指定奖励，3共享段无奖励，4共享段指定奖励，5给全部奖励 */
+		orderPolicy.setShareRewardType(policy.getShareRewardType());
+
+		/** 存在共享航班时全程指定奖励 */
+		orderPolicy.setShareAssignReward(policy.getAgencyFee());
+
+		/** 共享航班航段指定奖励 */
+		orderPolicy.setShareLegReward(policy.getAgencyFee());
+
+		/** 共享是否勾选仅和以下航司间共享时给全部奖励 ，0否（默认），1是 */
+		orderPolicy.setShareIsSuitAirline(policy.getShareIsSuitAirline());
+
+		/** 共享以下航司间给全部奖励，航司二字代码，多个以"/"分割 */
+		orderPolicy.setShareSuitAirline(policy.getShareSuitAirline());
+
+		/** 出票备注 */
+		orderPolicy.setTicketRemarks("");
+
+		/** 备注 */
+		orderPolicy.setRemark(policy.getRemark());
+
+		return orderPolicy;
 	}
 }

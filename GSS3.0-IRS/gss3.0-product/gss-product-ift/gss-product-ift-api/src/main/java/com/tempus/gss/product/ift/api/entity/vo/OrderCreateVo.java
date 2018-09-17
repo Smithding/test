@@ -1,12 +1,13 @@
 package com.tempus.gss.product.ift.api.entity.vo;
 
+import java.io.Serializable;
+import java.util.List;
+
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.tempus.gss.product.ift.api.entity.BuyOrderExt;
 import com.tempus.gss.product.ift.api.entity.SaleOrderExt;
+import com.tempus.gss.product.ift.api.entity.policy.IftOrderPrice;
 import com.tempus.gss.serializer.LongSerializer;
-
-import java.io.Serializable;
-import java.util.List;
 
 /**
  * Created by Administrator on 2016/10/12.
@@ -23,7 +24,10 @@ public class OrderCreateVo implements Serializable {
 	public BuyOrderExt buyOrderExt;
 	
 	public List<OrderPriceVo> orderPriceVoList;
-
+	/**
+	 * 订单政策信息
+	 */
+	private IftOrderPrice orderPolicy;
 	/*
 	* 客户类型
 	* */
@@ -187,5 +191,11 @@ public class OrderCreateVo implements Serializable {
 
 	public void setUnitName(String unitName) {
 		this.unitName = unitName;
+	}
+	public IftOrderPrice getOrderPolicy() {
+		return orderPolicy;
+	}
+	public void setOrderPolicy(IftOrderPrice orderPolicy) {
+		this.orderPolicy = orderPolicy;
 	}
 }
