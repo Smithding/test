@@ -89,5 +89,13 @@ public interface IProfitService {
 	 * @since  CodingExample　Ver 1.1
 	 */
 	public int deleteByProfitNo(Long profitNo, Agent agent);
+	
+	/**
+	 * 获取控润规则
+	 * 
+	 * @param agent 用户信息
+	 * @return Profit 控润规则
+	 */
+	Profit getIftProfit(Agent agent);
 }
 

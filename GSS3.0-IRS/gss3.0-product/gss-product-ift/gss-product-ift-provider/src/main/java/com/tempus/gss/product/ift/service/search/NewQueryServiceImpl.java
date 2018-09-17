@@ -26,18 +26,18 @@ import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.CabinsPricesTotals;
 import com.tempus.gss.product.ift.api.entity.Flight;
 import com.tempus.gss.product.ift.api.entity.PassengerTypePricesTotal;
+import com.tempus.gss.product.ift.api.entity.Profit;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.vo.FlightQueryRequest;
 import com.tempus.gss.product.ift.api.service.FliePriceMappingService;
 import com.tempus.gss.product.ift.api.service.IMultipassMappingService;
 import com.tempus.gss.product.ift.api.service.IPolicyRService;
+import com.tempus.gss.product.ift.api.service.IProfitService;
 import com.tempus.gss.product.ift.api.service.policy.IftPolicyService;
 import com.tempus.gss.product.ift.api.service.search.IftFlightQueryService;
 import com.tempus.gss.product.ift.api.service.search.NewQueryService;
 import com.tempus.gss.product.ift.api.utils.ThreadExecutor;
-import com.tempus.gss.product.ift.dao.ProfitDao;
-import com.tempus.gss.util.JsonUtil;
 import com.tempus.gss.vo.Agent;
 import com.tempus.tbd.service.IAirportService;
 import com.tempus.tbe.service.IShoppingService;
@@ -69,7 +69,7 @@ public class NewQueryServiceImpl implements NewQueryService {
 	@Reference
 	IMultipassMappingService multipassMappingService;
 	@Autowired
-	ProfitDao profitDao;
+	private IProfitService iProfitService;
 	@Reference
 	protected ICustomerService customerService;
 	@Autowired
@@ -129,6 +129,7 @@ public class NewQueryServiceImpl implements NewQueryService {
 		}
 		List<QueryIBEDetail> queryIBEDetailList = shoppingFlightRun.getQueryIBEDetailList();// shoppring结果集
 		List<IftPolicy> policyList = flightPolicyRun.getIftPolicyList();// 政策结果集
+		Profit profit = iProfitService.getIftProfit(agent);// 控润信息
 		List<QueryIBEDetail> newQueryIBEDetailList = new ArrayList<QueryIBEDetail>();
 		for (QueryIBEDetail queryIBEDetail : queryIBEDetailList) {
 			QueryIBEDetail detail = iftFlightQueryService.mappingPriceSpec(queryIBEDetail, policyList,
