@@ -68,6 +68,7 @@ import com.tempus.gss.product.ift.api.entity.SaleOrderDetail;
 import com.tempus.gss.product.ift.api.entity.SaleOrderExt;
 import com.tempus.gss.product.ift.api.entity.TicketSender;
 import com.tempus.gss.product.ift.api.entity.WarnOrder;
+import com.tempus.gss.product.ift.api.entity.policy.IftOrderPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftOrderPrice;
 import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
 import com.tempus.gss.product.ift.api.entity.vo.BlackOrderExtVo;
@@ -99,7 +100,6 @@ import com.tempus.gss.product.ift.api.service.IPassengerService;
 import com.tempus.gss.product.ift.api.service.ITicketSenderService;
 import com.tempus.gss.product.ift.api.service.IWarnOrderService;
 import com.tempus.gss.product.ift.api.service.IftPlaneTicketService;
-import com.tempus.gss.product.ift.api.service.policy.IftPolicyService;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.AdjustOrderDao;
 import com.tempus.gss.product.ift.dao.BuyOrderDetailDao;
@@ -111,7 +111,9 @@ import com.tempus.gss.product.ift.dao.PnrDao;
 import com.tempus.gss.product.ift.dao.SaleChangeExtDao;
 import com.tempus.gss.product.ift.dao.SaleOrderDetailDao;
 import com.tempus.gss.product.ift.dao.SaleOrderExtDao;
+import com.tempus.gss.product.ift.dao.policy.IftOrderPolicyMapper;
 import com.tempus.gss.product.ift.help.IftLogHelper;
+import com.tempus.gss.product.ift.help.IftPolicyHelper;
 import com.tempus.gss.product.ift.mq.IftTicketMqSender;
 import com.tempus.gss.security.AgentUtil;
 import com.tempus.gss.system.entity.User;
@@ -232,8 +234,12 @@ public class OrderServiceImpl implements IOrderService {
     IBuyOrderExtService buyOrderExtService;
     @Autowired
     IftMessageServiceImpl iftMessageServiceImpl;
+    
     @Autowired
-    IftPolicyService fftPolicyService;
+    IftOrderPolicyMapper orderPolicyMapper;
+    
+    @Autowired
+    private IftPolicyHelper policyHelper;
     
     @Value("${dpsconfig.job.owner}")
     protected String owner;
@@ -538,7 +544,8 @@ public class OrderServiceImpl implements IOrderService {
             //保存政策数据
             if(requestWithActor.getEntity().getOrderPolicy()!=null&&!requestWithActor.getEntity().getOrderPolicy().equals("")){
             	IftOrderPrice orderPolicy =  requestWithActor.getEntity().getOrderPolicy();
-            	fftPolicyService.createOrderPolicy(agent,Long.parseLong(orderPolicy.getPolicyId()), saleOrderNo, buyOrderNo, orderPolicy);
+            	IftOrderPolicy iftOrderPolicy = policyHelper.createOrderPolicy(agent,Long.parseLong(orderPolicy.getPolicyId()), saleOrderNo, buyOrderNo, orderPolicy);
+            	orderPolicyMapper.insert(iftOrderPolicy);
             }
         } catch (GSSException ex) {
             log.error("创建订单失败", ex);

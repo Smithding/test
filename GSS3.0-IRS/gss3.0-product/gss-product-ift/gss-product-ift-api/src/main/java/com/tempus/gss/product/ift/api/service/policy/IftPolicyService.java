@@ -5,7 +5,6 @@ import java.util.List;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.ift.api.entity.Leg;
 import com.tempus.gss.product.ift.api.entity.Passenger;
-import com.tempus.gss.product.ift.api.entity.policy.IftOrderPrice;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicyQuery;
 import com.tempus.gss.vo.Agent;
@@ -120,12 +119,4 @@ public interface IftPolicyService {
 	 * @return List<IftPolicy> 政策集合
 	 */
 	List<IftPolicy> getPolicysByPnr(Agent agent, List<Passenger> passengers, List<Leg> legs, String airline, String fareBasis, String pnr, String pnrContext);
-	
-	/**
-	 * 订单政策添加
-	 * @param agent
-	 * @param policyId
-	 * @param orderPrice
-	 */
-    void createOrderPolicy(Agent agent, Long policyId,Long saleId,Long buyId, IftOrderPrice orderPrice);
 }
