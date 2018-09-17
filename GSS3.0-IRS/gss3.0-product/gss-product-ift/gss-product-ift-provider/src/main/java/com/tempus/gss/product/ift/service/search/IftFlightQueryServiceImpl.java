@@ -142,7 +142,7 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 		
 		// 参数获取国际机票计算规则
 		int calcRule = StringUtils.isBlank(paramService.getValueByKey("ift_calc_rule")) ? 1 : Integer.parseInt(paramService.getValueByKey("ift_calc_rule"));
-		List<IftPolicyChange> policyChanges = CalculatePriceUtils.orderPolicyCalculate(queryIBEDetail,iftPolicyList,calcRule);
+		List<IftPolicyChange> policyChanges = CalculatePriceUtils.orderPolicyCalculate(queryIBEDetail,iftPolicyList,calcRule,profit);
 		return policyChanges;
 	}
 	@Override
@@ -182,7 +182,7 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 		List<IftPolicy> iftPolicyList = policyService.getPolicysByPnr(agent, passengers, legs, queryIBEDetail.getTicketAirline(),  queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFareBasis(), pnr, pnrContext);
 		// 参数获取国际机票计算规则
 		int calcRule = StringUtils.isBlank(paramService.getValueByKey("ift_calc_rule")) ? 1 : Integer.parseInt(paramService.getValueByKey("ift_calc_rule"));
-		List<IftPolicyChange> policyChanges = CalculatePriceUtils.orderPolicyCalculate(queryIBEDetail,iftPolicyList,calcRule);
+		List<IftPolicyChange> policyChanges = CalculatePriceUtils.orderPolicyCalculate(queryIBEDetail,iftPolicyList,calcRule,profit);
 		return policyChanges;
 	}
 }
