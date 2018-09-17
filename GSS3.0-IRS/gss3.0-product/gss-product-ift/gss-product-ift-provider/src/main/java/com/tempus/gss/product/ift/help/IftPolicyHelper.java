@@ -3,6 +3,7 @@ package com.tempus.gss.product.ift.help;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -15,6 +16,8 @@ import com.tempus.gss.product.ift.api.entity.Leg;
 import com.tempus.gss.product.ift.api.entity.Passenger;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.search.FlightQuery;
+import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
+import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.service.policy.IftPolicyServiceImpl;
 import com.tempus.gss.product.ift.service.search.IftPolicyRuleUtils;
 import com.tempus.gss.util.Collections;
@@ -43,6 +46,9 @@ public class IftPolicyHelper {
 	
 	@Reference
 	private IAirportService airportService;
+	
+	@Reference
+	private IConfigsService configsService;
 	
 	/** 日志记录器. */
 	protected static Logger logger = LogManager.getLogger(IftPolicyServiceImpl.class);
@@ -291,6 +297,21 @@ public class IftPolicyHelper {
 		iftPolicyList = this.ruleFilter(iftPolicyList, legs, query, fareBasis, passengers.get(0).getSaleFare().doubleValue());
 		//TODO 实现pnr以及PNR内容中数据过滤
 		return iftPolicyList;
+	}
+	
+	/**
+	 * 获取国际机票价格取整方式
+	 * 
+	 * @param agent 用户信息
+	 * @return boolean true代表取整，false代表保留俩位小数，第三位直接舍弃
+	 */
+	public boolean getCalcRound(Agent agent){
+		boolean result = true;
+		IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
+		 //结算价进整
+        Map<String, Object> config = configs.getConfig();
+        result = Boolean.parseBoolean(config.get("round").toString());
+		return result;
 	}
 	
 	/**

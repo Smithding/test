@@ -84,6 +84,9 @@ public class IftOrderPolicy implements Serializable{
 
 	/** 控润点数 */
 	private BigDecimal profitFee;
+	
+	/** 控润点数 */
+	private BigDecimal profitPrice;
 
 	/** 实际销售奖励费 */
 	private BigDecimal saleRewardFee;
@@ -330,6 +333,14 @@ public class IftOrderPolicy implements Serializable{
 
 	public void setProfitFee(BigDecimal profitFee) {
 		this.profitFee = profitFee;
+	}
+
+	public BigDecimal getProfitPrice() {
+		return profitPrice;
+	}
+
+	public void setProfitPrice(BigDecimal profitPrice) {
+		this.profitPrice = profitPrice;
 	}
 
 	public BigDecimal getSaleRewardFee() {
