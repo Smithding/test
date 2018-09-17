@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.omg.CORBA.PolicyHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -67,9 +68,11 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 	
 	@Reference
 	protected IParamService paramService;
+	@Autowired
+	protected IftPolicyHelper iftPolicyHelper;
 	
 	@Override
-	public QueryIBEDetail mappingPriceSpec(QueryIBEDetail queryIBEDetail,List<IftPolicy> iftPolicyList,String customerTypeNo, RequestWithActor<FlightQueryRequest> request) {
+	public QueryIBEDetail mappingPriceSpec(QueryIBEDetail queryIBEDetail,List<IftPolicy> iftPolicyList,String customerTypeNo, RequestWithActor<FlightQueryRequest> request,boolean calcRound,int calcRule,Profit profit) {
 		
 		/* 组装航程信息 */
 		List<Leg> legs = new ArrayList<Leg>();
@@ -99,11 +102,7 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 		iftPolicyList = policyHelper.ruleFilter(iftPolicyList, legs, query, 
 				queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFareBasis(), 
 				queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFare().doubleValue());
-		
-		Profit profit = iProfitService.getIftProfit(request.getAgent());// 控润信息
-		// 参数获取国际机票计算规则
-		int calcRule = StringUtils.isBlank(paramService.getValueByKey("ift_calc_rule")) ? 1 : Integer.parseInt(paramService.getValueByKey("ift_calc_rule"));
-		QueryIBEDetail detail  = CalculatePriceUtils.fligthCalculate(queryIBEDetail,iftPolicyList, calcRule,profit);
+		QueryIBEDetail detail  = CalculatePriceUtils.fligthCalculate(queryIBEDetail,iftPolicyList, calcRule,profit,calcRound);
 		return detail;
 	}
 	@Override
@@ -137,12 +136,13 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
             legs.add(leg);
 		}
 		Profit profit = iProfitService.getIftProfit(agent);// 控润信息
+		boolean calcRound = iftPolicyHelper.getCalcRound(agent);//销售结算价格是否取整
 		List<IftPolicy> iftPolicyList = policyService.getPolicys(agent, legs, queryIBEDetail.getTicketAirline(), queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFareBasis()
 				, queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFare().doubleValue(), adtNumber, chdNumber, infNumber);
 		
 		// 参数获取国际机票计算规则
 		int calcRule = StringUtils.isBlank(paramService.getValueByKey("ift_calc_rule")) ? 1 : Integer.parseInt(paramService.getValueByKey("ift_calc_rule"));
-		List<IftPolicyChange> policyChanges = CalculatePriceUtils.orderPolicyCalculate(queryIBEDetail,iftPolicyList,calcRule,profit);
+		List<IftPolicyChange> policyChanges = CalculatePriceUtils.orderPolicyCalculate(queryIBEDetail,iftPolicyList,calcRule,profit,calcRound);
 		return policyChanges;
 	}
 	@Override
@@ -179,10 +179,11 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
             legs.add(leg);
 		}
 		Profit profit = iProfitService.getIftProfit(agent);// 控润信息
+		boolean calcRound = iftPolicyHelper.getCalcRound(agent);//销售结算价格是否取整
 		List<IftPolicy> iftPolicyList = policyService.getPolicysByPnr(agent, passengers, legs, queryIBEDetail.getTicketAirline(),  queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFareBasis(), pnr, pnrContext);
 		// 参数获取国际机票计算规则
 		int calcRule = StringUtils.isBlank(paramService.getValueByKey("ift_calc_rule")) ? 1 : Integer.parseInt(paramService.getValueByKey("ift_calc_rule"));
-		List<IftPolicyChange> policyChanges = CalculatePriceUtils.orderPolicyCalculate(queryIBEDetail,iftPolicyList,calcRule,profit);
+		List<IftPolicyChange> policyChanges = CalculatePriceUtils.orderPolicyCalculate(queryIBEDetail,iftPolicyList,calcRule,profit,calcRound);
 		return policyChanges;
 	}
 }

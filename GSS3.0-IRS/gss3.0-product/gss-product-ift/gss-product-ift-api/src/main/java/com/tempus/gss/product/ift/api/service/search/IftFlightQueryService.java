@@ -3,6 +3,7 @@ package com.tempus.gss.product.ift.api.service.search;
 import java.util.List;
 
 import com.tempus.gss.product.common.entity.RequestWithActor;
+import com.tempus.gss.product.ift.api.entity.Profit;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicyChange;
@@ -29,13 +30,16 @@ import com.tempus.gss.vo.Agent;
 public interface IftFlightQueryService {
 	/**
 	 * 航班白屏列表查询；根据shoppring结果匹配政策
-	 * @param queryIBEDetail
-	 * @param iftPolicyList
-	 * @param customerTypeNo
-	 * @param agent
+	 * @param queryIBEDetail 航班对象
+	 * @param iftPolicyList 政策集合
+	 * @param customerTypeNo 客户编号
+	 * @param request 航班查询请求参数
+	 * @param calcRound 销售价格是否取整
+	 * @param calcRule 计算价格方式
+	 * @param profit 控润
 	 * @return
 	 */
-	 public QueryIBEDetail mappingPriceSpec(QueryIBEDetail queryIBEDetail,List<IftPolicy> iftPolicyList, String customerTypeNo, RequestWithActor<FlightQueryRequest> request); 
+	 public QueryIBEDetail mappingPriceSpec(QueryIBEDetail queryIBEDetail,List<IftPolicy> iftPolicyList, String customerTypeNo, RequestWithActor<FlightQueryRequest> request,boolean calcRound,int calcRule,Profit profit); 
 	 /**
 	  * 订单预订异步实时获取政策数据
 	  * @param queryIBEDetail

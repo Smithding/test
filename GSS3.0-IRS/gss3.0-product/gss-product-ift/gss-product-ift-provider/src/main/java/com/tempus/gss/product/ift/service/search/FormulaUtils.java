@@ -379,7 +379,7 @@ public class FormulaUtils {
 	public static FormulaParameters getProfit(IftPolicy policy,String passengerType,FormulaParameters formulaParameters,Profit profit) {
 		try{
 			//当政策不为空的情况对政策进行控润
-			if(policy!=null&&!policy.equals("")){
+			if(policy!=null&&policy.getId()!=null){
 				if(profit!=null&&!profit.equals("")&&profit.getPriceType().intValue()!=1){//价格方式  1 不控 2 控点 
 					 if (!passengerType.equals("INF")) {// 婴儿不控润
 						 if(profit.getPriceType().intValue()==2){// 2 控点
@@ -401,4 +401,4 @@ public class FormulaUtils {
 		}
 		return formulaParameters;
 	}
-}
+} 

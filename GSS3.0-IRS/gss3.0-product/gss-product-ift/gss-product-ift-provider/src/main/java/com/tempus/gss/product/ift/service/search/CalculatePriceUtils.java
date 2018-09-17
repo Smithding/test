@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.shiro.util.CollectionUtils;
 
 import com.tempus.gss.product.ift.api.entity.CabinsPricesTotals;
@@ -17,9 +16,6 @@ import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
 import com.tempus.gss.product.ift.api.entity.formula.FormulaParameters;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicyChange;
-import com.tempus.gss.util.JsonUtil;
-
-import springfox.documentation.spring.web.json.Json;
 
 
 /**
@@ -31,70 +27,58 @@ import springfox.documentation.spring.web.json.Json;
 public class CalculatePriceUtils {
 	/**
 	 * 计算白屏航班查询舱位价格(只有当往返是会存在两条政策)
-	 * 
 	 * @param queryIBEDetail
 	 * @param policyList
 	 * @param formula
+	 * @param profit
+	 * @param calcRound
 	 * 计算公式 1计奖的部分*(1-代理费率)(1-返点)+无奖的部分*(1-代理费率)+税费+手续费
 	 * 计奖的部分*(1-代理费率-返点)+无奖的部分*(1-代理费率)+税费+手续费
+	 * @return
 	 */
-	public static QueryIBEDetail fligthCalculate(QueryIBEDetail queryIBEDetail, List<IftPolicy> policyList, int formula,Profit profit) {
+	public static QueryIBEDetail fligthCalculate(QueryIBEDetail queryIBEDetail, List<IftPolicy> policyList, int formula,Profit profit,boolean calcRound) {
 		IftPolicy policy = new IftPolicy();// 单程只会有一条政策
 		// 单程
 		List<QueryIBEDetail> details = new ArrayList<QueryIBEDetail>();
-		/*if (queryIBEDetail.getLegType().intValue() == 1) {*/
 			if(!CollectionUtils.isEmpty(policyList)){
 				for (IftPolicy iftPolicy : policyList) {
 					//根据政策计算价格
 					QueryIBEDetail detail = (QueryIBEDetail)CloneUtils.deepCopy(queryIBEDetail);
 					// 根据政策计算价格
-					detail = oneWayQueryIBEDetail(detail, iftPolicy, formula,profit);
+					detail = oneWayQueryIBEDetail(detail, iftPolicy, formula,profit,calcRound);
 					details.add(detail);
 				}
 			}else{
 				//根据政策计算价格
 				QueryIBEDetail detail = (QueryIBEDetail)CloneUtils.deepCopy(queryIBEDetail);
 				// 根据政策计算价格
-				detail = oneWayQueryIBEDetail(detail, policy, formula,profit);
+				detail = oneWayQueryIBEDetail(detail, policy, formula,profit,calcRound);
 				details.add(detail);
 			}
 			//价格排序
 			priceSort(details);
-	/*	}else{
-				if(!CollectionUtils.isEmpty(policyList)){
-					for (IftPolicy iftPolicy : policyList) {
-						//根据政策计算价格
-						queryIBEDetail = oneWayQueryIBEDetail(queryIBEDetail,iftPolicy,formula);
-						details.add(queryIBEDetail);
-					}
-				}else{
-					//当没有政策的情况，给个空的政策对象
-					queryIBEDetail = oneWayQueryIBEDetail(queryIBEDetail,policy,formula);
-					details.add(queryIBEDetail);
-				}
-				//价格排序
-				priceSort(details);
-		}*/
 		return details.get(0);
 	}
 	/**
-	 * 订单预定页面计算订单价格
-	 * 
+	 * 订单实时获取政策计算订单价格
 	 * @param queryIBEDetail
 	 * @param policyList
 	 * @param formula
+	 * @param profit
+	 * @param calcRound
 	 * 计算公式 1计奖的部分*(1-代理费率)(1-返点)+无奖的部分*(1-代理费率)+税费+手续费
 	 * 计奖的部分*(1-代理费率-返点)+无奖的部分*(1-代理费率)+税费+手续费
+	 * @return
 	 */
 	public static List<IftPolicyChange> orderPolicyCalculate(QueryIBEDetail queryIBEDetail, List<IftPolicy> policyList,
-			int formula,Profit profit) {
+			int formula,Profit profit,boolean calcRound) {
 		List<IftPolicyChange> flightPolicies = new ArrayList<IftPolicyChange>();
 		try {
 			if (!CollectionUtils.isEmpty(policyList)) {
 				for (IftPolicy iftPolicy : policyList) {
 					QueryIBEDetail detail = (QueryIBEDetail)CloneUtils.deepCopy(queryIBEDetail);
 					// 根据政策计算价格
-					detail = oneWayQueryIBEDetail(detail, iftPolicy, formula,profit);
+					detail = oneWayQueryIBEDetail(detail, iftPolicy, formula,profit,calcRound);
 					// 订单预定页面价格和政策组装
 					IftPolicyChange policyChange = OrderPolicyUtils.getIftPolicyChange(detail, iftPolicy);
 					flightPolicies.add(policyChange);
@@ -113,7 +97,7 @@ public class CalculatePriceUtils {
 	 * @param formula
 	 * @return
 	 */
-	private static  QueryIBEDetail oneWayQueryIBEDetail(QueryIBEDetail queryIBEDetail,IftPolicy policy,int formula,Profit profit){
+	private static  QueryIBEDetail oneWayQueryIBEDetail(QueryIBEDetail queryIBEDetail,IftPolicy policy,int formula,Profit profit,boolean calcRound){
 		for (CabinsPricesTotals cabins : queryIBEDetail.getCabinsPricesTotalses()) {
 			for (PassengerTypePricesTotal passengerTypePricesTotal : cabins.getPassengerTypePricesTotals()) {// 乘客价格信息
 				FormulaParameters formulaP = new FormulaParameters();
@@ -153,9 +137,9 @@ public class CalculatePriceUtils {
 				FormulaUtils.getProfit(policy, passengerTypePricesTotal.getPassengerType(), formulaP, profit);
 				formulaP.setFlightType(queryIBEDetail.getLegType());//设置航程信息
 				if(queryIBEDetail.getLegType().intValue() == 1){
-					formulaPrice(passengerTypePricesTotal, formulaP, formula);//单程计算价格
+					formulaPrice(passengerTypePricesTotal, formulaP, formula,calcRound);//单程计算价格
 				}else{
-					towFormulaPrice(passengerTypePricesTotal, formulaP, formula);//单程计算价格
+					towFormulaPrice(passengerTypePricesTotal, formulaP, formula,calcRound);//单程计算价格
 				}
 			}
 		}
@@ -167,7 +151,7 @@ public class CalculatePriceUtils {
 	 * @param formulaP
 	 * @param formula
 	 */
-	private static void formulaPrice(PassengerTypePricesTotal passengerTypePricesTotal,FormulaParameters formulaP,int formula){
+	private static void formulaPrice(PassengerTypePricesTotal passengerTypePricesTotal,FormulaParameters formulaP,int formula,boolean calcRound){
 		switch (formula) {
 		case 1:
 			// 公式2:票价*（1-代理费率）*（1-返点）+ 税款 + 手续费-直减费用(往返直减)
@@ -177,9 +161,7 @@ public class CalculatePriceUtils {
 			// 计奖的部分*(1-代理费率-返点)+无奖的部分*(1-代理费率)+税费+手续费-直减费用
 			formulaP = FormulaUtils.formulaMethod2(formulaP);
 		}
-		passengerTypePricesTotal.setSalePrice(formulaP.getSalePrice().setScale(0, BigDecimal.ROUND_UP));//销售价格
-		passengerTypePricesTotal.setAwardPrice(formulaP.getAwardPrice());//及奖价格
-		setPassengerTypePricesTotal(passengerTypePricesTotal,formulaP);
+		setPassengerTypePricesTotal(passengerTypePricesTotal,formulaP,calcRound);
 	}
 	/**
 	 * 往返计算销售价格
@@ -187,7 +169,7 @@ public class CalculatePriceUtils {
 	 * @param formulaP
 	 * @param formula
 	 */
-	private static void towFormulaPrice(PassengerTypePricesTotal passengerTypePricesTotal,FormulaParameters formulaP,int formula){
+	private static void towFormulaPrice(PassengerTypePricesTotal passengerTypePricesTotal,FormulaParameters formulaP,int formula,boolean calcRound){
 		switch (formula) {
 		case 1:
 			// 公式2:票价*（1-代理费率）*（1-返点）+ 税款 + 手续费-直减费用(往返直减)
@@ -197,9 +179,7 @@ public class CalculatePriceUtils {
 			// 计奖的部分*(1-代理费率-返点)+无奖的部分*(1-代理费率)+税费+手续费-直减费用
 			formulaP = FormulaUtils.towFormulaMethod2(formulaP);
 		}
-		passengerTypePricesTotal.setSalePrice(formulaP.getSalePrice().setScale(0, BigDecimal.ROUND_UP));//销售价格
-		passengerTypePricesTotal.setAwardPrice(formulaP.getAwardPrice());//及奖价格
-		setPassengerTypePricesTotal(passengerTypePricesTotal,formulaP);
+		setPassengerTypePricesTotal(passengerTypePricesTotal,formulaP,calcRound);
 	}
     /**
      * 价格排序
@@ -248,12 +228,19 @@ public class CalculatePriceUtils {
 	 * @param passengerTypePricesTotal
 	 * @param formula 
 	 */
-	public static void setPassengerTypePricesTotal(PassengerTypePricesTotal passengerTypePricesTotal,FormulaParameters formula){
+	public static void setPassengerTypePricesTotal(PassengerTypePricesTotal passengerTypePricesTotal,FormulaParameters formula,boolean calcRound){
+		if(calcRound){
+	    	passengerTypePricesTotal.setSalePrice(formula.getSalePrice().setScale(0, BigDecimal.ROUND_UP));//销售价格
+	    }else{
+	    	passengerTypePricesTotal.setSalePrice(formula.getSalePrice().setScale(0, BigDecimal.ROUND_CEILING));//销售价格
+	    }
+		passengerTypePricesTotal.setAwardPrice(formula.getAwardPrice());//计奖价格
 		passengerTypePricesTotal.setFavorable(formula.getFare().add(formula.getTax()).subtract(passengerTypePricesTotal.getSalePrice()));//优惠.=票面价+税费-售价
 		passengerTypePricesTotal.setSaleRebate(formula.getSaleRebate());//返点
 		passengerTypePricesTotal.setAgencyFee(formula.getAgencyFee());//代理费率，小于等于1的2位小数，0.01表示一个点.
 		passengerTypePricesTotal.setBrokerage(formula.getBrokerage());//手续费，5，表示￥5.
 		passengerTypePricesTotal.setAddPrice(formula.getProfitPrice()==null?new BigDecimal(0):formula.getProfitPrice());//控润的钱
 		passengerTypePricesTotal.setProfitRebate(formula.getProfitRebate()==null?new BigDecimal(0):formula.getProfitRebate());//控润的返点
+		
 	}
 }
