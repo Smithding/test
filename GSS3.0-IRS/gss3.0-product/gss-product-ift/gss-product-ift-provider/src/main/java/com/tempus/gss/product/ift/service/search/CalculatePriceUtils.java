@@ -80,7 +80,7 @@ public class CalculatePriceUtils {
 					// 根据政策计算价格
 					detail = oneWayQueryIBEDetail(detail, iftPolicy, formula,profit,calcRound);
 					// 订单预定页面价格和政策组装
-					IftPolicyChange policyChange = OrderPolicyUtils.getIftPolicyChange(detail, iftPolicy);
+					IftPolicyChange policyChange = OrderPolicyUtils.getIftPolicyChange(detail, iftPolicy,profit);
 					flightPolicies.add(policyChange);
 				}
 			}
@@ -232,7 +232,7 @@ public class CalculatePriceUtils {
 		if(calcRound){
 	    	passengerTypePricesTotal.setSalePrice(formula.getSalePrice().setScale(0, BigDecimal.ROUND_UP));//销售价格
 	    }else{
-	    	passengerTypePricesTotal.setSalePrice(formula.getSalePrice().setScale(0, BigDecimal.ROUND_CEILING));//销售价格
+	    	passengerTypePricesTotal.setSalePrice(formula.getSalePrice().setScale(2, BigDecimal.ROUND_CEILING));//销售价格
 	    }
 		passengerTypePricesTotal.setAwardPrice(formula.getAwardPrice());//计奖价格
 		passengerTypePricesTotal.setFavorable(formula.getFare().add(formula.getTax()).subtract(passengerTypePricesTotal.getSalePrice()));//优惠.=票面价+税费-售价

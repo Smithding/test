@@ -5,6 +5,7 @@ import java.util.Date;
 
 import com.tempus.gss.bbp.util.DateUtil;
 import com.tempus.gss.product.ift.api.entity.PassengerTypePricesTotal;
+import com.tempus.gss.product.ift.api.entity.Profit;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
 import com.tempus.gss.product.ift.api.entity.policy.IftFlightPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftOrderPolicy;
@@ -24,9 +25,11 @@ public class OrderPolicyUtils {
 	 * @param policy
 	 * @return
 	 */
-	public static IftPolicyChange getIftPolicyChange(QueryIBEDetail detail ,IftPolicy policy){
+	public static IftPolicyChange getIftPolicyChange(QueryIBEDetail detail ,IftPolicy policy,Profit profit){
 		IftPolicyChange iftPolicyChange = new IftPolicyChange();
-		IftFlightPolicy flightPolicy = getIftFlightPolicy(policy,new BigDecimal(detail.getCabinsPricesTotalses().get(0).getSalePriceCount()),new BigDecimal(detail.getCabinsPricesTotalses().get(0).getFavorableCount()));
+		IftFlightPolicy flightPolicy = getIftFlightPolicy(policy,
+				new BigDecimal(detail.getCabinsPricesTotalses().get(0).getSalePriceCount()),
+				new BigDecimal(detail.getCabinsPricesTotalses().get(0).getFavorableCount()),profit);
 		iftPolicyChange.setFlightPolicy(flightPolicy);
 		//暂时因为航班数据有问题，一个舱位有两个价格，所以暂时保留第一个舱位价格，其他价格移除掉
 		if(detail.getCabinsPricesTotalses().size()>1){
@@ -46,8 +49,17 @@ public class OrderPolicyUtils {
 	 * @param favorableCount
 	 * @return
 	 */
-	public static IftFlightPolicy getIftFlightPolicy(IftPolicy policy,BigDecimal salePriceCount,BigDecimal favorableCount){
+	public static IftFlightPolicy getIftFlightPolicy(IftPolicy policy,BigDecimal salePriceCount,BigDecimal favorableCount,Profit profit){
 		IftFlightPolicy flightPolicy = new IftFlightPolicy();
+	     BigDecimal profitRebate = new BigDecimal(0);//控润返点
+	     BigDecimal profitPrice  = new BigDecimal(0); //控润加价
+		if(profit!=null&&profit.getId()!=null){
+			if(profit.getPriceType().intValue()==2){
+				profitRebate = profit.getRebate();
+			}else if(profit.getPriceType().intValue()==3){
+				profitPrice = profit.getRaisePrice();
+			}
+		}
 		flightPolicy.setPolicyId(policy.getId());
 		/**
 		 * 订单优惠总金额
@@ -119,7 +131,7 @@ public class OrderPolicyUtils {
 				chdStr.append("儿童奖不可开;");
 				break;
 			case 4:
-				chdStr.append("儿童指定奖励;"+policy.getChdAssignRewardFee());
+				chdStr.append("儿童指定奖励:"+policy.getChdAssignRewardFee().subtract(profitRebate).setScale(2, BigDecimal.ROUND_CEILING));
 				break;
 			default:
 				 chdStr.append("儿童奖励与成人一致;");
@@ -127,7 +139,7 @@ public class OrderPolicyUtils {
 			}
 		 }
 		 if(policy.getChdIsAddHandlingFee()!=null&&policy.getChdIsAddHandlingFee()){
-			 chdStr.append("儿童加收手续费;"+policy.getChdAddHandlingFee());
+			 chdStr.append("儿童加收手续费;"+policy.getChdAddHandlingFee().add(profitPrice));
 		 }
 		 if(policy.getChdTicketNoAgencyFee()!=null&&policy.getChdTicketNoAgencyFee()){
 			 chdStr.append("儿童可开无代理费;");
@@ -173,13 +185,13 @@ public class OrderPolicyUtils {
 				shareStr.append("全程无奖励");
 				break;
 			case 2:
-				shareStr.append("全程指定奖励"+policy.getShareAssignReward());
+				shareStr.append("全程指定奖励:"+policy.getShareAssignReward().subtract(profitRebate).setScale(2, BigDecimal.ROUND_CEILING));
 				break;
 			case 3:
 				shareStr.append("全程无奖励");
 				break;
 			case 4:
-				shareStr.append("共享段指定奖励"+policy.getShareLegReward());
+				shareStr.append("共享段指定奖励:"+policy.getShareLegReward().subtract(profitRebate).setScale(2, BigDecimal.ROUND_CEILING));
 				break;
 			case 5:
 				shareStr.append("给全部奖励");
