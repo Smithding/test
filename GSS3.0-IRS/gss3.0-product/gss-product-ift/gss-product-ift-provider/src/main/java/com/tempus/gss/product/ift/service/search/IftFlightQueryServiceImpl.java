@@ -103,7 +103,7 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 		Profit profit = iProfitService.getIftProfit(request.getAgent());// 控润信息
 		// 参数获取国际机票计算规则
 		int calcRule = StringUtils.isBlank(paramService.getValueByKey("ift_calc_rule")) ? 1 : Integer.parseInt(paramService.getValueByKey("ift_calc_rule"));
-		QueryIBEDetail detail  = CalculatePriceUtils.fligthCalculate(queryIBEDetail,iftPolicyList, calcRule);
+		QueryIBEDetail detail  = CalculatePriceUtils.fligthCalculate(queryIBEDetail,iftPolicyList, calcRule,profit);
 		return detail;
 	}
 	@Override
