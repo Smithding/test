@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
@@ -24,6 +25,8 @@ import com.tempus.gss.product.ift.help.IftLogHelper;
 import com.tempus.gss.product.ift.help.IftPolicyHelper;
 import com.tempus.gss.util.EntityUtil;
 import com.tempus.gss.vo.Agent;
+import com.tempus.tbd.entity.Country;
+import com.tempus.tbd.service.IAirportService;
 
 /**
  * 
@@ -53,6 +56,9 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 	@Autowired
 	private IftPolicyHelper policyHelper;
 	
+	@Reference
+	private IAirportService airportService;
+	
 	/** 日志记录器. */
 	protected static Logger logger = LogManager.getLogger(IftPolicyServiceImpl.class);
 	
@@ -78,6 +84,30 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 	public Page<IftPolicy> search(Agent agent, Page<IftPolicy> page, IftPolicyQuery query) {
 		
 		query.setOwner(agent.getOwner());
+		
+		/* 设置出发城市及到达城市所属国家信息 */
+		try {
+			Country deparCountry = airportService.queryCountryByAirport(query.getDepartAirport());
+			// 根据出发城市查询所属的国家
+			if (deparCountry != null && !deparCountry.equals("")) {
+				query.setDepartContinent(deparCountry.getAreaCode()==null?"":deparCountry.getAreaCode().replace(" ", ""));// 三字码所属州
+				query.setDepartCountry(deparCountry.getCountryCode());// 三字码所属国家
+				query.setDepartSign(deparCountry.getDomOrInt());//国际I还是国内D
+			} else {
+				logger.info(query.getDepartAirport() + "基础数据获取到城市信息");
+			}
+			Country arriveCountry = airportService.queryCountryByAirport(query.getArriveAirport());// 根据到达城市查询所属的国家
+			if (arriveCountry != null && !arriveCountry.equals("")) {
+				query.setArriveContinent(arriveCountry.getAreaCode()==null?"":arriveCountry.getAreaCode().replace(" ", ""));// 三字码所属州
+				query.setArriveCountry(arriveCountry.getCountryCode());// 三字码所属国家
+				query.setArriveSign(arriveCountry.getDomOrInt());//国际I还是国内D
+			} else {
+				logger.info(query.getArriveAirport() + "基础数据获取到城市信息");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		// 调用底层先分页查询出符合国际政策ID列表
 		List<Long> ids = iftPolicyMapper.query(page, query);
 		// 根据国际政策ID列表循环拉取国际政策的详细
