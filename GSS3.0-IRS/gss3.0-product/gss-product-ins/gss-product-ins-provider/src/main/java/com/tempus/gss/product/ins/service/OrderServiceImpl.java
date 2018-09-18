@@ -576,7 +576,7 @@ public class OrderServiceImpl implements IOrderService {
 				saleOrderDetail.setOwner(agent.getOwner());
 				saleOrderDetail.setCreateTime(new Date());
 				saleOrderDetail.setCreator(agent.getId().toString());
-				if(saleOrderDetail.getPremium().compareTo(BigDecimal.ZERO)==0||saleOrderDetail.getPremium()==null){
+				if(saleOrderDetail.getPremium()==null||saleOrderDetail.getPremium().compareTo(BigDecimal.ZERO)==0){
                     saleOrderDetail.setPremium(salePrice.multiply(new BigDecimal(saleOrderDetail.getInsuranceNum())));
                 }
 				saleOrderDetail.setIsReport("0");
