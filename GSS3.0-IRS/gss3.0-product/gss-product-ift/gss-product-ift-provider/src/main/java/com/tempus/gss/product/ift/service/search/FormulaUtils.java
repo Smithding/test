@@ -350,7 +350,6 @@ public class FormulaUtils {
 				formula.setBrokerage(openTicketFee.add(policy.getInfAddHandlingFee() == null ? new BigDecimal(0) : policy.getInfAddHandlingFee()));// 手续费
 				formula.setOneWayPrivilege(new BigDecimal(0));// 单程直减费用
 				formula.setRoundTripPrivilege(new BigDecimal(0));// 单程直减费用
-				formula.setAgencyFee(agencyFee);// 代理费
 			} else {// 成人
 				formula.setAgencyFee(agencyFee);// 代理费
 				formula.setSaleRebate(rewardFee);// 下游返点

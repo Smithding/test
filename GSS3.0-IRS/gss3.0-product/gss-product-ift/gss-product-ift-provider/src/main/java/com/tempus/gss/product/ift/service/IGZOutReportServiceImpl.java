@@ -4,17 +4,24 @@ package com.tempus.gss.product.ift.service;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.ift.api.entity.GZOutTicket;
+import com.tempus.gss.product.ift.api.entity.GzOutReport;
+import com.tempus.gss.product.ift.api.entity.GzOutReportParams;
 import com.tempus.gss.product.ift.api.entity.vo.QueryGZOutReportVo;
 import com.tempus.gss.product.ift.api.service.IGZOutTicketService;
 import com.tempus.gss.product.ift.dao.GZOutReportDao;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class IGZOutReportServiceImpl implements IGZOutTicketService {
 
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
     @Autowired
     private GZOutReportDao gzOutReportDao;
 
@@ -106,6 +113,23 @@ public class IGZOutReportServiceImpl implements IGZOutTicketService {
         }
         page.setRecords(gZOutReports);
         return page;
+    }
+
+    @Override
+    public Page<GzOutReport> queryIssueRecords(Page<GzOutReport> page, GzOutReportParams params) {
+        List<GzOutReport> list = new ArrayList<>();
+        try {
+            list = gzOutReportDao.queryIssueRecords(page,params);
+        } catch (Exception e) {
+            logger.error("国际广州报表查询 ERROR  {}", e);
+        }
+        page.setRecords(list);
+        return page;
+    }
+
+    @Override
+    public List<Map<String, Object>> queryIssueRecordsSum(GzOutReportParams params) {
+        return gzOutReportDao.queryIssueRecordsSum(params);
     }
 
     private String getYMDDate(String date){
