@@ -87,13 +87,22 @@ public class PayListener {
                             unpUpdate.setModifyTime(new Date());
                         }
                         if (unpSale.getChangeType().equals(EUnpConstant.ChangeType.DEFAULT.getKey())) {
+                            int orderStatus = 0;
+                            UnpBuy unpBuy = unpOrderService.getBuyOrderInfo(queryVo);
+                            if (unpBuy != null && unpBuy.getPayStatus() >= EUnpConstant.PayStatus.PAIED.getKey()) {
+                                //采购支付完成  将订单状态改为完成
+                                orderStatus = EUnpConstant.OrderStatus.DONE.getKey();
+                            } else {
+                                orderStatus = EUnpConstant.OrderStatus.PROCESSING.getKey();
+                            }
                             //正常支付
-                            unpUpdate.setStatus(EUnpConstant.OrderStatus.PROCESSING.getKey());
+                            unpUpdate.setStatus(orderStatus);
+                            final int os = orderStatus;
                             unpSale.getSaleItems().forEach(item -> {
                                 UnpSaleItem itemUpdate = new UnpSaleItem();
                                 itemUpdate.setItemId(item.getItemId());
                                 itemUpdate.setSaleOrderNo(item.getSaleOrderNo());
-                                itemUpdate.setItemStatus(EUnpConstant.OrderStatus.PROCESSING.getKey());
+                                itemUpdate.setItemStatus(os);
                                 itemsToUpdate.add(itemUpdate);
                             });
                         }
