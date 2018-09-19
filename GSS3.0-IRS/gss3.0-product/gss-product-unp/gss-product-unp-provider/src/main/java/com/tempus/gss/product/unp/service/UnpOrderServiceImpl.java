@@ -88,7 +88,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     @Autowired
     private UnpBuyRefundItemMapper unpBuyRefundItemMapper;
     @Reference
-    IBuyOrderService buyOrderService;
+    IBuyOrderService osBuyOrderService;
     @Reference
     IBuyChangeService buyChangeService;
     @Reference
@@ -427,7 +427,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             buyOrder.setBuyChildStatus(unpBuy.getStatus());
             buyOrder.setPayable(planAmount);
             buyOrder.setSaleOrderNo(unpBuy.getSaleOrderNo());
-            BuyOrder buyOrder1 = buyOrderService.create(agent, buyOrder);
+            BuyOrder buyOrder1 = osBuyOrderService.create(agent, buyOrder);
             //创建应收
             PlanAmountRecord planAmountRecord = this.createPlanAmount(agent, buyOrderNo, planAmount, BusinessType.BUYORDER, IncomeExpenseType.EXPENSE, CostType.FARE);
             if (planAmountRecord != null) {
@@ -889,7 +889,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 unpBuy.setStatus(3);
                 unpBuy.setChangeType(0);
                 unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
-                buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
+                osBuyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
                 for (UnpBuyItem unpBuyItem : unpBuyItemList) {
                     unpBuyItem.setItemStatus(3);
                     unpBuyItem.setChangeType(0);
@@ -909,14 +909,14 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                         unpBuy.setChangeType(3);
                         unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                         unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
-                        buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
+                        osBuyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
                     } else {
                         unpBuy.setModifier(agent.getAccount());
                         unpBuy.setModifyTime(new Date());
                         unpBuy.setChangeType(1);
                         unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                         unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
-                        buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
+                        osBuyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
                     }
                     unpBuyItemList.forEach(unpBuyItem -> {
                         unpBuyItem.setItemStatus(1);
@@ -935,7 +935,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                     unpBuy.setStatus(4);
                     unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                     unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
-                    buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
+                    osBuyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
                     for (UnpBuyItem unpBuyItem : unpBuyItemList) {
                         unpBuyItem.setChangeType(0);
                         unpBuyItem.setItemStatus(4);
@@ -966,14 +966,14 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                         unpBuy.setChangeType(0);
                         unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                         unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
-                        buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
+                        osBuyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
                     } else {
                         unpBuy.setModifier(agent.getAccount());
                         unpBuy.setModifyTime(new Date());
                         unpBuy.setChangeType(3);
                         unpBuy.setBuyOrderNo(queryUnpBuy.getBuyOrderNo());
                         unpBuyMapper.updateByPrimaryKeySelective(unpBuy);
-                        buyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
+                        osBuyOrderService.updatePayStatus(agent, unpBuy.getBuyOrderNo(), unpBuy.getStatus());
                     }
                     for (UnpBuyItem unpBuyItem : unpBuyItemList) {
                         unpBuyItem.setChangeType(0);
@@ -1070,8 +1070,12 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 continue;
             }
             UnpBuy buy = this.getBuyOrderInfo(vo);
-            if (buy != null) {
-                result.setMsg("销售单【" + aLong + "】已存在采购单");
+            if (buy == null) {
+                result.setMsg("销售单【" + aLong + "】对应采购单不存在");
+                continue;
+            }
+            if (buy.getPayStatus() > 2) {
+                result.setMsg("销售单【" + aLong + "】对应采购单已支付");
                 continue;
             }
             UnpSale saleUpdate = new UnpSale();
@@ -1084,9 +1088,21 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
                 this.unpSaleItemMapper.updateByPrimaryKeySelective(iUpdate);
             });
             unpSaleMapper.updateByPrimaryKeySelective(saleUpdate);
+            osSaleorderservice.updateStatus(agent, aLong, EUnpConstant.OrderStatus.CANCELED.getKey());
+            UnpBuy buyUpdate = new UnpBuy();
+            buyUpdate.setSaleOrderNo(buy.getBuyOrderNo());
+            buyUpdate.setStatus(EUnpConstant.OrderStatus.CANCELED.getKey());
+            buy.getBuyItems().forEach(i -> {
+                UnpBuyItem iUpdate = new UnpBuyItem();
+                iUpdate.setItemId(i.getItemId());
+                iUpdate.setItemStatus(EUnpConstant.OrderStatus.CANCELED.getKey());
+                this.unpBuyItemMapper.updateByPrimaryKeySelective(iUpdate);
+            });
+            unpBuyMapper.updateByPrimaryKeySelective(buyUpdate);
+            osBuyOrderService.updateStatus(agent, buy.getBuyOrderNo(), EUnpConstant.OrderStatus.CANCELED.getKey());
             success++;
         }
-        result.setMsg("取消成功【" + success + "/" + sum + "】");
+        result.setMsg("取消成功/总数 : 【" + success + "/" + sum + "】");
         return result;
     }
     

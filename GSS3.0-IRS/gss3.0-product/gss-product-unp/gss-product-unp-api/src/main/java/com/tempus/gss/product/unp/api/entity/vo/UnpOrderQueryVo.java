@@ -380,6 +380,111 @@ public class UnpOrderQueryVo implements Serializable {
     
     @Override
     public String toString() {
-        return "UnpOrderQueryVo:{ " + "\"saleOrderNo\":" + (saleOrderNo == null ? null : "\"" + saleOrderNo + "\"") + ",\"owner\":" + (owner == null ? null : "\"" + owner + "\"") + ",\"traNo\":" + (traNo == null ? null : "\"" + traNo + "\"") + ",\"customerNo\":" + (customerNo == null ? null : "\"" + customerNo + "\"") + ",\"customerType\":" + (customerType == null ? null : "\"" + customerType + "\"") + ",\"customerName\":" + (customerName == null ? "\"\"" : "\"" + customerName + "\"") + ",\"changeType\":" + (changeType == null ? null : "\"" + changeType + "\"") + ",\"payStatus\":" + (payStatus == null ? null : "\"" + payStatus + "\"") + ",\"payTime\":" + (payTime == null ? null : "\"" + payTime + "\"") + ",\"payTimeStart\":" + (payTimeStart == null ? "\"\"" : "\"" + payTimeStart + "\"") + ",\"payTimeEnd\":" + (payTimeEnd == null ? "\"\"" : "\"" + payTimeEnd + "\"") + ",\"status\":" + (status == null ? null : "\"" + status + "\"") + ",\"creator\":" + (creator == null ? "\"\"" : "\"" + creator + "\"") + ",\"createTime\":" + (createTime == null ? null : "\"" + createTime + "\"") + ",\"createTimeStart\":" + (createTimeStart == null ? "\"\"" : "\"" + createTimeStart + "\"") + ",\"createTimeEnd\":" + (createTimeEnd == null ? "\"\"" : "\"" + createTimeEnd + "\"") + ",\"modifier\":" + (modifier == null ? "\"\"" : "\"" + modifier + "\"") + ",\"modifyTime\":" + (modifyTime == null ? null : "\"" + modifyTime + "\"") + ",\"modifyTimeStart\":" + (modifyTimeStart == null ? "\"\"" : "\"" + modifyTimeStart + "\"") + ",\"modifyTimeEnd\":" + (modifyTimeEnd == null ? "\"\"" : "\"" + modifyTimeEnd + "\"") + ",\"valid\":" + (valid == null ? null : "\"" + valid + "\"") + ",\"buyOrderNo\":" + (buyOrderNo == null ? null : "\"" + buyOrderNo + "\"") + ",\"supplierId\":" + (supplierId == null ? null : "\"" + supplierId + "\"") + ",\"supplierType\":" + (supplierType == null ? null : "\"" + supplierType + "\"") + ",\"supplierName\":" + (supplierName == null ? "\"\"" : "\"" + supplierName + "\"") + ",\"thirdBusNo\":" + (thirdBusNo == null ? null : "\"" + thirdBusNo + "\"") + "}";
+        final StringBuffer sb = new StringBuffer("UnpOrderQueryVo{");
+        if (saleOrderNo != null) {
+            sb.append("    \"saleOrderNo\":\"").append(saleOrderNo).append("\"");
+        }
+        if (saleChangeNo != null) {
+            sb.append(",    \"saleChangeNo\":\"").append(saleChangeNo).append("\"");
+        }
+        if (owner != null) {
+            sb.append(",    \"owner\":\"").append(owner).append("\"");
+        }
+        if (traNo != null) {
+            sb.append(",    \"traNo\":\"").append(traNo).append("\"");
+        }
+        if (customerNo != null) {
+            sb.append(",    \"customerNo\":\"").append(customerNo).append("\"");
+        }
+        if (customerType != null) {
+            sb.append(",    \"customerType\":\"").append(customerType).append("\"");
+        }
+        if (customerName != null) {
+            sb.append(",    \"customerName\":\"").append(customerName).append("\"");
+        }
+        if (changeType != null) {
+            sb.append(",    \"changeType\":\"").append(changeType).append("\"");
+        }
+        if (payStatus != null) {
+            sb.append(",    \"payStatus\":\"").append(payStatus).append("\"");
+        }
+        if (payTime != null) {
+            sb.append(",    \"payTime\":\"").append(payTime).append("\"");
+        }
+        if (payTimeStart != null) {
+            sb.append(",    \"payTimeStart\":\"").append(payTimeStart).append("\"");
+        }
+        if (payTimeEnd != null) {
+            sb.append(",    \"payTimeEnd\":\"").append(payTimeEnd).append("\"");
+        }
+        if (status != null) {
+            sb.append(",    \"status\":\"").append(status).append("\"");
+        }
+        if (creator != null) {
+            sb.append(",    \"creator\":\"").append(creator).append("\"");
+        }
+        if (createTime != null) {
+            sb.append(",    \"createTime\":\"").append(createTime).append("\"");
+        }
+        if (createTimeStart != null) {
+            sb.append(",    \"createTimeStart\":\"").append(createTimeStart).append("\"");
+        }
+        if (createTimeEnd != null) {
+            sb.append(",    \"createTimeEnd\":\"").append(createTimeEnd).append("\"");
+        }
+        if (modifier != null) {
+            sb.append(",    \"modifier\":\"").append(modifier).append("\"");
+        }
+        if (modifyTime != null) {
+            sb.append(",    \"modifyTime\":\"").append(modifyTime).append("\"");
+        }
+        if (modifyTimeStart != null) {
+            sb.append(",    \"modifyTimeStart\":\"").append(modifyTimeStart).append("\"");
+        }
+        if (modifyTimeEnd != null) {
+            sb.append(",    \"modifyTimeEnd\":\"").append(modifyTimeEnd).append("\"");
+        }
+        if (valid != null) {
+            sb.append(",    \"valid\":\"").append(valid).append("\"");
+        }
+        if (groupName != null) {
+            sb.append(",    \"groupName\":\"").append(groupName).append("\"");
+        }
+        if (groupCode != null) {
+            sb.append(",    \"groupCode\":\"").append(groupCode).append("\"");
+        }
+        if (itemNo != null) {
+            sb.append(",    \"itemNo\":\"").append(itemNo).append("\"");
+        }
+        if (itemName != null) {
+            sb.append(",    \"itemName\":\"").append(itemName).append("\"");
+        }
+        if (itemCode != null) {
+            sb.append(",    \"itemCode\":\"").append(itemCode).append("\"");
+        }
+        if (buyOrderNo != null) {
+            sb.append(",    \"buyOrderNo\":\"").append(buyOrderNo).append("\"");
+        }
+        if (buyChangeNo != null) {
+            sb.append(",    \"buyChangeNo\":\"").append(buyChangeNo).append("\"");
+        }
+        if (supplierId != null) {
+            sb.append(",    \"supplierId\":\"").append(supplierId).append("\"");
+        }
+        if (supplierType != null) {
+            sb.append(",    \"supplierType\":\"").append(supplierType).append("\"");
+        }
+        if (supplierName != null) {
+            sb.append(",    \"supplierName\":\"").append(supplierName).append("\"");
+        }
+        if (thirdBusNo != null) {
+            sb.append(",    \"thirdBusNo\":\"").append(thirdBusNo).append("\"");
+        }
+        sb.append('}');
+        return sb.toString();
     }
+//    @Override
+//    public String toString() {
+//        return "UnpOrderQueryVo:{ " + "\"saleOrderNo\":" + (saleOrderNo == null ? null : "\"" + saleOrderNo + "\"") + ",\"owner\":" + (owner == null ? null : "\"" + owner + "\"") + ",\"traNo\":" + (traNo == null ? null : "\"" + traNo + "\"") + ",\"customerNo\":" + (customerNo == null ? null : "\"" + customerNo + "\"") + ",\"customerType\":" + (customerType == null ? null : "\"" + customerType + "\"") + ",\"customerName\":" + (customerName == null ? "\"\"" : "\"" + customerName + "\"") + ",\"changeType\":" + (changeType == null ? null : "\"" + changeType + "\"") + ",\"payStatus\":" + (payStatus == null ? null : "\"" + payStatus + "\"") + ",\"payTime\":" + (payTime == null ? null : "\"" + payTime + "\"") + ",\"payTimeStart\":" + (payTimeStart == null ? "\"\"" : "\"" + payTimeStart + "\"") + ",\"payTimeEnd\":" + (payTimeEnd == null ? "\"\"" : "\"" + payTimeEnd + "\"") + ",\"status\":" + (status == null ? null : "\"" + status + "\"") + ",\"creator\":" + (creator == null ? "\"\"" : "\"" + creator + "\"") + ",\"createTime\":" + (createTime == null ? null : "\"" + createTime + "\"") + ",\"createTimeStart\":" + (createTimeStart == null ? "\"\"" : "\"" + createTimeStart + "\"") + ",\"createTimeEnd\":" + (createTimeEnd == null ? "\"\"" : "\"" + createTimeEnd + "\"") + ",\"modifier\":" + (modifier == null ? "\"\"" : "\"" + modifier + "\"") + ",\"modifyTime\":" + (modifyTime == null ? null : "\"" + modifyTime + "\"") + ",\"modifyTimeStart\":" + (modifyTimeStart == null ? "\"\"" : "\"" + modifyTimeStart + "\"") + ",\"modifyTimeEnd\":" + (modifyTimeEnd == null ? "\"\"" : "\"" + modifyTimeEnd + "\"") + ",\"valid\":" + (valid == null ? null : "\"" + valid + "\"") + ",\"buyOrderNo\":" + (buyOrderNo == null ? null : "\"" + buyOrderNo + "\"") + ",\"supplierId\":" + (supplierId == null ? null : "\"" + supplierId + "\"") + ",\"supplierType\":" + (supplierType == null ? null : "\"" + supplierType + "\"") + ",\"supplierName\":" + (supplierName == null ? "\"\"" : "\"" + supplierName + "\"") + ",\"thirdBusNo\":" + (thirdBusNo == null ? null : "\"" + thirdBusNo + "\"") + "}";
+//    }
 }
