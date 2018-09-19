@@ -119,14 +119,14 @@ public class CalculatePriceUtils {
 							 formulaP.setShareRebate(new BigDecimal(0));//重新设置返点为0
 						}else if(policy.getShareRewardType().intValue()==2){//2全程指定奖励 shareLegReward
 							 formulaP = FormulaUtils.getFormula(passengerTypePricesTotal, policy,queryIBEDetail.getMileages());
-							 formulaP.setSaleRebate(policy.getShareAssignReward());//设置指定奖励
-							 formulaP.setShareRebate(policy.getShareAssignReward());//重新设置返点为0
+							 formulaP.setSaleRebate(policy.getShareAssignReward()==null?new BigDecimal(0):policy.getShareAssignReward());//设置指定奖励
+							 formulaP.setShareRebate(policy.getShareAssignReward()==null?new BigDecimal(0):policy.getShareAssignReward());//重新设置返点为0
 						}else if(policy.getShareRewardType().intValue()==3){//3共享段无奖励
 							formulaP = FormulaUtils.getFormula(passengerTypePricesTotal, policy,queryIBEDetail.getMileages());
 							formulaP.setShareRebate(new BigDecimal(0));//设置指定奖励
 						}else if(policy.getShareRewardType().intValue()==4){//4共享段指定奖励 shareLegReward
 							formulaP = FormulaUtils.getFormula(passengerTypePricesTotal, policy,queryIBEDetail.getMileages());
-							formulaP.setShareRebate(policy.getShareLegReward());//设置指定奖励
+							formulaP.setShareRebate(policy.getShareLegReward()==null?new BigDecimal(0):policy.getShareLegReward());//设置指定奖励
 						}else if(policy.getShareRewardType().intValue()==5){//5给全部奖励
 							formulaP = FormulaUtils.getFormula(passengerTypePricesTotal, policy,queryIBEDetail.getMileages());
 						}
