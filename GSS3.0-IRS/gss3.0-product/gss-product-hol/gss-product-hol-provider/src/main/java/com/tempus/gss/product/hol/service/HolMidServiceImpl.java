@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.exception.GSSException;
+import com.tempus.gss.product.hol.api.entity.HolCustomerRule;
 import com.tempus.gss.product.hol.api.entity.HolMidBaseInfo;
 import com.tempus.gss.product.hol.api.entity.ResNameSum;
 import com.tempus.gss.product.hol.api.entity.request.HotelListSearchReq;
@@ -525,6 +526,18 @@ public class HolMidServiceImpl implements IHolMidService {
 				tcFlag = true;
 			}else if(ss.contains("bqy")){
 				bqyFlag = true;
+			}
+		}
+
+			String account = agent.getAccount();
+		HolCustomerRule customerRule = mongoTemplate1.findOne(new Query(Criteria.where("loginName").is(account)), HolCustomerRule.class);
+		if (null != customerRule) {
+			String payTypeStr = customerRule.getPayType();// 1.预付; 2.现付
+			if (!payTypeStr.contains("1")) {
+				bqyFlag = false;
+			}
+			if (!payTypeStr.contains("2")) {
+				tcFlag = false;
 			}
 		}
 
