@@ -29,11 +29,12 @@ public class FormulaUtils {
 				.multiply(new BigDecimal(1).subtract(formulaParameters.getSaleRebate().divide(new BigDecimal(100))))
 				.add((formulaParameters.getFare().subtract(formulaParameters.getAwardPrice())).multiply(
 						new BigDecimal(1).subtract(formulaParameters.getAgencyFee().divide(new BigDecimal(100)))))
-				.add(formulaParameters.getTax().add(formulaParameters.getBrokerage()));
-		if (formulaParameters.getFlightType().intValue() == 1)//设置直减价格
-			salePrice.subtract(formulaParameters.getOneWayPrivilege());
-		else
+				.add(formulaParameters.getBrokerage());
+		if (formulaParameters.getFlightType().intValue() == 1){//设置直减价格
+			salePrice.subtract(formulaParameters.getOneWayPrivilege()).add(formulaParameters.getTax());
+			}else{
 			salePrice.subtract(formulaParameters.getRoundTripPrivilege());
+			}
 		return salePrice;
 	}
 	/**
@@ -44,12 +45,12 @@ public class FormulaUtils {
 				.multiply(new BigDecimal(1).subtract(formulaParameters.getAgencyFee().divide(new BigDecimal(100)))
 						.subtract(formulaParameters.getSaleRebate().divide(new BigDecimal(100))))
 				.add((formulaParameters.getFare().subtract(formulaParameters.getAwardPrice())).multiply(
-						new BigDecimal(1).subtract(formulaParameters.getAgencyFee().divide(new BigDecimal(100)))))
-				.add(formulaParameters.getTax().add(formulaParameters.getBrokerage()));
-		if (formulaParameters.getFlightType().intValue() == 1)//设置直减价格
-			salePrice.subtract(formulaParameters.getOneWayPrivilege());
-		else
+						new BigDecimal(1).subtract(formulaParameters.getAgencyFee().divide(new BigDecimal(100))))).add(formulaParameters.getBrokerage());
+		if (formulaParameters.getFlightType().intValue() == 1){//设置直减价格
+			salePrice.subtract(formulaParameters.getOneWayPrivilege()).add(formulaParameters.getTax());
+		}else{
 			salePrice.subtract(formulaParameters.getRoundTripPrivilege());
+		}
 		return salePrice;
 	}
 
