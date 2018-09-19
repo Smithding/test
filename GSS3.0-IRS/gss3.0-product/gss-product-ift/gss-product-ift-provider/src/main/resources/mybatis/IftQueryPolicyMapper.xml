@@ -48,18 +48,18 @@
 		AND NOW() &gt;= T1.TICKET_VALID_START_DATE
 		AND NOW() &lt;= T1.TICKET_VALID_END_DATE
 		<if test=" null != saleWeek &amp;&amp; 1 &lt;= saleWeek &amp;&amp; 5 &gt;= saleWeek">
-			AND NOW() &gt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(LEFT(T1.TICKET_DATE,LOCATE('-',T1.TICKET_DATE)-1)),':00'),'%Y-%m-%d %H:%i:%s'))
-			AND NOW() &lt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(RIGHT(T1.TICKET_DATE,LOCATE('-',T1.TICKET_DATE)-1)),':00'),'%Y-%m-%d %H:%i:%s'))
+			AND NOW() &gt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(SUBSTRING_INDEX(T1.TICKET_DATE,'-',1)),':00'),'%Y-%m-%d %H:%i:%s'))
+			AND NOW() &lt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(SUBSTRING_INDEX(T1.TICKET_DATE,'-',-1)),':00'),'%Y-%m-%d %H:%i:%s'))
 		</if>
 		<if test=" null != saleWeek &amp;&amp; 6 == saleWeek ">
 			AND T1.SAT_IS_TICKET = 1 
-			AND NOW() &gt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(LEFT(T1.SAT_TICKET_DATE,LOCATE('-',T1.SAT_TICKET_DATE)-1)),':00'),'%Y-%m-%d %H:%i:%s'))
-			AND NOW() &lt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(RIGHT(T1.SAT_TICKET_DATE,LOCATE('-',T1.SAT_TICKET_DATE)-1)),':00'),'%Y-%m-%d %H:%i:%s'))
+			AND NOW() &gt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(SUBSTRING_INDEX(T1.SAT_TICKET_DATE,'-',1)),':00'),'%Y-%m-%d %H:%i:%s'))
+			AND NOW() &lt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(SUBSTRING_INDEX(T1.SAT_TICKET_DATE,'-',-1)),':00'),'%Y-%m-%d %H:%i:%s'))
 		</if>
 		<if test=" null != saleWeek &amp;&amp; 7 == saleWeek ">
 			AND T1.SUN_IS_TICKET = 1 
-			AND NOW() &gt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(LEFT(T1.SUN_TICKET_DATE,LOCATE('-',T1.SUN_TICKET_DATE)-1)),':00'),'%Y-%m-%d %H:%i:%s'))
-			AND NOW() &lt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(RIGHT(T1.SUN_TICKET_DATE,LOCATE('-',T1.SUN_TICKET_DATE)-1)),':00'),'%Y-%m-%d %H:%i:%s'))
+			AND NOW() &gt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(SUBSTRING_INDEX(T1.SUN_TICKET_DATE,'-',1)),':00'),'%Y-%m-%d %H:%i:%s'))
+			AND NOW() &lt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(SUBSTRING_INDEX(T1.SUN_TICKET_DATE,'-',-1)),':00'),'%Y-%m-%d %H:%i:%s'))
 		</if>
 		<!-- 出发机场组装 -->
 		<if test="null != departAirport &amp;&amp; '' != departAirport">
@@ -96,8 +96,8 @@
 		<if test=" null != psgerNum">
 			AND (T1.SUIT_PEOPLE_NUMBER IS NULL 
 			OR  T1.SUIT_PEOPLE_NUMBER = '-' 
-			OR (CAST(LEFT(T1.SUIT_PEOPLE_NUMBER,LOCATE('-',T1.SUIT_PEOPLE_NUMBER)-1) AS SIGNED) &lt;= #{psgerNum}
-				AND CAST(RIGHT(T1.SUIT_PEOPLE_NUMBER,LOCATE('-',T1.SUIT_PEOPLE_NUMBER)-1) AS SIGNED) &gt;= #{psgerNum}))
+			OR (CAST(SUBSTRING_INDEX(T1.SUIT_PEOPLE_NUMBER,'-',1) AS SIGNED) &lt;= #{psgerNum}
+				AND CAST(SUBSTRING_INDEX(T1.SUIT_PEOPLE_NUMBER,'-',-1) AS SIGNED) &gt;= #{psgerNum}))
 		</if>
 		<if test=" null != psgerEven &amp;&amp; false == psgerEven">
 			AND (T1.SUIT_DOUBLE_PEOPLE IS NULL OR T1.SUIT_DOUBLE_PEOPLE = FALSE)   
