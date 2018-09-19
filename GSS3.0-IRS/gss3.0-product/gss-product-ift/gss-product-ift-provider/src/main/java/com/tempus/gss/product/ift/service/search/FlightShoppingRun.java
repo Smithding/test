@@ -101,9 +101,7 @@ public class FlightShoppingRun implements Runnable {
 			segs.add(shoppingSeg);
 		}
 		shoppingInput.setSegs(segs);
-		log.info("开始调用shopping接口,入参:{}", JsonUtil.toJson(shoppingInput));
 		ShoppingOutPut shoppingOutPut = shoppingService.shoppingI(shoppingInput);
-		log.info("完成调用shopping接口" + shoppingOutPut.getShortText());
 		List<AvailableJourney> availableJourneys = shoppingOutPut.getAvailableJourneys();
 		if (null != availableJourneys || availableJourneys.size() > 1) {
 			log.info("开始调用shopping数据转换");

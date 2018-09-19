@@ -3,6 +3,7 @@ package com.tempus.gss.product.ift.api.service;
 import java.util.List;
 
 import com.tempus.tbd.entity.Airline;
+import com.tempus.tbd.entity.Airport;
 
 public interface NewIftPolicyDataService {
 	/**
@@ -20,4 +21,11 @@ public interface NewIftPolicyDataService {
     * @return
     */
    List<Airline> getAllAirCode();
+   
+   /**
+    * 获取所有城市三字码
+    * 
+    * @return
+    */
+   List<Airport> getAllAirport();
 }

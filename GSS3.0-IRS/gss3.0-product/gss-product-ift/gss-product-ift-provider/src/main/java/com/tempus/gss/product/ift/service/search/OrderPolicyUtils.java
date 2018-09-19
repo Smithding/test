@@ -264,9 +264,12 @@ public class OrderPolicyUtils {
 
 		/** 供应商Office, 多个以"/"分隔 */
 		orderPolicy.setSupplierOffice(policy.getSupplierOffice());
-
+		String mixCabinType ="";
+        if(policy.getMixCabinType()!=null&&policy.getMixCabinType().contains("2")){
+        	mixCabinType = "票面略低";
+        }
 		/** 开票Office, 多个以"/"分隔 */
-		orderPolicy.setTicketOffice(policy.getTicketOffice());
+		orderPolicy.setTicketOffice(policy.getTicketOffice()+mixCabinType);
 
 		/** 上游代理费用 */
 		orderPolicy.setOriginalAgencyFee(policy.getOriginalAgencyFee());
