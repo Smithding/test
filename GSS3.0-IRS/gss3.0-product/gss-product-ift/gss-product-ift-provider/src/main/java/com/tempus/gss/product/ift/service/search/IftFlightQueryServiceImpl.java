@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.omg.CORBA.PolicyHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.dubbo.config.annotation.Reference;
@@ -78,8 +77,15 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 		List<Leg> legs = new ArrayList<Leg>();
 		for (Flight flights : queryIBEDetail.getFlights()) {
 			Leg leg = new Leg();
-			leg.setAirline(flights.getAirline());//航司
-			leg.setFlightNo(flights.getFlightNo());//航班号
+			String airline = flights.getAirline();
+			String flightNo = flights.getFlightNo();
+			String shareCode = flights.getCodeshare();
+			if(StringUtils.isNotBlank(flights.getCodeshare()) && !flights.getCodeshare().contains("null")){
+				airline = shareCode.substring(0, 2);
+				flightNo = shareCode.substring(2);
+			}
+			leg.setAirline(airline);//航司
+			leg.setFlightNo(flightNo);//航班号
 			leg.setDepTime(flights.getDepTime());//起飞时间
             leg.setArrTime(flights.getArrTime());//到达时间.
             leg.setCabin(flights.getFlightCabinPriceVos().get(0).getCabin());
@@ -123,8 +129,15 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 		List<Leg> legs = new ArrayList<Leg>();
 		for (Flight flights : queryIBEDetail.getFlights()) {
 			Leg leg = new Leg();
-			leg.setAirline(flights.getAirline());//航司
-			leg.setFlightNo(flights.getFlightNo());//航班号
+			String airline = flights.getAirline();
+			String flightNo = flights.getFlightNo();
+			String shareCode = flights.getCodeshare();
+			if(StringUtils.isNotBlank(flights.getCodeshare()) && !flights.getCodeshare().contains("null")){
+				airline = shareCode.substring(0, 2);
+				flightNo = shareCode.substring(2);
+			}
+			leg.setAirline(airline);//航司
+			leg.setFlightNo(flightNo);//航班号
 			leg.setDepTime(flights.getDepTime());//起飞时间
             leg.setArrTime(flights.getArrTime());//到达时间.
             leg.setCabin(flights.getFlightCabinPriceVos().get(0).getCabin()==null?"":flights.getFlightCabinPriceVos().get(0).getCabin());
@@ -165,8 +178,15 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 		List<Leg> legs = new ArrayList<Leg>();
 		for (Flight flights : queryIBEDetail.getFlights()) {
 			Leg leg = new Leg();
-			leg.setAirline(flights.getAirline());//航司
-			leg.setFlightNo(flights.getFlightNo());//航班号
+			String airline = flights.getAirline();
+			String flightNo = flights.getFlightNo();
+			String shareCode = flights.getCodeshare();
+			if(StringUtils.isNotBlank(flights.getCodeshare()) && !flights.getCodeshare().contains("null")){
+				airline = shareCode.substring(0, 2);
+				flightNo = shareCode.substring(2);
+			}
+			leg.setAirline(airline);//航司
+			leg.setFlightNo(flightNo);//航班号
 			leg.setDepTime(flights.getDepTime());//起飞时间
             leg.setArrTime(flights.getArrTime());//到达时间.
             leg.setCabin(flights.getFlightCabinPriceVos().get(0).getCabin()==null?"":flights.getFlightCabinPriceVos().get(0).getCabin());
