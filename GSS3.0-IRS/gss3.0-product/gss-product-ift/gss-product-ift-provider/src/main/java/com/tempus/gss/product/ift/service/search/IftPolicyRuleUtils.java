@@ -298,7 +298,7 @@ public class IftPolicyRuleUtils {
 		if(null != policy.getIsFlySuitFlight() && policy.getIsFlySuitFlight()){
 			if(StringUtils.isNotBlank(policy.getFlySuitFlight())){
 				for(String flightNo : flightNos){
-					if(!policy.getFlySuitFlight().contains(flightNo)){
+					if(!policy.getFlySuitFlight().contains(flightNo.substring(2))){
 						result = false;
 						break;
 					}
@@ -321,7 +321,7 @@ public class IftPolicyRuleUtils {
 		if((2 == policy.getVoyageType() || 3 == policy.getVoyageType()) && null != policy.getIsRtnSuitFlight() && policy.getIsRtnSuitFlight()){
 			if(StringUtils.isNotBlank(policy.getRtnSuitFlight())){
 				for(String flightNo : flightNos){
-					if(!policy.getRtnSuitFlight().contains(flightNo)){
+					if(!policy.getRtnSuitFlight().contains(flightNo.substring(2))){
 						result = false;
 						break;
 					}
@@ -344,7 +344,7 @@ public class IftPolicyRuleUtils {
 		if(null != policy.getIsNotSuitFlight() && policy.getIsNotSuitFlight()){
 			if(StringUtils.isNotBlank(policy.getNotSuitFlight())){
 				for(String flightNo : flightNos){
-					if(policy.getNotSuitFlight().contains(flightNo)){
+					if(policy.getNotSuitFlight().contains(flightNo.substring(2))){
 						result = false;
 						break;
 					}
