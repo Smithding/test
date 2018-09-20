@@ -1,5 +1,6 @@
 package com.tempus.gss.product.ift.api.entity.formula;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -9,8 +10,12 @@ import com.tempus.tbe.entity.NucFareInfo;
 /**
  * Created by 杨威 on 2016/10/18.
  */
-public class FormulaParameters {
+public class FormulaParameters implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5467397082233696916L;
 	/**
 	 * 票面.
 	 *
@@ -81,7 +86,28 @@ public class FormulaParameters {
      * 控润加价
      */
     private BigDecimal profitPrice;
+    
+    /**
+     * 采购返点
+     */
+    private BigDecimal buyRebate;
+    /**
+     * 采购代理费
+     */
+    private BigDecimal buyAgencyFee;
 
+	public BigDecimal getBuyRebate() {
+		return buyRebate;
+	}
+	public void setBuyRebate(BigDecimal buyRebate) {
+		this.buyRebate = buyRebate;
+	}
+	public BigDecimal getBuyAgencyFee() {
+		return buyAgencyFee;
+	}
+	public void setBuyAgencyFee(BigDecimal buyAgencyFee) {
+		this.buyAgencyFee = buyAgencyFee;
+	}
 	public BigDecimal getProfitPrice() {
 		return profitPrice;
 	}
