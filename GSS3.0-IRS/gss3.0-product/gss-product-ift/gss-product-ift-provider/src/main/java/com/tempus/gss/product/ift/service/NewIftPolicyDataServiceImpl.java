@@ -119,7 +119,6 @@ public class NewIftPolicyDataServiceImpl implements NewIftPolicyDataService {
 			return "fail";
 		}
 		String json = JsonUtil.toJson(city);
-		System.out.println(json);
 		return json;
 	}
 
@@ -166,10 +165,12 @@ public class NewIftPolicyDataServiceImpl implements NewIftPolicyDataService {
 	 * @return
 	 */
 	public List<States> getAirLineGlobal() {
-		// 获取所有的州
-		List<AreaInfo> areaInfos = areaInfoService.queryAllAreas();
+		
 		// 封装州的数据集合
 		List<States> listStates = new ArrayList<States>();
+		
+		// 获取所有的州
+		List<AreaInfo> areaInfos = areaInfoService.queryAllAreas();
 		for (AreaInfo areaInfo : areaInfos) {
 			// 封装州的数据实体类
 			States states = new States();
