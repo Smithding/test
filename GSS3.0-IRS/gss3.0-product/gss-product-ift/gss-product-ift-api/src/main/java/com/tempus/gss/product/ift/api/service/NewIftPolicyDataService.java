@@ -28,4 +28,10 @@ public interface NewIftPolicyDataService {
     * @return
     */
    List<Airport> getAllAirport();
+   /**
+    * 根据 城市或者国家二字码返回；对应属于的州和国家；
+    * @param key 当可以长度为2是国家，当长度为3是三字码
+    * @return
+    */
+   String getCityDate(String key);
 }

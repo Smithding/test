@@ -269,5 +269,26 @@ public class NewIftPolicyDataServiceImpl implements NewIftPolicyDataService {
 			}
 		}
 	}
+	public String getCityDate(String key) {
+		Country deparcountry;
+		String json = "";
+		try {
+			if (key.trim().length() == 2) {// 当长度为2标识是国家
+				deparcountry = countryService.queryCountryByPram(key);
+			} else {// 当长度为3表示是三字码
+				deparcountry = airportService.queryCountryByAirport(key);
+			}
+			if (deparcountry != null && !deparcountry.equals("")) {
+				json = "{'area':%s,'city':%s}";
+				json = json.format(json, deparcountry.getAreaCode().replace(" ", ""), deparcountry.getCountryCode());
+			} else {
+				logger.info(key + "基础数据获取到城市信息");
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // 根据出发城市查询所属的国家
 
+		return json;
+	}
 }
