@@ -34,14 +34,12 @@
     	<if test="null != voyageType">	AND (T1.VOYAGE_TYPE=#{voyageType} OR T1.VOYAGE_TYPE=3) </if>
     	<if test=" null != flyDate">
 			AND T1.FLY_START_DATE &lt;= #{flyDate}
-		</if>
-		<if test=" null != flyDate">
 			AND T1.FLY_END_DATE &gt;= #{flyDate}
+			<!-- 提前开票天数 -->
+			AND (T1.TICKET_RANGE IS NULL OR DATE_FORMAT(NOW(),'%Y-%m-%d') &lt; DATE_FORMAT(DATE_ADD(#{flyDate}, INTERVAL -CAST(T1.TICKET_RANGE AS SIGNED INTEGER) DAY),'%Y-%m-%d'))
 		</if>
 		<if test=" null != rtnFlyDate">
 			AND T1.RTN_START_DATE &lt;= #{rtnFlyDate}
-		</if>
-		<if test=" null != rtnFlyDate">
 			AND T1.RTN_END_DATE &gt;= #{rtnFlyDate}
 		</if>
 		<!-- 开始销售时间sql组装 -->

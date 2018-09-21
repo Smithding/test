@@ -122,6 +122,9 @@ public class IftPolicyHelper {
 			query.setOwner(agent.getOwner());
 			query.setAirline(airline);// 出票航司
 			query.setDepartAirport(departLeg.getDepAirport());// 出发城市
+			query.setAdtNum(adtNumber);
+			query.setChdNum(chdNumber);
+			query.setInfNum(infNumber);
 			Country deparcountry = airportService.queryCountryByAirport(departLeg.getDepAirport());// 根据出发城市查询所属的国家
 			if (deparcountry != null && !deparcountry.equals("")) {
 				query.setDepartContinent(deparcountry.getAreaCode()==null?"":deparcountry.getAreaCode().replace(" ", ""));// 三字码所属州
@@ -377,6 +380,7 @@ public class IftPolicyHelper {
 				&& ruleUtils.matcheTransitCabin(iftPolicy, transitCabins) 
 				&& ruleUtils.matcheNotSuitTransitAirport(iftPolicy, transitAirports)
 				&& ruleUtils.matcheArnk(iftPolicy, isArnk) 
+				&& ruleUtils.matcheCHDTikcet(iftPolicy, query.getAdtNum(), query.getChdNum())
 				&& ruleUtils.matcheFlightType(iftPolicy, airlines, flyType, null, isOpen)
 				&& ruleUtils.matcheDepartSuitFlight(iftPolicy, flightNos)
 				&& ruleUtils.matcheNotSuitFlight(iftPolicy, flightNos) 
@@ -417,6 +421,7 @@ public class IftPolicyHelper {
 				&& ruleUtils.matcheRtnAirport(iftPolicy, query)
 				&& ruleUtils.matcheNotSuitTransitAirport(iftPolicy, transitAirports)
 				&& ruleUtils.matcheArnk(iftPolicy, isArnk)
+				&& ruleUtils.matcheCHDTikcet(iftPolicy, query.getAdtNum(), query.getChdNum())
 				&& ruleUtils.matcheFlightType(iftPolicy, airlines, flyType, rtnType, isOpen)
 				&& ruleUtils.matcheDepartSuitFlight(iftPolicy, flyFlightNos)
 				&& ruleUtils.matcheArriveSuitFlight(iftPolicy, rtnFlightNos)

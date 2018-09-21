@@ -176,6 +176,25 @@ public class IftPolicyRuleUtils {
 	}
 	
 	/**
+	 * 检查儿童不单开
+	 * 
+	 * @param policy  待匹配的政策
+	 * @param adtNum  成人数量
+	 * @param chdNum  儿童数量
+	 * @return
+	 */
+	public boolean matcheCHDTikcet(IftPolicy policy, int adtNum, int chdNum) {
+		boolean result = true;
+		if(null != policy.getChdNotAloneTicket() && true == policy.getChdNotAloneTicket()){
+			if(chdNum > 0 && adtNum == 0){
+				result = false;
+			}
+		}
+		this.log(policy,result,"检查儿童不单开[matcheCHDTikcet]未通过");
+		return result;
+	}
+	
+	/**
 	 * 检查乘客类型不适用
 	 * 
 	 * @param policy  待匹配的政策
