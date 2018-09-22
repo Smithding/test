@@ -254,7 +254,7 @@ public class OrderServiceImpl implements IOrderService {
     @Transactional
     public SaleOrderExt createOrder(RequestWithActor<OrderCreateVo> requestWithActor) throws Exception {
 
-//        log.info("创建订单开始========" + JsonUtil.toJson(requestWithActor));
+        log.info("创建订单开始========" + JsonUtil.toJson(requestWithActor));
         
         /* 校验登录用户 */
         if (requestWithActor.getAgent() == null) {
@@ -530,7 +530,9 @@ public class OrderServiceImpl implements IOrderService {
             buyOrderExtDao.insertSelective(buyOrderExt);
             log.info("创建国际订单成功," + buyOrderExt.toString());
             // String logstr = "<p>" + String.format("创建国际订单成功=====", new Date()) + ":saleOrderNo=" + JsonUtil.toJson(saleOrderNo);
-            
+            if(StringUtils.equals("API",saleOrder.getSourceChannelNo())) {
+                iftMessageServiceImpl.sendMessage(owner, saleOrderNo,"salesman-auditor"); //销售核价员
+            }
             /* 创建操作日志 */
             try {
                 String title = "创建国际销售单";
