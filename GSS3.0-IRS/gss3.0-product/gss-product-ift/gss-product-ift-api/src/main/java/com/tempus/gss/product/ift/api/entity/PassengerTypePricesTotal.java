@@ -108,7 +108,53 @@ public class PassengerTypePricesTotal implements Serializable {
      * 控润返点
      */
     private BigDecimal profitRebate; 
-    public BigDecimal getProfitRebate() {
+    /**
+     * 采购返点
+     */
+    private BigDecimal buyRebate;
+    /**
+     * 采购代理费
+     */
+    private BigDecimal buyAgencyFee;
+    /**
+     * 采购结算价
+     */
+    private BigDecimal buyPrice;
+    /**
+     * 采购手续费
+     */
+    private BigDecimal buyBrokerage;
+    public BigDecimal getBuyBrokerage() {
+		return buyBrokerage;
+	}
+	public void setBuyBrokerage(BigDecimal buyBrokerage) {
+		this.buyBrokerage = buyBrokerage;
+	}
+	public Boolean getIsAward() {
+		return isAward;
+	}
+	public void setIsAward(Boolean isAward) {
+		this.isAward = isAward;
+	}
+	public BigDecimal getBuyRebate() {
+		return buyRebate;
+	}
+	public void setBuyRebate(BigDecimal buyRebate) {
+		this.buyRebate = buyRebate;
+	}
+	public BigDecimal getBuyAgencyFee() {
+		return buyAgencyFee;
+	}
+	public void setBuyAgencyFee(BigDecimal buyAgencyFee) {
+		this.buyAgencyFee = buyAgencyFee;
+	}
+	public BigDecimal getBuyPrice() {
+		return buyPrice;
+	}
+	public void setBuyPrice(BigDecimal buyPrice) {
+		this.buyPrice = buyPrice;
+	}
+	public BigDecimal getProfitRebate() {
 		return profitRebate;
 	}
 	public void setProfitRebate(BigDecimal profitRebate) {

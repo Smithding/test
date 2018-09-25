@@ -81,6 +81,13 @@ public class FlightQuery implements Serializable {
 	/** 回程机场国际I，还是国内D */
 	private String rtnSign;
 
+	/** 成人数量 */
+	private int adtNum;
+	/** 儿童数量 */
+	private int chdNum;
+	/** 婴儿数量 */
+	private int infNum;
+	
 	public String getDepartSign() {
 		return departSign;
 	}
@@ -270,6 +277,30 @@ public class FlightQuery implements Serializable {
 
 	public void setRtnSign(String rtnSign) {
 		this.rtnSign = rtnSign;
+	}
+
+	public int getAdtNum() {
+		return adtNum;
+	}
+
+	public void setAdtNum(int adtNum) {
+		this.adtNum = adtNum;
+	}
+
+	public int getChdNum() {
+		return chdNum;
+	}
+
+	public void setChdNum(int chdNum) {
+		this.chdNum = chdNum;
+	}
+
+	public int getInfNum() {
+		return infNum;
+	}
+
+	public void setInfNum(int infNum) {
+		this.infNum = infNum;
 	}
 	
 }

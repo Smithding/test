@@ -451,7 +451,7 @@ public class OrderServiceImpl implements IOrderService {
 		// 根据控润渠道销售价计算的总保费
 		BigDecimal premiums = salePrice;
 		//获取分销商的采购价
-		 List<Insurance> insuranceCai =   insuranceDao.selectInsuranceByNo(saleOrderExt.getInsuranceNo()) ;
+		 List<Insurance> insuranceCai = insuranceDao.selectInsuranceByNo(saleOrderExt.getInsuranceNo()) ;
 		 saleOrderExt.setBuyPrice(insuranceCai.get(0).getBuyPrice());
 		 //二级控润
         List<InsuranceProfit> insuranceProfitList = insuranceProfitService.queryInsuranceProfitByNo(agent, saleOrderExt.getInsuranceNo());
@@ -470,6 +470,8 @@ public class OrderServiceImpl implements IOrderService {
           }
         }
         saleOrderExt.setSalePrice(premiums);
+        //存储单价
+        BigDecimal univalence = premiums;
         //单个保险再乘以购买保险的总人数
         SaleOrderExt SaleOrderExt = requestWithActor.getEntity().getSaleOrderExt();
         int personnum = 0;
@@ -576,8 +578,8 @@ public class OrderServiceImpl implements IOrderService {
 				saleOrderDetail.setOwner(agent.getOwner());
 				saleOrderDetail.setCreateTime(new Date());
 				saleOrderDetail.setCreator(agent.getId().toString());
-				if(saleOrderDetail.getPremium()==null||saleOrderDetail.getPremium().compareTo(BigDecimal.ZERO)==0){
-                    saleOrderDetail.setPremium(salePrice.multiply(new BigDecimal(saleOrderDetail.getInsuranceNum())));
+				if(saleOrderDetail.getPremium()==null){
+                    saleOrderDetail.setPremium(univalence.multiply(new BigDecimal(saleOrderDetail.getInsuranceNum())));
                 }
 				saleOrderDetail.setIsReport("0");
 				saleOrderDetailDao.insertSelective(saleOrderDetail);

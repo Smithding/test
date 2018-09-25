@@ -25,6 +25,7 @@ public class GzOutReport implements Serializable {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date issueTime;
     //QUIT_TIME;退票时间
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date quitTime;
     //TICKET_NO
     private String ticketNo;
@@ -37,6 +38,7 @@ public class GzOutReport implements Serializable {
     //CABIN 舱位
     private String cabin;
     //DEP_TIME;
+    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
     private Date depTime;
     //ARR_TIME
     private Date arrTime;
@@ -80,6 +82,16 @@ public class GzOutReport implements Serializable {
     private String days;
     //航司
     private String airline;
+    //乘客编号
+    private Long passengerNo;
+
+    public Long getPassengerNo() {
+        return passengerNo;
+    }
+
+    public void setPassengerNo(Long passengerNo) {
+        this.passengerNo = passengerNo;
+    }
 
     public String getDays() {
         return days;

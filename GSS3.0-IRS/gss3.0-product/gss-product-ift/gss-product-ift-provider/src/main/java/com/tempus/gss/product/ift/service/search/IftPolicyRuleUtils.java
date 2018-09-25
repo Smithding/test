@@ -112,7 +112,7 @@ public class IftPolicyRuleUtils {
 	 */
 	public boolean matcheRtnAirport(IftPolicy policy, FlightQuery query) {
 		boolean result = true;
-		if((2 == policy.getVoyageType() || 3 == policy.getVoyageType()) && null != policy.getRoundTripAirportType()){
+		if((2 == policy.getVoyageType() || 3 == policy.getVoyageType()) && null != policy.getRoundTripAirportType() && 1 != policy.getRoundTripAirportType()){
 			result = false;
 			//1政策始发机场范围已经在sql中过滤
 			if(2 == policy.getRoundTripAirportType()){//同属洲际
@@ -172,6 +172,25 @@ public class IftPolicyRuleUtils {
 			}
 		}
 		this.log(policy,result,"检查目的地缺口程[matcheArnk]未通过");
+		return result;
+	}
+	
+	/**
+	 * 检查儿童不单开
+	 * 
+	 * @param policy  待匹配的政策
+	 * @param adtNum  成人数量
+	 * @param chdNum  儿童数量
+	 * @return
+	 */
+	public boolean matcheCHDTikcet(IftPolicy policy, int adtNum, int chdNum) {
+		boolean result = true;
+		if(null != policy.getChdNotAloneTicket() && true == policy.getChdNotAloneTicket()){
+			if(chdNum > 0 && adtNum == 0){
+				result = false;
+			}
+		}
+		this.log(policy,result,"检查儿童不单开[matcheCHDTikcet]未通过");
 		return result;
 	}
 	

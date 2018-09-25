@@ -14,9 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class IGZOutReportServiceImpl implements IGZOutTicketService {
@@ -123,8 +121,60 @@ public class IGZOutReportServiceImpl implements IGZOutTicketService {
         } catch (Exception e) {
             logger.error("国际广州报表查询 ERROR  {}", e);
         }
+        //同一个乘客有两个票号的重复的价格全部清0
+        handleList(list);
         page.setRecords(list);
         return page;
+    }
+
+    //相同游客名称
+    private void handleList(List<GzOutReport> list) {
+        if(list == null || list.size() == 0 ){
+            return ;
+        }
+        Set<String> passengerNoAndTypeSet = new HashSet<>();
+        //是否第一条记录
+        boolean isFirstGzOutReport = false;
+        if(passengerNoAndTypeSet.size() == 0){
+            isFirstGzOutReport = true;
+        }
+        String passengerNoAndType = null;
+        for (GzOutReport gzOutReport : list) {
+            //如果是第一条记录直接放入Set中
+            if(isFirstGzOutReport){
+                //添加记录到Set中
+                addGzOutReportToSet(passengerNoAndTypeSet,gzOutReport);
+                isFirstGzOutReport = false;
+                continue;
+            }
+            //如果不是第一条记录
+            String saleChangeNo = gzOutReport.getSaleChangeNo() == null ? "" : gzOutReport.getSaleChangeNo() + "";
+            passengerNoAndType = gzOutReport.getPassengerNo()+"-"+saleChangeNo+"-"+gzOutReport.getTicketType();
+            if (passengerNoAndTypeSet.contains(passengerNoAndType)) {
+                //如果Set集合中包含该乘客则情况多出来票号记录的价格
+                emptyPrice(gzOutReport);
+            } else{
+                //如果Set集合不包含该乘客则添加
+                addGzOutReportToSet(passengerNoAndTypeSet,gzOutReport);
+            }
+        }
+    }
+
+    private void addGzOutReportToSet(Set<String> passengerNoAndTypeSet, GzOutReport gzOutReport) {
+        String saleChangeNo = gzOutReport.getSaleChangeNo()==null?"":gzOutReport.getSaleChangeNo()+"";
+        String passengerNoAndType = gzOutReport.getPassengerNo()+"-"+saleChangeNo+"-"+gzOutReport.getTicketType();
+        passengerNoAndTypeSet.add(passengerNoAndType);
+    }
+
+    private void emptyPrice(GzOutReport gzOutReport) {
+        gzOutReport.setNetPrice(BigDecimal.ZERO);
+        gzOutReport.setTax(BigDecimal.ZERO);
+        gzOutReport.setQvalue(BigDecimal.ZERO);
+        gzOutReport.setBottomRebate(BigDecimal.ZERO);
+        gzOutReport.setBackRebate(BigDecimal.ZERO);
+        gzOutReport.setPlusPrice(BigDecimal.ZERO);
+        gzOutReport.setDeptProfit(BigDecimal.ZERO);
+        gzOutReport.setProfit(BigDecimal.ZERO);
     }
 
     @Override
