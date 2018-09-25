@@ -260,6 +260,9 @@ public class PNRMappingServiceImpl implements PNRMappingService {
                 flight.setArrTerminal(pnrSeg.getDepartureTerminal());
                 flight.setAirline(pnrSeg.getAirline());
                 flight.setCodeshare(pnrSeg.getOaCode() + pnrSeg.getOaFlightNumber());
+                if(pnrSeg.getOaCode()!=null&&!pnrSeg.getOaCode().equals("")){//是否包含共享航班
+                	queryIBEDetail.setIsShare(true);
+                }
                 flight.setFlightNum(pnrSeg.getRph());
                 flight.setFlightNo(pnrSeg.getFlightNumber());
                 if (null != pnrSeg.getArrivalDateTime()) {

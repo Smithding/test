@@ -185,13 +185,13 @@ public class OrderPolicyUtils {
 				shareStr.append("全程无奖励");
 				break;
 			case 2:
-				shareStr.append("全程指定奖励:"+policy.getShareAssignReward().subtract(profitRebate).setScale(2, BigDecimal.ROUND_CEILING));
+				shareStr.append("全程指定奖励:"+(null == policy.getShareAssignReward() ? 0 : policy.getShareAssignReward().subtract(profitRebate).setScale(2, BigDecimal.ROUND_CEILING)));
 				break;
 			case 3:
 				shareStr.append("全程无奖励");
 				break;
 			case 4:
-				shareStr.append("共享段指定奖励:"+policy.getShareLegReward().subtract(profitRebate).setScale(2, BigDecimal.ROUND_CEILING));
+				shareStr.append("共享段指定奖励:"+(null == policy.getShareLegReward() ? 0 : policy.getShareLegReward().subtract(profitRebate).setScale(2, BigDecimal.ROUND_CEILING)));
 				break;
 			case 5:
 				shareStr.append("给全部奖励");

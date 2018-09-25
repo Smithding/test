@@ -152,7 +152,8 @@ public class FlightCabinRun implements Runnable {
 						}
 					}
 				}
-				
+				//航班查询列表实际出票
+				shoppingOutPut.getAvailableJourneys().get(0).getFare().setTicketingCarrier(availableJourney.getFare().getTicketingCarrier());
 				queryIBEDetails = iftFlightQueryUtils.shoppingOutPutConvertQueryIBEDetails(shoppingOutPut);
 			}
 		} catch (Exception e) {

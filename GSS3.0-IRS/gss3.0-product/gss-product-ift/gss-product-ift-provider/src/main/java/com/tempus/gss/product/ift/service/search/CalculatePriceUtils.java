@@ -152,16 +152,28 @@ public class CalculatePriceUtils {
 	 * @param formula
 	 */
 	private static void formulaPrice(PassengerTypePricesTotal passengerTypePricesTotal,FormulaParameters formulaP,int formula,boolean calcRound){
+		try {
+		//对象用于计算采购价格
+		FormulaParameters buyformula = (FormulaParameters)CloneUtils.deepCopy(formulaP);
+		//对象用于计算销售价格
+		FormulaParameters saleformula = (FormulaParameters)CloneUtils.deepCopy(formulaP);
 		switch (formula) {
 		case 1:
-			// 公式2:票价*（1-代理费率）*（1-返点）+ 税款 + 手续费-直减费用(往返直减)
-			formulaP = FormulaUtils.formulaMethod1(formulaP);
+			// 公式2:票价*（1-代理费率）*（1-返点）+ 税款 + 手续费-直减费用(往返直减)计算销售价格
+			saleformula = FormulaUtils.formulaMethod1(saleformula,saleformula.getAgencyFee(),saleformula.getSaleRebate());
+			//计算采购价格
+			buyformula = FormulaUtils.formulaMethod1(buyformula,buyformula.getBuyAgencyFee(),buyformula.getBuyRebate());
 			break;
 		default:
 			// 计奖的部分*(1-代理费率-返点)+无奖的部分*(1-代理费率)+税费+手续费-直减费用
-			formulaP = FormulaUtils.formulaMethod2(formulaP);
+			saleformula = FormulaUtils.formulaMethod2(saleformula,saleformula.getAgencyFee(),saleformula.getSaleRebate());
+			//计算采购价格
+			buyformula = FormulaUtils.formulaMethod2(buyformula,buyformula.getBuyAgencyFee(),buyformula.getBuyRebate());
 		}
-		setPassengerTypePricesTotal(passengerTypePricesTotal,formulaP,calcRound);
+		setPassengerTypePricesTotal(passengerTypePricesTotal,saleformula,calcRound,buyformula);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	/**
 	 * 往返计算销售价格
@@ -170,16 +182,24 @@ public class CalculatePriceUtils {
 	 * @param formula
 	 */
 	private static void towFormulaPrice(PassengerTypePricesTotal passengerTypePricesTotal,FormulaParameters formulaP,int formula,boolean calcRound){
+		//对象用于计算采购价格
+		FormulaParameters buyformula = (FormulaParameters)CloneUtils.deepCopy(formulaP);
+		//对象用于计算销售价格
+		FormulaParameters saleformula = (FormulaParameters)CloneUtils.deepCopy(formulaP);
 		switch (formula) {
 		case 1:
 			// 公式2:票价*（1-代理费率）*（1-返点）+ 税款 + 手续费-直减费用(往返直减)
-			formulaP = FormulaUtils.towFormulaMethod1(formulaP);
+			saleformula = FormulaUtils.towFormulaMethod1(saleformula,saleformula.getAgencyFee(),saleformula.getSaleRebate());
+			//计算采购价格
+			buyformula = FormulaUtils.towFormulaMethod1(buyformula,buyformula.getBuyAgencyFee(),buyformula.getBuyRebate());
 			break;
 		default:
 			// 计奖的部分*(1-代理费率-返点)+无奖的部分*(1-代理费率)+税费+手续费-直减费用
-			formulaP = FormulaUtils.towFormulaMethod2(formulaP);
+			saleformula = FormulaUtils.towFormulaMethod2(saleformula,saleformula.getAgencyFee(),saleformula.getSaleRebate());
+			//计算采购价格
+			buyformula = FormulaUtils.towFormulaMethod2(buyformula,buyformula.getBuyAgencyFee(),buyformula.getBuyRebate());
 		}
-		setPassengerTypePricesTotal(passengerTypePricesTotal,formulaP,calcRound);
+		setPassengerTypePricesTotal(passengerTypePricesTotal,saleformula,calcRound,buyformula);
 	}
     /**
      * 价格排序
@@ -224,11 +244,13 @@ public class CalculatePriceUtils {
 		}
 	}
 	/**
-	 * 设置乘客对象价格数据
+	 * 
 	 * @param passengerTypePricesTotal
-	 * @param formula 
+	 * @param formula 销售价格对象
+	 * @param calcRound 销售价格取整方式 
+	 * @param buyFormula 采购价格对象
 	 */
-	public static void setPassengerTypePricesTotal(PassengerTypePricesTotal passengerTypePricesTotal,FormulaParameters formula,boolean calcRound){
+	public static void setPassengerTypePricesTotal(PassengerTypePricesTotal passengerTypePricesTotal,FormulaParameters formula,boolean calcRound,FormulaParameters buyFormula){
 		if(calcRound){
 	    	passengerTypePricesTotal.setSalePrice(formula.getSalePrice().setScale(0, BigDecimal.ROUND_UP));//销售价格
 	    }else{
@@ -241,6 +263,9 @@ public class CalculatePriceUtils {
 		passengerTypePricesTotal.setBrokerage(formula.getBrokerage());//手续费，5，表示￥5.
 		passengerTypePricesTotal.setAddPrice(formula.getProfitPrice()==null?new BigDecimal(0):formula.getProfitPrice());//控润的钱
 		passengerTypePricesTotal.setProfitRebate(formula.getProfitRebate()==null?new BigDecimal(0):formula.getProfitRebate());//控润的返点
-		
+		passengerTypePricesTotal.setBuyAgencyFee(buyFormula.getBuyAgencyFee());//采购代理费率
+		passengerTypePricesTotal.setBuyRebate(buyFormula.getBuyRebate());//采购返点
+		passengerTypePricesTotal.setBuyPrice(buyFormula.getSalePrice().setScale(2, BigDecimal.ROUND_CEILING));//采购结算价格
+		passengerTypePricesTotal.setBuyBrokerage(formula.getBrokerage());//采购手续费
 	}
 }
