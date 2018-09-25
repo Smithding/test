@@ -413,7 +413,7 @@
         GROUP BY ISOD.TICKET_NO ) t2
         WHERE 1=1
         <include refid="queryIssueRecordsSumWhere"/>
-        GROUP BY PASSENGER_NO
+        GROUP BY PASSENGER_NO,SALE_CHANGE_NO
 
         UNION ALL
 

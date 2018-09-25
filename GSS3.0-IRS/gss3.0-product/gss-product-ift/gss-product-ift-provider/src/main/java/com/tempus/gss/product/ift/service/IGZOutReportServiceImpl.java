@@ -148,7 +148,8 @@ public class IGZOutReportServiceImpl implements IGZOutTicketService {
                 continue;
             }
             //如果不是第一条记录
-            passengerNoAndType = gzOutReport.getPassengerNo()+"-"+gzOutReport.getTicketType();
+            String saleChangeNo = gzOutReport.getSaleChangeNo() == null ? "" : gzOutReport.getSaleChangeNo() + "";
+            passengerNoAndType = gzOutReport.getPassengerNo()+"-"+saleChangeNo+"-"+gzOutReport.getTicketType();
             if (passengerNoAndTypeSet.contains(passengerNoAndType)) {
                 //如果Set集合中包含该乘客则情况多出来票号记录的价格
                 emptyPrice(gzOutReport);
@@ -160,7 +161,8 @@ public class IGZOutReportServiceImpl implements IGZOutTicketService {
     }
 
     private void addGzOutReportToSet(Set<String> passengerNoAndTypeSet, GzOutReport gzOutReport) {
-        String passengerNoAndType = gzOutReport.getPassengerNo()+"-"+gzOutReport.getTicketType();
+        String saleChangeNo = gzOutReport.getSaleChangeNo()==null?"":gzOutReport.getSaleChangeNo()+"";
+        String passengerNoAndType = gzOutReport.getPassengerNo()+"-"+saleChangeNo+"-"+gzOutReport.getTicketType();
         passengerNoAndTypeSet.add(passengerNoAndType);
     }
 
