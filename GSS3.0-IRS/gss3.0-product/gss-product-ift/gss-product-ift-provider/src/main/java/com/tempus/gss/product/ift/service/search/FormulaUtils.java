@@ -330,8 +330,8 @@ public class FormulaUtils {
 					formula.setBuyRebate(new BigDecimal(0));//采购返点
 					break;
 				case 4:// 4指定奖励
-					formula.setSaleRebate(policy.getChdAssignRewardFee());// 销售返点
-					formula.setBuyRebate(policy.getChdAssignRewardFee());//采购返点
+					formula.setSaleRebate(policy.getChdAssignRewardFee()==null?new BigDecimal(0):policy.getChdAssignRewardFee());// 销售返点
+					formula.setBuyRebate(policy.getChdAssignRewardFee()==null?new BigDecimal(0):policy.getChdAssignRewardFee());//采购返点
 					break;
 				default:
 					formula.setSaleRebate(rewardFee);// 销售返点
@@ -383,8 +383,7 @@ public class FormulaUtils {
 	 */
 	public static FormulaParameters getProfit(IftPolicy policy,String passengerType,FormulaParameters formulaParameters,Profit profit) {
 		try{
-			//当政策不为空的情况对政策进行控润
-			if(policy!=null&&policy.getId()!=null){
+			    //当政策不为空的情况对政策进行控润
 				if(profit!=null&&!profit.equals("")&&profit.getPriceType().intValue()!=1){//价格方式  1 不控 2 控点 
 					 if (!passengerType.equals("INF")) {// 婴儿不控润
 						 if(profit.getPriceType().intValue()==2){// 2 控点
@@ -399,7 +398,6 @@ public class FormulaUtils {
 						 }
 					 }
 				}
-			}
 		}catch(Exception e){
 			logerr.error("设置控润异常"+e.getMessage());
 			return formulaParameters;
