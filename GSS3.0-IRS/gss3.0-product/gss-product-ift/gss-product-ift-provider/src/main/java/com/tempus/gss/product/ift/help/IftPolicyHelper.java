@@ -429,7 +429,7 @@ public class IftPolicyHelper {
 				&& ruleUtils.matcheMixtrueCabin(iftPolicy, cabins) 
 				&& ruleUtils.matcheFareBasis(iftPolicy, fareBasis) 
 				&& ruleUtils.matcheParpirce(iftPolicy, parPrice)
-				&& ruleUtils.matchedExclude(iftPolicy, query.getDepartAirport(), query.getArriveAirport()));
+				&& ruleUtils.matchedExclude(iftPolicy, query.getDepartAirport(), query.getRtnAirport()));
 		return iftPolicyList;
 	}
 }

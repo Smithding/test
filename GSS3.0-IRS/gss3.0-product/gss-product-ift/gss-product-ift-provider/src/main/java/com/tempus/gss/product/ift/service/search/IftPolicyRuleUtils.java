@@ -112,7 +112,7 @@ public class IftPolicyRuleUtils {
 	 */
 	public boolean matcheRtnAirport(IftPolicy policy, FlightQuery query) {
 		boolean result = true;
-		if((2 == policy.getVoyageType() || 3 == policy.getVoyageType()) && null != policy.getRoundTripAirportType()){
+		if((2 == policy.getVoyageType() || 3 == policy.getVoyageType()) && null != policy.getRoundTripAirportType() && 1 != policy.getRoundTripAirportType()){
 			result = false;
 			//1政策始发机场范围已经在sql中过滤
 			if(2 == policy.getRoundTripAirportType()){//同属洲际
