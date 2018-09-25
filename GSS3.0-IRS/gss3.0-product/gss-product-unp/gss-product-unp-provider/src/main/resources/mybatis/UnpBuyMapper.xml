@@ -10,7 +10,7 @@
         <result column="CHANGE_TYPE" jdbcType="INTEGER" property="changeType"/>
         <result column="REMARK" jdbcType="VARCHAR" property="remark"/>
         <result column="TRA_NO" jdbcType="BIGINT" property="traNo"/>
-        <result column="THIRD_BUS_NO" jdbcType="BIGINT" property="thirdBusNo"/>
+        <result column="THIRD_BUS_NO" jdbcType="VARCHAR" property="thirdBusNo"/>
         <result column="PLAN_AMOUNT" jdbcType="DECIMAL" property="planAmount"/>
         <result column="PAY_STATUS" jdbcType="INTEGER" property="payStatus"/>
         <result column="ACTUAL_AMOUNT" jdbcType="DECIMAL" property="actualAmount"/>

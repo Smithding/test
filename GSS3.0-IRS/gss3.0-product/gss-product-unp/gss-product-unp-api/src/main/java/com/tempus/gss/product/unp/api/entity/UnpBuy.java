@@ -4,6 +4,7 @@ import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -56,7 +57,7 @@ public class UnpBuy implements Serializable {
     /**
      * 第三方业务单号
      */
-    private Long thirdBusNo;
+    private String thirdBusNo;
     /**
      * 采购价, 应付总额
      */
@@ -188,11 +189,11 @@ public class UnpBuy implements Serializable {
         this.traNo = traNo;
     }
     
-    public Long getThirdBusNo() {
+    public String getThirdBusNo() {
         return thirdBusNo;
     }
     
-    public void setThirdBusNo(Long thirdBusNo) {
+    public void setThirdBusNo(String thirdBusNo) {
         this.thirdBusNo = thirdBusNo;
     }
     
@@ -296,4 +297,10 @@ public class UnpBuy implements Serializable {
         this.buyItems = buyItems;
     }
     
+    public UnpBuy(Integer initSize) {
+        this.buyItems = new ArrayList<>(initSize);
+    }
+    
+    public UnpBuy() {
+    }
 }

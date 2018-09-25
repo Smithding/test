@@ -8,6 +8,7 @@ import com.tempus.gss.product.unp.api.entity.UnpGroupType;
 import com.tempus.gss.product.unp.api.entity.UnpItemType;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
 import com.tempus.gss.product.unp.api.entity.vo.UnpGroupItemVo;
+import com.tempus.gss.product.unp.api.service.BaseUnpService;
 import com.tempus.gss.product.unp.api.service.UnpGroupItemService;
 import com.tempus.gss.product.unp.dao.UnpGroupTypeMapper;
 import com.tempus.gss.product.unp.dao.UnpItemTypeMapper;
@@ -168,6 +169,19 @@ public class UnpGroupItemServiceImpl extends BaseUnpService implements UnpGroupI
                 return null;
             }
             return this.itemTypeMapper.selectByCode(code);
+        } catch (Exception e) {
+            logger.error("getGroups  Error", e);
+            return null;
+        }
+    }
+    
+    @Override
+    public List<UnpItemType> getItemByName(String name) {
+        try {
+            if (NullableCheck.isNullOrEmpty(name)) {
+                return null;
+            }
+            return this.itemTypeMapper.selectByName(name);
         } catch (Exception e) {
             logger.error("getGroups  Error", e);
             return null;

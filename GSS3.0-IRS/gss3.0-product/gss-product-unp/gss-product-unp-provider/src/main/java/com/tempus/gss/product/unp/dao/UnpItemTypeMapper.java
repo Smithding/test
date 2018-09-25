@@ -20,9 +20,9 @@ public interface UnpItemTypeMapper {
     
     UnpItemType selectByCode(String itemTypeNo);
     
+    List<UnpItemType> selectByName(String name);
+    
     int updateByPrimaryKeySelective(UnpItemType record);
     
     int updateSelective(UnpItemType record);
-    
-    List<UnpItemType> queryAllItems();
 }

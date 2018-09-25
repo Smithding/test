@@ -47,11 +47,11 @@ public interface UnpOrderService {
      * @return UnpResult
      */
     UnpResult<UnpBuy> createBuy(Agent agent, UnpOrderVo request);
+    
     /**
      * @param agent
      *         agent
      * @param saleOrderNo
-     *
      * @return UnpResult
      */
     UnpResult<Object> createRefund(Agent agent, Long saleOrderNo);
@@ -73,12 +73,13 @@ public interface UnpOrderService {
      * @return UnpResult
      */
     UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpRefundVo request, UnpSaleRefund unpSaleRefund);
+    
     /**
      * @param agent
      *         agent
      * @param request
      *         UnpOrderVo
-     *@param unpSaleRefund
+     * @param unpSaleRefund
      * @return UnpResult
      */
     UnpResult<UnpBuyRefund> createBuyRefund(Agent agent, UnpOrderVo request, UnpSaleRefund unpSaleRefund);
@@ -216,7 +217,12 @@ public interface UnpOrderService {
      */
     UnpBuyRefund queryBuyOrderRefund(UnpOrderQueryVo param);
     
-    /** <<<<<<<<<<<<<<<<<<<<<<<【SELECT】【REFUND_PAY】>>>>>>>>>>>>>>>>>>>>>>> */
+    /** <<<<<<<<<<<<<<<<<<<<<<<【SELECT】【PAY】>>>>>>>>>>>>>>>>>>>>>>> */
+    
+    /**
+     * @return Page
+     */
+    void payBuy(Agent agent, UnpSale unpSale, Integer payWay, String paymentAccount, String receivableAccount) throws Exception;
     
     /**
      * @param saleRefundNo

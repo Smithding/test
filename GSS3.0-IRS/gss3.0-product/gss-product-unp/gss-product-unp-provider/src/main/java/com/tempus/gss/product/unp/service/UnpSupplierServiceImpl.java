@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.unp.api.entity.UnpTypeSupplier;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
 import com.tempus.gss.product.unp.api.entity.vo.SupplierVo;
+import com.tempus.gss.product.unp.api.service.BaseUnpService;
 import com.tempus.gss.product.unp.api.service.UnpSupplierService;
 import com.tempus.gss.vo.Agent;
 

@@ -51,7 +51,7 @@ public class UnpBuyRefund implements Serializable {
     /**
      * 第三方业务单号
      */
-    private Long thirdBusNo;
+    private String thirdBusNo;
     /**
      * 采购价, 退款总额
      */
@@ -103,23 +103,23 @@ public class UnpBuyRefund implements Serializable {
     private List<UnpBuyRefundItem> items;
     private String customerName;
     private String supplierName;
-
+    
     public String getCustomerName() {
         return customerName;
     }
-
+    
     public void setCustomerName(String customerName) {
         this.customerName = customerName;
     }
-
+    
     public String getSupplierName() {
         return supplierName;
     }
-
+    
     public void setSupplierName(String supplierName) {
         this.supplierName = supplierName;
     }
-
+    
     public Long getSaleRefundOrderNo() {
         return saleRefundOrderNo;
     }
@@ -200,12 +200,8 @@ public class UnpBuyRefund implements Serializable {
         this.changeType = changeType;
     }
     
-    public Long getThirdBusNo() {
-        return thirdBusNo;
-    }
-    
-    public void setThirdBusNo(Long thirdBusNo) {
-        this.thirdBusNo = thirdBusNo;
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
     }
     
     public BigDecimal getRefundAmount() {
@@ -266,6 +262,14 @@ public class UnpBuyRefund implements Serializable {
     
     public String getModifier() {
         return modifier;
+    }
+    
+    public String getThirdBusNo() {
+        return thirdBusNo;
+    }
+    
+    public void setThirdBusNo(String thirdBusNo) {
+        this.thirdBusNo = thirdBusNo;
     }
     
     public void setModifier(String modifier) {

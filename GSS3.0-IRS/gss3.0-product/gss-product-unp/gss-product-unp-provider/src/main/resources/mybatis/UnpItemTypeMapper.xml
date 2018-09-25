@@ -34,6 +34,12 @@
         from UNP_ITEM_TYPE
         where CODE = #{code,jdbcType=VARCHAR}
     </select>
+    <select id="selectByName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_ITEM_TYPE
+        where NAME = #{name,jdbcType=VARCHAR}
+    </select>
 
     <select id="queryItems" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpGroupItemVo" resultMap="BaseResultMap">
         SELECT

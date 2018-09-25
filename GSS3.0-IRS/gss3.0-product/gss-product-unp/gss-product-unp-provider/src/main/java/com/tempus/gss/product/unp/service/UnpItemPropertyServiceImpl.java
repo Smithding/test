@@ -4,6 +4,7 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.tempus.gss.product.unp.api.entity.UnpItemProperty;
 import com.tempus.gss.product.unp.api.entity.util.UnpResult;
 import com.tempus.gss.product.unp.api.entity.vo.UnpItemPropertyVo;
+import com.tempus.gss.product.unp.api.service.BaseUnpService;
 import com.tempus.gss.product.unp.api.service.UnpItemPropertyService;
 import com.tempus.gss.product.unp.dao.UnpItemPropertyMapper;
 import com.tempus.gss.vo.Agent;

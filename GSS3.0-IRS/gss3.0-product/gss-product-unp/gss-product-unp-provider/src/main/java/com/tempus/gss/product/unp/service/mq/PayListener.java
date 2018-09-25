@@ -94,6 +94,16 @@ public class PayListener {
                                 orderStatus = EUnpConstant.OrderStatus.DONE.getKey();
                             } else {
                                 orderStatus = EUnpConstant.OrderStatus.PROCESSING.getKey();
+                                if (unpBuy != null) {
+                                    Runnable runnable = () -> {
+                                        try {
+                                            unpOrderService.payBuy(agent, unpSale, Integer.decode(payWay), unpBuy.getBuyAccount(), "");
+                                        } catch (Exception e) {
+                                            logger.error("采购自动付款失败  单号:{}", unpBuy.getBuyOrderNo(), e);
+                                        }
+                                    };
+                                    runnable.run();
+                                }
                             }
                             //正常支付
                             unpUpdate.setStatus(orderStatus);

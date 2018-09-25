@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>gss-product-unp-api</artifactId>
-    <packaging>jar</packaging> 
+    <packaging>jar</packaging>
     <name>gss-product-unp-api</name>
     <description>暴露的服务接口，生产者与消费者要依赖于该模块</description>
     <properties>
@@ -20,22 +20,46 @@
     <dependencies>
         <dependency>
             <groupId>com.tempus.gss</groupId>
-            <artifactId>gss-product-common</artifactId> 
+            <artifactId>gss-product-common</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>com.tempus.gss</groupId>
             <artifactId>gss-os-api</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
         <dependency>
             <groupId>com.tempus.gss</groupId>
             <artifactId>gss-cps-api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.jyaml</groupId>
+            <artifactId>jyaml</artifactId>
+            <version>1.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>3.15</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml-schemas</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.tempus.gss</groupId>
+            <artifactId>gss-sm-api</artifactId>
+            <version>0.0.6-SNAPSHOT</version>
+        </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <!--   要将源码放上去，需要加入这个插件    -->
@@ -55,5 +79,5 @@
                 </executions>
             </plugin>
         </plugins>
-    </build>    
+    </build>
 </project>

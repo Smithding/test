@@ -21,6 +21,7 @@ import com.tempus.gss.product.unp.api.entity.util.UnpResult;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
 import com.tempus.gss.product.unp.api.entity.vo.UnpRefundVo;
+import com.tempus.gss.product.unp.api.service.BaseUnpService;
 import com.tempus.gss.product.unp.api.service.UnpGroupItemService;
 import com.tempus.gss.product.unp.api.service.UnpOrderService;
 import com.tempus.gss.product.unp.dao.*;
@@ -308,6 +309,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             unpSale.setSaleOrderNo(saleOrderNo);
             unpSale.setStatus(EUnpConstant.OrderStatus.READY.getKey());
             unpSaleMapper.insertSelective(unpSale);
+            result.setEntity(unpSale);
             //----------创建OS域销售单----------//
             SaleOrder saleOrder = new SaleOrder();
             saleOrder.setActorUser(agent.getAccount());
@@ -315,7 +317,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             saleOrder.setTransationOrderNo(unpSale.getTraNo());
             saleOrder.setSaleOrderNo(unpSale.getSaleOrderNo());
             saleOrder.setOrderType(OrderType.SALEORDER.getKey());
-            saleOrder.setSourceChannelNo("WEB");
+            saleOrder.setSourceChannelNo(unpSale.getSource() == null ? "WEB" : unpSale.getSource());
             saleOrder.setCustomerNo(unpSale.getCustomerNo());
             saleOrder.setCustomerTypeNo(unpSale.getCustomerType());
             saleOrder.setOrderingLoginName(agent.getAccount());
@@ -353,6 +355,40 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         createPlanAmountVO.setRecordNo(recordNo);
         createPlanAmountVO.setRecordMovingType(costType.getKey());
         return planAmountRecordService.create(agent, createPlanAmountVO);
+    }
+    
+    @Override
+    public void payBuy(Agent agent, UnpSale unpSale, Integer payWay, String paymentAccount, String receivableAccount) throws Exception {
+        UnpOrderQueryVo queryVo = new UnpOrderQueryVo();
+        queryVo.setSaleOrderNo(unpSale.getSaleOrderNo());
+        UnpBuy unpBuy = this.getBuyOrderInfo(queryVo);
+        CertificateCreateVO vo = new CertificateCreateVO();
+        vo.setTransationOrderNo(String.valueOf(unpSale.getTraNo()));
+        vo.setPayWay(payWay);
+        vo.setPayType(3);
+        vo.setServiceLine("1");
+        vo.setReason("UNP报表导入采购付款");
+        vo.setChannel(unpSale.getSource());
+        vo.setCustomerNo(unpBuy.getSupplierId());
+        vo.setCustomerTypeNo(unpBuy.getSupplierType());
+        vo.setSubBusinessType(EgoodsSubType.BUY.getKey());
+        vo.setIncomeExpenseType(IncomeExpenseType.EXPENSE.getKey());
+        vo.setProductType(ProductType.GENERAL);
+        vo.setThirdBusNo(unpBuy.getThirdBusNo());
+        vo.setDetailPayWay(DetailPayWay.NORMAL);
+        vo.setSaleOrderNo(String.valueOf(unpBuy.getBuyOrderNo()));
+        vo.setSpecialType(ECertSpecialType.UNP_IMPORT.getKey());
+        vo.setAccoutNo(unpBuy.getBuyAccount());
+        vo.setPaymentAccount(paymentAccount);
+        vo.setReceivableAccount(receivableAccount);
+        List<BusinessOrderInfo> list = new ArrayList<>();
+        BusinessOrderInfo record = new BusinessOrderInfo();
+        record.setBusinessType(BusinessType.BUY_ORDER);
+        record.setRecordNo(unpBuy.getBuyOrderNo());
+        record.setActualAmount(unpBuy.getPlanAmount());
+        list.add(record);
+        vo.setOrderInfoList(list);
+        certificateService.createBuyCertificate(agent, vo);
     }
     
     @Override
