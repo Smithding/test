@@ -98,7 +98,7 @@ public class IftFlightQueryUtils {
 	 * @return List<QueryIBEDetail>
 	 */
 
-	public List<QueryIBEDetail> shoppingOutPutConvertQueryIBEDetails(ShoppingOutPut shoppingOutPut)
+	public List<QueryIBEDetail> shoppingOutPutConvertQueryIBEDetails(ShoppingOutPut shoppingOutPut,FlightQueryRequest flightQuery)
 			throws ParseException {
 		SimpleDateFormat fl = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		List<QueryIBEDetail> queryIBEDetails = new ArrayList<QueryIBEDetail>();
@@ -106,6 +106,7 @@ public class IftFlightQueryUtils {
 		// 行程集合信息 ShoppingOD 中转的航班信息
 		// ShoppingOD.ShoppingFlight对象航段信息。（一般可能会有几段航班）
 		List<AvailableJourney> availableJourneys = shoppingOutPut.getAvailableJourneys();
+		Map<String,Integer> passengerTypeCount = new HashMap<String,Integer>();
 		for (AvailableJourney availableJourney : availableJourneys) {
 			QueryIBEDetail queryIBEDetail = new QueryIBEDetail();
 			// 将availableJourney保存在queryIBEDetail中，以便查询更多舱位
@@ -129,11 +130,16 @@ public class IftFlightQueryUtils {
 				passengerTypePricesTotal.setNucFareInfos(psgerFare.getNucFareInfos());//NUC
 				// 运价计算横式
 				passengerTypePricesTotal.setFareLinear(psgerFare.getFareLinear());
+				//passengerTypePricesTotal.setQvalue(new BigDecimal(psgerFare.getQnuc().getAmount()));
 				/*if (psgerFare.getFareLinear().contains("/it")) {
 					ticketType = "IT";
 				}*/
 				// 乘客类型ADT成人,CNN儿童,INF婴儿
 				passengerTypePricesTotal.setPassengerType(psgerFare.getPsgerInfo().getCode());
+				passengerTypeCount.put(psgerFare.getPsgerInfo().getCode(),psgerFare.getPsgerInfo().getCode().equals("ADT") ? flightQuery.getAdultCount():(psgerFare.getPsgerInfo().getCode().equals("CNN")
+												? flightQuery.getChildCount()
+												: flightQuery.getInfantCount()));
+				cabinsPricesTotals.setPassengerTypeCount(passengerTypeCount);
 				// 运价基础代码 KOBCN
 				passengerTypePricesTotal.setFareBasis(psgerFare.getFareBasis());
 				BigDecimal taxs = new BigDecimal(0);

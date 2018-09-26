@@ -55,7 +55,6 @@ public class FlightShoppingRun implements Runnable {
 	public void run() {
 		// TODO Auto-generated method stub
 		FlightQueryRequest flightQuery = flightQueryRequest.getEntity();
-		log.info("查询参数：" + JsonUtil.toJson(flightQuery));
 		ShoppingInput shoppingInput = new ShoppingInput();
 		shoppingInput.setIataNo(iataNo);
 		shoppingInput.setOffice(office);
@@ -106,7 +105,7 @@ public class FlightShoppingRun implements Runnable {
 		if (null != availableJourneys || availableJourneys.size() > 1) {
 			log.info("开始调用shopping数据转换");
 			try {
-				queryIBEDetailList = iftFlightQueryUtils.shoppingOutPutConvertQueryIBEDetails(shoppingOutPut);
+				queryIBEDetailList = iftFlightQueryUtils.shoppingOutPutConvertQueryIBEDetails(shoppingOutPut,flightQuery);
 			} catch (ParseException e) {
 				log.error("开始调用shopping数据转换", e);
 			}
