@@ -99,9 +99,12 @@ public class OrderPolicyUtils {
 		/** 供应商Office, 多个以"/"分隔 */
 		flightPolicy.setSupplierOffice(policy.getSupplierOffice());
 
+		String mixCabinType ="";
+        if(policy.getMixCabinType()!=null&&policy.getMixCabinType().contains("2")){
+        	mixCabinType = "：票面略低";
+        }
 		/** 开票Office, 多个以"/"分隔 */
-		flightPolicy.setTicketOffice(policy.getTicketOffice());
-
+        flightPolicy.setTicketOffice(policy.getTicketOffice()+mixCabinType);
 		/** 儿童票奖励方式，1奖励与成人一致（默认）,2可开无奖励，3不可开，4指定奖励 */
 		flightPolicy.setChdRewardType(policy.getChdRewardType());
 
@@ -273,13 +276,8 @@ public class OrderPolicyUtils {
 
 		/** 供应商Office, 多个以"/"分隔 */
 		orderPolicy.setSupplierOffice(policy.getSupplierOffice());
-		String mixCabinType ="";
-        if(policy.getMixCabinType()!=null&&policy.getMixCabinType().contains("2")){
-        	mixCabinType = "：票面略低";
-        }
 		/** 开票Office, 多个以"/"分隔 */
-		orderPolicy.setTicketOffice(policy.getTicketOffice()+mixCabinType);
-
+		orderPolicy.setTicketOffice(policy.getTicketOffice());
 		/** 上游代理费用 */
 		orderPolicy.setOriginalAgencyFee(policy.getOriginalAgencyFee());
 
