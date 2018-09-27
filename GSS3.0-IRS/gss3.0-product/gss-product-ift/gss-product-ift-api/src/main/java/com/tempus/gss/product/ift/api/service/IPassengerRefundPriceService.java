@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.PassengerRefundPrice;
+import com.tempus.gss.product.ift.api.entity.vo.PassengerRefundPriceVo;
 
 /**
  * 
@@ -19,7 +20,7 @@ public interface IPassengerRefundPriceService  {
 	
 	/**
 	 * 根据saleChangeNo查询
-	 * @param passengerChangerPrice
+	 * @param passengerRefundPrice
 	 * @return
 	 */
 	PassengerRefundPrice getPassengerRefundPrice(RequestWithActor<PassengerRefundPrice> passengerRefundPrice);
@@ -31,9 +32,14 @@ public interface IPassengerRefundPriceService  {
 	
 	/**
 	 * 列表查询
-	 * @param page
 	 * @param requestWithActor
 	 * @return
 	 */
 	List<PassengerRefundPrice> queryPassengerRefundPriceList(RequestWithActor<PassengerRefundPrice> requestWithActor);
+
+	/**
+	 * 批量更新乘客变更价格
+	 * @param requestWithActor
+	 */
+	void batchUpdatePassengerRefundPrice(RequestWithActor<PassengerRefundPriceVo> requestWithActor);
 }

@@ -24,6 +24,7 @@ import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.*;
 import com.tempus.gss.product.ift.api.entity.setting.IFTConfigs;
 import com.tempus.gss.product.ift.api.entity.vo.*;
+import com.tempus.gss.product.ift.api.enums.IFTOrderStatusEnums;
 import com.tempus.gss.product.ift.api.service.*;
 import com.tempus.gss.product.ift.api.service.setting.IConfigsService;
 import com.tempus.gss.product.ift.dao.*;
@@ -168,22 +169,6 @@ public class RefundServiceImpl implements IRefundService {
 			flag = false;
 			throw new GSSException("创建改签单失败", "0003", "创建改签单失败"+e);
 		}
-		/*new Thread(new Runnable() {
-			@Override
-			public void run() {
-				//查询当前单是否OP下单如果是直接指派当前业务员
-				//销售退废分单操作 (开启线程分单，因为不结束这个方法，数据库中的saleChangeOrder未生成，在其他dubbo服务空间内无法查找到)
-				Integer refundType = requestWithActor.getEntity().getRefundType();
-				String refundTypeStr = "";
-				if(new Integer(1).equals(refundType)){
-					//废票
-					refundTypeStr ="salesman-waste";
-				} else {
-					refundTypeStr ="salesman-refund";
-				}
-				IIftMessageService.sendRefuseMessage(requestWithActor.getEntity().getSaleOrderNo(),requestWithActor.getAgent().getOwner()+"",refundTypeStr);
-			}
-		}).start();*/
 		return flag;
 	}
 
@@ -304,7 +289,7 @@ public class RefundServiceImpl implements IRefundService {
 				}
 				buyChange.setOwner(agent.getOwner());
 				buyChange.setCreateTime(createTime);
-				buyChange.setChildStatus(1);// 1.待审核 2.已审核 3.处理中
+				buyChange.setChildStatus(Integer.valueOf(IFTOrderStatusEnums.PENDING.getCodeKey()));// 1.待审核 2.已审核 3.处理中
 				// 10.已处理 11.已取消
 				buyChange.setGoodsType(2);// 商品大类 2=国际机票
 				buyChange.setGoodsSubType(22);// 采购退单
@@ -343,7 +328,7 @@ public class RefundServiceImpl implements IRefundService {
 			saleChange.setBsignType(3);// 1销采 2换票 3废和退 4改签
 			saleChange.setOwner(agent.getOwner());
 			saleChange.setCreateTime(createTime);
-			saleChange.setChildStatus(1);// 1.待审核 2.已审核 3.退票中 废票中 改签中 10.已完成
+			saleChange.setChildStatus(Integer.valueOf(IFTOrderStatusEnums.PENDING.getCodeKey()));// 1.待审核 2.已审核 3.退票中 废票中 改签中 10.已完成
 			// 11.已取消
 			saleChange.setChangeReason(requestWithActor.getEntity().getRefundReason());
 			saleChange.setKeepSeat(requestWithActor.getEntity().getKeepSeat());// 默认 0.不留席位,1 留席位
@@ -360,10 +345,6 @@ public class RefundServiceImpl implements IRefundService {
 			saleChangeExt.setRefundWay(requestWithActor.getEntity().getRefundWay());
 			saleChangeExt.setOwner(agent.getOwner());
 			saleChangeExt.setCreateTime(createTime);
-			User user = userService.findUserByLoginName(agent,agent.getAccount());
-			/*if(user!=null) {
-				saleChangeExt.setLocker(user.getId());
-			}*/
 			saleChangeExt.setCreator(String.valueOf(agent.getAccount()));
 			saleChangeExt.setChangeType(requestWithActor.getEntity().getRefundType());
 			saleChangeExt.setContactName(requestWithActor.getEntity().getContactName());
@@ -372,7 +353,7 @@ public class RefundServiceImpl implements IRefundService {
 			saleChangeExt.setRefundWay(requestWithActor.getEntity().getRefundWay() == null ? 0
 					: requestWithActor.getEntity().getRefundWay());
 			saleChangeExt.setRefundFileUrl(requestWithActor.getEntity().getRefundFileUrl());
-			saleChangeExt.setAirlineStatus(1);//航司状态设置为1，待审核
+			saleChangeExt.setAirlineStatus(Integer.valueOf(IFTOrderStatusEnums.PENDING.getCodeKey()));//航司状态设置为1，待审核
 			saleChangeExt.setCustomerRemark(requestWithActor.getEntity().getCustomerRemark());//用户备注
 			Long customerNo = agent.getNum();
 			Long customerTypeNo = agent.getType();
@@ -477,22 +458,39 @@ public class RefundServiceImpl implements IRefundService {
 			throw new GSSException("创建废退单失败" + e, "0002", "创建废退单失败");
 		}
 		log.info("创建废退单申请结束===========");
-		/*new Thread(new Runnable() {
-			@Override
-			public void run() {
-				//销售退废分单操作 (开启线程分单，因为不结束这个方法，数据库中的saleChangeOrder未生成，在其他dubbo服务空间内无法查找到)
-				Integer refundType = requestWithActor.getEntity().getRefundType();
-				String refundTypeStr = "";
-				if(new Integer(1).equals(refundType)){
-					//废票
-					refundTypeStr ="salesman-waste";
-				} else {
-					refundTypeStr ="salesman-refund";
-				}
-				IIftMessageService.sendRefuseMessage(requestWithActor.getEntity().getSaleOrderNo(),requestWithActor.getAgent().getOwner()+"",refundTypeStr);
-			}
-		}).start();*/
 		return saleChangeExt;
+	}
+
+	//采购直接退款给客户
+	@Transactional
+	public void buyRedirectReturnMoney(RequestWithActor<Long> requestWithActor) throws GSSException{
+		PassengerRefundPrice passengerRefundPrice = new PassengerRefundPrice();
+		Long saleChangeNo = requestWithActor.getEntity();
+		Agent agent = requestWithActor.getAgent();
+		passengerRefundPrice.setSaleChangeNo(saleChangeNo);
+		//退款
+		redirectReturnMoney(agent,saleChangeNo);
+		//更新状态为已退款
+		updateSaleChangeStatus(agent,saleChangeNo);
+		log.info("{}采购直接退款结束。",saleChangeNo);
+	}
+
+	@Override
+	public void saleAndBuyAuditTogether(RequestWithActor<WasteAuditPramaVo> requestWithActor) {
+		WasteAuditPramaVo parameterEntity = requestWithActor.getEntity();
+		//RequestWithActor<PassengerRefundPriceVo> request = new RequestWithActor<>();
+		PassengerRefundPriceVo vo = parameterEntity.getPassengerRefundPriceVo();
+		Agent agent = requestWithActor.getAgent();
+		//request.setEntity(vo);
+		//request.setAgent(agent);
+		//passengerRefundPriceService.batchUpdatePassengerRefundPrice(request);
+		RequestWithActor<Long> saleChangeRequest = new RequestWithActor<Long>();
+		saleChangeRequest.setEntity(vo.getSaleChangeNo());
+		saleChangeRequest.setAgent(agent);
+		SaleChangeExt saleChangeExt = refundService.getSaleChangeExtByNo(saleChangeRequest);
+		String remark = parameterEntity.getChangeRemark();
+		updateSaleStatusAsAudited(saleChangeExt,vo,remark,agent);
+		updateBuyStatusAsAudit(vo,agent);
 	}
 
 	private void setTicketSenderNum(SaleChangeExt saleChangeExt, Agent agent, SaleOrder saleOrder) {
@@ -623,8 +621,6 @@ public class RefundServiceImpl implements IRefundService {
 			Long saleChangeNo = requestWithActor.getEntity().longValue();
 			SaleChangeExt saleChangeExt = saleChangeExtDao.selectByPrimaryKey(saleChangeNo);
 			SaleChange saleChangeByNo = saleChangeService.getSaleChangeByNo(requestWithActor.getAgent(), saleChangeNo);
-			//long originLocker = saleChangeExt.getLocker();
-			//long originBuyLocker = 0;
 			int updateFlag = 0 ;
 			if (1 == saleChangeByNo.getChildStatus() &&
 					(saleChangeExt.getLocker() == 0l||saleChangeExt.getLocker() == null)
@@ -641,19 +637,11 @@ public class RefundServiceImpl implements IRefundService {
 				//采购的锁单
 				BuyChangeExt buyChangeExt = buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
 				if(buyChangeExt.getBuyLocker()==null || buyChangeExt.getBuyLocker() == 0l){
-					//originBuyLocker = buyChangeExt.getBuyLocker();
 					buyChangeExt.setBuyLocker(requestWithActor.getAgent().getId());
 					buyChangeExt.setModifyTime(new Date());
 					updateFlag = buyChangeExtService.updateBuyChangeExt(buyChangeExt);
 				}
 			}
-
-			//锁定前先判断是否有locker
-			/*if(originLocker != 0l){
-				//对应locker出票员的num-1
-				iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),originLocker,"SALE_REFUSE_NUM");
-				iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),originLocker,"BUY_REFUSE_NUM");
-			}*/
 			if (updateFlag == 1) {
 				flag = true;
 				iTicketSenderService.updateByLockerId(requestWithActor.getAgent(),requestWithActor.getAgent().getId(),"SALE_REFUSE_NUM");
@@ -731,78 +719,6 @@ public class RefundServiceImpl implements IRefundService {
 	public int updateLocker(SaleChangeExt saleChangeExt) {
 		return  saleChangeExtDao.updateByPrimaryKeySelective(saleChangeExt);
 	}
-
-
-	/*@Override
-	@Transactional
-	public boolean verify(RequestWithActor<List<PassengerRefundPrice>> passengerRefundList) {
-
-		log.info("废退单审核开始");
-		boolean flag = false;
-		try {
-			BigDecimal saleTotal = new BigDecimal(0);// 销售单合计
-			BigDecimal buyTotal = new BigDecimal(0);// 采购单合计
-			for (PassengerRefundPrice passenger : passengerRefundList.getEntity()) {
-				if (passenger.getBuyFefundAccount() != null) {
-					buyTotal = buyTotal.add(passenger.getBuyFefundAccount());
-				}
-				if (passenger.getSaleRefundAccount() != null) {
-					// 合计
-					saleTotal = saleTotal.add(passenger.getSaleRefundAccount());
-				}
-			}
-			// 根据订单编号查询订单
-			SaleChange saleChange = saleChangeService.getSaleChangeByNo(passengerRefundList.getAgent(),
-					passengerRefundList.getEntity().get(0).getSaleChangeNo());
-			if (saleChange != null) {
-				// 销售单应收
-				CreatePlanAmountVO createPlanAmountVOType = new CreatePlanAmountVO();
-				createPlanAmountVOType.setRecordNo(saleChange.getSaleChangeNo());// 记录编号
-				createPlanAmountVOType.setIncomeExpenseType(2);// 收支类型 1 收，2 为支
-				createPlanAmountVOType.setRecordMovingType(CostType.COMMISSION_CHARGE.getKey());
-				createPlanAmountVOType.setPlanAmount(saleTotal);// 合计
-				createPlanAmountVOType
-						.setBusinessType(BusinessType.SALECHANGE.getKey());// 业务类型 2，销售单，3，采购单，4,变更单（可以根据变更表设计情况将废退改分开）
-				createPlanAmountVOType.setGoodsType(2);// 商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
-				planAmountRecordService.create(passengerRefundList.getAgent(), createPlanAmountVOType);
-			} else {
-				log.error("废退销售单为空");
-				throw new GSSException("废退销售单为空", "0601", "核价修改销售、采购失败");
-			}
-
-			List<BuyOrder> buyOrderList = buyOrderService
-					.getBuyOrdersBySONo(passengerRefundList.getAgent(), saleChange.getSaleOrderNo());
-			if (buyOrderList != null) {
-				for (BuyOrder buyOrder : buyOrderList) {
-					List<BuyChange> buyChangeList = buyChangeService
-							.getBuyChangesByBONo(passengerRefundList.getAgent(), buyOrder.getBuyOrderNo());
-					for (BuyChange buyChange : buyChangeList) {
-						if (buyChange.getBusinessSignNo().equals(saleChange.getBusinessSignNo())) {
-							// 采购单应付
-							CreatePlanAmountVO createPlanAmountVOType = new CreatePlanAmountVO();
-							createPlanAmountVOType.setRecordNo(buyChange.getBuyChangeNo());// 记录编号
-							createPlanAmountVOType.setIncomeExpenseType(1);// 收支类型 1 收，2 为支
-							createPlanAmountVOType.setRecordMovingType(CostType.COMMISSION_CHARGE.getKey());
-							createPlanAmountVOType.setPlanAmount(buyTotal);// 合计
-							createPlanAmountVOType.setBusinessType(
-									BusinessType.BUYCHANGE.getKey());// 业务类型 2，销售单，3，采购单，4，变更单（可以根据变更表设计情况将废退改分开）
-							createPlanAmountVOType.setGoodsType(2);// 商品大类 1 国内机票 2 国际机票 3 保险 4 酒店 5 机场服务 6 配送
-							planAmountRecordService.create(passengerRefundList.getAgent(), createPlanAmountVOType);
-						}
-					}
-				}
-			} else {
-				log.error("废退采购单为空");
-				throw new GSSException("废退采购单为空", "0601", "核价修改销售、采购失败");
-			}
-			log.info("订单核价结束");
-			flag = true;
-		} catch (Exception e) {
-			log.error("订单核价失败", e);
-			throw new GSSException("核价修改失败", "0603", "核价修改失败");
-		}
-		return flag;
-	}*/
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	@Override
@@ -936,17 +852,6 @@ public class RefundServiceImpl implements IRefundService {
 			if (saleChangeExt.getSaleChange().getPayStatus() == 1) {
 				int	subBusinessType = 3;
 				Long recordNo = saleChangeNo;
-				//根据乘客编号去查询该乘客有改签完成的改签订单！
-				/*List<PassengerRefundPrice> passengerRefundPriceList = saleChangeExt.getPassengerRefundPriceList();
-				if(passengerRefundPriceList != null || passengerRefundPriceList.size() > 0){
-					PassengerRefundPrice passengerRefundPrice = passengerRefundPriceList.get(0);
-					PassengerChangePrice lastChangeByPgerNoAndSaleOrderNo = passengerChangePriceService.getChangePassgerByPgerNo(passengerRefundPrice.getPassengerNo(), passengerRefundPrice.getSaleOrderNo());
-					if(lastChangeByPgerNoAndSaleOrderNo != null){
-						log.info("创建销售退款单的子业务类型为4");
-						subBusinessType = 4;//如果存在已完成的改签订单那么子业务类型为4
-						recordNo = lastChangeByPgerNoAndSaleOrderNo.getSaleChangeNo();
-					}
-				}*/
 				try {
 					CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
 					certificateCreateVO.setIncomeExpenseType(2); //收支类型 1 收，2 为支
@@ -962,6 +867,7 @@ public class RefundServiceImpl implements IRefundService {
 					businessOrderInfo.setBusinessType(4);//1.交易单，2.销售单，3.采购单，4.销售变更单，5.采购变更单
 					businessOrderInfo.setRecordNo(recordNo);
 					orderInfoList.add(businessOrderInfo);
+					certificateCreateVO.setSaleOrderNo(String.valueOf(saleOrder.getSaleOrderNo()));
 					certificateCreateVO.setOrderInfoList(orderInfoList);
 					certificateCreateVO.setServiceLine("2");
 					certificateService.saleRefundCert(agent, certificateCreateVO);
@@ -1241,11 +1147,6 @@ public class RefundServiceImpl implements IRefundService {
 			SaleChangeExt saleChangeExt = this.getSaleChangeExtByNo(saleChangeNo);
 			if(saleChangeExt!=null){
 				Long locker = saleChangeExt.getLocker();
-//				saleChangeExt.setLocker(0L);
-//				saleChangeExt.setModifier(agent.getAccount());
-//				saleChangeExt.setModifyTime(modifyTime);
-//                saleChangeExtDao.updateLocker(saleChangeExt);
-                //Long saleOrderNo = saleChangeExt.getSaleChange().getSaleOrderNo();
                 //只修改被拒单的航段+乘机人detail的状态，不能全部修改为4
 				List<SaleChangeDetail> saleChangeDetailList = saleChangeExt.getSaleChangeDetailList();
 				List<SaleOrderDetail> detailList = new ArrayList<>();
@@ -1352,19 +1253,6 @@ public class RefundServiceImpl implements IRefundService {
 								name = name + "," + passenger.getSurname() + passenger.getName();
 							}
 						}
-						/*if (saleOrderExt.getPassengerList() != null) {
-								for (Passenger passenger : saleOrderExt.getPassengerList()) {
-									if (passenger.getName() == null)
-										passenger.setName("");
-									if (passenger.getSurname() == null)
-										passenger.setSurname("");
-									if (name == null || name.equals("")) {
-										name = passenger.getSurname() + passenger.getName();
-									} else {
-										name = name + "," + passenger.getSurname() + passenger.getName();
-									}
-								}
-							}*/
 						// List<SaleOrderDetail> saleOrderDetails = saleOrderExt.getSaleOrderDetailList();
 							List<SaleChangeDetail> saleChangeDetailList = saleChangeExt.getSaleChangeDetailList();
 							List<SaleOrderDetail> saleOrderDetails = new ArrayList<>();
@@ -1654,20 +1542,11 @@ public class RefundServiceImpl implements IRefundService {
 	private void increaseBuyRefuseNum(Agent agent, Long buyLocker) {
 
 		//查询该种类型单被该业务员锁住的数量赋值给BuyRefuseNum字段
-//		User user = userService.findUserByLoginName(agent, buyLocker.getUserid());
-//		int lockCount = refundService.queryBuyRefundAndDelCountBylocker(user.getId());
-//		buyLocker.setBuyRefuseNum(lockCount);
-//		buyLocker.setIds(buyLocker.getId() + "");
-//		iTicketSenderService.update(buyLocker);
 		iTicketSenderService.updateByLockerId(agent,buyLocker,"BUY_REFUSE_NUM");
 	}
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void assingLockSaleChangeExt(SaleChangeExt order, Date date) {
-		/*User user = userService.findUserByLoginName(agent, sender.getUserid());
-		order.setLocker(user.getId());
-		order.setLockTime(date);
-		saleChangeExtDao.updateLocker(order);*/
 		Long saleChangeNo = order.getSaleChangeNo();
 		BuyChangeExt buyChangeExt =buyChangeExtDao.selectBySaleChangeNoFindOne(saleChangeNo);
 		buyChangeExt.setBuyLocker(order.getAloneLocker());
@@ -1788,16 +1667,6 @@ public class RefundServiceImpl implements IRefundService {
 			ticketSenderService.updateByLockerId(agent,buyChangeExt.getBuyLocker(),"BUY_REFUSE_NUM");
 		}
 		log.info("---航司退款拒单结束---");
-		//更新前一位采购人的订单处理数量
-	/*	User user = userService.findUserByLoginName(agent,agent.getAccount());
-		if(user!=null) {
-			saleChangeExt.setLocker(user.getId());
-			RequestWithActor<SaleChangeExt> saleOrderChange = new RequestWithActor<>();
-			saleOrderChange.setAgent(agent);
-			saleOrderChange.setEntity(saleChangeExt);
-			refundService.updateSaleChangeExt(saleOrderChange);
-			iTicketSenderService.updateByLockerId(agent, user.getId(), "BUY_REFUSE_NUM");
-		}*/
 	}
 
 	/**
@@ -1830,9 +1699,6 @@ public class RefundServiceImpl implements IRefundService {
 			requestWithActor.setAgent(agent);
 			log.info("航司审核更新变更单号信息:"+saleChangeExt.toString());
 			refundService.updateSaleChangeExt(requestWithActor1);
-			/*if(lockerId!=null) {
-				iTicketSenderService.updateByLockerId(agent, lockerId, "BUY_REFUSE_NUM");
-			}*/
 		}else{
 			throw new GSSException("变更单为空", "0001", "查询废退改签单失败");
 		}
@@ -1928,74 +1794,25 @@ public class RefundServiceImpl implements IRefundService {
 		Long saleChangeNo = entity.getSaleChangeNo();
 
 		try {
-			if (passengerRefundPriceVo.getPassengerRefundPriceList() != null
-					&& passengerRefundPriceVo.getPassengerRefundPriceList().size() != 0) {
-				//根据saleChangeNo进行修改退废价格信息
-				for (Passenger passenger : passengerRefundPriceVo.getPassenger()) {
-					for (PassengerRefundPrice passengerRefund : passengerRefundPriceVo.getPassengerRefundPriceList()) {
-						if (passenger.getPassengerType().equals(passengerRefund.getPassengerType())
-								|| ("1".equals(passenger.getPassengerType()) && "ADT".equals(passengerRefund.getPassengerType()))
-								|| ("2".equals(passenger.getPassengerType()) && "CHD".equals(passengerRefund.getPassengerType()))
-								|| ("3".equals(passenger.getPassengerType()) && "INF".equals(passengerRefund.getPassengerType()))) {
-							//根据条件查询passengerRefundPriceNo
-							RequestWithActor<PassengerRefundPrice> passengerRefundPrice = new RequestWithActor<>();
-							PassengerRefundPrice price = new PassengerRefundPrice();
-							price.setSaleChangeNo(passengerRefundPriceVo.getSaleChangeNo());
-							price.setSaleOrderNo(passengerRefundPriceVo.getSaleOrderNo());
-							price.setPassengerNo(passenger.getPassengerNo());
-							passengerRefundPrice.setEntity(price);
-							passengerRefundPrice.setAgent(agent);
-							PassengerRefundPrice getPassengerChangePrice = passengerRefundPriceService.getPassengerRefundPrice(passengerRefundPrice);
-							//根据passengerRefundPriceNo修改价格
-							RequestWithActor<PassengerRefundPrice> saleADTPassengerRefundPrice = new RequestWithActor<>();
-							passengerRefund.setPassengerRefundPriceNo(getPassengerChangePrice.getPassengerRefundPriceNo());
-							passengerRefund.setSaleChangeNo(passengerRefundPriceVo.getSaleChangeNo());
-							/*	passengerRefund.setCurrency(passengerRefundPriceVo.getCurrency());
-								passengerRefund.setSaleCurrency(passengerRefundPriceVo.getSaleCurrency());
-								passengerRefund.setExchangeRate(passengerRefundPriceVo.getExchangeRate());*/
-							saleADTPassengerRefundPrice.setEntity(passengerRefund);
-							saleADTPassengerRefundPrice.setAgent(agent);
-							passengerRefundPriceService.updatePassengerRefundPrice(saleADTPassengerRefundPrice);
-						}
-					}
-				}
-			}
-
+			RequestWithActor<PassengerRefundPriceVo> batchUpdateParameter = new RequestWithActor<>();
+			batchUpdateParameter.setAgent(agent);
+			batchUpdateParameter.setEntity(passengerRefundPriceVo);
+			passengerRefundPriceService.batchUpdatePassengerRefundPrice(batchUpdateParameter);
+			//更新订单状态为已审核
 			RequestWithActor<Long> saleChangeRequest = new RequestWithActor<Long>();
 			saleChangeRequest.setEntity(saleChangeNo);
 			saleChangeRequest.setAgent(agent);
-			Date time = new Date();
 			SaleChangeExt saleChangeExt = refundService.getSaleChangeExtByNo(saleChangeRequest);
-
-			if (saleChangeExt != null) {
-				//点击审核通过时修改销售但状态为已审核
-				if (saleChangeExt.getSaleChange() != null) {
-					saleChangeService.updateStatus(agent, saleChangeExt.getSaleChange().getSaleChangeNo(), 2);
-					//修改saleChangeExt的审核人员信息并解锁
-					RequestWithActor<SaleChangeExt> saleOrderChangeExt = new RequestWithActor<>();
-					long locker = saleChangeExt.getLocker();
-					saleChangeExt.setStatus("2");
-					saleChangeExt.setRefundWay(passengerRefundPriceVo.getRefundWay());
-					saleChangeExt.setAuditPerson(agent.getAccount());
-					SimpleDateFormat simple = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					saleChangeExt.setAuditTime(simple.format(time));
-					if (changeRemark != null && "" != changeRemark) {
-						saleChangeExt.setChangeRemark(changeRemark);
-					}
-					saleChangeExt.setExchangeRate(passengerRefundPriceVo.getPassengerRefundPriceList().get(0).getExchangeRate());
-					saleChangeExt.setSaleCurrency(passengerRefundPriceVo.getPassengerRefundPriceList().get(0).getSaleCurrency());
-					saleOrderChangeExt.setEntity(saleChangeExt);
-					saleOrderChangeExt.setAgent(agent);
-					refundService.updateSaleChangeExt(saleOrderChangeExt);
-					BuyChangeExt buyChangeExt = buyChangeExtService.queryBuyChgeExtByNo(saleChangeNo);
-					if (buyChangeExt != null) {
-						buyChangeExtService.updateBuyChangeByChangeNo(saleChangeRequest, "0");
-					}
-					ticketSenderService.updateByLockerId(agent, locker, "SALE_REFUSE_NUM");
-					refundService.assignBuyWaste(saleChangeRequest);
+			if(saleChangeExt!=null) {
+				updateSaleStatusAsAudited(saleChangeExt, passengerRefundPriceVo, changeRemark, agent);
+				BuyChangeExt buyChangeExt = buyChangeExtService.queryBuyChgeExtByNo(saleChangeNo);
+				if (buyChangeExt != null) {
+					buyChangeExtService.updateBuyChangeByChangeNo(saleChangeRequest, "0");
 				}
+				ticketSenderService.updateByLockerId(agent, saleChangeExt.getLocker(), "SALE_REFUSE_NUM");
+				refundService.assignBuyWaste(saleChangeRequest);
 			}
-			log.info("废票销售审核结束。");
+			log.info("废票单{}废票销售审核结束。",saleChangeNo);
 		} catch (Exception e){
 			log.error("废票销售审核异常："+e);
 			throw new GSSException("废票销售审核异常:" + e, "0002", "废票销售审核异常");
@@ -2009,93 +1826,32 @@ public class RefundServiceImpl implements IRefundService {
 		log.info("销售退票审核开始："+entity.toString());
 		String changeRemark = entity.getChangeRemark();
 		PassengerRefundPriceVo passengerRefundPriceVo = entity.getPassengerRefundPriceVo();
-		Long saleChangeNo = entity.getSaleChangeNo();
-
-		RequestWithActor<Long> saleChangeRequest = new RequestWithActor<Long>();
-		saleChangeRequest.setEntity(saleChangeNo);
-		saleChangeRequest.setAgent(agent);
 		try {
-			List<PassengerRefundPrice> passengerRefundPrices = passengerRefundPriceVo.getPassengerRefundPriceList();
-			String currency = passengerRefundPriceVo.getCurrency();
-			if (passengerRefundPrices!=null && passengerRefundPrices.size()!= 0) {
-				//根据saleChangeNo进行修改退废价格信息
-				List<Passenger> passengerList = passengerRefundPriceVo.getPassenger();
-				for (Passenger passenger : passengerList) {
-					for (PassengerRefundPrice passengerRefund : passengerRefundPrices) {
-						if (passenger.getPassengerType().equals(passengerRefund.getPassengerType())
-								|| ("1".equals(passenger.getPassengerType()) && "ADT".equals(passengerRefund.getPassengerType()))
-								|| ("2".equals(passenger.getPassengerType()) && "CHD".equals(passengerRefund.getPassengerType()))
-								|| ("3".equals(passenger.getPassengerType()) && "INF".equals(passengerRefund.getPassengerType()))) {
-							//根据条件查询passengerRefundPriceNo
-							RequestWithActor<PassengerRefundPrice> passengerRefundPrice = new RequestWithActor<>();
-							PassengerRefundPrice price = new PassengerRefundPrice();
-							price.setSaleChangeNo(passengerRefundPriceVo.getSaleChangeNo());
-							price.setSaleOrderNo(passengerRefundPriceVo.getSaleOrderNo());
-							price.setPassengerNo(passenger.getPassengerNo());
-							passengerRefundPrice.setEntity(price);
-							passengerRefundPrice.setAgent(agent);
-							PassengerRefundPrice getPassengerChangePrice = passengerRefundPriceService.getPassengerRefundPrice(passengerRefundPrice);
-							//根据passengerRefundPriceNo修改价格
-							RequestWithActor<PassengerRefundPrice> saleADTPassengerRefundPrice = new RequestWithActor<>();
-							passengerRefund.setPassengerRefundPriceNo(getPassengerChangePrice.getPassengerRefundPriceNo());
-							passengerRefund.setSaleChangeNo(passengerRefundPriceVo.getSaleChangeNo());
-							if(currency != null && !"".equals(currency)){
-								passengerRefund.setBuyCurrency(currency);//采购货币
-							}
-							BigDecimal buyExchangeRate = passengerRefundPriceVo.getBuyExchangeRate();
-							if(buyExchangeRate != null){
-								passengerRefund.setBuyExchangeRate(buyExchangeRate);//采购汇率
-							}
-							passengerRefund.setSaleCurrency(passengerRefundPriceVo.getSaleCurrency());//销售货币
-							passengerRefund.setExchangeRate(passengerRefundPriceVo.getExchangeRate());//销售汇率
-							saleADTPassengerRefundPrice.setEntity(passengerRefund);
-							saleADTPassengerRefundPrice.setAgent(agent);
-							log.info("-----"+passengerRefund.toString());
-							passengerRefundPriceService.updatePassengerRefundPrice(saleADTPassengerRefundPrice);
-						}
-					}
+			Long saleChangeNo = entity.getSaleChangeNo();
+			//String currency = passengerRefundPriceVo.getCurrency();
+			RequestWithActor<PassengerRefundPriceVo> batchUpdateParameter = new RequestWithActor<>();
+			batchUpdateParameter.setAgent(agent);
+			batchUpdateParameter.setEntity(passengerRefundPriceVo);
+			passengerRefundPriceService.batchUpdatePassengerRefundPrice(batchUpdateParameter);
+			//更新订单状态为已审核
+			RequestWithActor<Long> requestWithActor = new RequestWithActor<Long>();
+			requestWithActor.setEntity(saleChangeNo);
+			requestWithActor.setAgent(agent);
+			SaleChangeExt saleChangeExt = refundService.getSaleChangeExtByNo(requestWithActor);
+			if(saleChangeExt!=null) {
+				updateSaleStatusAsAudited(saleChangeExt, passengerRefundPriceVo, changeRemark, agent);
+				buyChangeExtService.updateBuyChangeByChangeNo(requestWithActor, "0");
+				try {
+					refundService.assignBuyRefund(requestWithActor);
+				} catch (Exception e) {
+					log.error("采购退票分单异常", e);
+				}
+				//更新出票员
+				if (saleChangeExt != null) {
+					ticketSenderService.updateByLockerId(agent, saleChangeExt.getLocker(), "SALE_REFUSE_NUM");
 				}
 			}
-			SaleChangeExt saleChangeExt = refundService.getSaleChangeExtByNo(saleChangeRequest);
-			if (saleChangeExt != null) {
-				//点击审核通过时修改销售但状态为已审核
-				if (saleChangeExt.getSaleChange() != null) {
-					long locker = 0l;
-					//修改saleChange的子状态
-					saleChangeService.updateStatus(agent,saleChangeExt.getSaleChange().getSaleChangeNo(),2);
-					//修改saleChangeExt的审核人员信息并解锁
-					RequestWithActor<SaleChangeExt> saleOrderChangeExt = new RequestWithActor<>();
-					locker = saleChangeExt.getLocker();
-					// saleChangeExt.setLocker(0L);
-					saleChangeExt.setStatus("2");
-					if (changeRemark !=null&&""!=changeRemark){
-						saleChangeExt.setChangeRemark(changeRemark);
-					}
-					saleChangeExt.setRefundWay(passengerRefundPriceVo.getRefundWay());
-					saleChangeExt.setAuditPerson(agent.getAccount());
-					saleChangeExt.setCurrency(currency);
-					saleChangeExt.setExchangeRate(passengerRefundPriceVo.getPassengerRefundPriceList().get(0).getExchangeRate());
-					saleChangeExt.setSaleCurrency(passengerRefundPriceVo.getPassengerRefundPriceList().get(0).getSaleCurrency());
-					SimpleDateFormat simple = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					saleChangeExt.setAuditTime(simple.format(new Date()));
-					saleOrderChangeExt.setEntity(saleChangeExt);
-					saleOrderChangeExt.setAgent(agent);
-					refundService.updateSaleChangeExt(saleOrderChangeExt);
-					//审核完进行分单
-					RequestWithActor<Long> requestWithActor = new RequestWithActor<>();
-					requestWithActor.setAgent(agent);
-					requestWithActor.setEntity(saleChangeExt.getSaleChangeNo());
-					buyChangeExtService.updateBuyChangeByChangeNo(requestWithActor, "0");
-					try {
-						refundService.assignBuyRefund(requestWithActor);
-					} catch (Exception e) {
-						log.error("采购退票分单异常",e);
-					}
-					//更新出票员
-					ticketSenderService.updateByLockerId(agent,locker,"SALE_REFUSE_NUM");
-				}
-			}
-			log.info("退票销售审核结束。");
+			log.info("{}退票销售审核结束。",saleChangeNo);
 		} catch (Exception e) {
 			log.error("退票销售审核异常",e);
 			throw new GSSException("退票销售审核异常:" + e, "0002", "退票销售审核异常");
@@ -2182,6 +1938,15 @@ public class RefundServiceImpl implements IRefundService {
 		return  maxOrderNum;
 	}
 
+	//获取
+	private String getIsDistribute(Agent agent){
+		String isDistribute = "false";
+		IFTConfigs configs = configsService.getConfigByChannelID(agent, 0L);
+		Map config = configs.getConfig();
+		isDistribute = (String) config.get("isDistributeTicket");
+		return  isDistribute;
+	}
+
 	//设置退废单扩展表的locker值
 	private  SaleChangeExt setExtLockerVal(SaleOrder saleOrder,Agent agent,SaleChangeExt saleChangeExt){
 		if(StringUtils.isNotBlank(saleOrder.getSourceChannelNo()) && StringUtils.equals("OP",saleOrder.getSourceChannelNo())){
@@ -2205,7 +1970,86 @@ public class RefundServiceImpl implements IRefundService {
       buyChangeExt.setOffice(office);
       buyChangeExt.setTicketType(ticketType);
       buyChangeExt.setBuyChangeNo(buyChangeNo);
+      String isDistribute = getIsDistribute(agent);
+      if(StringUtils.equals("false",isDistribute)){
+        buyChangeExt.setBuyLocker(agent.getId());
+	  }
       log.info("创建采购变更单扩展表"+buyChangeExt.toString());
       buyChangeExtDao.insertSelective(buyChangeExt);
 	}
+
+
+	private void redirectReturnMoney(Agent agent,Long saleChangeNo){
+		PassengerRefundPrice passengerRefundPrice = new PassengerRefundPrice();
+		passengerRefundPrice.setSaleChangeNo(saleChangeNo);
+		RequestWithActor<PassengerRefundPrice> queryCondition = new RequestWithActor<>();
+		queryCondition.setAgent(agent);
+		queryCondition.setEntity(passengerRefundPrice);
+		List<PassengerRefundPrice> refundPassengers = passengerRefundPriceService.queryPassengerRefundPriceList(queryCondition);
+		RequestWithActor<List<PassengerRefundPrice>> verifyParam = new RequestWithActor<>();
+		verifyParam.setEntity(refundPassengers);
+		verifyParam.setAgent(agent);
+		//创建应收应付
+		refundService.saleVerify(verifyParam);
+		//创建销售退款单
+		refundService.saleRefund(agent,saleChangeNo);
+	}
+
+	private void updateSaleChangeStatus(Agent agent,Long saleChangeNo){
+		Date modifyTime = new Date();
+		SaleChange saleChange = saleChangeService.getSaleChangeByNo(agent, saleChangeNo);
+		//页面参数passengerRefundPriceVo.status 5:退款 4:采购打回拒单 1:审核通过
+		saleChange.setChildStatus(10);//销售审核完成  已退款
+		saleChange.setModifier(agent.getAccount());
+		saleChange.setModifyTime(modifyTime);
+		saleChangeService.update(agent, saleChange);
+	}
+
+	private void updateSaleStatusAsAudited(SaleChangeExt saleChangeExt,PassengerRefundPriceVo passengerRefundPriceVo,String changeRemark,Agent agent){
+			Date time = new Date();
+			//点击审核通过时修改销售但状态为已审核
+			if (saleChangeExt.getSaleChange() != null) {
+				saleChangeService.updateStatus(agent, saleChangeExt.getSaleChange().getSaleChangeNo(), Integer.valueOf(IFTOrderStatusEnums.AUDITED.getCodeKey()));
+				//修改saleChangeExt的审核人员信息并解锁
+				RequestWithActor<SaleChangeExt> saleOrderChangeExt = new RequestWithActor<>();
+				long locker = saleChangeExt.getLocker();
+				saleChangeExt.setStatus(IFTOrderStatusEnums.AUDITED.getCodeKey());
+				saleChangeExt.setRefundWay(passengerRefundPriceVo.getRefundWay());
+				saleChangeExt.setAuditPerson(agent.getAccount());
+				SimpleDateFormat simple = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				saleChangeExt.setAuditTime(simple.format(time));
+				if (changeRemark != null && "" != changeRemark) {
+					saleChangeExt.setChangeRemark(changeRemark);
+				}
+				saleChangeExt.setExchangeRate(passengerRefundPriceVo.getPassengerRefundPriceList().get(0).getExchangeRate());
+				saleChangeExt.setSaleCurrency(passengerRefundPriceVo.getPassengerRefundPriceList().get(0).getSaleCurrency());
+				saleOrderChangeExt.setEntity(saleChangeExt);
+				saleOrderChangeExt.setAgent(agent);
+				refundService.updateSaleChangeExt(saleOrderChangeExt);
+			}
+	}
+
+	private void updateBuyStatusAsAudit(PassengerRefundPriceVo passengerRefundPriceVo,Agent agent){
+		Long saleChangeNo = passengerRefundPriceVo.getSaleChangeNo();
+		RequestWithActor<Long> saleChangeRequest = new RequestWithActor<Long>();
+		saleChangeRequest.setEntity(saleChangeNo);
+		saleChangeRequest.setAgent(agent);
+		SaleChangeExt saleChangeExt = refundService.getSaleChangeExtByNo(saleChangeRequest);
+		SaleChange saleChange = saleChangeExt.getSaleChange();
+		saleChangeExt.setAirlineStatus(Integer.valueOf(IFTOrderStatusEnums.AUDITED.getCodeKey()));//采购一审已审核
+		List<BuyOrder> buyOrderList = buyOrderService.getBuyOrdersBySONo(agent, passengerRefundPriceVo.getSaleOrderNo());
+		for(BuyOrder buyOrder:buyOrderList){
+			List<BuyChange> buyChangeList = buyChangeService.getBuyChangesByBONo(agent, buyOrder.getBuyOrderNo());
+			for(BuyChange buyChange:buyChangeList){
+				if(buyChange.getBusinessSignNo().equals(saleChange.getBusinessSignNo())){
+					buyChange.setChildStatus(Integer.valueOf(IFTOrderStatusEnums.AUDITED.getCodeKey()));//采购已审核
+					buyChange.setModifier(agent.getAccount());
+					buyChange.setModifyTime(new Date());
+					log.info("退票修改采购变更单信息"+buyChange.toString());
+					buyChangeService.update(agent, buyChange);
+				}
+			}
+		}
+	}
+
 }
