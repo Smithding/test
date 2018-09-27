@@ -2,6 +2,7 @@ package com.tempus.gss.product.ift.service.search;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Map;
 
 import com.tempus.gss.bbp.util.DateUtil;
 import com.tempus.gss.product.ift.api.entity.PassengerTypePricesTotal;
@@ -26,19 +27,25 @@ public class OrderPolicyUtils {
 	 * @return
 	 */
 	public static IftPolicyChange getIftPolicyChange(QueryIBEDetail detail ,IftPolicy policy,Profit profit){
-		IftPolicyChange iftPolicyChange = new IftPolicyChange();
-		IftFlightPolicy flightPolicy = getIftFlightPolicy(policy,
-				new BigDecimal(detail.getCabinsPricesTotalses().get(0).getSalePriceCount()),
-				new BigDecimal(detail.getCabinsPricesTotalses().get(0).getFavorableCount()),profit);
-		iftPolicyChange.setFlightPolicy(flightPolicy);
-		//暂时因为航班数据有问题，一个舱位有两个价格，所以暂时保留第一个舱位价格，其他价格移除掉
-		if(detail.getCabinsPricesTotalses().size()>1){
+		// 暂时因为航班数据有问题，一个舱位有两个价格，所以暂时保留第一个舱位价格，其他价格移除掉
+		if (detail.getCabinsPricesTotalses().size() > 1) {
 			for (int i = 0; i < detail.getCabinsPricesTotalses().size(); i++) {
-				if(i>0){
+				if (i > 0) {
 					detail.getCabinsPricesTotalses().remove(i);
 				}
 			}
 		}
+		IftPolicyChange iftPolicyChange = new IftPolicyChange();
+		BigDecimal salePriceCount = new BigDecimal(0);//总销售价格
+		BigDecimal far = new BigDecimal(0);//订单总票面
+		Map<String,Integer> passengerTypeCount = detail.getCabinsPricesTotalses().get(0).getPassengerTypeCount();//订单乘客人数MPA
+		for (PassengerTypePricesTotal priceTotal : detail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals()) {
+			salePriceCount = salePriceCount.add(priceTotal.getSalePrice().multiply(new BigDecimal(passengerTypeCount.get(priceTotal.getPassengerType()))));
+			far = far.add(priceTotal.getFare().multiply(new BigDecimal(passengerTypeCount.get(priceTotal.getPassengerType()))));
+		}
+		BigDecimal  favorableCount = far.subtract(salePriceCount);//优惠总金额
+		IftFlightPolicy flightPolicy = getIftFlightPolicy(policy,salePriceCount,favorableCount,profit);
+		iftPolicyChange.setFlightPolicy(flightPolicy);
 		iftPolicyChange.setCabinsPricesTotalses(detail.getCabinsPricesTotalses());
 		return iftPolicyChange;
 	}
@@ -92,9 +99,12 @@ public class OrderPolicyUtils {
 		/** 供应商Office, 多个以"/"分隔 */
 		flightPolicy.setSupplierOffice(policy.getSupplierOffice());
 
+		String mixCabinType ="";
+        if(policy.getMixCabinType()!=null&&policy.getMixCabinType().contains("2")){
+        	mixCabinType = "：票面略低";
+        }
 		/** 开票Office, 多个以"/"分隔 */
-		flightPolicy.setTicketOffice(policy.getTicketOffice());
-
+        flightPolicy.setTicketOffice(policy.getTicketOffice()+mixCabinType);
 		/** 儿童票奖励方式，1奖励与成人一致（默认）,2可开无奖励，3不可开，4指定奖励 */
 		flightPolicy.setChdRewardType(policy.getChdRewardType());
 
@@ -131,7 +141,9 @@ public class OrderPolicyUtils {
 				chdStr.append("儿童奖不可开;");
 				break;
 			case 4:
-				chdStr.append("儿童指定奖励:"+policy.getChdAssignRewardFee().subtract(profitRebate).setScale(2, BigDecimal.ROUND_CEILING));
+				/*chdStr.append("儿童指定奖励:" + policy.getChdAssignRewardFee() == null
+						? new BigDecimal(0).subtract(profitRebate).setScale(2, BigDecimal.ROUND_CEILING)
+						: policy.getChdAssignRewardFee().subtract(profitRebate).setScale(2, BigDecimal.ROUND_CEILING));*/
 				break;
 			default:
 				 chdStr.append("儿童奖励与成人一致;");
@@ -264,13 +276,8 @@ public class OrderPolicyUtils {
 
 		/** 供应商Office, 多个以"/"分隔 */
 		orderPolicy.setSupplierOffice(policy.getSupplierOffice());
-		String mixCabinType ="";
-        if(policy.getMixCabinType()!=null&&policy.getMixCabinType().contains("2")){
-        	mixCabinType = "票面略低";
-        }
 		/** 开票Office, 多个以"/"分隔 */
-		orderPolicy.setTicketOffice(policy.getTicketOffice()+mixCabinType);
-
+		orderPolicy.setTicketOffice(policy.getTicketOffice());
 		/** 上游代理费用 */
 		orderPolicy.setOriginalAgencyFee(policy.getOriginalAgencyFee());
 
