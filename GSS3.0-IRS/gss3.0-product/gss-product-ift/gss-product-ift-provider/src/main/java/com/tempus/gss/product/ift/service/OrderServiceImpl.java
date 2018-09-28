@@ -1897,12 +1897,12 @@ public class OrderServiceImpl implements IOrderService {
     }
     
     @Override
-    public boolean createPnr(Agent agent, Pnr insetPnr, SaleOrderExt saleOrderExt) {
+    public boolean createPnr(Agent agent, Pnr insetPnr, Long saleOrderNo) {
         Long pnrNo = null;
         try {
             pnrNo = maxNoService.generateBizNo("IFT_PNR_NO", 32);
             insetPnr.setPnr(insetPnr.getPnr());
-            insetPnr.setSourceNo(saleOrderExt.getSaleOrderNo());
+            insetPnr.setSourceNo(saleOrderNo);
             insetPnr.setBigPnr("");
             insetPnr.setPnrNo(pnrNo);
             insetPnr.setCreator(agent.getAccount());
@@ -1912,7 +1912,7 @@ public class OrderServiceImpl implements IOrderService {
             insetPnr.setStatus("1");
             pnrDao.insertSelective(insetPnr);
         } catch (Exception e) {
-            log.info("保存PNR，e=", e);
+            log.error("保存PNR，e=", e);
         }
         return false;
     }
