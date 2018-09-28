@@ -681,7 +681,7 @@ public class PolicyServiceImpl implements IPolicyService {
 				if(StringUtil.isNotNullOrEmpty(reatePnrOut.getPnr())){
 					Pnr pnr = new Pnr();
 					pnr.setPnr(reatePnrOut.getPnr());
-					orderService.createPnr(agent,pnr,saleOrderExt);
+					orderService.createPnr(agent,pnr,saleOrderExt.getSaleOrderNo());
 					return new Result(SUCCESS_CODE, SAVE_SUCCESS);
 				}else{
 					return new Result(FAILED_CODE, SAVE_SUCCESS);
