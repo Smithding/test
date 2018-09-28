@@ -127,7 +127,7 @@ public interface IPolicyService  {
 	 * @param saleOrderExt
 	 * @return
 	 */
-	 Result createPnr(SaleOrderExt saleOrderExt);
+	 Result createPnr(Agent agent, SaleOrderExt saleOrderExt);
 	/**
 	 * 根据SaleOrderExt数据创建PNR
 	 * @param saleOrderExt

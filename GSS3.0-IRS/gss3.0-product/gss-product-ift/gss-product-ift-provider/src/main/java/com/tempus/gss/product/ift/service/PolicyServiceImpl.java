@@ -625,8 +625,8 @@ public class PolicyServiceImpl implements IPolicyService {
 		}
 	}
 
-	public Result createPnr(SaleOrderExt saleOrderExt) {
-		String isCreatePnr = iParamService.getValueByKey("is_CreatPnr");
+	public Result createPnr(Agent agent, SaleOrderExt saleOrderExt) {
+        String isCreatePnr = iParamService.getValueByKey("is_CreatPnr");
 		if("true".equals(isCreatePnr)){
 			try {
 				log.info("创建国际PNR传入参数:"+JsonUtil.toJson(saleOrderExt));
@@ -668,7 +668,7 @@ public class PolicyServiceImpl implements IPolicyService {
 
                 int passengerSize = passengers.size()-1;
 				for  ( int  i  =   0 ; i  <passengerSize ; i ++ )   {
-					for  ( int  j  =  passengerSize ; j  >  i; j -- )   {
+					for  ( int  j  =  passengers.size()-1; j  >  i; j -- )   {
 						if  (passengers.get(j).getPersonNameEN().equals(passengers.get(i).getPersonNameEN()))   {
 							passengers.remove(j);
 						}
@@ -686,7 +686,7 @@ public class PolicyServiceImpl implements IPolicyService {
 				if(StringUtil.isNotNullOrEmpty(reatePnrOut.getPnr())){
 					Pnr pnr = new Pnr();
 					pnr.setPnr(reatePnrOut.getPnr());
-					orderService.createPnr(AgentUtil.getAgent(),pnr,saleOrderExt);
+					orderService.createPnr(agent,pnr,saleOrderExt);
 					return new Result(SUCCESS_CODE, SAVE_SUCCESS);
 				}else{
 					return new Result(FAILED_CODE, SAVE_SUCCESS);
