@@ -221,13 +221,13 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             }
 //            //将生成的销售单号填入采购单中
             //todo 采购创建将放到销售支付完成之后
-//            orderCreateVo.getUnpBuy().setSaleOrderNo(saleResult.getEntity().getSaleOrderNo());
-//            //--------创建buy相关------------//
-//            UnpResult<UnpBuy> buyResult = this.createBuy(agent, orderCreateVo);
-//            if (buyResult.getCode() == 0) {
-//                result.failed(buyResult.getMsg(), null);
-//                return result;
-//            }
+            orderCreateVo.getUnpBuy().setSaleOrderNo(saleResult.getEntity().getSaleOrderNo());
+            //--------创建buy相关------------//
+            UnpResult<UnpBuy> buyResult = this.createBuy(agent, orderCreateVo);
+            if (buyResult.getCode() == 0) {
+                result.failed(buyResult.getMsg(), null);
+                return result;
+            }
             result.success("创建订单成功", saleResult.getEntity());
         } catch (Exception e) {
             logger.error("Error", e);
