@@ -1,19 +1,9 @@
 package com.tempus.gss.product.unp.service;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import com.alibaba.dubbo.config.annotation.Service;
+import com.tempus.gss.product.unp.api.entity.util.CellProperty;
+import com.tempus.gss.product.unp.api.service.UnpFileService;
+import org.apache.poi.ss.usermodel.*;
 import org.ho.yaml.Yaml;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +11,24 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.ResourceUtils;
 
-import com.alibaba.dubbo.config.annotation.Service;
-import com.tempus.gss.product.unp.api.entity.util.CellProperty;
-import com.tempus.gss.product.unp.api.service.UnpFileService;
+import java.io.File;
+import java.io.InputStream;
+import java.util.*;
 
 @Service
 public class UnpFileServiceImpl implements UnpFileService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+    
+    @Override
+    public File getTemplate() {
+        try {
+            Resource resource = new ClassPathResource("import/import.xlsx");
+            return resource.getFile();
+        } catch (Exception e) {
+            logger.error("FileNotFoundException", e);
+            return null;
+        }
+    }
     
     @Override
     public Map<Integer, CellProperty> getCellProperties(String pathRelativeUnderClasspath) {
@@ -36,7 +37,9 @@ public class UnpFileServiceImpl implements UnpFileService {
         ArrayList<CellProperty> list;
         try {
 //            file = ResourceUtils.getFile("classpath:resources/" + pathRelativeUnderClasspath + ".yml");
-        	Resource resource = new ClassPathResource(pathRelativeUnderClasspath + ".yml");
+            Resource resource = new ClassPathResource(pathRelativeUnderClasspath + ".yml");
+//            YamlDecoder y = new YamlDecoder(resource.getInputStream());
+//            list = y.readObjectOfType(ArrayList.class);
             list = Yaml.loadType(resource.getInputStream(), ArrayList.class);
             list.forEach(o -> {
                 if (o != null) {

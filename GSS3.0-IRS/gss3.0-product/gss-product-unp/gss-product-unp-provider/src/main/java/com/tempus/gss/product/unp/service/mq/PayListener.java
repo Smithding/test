@@ -86,9 +86,10 @@ public class PayListener {
                             unpUpdate.setModifier(agent.getAccount());
                             unpUpdate.setModifyTime(new Date());
                         }
+                        
                         if (unpSale.getChangeType().equals(EUnpConstant.ChangeType.DEFAULT.getKey())) {
-                            int orderStatus = 0;
                             UnpBuy unpBuy = unpOrderService.getBuyOrderInfo(queryVo);
+                            int orderStatus = 0;
                             if (unpBuy != null && unpBuy.getPayStatus() >= EUnpConstant.PayStatus.PAIED.getKey()) {
                                 //采购支付完成  将订单状态改为完成
                                 orderStatus = EUnpConstant.OrderStatus.DONE.getKey();
@@ -103,6 +104,13 @@ public class PayListener {
                                         }
                                     };
                                     runnable.run();
+                                } else {
+
+////                            将生成的销售单号填入采购单中
+////                            todo 采购创建将放到销售支付完成之后
+//                                    orderCreateVo.getUnpBuy().setSaleOrderNo(saleResult.getEntity().getSaleOrderNo());
+//                                    //--------创建buy相关------------//
+//                                    UnpResult<UnpBuy> buyResult = this.createBuy(agent, orderCreateVo);
                                 }
                             }
                             //正常支付

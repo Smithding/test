@@ -219,14 +219,15 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
             if (saleResult.getCode() == 0) {
                 return saleResult;
             }
-            //将生成的销售单号填入采购单中
-            orderCreateVo.getUnpBuy().setSaleOrderNo(saleResult.getEntity().getSaleOrderNo());
-            //--------创建buy相关------------//
-            UnpResult<UnpBuy> buyResult = this.createBuy(agent, orderCreateVo);
-            if (buyResult.getCode() == 0) {
-                result.failed(buyResult.getMsg(), null);
-                return result;
-            }
+//            //将生成的销售单号填入采购单中
+            //todo 采购创建将放到销售支付完成之后
+//            orderCreateVo.getUnpBuy().setSaleOrderNo(saleResult.getEntity().getSaleOrderNo());
+//            //--------创建buy相关------------//
+//            UnpResult<UnpBuy> buyResult = this.createBuy(agent, orderCreateVo);
+//            if (buyResult.getCode() == 0) {
+//                result.failed(buyResult.getMsg(), null);
+//                return result;
+//            }
             result.success("创建订单成功", saleResult.getEntity());
         } catch (Exception e) {
             logger.error("Error", e);
@@ -367,7 +368,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         vo.setPayWay(payWay);
         vo.setPayType(3);
         vo.setServiceLine("1");
-        vo.setReason("UNP报表导入采购付款");
+        vo.setReason("UNP采购付款");
         vo.setChannel(unpSale.getSource());
         vo.setCustomerNo(unpBuy.getSupplierId());
         vo.setCustomerTypeNo(unpBuy.getSupplierType());

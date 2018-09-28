@@ -1,5 +1,6 @@
 package com.tempus.gss.product.unp.api.entity.util;
 
+import javax.swing.*;
 import java.io.Serializable;
 
 /**
