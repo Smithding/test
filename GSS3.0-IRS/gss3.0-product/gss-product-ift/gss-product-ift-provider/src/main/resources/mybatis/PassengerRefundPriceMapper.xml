@@ -78,6 +78,7 @@
     <association property="passenger" column="PASSENGER_NO"
                  select="com.tempus.gss.product.ift.dao.PassengerDao.selectByPrimaryKey"/>
   </resultMap>
+
   <sql id="Base_Column_List" >
     PASSENGER_REFUND_PRICE_NO, ID, OWNER, SALE_ORDER_NO,SALE_CHANGE_NO , PASSENGER_NO, 
     SALE_PRICE,SALE_BROKERAGE,BUY_BROKERAGE, SALE_TAX, SALE_REFUND_PRICE, SALE_TICKET_ACCOUNT, SALE_RECOVERY_AWARD, SALE_REFUND_ACCOUNT, 
@@ -85,16 +86,19 @@
     PASSENGER_TYPE, ORDER_TYPE, VALID, STATUS, CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME,SALE_COUNT,BUY_COUNT,CHARGE_PROFIT,
     CURRENCY,SALE_CURRENCY,EXCHANGE_RATE, BUY_CURRENCY,BUY_EXCHANGE_RATE
   </sql>
+
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
     select 
     <include refid="Base_Column_List" />
     from IFT_PASSENGER_REFUND_PRICE
     where PASSENGER_REFUND_PRICE_NO = #{passengerRefundPriceNo,jdbcType=BIGINT}
   </select>
+
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
     delete from IFT_PASSENGER_REFUND_PRICE
     where PASSENGER_REFUND_PRICE_NO = #{passengerRefundPriceNo,jdbcType=BIGINT}
   </delete>
+
   <insert id="insert" parameterType="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice" >
     insert into IFT_PASSENGER_REFUND_PRICE (PASSENGER_REFUND_PRICE_NO, ID, OWNER, 
       SALE_ORDER_NO,SALE_CHANGE_NO, PASSENGER_NO, 
@@ -118,6 +122,7 @@
       #{modifier,jdbcType=VARCHAR}, #{modifyTime,jdbcType=TIMESTAMP},#{saleCount,jdbcType=DECIMAL},#{buyCount,jdbcType=DECIMAL},#{chargeProfit,jdbcType=DECIMAL},#{buyCurrency,jdbcType=VARCHAR},
         #{buyExchangeRate,jdbcType=DECIMAL})
   </insert>
+
   <insert id="insertSelective" parameterType="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice" >
     insert into IFT_PASSENGER_REFUND_PRICE
     <trim prefix="(" suffix=")" suffixOverrides="," >
@@ -343,6 +348,7 @@
       </if>
     </trim>
   </insert>
+
   <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice" >
     update IFT_PASSENGER_REFUND_PRICE
     <set >
@@ -454,6 +460,7 @@
     </set>
     where PASSENGER_REFUND_PRICE_NO = #{passengerRefundPriceNo,jdbcType=BIGINT}
   </update>
+
   <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice" >
     update IFT_PASSENGER_REFUND_PRICE
     set ID = #{id,jdbcType=BIGINT},
@@ -489,6 +496,7 @@
         BUY_EXCHANGE_RATE = #{buyExchangeRate,jdbcType=DECIMAL}
     where PASSENGER_REFUND_PRICE_NO = #{passengerRefundPriceNo,jdbcType=BIGINT}
   </update>
+
   <select id="getPassengerRefundPrice" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice">
         select
         <include refid="Base_Column_List"/>
@@ -537,12 +545,14 @@
 	      </if>
 	      </trim>
     </select>
+
   <select id="selectPassengerRefundPriceBySaleOrderNo" resultMap="BaseResultMap" parameterType="java.lang.Long">
   	select 
     <include refid="Base_Column_List" />
     from IFT_PASSENGER_REFUND_PRICE
     where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT} 
   </select>
+
   <select id="queryObjByKeyList" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.vo.PassengerRefundPriceVo">
         select
         <include refid="Base_Column_List"/>
@@ -560,6 +570,7 @@
             </if>
         </trim>
     </select>
+
   <update id="updateByChangeOrderNo" parameterType="com.tempus.gss.product.ift.api.entity.PassengerRefundPrice">
     update IFT_PASSENGER_REFUND_PRICE
     <set>

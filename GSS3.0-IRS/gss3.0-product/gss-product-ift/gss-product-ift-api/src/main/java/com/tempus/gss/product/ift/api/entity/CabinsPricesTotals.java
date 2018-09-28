@@ -203,7 +203,7 @@ public class CabinsPricesTotals implements Serializable {
 	}
 
 	public Map<String, Integer> getPassengerTypeCount() {
-		Map<String, Integer> passengerTypeMap = new HashMap<>();
+	/*	Map<String, Integer> passengerTypeMap = new HashMap<>();
 		if(this.passengerTypePricesTotals!=null){
 			for(PassengerTypePricesTotal passengerType:this.passengerTypePricesTotals){
 				Integer num = passengerTypeMap.get(passengerType.getPassengerType());
@@ -213,8 +213,8 @@ public class CabinsPricesTotals implements Serializable {
 					passengerTypeMap.put(passengerType.getPassengerType(),num+1);
 				}
 			}
-		}
-		return passengerTypeMap;
+		}*/
+		return passengerTypeCount;
 	}
 
 	public void setPassengerTypeCount(Map<String,Integer> passengerTypeCount) {

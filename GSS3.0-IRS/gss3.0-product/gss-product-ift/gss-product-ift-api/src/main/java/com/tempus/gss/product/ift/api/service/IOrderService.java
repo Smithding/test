@@ -220,7 +220,7 @@ public interface IOrderService {
 	 * 创建PNR.
 	 * @return
 	 */
-	boolean createPnr(Agent agent,Pnr pnr,SaleOrderExt saleOrderExt);
+	boolean createPnr(Agent agent,Pnr pnr,Long saleOrderNo);
 
 	/**订单分配*/
 	void assign(Long saleOrderNo);

@@ -33,21 +33,6 @@ public interface IRefundService {
 	 */
 	SaleChangeExt createRefundExt(RequestWithActor<RefundCreateVo> requestWithActor);
 
-	/**
-	 * 废退单查询.
-	 * @param queryRequest
-	 * @return
-	 */
-  /*  PageResult<RefundQueryResponse> query(RequestWithActor<Long> queryRequest);*/
-
-	/**
-	 * 获取废退单.
-	 *
-	 * @param
-	 * @return
-	 */
-	/*RefundGetResponse get(RefundGetRequest getRequest);*/
-
     /*
     * 通过销售单编号获取废退变更单 saleOrderNO
     * */
@@ -231,4 +216,10 @@ public interface IRefundService {
 	void auditWasteTicket(RequestWithActor<WasteAuditPramaVo> request) throws GSSException;
 	//退票销售审核
     void auditRefundTicket(RequestWithActor<WasteAuditPramaVo> request) throws GSSException;
+
+    //采购直接退销售款
+    void buyRedirectReturnMoney(RequestWithActor<Long> requestWithActor) throws GSSException;
+
+    //销售一审，采购一审
+	void saleAndBuyAuditTogether(RequestWithActor<WasteAuditPramaVo> requestWithActor);
 }
