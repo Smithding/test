@@ -39,8 +39,26 @@ public class IftPolicyQuery implements Serializable{
 	/** 出发机场 */
 	private String departAirport;
 	
+	/** 出发所属洲 */
+	private String departContinent;
+	
+	/** 出发城市国际I，还是国内D */
+	private String departSign;
+	
+	/** 出发国家 */
+	private String departCountry;
+	
 	/** 到达机场 */
 	private String arriveAirport;
+	
+	/** 到达所属洲 */
+	private String arriveContinent;
+	
+	/** 到达国家，A00代表全球，CN0代表境内，CN1代表境外，国家多个以"/"分割 */
+	private String arriveCountry;
+
+	/** 到达机场国际I，还是国内D */
+	private String arriveSign;
 	
 	/** 政策来源 */
 	private String source;
@@ -258,6 +276,54 @@ public class IftPolicyQuery implements Serializable{
 
 	public void setPnrTicketType(Integer pnrTicketType) {
 		this.pnrTicketType = pnrTicketType;
+	}
+
+	public String getDepartContinent() {
+		return departContinent;
+	}
+
+	public void setDepartContinent(String departContinent) {
+		this.departContinent = departContinent;
+	}
+
+	public String getDepartSign() {
+		return departSign;
+	}
+
+	public void setDepartSign(String departSign) {
+		this.departSign = departSign;
+	}
+
+	public String getDepartCountry() {
+		return departCountry;
+	}
+
+	public void setDepartCountry(String departCountry) {
+		this.departCountry = departCountry;
+	}
+
+	public String getArriveContinent() {
+		return arriveContinent;
+	}
+
+	public void setArriveContinent(String arriveContinent) {
+		this.arriveContinent = arriveContinent;
+	}
+
+	public String getArriveCountry() {
+		return arriveCountry;
+	}
+
+	public void setArriveCountry(String arriveCountry) {
+		this.arriveCountry = arriveCountry;
+	}
+
+	public String getArriveSign() {
+		return arriveSign;
+	}
+
+	public void setArriveSign(String arriveSign) {
+		this.arriveSign = arriveSign;
 	}
 	
 }

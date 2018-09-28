@@ -4,6 +4,7 @@
     <resultMap id="BaseResultMap" type="com.tempus.gss.product.unp.api.entity.UnpBuyRefundItem">
         <id column="ITEM_ID" jdbcType="BIGINT" property="itemId"/>
         <result column="BUY_REFUND_ORDER_NO" jdbcType="BIGINT" property="buyRefundOrderNo"/>
+        <result column="SALE_REFUND_ITEM_NO" jdbcType="BIGINT" property="saleRefundItemNo"/>
         <result column="UNP_TYPE" jdbcType="INTEGER" property="unpType"/>
         <result column="NUM" jdbcType="INTEGER" property="num"/>
         <result column="CHANGE_TYPE" jdbcType="INTEGER" property="changeType"/>
@@ -12,7 +13,7 @@
         <result column="VALID" jdbcType="INTEGER" property="valid"/>
     </resultMap>
     <sql id="Base_Column_List">
-        ITEM_ID, BUY_REFUND_ORDER_NO, UNP_TYPE, NUM, CHANGE_TYPE, GROUP_AMOUNT, ITEM_STATUS,
+        ITEM_ID, BUY_REFUND_ORDER_NO, SALE_REFUND_ITEM_NO,UNP_TYPE, NUM, CHANGE_TYPE, GROUP_AMOUNT, ITEM_STATUS,
         VALID
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
@@ -20,6 +21,28 @@
         <include refid="Base_Column_List"/>
         from UNP_BUY_REFUND_ITEM
         where ITEM_ID = #{itemId,jdbcType=BIGINT}
+    </select>
+    <select id="selectItems" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo" resultMap="BaseResultMap">
+        SELECT UBRI.*
+        FROM UNP_BUY_REFUND_ITEM UBRI
+        LEFT JOIN UNP_BUY_REFUND UBR ON UBRI.BUY_REFUND_ORDER_NO = UBR.BUY_REFUND_ORDER_NO
+        LEFT JOIN UNP_SALE_REFUND USR ON USR.SALE_REFUND_ORDER_NO = UBR.SALE_REFUND_ORDER_NO
+        where 1=1
+        <if test="itemNo != null">
+            AND UBRI.ITEM_ID = #{itemNo,jdbcType=BIGINT}
+        </if>
+        <if test="saleChangeNo != null">
+            AND UBR.SALE_REFUND_ORDER_NO = #{saleChangeNo,jdbcType=BIGINT}
+        </if>
+        <if test="buyChangeNo != null">
+            AND UBRI.BUY_REFUND_ORDER_NO = #{buyChangeNo,jdbcType=BIGINT}
+        </if>
+        <if test="changeType != null">
+            AND UBRI.CHANGE_TYPE = #{changeType,jdbcType=INTEGER}
+        </if>
+        <if test="valid != null">
+            AND UBRI.VALID = #{valid,jdbcType=BIT}
+        </if>
     </select>
     <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
         delete from UNP_BUY_REFUND_ITEM
@@ -42,11 +65,14 @@
             <if test="buyRefundOrderNo != null">
                 BUY_REFUND_ORDER_NO,
             </if>
+            <if test="saleRefundItemNo != null">
+                SALE_REFUND_ITEM_NO,
+            </if>
             <if test="unpType != null">
                 UNP_TYPE,
             </if>
             <if test="num != null">
-                NUM,
+                PNUM,
             </if>
             <if test="changeType != null">
                 CHANGE_TYPE,
@@ -67,6 +93,9 @@
             </if>
             <if test="buyRefundOrderNo != null">
                 #{buyRefundOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="saleRefundItemNo != null">
+                #{saleRefundItemNo,jdbcType=BIGINT},
             </if>
             <if test="unpType != null">
                 #{unpType,jdbcType=INTEGER},
@@ -116,14 +145,14 @@
         where ITEM_ID = #{itemId,jdbcType=BIGINT}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyRefundItem">
-        update UNP_BUY_REFUND_ITEM
-        set BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT},
+        UPDATE UNP_BUY_REFUND_ITEM
+        SET BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT},
             UNP_TYPE            = #{unpType,jdbcType=INTEGER},
-            NUM                = #{num,jdbcType=INTEGER},
+            NUM                 = #{num,jdbcType=INTEGER},
             CHANGE_TYPE         = #{changeType,jdbcType=INTEGER},
             GROUP_AMOUNT        = #{groupAmount,jdbcType=DECIMAL},
             ITEM_STATUS         = #{itemStatus,jdbcType=INTEGER},
             VALID               = #{valid,jdbcType=INTEGER}
-        where ITEM_ID = #{itemId,jdbcType=BIGINT}
+        WHERE ITEM_ID = #{itemId,jdbcType=BIGINT}
     </update>
 </mapper>

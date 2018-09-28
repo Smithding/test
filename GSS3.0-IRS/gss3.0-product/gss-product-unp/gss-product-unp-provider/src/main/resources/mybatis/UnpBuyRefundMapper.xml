@@ -1,259 +1,313 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tempus.gss.product.unp.dao.UnpBuyRefundMapper">
-  <resultMap id="BaseResultMap" type="com.tempus.gss.product.unp.api.entity.UnpBuyRefund">
-    <id column="BUY_REFUND_ORDER_NO" jdbcType="BIGINT" property="buyRefundOrderNo" />
-    <result column="BUY_ORDER_NO" jdbcType="BIGINT" property="buyOrderNo" />
-    <result column="OWNER" jdbcType="INTEGER" property="owner" />
-    <result column="SUPPLIER_ID" jdbcType="BIGINT" property="supplierId" />
-    <result column="SUPPLIER_TYPE" jdbcType="BIGINT" property="supplierType" />
-    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
-    <result column="TRA_NO" jdbcType="BIGINT" property="traNo" />
-    <result column="CHANGE_TYPE" jdbcType="INTEGER" property="changeType" />
-    <result column="THIRD_BUS_NO" jdbcType="BIGINT" property="thirdBusNo" />
-    <result column="REFUND_AMOUNT" jdbcType="DECIMAL" property="refundAmount" />
-    <result column="PAY_STATUS" jdbcType="INTEGER" property="payStatus" />
-    <result column="ACTUAL_AMOUNT" jdbcType="DECIMAL" property="actualAmount" />
-    <result column="PAY_TIME" jdbcType="TIMESTAMP" property="payTime" />
-    <result column="STATUS" jdbcType="INTEGER" property="status" />
-    <result column="CREATOR" jdbcType="VARCHAR" property="creator" />
-    <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime" />
-    <result column="MODIFIER" jdbcType="VARCHAR" property="modifier" />
-    <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime" />
-    <result column="VALID" jdbcType="BIT" property="valid" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    BUY_REFUND_ORDER_NO, BUY_ORDER_NO, OWNER, SUPPLIER_ID, SUPPLIER_TYPE, REMARK, TRA_NO,
-    CHANGE_TYPE, THIRD_BUS_NO, REFUND_AMOUNT, PAY_STATUS, ACTUAL_AMOUNT, PAY_TIME, STATUS,
-    CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME, VALID
-  </sql>
-  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
-    select
-    <include refid="Base_Column_List" />
-    from UNP_BUY_REFUND
-    where BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
-  </select>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
-    delete from UNP_BUY_REFUND
-    where BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
-  </delete>
-  <insert id="insert" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyRefund">
-    insert into UNP_BUY_REFUND (BUY_REFUND_ORDER_NO, BUY_ORDER_NO, OWNER,
-      SUPPLIER_ID, SUPPLIER_TYPE, REMARK,
-      TRA_NO, CHANGE_TYPE, THIRD_BUS_NO,
-      REFUND_AMOUNT, PAY_STATUS, ACTUAL_AMOUNT,
-      PAY_TIME, STATUS, CREATOR,
-      CREATE_TIME, MODIFIER, MODIFY_TIME,
-      VALID)
-    values (#{buyRefundOrderNo,jdbcType=BIGINT}, #{buyOrderNo,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
-      #{supplierId,jdbcType=BIGINT}, #{supplierType,jdbcType=BIGINT}, #{remark,jdbcType=VARCHAR},
-      #{traNo,jdbcType=BIGINT}, #{changeType,jdbcType=INTEGER}, #{thirdBusNo,jdbcType=BIGINT},
-      #{refundAmount,jdbcType=DECIMAL}, #{payStatus,jdbcType=INTEGER}, #{actualAmount,jdbcType=DECIMAL},
-      #{payTime,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER}, #{creator,jdbcType=VARCHAR},
-      #{createTime,jdbcType=TIMESTAMP}, #{modifier,jdbcType=VARCHAR}, #{modifyTime,jdbcType=TIMESTAMP},
-      #{valid,jdbcType=BIT})
-  </insert>
-  <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyRefund">
-    insert into UNP_BUY_REFUND
-    <trim prefix="(" suffix=")" suffixOverrides=",">
-      <if test="buyRefundOrderNo != null">
-        BUY_REFUND_ORDER_NO,
-      </if>
-      <if test="buyOrderNo != null">
-        BUY_ORDER_NO,
-      </if>
-      <if test="owner != null">
-        OWNER,
-      </if>
-      <if test="supplierId != null">
-        SUPPLIER_ID,
-      </if>
-      <if test="supplierType != null">
-        SUPPLIER_TYPE,
-      </if>
-      <if test="remark != null">
-        REMARK,
-      </if>
-      <if test="traNo != null">
-        TRA_NO,
-      </if>
-      <if test="changeType != null">
-        CHANGE_TYPE,
-      </if>
-      <if test="thirdBusNo != null">
-        THIRD_BUS_NO,
-      </if>
-      <if test="refundAmount != null">
-        REFUND_AMOUNT,
-      </if>
-      <if test="payStatus != null">
-        PAY_STATUS,
-      </if>
-      <if test="actualAmount != null">
-        ACTUAL_AMOUNT,
-      </if>
-      <if test="payTime != null">
-        PAY_TIME,
-      </if>
-      <if test="status != null">
-        STATUS,
-      </if>
-      <if test="creator != null">
-        CREATOR,
-      </if>
-      <if test="createTime != null">
-        CREATE_TIME,
-      </if>
-      <if test="modifier != null">
-        MODIFIER,
-      </if>
-      <if test="modifyTime != null">
-        MODIFY_TIME,
-      </if>
-      <if test="valid != null">
-        VALID,
-      </if>
-    </trim>
-    <trim prefix="values (" suffix=")" suffixOverrides=",">
-      <if test="buyRefundOrderNo != null">
-        #{buyRefundOrderNo,jdbcType=BIGINT},
-      </if>
-      <if test="buyOrderNo != null">
-        #{buyOrderNo,jdbcType=BIGINT},
-      </if>
-      <if test="owner != null">
-        #{owner,jdbcType=INTEGER},
-      </if>
-      <if test="supplierId != null">
-        #{supplierId,jdbcType=BIGINT},
-      </if>
-      <if test="supplierType != null">
-        #{supplierType,jdbcType=BIGINT},
-      </if>
-      <if test="remark != null">
-        #{remark,jdbcType=VARCHAR},
-      </if>
-      <if test="traNo != null">
-        #{traNo,jdbcType=BIGINT},
-      </if>
-      <if test="changeType != null">
-        #{changeType,jdbcType=INTEGER},
-      </if>
-      <if test="thirdBusNo != null">
-        #{thirdBusNo,jdbcType=BIGINT},
-      </if>
-      <if test="refundAmount != null">
-        #{refundAmount,jdbcType=DECIMAL},
-      </if>
-      <if test="payStatus != null">
-        #{payStatus,jdbcType=INTEGER},
-      </if>
-      <if test="actualAmount != null">
-        #{actualAmount,jdbcType=DECIMAL},
-      </if>
-      <if test="payTime != null">
-        #{payTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="status != null">
-        #{status,jdbcType=INTEGER},
-      </if>
-      <if test="creator != null">
-        #{creator,jdbcType=VARCHAR},
-      </if>
-      <if test="createTime != null">
-        #{createTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="modifier != null">
-        #{modifier,jdbcType=VARCHAR},
-      </if>
-      <if test="modifyTime != null">
-        #{modifyTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="valid != null">
-        #{valid,jdbcType=BIT},
-      </if>
-    </trim>
-  </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyRefund">
-    update UNP_BUY_REFUND
-    <set>
-      <if test="buyOrderNo != null">
-        BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT},
-      </if>
-      <if test="owner != null">
-        OWNER = #{owner,jdbcType=INTEGER},
-      </if>
-      <if test="supplierId != null">
-        SUPPLIER_ID = #{supplierId,jdbcType=BIGINT},
-      </if>
-      <if test="supplierType != null">
-        SUPPLIER_TYPE = #{supplierType,jdbcType=BIGINT},
-      </if>
-      <if test="remark != null">
-        REMARK = #{remark,jdbcType=VARCHAR},
-      </if>
-      <if test="traNo != null">
-        TRA_NO = #{traNo,jdbcType=BIGINT},
-      </if>
-      <if test="changeType != null">
-        CHANGE_TYPE = #{changeType,jdbcType=INTEGER},
-      </if>
-      <if test="thirdBusNo != null">
-        THIRD_BUS_NO = #{thirdBusNo,jdbcType=BIGINT},
-      </if>
-      <if test="refundAmount != null">
-        REFUND_AMOUNT = #{refundAmount,jdbcType=DECIMAL},
-      </if>
-      <if test="payStatus != null">
-        PAY_STATUS = #{payStatus,jdbcType=INTEGER},
-      </if>
-      <if test="actualAmount != null">
-        ACTUAL_AMOUNT = #{actualAmount,jdbcType=DECIMAL},
-      </if>
-      <if test="payTime != null">
-        PAY_TIME = #{payTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="status != null">
-        STATUS = #{status,jdbcType=INTEGER},
-      </if>
-      <if test="creator != null">
-        CREATOR = #{creator,jdbcType=VARCHAR},
-      </if>
-      <if test="createTime != null">
-        CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="modifier != null">
-        MODIFIER = #{modifier,jdbcType=VARCHAR},
-      </if>
-      <if test="modifyTime != null">
-        MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
-      </if>
-      <if test="valid != null">
-        VALID = #{valid,jdbcType=BIT},
-      </if>
-    </set>
-    where BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
-  </update>
-  <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyRefund">
-    update UNP_BUY_REFUND
-    set BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT},
-      OWNER = #{owner,jdbcType=INTEGER},
-      SUPPLIER_ID = #{supplierId,jdbcType=BIGINT},
-      SUPPLIER_TYPE = #{supplierType,jdbcType=BIGINT},
-      REMARK = #{remark,jdbcType=VARCHAR},
-      TRA_NO = #{traNo,jdbcType=BIGINT},
-      CHANGE_TYPE = #{changeType,jdbcType=INTEGER},
-      THIRD_BUS_NO = #{thirdBusNo,jdbcType=BIGINT},
-      REFUND_AMOUNT = #{refundAmount,jdbcType=DECIMAL},
-      PAY_STATUS = #{payStatus,jdbcType=INTEGER},
-      ACTUAL_AMOUNT = #{actualAmount,jdbcType=DECIMAL},
-      PAY_TIME = #{payTime,jdbcType=TIMESTAMP},
-      STATUS = #{status,jdbcType=INTEGER},
-      CREATOR = #{creator,jdbcType=VARCHAR},
-      CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
-      MODIFIER = #{modifier,jdbcType=VARCHAR},
-      MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
-      VALID = #{valid,jdbcType=BIT}
-    where BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
-  </update>
+    <resultMap id="BaseResultMap" type="com.tempus.gss.product.unp.api.entity.UnpBuyRefund">
+        <id column="BUY_REFUND_ORDER_NO" jdbcType="BIGINT" property="buyRefundOrderNo"/>
+        <result column="BUY_ORDER_NO" jdbcType="BIGINT" property="buyOrderNo"/>
+        <result column="OWNER" jdbcType="INTEGER" property="owner"/>
+        <result column="SUPPLIER_ID" jdbcType="BIGINT" property="supplierId"/>
+        <result column="SUPPLIER_TYPE" jdbcType="BIGINT" property="supplierType"/>
+        <result column="REMARK" jdbcType="VARCHAR" property="remark"/>
+        <result column="TRA_NO" jdbcType="BIGINT" property="traNo"/>
+        <result column="CHANGE_TYPE" jdbcType="INTEGER" property="changeType"/>
+        <result column="THIRD_BUS_NO" jdbcType="VARCHAR" property="thirdBusNo"/>
+        <result column="REFUND_AMOUNT" jdbcType="DECIMAL" property="refundAmount"/>
+        <result column="PAY_STATUS" jdbcType="INTEGER" property="payStatus"/>
+        <result column="ACTUAL_AMOUNT" jdbcType="DECIMAL" property="actualAmount"/>
+        <result column="PAY_TIME" jdbcType="TIMESTAMP" property="payTime"/>
+        <result column="STATUS" jdbcType="INTEGER" property="status"/>
+        <result column="CREATOR" jdbcType="VARCHAR" property="creator"/>
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="MODIFIER" jdbcType="VARCHAR" property="modifier"/>
+        <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
+        <result column="VALID" jdbcType="BIT" property="valid"/>
+        <result column="CUSTOMER_NAME" jdbcType="VARCHAR" property="customerName"/>
+        <result column="SUPPLIER_NAME" jdbcType="VARCHAR" property="supplierName"/>
+        <result column="SALE_REFUND_ORDER_NO" jdbcType="BIGINT" property="saleRefundOrderNo"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        BUY_REFUND_ORDER_NO, BUY_ORDER_NO, OWNER, SUPPLIER_ID, SUPPLIER_TYPE, REMARK, TRA_NO,
+        CHANGE_TYPE, THIRD_BUS_NO, REFUND_AMOUNT, PAY_STATUS, ACTUAL_AMOUNT, PAY_TIME, STATUS,
+        CREATOR, CREATE_TIME, MODIFIER, MODIFY_TIME, VALID
+    </sql>
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from UNP_BUY_REFUND
+        where BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from UNP_BUY_REFUND
+        where BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
+    </delete>
+    <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyRefund">
+        insert into UNP_BUY_REFUND
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="buyRefundOrderNo != null">
+                BUY_REFUND_ORDER_NO,
+            </if>
+            <if test="saleRefundOrderNo != null">
+                SALE_REFUND_ORDER_NO,
+            </if>
+            <if test="buyOrderNo != null">
+                BUY_ORDER_NO,
+            </if>
+            <if test="owner != null">
+                OWNER,
+            </if>
+            <if test="supplierId != null">
+                SUPPLIER_ID,
+            </if>
+            <if test="supplierType != null">
+                SUPPLIER_TYPE,
+            </if>
+            <if test="remark != null">
+                REMARK,
+            </if>
+            <if test="traNo != null">
+                TRA_NO,
+            </if>
+            <if test="changeType != null">
+                CHANGE_TYPE,
+            </if>
+            <if test="thirdBusNo != null">
+                THIRD_BUS_NO,
+            </if>
+            <if test="refundAmount != null">
+                REFUND_AMOUNT,
+            </if>
+            <if test="payStatus != null">
+                PAY_STATUS,
+            </if>
+            <if test="actualAmount != null">
+                ACTUAL_AMOUNT,
+            </if>
+            <if test="payTime != null">
+                PAY_TIME,
+            </if>
+            <if test="status != null">
+                STATUS,
+            </if>
+            <if test="creator != null">
+                CREATOR,
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME,
+            </if>
+            <if test="modifier != null">
+                MODIFIER,
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME,
+            </if>
+            <if test="valid != null">
+                VALID,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="buyRefundOrderNo != null">
+                #{buyRefundOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="saleRefundOrderNo != null">
+                #{saleRefundOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="buyOrderNo != null">
+                #{buyOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null">
+                #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="supplierId != null">
+                #{supplierId,jdbcType=BIGINT},
+            </if>
+            <if test="supplierType != null">
+                #{supplierType,jdbcType=BIGINT},
+            </if>
+            <if test="remark != null">
+                #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="traNo != null">
+                #{traNo,jdbcType=BIGINT},
+            </if>
+            <if test="changeType != null">
+                #{changeType,jdbcType=INTEGER},
+            </if>
+            <if test="thirdBusNo != null">
+                #{thirdBusNo,jdbcType=BIGINT},
+            </if>
+            <if test="refundAmount != null">
+                #{refundAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="payStatus != null">
+                #{payStatus,jdbcType=INTEGER},
+            </if>
+            <if test="actualAmount != null">
+                #{actualAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="payTime != null">
+                #{payTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=INTEGER},
+            </if>
+            <if test="creator != null">
+                #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifier != null">
+                #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="valid != null">
+                #{valid,jdbcType=BIT},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpBuyRefund">
+        update UNP_BUY_REFUND
+        <set>
+            <if test="buyOrderNo != null">
+                BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT},
+            </if>
+            <if test="owner != null">
+                OWNER = #{owner,jdbcType=INTEGER},
+            </if>
+            <if test="supplierId != null">
+                SUPPLIER_ID = #{supplierId,jdbcType=BIGINT},
+            </if>
+            <if test="supplierType != null">
+                SUPPLIER_TYPE = #{supplierType,jdbcType=BIGINT},
+            </if>
+            <if test="remark != null">
+                REMARK = #{remark,jdbcType=VARCHAR},
+            </if>
+            <if test="traNo != null">
+                TRA_NO = #{traNo,jdbcType=BIGINT},
+            </if>
+            <if test="changeType != null">
+                CHANGE_TYPE = #{changeType,jdbcType=INTEGER},
+            </if>
+            <if test="thirdBusNo != null">
+                THIRD_BUS_NO = #{thirdBusNo,jdbcType=BIGINT},
+            </if>
+            <if test="refundAmount != null">
+                REFUND_AMOUNT = #{refundAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="payStatus != null">
+                PAY_STATUS = #{payStatus,jdbcType=INTEGER},
+            </if>
+            <if test="actualAmount != null">
+                ACTUAL_AMOUNT = #{actualAmount,jdbcType=DECIMAL},
+            </if>
+            <if test="payTime != null">
+                PAY_TIME = #{payTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="status != null">
+                STATUS = #{status,jdbcType=INTEGER},
+            </if>
+            <if test="creator != null and creator!=''">
+                CREATOR = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null">
+                CREATE_TIME = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifier != null and modifier!=''">
+                MODIFIER = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="modifyTime != null">
+                MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="valid != null">
+                VALID = #{valid,jdbcType=BIT},
+            </if>
+        </set>
+        where BUY_REFUND_ORDER_NO = #{buyRefundOrderNo,jdbcType=BIGINT}
+    </update>
+    <select id="queryList" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo" resultMap="BaseResultMap">
+        SELECT
+        UBR.*,
+        CC.SHORT_NAME AS CUSTOMER_NAME,
+        CS.SHORT_NAME AS SUPPLIER_NAME
+        FROM UNP_BUY_REFUND UBR
+        LEFT JOIN UNP_BUY UB ON UB.BUY_ORDER_NO = UBR.BUY_ORDER_NO
+        LEFT JOIN UNP_SALE_REFUND USR ON USR.SALE_ORDER_NO = UB.SALE_ORDER_NO
+        LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO = USR.CUSTOMER_NO
+        LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO = UB.SUPPLIER_ID
+        WHERE 1=1
+        <if test="saleChangeNo != null">
+            AND UBR.SALE_REFUND_ORDER_NO = #{saleChangeNo,jdbcType=BIGINT}
+        </if>
+        <if test="saleOrderNo != null">
+            AND UB.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+        </if>
+        <if test="buyChangeNo != null">
+            AND UBR.BUY_REFUND_ORDER_NO = #{buyChangeNo,jdbcType=BIGINT}
+        </if>
+        <if test="buyOrderNo != null">
+            AND UBR.BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
+        </if>
+        <if test="owner != null">
+            AND UBR.OWNER = #{owner,jdbcType=INTEGER}
+        </if>
+        <if test="customerNo != null">
+            AND USR.CUSTOMER_NO = #{customerNo,jdbcType=BIGINT}
+        </if>
+        <if test="thirdBusNo != null">
+            AND UBR.THIRD_BUS_NO = #{thirdBusNo,jdbcType=BIGINT}
+        </if>
+        <if test="customerType != null">
+            AND USR.CUSTOMER_TYPE = #{customerType,jdbcType=BIGINT}
+        </if>
+        <if test="supplierId != null">
+            AND UBR.SUPPLIER_ID = #{supplierId,jdbcType=BIGINT}
+        </if>
+        <if test="supplierType != null">
+            AND UBR.SUPPLIER_TYPE = #{supplierType,jdbcType=BIGINT}
+        </if>
+        <if test="traNo != null">
+            AND UBR.TRA_NO = #{traNo,jdbcType=BIGINT}
+        </if>
+        <if test="changeType != null">
+            AND UBR.CHANGE_TYPE = #{changeType,jdbcType=INTEGER}
+        </if>
+        <if test="payStatus != null">
+            AND UBR.PAY_STATUS = #{payStatus,jdbcType=TINYINT}
+        </if>
+        <if test="payTimeStart!=null and ''!=payTimeStart">
+            AND UBR.PAY_TIME <![CDATA[>=]]> CONCAT(#{payTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="payTimeEnd!=null and ''!=payTimeEnd">
+            AND UBR.PAY_TIME  <![CDATA[<=]]> CONCAT(#{payTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+        </if>
+        <if test="status != null">
+            AND UBR.STATUS = #{status,jdbcType=INTEGER}
+        </if>
+        <if test="creator != null  and creator!=''">
+            AND UBR.CREATOR LIKE concat('%',CONCAT(#{creator,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="createTimeStart!=null and ''!=createTimeStart">
+            AND UBR.CREATE_TIME <![CDATA[>=]]> CONCAT(#{createTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="createTimeEnd!=null and ''!=createTimeEnd">
+            AND UBR.CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+        </if>
+        <if test="modifier != null and modifier!=''">
+            AND UBR.MODIFIER LIKE concat('%',CONCAT(#{modifier,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="modifyTimeStart != null and ''!=modifyTimeStart">
+            AND UBR.MODIFY_TIME <![CDATA[>=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="modifyTimeEnd != null and ''!=modifyTimeEnd">
+            AND UBR.MODIFY_TIME <![CDATA[<=]]> CONCAT(#{modifyTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+        </if>
+        <if test="valid != null">
+            AND UBR.VALID = #{valid,jdbcType=INTEGER}
+        </if>
+        GROUP BY UBR.BUY_REFUND_ORDER_NO ORDER BY UBR.CREATE_TIME DESC
+    </select>
+
 </mapper>

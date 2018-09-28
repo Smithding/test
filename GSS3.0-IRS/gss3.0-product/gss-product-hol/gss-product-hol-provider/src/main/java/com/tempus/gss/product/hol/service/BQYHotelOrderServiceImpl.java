@@ -7,8 +7,7 @@ import java.util.*;
 import java.util.concurrent.Future;
 
 import com.tempus.gss.order.entity.*;
-import com.tempus.gss.order.entity.enums.BusinessType;
-import com.tempus.gss.order.entity.enums.GoodsBigType;
+import com.tempus.gss.order.entity.enums.*;
 import com.tempus.gss.order.entity.vo.ActualInfoSearchVO;
 import com.tempus.gss.order.entity.vo.CertificateCreateVO;
 import com.tempus.gss.order.entity.vo.CreatePlanAmountVO;
@@ -308,8 +307,16 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		saleChange.setPayStatus(1);
 		saleChange.setCreateTime(new Date());
 		saleChange.setGoodsType(GoodsBigType.GROGSHOP.getKey());
-		saleChangeService.create(agent, saleChange);
-		
+		saleChange.setOwner(hotelOrder.getOwner());
+		saleChange.setGoodsSubType(EgoodsSubType.SALE_RETREAT.getKey());
+		saleChange.setGoodsName("酒店");
+		saleChange.setBusinessSignNo(IdWorker.getId());
+		saleChange.setBsignType(BSignType.REFUND.getKey());
+		saleChange.setOrderChangeType(ChangeType.RETREAT.getKey());
+		saleChange.setChildStatus(OrderStatusUtils.getStatus(OwnerOrderStatus.keyOf(hotelOrder.getOrderStatus())));
+		SaleChange saleChange1 = saleChangeService.create(agent, saleChange);
+		logger.info("创建销售变更单为: "+JsonUtil.toJson(saleChange1));
+
 		//创建应付记录单
 		CreatePlanAmountVO amountVO = new CreatePlanAmountVO();
 		amountVO.setRecordNo(saleChangeNo);
@@ -318,24 +325,29 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		amountVO.setIncomeExpenseType(2);
 		amountVO.setPlanAmount(hotelOrder.getFactTotalPrice());
 		amountVO.setRecordMovingType(1);
-		planAmountRecordService.create(agent, amountVO);
-		
+		PlanAmountRecord planAmountRecord = planAmountRecordService.create(agent, amountVO);
+		logger.info("创建应付记录单: "+JsonUtil.toJson(planAmountRecord));
+
 		//退款操作
 		ActualInfoSearchVO actualInfo = actualAmountRecorService.queryActualInfoByBusNo(agent, hotelOrder.getSaleOrderNo(), 2);
+        Agent newAgent = new Agent(agent.getOwner(), hotelOrder.getCreator());
 		CertificateCreateVO certificateCreateVO = new CertificateCreateVO();
 		certificateCreateVO.setPayNo(actualInfo.getPayNo());
 		certificateCreateVO.setCustomerTypeNo(Long.valueOf(hotelOrder.getRequestText()));
 		certificateCreateVO.setCustomerNo(hotelOrder.getCustomerNo());
 		certificateCreateVO.setIncomeExpenseType(2);
-		certificateCreateVO.setAmount(hotelOrder.getTotalPrice());
+		certificateCreateVO.setAmount(hotelOrder.getFactTotalPrice());
 		certificateCreateVO.setSubBusinessType(BusinessType.BUY_ORDER);
+		certificateCreateVO.setServiceLine("1");
 		List<BusinessOrderInfo> businessOrderInfoList = new ArrayList<>();
 		BusinessOrderInfo businessOrderInfo = new BusinessOrderInfo();
-		businessOrderInfo.setRecordNo(hotelOrder.getSaleOrderNo());
+		businessOrderInfo.setRecordNo(saleChangeNo);
+		//businessOrderInfo.setRecordNo(hotelOrder.getSaleOrderNo());
 		businessOrderInfo.setBusinessType(BusinessType.SALE_CHANGE_ORDER);
 		businessOrderInfoList.add(businessOrderInfo);
 		certificateCreateVO.setOrderInfoList(businessOrderInfoList);
-		BigDecimal saleRefundCert = certificateService.saleRefundCert(agent, certificateCreateVO);
+		BigDecimal saleRefundCert = certificateService.saleRefundCert(newAgent, certificateCreateVO);
+		logger.info("退款操作完成, 退款金额为: "+saleRefundCert);
 		return saleRefundCert;
 	}
 
@@ -1021,7 +1033,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 		}
 		orderReq.setSupplierId(supplierId);
 		orderReq.setRatePlanCategory(ratePlanCategory);
-		orderReq.setUnitPrice(settleFee);
+		orderReq.setUnitPrice(settleFee.multiply(new BigDecimal(daysBetween)));
 		//可以不传
 		orderReq.setChannelType(2);
 		CreateOrderRespone createOrderRespone = bqyHotelInterService.createOrder(orderReq);
@@ -1030,7 +1042,7 @@ class BQYHotelOrderServiceImpl implements IBQYHotelOrderService {
 			Long orderNo = createOrderRespone.getOrderNumber();
 			if (null == orderNo || orderNo <= 0){
 				logger.info("bqy酒店订单创建失败,返回结订单号为空或小于等于0!");
-				throw new GSSException("bqy酒店订单创建失败!", String.valueOf(saleOrderNo), "酒店订单创建失败,返回订单号为空!");
+				throw new GSSException(hotelOrder.getHotelName(), String.valueOf(saleOrderNo), "酒店订单创建失败,返回订单号为空!");
 			}
 			//查询bqy酒店订单详情
 			OrderPayReq orderPayReq = new OrderPayReq();

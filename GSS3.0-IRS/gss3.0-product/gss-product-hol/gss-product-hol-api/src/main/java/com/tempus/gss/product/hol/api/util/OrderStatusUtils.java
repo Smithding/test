@@ -53,6 +53,10 @@ public class OrderStatusUtils {
         STATUS_MAP.put("801", 17);
         STATUS_MAP.put("900", 18);
         STATUS_MAP.put("950", 19);
+        STATUS_MAP.put("111", 20);
+        STATUS_MAP.put("666", 21);
+        STATUS_MAP.put("999", 22);
+        STATUS_MAP.put("404", 23);
     }
 
     /**

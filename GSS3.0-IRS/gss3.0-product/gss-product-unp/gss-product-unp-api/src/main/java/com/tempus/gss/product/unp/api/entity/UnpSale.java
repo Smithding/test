@@ -2,6 +2,7 @@ package com.tempus.gss.product.unp.api.entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -251,4 +252,11 @@ public class UnpSale implements Serializable {
         this.valid = valid;
     }
     
+    public UnpSale(Integer initSize) {
+        this.saleItems = new ArrayList<>(initSize);
+    }
+    
+    public UnpSale() {
+    
+    }
 }

@@ -203,7 +203,18 @@ public class SaleChangeExt implements Serializable {
 	//提交航司后采购审核状态
 	private Integer airLineRefundStatus;
 
+	/**
+	 * ORIGIN_SALE_CHANGE_NO 源改签单号，如果是在销售单上改签则无
+	 */
+	private Long originSaleChangeNo;
 
+	public Long getOriginSaleChangeNo() {
+		return originSaleChangeNo;
+	}
+
+	public void setOriginSaleChangeNo(Long originSaleChangeNo) {
+		this.originSaleChangeNo = originSaleChangeNo;
+	}
 
 	@Override
 	public String toString() {
@@ -248,6 +259,7 @@ public class SaleChangeExt implements Serializable {
 				", drawerLoginName='" + drawerLoginName + '\'' +
 				", airLineRefundStatus=" + airLineRefundStatus +
                 ",supplierNo="+supplierNo+
+				", originSaleChangeNo=" + originSaleChangeNo +
 				'}';
 	}
 

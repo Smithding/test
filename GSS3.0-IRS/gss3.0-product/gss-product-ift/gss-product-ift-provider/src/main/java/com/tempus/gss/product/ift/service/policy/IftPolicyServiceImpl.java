@@ -4,19 +4,29 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.toolkit.IdWorker;
+import com.tempus.gss.product.ift.api.entity.Leg;
+import com.tempus.gss.product.ift.api.entity.Passenger;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicyQuery;
+import com.tempus.gss.product.ift.api.entity.search.FlightQuery;
 import com.tempus.gss.product.ift.api.service.policy.IftPolicyService;
 import com.tempus.gss.product.ift.dao.policy.IftPolicyMapper;
+import com.tempus.gss.product.ift.dao.policy.IftQueryPolicyMapper;
 import com.tempus.gss.product.ift.help.IftLogHelper;
+import com.tempus.gss.product.ift.help.IftPolicyHelper;
 import com.tempus.gss.util.EntityUtil;
 import com.tempus.gss.vo.Agent;
+import com.tempus.tbd.entity.Country;
+import com.tempus.tbd.service.IAirportService;
 
 /**
  * 
@@ -41,7 +51,16 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 	private IftPolicyMapper iftPolicyMapper;
 	
 	@Autowired
-	private IftLogHelper logHelper;
+	private IftQueryPolicyMapper iftQueryPolicyMapper;
+	
+	@Autowired
+	private IftPolicyHelper policyHelper;
+	
+	@Reference
+	private IAirportService airportService;
+	
+	/** 日志记录器. */
+	protected static Logger logger = LogManager.getLogger(IftPolicyServiceImpl.class);
 	
 	@Override
 	public long create(Agent agent, IftPolicy iftPolicy) {
@@ -52,10 +71,10 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 		iftPolicy = this.setDefault(iftPolicy);
 		EntityUtil.setAddInfo(iftPolicy, agent);
 		iftPolicyMapper.insert(iftPolicy);
-		logHelper.logger(agent, policyId, "创建政策", packagePolicyLog(iftPolicy));
+		IftLogHelper.logger(agent, policyId, "创建政策", packagePolicyLog(iftPolicy));
 		return policyId;
 	}
-
+    
 	@Override
 	public IftPolicy find(Agent agent, long policyId) {
 		return iftPolicyMapper.find(agent.getOwner(), policyId);
@@ -65,6 +84,30 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 	public Page<IftPolicy> search(Agent agent, Page<IftPolicy> page, IftPolicyQuery query) {
 		
 		query.setOwner(agent.getOwner());
+		
+		/* 设置出发城市及到达城市所属国家信息 */
+		try {
+			Country deparCountry = airportService.queryCountryByAirport(query.getDepartAirport());
+			// 根据出发城市查询所属的国家
+			if (deparCountry != null && !deparCountry.equals("")) {
+				query.setDepartContinent(deparCountry.getAreaCode()==null?"":deparCountry.getAreaCode().replace(" ", ""));// 三字码所属州
+				query.setDepartCountry(deparCountry.getCountryCode());// 三字码所属国家
+				query.setDepartSign(deparCountry.getDomOrInt());//国际I还是国内D
+			} else {
+				logger.info(query.getDepartAirport() + "基础数据获取到城市信息");
+			}
+			Country arriveCountry = airportService.queryCountryByAirport(query.getArriveAirport());// 根据到达城市查询所属的国家
+			if (arriveCountry != null && !arriveCountry.equals("")) {
+				query.setArriveContinent(arriveCountry.getAreaCode()==null?"":arriveCountry.getAreaCode().replace(" ", ""));// 三字码所属州
+				query.setArriveCountry(arriveCountry.getCountryCode());// 三字码所属国家
+				query.setArriveSign(arriveCountry.getDomOrInt());//国际I还是国内D
+			} else {
+				logger.info(query.getArriveAirport() + "基础数据获取到城市信息");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		// 调用底层先分页查询出符合国际政策ID列表
 		List<Long> ids = iftPolicyMapper.query(page, query);
 		// 根据国际政策ID列表循环拉取国际政策的详细
@@ -86,11 +129,11 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 		
 		/* 第一步设置原政策无效 */
 		this.setInvalid(agent, iftPolicy.getId());
-		logHelper.logger(agent, iftPolicy.getId(), "删除政策", "编辑政策删除旧政策");
+		IftLogHelper.logger(agent, iftPolicy.getId(), "删除政策", "编辑政策删除旧政策");
 		
 		/* 第二步新增一条政策 */
 		long policyId = this.create(agent, iftPolicy);
-		logHelper.logger(agent, iftPolicy.getId(), "编辑政策", "该政策为编辑老政策["+policyId+"]生成的新政策");
+		IftLogHelper.logger(agent, iftPolicy.getId(), "编辑政策", "该政策为编辑老政策["+policyId+"]生成的新政策");
 		
 		return policyId;
 	}
@@ -114,6 +157,45 @@ public class IftPolicyServiceImpl implements IftPolicyService {
 		Date modifyTime = new Date(System.currentTimeMillis());
 		int count = iftPolicyMapper.delete(agent.getOwner(), policyIds, agent.getAccount(), modifyTime);
 		return count > 0 ? true:false;
+	}
+	
+	@Override
+	public List<IftPolicy> getPolicys(Agent agent, List<Leg> legs, String airline, String fareBasis, double parPrice, int adtNumber, int chdNumber, int infNumber) {
+		long startTime = System.currentTimeMillis();
+		/* 第一步，组装条件从库里面获取政策 */
+		FlightQuery query = policyHelper.packageQuery(agent, legs, airline, adtNumber, chdNumber, infNumber);
+		List<IftPolicy> iftPolicyList = iftQueryPolicyMapper.query(query);
+		long time1 = System.currentTimeMillis();
+		logger.info("数据库获取政策耗时：" + (time1 - startTime) + "毫秒");
+		
+		/* 第二步，再逐步过滤政策条件 */
+		iftPolicyList = policyHelper.ruleFilter(iftPolicyList, legs, query, fareBasis, parPrice);
+		
+		long endTime = System.currentTimeMillis();
+		logger.info("过滤耗时：" + (endTime - time1) + "毫秒");
+		logger.info("获取政策总耗时：" + (endTime - startTime) + "毫秒");
+		return iftPolicyList;
+	}
+	
+	@Override
+	public List<IftPolicy> getPolicysByPnr(Agent agent, List<Passenger> passengers, List<Leg> legs, String airline, String fareBasis,
+			String pnr, String pnrContext) {
+		long startTime = System.currentTimeMillis();
+		/* 第一步，组装条件从库里面获取政策 */
+		//TODO 儿童数以及婴儿数暂时还未获取
+		FlightQuery query = policyHelper.packageQuery(agent, legs, airline, passengers.size(), 0, 0);
+		List<IftPolicy> iftPolicyList = iftQueryPolicyMapper.query(query);
+		
+		long time1 = System.currentTimeMillis();
+		logger.info("数据库获取政策耗时：" + (time1 - startTime) + "毫秒");
+		
+		/* 第二步，再逐步过滤政策条件 */
+		iftPolicyList = policyHelper.ruleFilterByPnr(iftPolicyList, passengers, legs, query, fareBasis, pnr, pnrContext);
+		
+		long endTime = System.currentTimeMillis();
+		logger.info("过滤耗时：" + (endTime - time1) + "毫秒");
+		logger.info("获取政策总耗时：" + (endTime - startTime) + "毫秒");
+		return iftPolicyList;
 	}
 	
 	/**

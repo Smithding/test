@@ -13,24 +13,22 @@
 
 package com.tempus.gss.product.ift.service;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import com.tempus.gss.cps.entity.Channel;
-import com.tempus.gss.cps.entity.Customer;
-import com.tempus.gss.cps.service.IChannelService;
-import com.tempus.gss.cps.service.ICustomerService;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.tempus.gss.cps.entity.Channel;
+import com.tempus.gss.cps.entity.Customer;
+import com.tempus.gss.cps.service.IChannelService;
+import com.tempus.gss.cps.service.ICustomerService;
 import com.tempus.gss.exception.GSSException;
 import com.tempus.gss.product.ift.api.entity.Profit;
 import com.tempus.gss.product.ift.api.entity.vo.ProfitVO;
@@ -258,6 +256,16 @@ public class ProfitServiceImpl implements IProfitService {
 			throw new GSSException("删除国际控润失败", "0103", "传入参数有误");
 		}
 		return i;
+	}
+
+	@Override
+	public Profit getIftProfit(Agent agent) {
+		
+		List<Profit> profits = profitDao.getProfitByCustomerNo(agent.getOwner(), agent.getNum());
+		if(CollectionUtils.isEmpty(profits)){
+			profits = profitDao.getProfitByCustomerTypeNo(agent.getOwner(), agent.getType());
+		}
+		return CollectionUtils.isEmpty(profits)?null : profits.get(0);
 	}
 
 }

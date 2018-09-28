@@ -2,7 +2,7 @@ package com.tempus.gss.product.unp.dao;
 
 import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.product.unp.api.entity.UnpSale;
-import com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo;
+import com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public interface UnpSaleMapper {
     
     UnpSale selectByPrimaryKey(Long saleOrderNo);
     
-    List<UnpSale> queryOrderList(Page<UnpSale> page, UnpOrderVo param);
+    List<UnpSale> queryOrderList(Page<UnpSale> page, UnpOrderQueryVo param);
     
     int updateByPrimaryKeySelective(UnpSale record);
     

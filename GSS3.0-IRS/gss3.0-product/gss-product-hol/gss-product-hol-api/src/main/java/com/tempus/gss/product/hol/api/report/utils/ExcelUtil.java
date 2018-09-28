@@ -1,7 +1,6 @@
 package com.tempus.gss.product.hol.api.report.utils;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFDateUtil;
+import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -86,6 +85,60 @@ public class ExcelUtil {
         } else {
             return String.valueOf(xssfCell.getStringCellValue());
         }
+    }
+
+    /**
+     * 导出Excel
+     * @param sheetName sheet名称
+     * @param title 标题
+     * @param values 内容
+     * @param wb HSSFWorkbook对象
+     * @return
+     */
+    public static HSSFWorkbook getHSSFWorkbook(String sheetName, String[] title, String [][]values, HSSFWorkbook wb){
+
+        // 创建一个HSSFWorkbook，对应一个Excel文件
+        if(wb == null){
+            wb = new HSSFWorkbook();
+        }
+
+        // 在workbook中添加一个sheet,对应Excel文件中的sheet
+        HSSFSheet sheet = wb.createSheet(sheetName);
+
+        //设置列宽
+        sheet.setColumnWidth(0, 3766);
+        sheet.setColumnWidth(1, 3766);
+        sheet.setColumnWidth(2, 3766);
+        sheet.setColumnWidth(3, 3766);
+
+        // 在sheet中添加表头第0行,注意老版本poi对Excel的行数列数有限制
+        HSSFRow row = sheet.createRow(0);
+
+        // 创建单元格，并设置值表头 设置表头居中
+        HSSFCellStyle style = wb.createCellStyle();
+        style.setAlignment(HSSFCellStyle.ALIGN_CENTER); // 创建一个居中格式
+
+        //声明列对象
+        HSSFCell cell = null;
+
+        //创建标题
+        for(int i=0;i<title.length;i++){
+            cell = row.createCell(i);
+            cell.setCellValue(title[i]);
+            cell.setCellStyle(style);
+        }
+
+        //创建内容
+        for(int i=0;i<values.length;i++){
+            row = sheet.createRow(i + 1);
+            for(int j=0;j<values[i].length;j++){
+                //将内容按顺序赋给对应的列对象
+                HSSFCell cell1 = row.createCell(j);
+                cell1.setCellValue(values[i][j]);
+                cell1.setCellStyle(style);
+            }
+        }
+        return wb;
     }
 }
 

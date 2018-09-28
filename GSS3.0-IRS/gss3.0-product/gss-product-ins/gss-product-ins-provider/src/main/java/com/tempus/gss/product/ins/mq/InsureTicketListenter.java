@@ -1,5 +1,6 @@
 package com.tempus.gss.product.ins.mq;
 
+import com.alibaba.druid.support.json.JSONUtils;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.tempus.gss.dps.order.entity.sale.Sale;
 import com.tempus.gss.dps.order.entity.sale.SaleItem;
@@ -50,6 +51,7 @@ public class InsureTicketListenter {
         @RabbitHandler
         public void processLogRecord(TicketMessage ticketMessage){
                 logger.info("-------保险订单投保-----收到出票消息:"+ticketMessage.getOwner()+","+ticketMessage.getOrderNo()+","+ticketMessage.getTradeNo());
+                logger.info("-------保险订单投保-----机票数据为:"+ticketMessage.toString());
                 boolean result  = false;
                 Agent agent = new Agent(ticketMessage.getOwner(), "sys");
                 try{
@@ -71,14 +73,16 @@ public class InsureTicketListenter {
                                 if(ispay){
                                        // List<Sale> sales = saleService.getByTradeNo(AgentUtil.getAgent(),ticketMessage.getTradeNo());
                                         requestWithActor.setEntity(saleOrderExt.getSaleOrderNo());
+                                        Thread.sleep(2000);
                                         List<Sale> sales = saleService.getByTradeNo(agent,ticketMessage.getTradeNo());
                                         for(SaleOrderExt saleOrderExtTwo:saleOrderExtList){
                                                 for(SaleOrderDetail saleOrderDetail:saleOrderExtTwo.getSaleOrderDetailList()){
                                                         for(Sale sale:sales){
                                                                 for(SaleItem saleItem:sale.getItems()){
-                                                                        if(saleOrderExtTwo.getExtendedFieldsJson().contains(saleItem.getFlightNo())&&saleOrderDetail.getInsuredName().equals(saleItem.getName())){
+                                                                        if(saleOrderExtTwo.getExtendedFieldsJson().contains(saleItem.getFlightNo())&&saleOrderDetail.getInsuredName().equals(saleItem.getName())&&saleOrderDetail.getBillNo()==null){
                                                                                 saleOrderDetail.setBillNo(saleItem.getTicketNo());
                                                                                 saleOrderDetailDao.updateByPrimaryKeySelective(saleOrderDetail);
+                                                                                logger.info("-------------------该保险订单的票号为:"+saleItem.getTicketNo());
                                                                         }
                                                                 }
                                                         }
@@ -95,6 +99,7 @@ public class InsureTicketListenter {
                         }
 
                 } catch (Exception ex) {
+                        ex.printStackTrace();
                         logger.error("----------------查询保险订单出错！ 交易单号:"+ticketMessage.getTradeNo());
                         throw new GSSException("已出票保险订单投保失败！","003","已出票保险订单投保失败！");
                 }

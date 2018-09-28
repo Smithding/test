@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.shiro.util.CollectionUtils;
@@ -26,23 +27,25 @@ import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.CabinsPricesTotals;
 import com.tempus.gss.product.ift.api.entity.Flight;
 import com.tempus.gss.product.ift.api.entity.PassengerTypePricesTotal;
+import com.tempus.gss.product.ift.api.entity.Profit;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.vo.FlightQueryRequest;
 import com.tempus.gss.product.ift.api.service.FliePriceMappingService;
 import com.tempus.gss.product.ift.api.service.IMultipassMappingService;
 import com.tempus.gss.product.ift.api.service.IPolicyRService;
+import com.tempus.gss.product.ift.api.service.IProfitService;
+import com.tempus.gss.product.ift.api.service.policy.IftPolicyService;
 import com.tempus.gss.product.ift.api.service.search.IftFlightQueryService;
 import com.tempus.gss.product.ift.api.service.search.NewQueryService;
 import com.tempus.gss.product.ift.api.utils.ThreadExecutor;
-import com.tempus.gss.product.ift.dao.ProfitDao;
+import com.tempus.gss.product.ift.help.IftPolicyHelper;
+import com.tempus.gss.system.service.IParamService;
 import com.tempus.gss.vo.Agent;
 import com.tempus.tbd.service.IAirportService;
 import com.tempus.tbe.service.IShoppingService;
 
-/**
- * Created by 杨威 on 2016/10/12.
- */
+
 @Service
 @EnableAutoConfiguration
 public class NewQueryServiceImpl implements NewQueryService {
@@ -69,7 +72,7 @@ public class NewQueryServiceImpl implements NewQueryService {
 	@Reference
 	IMultipassMappingService multipassMappingService;
 	@Autowired
-	ProfitDao profitDao;
+	private IProfitService iProfitService;
 	@Reference
 	protected ICustomerService customerService;
 	@Autowired
@@ -78,10 +81,16 @@ public class NewQueryServiceImpl implements NewQueryService {
 	ILogService logService;
 	@Autowired
 	IPolicyRService policyRService;
-	@Reference
+	@Autowired
 	IftFlightQueryService iftFlightQueryService;
 	@Autowired
 	private IftFlightQueryUtils iftFlightQueryUtils;
+	@Autowired
+	IftPolicyService policyService;
+	@Reference
+	protected IParamService paramService;
+	@Autowired
+	protected IftPolicyHelper iftPolicyHelper;
 	@Value("${ift.iataNo}")
 	private String iataNo;
 	@Value("${ift.office}")
@@ -126,10 +135,14 @@ public class NewQueryServiceImpl implements NewQueryService {
 		}
 		List<QueryIBEDetail> queryIBEDetailList = shoppingFlightRun.getQueryIBEDetailList();// shoppring结果集
 		List<IftPolicy> policyList = flightPolicyRun.getIftPolicyList();// 政策结果集
+		Profit profit = iProfitService.getIftProfit(agent);// 控润信息
+		boolean calcRound = iftPolicyHelper.getCalcRound(agent);//销售结算价格是否取整
+		// 参数获取国际机票计算规则
+		int calcRule = StringUtils.isBlank(paramService.getValueByKey("ift_calc_rule")) ? 1 : Integer.parseInt(paramService.getValueByKey("ift_calc_rule"));
 		List<QueryIBEDetail> newQueryIBEDetailList = new ArrayList<QueryIBEDetail>();
 		for (QueryIBEDetail queryIBEDetail : queryIBEDetailList) {
 			QueryIBEDetail detail = iftFlightQueryService.mappingPriceSpec(queryIBEDetail, policyList,
-					flightQuery.getCustomerType(), agent);
+					flightQuery.getCustomerType(), flightQueryRequest,calcRound,calcRule,profit);
 			newQueryIBEDetailList.add(detail);
 		}
 		log.info("开始组装数据");
@@ -172,12 +185,20 @@ public class NewQueryServiceImpl implements NewQueryService {
 			return null;
 		}
 		log.info("开始匹配政策");
+		long startTime = System.currentTimeMillis();
+		Profit profit = iProfitService.getIftProfit(agent);// 控润信息
+		boolean calcRound = iftPolicyHelper.getCalcRound(agent);//销售结算价格是否取整
+		// 参数获取国际机票计算规则
+		int calcRule = StringUtils.isBlank(paramService.getValueByKey("ift_calc_rule")) ? 1 : Integer.parseInt(paramService.getValueByKey("ift_calc_rule"));
 		List<QueryIBEDetail> newQueryIBEDetailList = new ArrayList<QueryIBEDetail>();
 		for (QueryIBEDetail queryIBEDetail : flightCabinRun.getQueryIBEDetails()) {
 			QueryIBEDetail detail = iftFlightQueryService.mappingPriceSpec(queryIBEDetail,
-					flightPolicyRun.getIftPolicyList(), flightQuery.getCustomerType(), agent);
+					flightPolicyRun.getIftPolicyList(), flightQuery.getCustomerType(), flightQueryRequest,calcRound,calcRule,profit);
 			newQueryIBEDetailList.add(detail);
 		}
+		
+		long endTime = System.currentTimeMillis();
+		log.info("开始匹配政策，耗时：" + (endTime - startTime) + "毫秒");
 		return newQueryIBEDetailList;
 	}
 	/**

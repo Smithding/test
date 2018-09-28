@@ -12,6 +12,7 @@
         <result column="POLICY" jdbcType="INTEGER" property="policy"/>
         <result column="ADDITIONAL_INFO" jdbcType="VARCHAR" property="additionalInfo"/>
         <result column="VALID" jdbcType="INTEGER" property="valid"/>
+        <result column="PRODUCTNAME" jdbcType="VARCHAR" property="productName"/>
     </resultMap>
     <sql id="Base_Column_List">
     ITEM_ID, SALE_ORDER_NO, UNP_TYPE, NUM, GROUP_AMOUNT, ITEM_STATUS, CHANGE_TYPE, POLICY,
@@ -23,11 +24,12 @@
         from UNP_SALE_ITEM
         where ITEM_ID = #{itemId,jdbcType=BIGINT}
     </select>
-    <select id="selectItems" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo" resultMap="BaseResultMap">
-        SELECT USI.*
+    <select id="selectItems" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo" resultMap="BaseResultMap">
+        SELECT USI.*,UIT.NAME AS PRODUCT_NAME
         FROM UNP_SALE_ITEM USI
         LEFT JOIN UNP_SALE US ON US.SALE_ORDER_NO = USI.SALE_ORDER_NO
         LEFT JOIN UNP_BUY UB ON UB.SALE_ORDER_NO = USI.SALE_ORDER_NO
+        LEFT JOIN UNP_ITEM_TYPE UIT ON UIT.ITEM_TYPE_NO = USI.UNP_TYPE
         WHERE 1=1
         <if test="saleOrderNo != null">
             AND USI.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
@@ -49,16 +51,6 @@
     delete from UNP_SALE_ITEM
     where ITEM_ID = #{itemId,jdbcType=BIGINT}
   </delete>
-    <insert id="insert" parameterType="com.tempus.gss.product.unp.api.entity.UnpSaleItem">
-    insert into UNP_SALE_ITEM (ITEM_ID, SALE_ORDER_NO, UNP_TYPE,
-      NUM, GROUP_AMOUNT, ITEM_STATUS,
-      CHANGE_TYPE, POLICY, ADDITIONAL_INFO,
-      VALID)
-    values (#{itemId,jdbcType=BIGINT}, #{saleOrderNo,jdbcType=BIGINT}, #{unpType,jdbcType=INTEGER},
-      #{num,jdbcType=INTEGER}, #{groupAmount,jdbcType=DECIMAL}, #{itemStatus,jdbcType=INTEGER},
-      #{changeType,jdbcType=INTEGER}, #{policy,jdbcType=INTEGER}, #{additionalInfo,jdbcType=VARCHAR},
-      #{valid,jdbcType=INTEGER})
-  </insert>
     <insert id="insertSelective" parameterType="com.tempus.gss.product.unp.api.entity.UnpSaleItem">
         insert into UNP_SALE_ITEM
         <trim prefix="(" suffix=")" suffixOverrides=",">

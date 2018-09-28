@@ -1,21 +1,35 @@
 package com.tempus.gss.product.ift.service.search;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSONObject;
+import com.tempus.gss.bbp.util.DateUtil;
 import com.tempus.gss.product.common.entity.RequestWithActor;
+import com.tempus.gss.product.ift.api.entity.Flight;
+import com.tempus.gss.product.ift.api.entity.Leg;
+import com.tempus.gss.product.ift.api.entity.Passenger;
+import com.tempus.gss.product.ift.api.entity.PnrPassenger;
+import com.tempus.gss.product.ift.api.entity.Profit;
 import com.tempus.gss.product.ift.api.entity.QueryIBEDetail;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
+import com.tempus.gss.product.ift.api.entity.policy.IftPolicyChange;
 import com.tempus.gss.product.ift.api.entity.search.FlightQuery;
 import com.tempus.gss.product.ift.api.entity.vo.FlightQueryRequest;
+import com.tempus.gss.product.ift.api.service.IProfitService;
+import com.tempus.gss.product.ift.api.service.policy.IftPolicyService;
 import com.tempus.gss.product.ift.api.service.search.IftFlightQueryService;
 import com.tempus.gss.product.ift.dao.policy.IftQueryPolicyMapper;
-import com.tempus.gss.util.JsonUtil;
+import com.tempus.gss.product.ift.help.IftPolicyHelper;
+import com.tempus.gss.system.service.IParamService;
+import com.tempus.gss.util.Collections;
 import com.tempus.gss.vo.Agent;
 import com.tempus.tbe.entity.AvailableJourney;
 
@@ -42,17 +56,59 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 	private IftQueryPolicyMapper iftQueryPolicyMapper;
 	@Autowired
 	private IftFlightQueryUtils fftFlightQueryUtils;
-	private IftPolicyRuleUtils ruleUtils;
+	@Autowired
+	private IftPolicyHelper policyHelper;
+	
+	@Autowired
+	private IftPolicyService policyService;
+	
+	@Autowired
+	private IProfitService iProfitService;
+	
+	@Reference
+	protected IParamService paramService;
+	@Autowired
+	protected IftPolicyHelper iftPolicyHelper;
+	
 	@Override
-	public QueryIBEDetail mappingPriceSpec(QueryIBEDetail queryIBEDetail,List<IftPolicy> iftPolicyList,String customerTypeNo, Agent agent) {
-		// TODO Auto-generated method stub
-		//List<IftPolicy> iftPolicies = this.matcPolicy(request);
-		/*if(!CollectionUtils.isEmpty(iftPolicyList)){
-			iftPolicyList = Collections.filter(iftPolicyList, (policy) -> 
-				ruleUtils.matcheAirline(policy, queryIBEDetail.getTicketAirline()));
-				queryIBEDetail.setIftPolicies(iftPolicyList);
-		}*/
-		QueryIBEDetail detail  = CalculatePriceUtils.fligthCalculate(queryIBEDetail,iftPolicyList, 1);
+	public QueryIBEDetail mappingPriceSpec(QueryIBEDetail queryIBEDetail,List<IftPolicy> iftPolicyList,String customerTypeNo, RequestWithActor<FlightQueryRequest> request,boolean calcRound,int calcRule,Profit profit) {
+		
+		/* 组装航程信息 */
+		List<Leg> legs = new ArrayList<Leg>();
+		for (Flight flights : queryIBEDetail.getFlights()) {
+			Leg leg = new Leg();
+			String airline = flights.getAirline();
+			String flightNo = flights.getFlightNo();
+			String shareCode = flights.getCodeshare();
+			if(StringUtils.isNotBlank(flights.getCodeshare()) && !flights.getCodeshare().contains("null")){
+				airline = shareCode.substring(0, 2);
+				flightNo = shareCode.substring(2);
+			}
+			leg.setAirline(airline);//航司
+			leg.setFlightNo(flightNo);//航班号
+			leg.setDepTime(flights.getDepTime());//起飞时间
+            leg.setArrTime(flights.getArrTime());//到达时间.
+            leg.setCabin(flights.getFlightCabinPriceVos().get(0).getCabin());
+            leg.setArrAirport(flights.getArrAirport());//到达机场.
+			leg.setDepAirport(flights.getDepAirport());//起点机场.
+            leg.setGoBack(flights.getDirection().equals("go")?1:2);//方向标识 go/back
+            leg.setStopAirport(flights.getStopOverAirport());//经停机场
+            leg.setLegNo(Long.parseLong(String.valueOf(flights.getFlightNum())));
+            legs.add(leg);
+		}
+		int adtCount = request.getEntity().getAdultCount();
+		int chdCount = request.getEntity().getChildCount();
+		int infCount = request.getEntity().getInfantCount();
+		FlightQuery query = policyHelper.packageQuery(request.getAgent(), legs, queryIBEDetail.getTicketAirline(), adtCount, chdCount, infCount);
+		
+		/* 航班查询政策时，先过滤一次航司 */
+		IftPolicyRuleUtils iftPolicyRuleUtils = new IftPolicyRuleUtils();
+		iftPolicyList = Collections.filter(iftPolicyList, (iftPolicy) -> iftPolicyRuleUtils.matcheAirline(iftPolicy, query.getAirline()));
+		
+		iftPolicyList = policyHelper.ruleFilter(iftPolicyList, legs, query, 
+				queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFareBasis(), 
+				queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFare().doubleValue());
+		QueryIBEDetail detail  = CalculatePriceUtils.fligthCalculate(queryIBEDetail,iftPolicyList, calcRule,profit,calcRound);
 		return detail;
 	}
 	@Override
@@ -66,5 +122,88 @@ public class IftFlightQueryServiceImpl implements IftFlightQueryService {
 		FlightQuery query = fftFlightQueryUtils.getFlightQueryParam(request);
 		List<IftPolicy> iftPolicyList = iftQueryPolicyMapper.query(query);
 		return iftPolicyList;
+	}
+	@Override
+	public List<IftPolicyChange> orderPolicy(Agent agent,QueryIBEDetail queryIBEDetail, int adtNumber, int chdNumber, int infNumber) {
+		/* 组装航程信息 */
+		List<Leg> legs = new ArrayList<Leg>();
+		for (Flight flights : queryIBEDetail.getFlights()) {
+			Leg leg = new Leg();
+			String airline = flights.getAirline();
+			String flightNo = flights.getFlightNo();
+			String shareCode = flights.getCodeshare();
+			if(StringUtils.isNotBlank(flights.getCodeshare()) && !flights.getCodeshare().contains("null")){
+				airline = shareCode.substring(0, 2);
+				flightNo = shareCode.substring(2);
+			}
+			leg.setAirline(airline);//航司
+			leg.setFlightNo(flightNo);//航班号
+			leg.setDepTime(flights.getDepTime());//起飞时间
+            leg.setArrTime(flights.getArrTime());//到达时间.
+            leg.setCabin(flights.getFlightCabinPriceVos().get(0).getCabin()==null?"":flights.getFlightCabinPriceVos().get(0).getCabin());
+            leg.setArrAirport(flights.getArrAirport());//到达机场.
+			leg.setDepAirport(flights.getDepAirport());//起点机场.
+            leg.setGoBack(flights.getDirection().equals("go")?1:2);//方向标识 go/back
+            leg.setStopAirport(flights.getStopOverAirport());//经停机场
+            leg.setLegNo(Long.parseLong(String.valueOf(flights.getFlightNum())));
+            legs.add(leg);
+		}
+		Profit profit = iProfitService.getIftProfit(agent);// 控润信息
+		boolean calcRound = iftPolicyHelper.getCalcRound(agent);//销售结算价格是否取整
+		List<IftPolicy> iftPolicyList = policyService.getPolicys(agent, legs, queryIBEDetail.getTicketAirline(), queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFareBasis()
+				, queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFare().doubleValue(), adtNumber, chdNumber, infNumber);
+		
+		// 参数获取国际机票计算规则
+		int calcRule = StringUtils.isBlank(paramService.getValueByKey("ift_calc_rule")) ? 1 : Integer.parseInt(paramService.getValueByKey("ift_calc_rule"));
+		List<IftPolicyChange> policyChanges = CalculatePriceUtils.orderPolicyCalculate(queryIBEDetail,iftPolicyList,calcRule,profit,calcRound);
+		return policyChanges;
+	}
+	@Override
+	public List<IftPolicyChange> orderPolicyByPnr(Agent agent, QueryIBEDetail queryIBEDetail, String pnr, String pnrContext) {
+		
+		List<Passenger> passengers = new ArrayList<Passenger>();
+		for (PnrPassenger pnrPassenger : queryIBEDetail.getPnrPassengers()) {
+			Passenger passenger = new Passenger();
+			passenger.setPassengerType(pnrPassenger.getPassengerstype());//乘客类型
+			passenger.setPassengerBirth(DateUtil.getDate(pnrPassenger.getPassengerbirthday(), DateUtil.DATAFORMAT_STR));//乘客生日
+			passenger.setName(pnrPassenger.getPassengername());//乘客名字
+			passenger.setGender(pnrPassenger.getPassengersex());////乘机人性别 ( MR MS  CHD  OTHER)
+			passenger.setCertNo(pnrPassenger.getPassengeridentitynumber());//证件号码
+			passenger.setCertType(pnrPassenger.getPassengeridentitytype());//证件类型
+			passenger.setSaleFare(queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFare());
+			passengers.add(passenger);
+		}
+		
+		/* 组装航程信息 */
+		List<Leg> legs = new ArrayList<Leg>();
+		for (Flight flights : queryIBEDetail.getFlights()) {
+			Leg leg = new Leg();
+			String airline = flights.getAirline();
+			String flightNo = flights.getFlightNo();
+			String shareCode = flights.getCodeshare();
+			if(StringUtils.isNotBlank(flights.getCodeshare()) && !flights.getCodeshare().contains("null")){
+				airline = shareCode.substring(0, 2);
+				flightNo = shareCode.substring(2);
+			}
+			leg.setAirline(airline);//航司
+			leg.setFlightNo(flightNo);//航班号
+			leg.setDepTime(flights.getDepTime());//起飞时间
+            leg.setArrTime(flights.getArrTime());//到达时间.
+            leg.setCabin(flights.getFlightCabinPriceVos().get(0).getCabin()==null?"":flights.getFlightCabinPriceVos().get(0).getCabin());
+            leg.setArrAirport(flights.getArrAirport());//到达机场.
+			leg.setDepAirport(flights.getDepAirport());//起点机场.
+            leg.setGoBack(flights.getDirection().equals("go")?1:2);//方向标识 go/back
+            leg.setStopAirport(flights.getStopOverAirport());//经停机场
+            leg.setCabin(flights.getFlightCabinPriceVos().get(0).getCabin());
+            leg.setLegNo(Long.parseLong(String.valueOf(flights.getFlightNum())));
+            legs.add(leg);
+		}
+		Profit profit = iProfitService.getIftProfit(agent);// 控润信息
+		boolean calcRound = iftPolicyHelper.getCalcRound(agent);//销售结算价格是否取整
+		List<IftPolicy> iftPolicyList = policyService.getPolicysByPnr(agent, passengers, legs, queryIBEDetail.getTicketAirline(),  queryIBEDetail.getCabinsPricesTotalses().get(0).getPassengerTypePricesTotals().get(0).getFareBasis(), pnr, pnrContext);
+		// 参数获取国际机票计算规则
+		int calcRule = StringUtils.isBlank(paramService.getValueByKey("ift_calc_rule")) ? 1 : Integer.parseInt(paramService.getValueByKey("ift_calc_rule"));
+		List<IftPolicyChange> policyChanges = CalculatePriceUtils.orderPolicyCalculate(queryIBEDetail,iftPolicyList,calcRule,profit,calcRound);
+		return policyChanges;
 	}
 }

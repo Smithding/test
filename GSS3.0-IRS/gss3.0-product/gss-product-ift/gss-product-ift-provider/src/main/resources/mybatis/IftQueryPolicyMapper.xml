@@ -34,30 +34,30 @@
     	<if test="null != voyageType">	AND (T1.VOYAGE_TYPE=#{voyageType} OR T1.VOYAGE_TYPE=3) </if>
     	<if test=" null != flyDate">
 			AND T1.FLY_START_DATE &lt;= #{flyDate}
-		</if>
-		<if test=" null != flyDate">
 			AND T1.FLY_END_DATE &gt;= #{flyDate}
+			<!-- 提前开票天数 -->
+			AND (T1.TICKET_RANGE IS NULL OR DATE_FORMAT(NOW(),'%Y-%m-%d') &lt; DATE_FORMAT(DATE_ADD(#{flyDate}, INTERVAL -CAST(T1.TICKET_RANGE AS SIGNED INTEGER) DAY),'%Y-%m-%d'))
 		</if>
 		<if test=" null != rtnFlyDate">
 			AND T1.RTN_START_DATE &lt;= #{rtnFlyDate}
-		</if>
-		<if test=" null != rtnFlyDate">
 			AND T1.RTN_END_DATE &gt;= #{rtnFlyDate}
 		</if>
 		<!-- 开始销售时间sql组装 -->
+		AND NOW() &gt;= T1.TICKET_VALID_START_DATE
+		AND NOW() &lt;= T1.TICKET_VALID_END_DATE
 		<if test=" null != saleWeek &amp;&amp; 1 &lt;= saleWeek &amp;&amp; 5 &gt;= saleWeek">
-			AND NOW() &gt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(LEFT(T1.TICKET_DATE,LOCATE('-',T1.TICKET_DATE)-1)),':00'),'%Y-%m-%d %H:%i:%s'))
-			AND NOW() &lt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(RIGHT(T1.TICKET_DATE,LOCATE('-',T1.TICKET_DATE)-1)),':00'),'%Y-%m-%d %H:%i:%s'))
+			AND NOW() &gt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(SUBSTRING_INDEX(T1.TICKET_DATE,'-',1)),':00'),'%Y-%m-%d %H:%i:%s'))
+			AND NOW() &lt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(SUBSTRING_INDEX(T1.TICKET_DATE,'-',-1)),':00'),'%Y-%m-%d %H:%i:%s'))
 		</if>
 		<if test=" null != saleWeek &amp;&amp; 6 == saleWeek ">
 			AND T1.SAT_IS_TICKET = 1 
-			AND NOW() &gt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(LEFT(T1.SAT_TICKET_DATE,LOCATE('-',T1.SAT_TICKET_DATE)-1)),':00'),'%Y-%m-%d %H:%i:%s'))
-			AND NOW() &lt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(RIGHT(T1.SAT_TICKET_DATE,LOCATE('-',T1.SAT_TICKET_DATE)-1)),':00'),'%Y-%m-%d %H:%i:%s'))
+			AND NOW() &gt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(SUBSTRING_INDEX(T1.SAT_TICKET_DATE,'-',1)),':00'),'%Y-%m-%d %H:%i:%s'))
+			AND NOW() &lt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(SUBSTRING_INDEX(T1.SAT_TICKET_DATE,'-',-1)),':00'),'%Y-%m-%d %H:%i:%s'))
 		</if>
 		<if test=" null != saleWeek &amp;&amp; 7 == saleWeek ">
 			AND T1.SUN_IS_TICKET = 1 
-			AND NOW() &gt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(LEFT(T1.SUN_TICKET_DATE,LOCATE('-',T1.SUN_TICKET_DATE)-1)),':00'),'%Y-%m-%d %H:%i:%s'))
-			AND NOW() &lt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(RIGHT(T1.SUN_TICKET_DATE,LOCATE('-',T1.SUN_TICKET_DATE)-1)),':00'),'%Y-%m-%d %H:%i:%s'))
+			AND NOW() &gt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(SUBSTRING_INDEX(T1.SUN_TICKET_DATE,'-',1)),':00'),'%Y-%m-%d %H:%i:%s'))
+			AND NOW() &lt;= (STR_TO_DATE(CONCAT(DATE_FORMAT(NOW(),'%Y-%m-%d'),' ',(SUBSTRING_INDEX(T1.SUN_TICKET_DATE,'-',-1)),':00'),'%Y-%m-%d %H:%i:%s'))
 		</if>
 		<!-- 出发机场组装 -->
 		<if test="null != departAirport &amp;&amp; '' != departAirport">
@@ -75,8 +75,8 @@
 				OR (T1.DEPART_COUNTRY = 'A00' AND T1.DEPART_EXCLUDE_COUNTRY not like '%${departCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${departAirport}%')
 				)
 		</if>
-		<!-- 到达机场组装 -->
-		<if test="null != arriveAirport &amp;&amp; '' != arriveAirport">
+		<!-- 到达机场组装,分俩种情况，一种是往返，一种是非往返 -->
+		<if test="null == rtnAirport &amp;&amp; null != arriveAirport &amp;&amp; '' != arriveAirport">
 			AND ((T1.ARRIVE_AIRPORT like '%${arriveAirport}%') 
 				OR (T1.ARRIVE_COUNTRY like '%${arriveCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
 				<!-- 境外 -->
@@ -91,11 +91,26 @@
 				OR (T1.ARRIVE_COUNTRY = 'A00' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
 				)
 		</if>
+		<if test="null != rtnAirport &amp;&amp; '' != rtnAirport">
+			AND ((T1.ARRIVE_AIRPORT like '%${rtnAirport}%') 
+				OR (T1.ARRIVE_COUNTRY like '%${rtnCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${rtnAirport}%')
+				<!-- 境外 -->
+				<if test="'I'.toString() == arriveSign">
+					OR (T1.ARRIVE_COUNTRY = 'CN1' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${rtnCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${rtnAirport}%')
+				</if>
+				<!-- 境内 -->
+				<if test="'D'.toString() == arriveSign">
+					OR (T1.ARRIVE_COUNTRY = 'CN0' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${rtnCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${rtnAirport}%')
+				</if>
+				<!-- 全球 -->
+				OR (T1.ARRIVE_COUNTRY = 'A00' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${rtnCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${rtnAirport}%')
+				)
+		</if>
 		<if test=" null != psgerNum">
 			AND (T1.SUIT_PEOPLE_NUMBER IS NULL 
 			OR  T1.SUIT_PEOPLE_NUMBER = '-' 
-			OR (CAST(LEFT(T1.SUIT_PEOPLE_NUMBER,LOCATE('-',T1.SUIT_PEOPLE_NUMBER)-1) AS SIGNED) &lt;= #{psgerNum}
-				AND CAST(RIGHT(T1.SUIT_PEOPLE_NUMBER,LOCATE('-',T1.SUIT_PEOPLE_NUMBER)-1) AS SIGNED) &gt;= #{psgerNum}))
+			OR (CAST(SUBSTRING_INDEX(T1.SUIT_PEOPLE_NUMBER,'-',1) AS SIGNED) &lt;= #{psgerNum}
+				AND CAST(SUBSTRING_INDEX(T1.SUIT_PEOPLE_NUMBER,'-',-1) AS SIGNED) &gt;= #{psgerNum}))
 		</if>
 		<if test=" null != psgerEven &amp;&amp; false == psgerEven">
 			AND (T1.SUIT_DOUBLE_PEOPLE IS NULL OR T1.SUIT_DOUBLE_PEOPLE = FALSE)   

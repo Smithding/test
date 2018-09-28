@@ -13,14 +13,17 @@ public class UnpBuyRefundItem implements Serializable {
     private Long itemId;
     
     /**
-     * 销售单号
+     * 采购退单号
      */
     private Long buyRefundOrderNo;
-    
+    /**
+     * 销售明细退单号
+     */
+    private Long saleRefundItemNo;
     /**
      * 产品类型
      */
-    private Integer unpType;
+    private Long unpType;
     
     /**
      * 数量
@@ -49,6 +52,14 @@ public class UnpBuyRefundItem implements Serializable {
      */
     private Integer valid;
     
+    public Long getSaleRefundItemNo() {
+        return saleRefundItemNo;
+    }
+    
+    public void setSaleRefundItemNo(Long saleRefundItemNo) {
+        this.saleRefundItemNo = saleRefundItemNo;
+    }
+    
     private static final long serialVersionUID = 1L;
     
     public Long getItemId() {
@@ -67,11 +78,11 @@ public class UnpBuyRefundItem implements Serializable {
         this.buyRefundOrderNo = buyRefundOrderNo;
     }
     
-    public Integer getUnpType() {
+    public Long getUnpType() {
         return unpType;
     }
     
-    public void setUnpType(Integer unpType) {
+    public void setUnpType(Long unpType) {
         this.unpType = unpType;
     }
     

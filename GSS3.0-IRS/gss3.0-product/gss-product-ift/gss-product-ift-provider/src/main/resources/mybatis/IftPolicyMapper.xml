@@ -254,15 +254,45 @@
     	<if test="null != policyId">	AND T1.ID=#{policyId} </if>
     	<if test="null != flightType">	AND T1.FLIGHT_TYPE=#{flightType} </if>
     	<if test="null != airline &amp;&amp; '' != airline">	AND T1.AIRLINE=#{airline} </if>
-    	<if test="null != departAirport &amp;&amp; '' != departAirport">	AND T1.DEPART_AIRPORT like '%${departAirport}%' </if>
-    	<if test="null != arriveAirport &amp;&amp; '' != arriveAirport">	AND T1.ARRIVE_AIRPORT like '%${arriveAirport}%' </if>
+    	<if test="null != departAirport &amp;&amp; '' != departAirport">
+    		<!-- AND T1.DEPART_AIRPORT like '%${departAirport}%'  -->
+    		AND ((T1.DEPART_AIRPORT like '%${departAirport}%') 
+				OR (T1.DEPART_COUNTRY like '%${departCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${departAirport}%')
+				<!-- 境外 -->
+				<if test="'I'.toString() == departSign">
+					OR (T1.DEPART_COUNTRY = 'CN1' AND T1.DEPART_EXCLUDE_COUNTRY not like '%${departCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${departAirport}%')
+				</if>
+				<!-- 境内 -->
+				<if test="'D'.toString() == departSign">
+					OR (T1.DEPART_COUNTRY = 'CN0' AND T1.DEPART_EXCLUDE_COUNTRY not like '%${departCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${departAirport}%')
+				</if>
+				<!-- 全球 -->
+				OR (T1.DEPART_COUNTRY = 'A00' AND T1.DEPART_EXCLUDE_COUNTRY not like '%${departCountry}%' AND T1.DEPART_EXCLUDE_AIRPORT not like '%${departAirport}%')
+				)
+    	</if>
+    	<if test="null != arriveAirport &amp;&amp; '' != arriveAirport">
+    		<!-- AND T1.ARRIVE_AIRPORT like '%${arriveAirport}%'  -->
+    		AND ((T1.ARRIVE_AIRPORT like '%${arriveAirport}%') 
+				OR (T1.ARRIVE_COUNTRY like '%${arriveCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
+				<!-- 境外 -->
+				<if test="'I'.toString() == arriveSign">
+					OR (T1.ARRIVE_COUNTRY = 'CN1' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
+				</if>
+				<!-- 境内 -->
+				<if test="'D'.toString() == arriveSign">
+					OR (T1.ARRIVE_COUNTRY = 'CN0' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
+				</if>
+				<!-- 全球 -->
+				OR (T1.ARRIVE_COUNTRY = 'A00' AND T1.ARRIVE_EXCLUDE_COUNTRY not like '%${arriveCountry}%' AND T1.ARRIVE_EXCLUDE_AIRPORT not like '%${arriveAirport}%')
+				)
+    	</if>
     	<if test="null != source &amp;&amp; '' != source">	AND T1.SOURCE=#{source} </if>
     	<if test="null != voyageType ">	AND T1.VOYAGE_TYPE=#{voyageType} </if>
     	<if test="null != status ">	AND T1.STATUS=#{status} </if>
     	<if test="null != cabin &amp;&amp; '' != cabin">	AND T1.DEPART_CABIN like '%${cabin}%' </if>
     	<if test="null != ticketOffice &amp;&amp; '' != ticketOffice">	AND T1.TICKET_OFFICE like '%${ticketOffice}%' </if>
     	<if test="null != autoTicket">	AND T1.AUTO_TICKET=#{autoTicket} </if>
-    	<if test="null != ticketWay &amp;&amp; '' != ticketWay">	AND T1.TICKET_WAY=#{ticketWay} </if>
+    	<if test="null != ticketWay &amp;&amp; '' != ticketWay">	AND T1.TICKET_WAY like '%${ticketWay}%' </if>
     	<if test="null != name &amp;&amp; '' != name">	AND T1.NAME=#{name} </if>
     	<if test="null != pnrTicketType">	AND T1.PNR_TICKET_TYPE=#{pnrTicketType} </if>
     	<if test=" null != policyStartDate">

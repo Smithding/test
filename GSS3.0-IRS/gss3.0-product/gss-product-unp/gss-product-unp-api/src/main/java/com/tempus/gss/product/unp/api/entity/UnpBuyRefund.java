@@ -1,18 +1,25 @@
 package com.tempus.gss.product.unp.api.entity;
 
+import com.tempus.gss.product.unp.api.entity.enums.EUnpConstant;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author ZhangBro
  */
 public class UnpBuyRefund implements Serializable {
-    private static final long serialVersionUID = 4820926548845206555L;
+    private static final long serialVersionUID = 650424001017919443L;
     /**
      * 采购退款单号
      */
     private Long buyRefundOrderNo;
+    /**
+     * 采购退款单号
+     */
+    private Long saleRefundOrderNo;
     /**
      * 采购单号
      */
@@ -44,14 +51,15 @@ public class UnpBuyRefund implements Serializable {
     /**
      * 第三方业务单号
      */
-    private Long thirdBusNo;
+    private String thirdBusNo;
     /**
      * 采购价, 退款总额
      */
     private BigDecimal refundAmount;
     /**
      * 采购支付状态,1:未支付(默认); 2:支付中; 3:已支付; 4:挂账支付;
-     * @see com.tempus.gss.product.unp.api.entity.enums.EUnpConstant.PayStatus
+     *
+     * @see EUnpConstant.PayStatus
      */
     private Integer payStatus;
     /**
@@ -65,7 +73,7 @@ public class UnpBuyRefund implements Serializable {
     /**
      * 状态:1待处理;2处理中;3已完成;4已取消
      *
-     * @see EUnpOrderStatus
+     * @see EUnpConstant.OrderStatus
      */
     private Integer status;
     /**
@@ -88,6 +96,45 @@ public class UnpBuyRefund implements Serializable {
      * 删除标志 0 无效 已删除 1 有效
      */
     private Integer valid;
+    
+    /**
+     * 明细单们
+     */
+    private List<UnpBuyRefundItem> items;
+    private String customerName;
+    private String supplierName;
+    
+    public String getCustomerName() {
+        return customerName;
+    }
+    
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+    
+    public String getSupplierName() {
+        return supplierName;
+    }
+    
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
+    }
+    
+    public Long getSaleRefundOrderNo() {
+        return saleRefundOrderNo;
+    }
+    
+    public void setSaleRefundOrderNo(Long saleRefundOrderNo) {
+        this.saleRefundOrderNo = saleRefundOrderNo;
+    }
+    
+    public List<UnpBuyRefundItem> getItems() {
+        return items;
+    }
+    
+    public void setItems(List<UnpBuyRefundItem> items) {
+        this.items = items;
+    }
     
     public Long getBuyRefundOrderNo() {
         return buyRefundOrderNo;
@@ -153,12 +200,8 @@ public class UnpBuyRefund implements Serializable {
         this.changeType = changeType;
     }
     
-    public Long getThirdBusNo() {
-        return thirdBusNo;
-    }
-    
-    public void setThirdBusNo(Long thirdBusNo) {
-        this.thirdBusNo = thirdBusNo;
+    public static long getSerialVersionUID() {
+        return serialVersionUID;
     }
     
     public BigDecimal getRefundAmount() {
@@ -219,6 +262,14 @@ public class UnpBuyRefund implements Serializable {
     
     public String getModifier() {
         return modifier;
+    }
+    
+    public String getThirdBusNo() {
+        return thirdBusNo;
+    }
+    
+    public void setThirdBusNo(String thirdBusNo) {
+        this.thirdBusNo = thirdBusNo;
     }
     
     public void setModifier(String modifier) {

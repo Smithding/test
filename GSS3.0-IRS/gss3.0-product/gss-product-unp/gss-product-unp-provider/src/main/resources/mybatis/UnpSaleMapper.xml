@@ -35,7 +35,7 @@
     <!--
          LEFT JOIN UNP_BUY UB ON UB.SALE_ORDER_NO = US.SALE_ORDER_NO
          LEFT JOIN CPS_SUPPLIER CS ON UB.SUPPLIER_ID = CS.SUPPLIER_NO-->
-    <select id="queryOrderList" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderVo" resultMap="BaseResultMap">
+    <select id="queryOrderList" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo" resultMap="BaseResultMap">
         SELECT US.SALE_ORDER_NO ,US.OWNER ,US.TRA_NO ,US.CUSTOMER_NO ,US.CUSTOMER_TYPE ,US.REMARK ,US.CHANGE_TYPE ,US.PLAN_AMOUNT ,US.ACTUAL_AMOUNT
         ,US.PAY_STATUS ,US.PAY_TIME ,US.STATUS ,US.SOURCE ,US.CREATOR ,US.CREATE_TIME ,US.MODIFIER
         ,US.MODIFY_TIME ,US.VALID,CC.NAME
@@ -69,20 +69,32 @@
         <if test="payTime != null">
             AND US.PAY_TIME = #{payTime,jdbcType=TIMESTAMP}
         </if>
+        <if test="payTimeStart!=null and ''!=payTimeStart">
+            AND US.PAY_TIME <![CDATA[>=]]> CONCAT(#{payTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="payTimeEnd!=null and ''!=payTimeEnd">
+            AND US.PAY_TIME  <![CDATA[<=]]> CONCAT(#{payTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+        </if>
         <if test="status != null">
             AND US.STATUS = #{status,jdbcType=INTEGER}
         </if>
-        <if test="creator != null">
-            AND US.CREATOR LIKE concat('%',concat(#{creator,jdbcType=VARCHAR},'%'))
+        <if test="creator != null and creator!=''">
+            AND US.CREATOR LIKE concat('%',CONCAT(#{creator,jdbcType=VARCHAR},'%'))
         </if>
-        <if test="createTime != null">
-            AND US.CREATE_TIME = #{createTime,jdbcType=TIMESTAMP}
+        <if test="createTimeStart!=null and ''!=createTimeStart">
+            AND US.CREATE_TIME <![CDATA[>=]]> CONCAT(#{createTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
         </if>
-        <if test="modifier != null">
-            AND US.MODIFIER LIKE concat('%',concat(#{modifier,jdbcType=VARCHAR},'%'))
+        <if test="createTimeEnd!=null and ''!=createTimeEnd">
+            AND US.CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
-        <if test="modifyTime != null">
-            AND US.MODIFY_TIME = #{modifyTime,jdbcType=TIMESTAMP}
+        <if test="modifier != null  and modifier!=''">
+            AND US.MODIFIER LIKE concat('%',CONCAT(#{modifier,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="modifyTimeStart != null and ''!=modifyTimeStart">
+            AND US.MODIFY_TIME <![CDATA[>=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="modifyTimeEnd != null and ''!=modifyTimeEnd">
+            AND US.MODIFY_TIME <![CDATA[<=]]> CONCAT(#{modifyTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
         <if test="valid != null">
             AND US.VALID = #{valid,jdbcType=INTEGER}
@@ -291,5 +303,6 @@
             MODIFY_TIME   = #{modifyTime,jdbcType=TIMESTAMP},
             VALID         = #{valid,jdbcType=INTEGER}
         WHERE SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT}
+
     </update>
 </mapper>

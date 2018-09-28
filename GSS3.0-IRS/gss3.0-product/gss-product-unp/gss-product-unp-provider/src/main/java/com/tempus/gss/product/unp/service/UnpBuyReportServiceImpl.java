@@ -13,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
+/**
+ * @author zhangcheng
+ */
 @Service
 public class UnpBuyReportServiceImpl implements UnpBuyReportService {
     private Logger logger = LoggerFactory.getLogger(this.getClass());

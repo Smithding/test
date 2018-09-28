@@ -1,0 +1,117 @@
+---
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 1
+  name: supplierName
+  value: 供应商
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 2
+  name: source
+  value: 订单来源
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 3
+  name: unpName
+  value: 产品名称
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 4
+  name: unpTypeStatus
+  value: 产品状态
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 5
+  name: saleCom
+  value: 销售公司
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 6
+  name: customerName
+  value: 客户名称
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 7
+  name: saleDept
+  value: 销售部门
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 8
+  name: orderingTime
+  value: 交易日期
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 9
+  name: thirdBusNo
+  value: 订单号
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  convert: &20 true
+  index: 10
+  name: passengerName
+  value: 旅客姓名
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  convert: *20
+  index: 11
+  name: price
+  value: 单价
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  convert: *20
+  index: 12
+  name: fee
+  value: 实收手续费
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 13
+  name: planAmount
+  value: 应收金额
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 14
+  name: actualAmount
+  value: 实收金额
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 15
+  name: buyPlanAmount
+  value: 采购应付
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  convert: *20
+  index: 16
+  name: free
+  value: 是否赠送
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 17
+  name: remark
+  value: 备注
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 18
+  name: saler
+  value: 出票人
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 19
+  name: customerService
+  value: 客服
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 20
+  name: serviceLine
+  value: 业务线
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  convert: *20
+  index: 21
+  name: depDate
+  value: 乘车日期
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  convert: *20
+  index: 22
+  name: traNum
+  value: 车次
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  convert: *20
+  index: 23
+  name: leg
+  value: 行程
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  convert: *20
+  index: 24
+  name: num
+  value: 张数
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 25
+  name: payWay
+  value: 收款方式
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 26
+  name: payAccount
+  value: 收款账号
+- !com.tempus.gss.product.unp.api.entity.util.CellProperty
+  index: 27
+  name: payRemark
+  value: 转帐明细备注

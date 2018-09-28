@@ -48,7 +48,18 @@ public class UnpSaleItem implements Serializable {
      * 删除标志 0 无效 已删除 1 有效
      */
     private Integer valid;
-    
+    /*
+    * 小类名称
+    * */
+    private String productName;
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
     private static final long serialVersionUID = 7248601471160558477L;
     
     

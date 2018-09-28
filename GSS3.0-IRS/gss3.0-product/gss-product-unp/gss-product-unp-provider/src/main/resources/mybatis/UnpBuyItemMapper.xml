@@ -12,11 +12,11 @@
         <result column="POLICY" jdbcType="INTEGER" property="policy"/>
         <result column="VALID" jdbcType="INTEGER" property="valid"/>
         <result column="SALE_ITEM_NO" jdbcType="BIGINT" property="saleItemNo"/>
-        <result column="ADDITIONAL_INFO" jdbcType="VARCHAR" property="additionalInfo"/>
+        <result column="PRODUCT_NAME" jdbcType="VARCHAR" property="productName"/>
     </resultMap>
     <sql id="Base_Column_List">
         ITEM_ID, BUY_ORDER_NO, UNP_TYPE, PNUM, CHANGE_TYPE, GROUP_AMOUNT, ITEM_STATUS, POLICY,
-        VALID,SALE_ITEM_NO,ADDITIONAL_INFO
+        VALID,SALE_ITEM_NO
     </sql>
     <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
         select
@@ -66,6 +66,9 @@
             <if test="valid != null">
                 VALID,
             </if>
+            <if test="saleItemNo !=null">
+                SALE_ITEM_NO
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="itemId != null">
@@ -94,6 +97,9 @@
             </if>
             <if test="valid != null">
                 #{valid,jdbcType=INTEGER},
+            </if>
+            <if test="saleItemNo != null">
+                #{saleItemNo,jdbcType=INTEGER},
             </if>
         </trim>
     </insert>
@@ -187,9 +193,10 @@
         AND CHANGE_TYPE=1
     </select>
     <select id="selectItems" parameterType="java.lang.Long" resultMap="BaseResultMap">
-        SELECT UBI.*, USI.ADDITIONAL_INFO
+        SELECT  UBI.*, USI.ADDITIONAL_INFO,UIT.NAME AS PRODUCT_NAME
         FROM UNP_BUY_ITEM              UBI
          LEFT JOIN UNP_SALE_ITEM USI ON USI.ITEM_ID = UBI.SALE_ITEM_NO
+         LEFT JOIN UNP_ITEM_TYPE UIT ON  UIT.ITEM_TYPE_NO = USI.UNP_TYPE
         WHERE  BUY_ORDER_NO = #{buyOrderNo,jdbcType=BIGINT}
     </select>
 </mapper>

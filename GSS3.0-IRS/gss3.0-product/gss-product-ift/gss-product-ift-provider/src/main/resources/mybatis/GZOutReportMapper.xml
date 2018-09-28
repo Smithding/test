@@ -30,6 +30,40 @@
         <result column="END_PRICE" property="endPrice"/>
         <result column="AGENCY_FEE" property="agencyFee"/>
     </resultMap>
+    <resultMap id="queryIssueRecordsMap" type="com.tempus.gss.product.ift.api.entity.GzOutReport">
+        <result column="SALE_ORDER_NO" property="saleOrderNo" />
+        <result column="SALE_CHAGNE_NO" property="saleChangeNo" />
+        <result column="SUPPLIER_NAME" property="supplierName" />
+        <result column="ISSUE_TIME" property="issueTime" />
+        <result column="QUIT_TIME" property="quitTime" />
+        <result column="TICKET_NO" property="ticketNo" />
+        <result column="PNR" property="pnr" />
+        <result column="VOYAGE" property="voyage" />
+        <result column="FLIGHT_NO" property="flightNo" />
+        <result column="CABIN" property="cabin" />
+        <result column="DEP_TIME" property="depTime" />
+        <result column="TRAVEL_TIME" property="travelTime" />
+        <result column="PASSENGER_NAME" property="passengerName" />
+        <result column="PASSENGER_TYPE" property="passengerType" />
+        <result column="NET_PRICE" property="netPrice" />
+        <result column="TAX" property="tax" />
+        <result column="QVALUE" property="qvalue" />
+        <result column="TICKET_TYPE" property="ticketType" />
+        <result column="TICKET_NUM" property="ticketNum" />
+        <result column="BOTTOM_REBATE" property="bottomRebate" />
+        <result column="BACK_REBATE" property="backRebate" />
+        <result column="PLUS_PRICE" property="plusPrice" />
+        <result column="DEPT_PROFIT" property="deptProfit" />
+        <result column="PROFIT" property="profit" />
+        <result column="CUSTOMER_NAME" property="customerName" />
+        <result column="SALE_MAN" property="saleMan" />
+        <result column="DEPT_NAME" property="deptName" />
+        <result column="TICKET_NAME" property="ticketName" />
+        <result column="TICKET_DEPT" property="ticketDept" />
+        <result column="DAYS" property="days" />
+        <result column="AIRLINE" property="airline" />
+        <result column="PASSENGER_NO" property="passengerNo" />
+    </resultMap>
     <select id="queryGZOutReport" resultMap="IftReportResultMap">
         SELECT CS.NAME AS SUPPLIER,ISOE.ISSUE_TIME AS TICKET_DATE,ISOD.TICKET_NO AS TICKET_NO,IPR.PNR AS PNR,CONCAT(IL.DEP_AIRPORT,'-',IL.ARR_AIRPORT) AS
         ROUTING,IL.FLIGHT_NO AS FLIGHT_NO,ISOD.CABIN AS CABIN,IL.DEP_TIME AS DEPART_DATE,CONCAT
@@ -59,9 +93,6 @@
 
 
     </select>
-
-
-
     <sql id="selectSumByDateAndDept">
         <if test="air !=null and air!=''">
             AND IL.AIRLINE ="${air}"
@@ -100,6 +131,332 @@
             AND CC.NAME ="${customer}"
         </if>
     </sql>
+    <sql id="queryIssueRecordsWhere">
+        <if test="goBack !=null">
+            AND t.GO_BACK =${goBack}
+        </if>
+        <if test="airLine !=null and airLine!=''">
+            AND t.AIRLINE ="${airLine}"
+        </if>
+        <if test="ticketNoThr !=null and ticketNoThr!=''">
+            AND t.TICKET_NO LIKE '%${ticketNoThr}%'
+        </if>
+        <if test="ticketNo !=null and ticketNo!=''">
+            AND t.TICKET_NO = "${ticketNo}"
+        </if>
+        <if test="pnr !=null and pnr!=''">
+            AND t.PNR = "${pnr}"
+        </if>
+        <if test="ticketDateStart !=null and ticketDateStart != '' ">
+            <![CDATA[
+                AND  DATE_FORMAT(t.ISSUE_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{ticketDateStart},'%Y-%m-%d')
+                ]]>
+        </if>
+        <if test="ticketDateEnd !=null and ticketDateEnd != '' ">
+            <![CDATA[
+                AND  DATE_FORMAT(t.ISSUE_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{ticketDateEnd},'%Y-%m-%d')
+                ]]>
+        </if>
+        <if test="depDateStart !=null and depDateStart != '' ">
+            <![CDATA[
+                AND  DATE_FORMAT(t.DEP_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{depDateStart},'%Y-%m-%d')
+                ]]>
+        </if>
+        <if test="depDateEnd !=null and depDateEnd != '' ">
+            <![CDATA[
+                AND  DATE_FORMAT(t.ARR_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{depDateEnd},'%Y-%m-%d')
+                ]]>
+        </if>
+        <if test="depAirport !=null and depAirport != '' ">
+            AND t.DEP_AIRPORT = "${depAirport}"
+        </if>
+        <if test="arrAirport !=null and arrAirport != '' ">
+            AND t.ARR_AIRPORT = "${arrAirport}"
+        </if>
+        <if test="supplierName !=null and supplierName != '' ">
+            AND t.SUPPLIER_NAME LIKE "%${supplierName}%"
+        </if>
+        <if test="customerName !=null and customerName != '' ">
+            AND t.CUSTOMER_NAME LIKE "%${customerName}%"
+        </if>
+        <if test="cabins != null and cabins.size() != 0">
+            AND
+            <foreach collection="cabins" item="cabin" index="index" separator="OR" close=")" open="(">
+                     t.CABIN LIKE "%${cabin}%"
+            </foreach>
 
+        </if>
+    </sql>
+    <sql id="queryIssueRecordsSumWhere">
+        <if test="goBack !=null">
+            AND GO_BACK =${goBack}
+        </if>
+        <if test="airLine !=null and airLine!=''">
+            AND AIRLINE ="${airLine}"
+        </if>
+        <if test="ticketNoThr !=null and ticketNoThr!=''">
+            AND TICKET_NO LIKE '%${ticketNoThr}%'
+        </if>
+        <if test="ticketNo !=null and ticketNo!=''">
+            AND TICKET_NO = "${ticketNo}"
+        </if>
+        <if test="pnr !=null and pnr!=''">
+            AND PNR = "${pnr}"
+        </if>
+        <if test="ticketDateStart !=null and ticketDateStart != '' ">
+            <![CDATA[
+                AND  DATE_FORMAT(ISSUE_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{ticketDateStart},'%Y-%m-%d')
+                ]]>
+        </if>
+        <if test="ticketDateEnd !=null and ticketDateEnd != '' ">
+            <![CDATA[
+                AND  DATE_FORMAT(ISSUE_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{ticketDateEnd},'%Y-%m-%d')
+                ]]>
+        </if>
+        <if test="depDateStart !=null and depDateStart != '' ">
+            <![CDATA[
+                AND  DATE_FORMAT(DEP_TIME, '%Y-%m-%d') >= DATE_FORMAT(#{depDateStart},'%Y-%m-%d')
+                ]]>
+        </if>
+        <if test="depDateEnd !=null and depDateEnd != '' ">
+            <![CDATA[
+                AND  DATE_FORMAT(ARR_TIME, '%Y-%m-%d') <= DATE_FORMAT(#{depDateEnd},'%Y-%m-%d')
+                ]]>
+        </if>
+        <if test="depAirport !=null and depAirport != '' ">
+            AND DEP_AIRPORT = "${depAirport}"
+        </if>
+        <if test="arrAirport !=null and arrAirport != '' ">
+            AND ARR_AIRPORT = "${arrAirport}"
+        </if>
+        <if test="supplierName !=null and supplierName != '' ">
+            AND SUPPLIER_NAME LIKE "%${supplierName}%"
+        </if>
+        <if test="customerName !=null and customerName != '' ">
+            AND CUSTOMER_NAME LIKE "%${customerName}%"
+        </if>
+        <if test="cabins != null and cabins.size() != 0">
+            AND
+            <foreach collection="cabins" item="cabin" index="index" separator="OR" close=")" open="(">
+                     CABIN LIKE "%${cabin}%"
+            </foreach>
+
+        </if>
+    </sql>
+    <select id="queryIssueRecords" resultMap="queryIssueRecordsMap">
+        SELECT t.*
+        FROM(
+        SELECT ISOE.SALE_ORDER_NO AS SALE_ORDER_NO,NULL AS SALE_CHAGNE_NO,
+        CS.NAME AS SUPPLIER_NAME,ISOE.ISSUE_TIME AS ISSUE_TIME,NULL AS QUIT_TIME ,GROUP_CONCAT(DISTINCT ISOD.TICKET_NO) AS TICKET_NO
+        ,IP.PNR AS PNR,GROUP_CONCAT(CONCAT(IL.DEP_AIRPORT,"-",IL.ARR_AIRPORT)) AS VOYAGE ,GROUP_CONCAT(CONCAT(IL.AIRLINE,IL.FLIGHT_NO)) AS FLIGHT_NO,
+        GROUP_CONCAT(DISTINCT IL.CABIN) AS CABIN,MIN(IL.DEP_TIME) AS DEP_TIME,MAX(IL.ARR_TIME) AS ARR_TIME,CONCAT(MIN(IL.DEP_TIME),"-",MAX(IL.ARR_TIME)) AS TRAVEL_TIME,CONCAT(IPG.SURNAME,IPG.NAME) AS PASSENGER_NAME,
+        IPG.PASSENGER_TYPE AS PASSENGER_TYPE,(IPG.SALE_FARE+IPG.SALE_TAX) AS NET_PRICE,IPG.SALE_TAX AS TAX, (IPG.SALE_FARE - IPG.SALE_AWARD_PRICE) AS QVALUE,0 AS TICKET_TYPE,
+        COUNT(DISTINCT ISOD.TICKET_NO) AS TICKET_NUM ,IPG.BUY_REBATE AS BOTTOM_REBATE ,IPG.SALE_REBATE AS BACK_REBATE,IPG.SALE_BROKERAGE AS PLUS_PRICE,
+        IPG.DEPT_PROFIT AS DEPT_PROFIT,IPG.PROFIT AS PROFIT,CC.`NAME` AS CUSTOMER_NAME,SU.NAME AS SALE_MAN,SD.NAME AS DEPT_NAME,
+        SUT.NAME AS TICKET_NAME,SDT.NAME AS TICKET_DEPT,ISOE.CREATE_TIME AS CREATE_TIME,IL.AIRLINE AS AIRLINE,IL.DEP_AIRPORT,IL.ARR_AIRPORT,IL.GO_BACK,DATE_FORMAT(ISOE.ISSUE_TIME,'%Y-%m-%d') AS DAYS,IPG.PASSENGER_NO
+
+        FROM IFT_SALE_ORDER_EXT ISOE
+        LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
+        LEFT JOIN OS_SALEORDER OS ON OS.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
+        LEFT JOIN OS_BUYORDER OB ON OB.SALE_ORDER_NO = OS.SALE_ORDER_NO
+        LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO = OB.SUPPLIER_NO
+        LEFT JOIN IFT_PNR IP ON IP.PNR_NO = ISOE.PNR_NO
+        LEFT JOIN IFT_LEG IL ON IL.LEG_NO = ISOD.LEG_NO
+        LEFT JOIN IFT_PASSENGER IPG ON IPG.PASSENGER_NO = ISOD.PASSENGER_NO
+        LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO=OS.CUSTOMER_NO
+        LEFT JOIN SM_USER SU ON SU.LOGIN_NAME = ISOE.CREATOR
+        LEFT JOIN SM_DEPT SD ON SD.ID = SU.DEPT_ID
+        LEFT JOIN SM_USER SUT ON SUT.LOGIN_NAME = ISOE.DRAWER_LOGIN_NAME
+        LEFT JOIN SM_DEPT SDT ON SDT.ID = SUT.DEPT_ID
+        WHERE ISOD.STATUS &gt;= 4 AND ISOD.STATUS &lt;= 10 AND ISOD.IS_CHANGE = 0
+        GROUP BY ISOD.TICKET_NO
+        UNION ALL
+        SELECT
+        OS.SALE_ORDER_NO AS SALE_ORDER_NO,ISCE.SALE_CHANGE_NO AS SALE_CHANGE_NO,
+        CS.NAME AS SUPPLIER_NAME,ISCE.MODIFY_TIME AS ISSUE_TIME,NULL AS QUIT_TIME,GROUP_CONCAT(DISTINCT ISOD.TICKET_NO) AS TICKET_NO,
+        IP.PNR AS PNR,GROUP_CONCAT(CONCAT(IL.DEP_AIRPORT,"-",IL.ARR_AIRPORT)) AS VOYAGE,GROUP_CONCAT(CONCAT(IL.AIRLINE,IL.FLIGHT_NO)) AS FLIGHT_NO,
+        GROUP_CONCAT(DISTINCT IL.CABIN) AS CABIN,MIN(IL.DEP_TIME) AS DEP_TIME,MAX(IL.ARR_TIME) AS ARR_TIME,CONCAT(MIN(IL.DEP_TIME),"-",MAX(IL.ARR_TIME)) AS TRAVEL_TIME,CONCAT(IPG.SURNAME,IPG.NAME) AS PASSENGER_NAME,
+        IPCP.PASSENGER_TYPE AS PASSENGER_TYPE,(IPCP.SALE_PRICE+IPCP.SALE_TAX) AS NET_PRICE,IPCP.SALE_TAX AS TAX, 0 AS QVALUE,3 AS TICKET_TYPE,
+        COUNT(DISTINCT ISOD.TICKET_NO) AS TICKET_NUM,IPCP.BUY_REBATE AS BOTTOM_REBATE ,IPCP.SALE_REBATE AS BACK_REBATE,IPCP.SALE_BROKERAGE AS PLUS_PRICE,
+        IPCP.PROFIT AS DEPT_PROFIT,IPCP.PROFIT AS PROFIT,
+        CC.`NAME` AS CUSTOMER_NAME,SU.NAME AS SALE_MAN,SD.NAME AS DEPT_NAME,
+        SUT.NAME AS TICKET_NAME,SDT.NAME AS TICKET_DEPT,ISCE.CREATE_TIME AS CREATE_TIME,IL.AIRLINE AS AIRLINE,IL.DEP_AIRPORT,IL.ARR_AIRPORT,IL.GO_BACK,DATE_FORMAT(ISCE.MODIFY_TIME,'%Y-%m-%d') AS DAYS,IPG.PASSENGER_NO
+        FROM IFT_SALE_CHANGE_EXT ISCE
+        LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO = ISCE.SALE_CHANGE_NO
+        LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO = ISCE.SUPPLIER_NO
+        LEFT JOIN IFT_SALE_CHANGE_DETAIL ISCD ON ISCD.SALE_ORDER_DETAIL_NO = ISOD.SALE_ORDER_DETAIL_NO
+        LEFT JOIN OS_SALECHANGE OS ON OS.SALE_CHANGE_NO = ISCE.SALE_CHANGE_NO
+        LEFT JOIN IFT_PNR IP ON IP.PNR_NO = ISCE.PNR_NO
+        LEFT JOIN IFT_LEG IL ON IL.LEG_NO = ISOD.LEG_NO
+        LEFT JOIN IFT_PASSENGER_CHANGE_PRICE IPCP ON IPCP.PASSENGER_NO = ISOD.PASSENGER_NO
+        LEFT JOIN IFT_PASSENGER IPG ON IPG.PASSENGER_NO = IPCP.PASSENGER_NO
+        LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO=ISCE.CUSTOMER_NO
+        LEFT JOIN SM_USER SU ON SU.LOGIN_NAME = ISCE.CREATOR
+        LEFT JOIN SM_DEPT SD ON SD.ID = SU.DEPT_ID
+        LEFT JOIN SM_USER SUT ON SUT.LOGIN_NAME = ISCE.DRAWER_LOGIN_NAME
+        LEFT JOIN SM_DEPT SDT ON SDT.ID = SUT.DEPT_ID
+        WHERE ISOD.STATUS &gt;= 4 AND ISOD.STATUS &lt;=10 AND ISOD.IS_CHANGE = 1 AND ISCD.ORDER_DETAIL_TYPE = 2 AND ISCE.CHANGE_TYPE = 3
+        GROUP BY ISOD.TICKET_NO
+        UNION ALL
+        SELECT
+        OS.SALE_ORDER_NO AS SALE_ORDER_NO,ISCE.SALE_CHANGE_NO AS SALE_CHANGE_NO,
+        IFNULL(CS.`NAME`,OCS.`NAME`) AS SUPPLIER_NAME,IFNULL(ISCEB.MODIFY_TIME,ISOE.ISSUE_TIME)	AS ISSUE_TIME,
+        ISCE.MODIFY_TIME AS QUIT_TIME,GROUP_CONCAT(DISTINCT ISOD.TICKET_NO) AS TICKET_NO,
+        (SELECT PNR FROM IFT_PNR WHERE PNR_NO = IFNULL(ISCEB.PNR_NO,ISOE.PNR_NO) ) AS PNR,
+        GROUP_CONCAT(CONCAT(IL.DEP_AIRPORT,"-",IL.ARR_AIRPORT)) AS VOYAGE,GROUP_CONCAT(CONCAT(IL.AIRLINE,IL.FLIGHT_NO)) AS FLIGHT_NO,
+        GROUP_CONCAT(DISTINCT IL.CABIN) AS CABIN,MIN(IL.DEP_TIME) AS DEP_TIME,MAX(IL.ARR_TIME) AS ARR_TIME,CONCAT(MIN(IL.DEP_TIME),"-",MAX(IL.ARR_TIME)) AS TRAVEL_TIME,CONCAT(IPG.SURNAME,IPG.NAME) AS PASSENGER_NAME,
+        IPRP.PASSENGER_TYPE AS PASSENGER_TYPE,(IPRP.SALE_PRICE+IPRP.SALE_TAX)*-1 AS NET_PRICE,IPRP.SALE_TAX*-1 AS TAX, 0 AS QVALUE,
+        ISCE.CHANGE_TYPE AS TICKET_TYPE,
+        COUNT(DISTINCT ISOD.TICKET_NO)*-1 AS TICKET_NUM,NULL AS BOTTOM_REBATE ,NULL AS BACK_REBATE,NULL AS PLUS_PRICE,
+        NULL AS DEPT_PROFIT,NULL AS PROFIT,
+        CC.`NAME` AS CUSTOMER_NAME,NULL AS SALE_MAN,NULL AS DEPT_NAME,
+        NULL AS TICKET_NAME,NULL AS TICKET_DEPT,ISCE.CREATE_TIME AS CREATE_TIME,IL.AIRLINE AS AIRLINE,IL.DEP_AIRPORT,IL.ARR_AIRPORT,IL.GO_BACK,DATE_FORMAT(IFNULL(ISCEB.MODIFY_TIME,ISOE.ISSUE_TIME),'%Y-%m-%d') AS DAYS,IPG.PASSENGER_NO
+        FROM IFT_SALE_CHANGE_EXT ISCE
+        LEFT JOIN OS_SALECHANGE OS ON OS.SALE_CHANGE_NO = ISCE.SALE_CHANGE_NO
+        LEFT JOIN OS_BUYORDER OB ON OB.SALE_ORDER_NO = OS.SALE_ORDER_NO
+        LEFT JOIN CPS_SUPPLIER OCS ON OCS.SUPPLIER_NO = OB.SUPPLIER_NO
+        LEFT JOIN OS_BUYCHANGE OBC ON OBC.BUY_ORDER_NO = OB.BUY_ORDER_NO
+        LEFT JOIN IFT_SALE_CHANGE_DETAIL ISCD ON ISCD.SALE_CHANGE_NO = ISCE.SALE_CHANGE_NO
+        LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_DETAIL_NO = ISCD.SALE_ORDER_DETAIL_NO
+        LEFT JOIN IFT_SALE_ORDER_EXT ISOE ON ISOE.SALE_ORDER_NO = ISOD.SALE_ORDER_NO
+        LEFT JOIN IFT_SALE_CHANGE_EXT ISCEB ON ISCEB.SALE_CHANGE_NO = ISOD.SALE_ORDER_NO
+        LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO = ISCEB.SUPPLIER_NO
+        LEFT JOIN IFT_PNR IP ON IP.PNR_NO = ISCE.PNR_NO
+        LEFT JOIN IFT_LEG IL ON IL.LEG_NO = ISOD.LEG_NO
+        LEFT JOIN IFT_PASSENGER_REFUND_PRICE IPRP ON IPRP.PASSENGER_NO = ISOD.PASSENGER_NO
+        LEFT JOIN IFT_PASSENGER IPG ON IPG.PASSENGER_NO = IPRP.PASSENGER_NO
+        LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO=ISCE.CUSTOMER_NO
+        WHERE ISCE.CHANGE_TYPE IN (1,2) AND OBC.CHILD_STATUS = 10 AND ISOD.STATUS IN (8,9)
+        GROUP BY ISOD.TICKET_NO
+        ) t
+        WHERE  1=1
+        <include refid="queryIssueRecordsWhere"/>
+        ORDER BY
+        <if test="orderByType !=null and orderByType!=''">
+            ${orderByType} ASC,
+        </if>
+        CREATE_TIME ASC
+    </select>
+    <select id="queryIssueRecordsSum" resultType="map">
+        SELECT
+        <if test="orderByType !=null and orderByType!=''">
+            IFNULL(${orderByType},"") AS orderType,
+        </if>
+        <if test="orderByType ==null or orderByType==''">
+            "合计" AS orderType,
+        </if>
+        IFNULL(SUM(t.NET_PRICE), 0) AS ALL_NET_PRICE,
+        IFNULL(SUM(t.TAX), 0) AS ALL_TAX,
+        IFNULL(SUM(t.TICKET_NUM),0) AS ALL_TICKET_NUM,
+        IFNULL(SUM(DEPT_PROFIT),0) AS ALL_DEPT_PROFIT,
+        IFNULL(SUM(PROFIT),0) AS ALL_PROFIT,
+        IFNULL(COUNT(*),0) AS `INDEX`
+        FROM(
+
+        SELECT t1.* FROM (
+        SELECT ISOE.SALE_ORDER_NO AS SALE_ORDER_NO,NULL AS SALE_CHAGNE_NO,
+        CS.NAME AS SUPPLIER_NAME,ISOE.ISSUE_TIME AS ISSUE_TIME,NULL AS QUIT_TIME ,GROUP_CONCAT(DISTINCT ISOD.TICKET_NO) AS TICKET_NO
+        ,IP.PNR AS PNR,GROUP_CONCAT(CONCAT(IL.DEP_AIRPORT,"-",IL.ARR_AIRPORT)) AS VOYAGE ,GROUP_CONCAT(CONCAT(IL.AIRLINE,IL.FLIGHT_NO)) AS FLIGHT_NO,
+        GROUP_CONCAT(DISTINCT IL.CABIN) AS CABIN,MIN(IL.DEP_TIME) AS DEP_TIME,MAX(IL.ARR_TIME) AS ARR_TIME,CONCAT(MIN(IL.DEP_TIME),"-",MAX(IL.ARR_TIME)) AS TRAVEL_TIME,CONCAT(IPG.SURNAME,IPG.NAME) AS PASSENGER_NAME,
+        IPG.PASSENGER_TYPE AS PASSENGER_TYPE,(IPG.SALE_FARE+IPG.SALE_TAX) AS NET_PRICE,IPG.SALE_TAX AS TAX, (IPG.SALE_FARE - IPG.SALE_AWARD_PRICE) AS QVALUE,0 AS TICKET_TYPE,
+        COUNT(DISTINCT ISOD.TICKET_NO) AS TICKET_NUM ,IPG.BUY_REBATE AS BOTTOM_REBATE ,IPG.SALE_REBATE AS BACK_REBATE,IPG.SALE_BROKERAGE AS PLUS_PRICE,
+        IPG.DEPT_PROFIT AS DEPT_PROFIT,IPG.PROFIT AS PROFIT,CC.`NAME` AS CUSTOMER_NAME,SU.NAME AS SALE_MAN,SD.NAME AS DEPT_NAME,
+        SUT.NAME AS TICKET_NAME,SDT.NAME AS TICKET_DEPT,ISOE.CREATE_TIME AS CREATE_TIME,IL.AIRLINE AS AIRLINE,IL.DEP_AIRPORT,IL.ARR_AIRPORT,IL.GO_BACK,DATE_FORMAT(ISOE.ISSUE_TIME,'%Y-%m-%d') AS DAYS,IPG.PASSENGER_NO
+
+        FROM IFT_SALE_ORDER_EXT ISOE
+        LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
+        LEFT JOIN OS_SALEORDER OS ON OS.SALE_ORDER_NO = ISOE.SALE_ORDER_NO
+        LEFT JOIN OS_BUYORDER OB ON OB.SALE_ORDER_NO = OS.SALE_ORDER_NO
+        LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO = OB.SUPPLIER_NO
+        LEFT JOIN IFT_PNR IP ON IP.PNR_NO = ISOE.PNR_NO
+        LEFT JOIN IFT_LEG IL ON IL.LEG_NO = ISOD.LEG_NO
+        LEFT JOIN IFT_PASSENGER IPG ON IPG.PASSENGER_NO = ISOD.PASSENGER_NO
+        LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO=OS.CUSTOMER_NO
+        LEFT JOIN SM_USER SU ON SU.LOGIN_NAME = ISOE.CREATOR
+        LEFT JOIN SM_DEPT SD ON SD.ID = SU.DEPT_ID
+        LEFT JOIN SM_USER SUT ON SUT.LOGIN_NAME = ISOE.DRAWER_LOGIN_NAME
+        LEFT JOIN SM_DEPT SDT ON SDT.ID = SUT.DEPT_ID
+        WHERE ISOD.STATUS &gt;= 4 AND ISOD.STATUS &lt;= 10 AND ISOD.IS_CHANGE = 0
+        GROUP BY ISOD.TICKET_NO ) t1
+        WHERE  1=1
+        <include refid="queryIssueRecordsSumWhere"/>
+        GROUP BY PASSENGER_NO
+
+        UNION ALL
+
+        SELECT t2.* FROM (
+        SELECT
+        OS.SALE_ORDER_NO AS SALE_ORDER_NO,ISCE.SALE_CHANGE_NO AS SALE_CHANGE_NO,
+        CS.NAME AS SUPPLIER_NAME,ISCE.MODIFY_TIME AS ISSUE_TIME,NULL AS QUIT_TIME,GROUP_CONCAT(DISTINCT ISOD.TICKET_NO) AS TICKET_NO,
+        IP.PNR AS PNR,GROUP_CONCAT(CONCAT(IL.DEP_AIRPORT,"-",IL.ARR_AIRPORT)) AS VOYAGE,GROUP_CONCAT(CONCAT(IL.AIRLINE,IL.FLIGHT_NO)) AS FLIGHT_NO,
+        GROUP_CONCAT(DISTINCT IL.CABIN) AS CABIN,MIN(IL.DEP_TIME) AS DEP_TIME,MAX(IL.ARR_TIME) AS ARR_TIME,CONCAT(MIN(IL.DEP_TIME),"-",MAX(IL.ARR_TIME)) AS TRAVEL_TIME,CONCAT(IPG.SURNAME,IPG.NAME) AS PASSENGER_NAME,
+        IPCP.PASSENGER_TYPE AS PASSENGER_TYPE,(IPCP.SALE_PRICE+IPCP.SALE_TAX) AS NET_PRICE,IPCP.SALE_TAX AS TAX, 0 AS QVALUE,3 AS TICKET_TYPE,
+        COUNT(DISTINCT ISOD.TICKET_NO) AS TICKET_NUM,IPCP.BUY_REBATE AS BOTTOM_REBATE ,IPCP.SALE_REBATE AS BACK_REBATE,IPCP.SALE_BROKERAGE AS PLUS_PRICE,
+        IPCP.PROFIT AS DEPT_PROFIT,IPCP.PROFIT AS PROFIT,
+        CC.`NAME` AS CUSTOMER_NAME,SU.NAME AS SALE_MAN,SD.NAME AS DEPT_NAME,
+        SUT.NAME AS TICKET_NAME,SDT.NAME AS TICKET_DEPT,ISCE.CREATE_TIME AS CREATE_TIME,IL.AIRLINE AS AIRLINE,IL.DEP_AIRPORT,IL.ARR_AIRPORT,IL.GO_BACK,DATE_FORMAT(ISCE.MODIFY_TIME,'%Y-%m-%d') AS DAYS,IPG.PASSENGER_NO
+        FROM IFT_SALE_CHANGE_EXT ISCE
+        LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_NO = ISCE.SALE_CHANGE_NO
+        LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO = ISCE.SUPPLIER_NO
+        LEFT JOIN IFT_SALE_CHANGE_DETAIL ISCD ON ISCD.SALE_ORDER_DETAIL_NO = ISOD.SALE_ORDER_DETAIL_NO
+        LEFT JOIN OS_SALECHANGE OS ON OS.SALE_CHANGE_NO = ISCE.SALE_CHANGE_NO
+        LEFT JOIN IFT_PNR IP ON IP.PNR_NO = ISCE.PNR_NO
+        LEFT JOIN IFT_LEG IL ON IL.LEG_NO = ISOD.LEG_NO
+        LEFT JOIN IFT_PASSENGER_CHANGE_PRICE IPCP ON IPCP.PASSENGER_NO = ISOD.PASSENGER_NO
+        LEFT JOIN IFT_PASSENGER IPG ON IPG.PASSENGER_NO = IPCP.PASSENGER_NO
+        LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO=ISCE.CUSTOMER_NO
+        LEFT JOIN SM_USER SU ON SU.LOGIN_NAME = ISCE.CREATOR
+        LEFT JOIN SM_DEPT SD ON SD.ID = SU.DEPT_ID
+        LEFT JOIN SM_USER SUT ON SUT.LOGIN_NAME = ISCE.DRAWER_LOGIN_NAME
+        LEFT JOIN SM_DEPT SDT ON SDT.ID = SUT.DEPT_ID
+        WHERE ISOD.STATUS &gt;= 4 AND ISOD.STATUS &lt;=10 AND ISOD.IS_CHANGE = 1 AND ISCD.ORDER_DETAIL_TYPE = 2 AND ISCE.CHANGE_TYPE = 3
+        GROUP BY ISOD.TICKET_NO ) t2
+        WHERE 1=1
+        <include refid="queryIssueRecordsSumWhere"/>
+        GROUP BY PASSENGER_NO,SALE_CHANGE_NO
+
+        UNION ALL
+
+        SELECT t3.* FROM (
+        SELECT
+        OS.SALE_ORDER_NO AS SALE_ORDER_NO,ISCE.SALE_CHANGE_NO AS SALE_CHANGE_NO,
+        IFNULL(CS.`NAME`,OCS.`NAME`) AS SUPPLIER_NAME,IFNULL(ISCEB.MODIFY_TIME,ISOE.ISSUE_TIME)	AS ISSUE_TIME,
+        ISCE.MODIFY_TIME AS QUIT_TIME,GROUP_CONCAT(DISTINCT ISOD.TICKET_NO) AS TICKET_NO,
+        (SELECT PNR FROM IFT_PNR WHERE PNR_NO = IFNULL(ISCEB.PNR_NO,ISOE.PNR_NO) ) AS PNR,
+        GROUP_CONCAT(CONCAT(IL.DEP_AIRPORT,"-",IL.ARR_AIRPORT)) AS VOYAGE,GROUP_CONCAT(CONCAT(IL.AIRLINE,IL.FLIGHT_NO)) AS FLIGHT_NO,
+        GROUP_CONCAT(DISTINCT IL.CABIN) AS CABIN,MIN(IL.DEP_TIME) AS DEP_TIME,MAX(IL.ARR_TIME) AS ARR_TIME,CONCAT(MIN(IL.DEP_TIME),"-",MAX(IL.ARR_TIME)) AS TRAVEL_TIME,CONCAT(IPG.SURNAME,IPG.NAME) AS PASSENGER_NAME,
+        IPRP.PASSENGER_TYPE AS PASSENGER_TYPE,(IPRP.SALE_PRICE+IPRP.SALE_TAX)*-1 AS NET_PRICE,IPRP.SALE_TAX*-1 AS TAX, 0 AS QVALUE,
+        ISCE.CHANGE_TYPE AS TICKET_TYPE,
+        COUNT(DISTINCT ISOD.TICKET_NO)*-1 AS TICKET_NUM,NULL AS BOTTOM_REBATE ,NULL AS BACK_REBATE,NULL AS PLUS_PRICE,
+        NULL AS DEPT_PROFIT,NULL AS PROFIT,
+        CC.`NAME` AS CUSTOMER_NAME,NULL AS SALE_MAN,NULL AS DEPT_NAME,
+        NULL AS TICKET_NAME,NULL AS TICKET_DEPT,ISCE.CREATE_TIME AS CREATE_TIME,IL.AIRLINE AS AIRLINE,IL.DEP_AIRPORT,IL.ARR_AIRPORT,IL.GO_BACK,DATE_FORMAT(IFNULL(ISCEB.MODIFY_TIME,ISOE.ISSUE_TIME),'%Y-%m-%d') AS DAYS,IPG.PASSENGER_NO
+        FROM IFT_SALE_CHANGE_EXT ISCE
+        LEFT JOIN OS_SALECHANGE OS ON OS.SALE_CHANGE_NO = ISCE.SALE_CHANGE_NO
+        LEFT JOIN OS_BUYORDER OB ON OB.SALE_ORDER_NO = OS.SALE_ORDER_NO
+        LEFT JOIN CPS_SUPPLIER OCS ON OCS.SUPPLIER_NO = OB.SUPPLIER_NO
+        LEFT JOIN OS_BUYCHANGE OBC ON OBC.BUY_ORDER_NO = OB.BUY_ORDER_NO
+        LEFT JOIN IFT_SALE_CHANGE_DETAIL ISCD ON ISCD.SALE_CHANGE_NO = ISCE.SALE_CHANGE_NO
+        LEFT JOIN IFT_SALE_ORDER_DETAIL ISOD ON ISOD.SALE_ORDER_DETAIL_NO = ISCD.SALE_ORDER_DETAIL_NO
+        LEFT JOIN IFT_SALE_ORDER_EXT ISOE ON ISOE.SALE_ORDER_NO = ISOD.SALE_ORDER_NO
+        LEFT JOIN IFT_SALE_CHANGE_EXT ISCEB ON ISCEB.SALE_CHANGE_NO = ISOD.SALE_ORDER_NO
+        LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO = ISCEB.SUPPLIER_NO
+        LEFT JOIN IFT_PNR IP ON IP.PNR_NO = ISCE.PNR_NO
+        LEFT JOIN IFT_LEG IL ON IL.LEG_NO = ISOD.LEG_NO
+        LEFT JOIN IFT_PASSENGER_REFUND_PRICE IPRP ON IPRP.PASSENGER_NO = ISOD.PASSENGER_NO
+        LEFT JOIN IFT_PASSENGER IPG ON IPG.PASSENGER_NO = IPRP.PASSENGER_NO
+        LEFT JOIN CPS_CUSTOMER CC ON CC.CUSTOMER_NO=ISCE.CUSTOMER_NO
+        WHERE ISCE.CHANGE_TYPE IN (1,2) AND OBC.CHILD_STATUS = 10 AND ISOD.STATUS IN (8,9)
+        GROUP BY ISOD.TICKET_NO ) t3
+        WHERE 1=1
+        <include refid="queryIssueRecordsSumWhere"/>
+        GROUP BY PASSENGER_NO
+
+        ) t
+        <if test="orderByType !=null and orderByType!=''">
+            GROUP BY ${orderByType}
+            ORDER BY ${orderByType} ASC
+        </if>
+    </select>
 
 </mapper>

@@ -70,6 +70,8 @@
         <!-- 不分单时所有操作步骤都是由这个字段的操作员操作-->
         <result column="ALONE_LOCKER" property="aloneLocker" jdbcType="BIGINT"/>
         <result column="CUSTOMER_NAME" property="customerName" jdbcType="VARCHAR"/>
+        <!-- 源改签单号 -->
+        <result column="ORIGIN_SALE_CHANGE_NO" property="originSaleChangeNo" jdbcType="BIGINT"/>
         <!--一对多关联销售单明细-->
         <collection property="saleChangeDetailList" ofType="com.tempus.gss.product.ift.api.entity.SaleChangeDetail"
                     column="SALE_CHANGE_NO"
@@ -89,7 +91,7 @@
         VALID, CREATE_TIME, CREATOR, LOCKER, LOCK_TIME, CHANGE_TYPE, CONTACT_NAME, CONTACT_MOBILE,
         CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL,CUSTOMER_NO,
     CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,CURRENCY,SALE_CURRENCY,EXCHANGE_RATE,OFFICE,
-    DRAWER_LOGIN_NAME,ALONE_LOCKER,SUPPLIER_NO
+    DRAWER_LOGIN_NAME,ALONE_LOCKER,SUPPLIER_NO,ORIGIN_SALE_CHANGE_NO
     </sql>
 
     <select id="queryRefundCountBylocker" resultType="java.lang.Integer">
@@ -118,7 +120,7 @@
         i.SALE_CHANGE_NO, i.ID, i.OWNER, i.REFUND_WAY, i.MODIFIER, i.STATUS, i.MODIFY_TIME,
         i.VALID, i.CREATE_TIME, i.CREATOR, i.LOCKER, i.LOCK_TIME, i.CHANGE_TYPE, i.CONTACT_NAME, i.CONTACT_MOBILE,
         i.CUSTOMER_REMARK, i.REFUSE_REASON,i.TICKET_CHANGE_TYPE,
-        i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO
+        i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO,i.ORIGIN_SALE_CHANGE_NO
         FROM
         IFT_SALE_CHANGE_EXT i
         LEFT JOIN OS_SALECHANGE o ON o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
@@ -146,7 +148,7 @@
         i.SALE_CHANGE_NO, i.ID, i.OWNER, i.REFUND_WAY, i.MODIFIER, i.STATUS, i.MODIFY_TIME,
         i.VALID, i.CREATE_TIME, i.CREATOR, i.LOCKER, i.LOCK_TIME, i.CHANGE_TYPE, i.CONTACT_NAME, i.CONTACT_MOBILE,
         i.CUSTOMER_REMARK, i.REFUSE_REASON,i.TICKET_CHANGE_TYPE,
-        i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO
+        i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO,i.ORIGIN_SALE_CHANGE_NO
         FROM
         IFT_SALE_CHANGE_EXT i
         LEFT JOIN OS_SALECHANGE o ON o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
@@ -259,7 +261,7 @@
     <select id="queryChangeBylocker" resultMap="BaseResultMap">
         SELECT DISTINCT i.SALE_CHANGE_NO,i.ID,i. OWNER,i.REFUND_WAY,i.MODIFIER,i. STATUS,i.MODIFY_TIME,i.VALID,i.CREATE_TIME,i.CREATOR,
         i.LOCKER,i.LOCK_TIME,i.CHANGE_TYPE,i.CONTACT_NAME,i.CONTACT_MOBILE,i.CUSTOMER_REMARK,i.REFUSE_REASON,i.TICKET_CHANGE_TYPE,
-        i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO
+        i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO,i.ORIGIN_SALE_CHANGE_NO
         FROM
         IFT_SALE_CHANGE_EXT i
         LEFT JOIN OS_SALECHANGE o ON o.SALE_CHANGE_NO = i.SALE_CHANGE_NO
@@ -299,7 +301,7 @@
         CREATE_TIME, CREATOR, LOCKER,
         LOCK_TIME, CHANGE_TYPE, CONTACT_NAME,
         CONTACT_MOBILE, CUSTOMER_REMARK, REFUSE_REASON,AIRLINE_STATUS,AUDIT_PERSON,AUDIT_TIME,REFUND_FILE_URL,
-      	CUSTOMER_NO, CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,DRAWER_LOGIN_NAME,ALONE_LOCKER
+      	CUSTOMER_NO, CUSTOMER_TYPE_NO,TICKET_CHANGE_TYPE,PNR_NO,CHANGE_REMARK,DRAWER_LOGIN_NAME,ALONE_LOCKER,ORIGIN_SALE_CHANGE_NO
         )
         values (#{saleChangeNo,jdbcType=BIGINT}, #{id,jdbcType=BIGINT}, #{owner,jdbcType=INTEGER},
         #{refundWay,jdbcType=INTEGER},  #{modifier,jdbcType=VARCHAR},
@@ -309,7 +311,8 @@
         #{contactMobile,jdbcType=VARCHAR}, #{customerRemark,jdbcType=VARCHAR}, #{refuseReason,jdbcType=VARCHAR},
         #{airlineStatus,jdbcType=INTEGER},#{auditPerson,jdbcType=VARCHAR},#{auditTime,jdbcType=VARCHAR},#{refundFileUrl,jdbcType=VARCHAR},
 	    #{customerNo,jdbcType=BIGINT}, #{customerTypeNo,jdbcType=BIGINT}, #{ticketChangeType,jdbcType=INTEGER}),
-	    #{pnrNo,jdbcType=BIGINT}), #{changeRemark,jdbcType=VARCHAR},#{drawerLoginName,jdbcType=VARCHAR},#{aloneLocker,jdbcType=BIGINT})
+	    #{pnrNo,jdbcType=BIGINT}), #{changeRemark,jdbcType=VARCHAR},#{drawerLoginName,jdbcType=VARCHAR},#{aloneLocker,jdbcType=BIGINT},
+	    #{originSaleChangeNo,jdbcType=BIGINT})
         )
     </insert>
     <select id="selectLastChangeExtByPassengerNo" resultType="com.tempus.gss.product.ift.api.entity.SaleChangeExt" parameterType="java.lang.Long">
@@ -419,6 +422,9 @@
             <if test="supplierNo !=null">
                 SUPPLIER_NO,
             </if>
+            <if test="originSaleChangeNo !=null">
+                ORIGIN_SALE_CHANGE_NO,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="saleChangeNo != null">
@@ -511,6 +517,9 @@
             </if>
             <if test="supplierNo !=null">
                 #{supplierNo,jdbcType=BIGINT},
+            </if>
+            <if test="originSaleChangeNo !=null">
+                #{originSaleChangeNo,jdbcType=BIGINT},
             </if>
         </trim>
     </insert>
@@ -611,7 +620,10 @@
                 OFFICE =#{office,jdbcType=VARCHAR},
             </if>
             <if test="supplierNo!=null">
-                SUPPLIER_NO =#{supplierNo,jdbcType=BIGINT}
+                SUPPLIER_NO =#{supplierNo,jdbcType=BIGINT},
+            </if>
+            <if test="originSaleChangeNo !=null">
+                ORIGIN_SALE_CHANGE_NO = #{originSaleChangeNo,jdbcType=BIGINT}
             </if>
         </set>
         where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=BIGINT}
@@ -713,7 +725,10 @@
                 SUPPLIER_NO = #{supplierNo,jdbcType=BIGINT},
             </if>
             <if test="office !=null">
-                OFFICE = #{office,jdbcType=BIGINT}
+                OFFICE = #{office,jdbcType=BIGINT},
+            </if>
+            <if test="originSaleChangeNo !=null">
+                ORIGIN_SALE_CHANGE_NO = #{originSaleChangeNo,jdbcType=BIGINT}
             </if>
         </set>
         where SALE_CHANGE_NO = #{saleChangeNo,jdbcType=VARCHAR}
@@ -743,7 +758,8 @@
             i.AUDIT_TIME,
             i.TICKET_CHANGE_TYPE,
             i.DRAWER_LOGIN_NAME,
-            i.ALONE_LOCKER
+            i.ALONE_LOCKER,
+            i.ORIGIN_SALE_CHANGE_NO
         FROM IFT_SALE_CHANGE_EXT i
             LEFT JOIN OS_SALECHANGE s ON s.SALE_CHANGE_NO = i.SALE_CHANGE_NO
         WHERE s.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT} and i.LOCKER = 0 and s.CHILD_STATUS = 1
@@ -756,7 +772,7 @@
         i.CUSTOMER_REMARK, i.REFUSE_REASON,i.TICKET_CHANGE_TYPE
         ,i.AIRLINE_STATUS,i.REFUND_FILE_URL,i.AUDIT_PERSON,i.AUDIT_TIME,i.CUSTOMER_NO,i.CUSTOMER_TYPE_NO,/*su.LOGIN_NAME,*/i.DRAWER_LOGIN_NAME,
         h.AIRLINE_REFUND_STATUS,i.ALONE_LOCKER,CC.`NAME` CUSTOMER_NAME,
-        h.BUY_LOCKER,
+        h.BUY_LOCKER,i.ORIGIN_SALE_CHANGE_NO,
         <if test="locker !=null">
             (SELECT NAME FROM SM_USER where ID = i.LOCKER) as LOGIN_NAME
         </if>
@@ -944,6 +960,9 @@
                     ${longList}
                 </foreach>
             </if>
+            <if test="originSaleChangeNo !=null">
+               AND i.ORIGIN_SALE_CHANGE_NO = #{originSaleChangeNo,jdbcType=BIGINT}
+            </if>
             order by i.MODIFY_TIME desc
         </trim>
     </select>
@@ -1048,6 +1067,9 @@
             </if>
             <if test="aloneLocker !=null">
                 c.ALONE_LOCKER = #{aloneLocker,jdbcType=BIGINT},
+            </if>
+            <if test="originSaleChangeNo !=null">
+                c.ORIGIN_SALE_CHANGE_NO = #{originSaleChangeNo,jdbcType=BIGINT},
             </if>
         </set>
         WHERE c.SALE_CHANGE_NO IN (SELECT p.SALE_CHANGE_NO FROM IFT_PASSENGER_CHANGE_PRICE p WHERE p.SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT})

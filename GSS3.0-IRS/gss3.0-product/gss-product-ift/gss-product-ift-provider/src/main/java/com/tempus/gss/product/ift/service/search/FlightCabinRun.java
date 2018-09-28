@@ -48,7 +48,6 @@ public class FlightCabinRun implements Runnable {
 	public void run() {
 		// TODO Auto-generated method stub
 		FlightQueryRequest flightQuery = flightQueryRequest.getEntity();
-		log.info("查询参数：" + JsonUtil.toJson(flightQuery));
 		ShoppingOneInput shoppingOneInput = new ShoppingOneInput();
 		shoppingOneInput.setIataNo(iataNo);
 		shoppingOneInput.setOffice(office);
@@ -132,20 +131,30 @@ public class FlightCabinRun implements Runnable {
 		shoppingOneInput.setOds(shoppingOneODList);
 		try {
 			ShoppingOutPut shoppingOutPut = shoppingService.shoppingOneI(shoppingOneInput);
-			log.info("开始调用shopping数据转换"+JsonUtil.toJson(shoppingOutPut));
 			//因为获取更多舱位返回的航班集合里面把共享的航程全转换成实际承运的航司数据，这样影响政策匹配，因此需要把白屏查询带过的航班数据替换现有的航班数据结果集
 			if(!CollectionUtils.isEmpty(shoppingOutPut.getAvailableJourneys())){
 				for (AvailableJourney journey : shoppingOutPut.getAvailableJourneys()) {//当有几个舱位组合，这就是几条数据
 					for (ShoppingOD shoppingOD : journey.getOdOption()) {//获取更多舱位返回的航班集合
 						for (ShoppingOD shoppings : availableJourney.getOdOption()) {//白屏查询列表页面带过的航班数据
 							if(shoppingOD.getRph()==shoppings.getRph()){
-								shoppingOD.setFlight(shoppings.getFlight());
+								for (ShoppingFlight newshoppingOneOD : shoppingOD.getFlight()) {//更多舱位的航班数据
+									for (ShoppingFlight oldshoppingOneOD : shoppings.getFlight()) {//原始的列表查询航班数据
+										if(newshoppingOneOD.getRph()==oldshoppingOneOD.getRph()){
+											newshoppingOneOD.setCodeshare(oldshoppingOneOD.isCodeshare());
+											newshoppingOneOD.setOpCode(oldshoppingOneOD.getOpCode());
+											newshoppingOneOD.setOpFltNo(oldshoppingOneOD.getOpFltNo());
+											newshoppingOneOD.setMarketingAirline(oldshoppingOneOD.getMarketingAirline());
+											newshoppingOneOD.setFlightNumber(oldshoppingOneOD.getFlightNumber());
+										}
+									}
+								}
 							}
 						}
 					}
 				}
-				
-				queryIBEDetails = iftFlightQueryUtils.shoppingOutPutConvertQueryIBEDetails(shoppingOutPut);
+				//航班查询列表实际出票
+				shoppingOutPut.getAvailableJourneys().get(0).getFare().setTicketingCarrier(availableJourney.getFare().getTicketingCarrier());
+				queryIBEDetails = iftFlightQueryUtils.shoppingOutPutConvertQueryIBEDetails(shoppingOutPut,flightQuery);
 			}
 		} catch (Exception e) {
 			log.error("调用shopping接口", e);

@@ -1,28 +1,36 @@
 package com.tempus.gss.product.ift.service;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.alibaba.dubbo.config.annotation.Service;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.tempus.gss.bbp.util.StringUtil;
 import com.tempus.gss.controller.Result;
+import com.tempus.gss.cps.service.ISupplierService;
+import com.tempus.gss.dps.product.dict.PolicyStatus;
+import com.tempus.gss.exception.GSSException;
+import com.tempus.gss.file.service.FastDFSClientService;
+import com.tempus.gss.file.service.FilePath;
+import com.tempus.gss.product.common.entity.RequestWithActor;
 import com.tempus.gss.product.ift.api.entity.*;
+import com.tempus.gss.product.ift.api.entity.exception.ProductException;
+import com.tempus.gss.product.ift.api.entity.helper.ExcelHelper;
 import com.tempus.gss.product.ift.api.entity.vo.PolicyExcelBean;
+import com.tempus.gss.product.ift.api.entity.vo.PolicyVo;
 import com.tempus.gss.product.ift.api.service.IOrderService;
 import com.tempus.gss.product.ift.api.service.IPolicyIndexService;
 import com.tempus.gss.product.ift.api.service.IPolicyRService;
+import com.tempus.gss.product.ift.api.service.IPolicyService;
+import com.tempus.gss.product.ift.dao.CabinDao;
+import com.tempus.gss.product.ift.dao.PolicyDao;
+import com.tempus.gss.product.ift.dao.ProfitControlDao;
 import com.tempus.gss.security.AgentUtil;
+import com.tempus.gss.system.service.IMaxNoService;
 import com.tempus.gss.system.service.IParamService;
+import com.tempus.gss.util.EntityUtil;
 import com.tempus.gss.util.JsonUtil;
+import com.tempus.gss.vo.Agent;
 import com.tempus.tbe.entity.*;
 import com.tempus.tbe.service.ICreatePnrService;
-import net.sf.json.JSONObject;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,26 +42,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import com.alibaba.dubbo.config.annotation.Reference;
-import com.alibaba.dubbo.config.annotation.Service;
-import com.baomidou.mybatisplus.plugins.Page;
-import com.tempus.gss.cps.service.ISupplierService;
-import com.tempus.gss.dps.product.dict.PolicyStatus;
-import com.tempus.gss.exception.GSSException;
-import com.tempus.gss.product.common.entity.RequestWithActor;
-import com.tempus.gss.product.ift.api.entity.exception.ProductException;
-import com.tempus.gss.product.ift.api.entity.helper.ExcelHelper;
-import com.tempus.gss.product.ift.api.entity.vo.PolicyVo;
-import com.tempus.gss.product.ift.api.service.IPolicyService;
-import com.tempus.gss.product.ift.dao.CabinDao;
-import com.tempus.gss.product.ift.dao.PolicyDao;
-import com.tempus.gss.product.ift.dao.ProfitControlDao;
-import com.tempus.gss.system.service.IMaxNoService;
-import com.tempus.gss.util.EntityUtil;
-import com.tempus.gss.vo.Agent;
 import org.springframework.transaction.annotation.Transactional;
-import com.tempus.gss.file.service.FastDFSClientService;
-import com.tempus.gss.file.service.FilePath;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 
 /**
@@ -625,8 +620,8 @@ public class PolicyServiceImpl implements IPolicyService {
 		}
 	}
 
-	public Result createPnr(SaleOrderExt saleOrderExt) {
-		String isCreatePnr = iParamService.getValueByKey("is_CreatPnr");
+	public Result createPnr(Agent agent, SaleOrderExt saleOrderExt) {
+        String isCreatePnr = iParamService.getValueByKey("is_CreatPnr");
 		if("true".equals(isCreatePnr)){
 			try {
 				log.info("创建国际PNR传入参数:"+JsonUtil.toJson(saleOrderExt));
@@ -668,7 +663,7 @@ public class PolicyServiceImpl implements IPolicyService {
 
                 int passengerSize = passengers.size()-1;
 				for  ( int  i  =   0 ; i  <passengerSize ; i ++ )   {
-					for  ( int  j  =  passengerSize ; j  >  i; j -- )   {
+					for  ( int  j  =  passengers.size()-1; j  >  i; j -- )   {
 						if  (passengers.get(j).getPersonNameEN().equals(passengers.get(i).getPersonNameEN()))   {
 							passengers.remove(j);
 						}
@@ -686,7 +681,7 @@ public class PolicyServiceImpl implements IPolicyService {
 				if(StringUtil.isNotNullOrEmpty(reatePnrOut.getPnr())){
 					Pnr pnr = new Pnr();
 					pnr.setPnr(reatePnrOut.getPnr());
-					orderService.createPnr(AgentUtil.getAgent(),pnr,saleOrderExt);
+					orderService.createPnr(agent,pnr,saleOrderExt.getSaleOrderNo());
 					return new Result(SUCCESS_CODE, SAVE_SUCCESS);
 				}else{
 					return new Result(FAILED_CODE, SAVE_SUCCESS);

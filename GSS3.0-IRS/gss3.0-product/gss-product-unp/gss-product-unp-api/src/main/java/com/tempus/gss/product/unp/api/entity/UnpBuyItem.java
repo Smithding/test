@@ -9,7 +9,7 @@ import java.math.BigDecimal;
  * @author ZhangBro
  */
 public class UnpBuyItem implements Serializable {
-    
+
     /**
      * 编号
      */
@@ -52,13 +52,22 @@ public class UnpBuyItem implements Serializable {
      * 删除标志 0 无效 已删除 1 有效
      */
     private Integer valid;
-    
+    private String productName;
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
     private String additionalInfo;
-    private static final long serialVersionUID = 5304640655455648250L;
+    private static final long serialVersionUID = 1403028650755975729L;
     
     public String getAdditionalInfo() {
         return additionalInfo;
-       
+        
     }
     
     public void setAdditionalInfo(String additionalInfo) {

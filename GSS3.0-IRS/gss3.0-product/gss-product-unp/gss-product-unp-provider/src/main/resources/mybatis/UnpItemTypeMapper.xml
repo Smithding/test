@@ -34,13 +34,13 @@
         from UNP_ITEM_TYPE
         where CODE = #{code,jdbcType=VARCHAR}
     </select>
-    <select id="queryAllItems" resultMap="BaseResultMap">
-        SELECT
+    <select id="selectByName" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
         <include refid="Base_Column_List"/>
-        FROM UNP_ITEM_TYPE
-        WHERE
-        VALID='1'
+        from UNP_ITEM_TYPE
+        where NAME = #{name,jdbcType=VARCHAR}
     </select>
+
     <select id="queryItems" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpGroupItemVo" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
@@ -71,19 +71,19 @@
             AND CREATOR like concat('%',concat(#{creator,jdbcType=VARCHAR},'%'))
         </if>
         <if test="createTimeStart!=null and ''!=createTimeStart">
-            AND CREATE_TIME <![CDATA[>=]]> #{createTimeStart,jdbcType=TIMESTAMP}
+            AND CREATE_TIME <![CDATA[>=]]> CONCAT(#{createTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
         </if>
         <if test="createTimeEnd!=null and ''!=createTimeEnd">
-            AND CREATE_TIME  <![CDATA[<=]]> #{createTimeEnd,jdbcType=TIMESTAMP}
+            AND CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
         <if test="modifier!=null and ''!=modifier">
             AND MODIFIER like concat(concat('%',#{modifier,jdbcType=VARCHAR}),'%')
         </if>
         <if test="modifyTimeStart!=null and ''!=modifyTimeStart">
-            AND MODIFY_TIME <![CDATA[>=]]> #{modifyTimeStart,jdbcType=TIMESTAMP}
+            AND MODIFY_TIME <![CDATA[>=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
         </if>
         <if test="modifyTimeEnd!=null and ''!=modifyTimeEnd">
-            AND MODIFY_TIME <![CDATA[<=]]> #{modifyTimeEnd,jdbcType=TIMESTAMP}
+            AND MODIFY_TIME <![CDATA[<=]]> CONCAT(#{modifyTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
         ORDER BY CREATE_TIME DESC
     </select>
@@ -92,7 +92,8 @@
         <include refid="Base_Column_List"/>
         FROM UNP_ITEM_TYPE
         <if test="param!=null and param!=''">
-            WHERE NAME LIKE concat('%',concat(#{param,jdbcType=VARCHAR},'%')) OR CODE LIKE concat('%',concat(#{param,jdbcType=VARCHAR},'%')) OR GROUP_CODE LIKE concat('%',concat(#{param,jdbcType=VARCHAR},'%')) OR GROUP_NAME LIKE
+            WHERE NAME LIKE concat('%',concat(#{param,jdbcType=VARCHAR},'%')) OR CODE LIKE concat('%',concat(#{param,jdbcType=VARCHAR},'%')) OR
+            GROUP_CODE LIKE concat('%',concat(#{param,jdbcType=VARCHAR},'%')) OR GROUP_NAME LIKE
             concat('%',concat(#{param,jdbcType=VARCHAR},'%'))
         </if>
         ORDER BY CREATE_TIME DESC
@@ -315,19 +316,19 @@
             AND CREATOR = #{creator,jdbcType=VARCHAR}
         </if>
         <if test="createTimeStart!=null and ''!=createTimeStart">
-            AND CREATE_TIME <![CDATA[>=]]> #{createTimeStart,jdbcType=TIMESTAMP}
+            AND CREATE_TIME <![CDATA[>=]]> CONCAT(#{createTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
         </if>
         <if test="createTimeEnd!=null and ''!=createTimeEnd">
-            AND CREATE_TIME  <![CDATA[<=]]> #{createTimeEnd,jdbcType=TIMESTAMP}
+            AND CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
         <if test="modifier!=null and ''!=modifier">
             AND MODIFIER = #{modifier,jdbcType=VARCHAR}
         </if>
         <if test="modifyTimeStart!=null and ''!=modifyTimeStart">
-            AND MODIFY_TIME <![CDATA[>=]]> #{modifyTimeStart,jdbcType=TIMESTAMP}
+            AND MODIFY_TIME <![CDATA[>=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
         </if>
         <if test="modifyTimeEnd!=null and ''!=modifyTimeEnd">
-            AND MODIFY_TIME <![CDATA[<=]]> #{modifyTimeEnd,jdbcType=TIMESTAMP}
+            AND MODIFY_TIME <![CDATA[<=]]> CONCAT(#{modifyTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
         </if>
     </update>
 </mapper>

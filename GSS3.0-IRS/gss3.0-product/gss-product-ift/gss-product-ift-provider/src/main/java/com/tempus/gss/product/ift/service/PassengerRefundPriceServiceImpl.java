@@ -1,10 +1,15 @@
 package com.tempus.gss.product.ift.service;
 
 
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import com.tempus.gss.product.ift.api.entity.Passenger;
+import com.tempus.gss.product.ift.api.entity.vo.PassengerRefundPriceVo;
+import com.tempus.gss.vo.Agent;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,5 +105,49 @@ public class PassengerRefundPriceServiceImpl  implements IPassengerRefundPriceSe
 			throw new GSSException("查询需求模块", "0302", "查询失败");
 		}
 		return passengerRefundPriceList;
+	}
+
+	@Override
+	public void batchUpdatePassengerRefundPrice(RequestWithActor<PassengerRefundPriceVo> requestWithActor) {
+		PassengerRefundPriceVo passengerRefundPriceVo =  requestWithActor.getEntity();
+		Agent agent = requestWithActor.getAgent();
+		if(passengerRefundPriceVo!=null && passengerRefundPriceVo.getPassengerRefundPriceList()!=null){
+			String currency = passengerRefundPriceVo.getCurrency();
+			Long saleChangeNo = passengerRefundPriceVo.getSaleChangeNo();
+			List<PassengerRefundPrice> passengerRefundPriceList = passengerRefundPriceVo.getPassengerRefundPriceList();
+			List<Passenger> passengerList = passengerRefundPriceVo.getPassenger();
+			Date modifyTime = new Date();
+			RequestWithActor<PassengerRefundPrice> passengerRefundPrice = new RequestWithActor<>();
+			PassengerRefundPrice queryParameter = new PassengerRefundPrice();
+			queryParameter.setSaleChangeNo(passengerRefundPriceVo.getSaleChangeNo());
+			queryParameter.setSaleOrderNo(passengerRefundPriceVo.getSaleOrderNo());
+			passengerRefundPrice.setAgent(agent);
+			for(Passenger passenger:passengerList){
+				for (PassengerRefundPrice psgRefundPrice : passengerRefundPriceList){
+					if (passenger.getPassengerType().equals(psgRefundPrice.getPassengerType())
+							|| ("1".equals(passenger.getPassengerType()) && "ADT".equals(psgRefundPrice.getPassengerType()))
+							|| ("2".equals(passenger.getPassengerType()) && "CHD".equals(psgRefundPrice.getPassengerType()))
+							|| ("3".equals(passenger.getPassengerType()) && "INF".equals(psgRefundPrice.getPassengerType()))) {
+						queryParameter.setPassengerNo(passenger.getPassengerNo());
+						passengerRefundPrice.setEntity(queryParameter);
+						PassengerRefundPrice passengerRefundInfo = passengerRefundPriceDao.getPassengerRefundPrice(queryParameter);
+						psgRefundPrice.setPassengerRefundPriceNo(passengerRefundInfo.getPassengerRefundPriceNo());
+						psgRefundPrice.setSaleCurrency(passengerRefundPriceVo.getSaleCurrency());//销售货币
+						psgRefundPrice.setExchangeRate(passengerRefundPriceVo.getExchangeRate());//销售汇率
+						if(StringUtils.isNotEmpty(currency)){
+							psgRefundPrice.setBuyCurrency(currency);//采购货币
+						}
+						BigDecimal buyExchangeRate = passengerRefundPriceVo.getBuyExchangeRate();
+						if(buyExchangeRate != null){
+							psgRefundPrice.setBuyExchangeRate(buyExchangeRate);//采购汇率
+						}
+						psgRefundPrice.setModifier(agent.getAccount());
+						psgRefundPrice.setModifyTime(modifyTime);
+						logger.info("退废单:{}审核，批量更新乘客退废信息：{}",saleChangeNo,psgRefundPrice.toString());
+						passengerRefundPriceDao.updateByPrimaryKeySelective(psgRefundPrice);
+					}
+				}
+			}
+		}
 	}
 }

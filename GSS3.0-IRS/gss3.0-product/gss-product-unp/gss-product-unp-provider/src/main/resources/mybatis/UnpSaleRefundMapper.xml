@@ -20,6 +20,8 @@
         <result column="MODIFIER" jdbcType="VARCHAR" property="modifier"/>
         <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
         <result column="VALID" jdbcType="INTEGER" property="valid"/>
+        <result column="NAME" jdbcType="VARCHAR" property="name"/>
+        <result column="SUPPLIER_NAME" jdbcType="VARCHAR" property="supplierName"/>
     </resultMap>
     <sql id="Base_Column_List">
         SALE_REFUND_ORDER_NO, SALE_ORDER_NO, OWNER, CUSTOMER_NO, CUSTOMER_TYPE, REMARK, TRA_NO,
@@ -225,8 +227,8 @@
         where SALE_REFUND_ORDER_NO = #{saleRefundOrderNo,jdbcType=BIGINT}
     </update>
     <update id="updateByPrimaryKey" parameterType="com.tempus.gss.product.unp.api.entity.UnpSaleRefund">
-        update UNP_SALE_REFUND
-        set SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT},
+        UPDATE UNP_SALE_REFUND
+        SET SALE_ORDER_NO = #{saleOrderNo,jdbcType=BIGINT},
             OWNER         = #{owner,jdbcType=INTEGER},
             CUSTOMER_NO   = #{customerNo,jdbcType=BIGINT},
             CUSTOMER_TYPE = #{customerType,jdbcType=BIGINT},
@@ -243,6 +245,69 @@
             MODIFIER      = #{modifier,jdbcType=VARCHAR},
             MODIFY_TIME   = #{modifyTime,jdbcType=TIMESTAMP},
             VALID         = #{valid,jdbcType=INTEGER}
-        where SALE_REFUND_ORDER_NO = #{saleRefundOrderNo,jdbcType=BIGINT}
+        WHERE SALE_REFUND_ORDER_NO = #{saleRefundOrderNo,jdbcType=BIGINT}
     </update>
+    <select id="queryList" parameterType="com.tempus.gss.product.unp.api.entity.vo.UnpOrderQueryVo" resultMap="BaseResultMap">
+        SELECT USR.*, UB.BUY_ORDER_NO, CC.NAME, CS.NAME AS SUPPLIER_NAME
+        FROM UNP_SALE_REFUND USR
+        LEFT JOIN UNP_BUY UB ON UB.SALE_ORDER_NO = USR.SALE_ORDER_NO
+        LEFT JOIN CPS_CUSTOMER CC ON USR.CUSTOMER_NO = CC.CUSTOMER_NO
+        LEFT JOIN CPS_SUPPLIER CS ON CS.SUPPLIER_NO = UB.SUPPLIER_ID
+        WHERE 1=1
+        <if test="saleChangeNo != null">
+            AND USR.SALE_REFUND_ORDER_NO = #{saleChangeNo,jdbcType=BIGINT}
+        </if>
+        <if test="saleOrderNo != null">
+            AND USR.SALE_ORDER_NO = #{saleOrderNo ,jdbcType=BIGINT}
+        </if>
+        <if test="owner != null">
+            AND USR.OWNER = #{owner ,jdbcType=INTEGER}
+        </if>
+        <if test="customerNo != null">
+            AND USR.CUSTOMER_NO = #{customerNo, jdbcType=BIGINT}
+        </if>
+        <if test="customerType != null">
+            AND USR.CUSTOMER_TYPE = #{customerType, jdbcType=BIGINT}
+        </if>
+        <if test="traNo != null">
+            AND USR.TRA_NO = #{traNo,jdbcType=BIGINT}
+        </if>
+        <if test="changeType != null">
+            AND USR.CHANGE_TYPE = #{changeType ,jdbcType=INTEGER}
+        </if>
+        <if test="payStatus != null">
+            AND USR.PAY_STATUS = #{payStatus ,jdbcType=TINYINT}
+        </if>
+        <if test="payTimeStart!=null and ''!=payTimeStart">
+            AND USR.PAY_TIME <![CDATA[>=]]> CONCAT(#{payTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="payTimeEnd!=null and ''!=payTimeEnd">
+            AND USR.PAY_TIME  <![CDATA[<=]]> CONCAT(#{payTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+        </if>
+        <if test="status != null">
+            AND USR.STATUS = #{status,jdbcType=INTEGER}
+        </if>
+        <if test="creator != null and creator!=''">
+            AND USR.CREATOR LIKE concat('%',CONCAT(#{creator,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="createTimeStart!=null and ''!=createTimeStart">
+            AND USR.CREATE_TIME <![CDATA[>=]]> CONCAT(#{createTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="createTimeEnd!=null and ''!=createTimeEnd">
+            AND USR.CREATE_TIME  <![CDATA[<=]]> CONCAT(#{createTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+        </if>
+        <if test="modifier != null  and modifier!=''">
+            AND USR.MODIFIER LIKE concat('%',CONCAT(#{modifier,jdbcType=VARCHAR},'%'))
+        </if>
+        <if test="modifyTimeStart != null and ''!=modifyTimeStart">
+            AND USR.MODIFY_TIME <![CDATA[>=]]> CONCAT(#{modifyTimeStart,jdbcType=TIMESTAMP},' 00:00:00')
+        </if>
+        <if test="modifyTimeEnd != null and ''!=modifyTimeEnd">
+            AND USR.MODIFY_TIME <![CDATA[<=]]> CONCAT(#{modifyTimeEnd,jdbcType=TIMESTAMP},' 23:59:59')
+        </if>
+        <if test="valid != null">
+            AND USR.VALID = #{valid,jdbcType=INTEGER}
+        </if>
+        ORDER BY USR.CREATE_TIME DESC
+    </select>
 </mapper>

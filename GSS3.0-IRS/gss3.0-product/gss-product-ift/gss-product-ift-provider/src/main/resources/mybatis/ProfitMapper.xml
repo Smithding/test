@@ -110,6 +110,23 @@
   </select>
 
   <delete id="deleteByPrimaryKeySelective" >
-DELETE FROM IFT_PROFIT WHERE PROFIT_NO=#{profitNo,jdbcType=BIGINT}
+	DELETE FROM IFT_PROFIT WHERE PROFIT_NO=#{profitNo,jdbcType=BIGINT}
   </delete>
+  
+  <select id="getProfitByCustomerNo" resultMap="BaseResultMap">
+    SELECT DISTINCT *
+    FROM IFT_PROFIT  WHERE OWNER =  #{owner} 
+    AND CUSTOMER_NO = #{customerNo}  
+    AND STATUS = 1 
+    AND VALID = 1
+  </select>
+  
+  <select id="getProfitByCustomerTypeNo" resultMap="BaseResultMap">
+    SELECT DISTINCT *
+    FROM IFT_PROFIT  WHERE OWNER =  #{owner} 
+    AND CUSTOMER_TYPE_NO = #{customerTypeNo}  
+    AND STATUS = 1 
+    AND VALID = 1
+  </select>
+  
 </mapper>

@@ -1,9 +1,14 @@
 package com.tempus.gss.product.ift.service.search;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.tempus.gss.product.ift.api.entity.Passenger;
 import com.tempus.gss.product.ift.api.entity.policy.IftPolicy;
 import com.tempus.gss.product.ift.api.entity.search.FlightQuery;
 
@@ -36,7 +41,8 @@ public class IftPolicyRuleUtils {
 	 * @return
 	 */
 	public boolean matcheAirline(IftPolicy policy, String airline) {
-		boolean result = policy.getAirline().equals(airline) || (StringUtils.isNotBlank(policy.getSuitAirline()) && policy.getSuitAirline().contains(airline));
+		boolean result = true;
+		result = policy.getAirline().equals(airline) || (StringUtils.isNotBlank(policy.getSuitAirline()) && policy.getSuitAirline().contains(airline));
 		this.log(policy,result,"检查产品是否符合航司[matcheAirline]未通过");
 		return result;
 	}
@@ -48,7 +54,7 @@ public class IftPolicyRuleUtils {
 	 * @param cabins  舱位集合
 	 * @return
 	 */
-	public boolean matcheDepartCabin(IftPolicy policy, String[] cabins) {
+	public boolean matcheDepartCabin(IftPolicy policy, List<String> cabins) {
 		boolean matcheResult = true;
 		String[] policyCabins = policy.getDepartCabin().split(",");
 		for(String cabin : cabins){
@@ -75,20 +81,22 @@ public class IftPolicyRuleUtils {
 	 * @param cabins  舱位集合
 	 * @return
 	 */
-	public boolean matcheTransitCabin(IftPolicy policy, String[] cabins) {
+	public boolean matcheTransitCabin(IftPolicy policy, List<String> cabins) {
 		boolean matcheResult = true;
-		String[] policyCabins = policy.getTransitCabin().split(",");
-		for(String cabin : cabins){
-			boolean result = false;
-			for(String policyCabin : policyCabins){
-				if(policyCabin.equals(cabin)){
-					result = true;
+		if(StringUtils.isNotBlank(policy.getTransitCabin()) && CollectionUtils.isNotEmpty(cabins)){
+			String[] policyCabins = policy.getTransitCabin().split(",");
+			for(String cabin : cabins){
+				boolean result = false;
+				for(String policyCabin : policyCabins){
+					if(policyCabin.equals(cabin)){
+						result = true;
+						break;
+					}
+				}
+				if(!result){
+					matcheResult = false;
 					break;
 				}
-			}
-			if(!result){
-				matcheResult = false;
-				break;
 			}
 		}
 		this.log(policy,matcheResult,"检查产品是否适用该航班中转舱位[matcheTransitCabin]未通过");
@@ -104,7 +112,7 @@ public class IftPolicyRuleUtils {
 	 */
 	public boolean matcheRtnAirport(IftPolicy policy, FlightQuery query) {
 		boolean result = true;
-		if((2 == policy.getVoyageType() || 3 == policy.getVoyageType()) && null != policy.getRoundTripAirportType()){
+		if((2 == policy.getVoyageType() || 3 == policy.getVoyageType()) && null != policy.getRoundTripAirportType() && 1 != policy.getRoundTripAirportType()){
 			result = false;
 			//1政策始发机场范围已经在sql中过滤
 			if(2 == policy.getRoundTripAirportType()){//同属洲际
@@ -133,7 +141,7 @@ public class IftPolicyRuleUtils {
 	 * @param transitAirports 转机机场集合
 	 * @return
 	 */
-	public boolean matcheNotSuitTransitAirport(IftPolicy policy, String[] transitAirports) {
+	public boolean matcheNotSuitTransitAirport(IftPolicy policy, List<String> transitAirports) {
 		boolean result = true;
 		if(null != policy.getIsNotsuitTransferAirport() && policy.getIsNotsuitTransferAirport()){
 			if(StringUtils.isNotBlank(policy.getNotsuitTransferAirport())){
@@ -150,18 +158,169 @@ public class IftPolicyRuleUtils {
 	}
 	
 	/**
+	 * 检查目的地缺口程
+	 * 
+	 * @param policy  待匹配的政策
+	 * @param flightNos  航班号集合
+	 * @return
+	 */
+	public boolean matcheArnk(IftPolicy policy, boolean isArnk) {
+		boolean result = true;
+		if(null != policy.getArnkType() && 3 == policy.getArnkType()){
+			if(isArnk){
+				result = false;
+			}
+		}
+		this.log(policy,result,"检查目的地缺口程[matcheArnk]未通过");
+		return result;
+	}
+	
+	/**
+	 * 检查儿童不单开
+	 * 
+	 * @param policy  待匹配的政策
+	 * @param adtNum  成人数量
+	 * @param chdNum  儿童数量
+	 * @return
+	 */
+	public boolean matcheCHDTikcet(IftPolicy policy, int adtNum, int chdNum) {
+		boolean result = true;
+		if(null != policy.getChdNotAloneTicket() && true == policy.getChdNotAloneTicket()){
+			if(chdNum > 0 && adtNum == 0){
+				result = false;
+			}
+		}
+		this.log(policy,result,"检查儿童不单开[matcheCHDTikcet]未通过");
+		return result;
+	}
+	
+	/**
+	 * 检查乘客类型不适用
+	 * 
+	 * @param policy  待匹配的政策
+	 * @param passengers  乘客集合
+	 * @return
+	 */
+	public boolean matchePassengerType(IftPolicy policy, List<Passenger> passengers) {
+		boolean result = true;
+		//TODO 未知乘客类型，后实现
+		this.log(policy,result,"检查乘客类型不适用[matchePassengerType]未通过");
+		return result;
+	}
+	
+	/**
+	 * 检查航程类型不适用
+	 * 
+	 * @param policy  待匹配的政策
+	 * @param legs 航程集合
+	 * @return
+	 */
+	public boolean matcheFlightType(IftPolicy policy, ArrayList<String> airlines, Integer flyType, Integer rtnType, boolean isOpen) {
+		boolean result = true;
+		if(StringUtils.isNotBlank(policy.getNotsuitPassengerType())){
+			/* 判断Add-on */
+			if(policy.getNotsuitPassengerType().contains("11")){
+				if(1 == flyType || 3 == flyType){
+					result = false; 
+				}
+				if(result && null != rtnType && (1 == rtnType || 3 == rtnType)){
+					result = false; 
+				}
+			}
+			
+			/* 判断境外中转 */
+			if(result && policy.getNotsuitPassengerType().contains("12")){
+				if(2 == flyType || 3 == flyType){
+					result = false; 
+				}
+				if(result && null != rtnType && (2 == rtnType || 3 == rtnType)){
+					result = false; 
+				}
+			}
+			
+			/* 判断OPEN */
+			if(result && policy.getNotsuitPassengerType().contains("13")){
+				if(isOpen){
+					result = false;
+				}
+			}
+			
+			/* 判断SPA */
+			if(result && policy.getNotsuitPassengerType().contains("14")){
+				for(String airline : airlines){
+					if(!this.matcheAirline(policy, airline)){
+						result = false;
+						break;
+					}
+				}
+			}
+		}
+		this.log(policy,result,"检查航程类型不适用[matcheFlightType]未通过");
+		return result;
+	}
+	
+	/**
+	 * 检查运价基础
+	 * 
+	 * @param policy  待匹配的政策
+	 * @param fareBasis 运价基础
+	 * @return
+	 */
+	public boolean matcheFareBasis(IftPolicy policy, String fareBasis) {
+		boolean result = true;
+		/* 首先检查不适用的运价基础 */
+		if(null != policy.getIsFareIncludeText() && policy.getIsFareIncludeText() && null != policy.getFareIncludeType() && 3 == policy.getFareIncludeType()){
+			if(StringUtils.isNotBlank(policy.getFareIncludeText())){
+				String[] policyFareBasisList = policy.getFareIncludeText().split("/");
+				for(String policyFareBasis : policyFareBasisList){
+					if(fareBasis.contains(policyFareBasis)){
+						result = false;
+						break;
+					}
+				}
+			}
+		}
+		
+		/* 检查适用的运价基础 */
+		if(result && null != policy.getIsSuitFareBase() && policy.getIsSuitFareBase()){
+			if(StringUtils.isNotBlank(policy.getSuitFareBase())){
+				String[] policySuitFareBases = policy.getSuitFareBase().split("/");
+				String[] fareBasisList = fareBasis.split("\\+");
+				for(int i=0; i < policySuitFareBases.length; i++){
+					boolean isHand = false;
+					for(String fareBasisStr : fareBasisList){
+						if(policySuitFareBases[i].equals(fareBasisStr)){
+							isHand = true;
+							break;
+						}
+					}
+					if(!isHand){
+						result = false;
+						break;
+					}
+				}
+			}
+		}
+		this.log(policy,result,"检查运价基础[matcheFareBasis]未通过");
+		return result;
+	}
+	
+	/**
 	 * 检查去程适用航班
 	 * 
 	 * @param policy  待匹配的政策
-	 * @param flightNo 去程航班号
+	 * @param flightNos 去程航班号集合
 	 * @return
 	 */
-	public boolean matcheDepartSuitFlight(IftPolicy policy, String flightNo) {
+	public boolean matcheDepartSuitFlight(IftPolicy policy, List<String> flightNos) {
 		boolean result = true;
 		if(null != policy.getIsFlySuitFlight() && policy.getIsFlySuitFlight()){
 			if(StringUtils.isNotBlank(policy.getFlySuitFlight())){
-				if(!policy.getFlySuitFlight().contains(flightNo)){
-					result = false;
+				for(String flightNo : flightNos){
+					if(!policy.getFlySuitFlight().contains(flightNo)){
+						result = false;
+						break;
+					}
 				}
 			}
 		}
@@ -173,15 +332,18 @@ public class IftPolicyRuleUtils {
 	 * 检查回程适用航班
 	 * 
 	 * @param policy  待匹配的政策
-	 * @param flightNo 回程航班号
+	 * @param flightNos 回程航班号集合
 	 * @return
 	 */
-	public boolean matcheArriveSuitFlight(IftPolicy policy, String flightNo) {
+	public boolean matcheArriveSuitFlight(IftPolicy policy, List<String> flightNos) {
 		boolean result = true;
 		if((2 == policy.getVoyageType() || 3 == policy.getVoyageType()) && null != policy.getIsRtnSuitFlight() && policy.getIsRtnSuitFlight()){
 			if(StringUtils.isNotBlank(policy.getRtnSuitFlight())){
-				if(!policy.getRtnSuitFlight().contains(flightNo)){
-					result = false;
+				for(String flightNo : flightNos){
+					if(!policy.getRtnSuitFlight().contains(flightNo)){
+						result = false;
+						break;
+					}
 				}
 			}
 		}
@@ -196,7 +358,7 @@ public class IftPolicyRuleUtils {
 	 * @param flightNos 航班号集合
 	 * @return
 	 */
-	public boolean matcheNotSuitFlight(IftPolicy policy, String[] flightNos) {
+	public boolean matcheNotSuitFlight(IftPolicy policy, List<String> flightNos) {
 		boolean result = true;
 		if(null != policy.getIsNotSuitFlight() && policy.getIsNotSuitFlight()){
 			if(StringUtils.isNotBlank(policy.getNotSuitFlight())){
@@ -212,6 +374,48 @@ public class IftPolicyRuleUtils {
 		return result;
 	}
 	
+	/**
+	 * 检查允许混舱1/2RT
+	 * 
+	 * @param policy 待匹配的政策
+	 * @param cabinGrades 航班的舱位等级集合
+	 * @return 
+	 */
+	public boolean matcheMixtrueCabin(IftPolicy policy, List<String> cabinGrades){
+		boolean result = true;
+		if(null != policy.getIsMixCabin() && !policy.getIsMixCabin()){
+			String filghtCabinGrade = cabinGrades.get(0);
+			for(String cabinGrade : cabinGrades){
+				if(!cabinGrade.equals(filghtCabinGrade)){
+					result = false;
+					break;
+				}
+			}
+		}
+		this.log(policy,result,"检查允许混舱1/2RT[matcheMixtrueCabin]未通过");
+		return result;
+	}
+	
+	/**
+	 * 检查票面范围
+	 * 
+	 * @param policy 待匹配的政策
+	 * @param parpirce 单人总票面
+	 * @return 
+	 */
+	public boolean matcheParpirce(IftPolicy policy, double parpirce){
+		boolean result = true;
+		if(null != policy.getIsParLimit() && policy.getIsParLimit()){
+			if(StringUtils.isNotBlank(policy.getParLimit()) && !"-".equals(policy.getParLimit())){
+				String[] limits = policy.getParLimit().split("-");
+				if(parpirce < Integer.parseInt(limits[0]) || parpirce > Integer.parseInt(limits[1])){
+					result = false;
+				}
+			}
+		}
+		this.log(policy,result,"检查票面范围[matcheParpirce]未通过");
+		return result;
+	}
 	
 	/**
 	 * 检查不适用航线
@@ -250,21 +454,24 @@ public class IftPolicyRuleUtils {
 	
 	public static void main(String[] args) {
 //		String str = "J,F,P,C,D,I,W,S1,S2,S3,Y,B,M,H,U,A,L,E,V,Z,T,R,K,Q,N";
-		String[] cabins = {"S1","W"};
+//		String[] cabins = {"S1","W"};
 //		System.out.println(StringUtil2.containsAnyString(str, cabins));
 		
 //		String[] oldimg = "J,F,P,C,D,I,W,S1,S2,S3,Y,B,M,H,U,A,L,E,V,Z,T,R,K,Q,N".split(",");
-		String str = "J,F,P,C,D,I,W,S1,S2,S3,Y,B,M,H,U,A,L,E,V,Z,T,R,K,Q,N";
+//		String str = "J,F,P,C,D,I,W,S1,S2,S3,Y,B,M,H,U,A,L,E,V,Z,T,R,K,Q,N";
 		
-		IftPolicyRuleUtils utils = new IftPolicyRuleUtils();
-		IftPolicy iftPolicy = new IftPolicy();
-		iftPolicy.setDepartCabin(str);
-		boolean result = utils.matcheDepartCabin(iftPolicy, cabins);
-		System.out.println(result);
+//		IftPolicyRuleUtils utils = new IftPolicyRuleUtils();
+//		IftPolicy iftPolicy = new IftPolicy();
+//		iftPolicy.setDepartCabin(str);
+//		boolean result = utils.matcheDepartCabin(iftPolicy, cabins);
+//		System.out.println(result);
 		
 //		String[] cabins = str.split(",");
 //		System.out.println(cabins.length);
 //		System.out.println(Arrays.binarySearch(cabins, "K"));
-
+		String str = "J+P+A";
+		for(String s : str.split("\\+")){
+			System.out.println(s);
+		}
 	}
 }

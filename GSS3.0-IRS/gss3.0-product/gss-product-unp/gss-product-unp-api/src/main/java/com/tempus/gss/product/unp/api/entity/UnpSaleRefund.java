@@ -3,6 +3,7 @@ package com.tempus.gss.product.unp.api.entity;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author ZhangBro
@@ -75,6 +76,14 @@ public class UnpSaleRefund implements Serializable {
      */
     private String modifier;
     /**
+     * 客户名称
+     */
+    private String name;
+    /**
+     * 供应商名称
+     */
+    private String supplierName;
+    /**
      * 修改时间
      */
     private Date modifyTime;
@@ -82,8 +91,35 @@ public class UnpSaleRefund implements Serializable {
      * 删除标志 0 无效 已删除 1 有效
      */
     private Integer valid;
-    
+    /**
+     * 明细单们
+     */
+    private List<UnpSaleRefundItem> items;
     private static final long serialVersionUID = -6218324244217597170L;
+    
+    public List<UnpSaleRefundItem> getItems() {
+        return items;
+    }
+    
+    public void setItems(List<UnpSaleRefundItem> items) {
+        this.items = items;
+    }
+    
+    public String getSupplierName() {
+        return supplierName;
+    }
+    
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
+    }
+    
+    public String getName() {
+        return name;
+    }
+    
+    public void setName(String name) {
+        this.name = name;
+    }
     
     public Long getSaleRefundOrderNo() {
         return saleRefundOrderNo;

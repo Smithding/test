@@ -9,7 +9,7 @@ import javax.annotation.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.data.redis.core.ValueOperations;
-import com.baomidou.mybatisplus.plugins.Page;
+
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.tempus.gss.ops.util.SortUtils;
@@ -51,6 +51,17 @@ public class NewIftPolicyDataServiceImpl implements NewIftPolicyDataService {
 	protected static final String FOREIGN_LABLE = "境外";
 	protected static final String GLOBAL_KEY = "A00";
 	protected static final String GLOBAL_LABLE = "全球";
+	
+	// 需要特殊处理的城市
+	public final static String CITY_CODE_PEK = "PEK";
+	public final static String CITY_NAME_PEK = "北京首都";
+	public final static String CITY_CODE_NAY = "NAY";
+	public final static String CITY_NAME_NAY = "北京南苑";
+	public final static String CITY_CODE_SHA = "SHA";
+	public final static String CITY_NAME_SHA = "上海虹桥";
+	public final static String CITY_CODE_PVG = "PVG";
+	public final static String CITY_NAME_PVG = "上海浦东";
+	
 	@Reference
 	private IContinentService continentService;
 	@Reference
@@ -108,7 +119,6 @@ public class NewIftPolicyDataServiceImpl implements NewIftPolicyDataService {
 			return "fail";
 		}
 		String json = JsonUtil.toJson(city);
-		System.out.println(json);
 		return json;
 	}
 
@@ -155,10 +165,12 @@ public class NewIftPolicyDataServiceImpl implements NewIftPolicyDataService {
 	 * @return
 	 */
 	public List<States> getAirLineGlobal() {
-		// 获取所有的州
-		List<AreaInfo> areaInfos = areaInfoService.queryAllAreas();
+		
 		// 封装州的数据集合
 		List<States> listStates = new ArrayList<States>();
+		
+		// 获取所有的州
+		List<AreaInfo> areaInfos = areaInfoService.queryAllAreas();
 		for (AreaInfo areaInfo : areaInfos) {
 			// 封装州的数据实体类
 			States states = new States();
@@ -218,4 +230,65 @@ public class NewIftPolicyDataServiceImpl implements NewIftPolicyDataService {
 		return null;
 	}
 
+	@Override
+	public List<Airport> getAllAirport() {
+		List<Airport> iftAirportList = null;
+		try {
+			iftAirportList = airportService.queryAirportByCIty("I",null, null,null,null);
+			List<Airport> airportList = airportService.queryAirportByCIty("D",null, null,null,null);
+			getSpecialCityNName(airportList);
+			iftAirportList.addAll(airportList);
+		} catch (Exception e) {
+			logger.error("获取国际机场信息异常！",e);
+		}
+		return iftAirportList;
+	}
+	
+	/**
+	 * 城市名称的特殊处理，主要针对北京和上海
+	 * 
+	 * @return
+	 */
+	private void getSpecialCityNName(List<Airport> list) {
+		if (list != null && !list.isEmpty()) {
+			for (Airport airport : list) {
+				switch (airport.getAirportCode()) {
+				case CITY_CODE_PEK:
+					airport.setCityCName(CITY_NAME_PEK);
+					break;
+				case CITY_CODE_NAY:
+					airport.setCityCName(CITY_NAME_NAY);
+					break;
+				case CITY_CODE_SHA:
+					airport.setCityCName(CITY_NAME_SHA);
+					break;
+				case CITY_CODE_PVG:
+					airport.setCityCName(CITY_NAME_PVG);
+					break;
+				}
+			}
+		}
+	}
+	public String getCityDate(String key) {
+		Country deparcountry;
+		String json = "";
+		try {
+			if (key.trim().length() == 2) {// 当长度为2标识是国家
+				deparcountry = countryService.queryCountryByPram(key);
+			} else {// 当长度为3表示是三字码
+				deparcountry = airportService.queryCountryByAirport(key);
+			}
+			if (deparcountry != null && !deparcountry.equals("")) {
+				json = "{'area':%s,'city':%s}";
+				json = json.format(json, deparcountry.getAreaCode().replace(" ", ""), deparcountry.getCountryCode());
+			} else {
+				logger.info(key + "基础数据获取到城市信息");
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // 根据出发城市查询所属的国家
+
+		return json;
+	}
 }
