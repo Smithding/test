@@ -34,17 +34,12 @@
       #{selecttypes,jdbcType=VARCHAR}, #{userid,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR}
       )
   </insert>
-  <select id="getAdjustOrderByOrderId" resultMap="BaseResultMap" parameterType="com.tempus.gss.product.ift.api.entity.AdjustOrder" >
+  <select id="getAdjustOrderByOrderId" resultMap="BaseResultMap" parameterType="java.lang.String" >
     select
        distinct 
     <include refid="Base_Column_List" />
-       from IFT_ADJUSTORDER
-    <if test="adjustflag != null">
-        	ADJUSTFLAG = #{adjustflag,jdbcType=VARCHAR} 
-    </if>
-    <if test="orderid != null">
-        	ORDERID = #{orderid,jdbcType=VARCHAR} 
-    </if>
+       from IFT_ADJUSTORDER WHERE
+    ORDERID = #{orderid,jdbcType=VARCHAR}
     order by  ISSUEDATE desc 
   </select>
   <update id="updateByPrimaryKeySelective" parameterType="com.tempus.gss.product.ift.api.entity.AdjustOrder" >
