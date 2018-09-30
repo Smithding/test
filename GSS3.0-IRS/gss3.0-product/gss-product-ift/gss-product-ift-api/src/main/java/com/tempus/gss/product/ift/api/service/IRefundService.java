@@ -191,6 +191,12 @@ public interface IRefundService {
 	void shoppingRefuse(RequestWithActor<Long> requestWithActor);
 
 	/**
+	 * 不分单情况下提交航司后 采购打回重审
+	 * @param requestWithActor
+	 */
+	void shoppingRefuseInNoDitribute(RequestWithActor<Long> requestWithActor);
+
+	/**
 	 * 提交航司后 采购审核通过
 	 * @param requestWithActor
 	 */
