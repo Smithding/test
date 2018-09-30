@@ -2,12 +2,7 @@ package com.tempus.gss.product.ift.service;
 
 import java.math.BigDecimal;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections4.CollectionUtils;
@@ -2688,14 +2683,16 @@ public class OrderServiceImpl implements IOrderService {
             ubpInfo = insaleService.addInallsale(sale);
             log.info("结算系统解挂返回原始JSON:", JsonUtil.toJson(ubpInfo));
             /**如果创建类型是冲单、补单、调整单1、调整单2、ADM单、ACM单，就不用解挂**/String createTypes = "7,8,9,10,11,12";
-            if (ubpInfo.getCode().equals("0") && createTypes.indexOf(saleOrderExt.getCreateType() + "") == -1) {
+            //saleOrderExt.getCreateType()
+            List<String> createTypeList = Arrays.asList("7","8","9","10","11","12");
+            if (ubpInfo.getCode().equals("0") && !createTypeList.contains(saleOrderExt.getCreateType()+"")) {
                 
                 List<AdjustOrder> adjustorder = adjustOrderDao.getAdjustOrderByOrderId(saleOrderExtVo.getSaleOrderNo() + "");
                 if (adjustorder != null && adjustorder.size() > 0) {
                     
                     for (AdjustOrder ado : adjustorder) {
                         ado.setAdjustflag("2");// 已解挂
-                        adjustOrderDao.updateByPrimaryKey(ado);
+                        adjustOrderDao.updateByPrimaryKeySelective(ado);
                     }
                 }
                 ubpInfo.setMessage("解挂成功");
