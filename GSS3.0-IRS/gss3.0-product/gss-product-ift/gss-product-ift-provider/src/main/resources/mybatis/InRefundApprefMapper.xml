@@ -23,6 +23,8 @@
          <result property="tanagementarea" column="TANAGEMENTAREA"/>
          <result property="saledep" column="SALEDEP"/>
          <result property="oldorderid" column="OLDORDERID"/>
+         <result property="refType" column="REFTYPE"/>
+         <result property="settlementId" column="SETTLEMENTID"/>
      </resultMap>
     
     <sql id="Base_Column_List">
@@ -44,12 +46,18 @@
 			BUSINESSLINE,
 			TANAGEMENTAREA,
 			SALEDEP,
-			OLDORDERID
+			OLDORDERID,
+			REFTYPE,
+			SETTLEMENTID
 	</sql>
 	
 	<select id="selectInRefundApprefVo" resultMap="applyMap">
         select <include refid="Base_Column_List"/> from IFT_INREFUND_APPREF a
 		 WHERE a.ORDERID = #{orderid} ORDER BY a.APPLYTIME DESC
+    </select>
+    <select id="selectInRefundApprefBySettlementId" resultMap="applyMap">
+        select <include refid="Base_Column_List"/> from IFT_INREFUND_APPREF a
+		 WHERE a.SETTLEMENTID = #{settlementId} ORDER BY a.APPLYTIME DESC
     </select>
 	
     <insert id="insertAndGetId" parameterType="com.tempus.gss.product.ift.api.entity.vo.InRefundApprefRequest" useGeneratedKeys="true" keyProperty="id">
@@ -71,7 +79,9 @@
 			BUSINESSLINE,
 			TANAGEMENTAREA,
 			SALEDEP,
-			OLDORDERID
+			OLDORDERID,
+			REFTYPE,
+            SETTLEMENTID
 		)
 		VALUES(
 			#{orderid,jdbcType=VARCHAR},
@@ -91,7 +101,9 @@
 			#{businessline,jdbcType=VARCHAR},
 			#{tanagementarea,jdbcType=VARCHAR},
 			#{saledep,jdbcType=VARCHAR},
-			#{oldorderid,jdbcType=VARCHAR}
+			#{oldorderid,jdbcType=VARCHAR},
+			#{refType,jdbcType=VARCHAR},
+			#{settlementId,jdbcType=BIGINT}
 		)
 	</insert>
 	

@@ -39,4 +39,6 @@ public interface InRefundApprefService  {
 	int updateInRefundAppref(InRefundApprefRequest inRefundAppref);
 
 	Page<InRefundApprefRequest> queryInRefApprefByVo(Page page,RequestWithActor<InRefundApprefRequest> requestWithActor);
+
+	InRefundApprefRequest getInRefundApprefBySettlementId(Long settlementId);
 }

@@ -21,4 +21,6 @@ public interface InRefundApprefDao extends BaseDao<InRefundApprefRequest, InRefu
 	 * @param paramsMap Map
 	 */
 	void updateStatus(Map<String, Object> paramsMap);
+
+    InRefundApprefRequest selectInRefundApprefBySettlementId(@Param("settlementId")Long settlementId);
 }

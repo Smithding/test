@@ -108,4 +108,17 @@ public class InRefundApprefServiceImpl implements InRefundApprefService {
         return page;
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED, isolation = Isolation.DEFAULT)
+    public InRefundApprefRequest getInRefundApprefBySettlementId(Long settlementId) {
+        InRefundApprefRequest InRefundApprefRequest = null;
+        try {
+            InRefundApprefRequest = inRefundApprefDao.selectInRefundApprefBySettlementId(settlementId);
+        } catch (Exception e) {
+            log.error("国际退款申请单查询失败", e);
+            throw new GSSException("国际退款申请单查询模块", "0107", "国际退款申请单模块查询失败");
+        }
+        return InRefundApprefRequest;
+    }
+
 }
