@@ -361,6 +361,11 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
     @Override
     public void payBuy(Agent agent, UnpSale unpSale, Integer payWay, String paymentAccount, String receivableAccount) throws Exception {
         UnpOrderQueryVo queryVo = new UnpOrderQueryVo();
+        String source = unpSale.getSource();
+        if ("Excel".equalsIgnoreCase(source)) {
+            logger.error("报表导入通过MQ支付跳过");
+            return ;
+        }
         queryVo.setSaleOrderNo(unpSale.getSaleOrderNo());
         UnpBuy unpBuy = this.getBuyOrderInfo(queryVo);
         CertificateCreateVO vo = new CertificateCreateVO();
@@ -369,7 +374,7 @@ public class UnpOrderServiceImpl extends BaseUnpService implements UnpOrderServi
         vo.setPayType(3);
         vo.setServiceLine("1");
         vo.setReason("UNP采购付款");
-        vo.setChannel(unpSale.getSource());
+        vo.setChannel(source);
         vo.setCustomerNo(unpBuy.getSupplierId());
         vo.setCustomerTypeNo(unpBuy.getSupplierType());
         vo.setSubBusinessType(EgoodsSubType.BUY.getKey());
