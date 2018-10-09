@@ -60,7 +60,8 @@ import javax.xml.bind.annotation.XmlType;
     "settlementId",
     "status",
     "tanagementarea",
-    "ticketno"
+    "ticketno",
+        "refType"
 })
 public class InRefundApprefVo implements Serializable {
 
@@ -85,8 +86,17 @@ public class InRefundApprefVo implements Serializable {
     protected String status;
     protected String tanagementarea;
     protected String ticketno;
+    protected String refType;
 
-	/**
+    public String getRefType() {
+        return refType;
+    }
+
+    public void setRefType(String refType) {
+        this.refType = refType;
+    }
+
+    /**
      * ��ȡaccountnumber���Ե�ֵ��
      * 
      * @return

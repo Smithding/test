@@ -31,6 +31,15 @@ public class InRefundApprefRequest implements Serializable {
     protected String status;
     protected String tanagementarea;
     protected String ticketno;
+      protected String refType;
+
+    public String getRefType() {
+        return refType;
+    }
+
+    public void setRefType(String refType) {
+        this.refType = refType;
+    }
 
     public Long getId() {
 		return id;

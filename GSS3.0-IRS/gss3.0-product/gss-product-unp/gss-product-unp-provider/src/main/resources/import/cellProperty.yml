@@ -38,17 +38,17 @@
 - !com.tempus.gss.product.unp.api.entity.util.CellProperty
   convert: &20 true
   index: 10
-  name: passengerName
+  name: NAME
   value: 旅客姓名
 - !com.tempus.gss.product.unp.api.entity.util.CellProperty
   convert: *20
   index: 11
-  name: price
+  name: PRICE
   value: 单价
 - !com.tempus.gss.product.unp.api.entity.util.CellProperty
   convert: *20
   index: 12
-  name: fee
+  name: FEE
   value: 实收手续费
 - !com.tempus.gss.product.unp.api.entity.util.CellProperty
   index: 13
@@ -86,32 +86,20 @@
 - !com.tempus.gss.product.unp.api.entity.util.CellProperty
   convert: *20
   index: 21
-  name: depDate
+  name: DATE
   value: 乘车日期
 - !com.tempus.gss.product.unp.api.entity.util.CellProperty
   convert: *20
   index: 22
-  name: traNum
+  name: TRA_NO
   value: 车次
 - !com.tempus.gss.product.unp.api.entity.util.CellProperty
   convert: *20
   index: 23
-  name: leg
+  name: LEG
   value: 行程
 - !com.tempus.gss.product.unp.api.entity.util.CellProperty
   convert: *20
   index: 24
-  name: num
+  name: NUM
   value: 张数
-- !com.tempus.gss.product.unp.api.entity.util.CellProperty
-  index: 25
-  name: payWay
-  value: 收款方式
-- !com.tempus.gss.product.unp.api.entity.util.CellProperty
-  index: 26
-  name: payAccount
-  value: 收款账号
-- !com.tempus.gss.product.unp.api.entity.util.CellProperty
-  index: 27
-  name: payRemark
-  value: 转帐明细备注
